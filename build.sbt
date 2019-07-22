@@ -40,6 +40,7 @@ lazy val data  = project settings defaultSettings dependsOn (core, opticsCore)
 
 lazy val fputils = project
   .in(file("."))
+  .settings(defaultSettings)
   .aggregate((coreModules ++ commonModules).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
