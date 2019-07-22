@@ -1,6 +1,6 @@
 # ToFu
 
-**Functional programming toolset making Tagless Final approach sane by Tinkoff scala team** 
+**Functional programming toolkit by Tinkoff scala team aimed at taming the complexity of Tagless Final approach.** 
 
 ### Quick Start
 
