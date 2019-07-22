@@ -144,26 +144,12 @@ trait EnvSpecializedFunctions[E] {
                                       fa6: Env[E, A6])(f: (A1, A2, A3, A4, A5, A6) => R): Env[E, R] =
     Env.map6(fa1, fa2, fa3, fa4, fa5, fa6)(f)
 
-  @deprecated("use parZip2", since = "0.4.4")
-  def zip2[A1, A2](fa1: Env[E, A1], fa2: Env[E, A2]): Env[E, (A1, A2)] =
-    Env.parZip2(fa1, fa2)
 
   def parZip2[A1, A2](fa1: Env[E, A1], fa2: Env[E, A2]): Env[E, (A1, A2)] =
     Env.parZip2(fa1, fa2)
 
-  @deprecated("use parZip3", since = "0.4.4")
-  def zip3[A1, A2, A3](fa1: Env[E, A1], fa2: Env[E, A2], fa3: Env[E, A3]): Env[E, (A1, A2, A3)] =
-    Env.parZip3(fa1, fa2, fa3)
-
   def parZip3[A1, A2, A3](fa1: Env[E, A1], fa2: Env[E, A2], fa3: Env[E, A3]): Env[E, (A1, A2, A3)] =
     Env.parZip3(fa1, fa2, fa3)
-
-  @deprecated("use parZip4", since = "0.4.4")
-  def zip4[A1, A2, A3, A4](fa1: Env[E, A1],
-                           fa2: Env[E, A2],
-                           fa3: Env[E, A3],
-                           fa4: Env[E, A4]): Env[E, (A1, A2, A3, A4)] =
-    Env.parZip4(fa1, fa2, fa3, fa4)
 
   def parZip4[A1, A2, A3, A4](fa1: Env[E, A1],
                               fa2: Env[E, A2],
@@ -171,29 +157,12 @@ trait EnvSpecializedFunctions[E] {
                               fa4: Env[E, A4]): Env[E, (A1, A2, A3, A4)] =
     Env.parZip4(fa1, fa2, fa3, fa4)
 
-  @deprecated("use parZip5", since = "0.4.4")
-  def zip5[A1, A2, A3, A4, A5](fa1: Env[E, A1],
-                               fa2: Env[E, A2],
-                               fa3: Env[E, A3],
-                               fa4: Env[E, A4],
-                               fa5: Env[E, A5]): Env[E, (A1, A2, A3, A4, A5)] =
-    Env.parZip5(fa1, fa2, fa3, fa4, fa5)
-
   def parZip5[A1, A2, A3, A4, A5](fa1: Env[E, A1],
                                   fa2: Env[E, A2],
                                   fa3: Env[E, A3],
                                   fa4: Env[E, A4],
                                   fa5: Env[E, A5]): Env[E, (A1, A2, A3, A4, A5)] =
     Env.parZip5(fa1, fa2, fa3, fa4, fa5)
-
-  @deprecated("use parZip6", since = "0.4.4")
-  def zip6[A1, A2, A3, A4, A5, A6](fa1: Env[E, A1],
-                                   fa2: Env[E, A2],
-                                   fa3: Env[E, A3],
-                                   fa4: Env[E, A4],
-                                   fa5: Env[E, A5],
-                                   fa6: Env[E, A6]): Env[E, (A1, A2, A3, A4, A5, A6)] =
-    Env.parZip6(fa1, fa2, fa3, fa4, fa5, fa6)
 
   def parZip6[A1, A2, A3, A4, A5, A6](fa1: Env[E, A1],
                                       fa2: Env[E, A2],

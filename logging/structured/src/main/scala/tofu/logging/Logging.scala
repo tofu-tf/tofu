@@ -1,14 +1,13 @@
 package tofu.logging
 
 import Logging._
-import cats.effect.Sync
 import cats.kernel.Monoid
 import cats.syntax.apply._
 import cats.tagless.{ApplyK, Derive}
 import cats.{Applicative, Apply, FlatMap}
 import org.slf4j.{Logger, LoggerFactory, Marker}
-import tofu.logging.impl.{ContextLoggingImpl, ContextSyncLoggingImpl, EmbedLogging, SyncLogging}
 import tofu.higherKind.Embed
+import tofu.logging.impl.EmbedLogging
 import tofu.syntax.functionK._
 
 import scala.reflect.ClassTag
@@ -79,27 +78,6 @@ object Logging {
     LoggerFactory.getLogger(ct.runtimeClass)
 
   def flatten[F[_]: FlatMap](underlying: F[Logging[F]]): Logging[F] = new EmbedLogging[F](underlying)
-
-  /** same as `syncService` but trying to retrieve reader context
-    * and log it along with parameters
-    * unsafe, because logging is happening inside the `ask` function*/
-  @deprecated("method is unsafe", since = "0.4.18")
-  def contextService[F[_]: Applicative, Service: ClassTag](implicit ctx: LoggableContext[F]): Logging[F] = {
-    import ctx.loggable
-    new ContextLoggingImpl[F, ctx.Ctx, Service](ctx.context, loggerForService[Service]) with ServiceLogging[F, Service]
-  }
-
-  /** same as `syncService` but trying to retrieve reader context
-    * and log it along with parameters*/
-  @deprecated("method is unsafe, use `ServiceLogs` factories", since = "0.4.18")
-  def contextSyncService[F[_]: Sync, Service: ClassTag](implicit ctx: LoggableContext[F]): Logging[F] = {
-    import ctx.loggable
-    new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, loggerForService[Service]) with ServiceLogging[F, Service]
-  }
-
-  /** initialize new Logging with internal Logger, referencing `Service` class as logger name */
-  @deprecated("method is unsafe, use `ServiceLogs` factories", since = "0.4.18")
-  def syncService[F[_]: Sync, Svc: ClassTag]: Logging[F] = new SyncLogging[F](loggerForService[Svc])
 
   implicit val loggingApplyK: ApplyK[Logging] = Derive.applyK[Logging]
 
