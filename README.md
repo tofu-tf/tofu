@@ -2,7 +2,7 @@
 
 **Functional programming toolset making Tagless Final approach sane by Tinkoff scala team** 
 
-###Quick Start
+### Quick Start
 
 To use the whole utils pack just add: 
 
