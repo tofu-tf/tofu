@@ -17,13 +17,13 @@ Of course you can also specify the exact subproject that you wanna add to yours 
 * `tofu-env` for env (Some variation of a Reader Monad)
 * `tofu-parallel` for parallel (Parallel utils)
 * `tofu-concurrent` for concurrent (Concurrent utils)
-* `tofu-optics"0.1"` for optics core (Optics typeclasses)
-* `tofu-optics % "0.1"` for optics interop with [Monocle](https://github.com/julien-truffaut/Monocle)
+* `tofu-optics-core` for optics core (Optics typeclasses)
+* `tofu-optics-interop` for optics interop with [Monocle](https://github.com/julien-truffaut/Monocle)
 * `tofu-data` for data utils
 * `tofu-logging` for the whole set of logging utils (derivation, layout, structured)
-* `tofu-loggingon" % "0.1"` for logging derivation only
-* `tofu-logginged" % "0.1"` for logging structured only
-* `tofu-logging% "0.1"` for logging layout only
+* `tofu-logging-derivation` for logging derivation only
+* `tofu-logging-structured` for logging structured only
+* `tofu-logging-layout` for logging layout only
 * `tofu-observable` for observable
 * `tofu-enums` for enums ([Enumeratum](https://github.com/lloydmeta/enumeratum) utils)
 
