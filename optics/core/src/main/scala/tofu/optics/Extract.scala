@@ -1,6 +1,5 @@
 package tofu.optics
 
-import cats.data.Const
 import cats.{Functor, Monoid, Semigroup}
 import tofu.optics.data.Constant
 

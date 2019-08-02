@@ -19,9 +19,8 @@ trait OpticCompanion[O[s, t, a, b] >: PSame[s, t, a, b]] {
   def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): O[S, T, A, B]
 
   final implicit val category: Category[Mono] = new Category[Mono] {
-    def id[A] = PSame.id[A, A]
-    def compose[A, B, C](f: Mono[B, C], g: Mono[A, B]): Mono[A, C] =
-      self.compose(f, g)
+    def id[A]                                                      = PSame.id[A, A]
+    def compose[A, B, C](f: Mono[B, C], g: Mono[A, B]): Mono[A, C] = self.compose(f, g)
   }
 
   final implicit val category2: Category2[O] = new Category2[O] {
@@ -33,13 +32,13 @@ trait OpticCompanion[O[s, t, a, b] >: PSame[s, t, a, b]] {
 }
 
 trait OpticContext {
-  type F[+ _]
-  type P[- _, + _]
+  type F[+_]
+  type P[-_, +_]
 }
 
 abstract class MonoOpticCompanion[PO[s, t, a, b] >: PSame[s, t, a, b]](
-                                                                        poly: OpticCompanion[PO]
-                                                                      ) {
+    poly: OpticCompanion[PO]
+) {
   self =>
   type O[a, b] = PO[a, a, b, b]
 
@@ -50,7 +49,10 @@ abstract class MonoOpticCompanion[PO[s, t, a, b] >: PSame[s, t, a, b]](
 
 class OpticComposeOps[O[s, t, a, b], S, T, A, B](private val o: O[S, T, A, B]) extends AnyVal {
   def andThen[O1[s, t, a, b] >: O[s, t, a, b], U, V](o1: O1[A, B, U, V])(
-    implicit category2: Category2[O1]): O1[S, T, U, V] = category2.compose(o1, o)
+      implicit category2: Category2[O1]
+  ): O1[S, T, U, V] = category2.compose(o1, o)
+
+  def >>[O1[s, t, a, b] >: O[s, t, a, b]: Category2, U, V](o1: O1[A, B, U, V]): O1[S, T, U, V] = andThen(o1)
 }
 
 /** generic optic form, aka Profunctor Optic */
@@ -58,9 +60,7 @@ trait Optic[-Ctx <: OpticContext, -S, +T, +A, -B] {
   self =>
   def apply(c: Ctx)(p: c.P[A, c.F[B]]): c.P[S, c.F[T]]
 
-  def andThen[C1 <: Ctx, U, V](
-                                that: Optic[C1, A, B, U, V]
-                              ): Optic[C1, S, T, U, V] =
+  def andThen[C1 <: Ctx, U, V](that: Optic[C1, A, B, U, V]): Optic[C1, S, T, U, V] =
     new Optic[C1, S, T, U, V] {
       def apply(c: C1)(p: c.P[U, c.F[V]]): c.P[S, c.F[T]] = self(c)(that(c)(p))
     }

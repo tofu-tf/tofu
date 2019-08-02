@@ -2,7 +2,6 @@ package tofu.optics
 
 import alleycats.Pure
 import cats._
-import cats.data.Const
 import tofu.optics.data.{Constant, Identity}
 
 /** aka Traversal
@@ -16,15 +15,27 @@ trait PItems[-S, +T, +A, -B] extends PUpdate[S, T, A, B] with PFolded[S, T, A, B
   def foldMap[X: Monoid](a: S)(f: A => X): X = traverse[Constant[X, +*]](a)(b => Constant(f(b))).value
 }
 
-object Items extends MonoOpticCompanion(PItems)
+object Items extends MonoOpticCompanion(PItems) {
+  def apply[S] = new ItemsApply[S]
+
+  class ItemsApply[S] {
+    type Arb[+_]
+
+    def apply[A](trav: Applicative[Arb] => (S, A => Arb[A]) => Arb[S]): Items[S, A] = new Items[S, A] {
+      def traverse[F[+_]: Applicative](s: S)(f: A => F[A]): F[S] =
+        trav(Applicative[F].asInstanceOf[Applicative[Arb]])(s, f.asInstanceOf[A => Arb[A]]).asInstanceOf[F[S]]
+    }
+  }
+}
 
 object PItems extends OpticCompanion[PItems] {
+
   def compose[S, T, A, B, U, V](f: PItems[A, B, U, V], g: PItems[S, T, A, B]): PItems[S, T, U, V] =
     new PItems[S, T, U, V] {
-      def traverse[F[+ _]: Applicative](a: S)(fc: U => F[V]): F[T] = g.traverse(a)(f.traverse(_)(fc))
+      def traverse[F[+_]: Applicative](a: S)(fc: U => F[V]): F[T] = g.traverse(a)(f.traverse(_)(fc))
     }
 
-  final implicit def fromTraverse[F[+ _], A, B](implicit F: Traverse[F]): PItems[F[A], F[B], A, B] =
+  final implicit def fromTraverse[F[+_], A, B](implicit F: Traverse[F]): PItems[F[A], F[B], A, B] =
     new PItems[F[A], F[B], A, B] {
       def traverse[G[_]: Applicative](a: F[A])(f: A => G[B]): G[F[B]] = F.traverse(a)(f)
     }

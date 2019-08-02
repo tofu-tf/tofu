@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 private[env] class EnvFunctorstance[E]
     extends Concurrent[Env[E, *]] with Timer[Env[E, *]] with RunContext[Env[E, *]] with Execute[Env[E, *]]
-    with Memoize[Env[E, *]] with ContextShift[Env[E, *]]  with Timeout[Env[E, *]] {
+    with Memoize[Env[E, *]] with ContextShift[Env[E, *]] with Timeout[Env[E, *]] {
   override type Lower[A] = Task[A]
   override type Ctx      = E
 
@@ -50,8 +50,9 @@ private[env] class EnvFunctorstance[E]
   override def rethrow[A](fa: Env[E, Either[Throwable, A]]): Env[E, A] = fa.mapTask(_.flatMap(Task.fromEither(_)))
 
   //Bracket
-  override def bracketCase[A, B](acquire: Env[E, A])(use: A => Env[E, B])(
-      release: (A, ExitCase[Throwable]) => Env[E, Unit]): Env[E, B] =
+  override def bracketCase[A, B](
+      acquire: Env[E, A]
+  )(use: A => Env[E, B])(release: (A, ExitCase[Throwable]) => Env[E, Unit]): Env[E, B] =
     acquire.bracketСase(use)(release)
   override def bracket[A, B](acquire: Env[E, A])(use: A => Env[E, B])(release: A => Env[E, Unit]): Env[E, B] =
     acquire.bracket(use)(release)
@@ -76,8 +77,10 @@ private[env] class EnvFunctorstance[E]
 
   override def start[A](fa: Env[E, A]): Env[E, Fiber[Env[E, *], A]]           = fa.start
   override def race[A, B](fa: Env[E, A], fb: Env[E, B]): Env[E, Either[A, B]] = Env.race(fa, fb)
-  override def racePair[A, B](fa: Env[E, A],
-                              fb: Env[E, B]): Env[E, Either[(A, Fiber[Env[E, *], B]), (Fiber[Env[E, *], A], B)]] =
+  override def racePair[A, B](
+      fa: Env[E, A],
+      fb: Env[E, B]
+  ): Env[E, Either[(A, Fiber[Env[E, *], B]), (Fiber[Env[E, *], A], B)]] =
     Env.racePair(fa, fb)
 
   //Timer
@@ -97,8 +100,8 @@ private[env] class EnvFunctorstance[E]
   override def runContext[A](fa: Env[E, A])(ctx: E): Task[A] = fa.run(ctx)
 
   //Memoize
-  override def memoize[A](fa: Env[E, A]): Env[E, A]          = fa.memoize
-  override def memoizeOnSuccess[A](fa: Env[E, A]): Env[E, A] = fa.memoizeOnSuccess
+  override def memoize[A](fa: Env[E, A]): Env[E, Env[E, A]]          = fa.memo
+  override def memoizeOnSuccess[A](fa: Env[E, A]): Env[E, Env[E, A]] = fa.memoSuccess
 
   //Execute
   override def executionContext: Env[E, ExecutionContext]                        = Env.deferTask(Task.deferAction(Task.pure))

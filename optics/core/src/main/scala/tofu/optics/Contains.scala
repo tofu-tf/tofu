@@ -2,14 +2,11 @@ package tofu.optics
 
 import cats._
 import cats.data._
-import cats.syntax.functor._
-import cats.syntax.bifunctor._
 import cats.instances.tuple._
+import cats.syntax.bifunctor._
+import cats.syntax.functor._
 import tofu.optics.classes.PChoice
 import tofu.optics.data.{Constant, Identity}
-import tofu.optics.classes.PChoice
-
-import scala.annotation.unchecked.uncheckedVariance
 
 /** aka Lens
   * S has exactly one A and can update it
@@ -17,6 +14,8 @@ import scala.annotation.unchecked.uncheckedVariance
 trait PContains[-S, +T, +A, -B] extends PExtract[S, T, A, B] with PRepeated[S, T, A, B] with PProperty[S, T, A, B] {
   def set(s: S, b: B): T
   def extract(s: S): A
+
+  def get(s: S): A = extract(s)
 
   def narrow(s: S): Either[T, A]            = Right(extract(s))
   override def update(s: S, fab: A => B): T = set(s, fab(extract(s)))
@@ -29,12 +28,30 @@ trait PContains[-S, +T, +A, -B] extends PExtract[S, T, A, B] with PRepeated[S, T
     F.map(f(extract(a)))(b => set(a, b))
 
   override def traverse[F[+_]](s: S)(f: A => F[B])(implicit F: Applicative[F]): F[T] = traverse1(s)(f)
-  override def downcast(s: S): Option[A]                                            = Some(extract(s))
+  override def downcast(s: S): Option[A]                                             = Some(extract(s))
 }
 
-object Contains extends MonoOpticCompanion(PContains)
+object Contains extends MonoOpticCompanion(PContains) {
+  def apply[A] = new ContainsApplied[A](true)
+
+  class ContainsApplied[A](private val dummy: Boolean) extends AnyVal {
+    def apply[B](fget: A => B)(fset: (A, B) => A): Contains[A, B] = new Contains[A, B] {
+      def set(s: A, b: B): A = fset(s, b)
+      def extract(s: A): B   = fget(s)
+    }
+  }
+}
 
 object PContains extends OpticCompanion[PContains] {
+  def apply[S, B] = new PContainsApplied[S, B](true)
+
+  class PContainsApplied[S, B](private val dummy: Boolean) extends AnyVal {
+    def apply[A, T](fget: S => A)(fset: (S, B) => T): PContains[S, T, A, B] = new PContains[S, T, A, B] {
+      def set(s: S, b: B): T = fset(s, b)
+      def extract(s: S): A   = fget(s)
+    }
+  }
+
   def compose[S, T, A, B, U, V](f: PContains[A, B, U, V], g: PContains[S, T, A, B]): PContains[S, T, U, V] =
     new PContains[S, T, U, V] {
       def set(s: S, b: V): T = g.set(s, f.set(g.extract(s), b))
@@ -69,7 +86,7 @@ object PContains extends OpticCompanion[PContains] {
     }
 
   implicit class PContainsOps[S, T, A, B](private val self: PContains[S, T, A, B]) extends AnyVal {
-    def focusState[F[+ _]: Functor, R](state: IndexedStateT[F, A, B, R]): IndexedStateT[F, S, T, R] =
+    def focusState[F[+_]: Functor, R](state: IndexedStateT[F, A, B, R]): IndexedStateT[F, S, T, R] =
       IndexedStateT.applyF(state.runF.map(afbr => (s: S) => afbr(self.extract(s)).map(_.leftMap(self.set(s, _)))))
   }
 

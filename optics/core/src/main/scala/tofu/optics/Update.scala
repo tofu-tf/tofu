@@ -1,6 +1,6 @@
 package tofu.optics
 
-import cats.{Applicative, Functor, Id}
+import cats.{Applicative, Functor}
 import tofu.optics.data.Identity
 
 /** aka Setter

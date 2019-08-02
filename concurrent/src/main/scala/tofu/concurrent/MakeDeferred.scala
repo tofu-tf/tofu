@@ -1,7 +1,7 @@
 package tofu.concurrent
 
-import cats.effect.{Concurrent, Sync}
 import cats.effect.concurrent.Deferred
+import cats.effect.{Concurrent, Sync}
 
 trait MakeDeferred[I[_], F[_]] {
   def deferred[A]: I[Deferred[F, A]]

@@ -1,8 +1,6 @@
 package tofu.optics
 
 import cats._
-import cats.data.Const
-import tofu.optics.data.Constant
 import tofu.optics.data.Constant
 
 /** aka NonEmptyTraversal
@@ -10,14 +8,25 @@ import tofu.optics.data.Constant
   * and can update them using some effect
   */
 trait PRepeated[-S, +T, +A, -B] extends PItems[S, T, A, B] with PReduced[S, T, A, B] {
-  def traverse1[F[+ _]: Apply](s: S)(f: A => F[B]): F[T]
+  def traverse1[F[+_]: Apply](s: S)(f: A => F[B]): F[T]
 
-  def traverse[F[+ _]: Applicative](s: S)(f: A => F[B]): F[T] = traverse1[F](s)(f)
-  override def foldMap[X: Monoid](s: S)(f: A => X): X       = reduceMap[X](s)(f)
-  def reduceMap[X: Semigroup](s: S)(f: A => X): X             = traverse1[Constant[X, +*]](s)(b => Constant(f(b))).value
+  def traverse[F[+_]: Applicative](s: S)(f: A => F[B]): F[T] = traverse1[F](s)(f)
+  override def foldMap[X: Monoid](s: S)(f: A => X): X        = reduceMap[X](s)(f)
+  def reduceMap[X: Semigroup](s: S)(f: A => X): X            = traverse1[Constant[X, +*]](s)(b => Constant(f(b))).value
 }
 
-object Repeated extends MonoOpticCompanion(PRepeated)
+object Repeated extends MonoOpticCompanion(PRepeated) {
+  def apply[S] = new RepeatedApply[S]
+
+  class RepeatedApply[S] {
+    type Arb[+_]
+
+    def apply[A](trav: Apply[Arb] => (S, A => Arb[A]) => Arb[S]): Repeated[S, A] = new Repeated[S, A] {
+      def traverse1[F[+_]: Apply](s: S)(f: A => F[A]): F[S] =
+        trav(Apply[F].asInstanceOf[Apply[Arb]])(s, f.asInstanceOf[A => Arb[A]]).asInstanceOf[F[S]]
+    }
+  }
+}
 
 object PRepeated extends OpticCompanion[PRepeated] {
   def compose[S, T, A, B, U, V](f: PRepeated[A, B, U, V], g: PRepeated[S, T, A, B]): PRepeated[S, T, U, V] =

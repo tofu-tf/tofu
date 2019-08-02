@@ -7,8 +7,7 @@ import cats.effect.concurrent.{MVar, Ref}
 import cats.syntax.functor._
 import tofu.concurrent.Mut.FocusedMut
 import tofu.optics.Contains
-import syntax.bracket._
-import syntax.optics._
+import tofu.syntax.bracket._
 
 /** simplified form of synchonized mutable variable, that could be satisfied both by MVar and Ref */
 trait Mut[F[_], A] {
@@ -41,6 +40,6 @@ object Mut {
     override def set(b: B): F[Unit] = v.update(focus.set(_, b))
 
     override def focused[C](implicit next: B Contains C, F: Functor[F]): Mut[F, C] =
-      new FocusedMut[F, A, C](v, focus >>> next)
+      new FocusedMut[F, A, C](v, focus >> next)
   }
 }

@@ -11,7 +11,7 @@ import cats.syntax.either._
 import tofu.Guarantee
 
 object bracket {
-  implicit class BracketFPUtilsOps[F[_], A](val fa: F[A]) extends AnyVal {
+  implicit class TofuBracketOps[F[_], A](val fa: F[A]) extends AnyVal {
     def bracketIncomplete[B, C](use: A => F[B])(release: A => F[C])(implicit F: Applicative[F],
                                                                     FG: Guarantee[F]): F[B] =
       FG.bracket(fa)(use) { case (a, success) => release(a).whenA(!success) }
@@ -20,12 +20,12 @@ object bracket {
       FG.bracket(F.unit)(_ => fa)((_, success) => release.whenA(!success))
   }
 
-  implicit class BracketMVarOps[F[_], A](val mvar: MVar[F, A]) extends AnyVal {
+  implicit class TofuBracketMVarOps[F[_], A](val mvar: MVar[F, A]) extends AnyVal {
     def bracketUpdate[B, E](use: A => F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[B] =
       mvar.take.bracketIncomplete(use)(mvar.put)
   }
 
-  implicit class BracketEitherTOps[F[_], E, A](val e: EitherT[F, E, A]) extends AnyVal {
+  implicit class TofuBracketEitherTOps[F[_], E, A](val e: EitherT[F, E, A]) extends AnyVal {
 
     /** special bracket form that could handle both Either logic error and F underlying error */
     def bracketCaseErr[U, B](use: A => EitherT[F, E, B])(release: (A, ExitCase[Either[E, U]]) => F[Unit])(

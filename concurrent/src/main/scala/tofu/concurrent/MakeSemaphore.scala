@@ -1,7 +1,7 @@
 package tofu.concurrent
 
-import cats.effect.{Concurrent, Sync}
 import cats.effect.concurrent.Semaphore
+import cats.effect.{Concurrent, Sync}
 
 trait MakeSemaphore[I[_], F[_]] {
   def semaphore(count: Long): I[Semaphore[F]]

@@ -5,6 +5,7 @@ import cats.effect._
 import monix.eval.Task
 import monix.execution.{Cancelable, CancelableFuture, Scheduler}
 import cats.syntax.either._
+import monix.execution.annotations.UnsafeBecauseImpure
 
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.duration.FiniteDuration
@@ -19,13 +20,16 @@ sealed trait Env[E, +A] {
   def mapTask3[B1, B2, R](e1: Env[E, B1], e2: Env[E, B2])(f: (Task[A], Task[B1], Task[B2]) => Task[R]): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx)))
   def mapTask4[B1, B2, B3, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3])(
-      f: (Task[A], Task[B1], Task[B2], Task[B3]) => Task[R]): Env[E, R] =
+      f: (Task[A], Task[B1], Task[B2], Task[B3]) => Task[R]
+  ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx)))
   def mapTask5[B1, B2, B3, B4, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3], e4: Env[E, B4])(
-      f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4]) => Task[R]): Env[E, R] =
+      f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4]) => Task[R]
+  ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx), e4.run(ctx)))
   def mapTask6[B1, B2, B3, B4, B5, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3], e4: Env[E, B4], e5: Env[E, B5])(
-      f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4], Task[B5]) => Task[R]): Env[E, R] =
+      f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4], Task[B5]) => Task[R]
+  ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx), e4.run(ctx), e5.run(ctx)))
 
   // execution
@@ -118,14 +122,29 @@ sealed trait Env[E, +A] {
 
   def memoizeTask: Env[E, A]          = mapTask(_.memoize)
   def memoizeTaskOnSuccess: Env[E, A] = mapTask(_.memoizeOnSuccess)
+
+  @UnsafeBecauseImpure
   def memoizeOnSuccess: Env[E, A] = {
-    val memoization = Memoization[A]()
+    val memoization = Memoization.unsafe[A]()
+
     Env(ctx => memoization.flatMap(_.getOrElse(run(ctx))))
   }
+
+  @UnsafeBecauseImpure
   def memoize: Env[E, A] = {
-    val memoization = Memoization[Try[A]]()
+    val memoization = Memoization.unsafe[Try[A]]()
     Env(ctx => memoization.flatMap(_.getOrElse(run(ctx).materialize)).dematerialize)
   }
+
+  def memoSuccess: Env[E, Env[E, A]] =
+    Env.fromTask(Memoization[A].map { memo =>
+      Env(ctx => memo.flatMap(_.getOrElse(run(ctx))))
+    })
+
+  def memo: Env[E, Env[E, A]] =
+    Env.fromTask(Memoization[Try[A]].map { memo =>
+      Env(ctx => memo.flatMap(_.getOrElse(run(ctx).materialize)).dematerialize)
+    })
 
   // scheduling
   def delayExcecution(dur: FiniteDuration): Env[E, A] =
@@ -201,15 +220,18 @@ final case class EnvTask[E, +A](ta: Task[A]) extends Env[E, A] {
       case _           => super.mapTask2(eb)(f)
     }
   override def mapTask3[B1, B2, D](e1: Env[E, B1], e2: Env[E, B2])(
-      f: (Task[A], Task[B1], Task[B2]) => Task[D]): Env[E, D] =
+      f: (Task[A], Task[B1], Task[B2]) => Task[D]
+  ): Env[E, D] =
     e1.mapTask2(e2)(f(ta, _, _))
 
   override def mapTask4[B1, B2, B3, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3])(
-      f: (Task[A], Task[B1], Task[B2], Task[B3]) => Task[R]): Env[E, R] =
+      f: (Task[A], Task[B1], Task[B2], Task[B3]) => Task[R]
+  ): Env[E, R] =
     e1.mapTask3(e2, e3)(f(ta, _, _, _))
 
   override def mapTask5[B1, B2, B3, B4, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3], e4: Env[E, B4])(
-      f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4]) => Task[R]): Env[E, R] =
+      f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4]) => Task[R]
+  ): Env[E, R] =
     e1.mapTask4(e2, e3, e4)(f(ta, _, _, _, _))
 
   override def mapTask6[B1, B2, B3, B4, B5, R](
@@ -217,7 +239,8 @@ final case class EnvTask[E, +A](ta: Task[A]) extends Env[E, A] {
       e2: Env[E, B2],
       e3: Env[E, B3],
       e4: Env[E, B4],
-      e5: Env[E, B5])(f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4], Task[B5]) => Task[R]): Env[E, R] =
+      e5: Env[E, B5]
+  )(f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4], Task[B5]) => Task[R]): Env[E, R] =
     e1.mapTask5(e2, e3, e4, e5)(f(ta, _, _, _, _, _))
 
   override def map2[B, C](eb: Env[E, B])(f: (A, B) => C) = eb match {

@@ -1,5 +1,4 @@
-package tofu.concurrent
-
+package tofu.concurrent.impl
 import cats.Functor
 import cats.data.State
 import cats.effect.concurrent.Ref

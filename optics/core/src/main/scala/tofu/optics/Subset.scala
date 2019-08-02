@@ -27,7 +27,16 @@ trait PSubset[-S, +T, +A, -B]
   override def foldMap[X: Monoid](a: S)(f: A => X): X = downcast(a).foldMap(f)
 }
 
-object Subset extends MonoOpticCompanion(PSubset){
+object Subset extends MonoOpticCompanion(PSubset) {
+  def apply[A] = new SubsetApplied[A](true)
+
+  class SubsetApplied[A](private val dummy: Boolean) extends AnyVal {
+    def apply[B](fdown: A => Option[B])(fup: B => A): Subset[A, B] = new ByDowncast[A, B] {
+      def cast(a: A): Option[B] = fdown(a)
+      def upcast(b: B): A       = fup(b)
+    }
+  }
+
   def subType[A, B <: A: ClassTag]: Subset[A, B] = new ByDowncast[A, B] {
     def cast(a: A): Option[B] = Some(a).collect { case b: B => b }
     def upcast(b: B): A       = b
@@ -44,6 +53,15 @@ object Subset extends MonoOpticCompanion(PSubset){
 object PSubset extends OpticCompanion[PSubset] {
   override type Mono[A, B] = Subset[A, B]
 
+  def apply[S, B] = new SubsetApplied[S, B](true)
+
+  class SubsetApplied[S, B](private val dummy: Boolean) extends AnyVal {
+    def apply[T, A](fdown: S => Either[T, A])(fup: B => T): PSubset[S, T, A, B] = new PSubset[S, T, A, B] {
+      def narrow(s: S): Either[T, A] = fdown(s)
+      def upcast(b: B): T            = fup(b)
+    }
+  }
+
   def compose[S, T, A, B, U, V](f: PSubset[A, B, U, V], g: PSubset[S, T, A, B]): PSubset[S, T, U, V] =
     new PSubset[S, T, U, V] {
       def narrow(s: S): Either[T, U] = g.narrow(s).flatMap(f.narrow(_).leftMap(g.upcast))
@@ -53,8 +71,8 @@ object PSubset extends OpticCompanion[PSubset] {
   trait ByInject[S, T, A, B] extends PSubset[S, T, A, B] {
     implicit val boptMonoid: Monoid[Option[A]] = MonoidK[Option].algebra[A]
 
-    def inj[F[+ _]: Pure: Functor, P[- _, + _]: PChoice](pb: P[A, F[B]]): P[S, F[T]]
-    override def inject[F[+ _]: Pure: Functor, P[- _, + _]: PChoice](pb: P[A, F[B]]): P[S, F[T]] = inj(pb)
+    def inj[F[+_]: Pure: Functor, P[-_, +_]: PChoice](pb: P[A, F[B]]): P[S, F[T]]
+    override def inject[F[+_]: Pure: Functor, P[-_, +_]: PChoice](pb: P[A, F[B]]): P[S, F[T]] = inj(pb)
 
     def upcast(b: B): T            = inj[Identity, Tagged](Tagged(b)).value
     def narrow(s: S): Either[T, A] = inj[Either[A, +*], Function](Left(_)).apply(s).swap
@@ -77,7 +95,7 @@ object PSubset extends OpticCompanion[PSubset] {
         def functor    = Functor[G]
         def profunctor = PChoice[Q]
         def pure       = Pure[F]
-        type F[+x]    = G[x]
+        type F[+x]     = G[x]
         type P[-x, +y] = Q[x, y]
       })(pb)
 

@@ -1,7 +1,6 @@
 package tofu.optics
 
 import cats.Monoid
-import cats.data.Const
 import cats.instances.option._
 import cats.syntax.foldable._
 import tofu.optics.data.Constant
@@ -12,6 +11,8 @@ import tofu.optics.data.Constant
   */
 trait PDowncast[-S, +T, +A, -B]  extends PFolded[S, T, A, B] {
   def downcast(s: S): Option[A]
+
+  def getOption(s: S): Option[A] = downcast(s)
 
   def foldMap[X: Monoid](s: S)(f: A => X): X = downcast(s).foldMap(f)
 }
