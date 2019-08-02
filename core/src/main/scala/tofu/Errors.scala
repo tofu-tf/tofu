@@ -74,7 +74,7 @@ object Handle extends HandleInstances with DataEffectComp[Handle] {
       recWith(fa)(CachedMatcher(f))
     override def recoverWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A] = recWith(fa)(pf)
     override def recover[A](fa: F[A])(pf: PartialFunction[E, A])(implicit F: Applicative[F]): F[A] =
-      recWith(fa)(pf andThen F.pure)
+      recWith(fa)(pf andThen F.pure _)
   }
 
 }

@@ -2,6 +2,20 @@ package tofu.optics
 
 /** classic names for types */
 object classic {
+  val Equality: Same.type              = Same
+  val Iso: Equivalent.type             = Equivalent
+  val Prism: Subset.type               = Subset
+  val Lens: Contains.type              = Contains
+  val Optional: Property.type          = Property
+  val NonEmptyTraversal: Repeated.type = Repeated
+  val Traversal: Items.type            = Items
+  val NonEmptyFold: Reduced.type       = Reduced
+  val View: Downcast.type              = Downcast
+  val Review: Upcast.type              = Upcast
+  val Getter: Extract.type             = Extract
+  val Fold: Folded.type                = Folded
+  val Setter: Update.type              = Update
+
   type Equality[A, B]          = PSame[A, A, B, B]
   type Iso[A, B]               = PEquivalent[A, A, B, B]
   type Prism[A, B]             = PSubset[A, A, B, B]
@@ -15,6 +29,20 @@ object classic {
   type Getter[A, B]            = PExtract[A, A, B, B]
   type Fold[A, B]              = PFolded[A, A, B, B]
   type Setter[A, B]            = PUpdate[A, A, B, B]
+
+  val PEquality: PSame.type              = PSame
+  val PIso: PEquivalent.type             = PEquivalent
+  val PPrism: PSubset.type               = PSubset
+  val PLens: PContains.type              = PContains
+  val POptional: PProperty.type          = PProperty
+  val PNonEmptyTraversal: PRepeated.type = PRepeated
+  val PTraversal: PItems.type            = PItems
+  val PNonEmptyFold: PReduced.type       = PReduced
+  val PView: PDowncast.type              = PDowncast
+  val PReview: PUpcast.type              = PUpcast
+  val PGetter: PExtract.type             = PExtract
+  val PFold: PFolded.type                = PFolded
+  val PSetter: PUpdate.type              = PUpdate
 
   type PEquality[S, T, A, B]          = PSame[S, T, A, B]
   type PIso[S, T, A, B]               = PEquivalent[S, T, A, B]

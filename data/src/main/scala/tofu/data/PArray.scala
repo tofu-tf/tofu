@@ -37,10 +37,10 @@ object PArray extends Newtype1Covariant{
       go(0)
     }
     override def get[A](fa: PArray[A])(idx: Long): Option[A] = fa.get(idx.toInt)
-    override def map[A, B](fa: PArray[A])(f: A => B): PArray[B] = fromArray(fa.toArray.map[B, Array[Any]](f))
+    override def map[A, B](fa: PArray[A])(f: A => B): PArray[B] = fromArray(fa.toArray.map(f : A => Any))
     def pure[A](x: A): PArray[A]                             = PArray(x)
     def flatMap[A, B](fa: PArray[A])(f: A => PArray[B]): PArray[B] =
-      fromArray(fa.toArray.flatMap[B, Array[Any]](a => f(a).toArray))
+      fromArray(fa.toArray.flatMap(a => (f(a).toArray : Iterable[Any])))
 
     def tailRecM[A, B](a: A)(f: A => PArray[Either[A, B]]): PArray[B] = {
       val bldr = Array.newBuilder[Any]

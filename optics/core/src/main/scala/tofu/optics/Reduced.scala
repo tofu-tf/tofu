@@ -1,8 +1,7 @@
 package tofu.optics
 
 import cats._
-import cats.data.{Const, NonEmptyList}
-import tofu.optics.data.Constant
+import cats.data.NonEmptyList
 import tofu.optics.data.Constant
 
 /** aka NonEmptyFold
@@ -13,10 +12,21 @@ trait PReduced[-S, +T, +A, -B] extends PFolded[S, T, A, B] {
   def reduceMap[X: Semigroup](s: S)(f: A => X): X
 
   def foldMap[X: Monoid](s: S)(f: A => X): X = reduceMap(s)(f)
-  def getAll1(s: S): NonEmptyList[A] = reduceMap(s)(NonEmptyList.one[A])
+  def getAll1(s: S): NonEmptyList[A]         = reduceMap(s)(NonEmptyList.one[A])
 }
 
-object Reduced extends MonoOpticCompanion(PReduced)
+object Reduced extends MonoOpticCompanion(PReduced) {
+  def apply[S] = new ReducedApply[S]
+
+  class ReducedApply[S] {
+    type Arb
+
+    def apply[A](fm: Semigroup[Arb] => (S, A => Arb) => Arb): Reduced[S, A] = new Reduced[S, A] {
+      def reduceMap[X: Semigroup](s: S)(f: A => X): X =
+        fm(Semigroup[X].asInstanceOf[Semigroup[Arb]])(s, f.asInstanceOf[A => Arb]).asInstanceOf[X]
+    }
+  }
+}
 
 object PReduced extends OpticCompanion[PReduced] {
   def compose[S, T, A, B, U, V](f: PReduced[A, B, U, V], g: PReduced[S, T, A, B]): PReduced[S, T, U, V] =
@@ -46,9 +56,9 @@ object PReduced extends OpticCompanion[PReduced] {
     new PReduced[S, T, A, B] {
       def reduceMap[Y: Semigroup](s: S)(f: A => Y): Y =
         o.apply(new Context {
-          type X = Y
-          def algebra = Semigroup[Y]
-        })(a => Constant.Impl(f(a)))(s)
+            type X = Y
+            def algebra = Semigroup[Y]
+          })(a => Constant.Impl(f(a)))(s)
           .value
 
     }

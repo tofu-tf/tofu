@@ -18,6 +18,9 @@ final class Memoization[A] private (memo: MVar[Task, Option[A]]) {
 }
 
 object Memoization {
-  def apply[A](): Task[Memoization[A]] =
+  def apply[A]: Task[Task[Memoization[A]]] =
+    Task.delay(unsafe())
+
+  def unsafe[A](): Task[Memoization[A]] =
     MVar[Task].of(Option.empty[A]).map(mvar => new Memoization[A](mvar)).memoize
 }
