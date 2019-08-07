@@ -3,7 +3,7 @@ import com.typesafe.sbt.SbtGit.git
 
 scalaVersion := "2.12.8"
 
-val libVersion = "0.1.1"
+val libVersion = "0.2.0"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -117,7 +117,7 @@ lazy val concurrent =
 )
 
 lazy val coreModules   = List(core, memo, env, parallel, concurrent, opticsCore, data)
-lazy val commonModules = List(observable, opticsInterop, logging, enums)
+lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums)
 
 lazy val opticsCore = project
   .in(file("optics/core"))
@@ -132,6 +132,11 @@ lazy val opticsInterop = project
   .in(file("optics/interop"))
   .dependsOn(opticsCore)
   .settings(defaultSettings, libraryDependencies += monocle, publishName := "optics-interop")
+
+lazy val opticsMacro = project
+  .in(file("optics/macro"))
+  .dependsOn(opticsCore)
+  .settings(defaultSettings, macros, publishName := "optics-macro")
 
 lazy val enums = project
   .dependsOn(loggingStr)
