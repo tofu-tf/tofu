@@ -31,7 +31,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
     def monolenses(tpname: TypeName, params: List[ValDef]): List[Tree] = params.map { param =>
       val lensName = TermName(prefix + param.name.decodedName)
       q"""val $lensName =
-        tofu.optics.macros.internal.Macro.mkContains[$tpname, $tpname, ${param.tpt}, ${param.tpt}](${param.name.toString})"""
+        _root_.tofu.optics.macros.internal.Macro.mkContains[$tpname, $tpname, ${param.tpt}, ${param.tpt}](${param.name.toString})"""
     }
 
     def optics(tpname: TypeName, tparams: List[TypeDef], params: List[ValDef]): List[Tree] = {
@@ -43,7 +43,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
           val q"x: $s" = q"x: $tpname[..${tparams.map(_.name)}]"
           val q"x: $a" = q"x: ${param.tpt}"
           q"""def $lensName[..$tparams] =
-            tofu.optics.macros.internal.Macro.mkContains[$s, $s, $a, $a](${param.name.toString})"""
+            _root_.tofu.optics.macros.internal.Macro.mkContains[$s, $s, $a, $a](${param.name.toString})"""
         }
       }
     }
@@ -87,7 +87,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
           val q"x: $b" = q"x: ${tptTransformer.transform(param.tpt)}"
 
           q"""def $lensName[..$defParams] =
-               tofu.optics.macros.internal.Macro.mkContains[$s, $t, $a, $b](${param.name.toString})"""
+            _root_.tofu.optics.macros.internal.Macro.mkContains[$s, $t, $a, $b](${param.name.toString})"""
         }
       }
     }

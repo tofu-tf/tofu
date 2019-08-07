@@ -47,7 +47,7 @@ private[macros] class MacroImpl(val c: blackbox.Context) {
           )
           ) if termDefName.decodedName.toString == termUseName.decodedName.toString =>
         c.Expr[Contains[S, A]](
-          typesFields.map { case (t, f) => q"tofu.optics.macros.GenContains[$t](_.$f)" }
+          typesFields.map { case (t, f) => q"_root_.tofu.optics.macros.GenContains[$t](_.$f)" }
             .reduce((a, b) => q"$a andThen $b")
         )
 
@@ -81,7 +81,7 @@ private[macros] class MacroImpl(val c: blackbox.Context) {
       .getOrElse(c.abort(c.enclosingPosition, s"Cannot find constructor field named $fieldName in $sTpe"))
 
     c.Expr[PContains[S, T, A, B]](q"""
-      import tofu.optics.PContains
+      import _root_.tofu.optics.PContains
       import _root_.scala.language.higherKinds // prevent warning at call site
 
       new PContains[$sTpe, $tTpe, $aTpe, $bTpe]{

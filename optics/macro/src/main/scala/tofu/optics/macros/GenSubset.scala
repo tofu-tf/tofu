@@ -17,7 +17,7 @@ private class GenSubsetImpl(val c: blackbox.Context) {
 
     val sTpeSym = sTpe.typeSymbol.companion
     c.Expr[Subset[S, A]](q"""
-      import tofu.optics.Subset
+      import _root_.tofu.optics.Subset
 
       new Subset[$sTpe, $aTpe]{
         override def narrow(s: $sTpe): $sTpe Either $aTpe =

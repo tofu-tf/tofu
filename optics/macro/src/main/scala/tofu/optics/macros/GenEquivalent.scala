@@ -41,14 +41,14 @@ sealed abstract class GenEquivalentImplBase {
       val tree = table.gen
       val obj = tree.mkAttributedQualifier(sTpe.asInstanceOf[tree.global.Type]).asInstanceOf[Tree]
       q"""
-        tofu.optics.Equivalent[${sTpe}, Unit](Function.const(()))(Function.const(${obj}))
+        _root_.tofu.optics.Equivalent[${sTpe}, Unit](Function.const(()))(Function.const(${obj}))
       """
     } else {
       caseAccessorsOf[S] match {
         case Nil =>
           val sTpeSym = sTpe.typeSymbol.companion
           q"""
-            tofu.optics.Equivalent[${sTpe}, Unit](Function.const(()))(Function.const(${sTpeSym}()))
+            _root_.tofu.optics.Equivalent[${sTpe}, Unit](Function.const(()))(Function.const(${sTpeSym}()))
           """
         case _   => fail(s"$sTpe needs to be a case class with no accessor or an object.")
       }
@@ -71,7 +71,7 @@ class GenEquivalentImpl(override val c: blackbox.Context) extends GenEquivalentI
     val sTpeSym = sTpe.typeSymbol.companion
 
     c.Expr[Equivalent[S, A]](q"""
-      import tofu.optics.Equivalent
+      import _root_.tofu.optics.Equivalent
       new Equivalent[$sTpe, $aTpe]{ self =>
         override def extract(s: $sTpe): $aTpe =
           s.$fieldMethod
@@ -124,7 +124,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
       case (param :: Nil) :: Nil =>
         val (pName, pType) = nameAndType(sTpe, param)
         q"""
-          new tofu.optics.Equivalent[$sTpe, $pType] {
+          new _root_.tofu.optics.Equivalent[$sTpe, $pType] {
             override def extract(s: $sTpe): $pType = s.$pName
 
             override def upcast(a: $pType): $sTpe = ${sTpeSym.companion}(_)
@@ -142,7 +142,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
           types ::= pType
         }
         q"""
-          new tofu.optics.Equivalent[$sTpe, (..$types)] {
+          new _root_.tofu.optics.Equivalent[$sTpe, (..$types)] {
             override def extract(s: $sTpe): (..$types) = (..$readField)
 
             override def upcast(a: (..$types)): $sTpe = ${sTpeSym.companion}(..$readTuple)
