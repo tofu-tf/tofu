@@ -136,7 +136,7 @@ lazy val opticsInterop = project
 lazy val opticsMacro = project
   .in(file("optics/macro"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, macros, publishName := "optics-macro")
+  .settings(defaultSettings, compile213, macros, publishName := "optics-macro")
 
 lazy val enums = project
   .dependsOn(loggingStr)
