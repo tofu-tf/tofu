@@ -14,7 +14,7 @@ object context {
   def runContext[F[_]] = new RunContextPA[F]
 
   class RunContextPA[F[_]] {
-    def apply[A, C, G[_]](fa: F[A])(ctx: C)(implicit runCtx: RunContext.Aux[F, G, C]): G[A] =
+    def apply[A, C, G[_]](fa: F[A])(ctx: C)(implicit runCtx: HasContextRun[F, G, C]): G[A] =
       runCtx.runContext(fa)(ctx)
   }
 

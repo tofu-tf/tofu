@@ -19,11 +19,11 @@ trait Context[F[_]] {
 }
 
 object Context extends ContextInstances {
-  def apply[F[_]](implicit ctx: Context[F]): Aux[F, ctx.Ctx] = ctx
-  type Aux[F[_], C] = Context[F] { type Ctx = C }
+  def apply[F[_]](implicit ctx: Context[F]): HasContext[F, ctx.Ctx] = ctx
+  type Aux[F[_], C] = HasContext[F, C]
 }
 
-trait ContextInstances extends LocalInstances[HasContext]
+trait ContextInstances extends LocalInstances[λ[(f[_], g[_], r) => HasContext[f, r]]]
 
 trait Local[F[_]] extends Context[F] {
   def local[A](fa: F[A])(project: Ctx => Ctx): F[A]
@@ -31,31 +31,28 @@ trait Local[F[_]] extends Context[F] {
   def subcontext[A](contains: Ctx Contains A): HasLocal[F, A] = new LocalContainsInstance[F, Ctx, A](this, contains)
 }
 
-object Local extends LocalInstances[HasLocal] {
+object Local extends LocalInstances[λ[(f[_], g[_], r) => HasLocal[f, r]]] {
   def apply[F[_]](implicit ctx: Local[F]): HasLocal[F, ctx.Ctx] = ctx
   type Aux[F[_], C] = HasLocal[F, C]
 }
 
-trait LocalInstances[TCA[f[_], r] >: HasLocal[f, r]] extends RunContextInstances[TCA]
+trait LocalInstances[TCA[f[_], g[_], r] >: HasLocal[f, r]] extends RunContextInstances[TCA]
 
 trait RunContext[F[_]] extends Local[F] {
   type Lower[A]
   def runContext[A](fa: F[A])(ctx: Ctx): Lower[A]
 
-  def runEquivalent[A](eq: Equivalent[Ctx, A]): RunContext.Aux[F, Lower, A] =
+  def runEquivalent[A](eq: Equivalent[Ctx, A]): HasContextRun[F, Lower, A] =
     new RunContextEquivalentInstance[F, Lower, Ctx, A](this, eq)
 }
 
 object RunContext extends RunContextInstances[HasContextRun] {
-  def apply[F[_]](implicit ctx: RunContext[F]): Aux[F, ctx.Lower, ctx.Ctx] = ctx
-  type Aux[F[_], G[_], C] = RunContext[F] {
-    type Lower[A] = G[A]
-    type Ctx      = C
-  }
+  def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx
+  type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
 }
 
-trait RunContextInstances[TCA[f[_], r] >: HasContextRun[f, r]] {
-  implicit def readerTContext[C, F[_]: Applicative]: TCA[ReaderT[F, C, *], C] = new RunContext[ReaderT[F, C, *]] {
+trait RunContextInstances[TCA[f[_], g[_], r] >: HasContextRun[f, g, r]] {
+  implicit def readerTContext[C, F[_]: Applicative]: TCA[ReaderT[F, C, *], F, C] = new RunContext[ReaderT[F, C, *]] {
     type Lower[A] = F[A]
     type Ctx      = C
     override def runContext[A](fa: ReaderT[F, C, A])(ctx: C): F[A]                 = fa.run(ctx)
@@ -78,7 +75,7 @@ private[tofu] class LocalContainsInstance[F[_], C1, C2](ctx: F HasLocal C1, cont
 }
 
 private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](
-    ctx: RunContext.Aux[F, G, C1],
+    ctx: HasContextRun[F, G, C1],
     equivalent: C1 Equivalent C2
 ) extends LocalContainsInstance[F, C1, C2](ctx, equivalent) with RunContext[F] {
   type Lower[a] = G[a]
