@@ -4,8 +4,6 @@ package logging
 import cats.Foldable
 import cats.kernel.{Monoid, Semigroup}
 import cats.syntax.monoid._
-import cats.syntax.foldable._
-import tofu.data.PArray
 import tofu.data.PArray
 import syntax.logRenderer._
 

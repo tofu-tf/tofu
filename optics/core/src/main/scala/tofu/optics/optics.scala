@@ -1,9 +1,6 @@
 package tofu.optics
 
 import cats.arrow._
-import cats.instances.either._
-import cats.syntax.either._
-import cats.syntax.option._
 import tofu.optics.classes.Category2
 
 trait OpticCompanion[O[s, t, a, b] >: PSame[s, t, a, b]] {

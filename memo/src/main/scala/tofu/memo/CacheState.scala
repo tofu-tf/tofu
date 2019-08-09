@@ -4,7 +4,7 @@ package memo
 import cats.effect.concurrent.{MVar, Ref}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import cats.tagless.{FunctorK, InvariantK}
+import cats.tagless.InvariantK
 import cats.{Functor, Monad, ~>}
 import tofu.concurrent.{MVars, MakeMVar, MakeRef, Refs}
 import tofu.memo.CacheOperation.{CleanUp, GetOrElse}

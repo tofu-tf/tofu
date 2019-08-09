@@ -6,7 +6,7 @@ import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.apply._
 import cats.syntax.functor._
-import cats.{Applicative, Apply, FlatMap, Functor, Monad}
+import cats.{Applicative, Apply, FlatMap, Functor}
 import org.slf4j.LoggerFactory
 import Logging.loggerForService
 import impl.{ContextSyncLoggingImpl, SyncLogging}
