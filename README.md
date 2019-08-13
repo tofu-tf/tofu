@@ -7,7 +7,7 @@
 To use the whole utils pack just add to your `build.sbt`: 
 
 ```scala
-libraryDependencies += "ru.tinkoff" %% "tofu" % "0.1"
+libraryDependencies += "ru.tinkoff" %% "tofu" % "0.2.0"
 ```
 
 Of course you can also specify the exact subproject that you wanna add to yours dependencies (used in place of `"tofu"`):
@@ -19,6 +19,7 @@ Of course you can also specify the exact subproject that you wanna add to yours 
 * `tofu-concurrent` for concurrent (Concurrent utils)
 * `tofu-optics-core` for optics core (Optics typeclasses)
 * `tofu-optics-interop` for optics interop with [Monocle](https://github.com/julien-truffaut/Monocle)
+* `tofu-optics-macro` for macro optics generators
 * `tofu-data` for data utils
 * `tofu-logging` for the whole set of logging utils (derivation, layout, structured)
 * `tofu-logging-derivation` for logging derivation only

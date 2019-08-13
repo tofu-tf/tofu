@@ -10,7 +10,7 @@ object Dependencies {
   val catsTaglessVersion = "0.8"
   val monocleVersion     = "1.5.1-cats"
   val enumeratumVersion  = "1.5.13"
-  val derevoVersion      = "0.9.1"
+  val derevoVersion      = "0.10.1"
   val slf4jVersion       = "1.7.26"
   val fs2Version         = "1.0.5"
 
