@@ -1,46 +1,67 @@
 import sbt._
+import Keys._
 
 object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
-  val circeVersion       = "0.12.0-M3"
-  val tethysVersion      = "0.10.0"
-  val catsVersion        = "2.0.0-M4"
-  val catsEffectVersion  = "2.0.0-M4"
-  val catsTaglessVersion = "0.8"
-  val monocleVersion     = "1.5.1-cats"
-  val enumeratumVersion  = "1.5.13"
-  val derevoVersion      = "0.10.1"
-  val slf4jVersion       = "1.7.26"
-  val fs2Version         = "1.0.5"
+  object Version {
+    val circe = "0.12.0-M3"
 
-  val catsCore        = "org.typelevel"              %% "cats-core"        % catsVersion
-  val catsFree        = "org.typelevel"              %% "cats-free"        % catsVersion
-  val monocle         = "com.github.julien-truffaut" %% "monocle-core"     % monocleVersion
-  val alleycats       = "org.typelevel"              %% "alleycats-core"   % catsVersion
-  val catsEffect      = "org.typelevel"              %% "cats-effect"      % catsEffectVersion
-  val monix           = "io.monix"                   %% "monix"            % "3.0.0-RC2"
-  val simulacrum      = "com.github.mpilquist"       %% "simulacrum"       % "0.19.0"
-  val logback         = "ch.qos.logback"             % "logback-classic"   % "1.2.3"
-  val slf4j           = "org.slf4j"                  % "slf4j-simple"      % slf4jVersion
-  val circeCore       = "io.circe"                   %% "circe-core"       % circeVersion
-  val circeJava8      = "io.circe"                   %% "circe-java8"      % circeVersion
-  val circeDerivation = "io.circe"                   %% "circe-derivation" % "0.10.0-M1"
-  val scalatest       = "org.scalatest"              %% "scalatest"        % "3.0.8" % Test
-  val scalamock       = "org.scalamock"              %% "scalamock"        % "4.1.0" % Test
+    val tethys = "0.10.0"
 
-  val derevo        = "org.manatki"   %% "derevo-core"         % derevoVersion
-  val derevoTagless = "org.manatki"   %% "derevo-cats-tagless" % derevoVersion
-  val enumeratum    = "com.beachape"  %% "enumeratum"          % enumeratumVersion
-  val catsTagless   = "org.typelevel" %% "cats-tagless-macros" % catsTaglessVersion
+    val cats = "2.0.0-M4"
 
-  val fs2 = "co.fs2" %% "fs2-io" % fs2Version
+    val catsEffect = "2.0.0-M4"
 
-  val tethys        = "com.tethys-json" %% "tethys-core"    % tethysVersion
-  val tethysJackson = "com.tethys-json" %% "tethys-jackson" % tethysVersion
+    val catsTagless = "0.8"
 
-  val oracleJbdc = "com.oracle"           % "ojdbc6"      % "11.2.0.4.0"
-  val couchbase  = "com.couchbase.client" % "java-client" % "2.5.8"
+    val monocle = "1.5.1-cats"
+
+    val enumeratum = "1.5.13"
+
+    val derevo = "0.10.1"
+
+    val slf4j = "1.7.26"
+
+    val fs2 = "1.0.5"
+
+    val logback = "1.2.3"
+
+    val simulacrum = "0.19.0"
+
+    val monix = "3.0.0-RC4"
+
+    val scalamock = "4.1.0"
+
+    val scalatest = "3.0.8"
+  }
+
+  val catsCore        = "org.typelevel"              %% "cats-core"        % Version.cats
+  val catsFree        = "org.typelevel"              %% "cats-free"        % Version.cats
+  val monocle         = "com.github.julien-truffaut" %% "monocle-core"     % Version.monocle
+  val alleycats       = "org.typelevel"              %% "alleycats-core"   % Version.cats
+  val catsEffect      = "org.typelevel"              %% "cats-effect"      % Version.catsEffect
+  val monix           = "io.monix"                   %% "monix"            % Version.monix
+  val simulacrum      = "com.github.mpilquist"       %% "simulacrum"       % Version.simulacrum
+  val logback         = "ch.qos.logback"             % "logback-classic"   % Version.logback
+  val slf4j           = "org.slf4j"                  % "slf4j-simple"      % Version.slf4j % Provided
+  val circeCore       = "io.circe"                   %% "circe-core"       % Version.circe
+  val circeJava8      = "io.circe"                   %% "circe-java8"      % Version.circe
+  val circeDerivation = "io.circe"                   %% "circe-derivation" % Version.circe
+  val scalatest       = "org.scalatest"              %% "scalatest"        % Version.scalatest % Test
+  val scalamock       = "org.scalamock"              %% "scalamock"        % Version.scalamock % Test
+
+  val derevo        = "org.manatki"   %% "derevo-core"         % Version.derevo
+  val derevoTagless = "org.manatki"   %% "derevo-cats-tagless" % Version.derevo
+  val enumeratum    = "com.beachape"  %% "enumeratum"          % Version.enumeratum
+  val catsTagless   = "org.typelevel" %% "cats-tagless-macros" % Version.catsTagless
+
+  val reflect = libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value % Test
+
+  val fs2 = "co.fs2" %% "fs2-io" % Version.fs2
+
+  val tethys        = "com.tethys-json" %% "tethys-core"    % Version.tethys
+  val tethysJackson = "com.tethys-json" %% "tethys-jackson" % Version.tethys
 
   val macros = Keys.libraryDependencies ++= {
     minorVersion.value match {

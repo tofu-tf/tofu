@@ -1,5 +1,6 @@
 package tofu.optics
 
+import cats.{Applicative, Apply}
 import cats.arrow._
 import tofu.optics.classes.Category2
 
@@ -7,8 +8,6 @@ trait OpticCompanion[O[s, t, a, b] >: PSame[s, t, a, b]] {
   self =>
   type Context <: OpticContext
   type Mono[a, b] = O[a, a, b, b]
-
-  def apply[S, T, A, B](implicit o: O[S, T, A, B]): O[S, T, A, B] = o
 
   def compose[S, T, A, B, U, V](f: O[A, B, U, V], g: O[S, T, A, B]): O[S, T, U, V]
 
@@ -26,6 +25,9 @@ trait OpticCompanion[O[s, t, a, b] >: PSame[s, t, a, b]] {
   }
 
   final implicit def toOpticComposeOps[S, T, A, B](o: O[S, T, A, B]) = new OpticComposeOps[O, S, T, A, B](o)
+
+  final implicit def toMonoOpticOps[S, A](o: O[S, S, A, A]) = new MonoOpticOps[O, S, A](o)
+
 }
 
 trait OpticContext {
@@ -52,6 +54,10 @@ class OpticComposeOps[O[s, t, a, b], S, T, A, B](private val o: O[S, T, A, B]) e
   def >>[O1[s, t, a, b] >: O[s, t, a, b]: Category2, U, V](o1: O1[A, B, U, V]): O1[S, T, U, V] = andThen(o1)
 }
 
+class MonoOpticOps[O[s, t, a, b], S, A](private val o: O[S, S, A, A]) extends AnyVal {
+  def ->:(s: S): Applied[O, S, S, A, A] = Applied(s, o)
+}
+
 /** generic optic form, aka Profunctor Optic */
 trait Optic[-Ctx <: OpticContext, -S, +T, +A, -B] {
   self =>
@@ -69,8 +75,10 @@ object Optic {
     PSame.toGeneric(PSame.id)
 
   implicit def opticCategoryInstance[Ctx <: OpticContext]: Category[Mono[Ctx, ?, ?]] =
-    new Category[Mono[Ctx, ?, ?]] {
+    new Category[Mono[Ctx, *, *]] {
       def id[A]: Mono[Ctx, A, A]                                                    = Optic.id
       def compose[A, B, C](f: Mono[Ctx, B, C], g: Mono[Ctx, A, B]): Mono[Ctx, A, C] = g.andThen(f)
     }
 }
+
+
