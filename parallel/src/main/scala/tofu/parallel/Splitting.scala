@@ -2,6 +2,7 @@ package tofu.parallel
 
 import cats._
 import cats.arrow.FunctionK
+import com.github.ghik.silencer.silent
 import simulacrum.{op, typeclass}
 
 @typeclass
@@ -40,7 +41,7 @@ trait Splitting[F[_]] { self =>
   def parProduct[A, B](fa: F[A], fb: F[B]): F[(A, B)] =
     sequential(apply.product(parallel(fa), parallel(fb)))
 
-  @op("<&>", alias = true)
+  @op("<&>", alias = true) @silent
   def parAp[A, B](fab: F[A => B])(fa: F[A]): F[B] =
     sequential(apply.ap(parallel(fab))(parallel(fa)))
 

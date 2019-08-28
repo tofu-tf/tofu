@@ -23,6 +23,13 @@ lazy val defaultSettings = List(
   scala11Options,
   libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
   libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.0"),
+  libraryDependencies ++= {
+    val silencerVersion = "1.4.3"
+    List(
+      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    )
+  }
 ) ++ publishSettings ++ scala213Options
 
 lazy val compile213 = crossScalaVersions += "2.13.0"
