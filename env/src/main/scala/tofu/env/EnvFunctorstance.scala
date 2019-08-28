@@ -47,7 +47,9 @@ private[env] class EnvFunctorstance[E]
     fa.ensureOr(error)(predicate)
   override def adaptError[A](fa: Env[E, A])(pf: PartialFunction[Throwable, Throwable]): Env[E, A] =
     fa.mapTask(_.onErrorRecoverWith { case e if pf.isDefinedAt(e) => Task.raiseError(pf(e)) })
-  override def rethrow[A](fa: Env[E, Either[Throwable, A]]): Env[E, A] = fa.mapTask(_.flatMap(Task.fromEither(_)))
+
+  override def rethrow[A, EE <: Throwable](fa: Env[E, Either[EE, A]]): Env[E, A] =
+    fa.mapTask(_.flatMap(Task.fromEither(_)))
 
   //Bracket
   override def bracketCase[A, B](

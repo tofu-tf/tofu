@@ -29,15 +29,16 @@ private[env] trait EnvInstances {
       fa.mapTask(t => Task.gather(Iterable.fill(n)(t)).map(_.toList))
   }
 
-  private object anyEnvParallelInstance extends Parallel[Env[Any, *], Env[Any, *]] {
+  private object anyEnvParallelInstance extends Parallel[Env[Any, *]] {
+    type F[a] = Env[Any, a]
     override def applicative: Applicative[Env[Any, *]]    = envParallelInstance
     override def monad: Monad[Env[Any, *]]                = anyEnvInstance
     override val sequential: ~>[Env[Any, *], Env[Any, *]] = FunctionK.id
     override val parallel: ~>[Env[Any, *], Env[Any, *]]   = FunctionK.id
   }
 
-  implicit def envParallelInstance[E]: Parallel[Env[E, *], Env[E, *]] =
-    anyEnvParallelInstance.asInstanceOf[Parallel[Env[E, *], Env[E, *]]]
+  implicit def envParallelInstance[E]: Parallel[Env[E, *]] =
+    anyEnvParallelInstance.asInstanceOf[Parallel[Env[E, *]]]
 
   implicit val envProfuctorInstance: Profunctor[Env] with ArrowChoice[Env] =
     new Profunctor[Env] with ArrowChoice[Env] {

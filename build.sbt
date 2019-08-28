@@ -1,9 +1,9 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.9"
 
-val libVersion = "0.2.0"
+val libVersion = "0.3.0"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -112,18 +112,16 @@ lazy val observable = project.settings(
   libraryDependencies += monix,
   libraryDependencies += scalatest,
 )
-lazy val parallel =
-  project.settings(defaultSettings, compile213, libraryDependencies ++= List(simulacrum, catsCore), macros)
 
 lazy val concurrent =
-  project dependsOn (core, parallel) settings (
+  project dependsOn (core) settings (
     defaultSettings,
     compile213,
     libraryDependencies ++= List(catsEffect, catsTagless, simulacrum, scalatest),
     macros,
 )
 
-lazy val coreModules   = List(core, memo, env, parallel, concurrent, opticsCore, data)
+lazy val coreModules   = List(core, memo, env,  concurrent, opticsCore, data)
 lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums)
 
 lazy val opticsCore = project
@@ -133,13 +131,12 @@ lazy val opticsCore = project
     compile213,
     libraryDependencies ++= Seq(catsCore, alleycats, scalatest),
     publishName := "optics-core",
-    reflect,
   )
 
 lazy val opticsInterop = project
   .in(file("optics/interop"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, libraryDependencies += monocle, publishName := "optics-interop")
+  .settings(defaultSettings, compile213, libraryDependencies += monocle, publishName := "optics-interop")
 
 lazy val opticsMacro = project
   .in(file("optics/macro"))
@@ -237,7 +234,7 @@ lazy val publishSettings = List(
   publishVersion := libVersion,
   publishMavenStyle in ThisBuild := true,
   description := "Opinionated Set of tool for functional programming in scala",
-  crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.8"),
+  crossScalaVersions in ThisBuild := Seq("2.12.9"),
   publishTo := Some(
     if (isSnapshot.value)
       Opts.resolver.sonatypeSnapshots

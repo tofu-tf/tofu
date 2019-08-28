@@ -5,17 +5,17 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val circe = "0.12.0-M3"
+    val circe = "0.12.0-RC4"
 
     val tethys = "0.10.0"
 
-    val cats = "2.0.0-M4"
+    val cats = "2.0.0-RC2"
 
-    val catsEffect = "2.0.0-M4"
+    val catsEffect = "2.0.0-RC2"
 
-    val catsTagless = "0.8"
+    val catsTagless = "0.9"
 
-    val monocle = "1.5.1-cats"
+    val monocle = "2.0.0-RC1"
 
     val enumeratum = "1.5.13"
 
@@ -56,8 +56,6 @@ object Dependencies {
   val enumeratum    = "com.beachape"  %% "enumeratum"          % Version.enumeratum
   val catsTagless   = "org.typelevel" %% "cats-tagless-macros" % Version.catsTagless
 
-  val reflect = libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value % Test
-
   val fs2 = "co.fs2" %% "fs2-io" % Version.fs2
 
   val tethys        = "com.tethys-json" %% "tethys-core"    % Version.tethys
@@ -65,8 +63,14 @@ object Dependencies {
 
   val macros = Keys.libraryDependencies ++= {
     minorVersion.value match {
-      case 13      => List()
-      case 11 | 12 => List(compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch))
+      case 13 => List(scalaOrganization.value % "scala-reflect" % scalaVersion.value)
+      case 11 | 12 =>
+        List(
+          compilerPlugin(
+            "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch
+          ),
+          scalaOrganization.value % "scala-reflect" % scalaVersion.value
+        )
     }
   }
 
