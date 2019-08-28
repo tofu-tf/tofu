@@ -29,6 +29,16 @@ object Items extends MonoOpticCompanion(PItems) {
 }
 
 object PItems extends OpticCompanion[PItems] {
+  def apply[S, A, B] = new PItemsApply[S, A, B]
+
+  class PItemsApply[S, A, B] {
+    type Arb[+_]
+
+    def apply[T](trav: Applicative[Arb] => (S, A => Arb[B]) => Arb[T]): PItems[S, T, A, B] = new PItems[S, T, A, B] {
+      def traverse[F[+_]: Applicative](s: S)(f: A => F[B]): F[T] =
+        trav(Applicative[F].asInstanceOf[Applicative[Arb]])(s, f.asInstanceOf[A => Arb[B]]).asInstanceOf[F[T]]
+    }
+  }
 
   def compose[S, T, A, B, U, V](f: PItems[A, B, U, V], g: PItems[S, T, A, B]): PItems[S, T, U, V] =
     new PItems[S, T, U, V] {

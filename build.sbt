@@ -124,8 +124,9 @@ lazy val opticsCore = project
   .settings(
     defaultSettings,
     compile213,
-    libraryDependencies ++= Seq(catsCore, alleycats),
-    publishName := "optics-core"
+    libraryDependencies ++= Seq(catsCore, alleycats, scalatest),
+    publishName := "optics-core",
+    reflect,
   )
 
 lazy val opticsInterop = project
