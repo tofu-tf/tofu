@@ -1,6 +1,5 @@
 package tofu.optics
 
-import cats.{Applicative, Apply}
 import cats.arrow._
 import tofu.optics.classes.Category2
 

@@ -64,7 +64,7 @@ private[env] class EnvFunctorstance[E]
   //Async
   override def shift: Env[E, Unit]                                       = fromTask(Task.shift)
   override def evalOn[A](ec: ExecutionContext)(fa: Env[E, A]): Env[E, A] = fa.mapTask(_.executeOn(Scheduler(ec)))
-  override def liftIO[A](ioa: IO[A]): Env[E, A]                          = fromTask(Task.fromIO(ioa))
+  override def liftIO[A](ioa: IO[A]): Env[E, A]                          = fromTask(Task.from(ioa))
   override def asyncF[A](k: (Either[Throwable, A] => Unit) => Env[E, Unit]): Env[E, A] =
     Env(ctx => Task.asyncF(cb => k(cb).run(ctx)))
   override def async[A](k: (Either[Throwable, A] => Unit) => Unit): Env[E, A] =

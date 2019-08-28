@@ -1,7 +1,7 @@
 package tofu.optics
 import cats.data.NonEmptyList
 import cats.kernel.Semigroup
-import cats.{Applicative, Apply, Foldable, Monoid}
+import cats.{Applicative, Apply, Monoid}
 import tofu.optics.classes.Category2
 import tofu.optics.tags.{PTagApply, Tagger}
 

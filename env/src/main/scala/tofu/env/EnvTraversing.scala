@@ -1,8 +1,6 @@
 package tofu.env
 
 import monix.eval.Task
-
-import scala.collection.{IterableLike, TraversableLike}
 import monix.execution.compat.BuildFrom
 
 private[env] trait EnvTraversing {
@@ -12,7 +10,7 @@ private[env] trait EnvTraversing {
 
   def traverse[E, A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B])(
       implicit cbf: BuildFrom[M[A], B, M[B]]): Env[E, M[B]] =
-    Env(ctx => Task.traverse(in)(x => f(x).run(ctx)))
+    Env(ctx => Task.traverse(in)(x => f(x). run(ctx)))
 
   def gather[E, A, M[X] <: Iterable[X]](in: M[Env[E, A]])(
       implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
