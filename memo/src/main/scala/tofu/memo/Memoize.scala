@@ -4,17 +4,11 @@ import cats.effect.{Concurrent, ExitCase}
 import cats.effect.concurrent.{Deferred, Ref}
 import simulacrum.typeclass
 import cats.syntax.functor._
-import cats.syntax.apply._
-import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.semigroupal._
 import cats.syntax.option._
-import cats.syntax.monadError._
-import cats.syntax.applicativeError._
 import cats.effect.syntax.concurrent._
 import cats.effect.syntax.bracket._
-
-import scala.util.Either
 
 /** WARNING breaks referential transparency, use with great care */
 @typeclass
