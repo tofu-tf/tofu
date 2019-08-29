@@ -120,8 +120,15 @@ lazy val concurrent =
     macros,
 )
 
+lazy val config = project dependsOn (core, data, opticsCore) settings (
+  defaultSettings,
+  compile213,
+  libraryDependencies += magnolia
+)
+
 lazy val coreModules   = List(core, memo, env, concurrent, opticsCore, data)
-lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, dataDerivation)
+
+lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, config, dataDerivation)
 
 lazy val opticsCore = project
   .in(file("optics/core"))
