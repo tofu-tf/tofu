@@ -184,7 +184,7 @@ sealed trait Env[E, +A] {
   def executeOn(s: Scheduler, forceAsync: Boolean = true): Env[E, A] =
     mapTask(_.executeOn(s, forceAsync))
   def fork: Env[E, Fiber[Env[E, *], A @uv]] = executeAsync.start
-  @scala.deprecated("Replaced with startAndForget", "0.2.1")
+  @scala.deprecated("Replaced with startAndForget", "0.3.0")
   def forkAndForget: Env[E, Unit]           = mapTask(_.startAndForget)
   def startAndForget: Env[E, Unit]          = mapTask(_.startAndForget)
 

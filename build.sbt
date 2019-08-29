@@ -20,7 +20,6 @@ lazy val defaultSettings = List(
   setModuleName,
   experimental,
   defaultScalacOptions,
-  scala11Options,
   libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
   libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.0"),
   libraryDependencies ++= {
@@ -81,8 +80,7 @@ lazy val loggingDer = project
   .settings(
     defaultSettings,
     compile213,
-    libraryDependencies ++= List(derevo, scalatest),
-    magnolia,
+    libraryDependencies ++= List(derevo, scalatest, magnolia),
     macros,
     publishName := "logging-derivation"
   )
@@ -121,7 +119,7 @@ lazy val concurrent =
     macros,
 )
 
-lazy val coreModules   = List(core, memo, env,  concurrent, opticsCore, data)
+lazy val coreModules   = List(core, memo, env, concurrent, opticsCore, data)
 lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums)
 
 lazy val opticsCore = project
@@ -166,7 +164,7 @@ lazy val scala213Options = List(
   scalacOptions ++= {
     minorVersion.value match {
       case 13 => List("-Ymacro-annotations")
-      case 11 | 12 =>
+      case 12 =>
         List(
           "-Yno-adapted-args",                // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
           "-Ypartial-unification",            // Enable partial unification in type constructor inference
@@ -210,24 +208,16 @@ lazy val defaultScalacOptions = scalacOptions ++= List(
   "-Xlint:private-shadow",         // A private field (or class parameter) shadows a superclass field.
   "-Xlint:stars-align",            // Pattern sequence wildcard must align with sequence component.
   "-Xlint:type-parameter-shadow",  // A local type parameter shadows a type already in scope.
+  "-Xlint:constant",         // Evaluation of a constant arithmetic expression results in an error.
+  "-Ywarn-unused:imports",   // Warn if an import selector is not referenced.
+  "-Ywarn-unused:locals",    // Warn if a local definition is unused.
+  "-Ywarn-unused:params",    // Warn if a value parameter is unused.
+  "-Ywarn-unused:patvars",   // Warn if a variable bound in a pattern is unused.
+  "-Ywarn-unused:privates",  // Warn if a private member is unused.
+  "-Ywarn-unused:implicits", // Warn if an implicit parameter is unused.
+  "-Ywarn-extra-implicit",    // Warn when more than one implicit parameter section is defined.
 )
 
-lazy val scala11Options = scalacOptions ++= {
-  minorVersion.value match {
-    case 12 | 13 =>
-      List(
-        "-Xlint:constant",         // Evaluation of a constant arithmetic expression results in an error.
-        "-Ywarn-unused:imports",   // Warn if an import selector is not referenced.
-        "-Ywarn-unused:locals",    // Warn if a local definition is unused.
-        "-Ywarn-unused:params",    // Warn if a value parameter is unused.
-        "-Ywarn-unused:patvars",   // Warn if a variable bound in a pattern is unused.
-        "-Ywarn-unused:privates",  // Warn if a private member is unused.
-        "-Ywarn-unused:implicits", // Warn if an implicit parameter is unused.
-        "-Ywarn-extra-implicit"    // Warn when more than one implicit parameter section is defined.
-      )
-    case 11 => List()
-  }
-}
 
 lazy val publishSettings = List(
   organization in ThisBuild := "ru.tinkoff",

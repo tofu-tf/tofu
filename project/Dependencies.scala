@@ -34,6 +34,8 @@ object Dependencies {
     val scalamock = "4.1.0"
 
     val scalatest = "3.0.8"
+
+    val magnolia = "0.11.0"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"        % Version.cats
@@ -64,7 +66,7 @@ object Dependencies {
   val macros = Keys.libraryDependencies ++= {
     minorVersion.value match {
       case 13 => List(scalaOrganization.value % "scala-reflect" % scalaVersion.value)
-      case 11 | 12 =>
+      case 12 =>
         List(
           compilerPlugin(
             "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch
@@ -74,10 +76,4 @@ object Dependencies {
     }
   }
 
-  val magnolia = Keys.libraryDependencies += "com.propensive" %% "magnolia" % {
-    minorVersion.value match {
-      case 12 | 13 => "0.11.0"
-      case 11      => "0.10.0"
-    }
-  }
 }
