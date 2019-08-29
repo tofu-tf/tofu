@@ -47,7 +47,9 @@ private[env] class EnvFunctorstance[E]
     fa.ensureOr(error)(predicate)
   override def adaptError[A](fa: Env[E, A])(pf: PartialFunction[Throwable, Throwable]): Env[E, A] =
     fa.mapTask(_.onErrorRecoverWith { case e if pf.isDefinedAt(e) => Task.raiseError(pf(e)) })
-  override def rethrow[A](fa: Env[E, Either[Throwable, A]]): Env[E, A] = fa.mapTask(_.flatMap(Task.fromEither(_)))
+
+  override def rethrow[A, EE <: Throwable](fa: Env[E, Either[EE, A]]): Env[E, A] =
+    fa.mapTask(_.flatMap(Task.fromEither(_)))
 
   //Bracket
   override def bracketCase[A, B](
@@ -64,7 +66,7 @@ private[env] class EnvFunctorstance[E]
   //Async
   override def shift: Env[E, Unit]                                       = fromTask(Task.shift)
   override def evalOn[A](ec: ExecutionContext)(fa: Env[E, A]): Env[E, A] = fa.mapTask(_.executeOn(Scheduler(ec)))
-  override def liftIO[A](ioa: IO[A]): Env[E, A]                          = fromTask(Task.fromIO(ioa))
+  override def liftIO[A](ioa: IO[A]): Env[E, A]                          = fromTask(Task.from(ioa))
   override def asyncF[A](k: (Either[Throwable, A] => Unit) => Env[E, Unit]): Env[E, A] =
     Env(ctx => Task.asyncF(cb => k(cb).run(ctx)))
   override def async[A](k: (Either[Throwable, A] => Unit) => Unit): Env[E, A] =

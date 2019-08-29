@@ -5,9 +5,8 @@ import cats.data.ReaderT
 import cats.effect._
 import monix.eval.{Coeval, Task}
 import monix.execution.Scheduler
+import monix.execution.compat.BuildFrom
 
-import scala.collection.TraversableLike
-import scala.collection.generic.CanBuildFrom
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -54,48 +53,48 @@ trait EnvSpecializedFunctions[E] {
   def fromCoevalFunc[A](fca: E => Coeval[A]): F[A]               = Env.fromCoevalFunc(fca)
   def tailRecM[A, B](a: A)(f: A => F[Either[A, B]]): F[B]        = Env.tailRecM(a)(f)
   def race[A, B](ta: F[A], tb: F[B]): F[Either[A, B]]            = Env.race(ta, tb)
-  def raceMany[A](tta: TraversableOnce[F[A]]): F[A]              = Env.raceMany(tta)
+  def raceMany[A](tta: Iterable[F[A]]): F[A]              = Env.raceMany(tta)
 
   def racePair[A, B](ta: F[A], tb: F[B]): F[Either[(A, Fiber[F, B]), (Fiber[F, A], B)]] =
     Env.racePair(ta, tb)
-  def sequence[A, M[X] <: TraversableOnce[X]](in: M[F[A]])(implicit cbf: CanBuildFrom[M[F[A]], A, M[A]]): F[M[A]] =
+  def sequence[A, M[X] <: Iterable[X]](in: M[F[A]])(implicit cbf: BuildFrom[M[F[A]], A, M[A]]): F[M[A]] =
     Env.sequence(in)
-  def traverse[A, B, M[X] <: TraversableOnce[X]](in: M[A])(f: A => F[B])(
-      implicit cbf: CanBuildFrom[M[A], B, M[B]]): F[M[B]] =
+  def traverse[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => F[B])(
+      implicit cbf: BuildFrom[M[A], B, M[B]]): F[M[B]] =
     Env.traverse(in)(f)
-  def gather[A, M[X] <: TraversableOnce[X]](in: M[F[A]])(implicit cbf: CanBuildFrom[M[F[A]], A, M[A]]): F[M[A]] =
+  def gather[A, M[X] <: Iterable[X]](in: M[F[A]])(implicit cbf: BuildFrom[M[F[A]], A, M[A]]): F[M[A]] =
     Env.gather(in)
-  def wander[A, B, M[X] <: TraversableOnce[X]](in: M[A])(f: A => F[B])(
-      implicit cbf: CanBuildFrom[M[A], B, M[B]]): F[M[B]] =
+  def wander[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => F[B])(
+      implicit cbf: BuildFrom[M[A], B, M[B]]): F[M[B]] =
     Env.wander(in)(f)
-  def gatherUnordered[A](in: TraversableOnce[F[A]]): F[List[A]] = Env.gatherUnordered(in)
-  def wanderUnordered[A, B, M[X] <: TraversableOnce[X]](in: M[A])(f: A => F[B]): F[List[B]] =
+  def gatherUnordered[A](in: Iterable[F[A]]): F[List[A]] = Env.gatherUnordered(in)
+  def wanderUnordered[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => F[B]): F[List[B]] =
     Env.wanderUnordered(in)(f)
 
   /** Mirrored traversing operations, trying to create context-unaware Tasks whenever possible */
   object opt {
-    def sequence[A, M[+X] <: TraversableLike[X, M[X]]](in: M[Env[E, A]])(
-        implicit cbf: CanBuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
+    def sequence[A, M[+X] <: Iterable[X]](in: M[Env[E, A]])(
+        implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
       Env.opt.sequence(in)
 
-    def traverse[A, B, M[+X] <: TraversableLike[X, M[X]]](in: M[A])(f: A => Env[E, B])(
-        implicit cbf1: CanBuildFrom[M[A], Env[E, B], M[Env[E, B]]],
-        cbf2: CanBuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
+    def traverse[A, B, M[+X] <: Iterable[X]](in: M[A])(f: A => Env[E, B])(
+        implicit cbf1: BuildFrom[Iterable[A], Env[E, B], M[Env[E, B]]],
+        cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
       Env.opt.traverse(in)(f)
 
-    def gather[A, M[+X] <: TraversableLike[X, M[X]]](in: M[Env[E, A]])(
-        implicit cbf: CanBuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
+    def gather[A, M[X] <: Iterable[X]](in: M[Env[E, A]])(
+        implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
       Env.opt.gather(in)
 
-    def wander[A, B, M[+X] <: TraversableLike[X, M[X]]](in: M[A])(f: A => Env[E, B])(
-        implicit cbf1: CanBuildFrom[M[A], Env[E, B], M[Env[E, B]]],
-        cbf2: CanBuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
+    def wander[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B])(
+        implicit cbf1: BuildFrom[Iterable[A], Env[E, B], M[Env[E, B]]],
+        cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
       Env.opt.wander(in)(f)
 
-    def gatherUnordered[A](in: Traversable[Env[E, A]]): Env[E, List[A]] =
+    def gatherUnordered[A](in: Iterable[Env[E, A]]): Env[E, List[A]] =
       Env.opt.gatherUnordered(in)
 
-    def wanderUnordered[A, B, M[X] <: Traversable[X]](in: M[A])(f: A => Env[E, B]): Env[E, List[B]] =
+    def wanderUnordered[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B]): Env[E, List[B]] =
       Env.opt.wanderUnordered(in)(f)
   }
 

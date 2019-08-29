@@ -42,16 +42,6 @@ object Property extends MonoOpticCompanion(PProperty) {
     def narrow(s: S): Either[S, A]         = getOpt(s).toRight(s)
     override def downcast(s: S): Option[A] = getOpt(s)
   }
-
-  def mapItem[K, V](k: K): Property[Map[K, V], V] = new DownCasting[Map[K, V], V] {
-    def set(s: Map[K, V], b: V): Map[K, V] = s.updated(k, b)
-    def getOpt(s: Map[K, V]): Option[V]    = s.get(k)
-  }
-
-  def vecItem[A](i: Int): Property[Vector[A], A] = new DownCasting[Vector[A], A] {
-    def getOpt(s: Vector[A]): Option[A]    = s.lift(i)
-    def set(s: Vector[A], b: A): Vector[A] = if (s.length < i) s.updated(i, b) else s
-  }
 }
 
 object PProperty extends OpticCompanion[PProperty] {

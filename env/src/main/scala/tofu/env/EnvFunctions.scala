@@ -62,15 +62,15 @@ private[env] trait EnvFunctions extends EnvProducts with EnvTraversing with EnvR
     fromTask(Task.fromEffect(fa))
   def fromEffectFunc[F[_]: Effect, E, A](ffa: E => F[A]): Env[E, A] =
     Env(ctx => Task.fromEffect(ffa(ctx)))
-  def fromEval[E, A](ea: Eval[A]): Env[E, A] = fromTask(Task.fromEval(ea))
+  def fromEval[E, A](ea: Eval[A]): Env[E, A] = fromTask(Task.from(ea))
   def fromEvalFunc[E, A](fea: E => Eval[A]): Env[E, A] =
-    Env(ctx => Task.fromEval(fea(ctx)))
-  def fromIO[E, A](ioa: IO[A]): Env[E, A] = fromTask(Task.fromIO(ioa))
+    Env(ctx => Task.from(fea(ctx)))
+  def fromIO[E, A](ioa: IO[A]): Env[E, A] = fromTask(Task.from(ioa))
   def fromIOFunc[E, A](fioa: E => IO[A]): Env[E, A] =
-    Env(ctx => Task.fromIO(fioa(ctx)))
-  def fromCoeval[E, A](ca: Coeval[A]): Env[E, A] = fromTask(ca.task)
+    Env(ctx => Task.from(fioa(ctx)))
+  def fromCoeval[E, A](ca: Coeval[A]): Env[E, A] = fromTask(ca.to[Task])
   def fromCoevalFunc[E, A](fca: E => Coeval[A]): Env[E, A] =
-    Env(ctx => fca(ctx).task)
+    Env(ctx => fca(ctx).to[Task])
 
   def tailRecM[E, A, B](a: A)(f: (A) => Env[E, Either[A, B]]): Env[E, B] =
     Env(ctx => Task.tailRecM(a)(a1 => f(a1).run(ctx)))

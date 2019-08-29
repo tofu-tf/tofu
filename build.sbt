@@ -1,9 +1,9 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.9"
 
-val libVersion = "0.2.0"
+val libVersion = "0.3.0"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -20,7 +20,6 @@ lazy val defaultSettings = List(
   setModuleName,
   experimental,
   defaultScalacOptions,
-  scala11Options,
   libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
   libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.0"),
   libraryDependencies ++= {
@@ -81,8 +80,7 @@ lazy val loggingDer = project
   .settings(
     defaultSettings,
     compile213,
-    libraryDependencies ++= List(derevo, scalatest),
-    magnolia,
+    libraryDependencies ++= List(derevo, scalatest, magnolia),
     macros,
     publishName := "logging-derivation"
   )
@@ -112,18 +110,16 @@ lazy val observable = project.settings(
   libraryDependencies += monix,
   libraryDependencies += scalatest,
 )
-lazy val parallel =
-  project.settings(defaultSettings, compile213, libraryDependencies ++= List(simulacrum, catsCore), macros)
 
 lazy val concurrent =
-  project dependsOn (core, parallel) settings (
+  project dependsOn (core) settings (
     defaultSettings,
     compile213,
     libraryDependencies ++= List(catsEffect, catsTagless, simulacrum, scalatest),
     macros,
 )
 
-lazy val coreModules   = List(core, memo, env, parallel, concurrent, opticsCore, data)
+lazy val coreModules   = List(core, memo, env, concurrent, opticsCore, data)
 lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums)
 
 lazy val opticsCore = project
@@ -131,14 +127,14 @@ lazy val opticsCore = project
   .settings(
     defaultSettings,
     compile213,
-    libraryDependencies ++= Seq(catsCore, alleycats),
-    publishName := "optics-core"
+    libraryDependencies ++= Seq(catsCore, alleycats, scalatest),
+    publishName := "optics-core",
   )
 
 lazy val opticsInterop = project
   .in(file("optics/interop"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, libraryDependencies += monocle, publishName := "optics-interop")
+  .settings(defaultSettings, compile213, libraryDependencies += monocle, publishName := "optics-interop")
 
 lazy val opticsMacro = project
   .in(file("optics/macro"))
@@ -168,7 +164,7 @@ lazy val scala213Options = List(
   scalacOptions ++= {
     minorVersion.value match {
       case 13 => List("-Ymacro-annotations")
-      case 11 | 12 =>
+      case 12 =>
         List(
           "-Yno-adapted-args",                // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
           "-Ypartial-unification",            // Enable partial unification in type constructor inference
@@ -212,31 +208,23 @@ lazy val defaultScalacOptions = scalacOptions ++= List(
   "-Xlint:private-shadow",         // A private field (or class parameter) shadows a superclass field.
   "-Xlint:stars-align",            // Pattern sequence wildcard must align with sequence component.
   "-Xlint:type-parameter-shadow",  // A local type parameter shadows a type already in scope.
+  "-Xlint:constant",         // Evaluation of a constant arithmetic expression results in an error.
+  "-Ywarn-unused:imports",   // Warn if an import selector is not referenced.
+  "-Ywarn-unused:locals",    // Warn if a local definition is unused.
+  "-Ywarn-unused:params",    // Warn if a value parameter is unused.
+  "-Ywarn-unused:patvars",   // Warn if a variable bound in a pattern is unused.
+  "-Ywarn-unused:privates",  // Warn if a private member is unused.
+  "-Ywarn-unused:implicits", // Warn if an implicit parameter is unused.
+  "-Ywarn-extra-implicit",    // Warn when more than one implicit parameter section is defined.
 )
 
-lazy val scala11Options = scalacOptions ++= {
-  minorVersion.value match {
-    case 12 | 13 =>
-      List(
-        "-Xlint:constant",         // Evaluation of a constant arithmetic expression results in an error.
-        "-Ywarn-unused:imports",   // Warn if an import selector is not referenced.
-        "-Ywarn-unused:locals",    // Warn if a local definition is unused.
-        "-Ywarn-unused:params",    // Warn if a value parameter is unused.
-        "-Ywarn-unused:patvars",   // Warn if a variable bound in a pattern is unused.
-        "-Ywarn-unused:privates",  // Warn if a private member is unused.
-        "-Ywarn-unused:implicits", // Warn if an implicit parameter is unused.
-        "-Ywarn-extra-implicit"    // Warn when more than one implicit parameter section is defined.
-      )
-    case 11 => List()
-  }
-}
 
 lazy val publishSettings = List(
   organization in ThisBuild := "ru.tinkoff",
   publishVersion := libVersion,
   publishMavenStyle in ThisBuild := true,
   description := "Opinionated Set of tool for functional programming in scala",
-  crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.8"),
+  crossScalaVersions in ThisBuild := Seq("2.12.9"),
   publishTo := Some(
     if (isSnapshot.value)
       Opts.resolver.sonatypeSnapshots

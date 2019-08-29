@@ -38,7 +38,7 @@ private[env] trait EnvRacing {
     val tasks = taskAccum.result()
     val funcs = funcAccum.result()
     if (funcs.isEmpty) EnvTask(Task.raceMany(tasks))
-    else Env(ctx => Task.raceMany(funcs.iterator.map(_(ctx)) ++ tasks))
+    else Env(ctx => Task.raceMany(funcs.map(_(ctx)) ++ tasks))
   }
 }
 

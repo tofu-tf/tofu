@@ -15,7 +15,6 @@ private class GenSubsetImpl(val c: blackbox.Context) {
 
     val (sTpe, aTpe) = (weakTypeOf[S], weakTypeOf[A])
 
-    val sTpeSym = sTpe.typeSymbol.companion
     c.Expr[Subset[S, A]](q"""
       import _root_.tofu.optics.Subset
 
