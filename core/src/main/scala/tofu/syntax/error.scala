@@ -15,9 +15,11 @@ object raise {
   }
 
   final implicit class RaiseEitherOps[E, A](val either: Either[E, A]) extends AnyVal {
-    def toRaise[F[_]](implicit
-                      app: Applicative[F],
-                      raise: Raise[F, E]): F[A] =
+    def toRaise[F[_]](
+        implicit
+        app: Applicative[F],
+        raise: Raise[F, E]
+    ): F[A] =
       either match {
         case Left(err)    => raise.raise(err)
         case Right(value) => app.pure(value)
@@ -34,13 +36,13 @@ object raise {
 }
 
 object handle {
-  final implicit class RestoreToOps[F[_], G[_], A, E](val fa: F[A]) extends AnyVal {
-    def restore(implicit FE: RestoreTo[F, G]): G[Option[A]] = FE.restore(fa)
+  final implicit class RestoreToOps[F[_], A](val fa: F[A]) extends AnyVal {
+    def restore[G[_]](implicit FE: RestoreTo[F, G]): G[Option[A]] = FE.restore(fa)
   }
 
-  implicit class RestoreOps[F[_], A, E](val fa: F[A]) extends AnyVal {
+  implicit class RestoreOps[F[_], A](val fa: F[A]) extends AnyVal {
     def restoreWith(ra: => F[A])(implicit FE: Restore[F]): F[A] = FE.restoreWith(fa)(ra)
-    def retry(count: Int)(implicit FE: Handle[F, E]): F[A]      = if (count <= 1) fa else restoreWith(retry(count - 1))
+    def retry(count: Int)(implicit FE: Restore[F]): F[A]        = if (count <= 1) fa else restoreWith(retry(count - 1))
   }
 
   final implicit class HandleOps[F[_], A, E](val fa: F[A]) extends AnyVal {
