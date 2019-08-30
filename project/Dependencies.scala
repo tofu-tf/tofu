@@ -36,6 +36,8 @@ object Dependencies {
     val scalatest = "3.0.8"
 
     val magnolia = "0.11.0"
+
+    val typesafeConfig = "1.3.4"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"           % Version.cats
@@ -58,6 +60,7 @@ object Dependencies {
   val tethys          = "com.tethys-json"            %% "tethys-core"         % Version.tethys
   val tethysJackson   = "com.tethys-json"            %% "tethys-jackson"      % Version.tethys
   val catsTagless     = "org.typelevel"              %% "cats-tagless-macros" % Version.catsTagless
+  val typesafeConfig  = "com.typesafe"               % "config"               % Version.typesafeConfig
 
   val scalatest = "org.scalatest" %% "scalatest" % Version.scalatest % Test
   val scalamock = "org.scalamock" %% "scalamock" % Version.scalamock % Test

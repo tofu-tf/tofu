@@ -120,10 +120,10 @@ lazy val concurrent =
     macros,
 )
 
-lazy val config = project dependsOn (core, data, opticsCore) settings (
+lazy val config = project dependsOn (core, data, opticsCore, concurrent) settings (
   defaultSettings,
   compile213,
-  libraryDependencies += magnolia
+  libraryDependencies ++= List(typesafeConfig, magnolia)
 )
 
 lazy val coreModules   = List(core, memo, env, concurrent, opticsCore, data)

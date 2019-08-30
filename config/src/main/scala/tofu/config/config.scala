@@ -7,5 +7,5 @@ import scala.annotation.unchecked.uncheckedVariance
 package object config {
   type Path = Vector[Key]
   type MessageList = Vector[(Path, Message)]
-  type ConfigT[F[+_], +A] = ReaderT[F, ConfigTContext[F], A @uncheckedVariance]
+  type ConfigT[F[_], +A] = ReaderT[F, ConfigTContext[F], A @uncheckedVariance]
 }
