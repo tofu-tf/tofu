@@ -10,49 +10,50 @@ import cats.syntax.functor._
 import cats.syntax.monoid._
 import cats.instances.option._
 import cats.instances.either._
-import tofu.optics.Applied
+import cats.syntax.option._
+import cats.syntax.either._
 
 object Flux extends FluxInstances {
   trait FluxTag extends Any
 
-  type FluxRepr[+F[+_], +G[+_], +A] <: FluxTag
+  type FluxRepr[+F[_], +G[_], +A] <: FluxTag
 
-  def apply[F[+_], G[+_], A](tfa: F[G[(A, Flux[F, G, A])]]): FluxRepr[F, G, A] = tfa.asInstanceOf[FluxRepr[F, G, A]]
+  def apply[F[_], G[_], A](tfa: F[G[(A, Flux[F, G, A])]]): FluxRepr[F, G, A] = tfa.asInstanceOf[FluxRepr[F, G, A]]
 
-  implicit class FluxValueExtract[F[+_], G[+_], A](private val repr: FluxRepr[F, G, A]) extends AnyVal {
+  implicit class FluxValueExtract[F[_], G[_], A](private val repr: FluxRepr[F, G, A]) extends AnyVal {
     def value: F[G[(A, Flux[F, G, A])]] = repr.asInstanceOf[F[G[(A, Flux[F, G, A])]]]
   }
 
-  type Infinite[+F[+_], A]   = Flux[F, Identity, A]
-  type Stream[+F[+_], +A]    = Flux[F, Option, A]
-  type Accum[+F[+_], +R, +A] = Flux[F, Either[R, +*], A]
+  type Infinite[+F[_], A]   = Flux[F, Identity, A]
+  type Stream[+F[_], +A]    = Flux[F, Option, A]
+  type Accum[+F[_], +R, +A] = Flux[F, Either[R, +*], A]
 
-  def stream[F[+_]] = new StreamApply[F]
-  class StreamApply[F[+_]] {
+  def stream[F[_]] = new StreamApply[F]
+  class StreamApply[F[_]] {
     def apply[T[_]: Foldable, A](xs: T[A])(implicit F: Applicative[F], DF: Defer[F]): Stream[F, A] =
-      xs.foldRight[Stream[F, A]](now(Flux(F.pure(None))))((a, eb) => now(Flux(DF.defer(F.pure(Some((a, eb.value)))))))
+      xs.foldRight[Stream[F, A]](now(Flux(F.pure(none[(A, Stream[F, A])]))))((a, eb) => now(Flux(DF.defer(F.pure((a, eb.value).some)))))
         .value
   }
 
-  final implicit def toFluxOps[F[+_], G[+_], A](flux: Flux[F, G, A]): FluxOps[F, G, A] = new FluxOps(flux.value)
-  final implicit def toStreamOps[F[+_], A](flux: Flux[F, Option, A]): FluxStreamOps[F, A] =
+  final implicit def toFluxOps[F[_], G[_], A](flux: Flux[F, G, A]): FluxOps[F, G, A] = new FluxOps(flux.value)
+  final implicit def toStreamOps[F[_], A](flux: Flux[F, Option, A]): FluxStreamOps[F, A] =
     new FluxStreamOps(flux.value)
 
   object Stream {
-    def range[F[+_]: Applicative, N](from: N, to: N, by: N)(implicit N: Numeric[N]): Stream[F, N] = ???
+    def range[F[_]: Applicative, N](from: N, to: N, by: N)(implicit N: Numeric[N]): Stream[F, N] = ???
 
-    def range[F[+_]: Applicative, N: Numeric](from: N, to: N): Stream[F, N] =
+    def range[F[_]: Applicative, N: Numeric](from: N, to: N): Stream[F, N] =
       range[F, N](from, to, implicitly[Numeric[N]].one)
 
-    def apply[F[+_]] = new Applied[F]
+    def apply[F[_]] = new Applied[F]
 
-    class Applied[F[+_]] {
+    class Applied[F[_]] {
       def apply[T[_]: Foldable, A](ta: T[A])(implicit F: Applicative[F]): Stream[F, A] = ???
     }
   }
 }
 
-class FluxStreamOps[F[+_], A](private val value: F[Option[(A, Flux.Stream[F, A])]]) extends AnyVal {
+class FluxStreamOps[F[_], A](private val value: F[Option[(A, Flux.Stream[F, A])]]) extends AnyVal {
   def foldMap[M: Monoid](f: A => M)(implicit F: Monad[F]): F[M] =
     value.flatMap {
       case None               => Monoid.empty[M].pure[F]
@@ -63,8 +64,8 @@ class FluxStreamOps[F[+_], A](private val value: F[Option[(A, Flux.Stream[F, A])
     foldMap[M[B]](f)(M.algebra[B], F)
 }
 
-class FluxOps[F[+_], G[+_], A](private val value: F[G[(A, Flux[F, G, A])]]) extends AnyVal {
-  def mapK[H[+_]: Functor](f: F ~> H)(implicit G: Functor[G]): Flux[H, G, A] =
+class FluxOps[F[_], G[_], A](private val value: F[G[(A, Flux[F, G, A])]]) extends AnyVal {
+  def mapK[H[_]: Functor](f: F ~> H)(implicit G: Functor[G]): Flux[H, G, A] =
     Flux(f(value).map(_.map { case (a, flx) => (a, flx.mapK(f)) }))
 
   def flatMapF[B](f: A => F[B])(implicit F: Monad[F], G: Traverse[G]): Flux[F, G, B] =
@@ -74,26 +75,26 @@ class FluxOps[F[+_], G[+_], A](private val value: F[G[(A, Flux[F, G, A])]]) exte
 }
 
 trait FluxInstances extends FluxInstances1 { self: Flux.type =>
-  implicit def streamMonad[F[+_]: Monad]: Monad[Stream[F, *]] with Alternative[Stream[F, *]] =
+  implicit def streamMonad[F[_]: Monad]: Monad[Stream[F, *]] with Alternative[Stream[F, *]] =
     new FluxFunctor[F, Option] with StackSafeMonad[Stream[F, *]] with Alternative[Stream[F, *]] {
-      def pure[A](x: A) = Flux(Some((x, empty[A])).pure[F])
+      def pure[A](x: A) = Flux((x, empty[A]).some.pure[F])
 
       def flatMap[A, B](fa: Stream[F, A])(f: A => Stream[F, B]): Stream[F, B] =
         Flux(fa.value.flatMap {
-          case None               => None.pure[F]
+          case None               => none[(B, Stream[F, B])].pure[F]
           case Some((head, tail)) => combineK(f(head), flatMap(tail)(f)).value
         })
 
-      def empty[A]: Stream[F, A] = Flux(None.pure[F])
+      def empty[A]: Stream[F, A] = Flux(none[(A, Stream[F, A])].pure[F])
 
       def combineK[A](x: Stream[F, A], y: Stream[F, A]): Stream[F, A] =
         Flux(x.value.flatMap {
           case None               => y.value
-          case Some((head, tail)) => Some((head, combineK(tail, y))).pure[F]
+          case Some((head, tail)) => (head, combineK(tail, y)).some.pure[F]
         })
     }
 
-  implicit def accumMonad[F[+_]: Monad, R: Monoid]: Monad[Accum[F, R, *]] with Alternative[Accum[F, R, *]] =
+  implicit def accumMonad[F[_]: Monad, R: Monoid]: Monad[Accum[F, R, *]] with Alternative[Accum[F, R, *]] =
     new FluxFunctor[F, Either[R, +*]] with StackSafeMonad[Accum[F, R, *]] with Alternative[Accum[F, R, *]] {
       private def add[A](r: R, f: Accum[F, R, A]): Accum[F, R, A] =
         Flux(f.value.map {
@@ -101,21 +102,21 @@ trait FluxInstances extends FluxInstances1 { self: Flux.type =>
           case Right((head, tail)) => Right((head, add(r, tail)))
         })
 
-      def empty[A]: Accum[F, R, A]      = Flux(Left(Monoid.empty[R]).pure[F])
-      def pure[A](x: A): Accum[F, R, A] = Flux(Right((x, empty[A])).pure[F])
+      def empty[A]: Accum[F, R, A]      = Flux(Monoid.empty[R].asLeft[(A, Accum[F, R, A])].pure[F])
+      def pure[A](x: A): Accum[F, R, A] = Flux((x, empty[A]).asRight[R].pure[F])
       def combineK[A](x: Accum[F, R, A], y: Accum[F, R, A]): Accum[F, R, A] =
         Flux(x.value.flatMap {
           case Left(r)             => add(r, y).value
-          case Right((head, tail)) => Right((head, combineK(tail, y))).pure[F]
+          case Right((head, tail)) => (head, combineK(tail, y)).asRight[R].pure[F]
         })
       def flatMap[A, B](fa: Accum[F, R, A])(f: A => Accum[F, R, B]): Accum[F, R, B] =
         Flux(fa.value.flatMap {
-          case Left(r)             => Left(r).pure[F]
+          case Left(r)             => r.asLeft[(B, Accum[F, R, B])].pure[F]
           case Right((head, tail)) => combineK(f(head), flatMap(tail)(f)).value
         })
     }
 
-  implicit def infiniteApplicative[F[+_]: Applicative: Defer]: Applicative[Infinite[F, *]] =
+  implicit def infiniteApplicative[F[_]: Applicative: Defer]: Applicative[Infinite[F, *]] =
     new Applicative[Infinite[F, *]] {
       def pure[A](x: A): Infinite[F, A] = {
         lazy val result: Infinite[F, A] = Flux[F, Identity, A](Defer[F].defer((x, result).pure[F]))
@@ -129,10 +130,10 @@ trait FluxInstances extends FluxInstances1 { self: Flux.type =>
     }
 }
 trait FluxInstances1 { self: Flux.type =>
-  implicit def fluxFunctor[F[+_]: Functor, G[+_]: Functor]: Functor[Flux[F, G, *]] = new FluxFunctor[F, G]
+  implicit def fluxFunctor[F[_]: Functor, G[_]: Functor]: Functor[Flux[F, G, *]] = new FluxFunctor[F, G]
 }
 
-class FluxFunctor[F[+_]: Functor, G[+_]: Functor] extends Functor[Flux[F, G, *]] {
+class FluxFunctor[F[_]: Functor, G[_]: Functor] extends Functor[Flux[F, G, *]] {
   override def map[A, B](fa: Flux[F, G, A])(f: A => B): Flux[F, G, B] =
     Flux(fa.value.map(_.map { case (head, tail) => (f(head), map(tail)(f)) }))
 }
