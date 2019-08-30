@@ -28,19 +28,19 @@ object Flux extends FluxInstances {
   type Stream[+F[_], +A]    = Flux[F, Option, A]
   type Accum[+F[_], +R, +A] = Flux[F, Either[R, +*], A]
 
-  def stream[F[_]] = new StreamApply[F]
-  class StreamApply[F[_]] {
-    def apply[T[_]: Foldable, A](xs: T[A])(implicit F: Applicative[F], DF: Defer[F]): Stream[F, A] =
-      xs.foldRight[Stream[F, A]](now(Flux(F.pure(none[(A, Stream[F, A])]))))((a, eb) => now(Flux(DF.defer(F.pure((a, eb.value).some)))))
-        .value
-  }
-
   final implicit def toFluxOps[F[_], G[_], A](flux: Flux[F, G, A]): FluxOps[F, G, A] = new FluxOps(flux.value)
   final implicit def toStreamOps[F[_], A](flux: Flux[F, Option, A]): FluxStreamOps[F, A] =
     new FluxStreamOps(flux.value)
 
   object Stream {
-    def range[F[_]: Applicative, N](from: N, to: N, by: N)(implicit N: Numeric[N]): Stream[F, N] = ???
+    import Numeric.Implicits._
+    import Ordering.Implicits._
+
+    def empty[F[_]: Applicative, A]: Stream[F, A] = Flux(none[(A, Stream[F, A])].pure[F])
+
+    def range[F[_]: Applicative, N](from: N, to: N, by: N)(implicit N: Numeric[N]): Stream[F, N] =
+      if (from > to) empty[F, N]
+      else Flux((from, range(from + by, to, by)).some.pure[F])
 
     def range[F[_]: Applicative, N: Numeric](from: N, to: N): Stream[F, N] =
       range[F, N](from, to, implicitly[Numeric[N]].one)
@@ -48,7 +48,8 @@ object Flux extends FluxInstances {
     def apply[F[_]] = new Applied[F]
 
     class Applied[F[_]] {
-      def apply[T[_]: Foldable, A](ta: T[A])(implicit F: Applicative[F]): Stream[F, A] = ???
+      def apply[T[_]: Foldable, A](xs: T[A])(implicit F: Applicative[F]): Stream[F, A] =
+        xs.foldr[Stream[F, A]](now(empty[F, A]))((a, eb) => eb.map(b => (Flux(F.pure((a, b).some))))).value
     }
   }
 }
@@ -57,11 +58,12 @@ class FluxStreamOps[F[_], A](private val value: F[Option[(A, Flux.Stream[F, A])]
   def foldMap[M: Monoid](f: A => M)(implicit F: Monad[F]): F[M] =
     value.flatMap {
       case None               => Monoid.empty[M].pure[F]
-      case Some((head, tail)) => Flux.toStreamOps(tail).foldMap(f).map(f(head) |+| _)
+      case Some((head, tail)) => tail.foldMap(f).map(f(head) |+| _)
     }
 
   def foldMapK[M[_], B](f: A => M[B])(implicit F: Monad[F], M: MonoidK[M]): F[M[B]] =
     foldMap[M[B]](f)(M.algebra[B], F)
+
 }
 
 class FluxOps[F[_], G[_], A](private val value: F[G[(A, Flux[F, G, A])]]) extends AnyVal {
@@ -72,6 +74,11 @@ class FluxOps[F[_], G[_], A](private val value: F[G[(A, Flux[F, G, A])]]) extend
     Flux[F, G, B](value.flatMap(_.traverse[F, (B, Flux[F, G, B])] {
       case (a, flux) => f(a).tupleRight(flux.flatMapF(f))
     }))
+
+  def zipWithIndex(starting: Int)(implicit F: Functor[F], G: Functor[G]): Flux[F, G, (A, Int)] =
+    Flux(value.map(_.map { case (a, next) => ((a, starting), next.zipWithIndex(starting + 1)) }))
+
+  def zipWithIndex(implicit F: Functor[F], G: Functor[G]): Flux[F, G, (A, Int)] = zipWithIndex(0)
 }
 
 trait FluxInstances extends FluxInstances1 { self: Flux.type =>
