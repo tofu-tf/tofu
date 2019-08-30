@@ -19,6 +19,8 @@ import cats.syntax.parallel._
 import magnolia.{CaseClass, Magnolia, SealedTrait}
 import syntax.handle._
 import tofu.config.ConfigItem._
+import syntax.context._
+import tofu.config.Key.{Index, Prop, Variant}
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration.{Duration, FiniteDuration}
@@ -93,7 +95,9 @@ object Configurable extends BaseGetters {
         case ValueType.Dict(get, _) =>
           Chain
             .fromSeq(ctx.parameters)
-            .parTraverse[F, Any](p => get(p.label).flatMap(p.typeclass.apply[F]).map(x => x))
+            .parTraverse[F, Any](
+              param => get(param.label).flatMap(param.typeclass.apply[F]).local(Prop(param.label) +: _).map(x => x)
+            )
             .map(c => ctx.rawConstruct(c.toList))
         case it => ConfigErrors.badType[F, T](ValueType.Dict)(it.valueType)
       }
@@ -104,7 +108,12 @@ object Configurable extends BaseGetters {
       def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[T] =
         ctx.subtypes.toList
           .parTraverse[F, Option[(String, T)]](
-            sub => sub.typeclass[F](cfg).map(x => sub.typeName.short -> (x: T)).restore[F]
+            sub =>
+              sub
+                .typeclass[F](cfg)
+                .map(x => sub.typeName.short -> (x: T))
+                .local(Variant(sub.typeName.short) +: _)
+                .restore[F]
           )
           .flatMap(_.unite match {
             case Nil                => F.config.noVariantFound
@@ -132,7 +141,7 @@ trait BaseGetters { self: Configurable.type =>
   implicit val durationConfigurable: Configurable[Duration] = requireSimple(ValueType.Str).flatMake[Duration] {
     F => s =>
       try F.monad.pure(Duration(s))
-      catch { case ex: RuntimeException => F.config.badString(s, "bad duration") }
+      catch { case _: RuntimeException => F.config.badString(s, "bad duration") }
   }
   implicit val finiteDirationConfigurable: Configurable[FiniteDuration] =
     durationConfigurable.flatMake[FiniteDuration](F => {
@@ -150,9 +159,11 @@ trait BaseGetters { self: Configurable.type =>
   private def monoidConfigurable[A: Configurable, C: Monoid](f: A => C): Configurable[C] =
     new Typeclass[C] {
       def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[C] = cfg match {
-        case ValueType.Array((get, is)) => is.flatMapF(i => get(i).flatMap(parse[F, A](_))).foldMap(f)
-        case ValueType.Stream(items)    => items.flatMapF(parse[F, A](_)).foldMap(f)
-        case it                         => ConfigErrors.badType[F, C](ValueType.Array, ValueType.Stream)(it.valueType)
+        case ValueType.Array((get, is)) =>
+          is.flatMapF(i => get(i).flatMap(parse[F, A](_)).local(Index(i) +: _)).foldMap(f)
+        case ValueType.Stream(items) =>
+          items.zipWithIndex.flatMapF { case (a, i) => parse[F, A](a).local(Index(i) +: _) }.foldMap(f)
+        case it => ConfigErrors.badType[F, C](ValueType.Array, ValueType.Stream)(it.valueType)
       }
     }
 
