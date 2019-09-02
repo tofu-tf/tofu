@@ -4,10 +4,8 @@ import cats.ApplicativeError
 import cats.effect._
 import cats.effect.concurrent.{Deferred, Ref}
 import cats.effect.syntax.bracket._
-import cats.syntax.apply._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
 import cats.syntax.option._
+import tofu.syntax.monadic._
 
 import scala.collection.immutable.Queue
 

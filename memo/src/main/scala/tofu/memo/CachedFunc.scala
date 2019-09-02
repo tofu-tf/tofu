@@ -3,8 +3,7 @@ package tofu.memo
 import java.util.concurrent.TimeUnit
 
 import cats.effect.Clock
-import cats.syntax.flatMap._
-import cats.syntax.functor._
+import tofu.syntax.monadic._
 import cats.{Functor, Monad}
 import tofu.Guarantee
 import tofu.concurrent.{MVars, MakeMVar, MakeRef, Refs}

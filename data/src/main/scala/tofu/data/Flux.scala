@@ -1,12 +1,10 @@
 package tofu.data
 import cats.Eval.now
 import cats._
-import cats.syntax.applicative._
-import cats.syntax.apply._
-import cats.syntax.flatMap._
+
+import tofu.syntax.monadic._
 import cats.syntax.foldable._
 import cats.syntax.traverse._
-import cats.syntax.functor._
 import cats.syntax.monoid._
 import cats.instances.option._
 import cats.instances.either._

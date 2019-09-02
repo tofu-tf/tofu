@@ -4,10 +4,7 @@ import cats.data.OptionT
 import cats.effect.concurrent.{MVar, Ref}
 import cats.instances.list._
 import cats.instances.option._
-import cats.syntax.apply._
-import cats.syntax.flatMap._
 import cats.syntax.foldable._
-import cats.syntax.functor._
 import cats.syntax.traverse._
 import cats.{Functor, Monad}
 import tofu.Guarantee
@@ -15,6 +12,7 @@ import tofu.concurrent.{MVars, MakeMVar, MakeRef, Refs}
 import tofu.memo.CacheKeyState.valueByMap
 import tofu.memo.CacheOperation.{CleanUp, GetOrElse}
 import tofu.syntax.bracket._
+import tofu.syntax.monadic._
 
 trait CacheKeyState[F[_], -K, A] {
   def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B]

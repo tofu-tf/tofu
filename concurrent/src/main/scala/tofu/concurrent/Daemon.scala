@@ -5,15 +5,11 @@ import cats.data.StateT
 import cats.effect._
 import cats.effect.concurrent.MVar
 import cats.effect.syntax.bracket._
-import cats.syntax.applicative._
 import cats.syntax.applicativeError._
-import cats.syntax.apply._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import cats.syntax.monad._
 import cats.tagless.FunctorK
 import cats.{Apply, FlatMap, Monad, ~>}
 import simulacrum.typeclass
+import tofu.syntax.monadic._
 import tofu.syntax.start._
 
 @typeclass

@@ -3,13 +3,12 @@ package config
 
 import cats.data.ReaderT
 import cats.effect.concurrent.Ref
-import cats.syntax.flatMap._
-import cats.syntax.functor._
 import cats.{Monad, Parallel}
 import tofu.concurrent._
 import tofu.config.ConfigErrors.Message
 import tofu.config.ConfigTContext.Fail
 import tofu.optics.Contains
+import tofu.syntax.monadic._
 
 trait ConfigMonad[F[_]] {
   implicit def monad: Monad[F]
