@@ -1,18 +1,16 @@
 package tofu.config
 
 import cats.effect.Sync
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import cats.syntax.option._
-import cats.instances.option._
 import cats.instances.list._
+import cats.instances.option._
+import cats.syntax.option._
 import cats.{Applicative, Functor, Id, Monad, ~>}
 import tofu.Errors
 import tofu.concurrent.Refs
 import tofu.config.ConfigItem.ValueType
 import tofu.config.ConfigTContext.Fail
 import tofu.data.{Flux, Identity}
+import tofu.syntax.monadic._
 
 import collection.immutable.IndexedSeq
 import scala.annotation.unchecked.{uncheckedVariance => uv}

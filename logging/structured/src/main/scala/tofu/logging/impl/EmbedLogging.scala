@@ -3,8 +3,8 @@ package logging
 package impl
 
 import cats.FlatMap
-import cats.syntax.flatMap._
 import org.slf4j.Marker
+import tofu.syntax.monadic._
 
 class EmbedLogging[F[_]: FlatMap](underlying : F[Logging[F]]) extends Logging[F] {
   def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit] =

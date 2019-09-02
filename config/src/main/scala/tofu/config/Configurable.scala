@@ -11,16 +11,14 @@ import cats.instances.option._
 import cats.instances.vector._
 import cats.kernel.Monoid
 import cats.syntax.alternative._
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
 import cats.syntax.option._
 import cats.syntax.parallel._
 import magnolia.{CaseClass, Magnolia, SealedTrait}
+import syntax.context._
 import syntax.handle._
 import tofu.config.ConfigItem._
-import syntax.context._
 import tofu.config.Key.{Index, Prop, Variant}
+import tofu.syntax.monadic._
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration.{Duration, FiniteDuration}

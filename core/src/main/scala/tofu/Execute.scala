@@ -1,11 +1,9 @@
 package tofu
 
 import cats.effect.Async
+import tofu.syntax.monadic._
 
 import scala.concurrent.{ExecutionContext, Future}
-import cats.syntax.flatMap._
-import cats.syntax.applicative._
-
 import scala.util.{Failure, Success}
 
 trait Execute[F[_]] {

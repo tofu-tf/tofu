@@ -1,15 +1,12 @@
 package tofu.logging
 
+import Logging.loggerForService
 import cats.effect.Sync
 import cats.kernel.Monoid
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.apply._
-import cats.syntax.functor._
 import cats.{Applicative, Apply, FlatMap, Functor}
-import org.slf4j.LoggerFactory
-import Logging.loggerForService
 import impl.{ContextSyncLoggingImpl, SyncLogging}
+import org.slf4j.LoggerFactory
+import tofu.syntax.monadic._
 
 import scala.reflect.ClassTag
 

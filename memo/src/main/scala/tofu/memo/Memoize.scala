@@ -3,8 +3,7 @@ package tofu.memo
 import cats.effect.{Concurrent, ExitCase}
 import cats.effect.concurrent.{Deferred, Ref}
 import simulacrum.typeclass
-import cats.syntax.functor._
-import cats.syntax.flatMap._
+import tofu.syntax.monadic._
 import cats.syntax.semigroupal._
 import cats.syntax.option._
 import cats.effect.syntax.concurrent._
