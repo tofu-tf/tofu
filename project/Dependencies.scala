@@ -31,8 +31,6 @@ object Dependencies {
 
     val monix = "3.0.0-RC4"
 
-    val scalamock = "4.1.0"
-
     val scalatest = "3.0.8"
 
     val magnolia = "0.11.0"
@@ -63,7 +61,6 @@ object Dependencies {
   val typesafeConfig  = "com.typesafe"               % "config"               % Version.typesafeConfig
 
   val scalatest = "org.scalatest" %% "scalatest" % Version.scalatest % Test
-  val scalamock = "org.scalamock" %% "scalamock" % Version.scalamock % Test
 
   val macros = Keys.libraryDependencies ++= {
     minorVersion.value match {
