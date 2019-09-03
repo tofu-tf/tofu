@@ -16,6 +16,7 @@ import cats.syntax.parallel._
 import magnolia.{CaseClass, Magnolia, SealedTrait}
 import syntax.context._
 import syntax.handle._
+import tofu.config.ConfigError.{BadNumber, BadString, BadType, Invalid, MultipleVariants, NoVariantFound}
 import tofu.config.ConfigItem._
 import tofu.config.Key.{Index, Prop, Variant}
 import tofu.syntax.monadic._
@@ -77,14 +78,14 @@ object Configurable extends BaseGetters {
   def requireSimple[A](vtype: ValueTypeSimple[A]): Configurable[A] =
     make(F => {
       case vtype(a)            => F.monad.pure(a)
-      case item: ConfigItem[_] => F.config.badType(List(vtype), item.valueType)
+      case item: ConfigItem[_] => F.config.raise(BadType(List(vtype), item.valueType))
     })
 
   def requireOneOf[A, B](vtypeA: ValueTypeSimple[A], vtypeB: ValueTypeSimple[B]): Configurable[Either[A, B]] =
     make(F => {
       case vtypeA(a)           => F.monad.pure(Left(a))
       case vtypeB(b)           => F.monad.pure(Right(b))
-      case item: ConfigItem[_] => F.config.badType(List(vtypeA, vtypeB), item.valueType)
+      case item: ConfigItem[_] => F.config.raise(BadType(List(vtypeA, vtypeB), item.valueType))
     })
 
   def combine[T](ctx: CaseClass[Configurable, T]): Configurable[T] =
@@ -97,7 +98,7 @@ object Configurable extends BaseGetters {
               param => get(param.label).flatMap(param.typeclass.apply[F]).local(Prop(param.label) +: _).map(x => x)
             )
             .map(c => ctx.rawConstruct(c.toList))
-        case it => ConfigErrors.badType[F, T](ValueType.Dict)(it.valueType)
+        case it => F.error(BadType(List(ValueType.Dict), it.valueType))
       }
     }
 
@@ -114,9 +115,9 @@ object Configurable extends BaseGetters {
                 .restore[F]
           )
           .flatMap(_.unite match {
-            case Nil                => F.config.noVariantFound
+            case Nil                => F.error(NoVariantFound)
             case (_, res) :: Nil    => res.pure[F]
-            case (name1, _) :: rest => F.config.multipleVariants(NonEmptyList(name1, rest.map(_._1)))
+            case (name1, _) :: rest => F.error(MultipleVariants(NonEmptyList(name1, rest.map(_._1))))
           })
 
     }
@@ -128,10 +129,10 @@ trait BaseGetters { self: Configurable.type =>
   //simple types
   implicit val booleanConfigurable: Configurable[Boolean] = requireSimple(ValueType.Bool)
   implicit val intConfigurable: Configurable[Int] = requireSimple(ValueType.Num).flatMake[Int] { F => b =>
-    if (b.isValidInt) F.monad.pure(b.toIntExact) else F.config.badNumber(b, "bad integer value")
+    if (b.isValidInt) F.monad.pure(b.toIntExact) else F.error(BadNumber(b, "bad integer value"))
   }
   implicit val longConfigurable: Configurable[Long] = requireSimple(ValueType.Num).flatMake[Long] { F => b =>
-    if (b.isValidLong) F.monad.pure(b.toLongExact) else F.config.badNumber(b, "bad long value")
+    if (b.isValidLong) F.monad.pure(b.toLongExact) else F.error(BadNumber(b, "bad long value"))
   }
   implicit val stringConfigurable: Configurable[String] = requireSimple(ValueType.Str)
   implicit val doubleConfigurable: Configurable[Double] = requireSimple(ValueType.Num).map(_.toDouble)
@@ -139,18 +140,18 @@ trait BaseGetters { self: Configurable.type =>
   implicit val durationConfigurable: Configurable[Duration] = requireSimple(ValueType.Str).flatMake[Duration] {
     F => s =>
       try F.monad.pure(Duration(s))
-      catch { case _: RuntimeException => F.config.badString(s, "bad duration") }
+      catch { case _: RuntimeException => F.error(BadString(s, "bad duration")) }
   }
   implicit val finiteDirationConfigurable: Configurable[FiniteDuration] =
     durationConfigurable.flatMake[FiniteDuration](F => {
       case d: FiniteDuration => F.monad.pure(d)
-      case d                 => F.config.invalid(s"duration $d is not finite")
+      case d                 => F.error(Invalid(s"duration $d is not finite"))
     })
   implicit val urlConfigurable: Configurable[URL] =
-    requireSimple(ValueType.Str).catchMake(new URL(_))(F => p => F.config.badString(p._1, "bad URL"))
+    requireSimple(ValueType.Str).catchMake(new URL(_))(F => p => F.error(BadString(p._1, "bad URL")))
 
   implicit val uriConfigurable: Configurable[URI] =
-    requireSimple(ValueType.Str).catchMake(new URI(_))(F => p => F.config.badString(p._1, "bad URI"))
+    requireSimple(ValueType.Str).catchMake(new URI(_))(F => p => F.error(BadString(p._1, "bad URI")))
 
   //simple sequence types
 
@@ -161,7 +162,7 @@ trait BaseGetters { self: Configurable.type =>
           is.flatMapF(i => get(i).flatMap(parse[F, A](_)).local(Index(i) +: _)).foldMap(f)
         case ValueType.Stream(items) =>
           items.zipWithIndex.flatMapF { case (a, i) => parse[F, A](a).local(Index(i) +: _) }.foldMap(f)
-        case it => ConfigErrors.badType[F, C](ValueType.Array, ValueType.Stream)(it.valueType)
+        case it => F.error(BadType(List[ValueTag](ValueType.Array, ValueType.Stream), it.valueType))
       }
     }
 
@@ -176,7 +177,7 @@ trait BaseGetters { self: Configurable.type =>
       def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[Map[String, A]] = cfg match {
         case ValueType.Dict(get, is) =>
           is.flatMapF(k => get(k).flatMap(parse[F, A](_)).tupleLeft(k))(F.monad, implicitly).foldMapK(Map(_))
-        case it => ConfigErrors.badType[F, Map[String, A]](ValueType.Dict)(it.valueType)
+        case it => F.error(BadType(List(ValueType.Dict), it.valueType))
       }
     }
 

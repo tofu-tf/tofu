@@ -1,11 +1,9 @@
 package tofu
-import cats.data.{Chain, ReaderT}
-import tofu.config.ConfigErrors.Message
-
-import scala.annotation.unchecked.uncheckedVariance
+import cats.data.ReaderT
 
 package object config {
-  type Path = Vector[Key]
-  type MessageList = Vector[(Path, Message)]
-  type ConfigT[F[_], +A] = ReaderT[F, ConfigTContext[F], A @uncheckedVariance]
+  type Path              = Vector[Key]
+  type MessageList       = Vector[(Path, ConfigError)]
+  type ConfigT[F[_], A]  = ReaderT[F, ConfigTContext[F], A]
+  type ConfigRaise[F[_]] = Raise[F, ConfigError]
 }

@@ -22,6 +22,7 @@ lazy val defaultSettings = List(
   defaultScalacOptions,
   libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
   libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.0"),
+  libraryDependencies += scalatest,
   libraryDependencies ++= {
     val silencerVersion = "1.4.3"
     List(
@@ -80,7 +81,7 @@ lazy val loggingDer = project
   .settings(
     defaultSettings,
     compile213,
-    libraryDependencies ++= List(derevo, scalatest, magnolia),
+    libraryDependencies ++= List(derevo,  magnolia),
     macros,
     publishName := "logging-derivation"
   )
@@ -103,7 +104,7 @@ lazy val logging = project
 
 lazy val env = project
   .dependsOn(core, memo)
-  .settings(defaultSettings, libraryDependencies ++= List(catsCore, catsEffect, monix, scalatest))
+  .settings(defaultSettings, libraryDependencies ++= List(catsCore, catsEffect, monix))
 
 lazy val observable = project.settings(
   defaultSettings,
@@ -115,7 +116,7 @@ lazy val concurrent =
   project dependsOn (core) settings (
     defaultSettings,
     compile213,
-    libraryDependencies ++= List(catsEffect, catsTagless, simulacrum, scalatest),
+    libraryDependencies ++= List(catsEffect, catsTagless, simulacrum),
     macros,
 )
 
@@ -133,7 +134,7 @@ lazy val opticsCore = project
   .settings(
     defaultSettings,
     compile213,
-    libraryDependencies ++= Seq(catsCore, alleycats, scalatest),
+    libraryDependencies ++= List(catsCore, alleycats),
     publishName := "optics-core",
   )
 
@@ -145,7 +146,7 @@ lazy val opticsInterop = project
 lazy val opticsMacro = project
   .in(file("optics/macro"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, compile213, macros, libraryDependencies += scalatest, publishName := "optics-macro")
+  .settings(defaultSettings, compile213, macros, publishName := "optics-macro")
 
 lazy val enums = project
   .dependsOn(loggingStr)

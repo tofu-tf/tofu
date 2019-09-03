@@ -53,15 +53,19 @@ object Flux extends FluxInstances {
 }
 
 class FluxStreamOps[F[_], A](private val value: F[Option[(A, Flux.Stream[F, A])]]) extends AnyVal {
-  def foldMap[M: Monoid](f: A => M)(implicit F: Monad[F]): F[M] =
-    value.flatMap {
-      case None               => Monoid.empty[M].pure[F]
-      case Some((head, tail)) => tail.foldMap(f).map(f(head) |+| _)
-    }
+  def foldLeftM[B](init: F[B])(f: (B, A) => F[B])(implicit F: Monad[F]): F[B] = value.flatMap {
+    case None               => init
+    case Some((head, tail)) => tail.foldLeftM(init.flatMap(f(_, head)))(f)
+  }
 
-  def foldMapK[M[_], B](f: A => M[B])(implicit F: Monad[F], M: MonoidK[M]): F[M[B]] =
-    foldMap[M[B]](f)(M.algebra[B], F)
+  def foldLeft[B](init: B)(f: (B, A) => B)(implicit F: Monad[F]): F[B] = value.flatMap {
+    case None               => init.pure[F]
+    case Some((head, tail)) => tail.foldLeft(f(init, head))(f)
+  }
 
+  def foldMap[M](f: A => M)(implicit M: Monoid[M], F: Monad[F]): F[M] = foldLeft(M.empty)((m, a) => M.combine(m, f(a)))
+
+  def foldMapK[M[_], B](f: A => M[B])(implicit F: Monad[F], M: MonoidK[M]): F[M[B]] = foldMap[M[B]](f)(M.algebra[B], F)
 }
 
 class FluxOps[F[_], G[_], A](private val value: F[G[(A, Flux[F, G, A])]]) extends AnyVal {
