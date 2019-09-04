@@ -1,0 +1,4 @@
+env:
+  global:
+    - SCALA_VERSION=2.12
+language: scala
