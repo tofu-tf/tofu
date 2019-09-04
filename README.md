@@ -2,7 +2,7 @@
 
 | CI | Release | 
 | --- | --- |
-| [![Build Status](https://travis-ci.com/TinkoffCreditSystems/tofu.svg?branch=master)](https://travis-ci.com/TinkoffCreditSystems/tofu) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu) | 
+| [![Build Status](https://travis-ci.com/TinkoffCreditSystems/tofu.svg?branch=master)](https://travis-ci.com/TinkoffCreditSystems/tofu) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu-core_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu-core) | 
 
 **Functional programming toolkit by Tinkoff scala team aimed at taming the complexity of Tagless Final approach.** 
 
