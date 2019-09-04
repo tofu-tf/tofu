@@ -11,7 +11,7 @@
 To use the whole utils pack just add to your `build.sbt`: 
 
 ```scala
-libraryDependencies += "ru.tinkoff" %% "tofu" % "0.2.0"
+libraryDependencies += "ru.tinkoff" %% "tofu" % "0.3.0"
 ```
 
 Of course you can also specify the exact subproject that you wanna add to yours dependencies (used in place of `"tofu"`):
