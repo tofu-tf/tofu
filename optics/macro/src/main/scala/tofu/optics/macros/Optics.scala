@@ -2,11 +2,11 @@ package tofu.optics.macros
 
 import scala.reflect.macros.blackbox
 
-class Optics(prefix: String = "") extends scala.annotation.StaticAnnotation {
+class Optics(val prefix: String = "") extends scala.annotation.StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro OpticsImpl.opticsAnnotationMacro
 }
 
-class POptics(prefix: String = "") extends scala.annotation.StaticAnnotation {
+class POptics(val prefix: String = "") extends scala.annotation.StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro OpticsImpl.popticsAnnotationMacro
 }
 

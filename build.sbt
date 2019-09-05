@@ -22,6 +22,7 @@ lazy val defaultSettings = List(
   defaultScalacOptions,
   libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
   libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.0"),
+  libraryDependencies += scalatest,
   libraryDependencies ++= {
     val silencerVersion = "1.4.3"
     List(
@@ -120,7 +121,7 @@ lazy val concurrent =
 )
 
 lazy val coreModules   = List(core, memo, env, concurrent, opticsCore, data)
-lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums)
+lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, dataDerivation)
 
 lazy val opticsCore = project
   .in(file("optics/core"))
@@ -150,7 +151,21 @@ lazy val enums = project
   )
 
 lazy val data =
-  project.settings(defaultSettings, compile213, libraryDependencies += catsFree).dependsOn(core, opticsCore)
+  project
+    .settings(defaultSettings, compile213, libraryDependencies ++= List(catsFree))
+    .dependsOn(core, opticsCore)
+
+lazy val dataDerivation =
+  project
+    .in(file("data-derivation"))
+    .settings(
+      defaultSettings,
+      compile213,
+      libraryDependencies ++= List(magnolia, derevo),
+      macros,
+      publishName := "data-derivation"
+    )
+    .dependsOn(data)
 
 lazy val tofu = project
   .in(file("."))
@@ -208,16 +223,15 @@ lazy val defaultScalacOptions = scalacOptions ++= List(
   "-Xlint:private-shadow",         // A private field (or class parameter) shadows a superclass field.
   "-Xlint:stars-align",            // Pattern sequence wildcard must align with sequence component.
   "-Xlint:type-parameter-shadow",  // A local type parameter shadows a type already in scope.
-  "-Xlint:constant",         // Evaluation of a constant arithmetic expression results in an error.
-  "-Ywarn-unused:imports",   // Warn if an import selector is not referenced.
-  "-Ywarn-unused:locals",    // Warn if a local definition is unused.
-  "-Ywarn-unused:params",    // Warn if a value parameter is unused.
-  "-Ywarn-unused:patvars",   // Warn if a variable bound in a pattern is unused.
-  "-Ywarn-unused:privates",  // Warn if a private member is unused.
-  "-Ywarn-unused:implicits", // Warn if an implicit parameter is unused.
-  "-Ywarn-extra-implicit",    // Warn when more than one implicit parameter section is defined.
+  "-Xlint:constant",               // Evaluation of a constant arithmetic expression results in an error.
+  "-Ywarn-unused:imports",         // Warn if an import selector is not referenced.
+  "-Ywarn-unused:locals",          // Warn if a local definition is unused.
+  "-Ywarn-unused:params",          // Warn if a value parameter is unused.
+  "-Ywarn-unused:patvars",         // Warn if a variable bound in a pattern is unused.
+  "-Ywarn-unused:privates",        // Warn if a private member is unused.
+  "-Ywarn-unused:implicits",       // Warn if an implicit parameter is unused.
+  "-Ywarn-extra-implicit",         // Warn when more than one implicit parameter section is defined.
 )
-
 
 lazy val publishSettings = List(
   organization in ThisBuild := "ru.tinkoff",
@@ -225,12 +239,11 @@ lazy val publishSettings = List(
   publishMavenStyle in ThisBuild := true,
   description := "Opinionated Set of tool for functional programming in scala",
   crossScalaVersions in ThisBuild := Seq("2.12.9"),
-  publishTo := Some(
-    if (isSnapshot.value)
-      Opts.resolver.sonatypeSnapshots
-    else
-      Opts.resolver.sonatypeStaging
-  ),
+  publishTo := (if (!isSnapshot.value) {
+                  Some(Resolver.file("local-publish", new File("target/local-repo")))
+                } else {
+                  Some(Opts.resolver.sonatypeSnapshots)
+                }),
   credentials in ThisBuild += Credentials(Path.userHome / ".sbt" / ".ossrh-credentials"),
   version in ThisBuild := {
     val branch = git.gitCurrentBranch.value
