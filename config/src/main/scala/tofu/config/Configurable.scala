@@ -13,6 +13,8 @@ import cats.kernel.Monoid
 import cats.syntax.alternative._
 import cats.syntax.option._
 import cats.syntax.parallel._
+import cats.syntax.monoid._
+import cats.syntax.traverse._
 import magnolia.{CaseClass, Magnolia, SealedTrait}
 import syntax.context._
 import syntax.handle._
@@ -20,10 +22,15 @@ import tofu.config.ConfigError.{BadNumber, BadString, BadType, Invalid, Multiple
 import tofu.config.ConfigItem._
 import tofu.config.Key.{Index, Prop, Variant}
 import tofu.syntax.monadic._
+import tofu.syntax.raise._
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.util.control.NonFatal
+import tofu.config.MagnoliaDerivation.SingletonConfigurable
+import tofu.config.MagnoliaDerivation.EnumConfigurable
+import org.manatki.derevo.Derivation
+import tofu.config.ConfigError.NotFound
 
 trait Configurable[A] extends ConfigArr[ConfigItem, A] { self =>
   import ConfigMonad.promote._
@@ -63,7 +70,7 @@ trait Configurable[A] extends ConfigArr[ConfigItem, A] { self =>
   def widen[A1 >: A]: Configurable[A1] = this.asInstanceOf[Configurable[A1]]
 }
 
-object Configurable extends BaseGetters {
+object Configurable extends BaseGetters with MagnoliaDerivation {
 
   def apply[A](implicit cfg: Configurable[A]): Configurable[A] = cfg
 
@@ -73,78 +80,46 @@ object Configurable extends BaseGetters {
     new Configurable[A] { def apply[F[_]: ConfigMonad](cfg: ConfigItem[F]): F[A] = f(cfg) }
   }
 
-  type Typeclass[T] = Configurable[T]
-
   def requireSimple[A](vtype: ValueTypeSimple[A]): Configurable[A] =
     make(F => {
-      case vtype(a)            => F.monad.pure(a)
-      case item: ConfigItem[_] => F.config.raise(BadType(List(vtype), item.valueType))
+      case vtype(a)            => F.pure(a)
+      case Null                => F.error(NotFound)
+      case item: ConfigItem[_] => F.error(BadType(List(vtype), item.valueType))
     })
 
   def requireOneOf[A, B](vtypeA: ValueTypeSimple[A], vtypeB: ValueTypeSimple[B]): Configurable[Either[A, B]] =
     make(F => {
-      case vtypeA(a)           => F.monad.pure(Left(a))
-      case vtypeB(b)           => F.monad.pure(Right(b))
-      case item: ConfigItem[_] => F.config.raise(BadType(List(vtypeA, vtypeB), item.valueType))
+      case vtypeA(a)           => F.pure(Left(a))
+      case vtypeB(b)           => F.pure(Right(b))
+      case Null                => F.error(NotFound)
+      case item: ConfigItem[_] => F.error(BadType(List(vtypeA, vtypeB), item.valueType))
     })
-
-  def combine[T](ctx: CaseClass[Configurable, T]): Configurable[T] =
-    new Configurable[T] {
-      def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[T] = cfg match {
-        case ValueType.Dict(get, _) =>
-          Chain
-            .fromSeq(ctx.parameters)
-            .parTraverse[F, Any](
-              param => get(param.label).flatMap(param.typeclass.apply[F]).local(Prop(param.label) +: _).map(x => x)
-            )
-            .map(c => ctx.rawConstruct(c.toList))
-        case it => F.error(BadType(List(ValueType.Dict), it.valueType))
-      }
-    }
-
-  def dispatch[T](ctx: SealedTrait[Configurable, T]): Configurable[T] =
-    new Typeclass[T] {
-      def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[T] =
-        ctx.subtypes.toList
-          .parTraverse[F, Option[(String, T)]](
-            sub =>
-              sub
-                .typeclass[F](cfg)
-                .map(x => sub.typeName.short -> (x: T))
-                .local(Variant(sub.typeName.short) +: _)
-                .restore[F]
-          )
-          .flatMap(_.unite match {
-            case Nil                => F.error(NoVariantFound)
-            case (_, res) :: Nil    => res.pure[F]
-            case (name1, _) :: rest => F.error(MultipleVariants(NonEmptyList(name1, rest.map(_._1))))
-          })
-
-    }
-
-  implicit final def gen[T]: Typeclass[T] = macro Magnolia.gen[T]
-
 }
 trait BaseGetters { self: Configurable.type =>
   //simple types
-  implicit val booleanConfigurable: Configurable[Boolean] = requireSimple(ValueType.Bool)
-  implicit val intConfigurable: Configurable[Int] = requireSimple(ValueType.Num).flatMake[Int] { F => b =>
-    if (b.isValidInt) F.monad.pure(b.toIntExact) else F.error(BadNumber(b, "bad integer value"))
-  }
-  implicit val longConfigurable: Configurable[Long] = requireSimple(ValueType.Num).flatMake[Long] { F => b =>
-    if (b.isValidLong) F.monad.pure(b.toLongExact) else F.error(BadNumber(b, "bad long value"))
-  }
-  implicit val stringConfigurable: Configurable[String] = requireSimple(ValueType.Str)
+
+  private def numConfigurable[X](check: BigDecimal => Boolean, get: BigDecimal => X, name: String): Configurable[X] =
+    requireSimple(ValueType.Num).flatMake { F => b =>
+      if (check(b)) F.monad.pure(get(b)) else F.error(BadNumber(b, s"bad $name value"))
+    }
+
+  implicit val byteConfigurable: Configurable[Byte]     = numConfigurable[Byte](_.isValidByte, _.toByteExact, "byte")
+  implicit val shortConfigurable: Configurable[Short]   = numConfigurable[Short](_.isValidShort, _.toShortExact, "short")
+  implicit val intConfigurable: Configurable[Int]       = numConfigurable(_.isValidInt, _.toIntExact, "integer")
+  implicit val longConfigurable: Configurable[Long]     = numConfigurable(_.isValidLong, _.toLongExact, "integer")
+  implicit val floatConfigurable: Configurable[Float]   = requireSimple(ValueType.Num).map(_.toFloat)
   implicit val doubleConfigurable: Configurable[Double] = requireSimple(ValueType.Num).map(_.toDouble)
 
-  implicit val durationConfigurable: Configurable[Duration] = requireSimple(ValueType.Str).flatMake[Duration] {
-    F => s =>
-      try F.monad.pure(Duration(s))
-      catch { case _: RuntimeException => F.error(BadString(s, "bad duration")) }
-  }
+  implicit val booleanConfigurable: Configurable[Boolean] = requireSimple(ValueType.Bool)
+  implicit val stringConfigurable: Configurable[String]   = requireSimple(ValueType.Str)
+  implicit val durationConfigurable: Configurable[Duration] =
+    requireSimple(ValueType.Str).catching[Duration](Duration(_))(ConfigFunc.apply(F => {
+      case (s, _) => F.error(BadString(s, "bad duration"))
+    }))
+
   implicit val finiteDirationConfigurable: Configurable[FiniteDuration] =
     durationConfigurable.flatMake[FiniteDuration](F => {
-      case d: FiniteDuration => F.monad.pure(d)
+      case d: FiniteDuration => F.pure(d)
       case d                 => F.error(Invalid(s"duration $d is not finite"))
     })
   implicit val urlConfigurable: Configurable[URL] =
@@ -157,12 +132,21 @@ trait BaseGetters { self: Configurable.type =>
 
   private def monoidConfigurable[A: Configurable, C: Monoid](f: A => C): Configurable[C] =
     new Typeclass[C] {
-      def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[C] = cfg match {
-        case ValueType.Array((get, is)) =>
-          is.flatMapF(i => get(i).flatMap(parse[F, A](_)).local(Index(i) +: _)).foldMap(f)
-        case ValueType.Stream(items) =>
-          items.zipWithIndex.flatMapF { case (a, i) => parse[F, A](a).local(Index(i) +: _) }.foldMap(f)
-        case it => F.error(BadType(List[ValueTag](ValueType.Array, ValueType.Stream), it.valueType))
+      def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[C] = {
+        cfg match {
+          case ValueType.Array((get, is)) =>
+            is.foldLeft(F.pure(Monoid.empty[C])) { (fc, i) =>
+                (fc, get(i).flatMap(parse[F, A](_)).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
+              }
+              .flatten
+          case ValueType.Stream(items) =>
+            items.zipWithIndex.foldLeft(F.pure(Monoid.empty[C])){
+              case (fc, (x, i)) => 
+              (fc, parse[F, A](x).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
+            }.flatten
+          case Null => Monoid.empty[C].pure[F]
+          case it   => F.error(BadType(List[ValueTag](ValueType.Array, ValueType.Stream), it.valueType))
+        }
       }
     }
 
@@ -188,4 +172,76 @@ trait BaseGetters { self: Configurable.type =>
         case item            => parse[F, A](item).map(_.some)
       }
     }
+}
+
+trait MagnoliaDerivation extends Derivation[Configurable] {
+  type Typeclass[T] = Configurable[T]
+
+  def combine[T](ctx: CaseClass[Configurable, T]): Configurable[T] =
+    if (ctx.isObject) new SingletonConfigurable(ctx.typeName.short, ctx.construct(_ => ()))
+    else
+      new Configurable[T] {
+        def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[T] =
+          cfg match {
+            case ValueType.Dict(get, _) =>
+              Chain
+                .fromSeq(ctx.parameters)
+                .parTraverse[F, Any](
+                  param => get(param.label).flatMap(param.typeclass.apply[F]).local(_ :+ Prop(param.label)).map(x => x)
+                )
+                .map(c => ctx.rawConstruct(c.toList))
+            case ConfigItem.Null => F.error(NotFound)
+            case it              => F.error(BadType(List(ValueType.Dict), it.valueType))
+          }
+      }
+
+  def dispatch[T](ctx: SealedTrait[Configurable, T]): Configurable[T] =
+    ctx.subtypes.toList.map(_.typeclass).traverse[Option, Map[String, T]] {
+      case en: EnumConfigurable[_] => Some(en.nameMap)
+      case _                       => None
+    } match {
+      case Some(maps) => new EnumConfigurable(maps.reduceLeft(_ ++ _))
+      case None =>
+        new Typeclass[T] {
+          def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[T] =
+            ctx.subtypes.toList
+              .parTraverse[F, Option[(String, T)]](
+                sub =>
+                  sub
+                    .typeclass[F](cfg)
+                    .map(x => sub.typeName.short -> (x: T))
+                    .local(_ :+ Variant(sub.typeName.short))
+                    .restore[F]
+              )
+              .flatMap(_.unite match {
+                case Nil                => F.error(NoVariantFound)
+                case (_, res) :: Nil    => res.pure[F]
+                case (name1, _) :: rest => F.error(MultipleVariants(NonEmptyList(name1, rest.map(_._1))))
+              })
+
+        }
+    }
+
+  implicit final def instance[T]: Typeclass[T] = macro Magnolia.gen[T]
+}
+
+object MagnoliaDerivation {
+  class SingletonConfigurable[A](name: String, value: A) extends EnumConfigurable[A](Map(name -> value)) {
+    override def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[A] =
+      cfg match {
+        case Str(tag) =>
+          if (tag == name) value.pure[F]
+          else F.error(ConfigError.BadString(tag, s"expected $name"))
+        case t => F.error(ConfigError.BadType(List(ValueType.Str), t.valueType))
+      }
+  }
+
+  class EnumConfigurable[A](val nameMap: Map[String, A]) extends Configurable[A] {
+    private val names = nameMap.keys.mkString(",")
+    def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[A] =
+      cfg match {
+        case Str(tag) => nameMap.get(tag).orRaise[F](ConfigError.BadString(tag, s"expected one of: $names"))
+        case t        => F.error(ConfigError.BadType(List(ValueType.Str), t.valueType))
+      }
+  }
 }

@@ -81,7 +81,7 @@ lazy val loggingDer = project
   .settings(
     defaultSettings,
     compile213,
-    libraryDependencies ++= List(derevo,  magnolia),
+    libraryDependencies ++= List(derevo, magnolia),
     macros,
     publishName := "logging-derivation"
   )
@@ -123,10 +123,11 @@ lazy val concurrent =
 lazy val config = project dependsOn (core, data, opticsCore, concurrent) settings (
   defaultSettings,
   compile213,
-  libraryDependencies ++= List(typesafeConfig, magnolia)
+  libraryDependencies ++= List(typesafeConfig, magnolia, derevo),
+  macros,
 )
 
-lazy val coreModules   = List(core, memo, env, concurrent, opticsCore, data)
+lazy val coreModules = List(core, memo, env, concurrent, opticsCore, data)
 
 lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, config, dataDerivation)
 
@@ -147,7 +148,16 @@ lazy val opticsInterop = project
 lazy val opticsMacro = project
   .in(file("optics/macro"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, compile213, macros, publishName := "optics-macro")
+  .settings(
+    defaultSettings,
+    scalacOptions --= List(
+      "-Ywarn-unused:params",
+      "-Ywarn-unused:patvars",
+      ),       
+    compile213,
+    macros,
+    publishName := "optics-macro"
+  )
 
 lazy val enums = project
   .dependsOn(loggingStr)
@@ -246,11 +256,12 @@ lazy val publishSettings = List(
   publishMavenStyle in ThisBuild := true,
   description := "Opinionated Set of tool for functional programming in scala",
   crossScalaVersions in ThisBuild := Seq("2.12.9"),
-  publishTo := (if (!isSnapshot.value) {
-                  Some(Resolver.file("local-publish", new File("target/local-repo")))
-                } else {
-                  Some(Opts.resolver.sonatypeSnapshots)
-                }),
+  publishTo := Some(
+    if (isSnapshot.value)
+      Opts.resolver.sonatypeSnapshots
+    else
+      Opts.resolver.sonatypeStaging
+  ),
   credentials in ThisBuild += Credentials(Path.userHome / ".sbt" / ".ossrh-credentials"),
   version in ThisBuild := {
     val branch = git.gitCurrentBranch.value

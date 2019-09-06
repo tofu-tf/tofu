@@ -98,7 +98,7 @@ trait ErrorInstances {
   final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
     new Errors[ReaderT[F, R, *], E] {
       def raise[A](err: E): ReaderT[F, R, A] =
-        ReaderT(r => F.raise(err))
+        ReaderT.liftF(F.raise(err))
       def tryHandleWith[A](fa: ReaderT[F, R, A])(f: E => Option[ReaderT[F, R, A]]): ReaderT[F, R, A] =
         ReaderT(r => F.tryHandleWith(fa.run(r))(e => f(e).map(_.run(r))))
       def restore[A](fa: ReaderT[F, R, A]): ReaderT[F, R, Option[A]] =

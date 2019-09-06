@@ -1,14 +1,13 @@
-package tofu.config
+package tofu
+package config
 
 import cats.effect.Sync
 import cats.instances.list._
 import cats.instances.option._
 import cats.syntax.option._
 import cats.{Applicative, Functor, Id, Monad, ~>}
-import tofu.Errors
 import tofu.concurrent.Refs
 import tofu.config.ConfigItem.ValueType
-import tofu.config.ConfigTContext.Fail
 import tofu.data.{Flux, Identity}
 import tofu.syntax.monadic._
 
@@ -111,12 +110,12 @@ object ConfigItem {
     def tryParseSync[A: Configurable](
         implicit FR: Refs[F],
         FM: Monad[F],
-        FE: Errors[F, Fail.type],
+        FE: ErrorsFail[F],
         PR: ParallelReader[F]
     ): F[(MessageList, Option[A])] =
       ConfigMonad.tryParse[F, A](item)
 
-    def parseSync[A: Configurable](implicit F: Sync[F], PR: ParallelReader[F]): F[A] =
+    def parseSync[A: Configurable](implicit FR: Refs[F], F: MonadThrow[F], PR: ParallelReader[F]): F[A] =
       for {
         (mess, optA) <- tryParseSync[A]
         res          <- optA.liftTo[F](ConfigParseErrors(mess))
@@ -129,6 +128,4 @@ object ConfigItem {
     def tryParseF[F[_]: Sync, A: Configurable]: F[(MessageList, Option[A])] = liftF[F].tryParseSync[A]
     def parseF[F[_]: Sync, A: Configurable]: F[A]                           = liftF[F].parseSync[A]
   }
-
-  final case class ConfigParseErrors(ms: MessageList) extends RuntimeException
 }

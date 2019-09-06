@@ -29,7 +29,7 @@ object Dependencies {
 
     val simulacrum = "0.19.0"
 
-    val monix = "3.0.0-RC4"
+    val monix = "3.0.0-RC5"
 
     val scalatest = "3.0.8"
 

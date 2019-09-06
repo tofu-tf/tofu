@@ -8,6 +8,11 @@ import tofu.concurrent._
 import tofu.config.ConfigTContext.Fail
 import tofu.optics.Contains
 import tofu.syntax.monadic._
+import cats.MonadError
+import cats.Applicative
+import cats.~>
+import tofu.syntax.functionK._
+import cats.syntax.applicativeError._
 
 trait ConfigMonad[F[_]] {
   implicit def monad: Monad[F]
@@ -17,6 +22,7 @@ trait ConfigMonad[F[_]] {
   implicit def restore: Restore[F]
 
   def error[A](err: ConfigError): F[A] = config.raise(err)
+  def pure[A](a: A): F[A]              = monad.pure(a)
 }
 
 object ConfigMonad {
@@ -24,9 +30,9 @@ object ConfigMonad {
 
   def tryParse[F[_]: Monad: Refs: ParallelReader, A: Configurable](
       item: ConfigItem[F]
-  )(implicit errors: Errors[F, Fail.type]): F[(Vector[(Path, ConfigError)], Option[A])] = {
+  )(implicit errors: Errors[F, Fail.type]): F[(Vector[ConfigParseMessage], Option[A])] = {
     for {
-      ref      <- newRef[F].of(Vector[(Path, ConfigError)]())
+      ref      <- newRef[F].of(Vector[ConfigParseMessage]())
       reader   = Configurable.parse[ConfigT[F, *], A](item.mapK[ConfigT[F, *]](ReaderT.liftK[F, ConfigTContext[F]]))
       context  = ConfigTContext[F](Vector.empty, ref)
       res      <- errors.restore(reader.run(context))
@@ -73,7 +79,7 @@ object ConfigMonad {
   }
 }
 
-final case class ConfigTContext[F[_]](path: Path, ref: Ref[F, Vector[(Path, ConfigError)]])
+final case class ConfigTContext[F[_]](path: Path, ref: Ref[F, MessageList])
 
 object ConfigTContext {
   implicit def configTParallelConfigMonad[F[_]: ParallelReader](
@@ -95,7 +101,7 @@ object ConfigTContext {
     val path: HasLocal[ConfigT[F, *], Path] = Local[ConfigT[F, *]].subcontext(contextPath[F])
     val config: ConfigRaise[ConfigT[F, *]] = new ConfigRaise[ConfigT[F, *]] {
       def raise[A](err: ConfigError): ConfigT[F, A] = ReaderT(
-        ctx => ctx.ref.update(_ :+ (ctx.path -> err)) *> FR.raise(Fail)
+        ctx => ctx.ref.update(_ :+ ConfigParseMessage(ctx.path, err)) *> FR.raise(Fail)
       )
     }
     val restore: Restore[ConfigT[F, *]] = new Restore[ConfigT[F, *]] {
@@ -110,9 +116,30 @@ object ConfigTContext {
 
 final case class ParallelReader[F[_]](paralleled: Parallel[ConfigT[F, *]]) extends AnyVal
 
-object ParallelReader extends LowPriorityParallelReader {
-  implicit def findParallel[F[_]](implicit para: Parallel[F]) = ParallelReader[F](implicitly)
+object ParallelReader extends LowPriorityParallelReader1 {
+  implicit def findParallel[F[_]](implicit para: Parallel[F]): ParallelReader[F] = ParallelReader[F](implicitly)
 }
-trait LowPriorityParallelReader {
-  implicit def provideIdentity[F[_]](implicit F: Monad[F]) = ParallelReader[F](Parallel.identity[ConfigT[F, *]])
+
+trait LowPriorityParallelReader1 extends LowPriorityParallelReader2 {
+  implicit def makeError[F[_], E](implicit F: MonadError[F, E]): ParallelReader[F] =
+    ParallelReader[F](parallelFromError[ConfigT[F, *], E])
+
+  private def parallelFromError[M[_], E](implicit F: MonadError[M, E]): Parallel[M] = new Parallel[M] {
+    type F[a] = M[a]
+    def applicative: Applicative[M] = new Applicative[M]{
+      def ap[A, B](ff: M[A => B])(fa: M[A]): M[B] = 
+        ff.attempt.flatMap{
+          case Right(f) => fa.map(f(_))
+          case Left(e)  => fa *> F.raiseError(e)
+        }
+      def pure[A](x: A): M[A] = F.pure(x)
+    }
+    def monad                       = F
+    def parallel: F ~> F            = makeFunctionK[F, F](x => x)
+    def sequential: F ~> F          = makeFunctionK[F, F](x => x)
+  }
+}
+trait LowPriorityParallelReader2 {
+  implicit def provideIdentity[F[_]](implicit F: Monad[F]): ParallelReader[F] =
+    ParallelReader[F](Parallel.identity[ConfigT[F, *]])
 }

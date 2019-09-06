@@ -13,8 +13,9 @@ import cats.syntax.either._
 
 object Flux extends FluxInstances {
   trait FluxTag extends Any
+  type Base = Any {type FluxOpaque}
 
-  type FluxRepr[+F[_], +G[_], +A] <: FluxTag
+  type FluxRepr[+F[_], +G[_], +A] <: Base with FluxTag
 
   def apply[F[_], G[_], A](tfa: F[G[(A, Flux[F, G, A])]]): FluxRepr[F, G, A] = tfa.asInstanceOf[FluxRepr[F, G, A]]
 
@@ -37,7 +38,7 @@ object Flux extends FluxInstances {
     def empty[F[_]: Applicative, A]: Stream[F, A] = Flux(none[(A, Stream[F, A])].pure[F])
 
     def range[F[_]: Applicative, N](from: N, to: N, by: N)(implicit N: Numeric[N]): Stream[F, N] =
-      if (from > to) empty[F, N]
+      if (from >= to) empty[F, N]
       else Flux((from, range(from + by, to, by)).some.pure[F])
 
     def range[F[_]: Applicative, N: Numeric](from: N, to: N): Stream[F, N] =

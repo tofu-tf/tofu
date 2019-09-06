@@ -13,10 +13,11 @@ object Key {
 
   implicit val show: Show[Key] = {
     case Index(i)      => s"[$i]"
-    case Prop(name)    => s".$name"
+    case Prop(name)    => s"$name"
     case Variant(name) => s"#$name#"
   }
 
   implicit val order: Order[Key] = data.instances.order.derive
+
 }
 
