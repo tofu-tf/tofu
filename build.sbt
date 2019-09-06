@@ -3,7 +3,7 @@ import com.typesafe.sbt.SbtGit.git
 
 scalaVersion := "2.12.9"
 
-val libVersion = "0.3.0"
+val libVersion = "0.4.0"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
