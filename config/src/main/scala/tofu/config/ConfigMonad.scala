@@ -43,7 +43,7 @@ object ConfigMonad {
   def fromMonadAndErrors[F[_]](
       implicit
       F: Monad[F],
-      FE: Errors[F, ConfigError],
+      FE: Raise[F, ConfigError],
       FR: Restore[F],
       FL: HasLocal[F, Path]
   ): ConfigMonad[F] =

@@ -9,7 +9,7 @@ import cats.syntax.foldable._
 import cats.instances.string._
 import cats.instances.vector._
 
-sealed trait ConfigError extends Throwable with Product with Serializable
+sealed trait ConfigError extends Product with Serializable
 object ConfigError {
   case object NotFound                                                 extends ConfigError
   case object NoVariantFound                                           extends ConfigError
@@ -40,4 +40,5 @@ object ConfigParseMessage{
 }
 
 final case class ConfigParseErrors(ms: MessageList) extends RuntimeException(ms.mkString_("\n"))
+
 

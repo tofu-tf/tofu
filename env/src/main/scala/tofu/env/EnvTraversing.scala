@@ -2,6 +2,7 @@ package tofu.env
 
 import monix.eval.Task
 import monix.execution.compat.BuildFrom
+import tofu.env.internal.CollectionMapper
 
 private[env] trait EnvTraversing {
   def sequence[E, A, M[X] <: Iterable[X]](in: M[Env[E, A]])(
@@ -42,18 +43,19 @@ private[env] trait EnvTraversing {
       walkTasks(in, Env.sequence(in), Task.traverse[Env[E, A], A, M])
 
     def traverse[E, A, B, M[+X] <: Iterable[X]](in: M[A])(f: A => Env[E, B])(
-        implicit cbf1: BuildFrom[Iterable[A], Env[E, B], M[Env[E, B]]],
-        cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
-      sequence[E, B, M](in.map[Env[E, B], M[Env[E, B]]](f))
+        implicit mapper : CollectionMapper[A, Env[E, B], M],
+        cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =  
+        sequence(mapper.map(in, f))
+
 
     def gather[E, A, M[X] <: Iterable[X]](in: M[Env[E, A]])(
         implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
       walkTasks(in, Env.gather(in), Task.wander[Env[E, A], A, M])
 
     def wander[E, A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B])(
-        implicit cbf1: BuildFrom[Iterable[A], Env[E, B], M[Env[E, B]]],
-        cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
-      gather(in.map(f))
+        implicit mapper : CollectionMapper[A, Env[E, B], M],
+        cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] = 
+        gather(mapper.map(in, f))
 
     def gatherUnordered[E, A](in: Iterable[Env[E, A]]): Env[E, List[A]] =
       walkTasks(in.toList, Env.gatherUnordered(in), Task.wanderUnordered[Env[E, A], A, List])
