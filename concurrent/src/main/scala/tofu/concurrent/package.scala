@@ -8,4 +8,9 @@ package object concurrent {
   type Semaphores[F[_]] = MakeSemaphore[F, F]
   type MVars[F[_]]      = MakeMVar[F, F]
   type Deferreds[F[_]]  = MakeDeferred[F, F]
+
+  def newRef[F[_]: Refs]              = MakeRef[F, F]
+  def newSemaphore[F[_]: Semaphores]  = MakeSemaphore[F, F]
+  def newVar[F[_]: MVars]             = MakeMVar[F, F]
+  def newDeffered[F[_]: Deferreds, A] = MakeDeferred[F, F, A]
 }

@@ -52,8 +52,9 @@ object Merge extends Derivation[Merge] with MergeInstances1 {
 
 object Merged {
   trait OpaqueTag extends Any
+  type Base = Any {type MergedOpaque}
 
-  type Mer[A] <: OpaqueTag
+  type Mer[A] <: Base with OpaqueTag
 
   def apply[A](value: A): Mer[A] = value.asInstanceOf[Mer[A]]
 

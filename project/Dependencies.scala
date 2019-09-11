@@ -9,9 +9,9 @@ object Dependencies {
 
     val tethys = "0.10.0"
 
-    val cats = "2.0.0-RC2"
+    val cats = "2.0.0"
 
-    val catsEffect = "2.0.0-RC2"
+    val catsEffect = "2.0.0"
 
     val catsTagless = "0.9"
 
@@ -19,7 +19,7 @@ object Dependencies {
 
     val enumeratum = "1.5.13"
 
-    val derevo = "0.10.1"
+    val derevo = "0.10.2"
 
     val slf4j = "1.7.26"
 
@@ -29,13 +29,13 @@ object Dependencies {
 
     val simulacrum = "0.19.0"
 
-    val monix = "3.0.0-RC4"
-
-    val scalamock = "4.1.0"
+    val monix = "3.0.0"
 
     val scalatest = "3.0.8"
 
     val magnolia = "0.11.0"
+
+    val typesafeConfig = "1.3.4"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"           % Version.cats
@@ -58,21 +58,7 @@ object Dependencies {
   val tethys          = "com.tethys-json"            %% "tethys-core"         % Version.tethys
   val tethysJackson   = "com.tethys-json"            %% "tethys-jackson"      % Version.tethys
   val catsTagless     = "org.typelevel"              %% "cats-tagless-macros" % Version.catsTagless
-
-  val scalatest = "org.scalatest" %% "scalatest" % Version.scalatest % Test
-  val scalamock = "org.scalamock" %% "scalamock" % Version.scalamock % Test
-
-  val macros = Keys.libraryDependencies ++= {
-    minorVersion.value match {
-      case 13 => List(scalaOrganization.value % "scala-reflect" % scalaVersion.value)
-      case 12 =>
-        List(
-          compilerPlugin(
-            "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch
-          ),
-          scalaOrganization.value % "scala-reflect" % scalaVersion.value
-        )
-    }
-  }
+  val typesafeConfig  = "com.typesafe"               % "config"               % Version.typesafeConfig
+  val scalatest       = "org.scalatest"              %% "scalatest"           % Version.scalatest % Test
 
 }

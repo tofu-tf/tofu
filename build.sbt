@@ -1,9 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-scalaVersion := "2.12.9"
-
-val libVersion = "0.3.0"
+val libVersion = "0.4.0"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -15,7 +13,19 @@ lazy val setMinorVersion = minorVersion := {
 lazy val setModuleName = moduleName := { s"tofu-${(publishName or name).value}" }
 lazy val experimental  = scalacOptions ++= { if (scalaVersion.value < "2.12") List("-Xexperimental") else Nil }
 
+val macros = Keys.libraryDependencies ++= {
+  minorVersion.value match {
+    case 13 => List(scalaOrganization.value % "scala-reflect" % scalaVersion.value)
+    case 12 =>
+      List(
+        compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
+        scalaOrganization.value % "scala-reflect" % scalaVersion.value
+      )
+  }
+}
+
 lazy val defaultSettings = List(
+  scalaVersion := "2.13.0",
   setMinorVersion,
   setModuleName,
   experimental,
@@ -32,13 +42,10 @@ lazy val defaultSettings = List(
   }
 ) ++ publishSettings ++ scala213Options
 
-lazy val compile213 = crossScalaVersions += "2.13.0"
-
 moduleName := "tofu"
 
 lazy val core = project dependsOn (opticsCore) settings (
   defaultSettings,
-  compile213,
   publishName := "core",
   libraryDependencies ++= Seq(simulacrum, catsCore, catsEffect, catsTagless),
   macros
@@ -48,7 +55,6 @@ lazy val memo = project
   .dependsOn(core, concurrent)
   .settings(
     defaultSettings,
-    compile213,
     libraryDependencies ++= Seq(catsCore, catsEffect, simulacrum),
     macros
   )
@@ -58,7 +64,6 @@ lazy val loggingStr = project
   .settings(
     publishName := "logging-structured",
     defaultSettings,
-    compile213,
     libraryDependencies ++= List(
       catsCore,
       catsEffect,
@@ -80,8 +85,7 @@ lazy val loggingDer = project
   .dependsOn(loggingStr)
   .settings(
     defaultSettings,
-    compile213,
-    libraryDependencies ++= List(derevo, scalatest, magnolia),
+    libraryDependencies ++= List(derevo, magnolia),
     macros,
     publishName := "logging-derivation"
   )
@@ -90,7 +94,6 @@ lazy val loggingLayout = project
   .in(file("logging/layout"))
   .settings(
     defaultSettings,
-    compile213,
     libraryDependencies ++= List(catsCore, catsEffect, simulacrum, logback, slf4j),
     macros,
     publishName := "logging-layout"
@@ -100,11 +103,11 @@ lazy val loggingLayout = project
 lazy val logging = project
   .dependsOn(loggingStr, loggingDer, loggingLayout)
   .aggregate(loggingStr, loggingDer, loggingLayout)
-  .settings(defaultSettings, compile213)
+  .settings(defaultSettings)
 
 lazy val env = project
   .dependsOn(core, memo)
-  .settings(defaultSettings, libraryDependencies ++= List(catsCore, catsEffect, monix, scalatest))
+  .settings(defaultSettings, libraryDependencies ++= List(catsCore, catsEffect, monix))
 
 lazy val observable = project.settings(
   defaultSettings,
@@ -115,44 +118,56 @@ lazy val observable = project.settings(
 lazy val concurrent =
   project dependsOn (core) settings (
     defaultSettings,
-    compile213,
-    libraryDependencies ++= List(catsEffect, catsTagless, simulacrum, scalatest),
+    libraryDependencies ++= List(catsEffect, catsTagless, simulacrum),
     macros,
 )
 
-lazy val coreModules   = List(core, memo, env, concurrent, opticsCore, data)
-lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, dataDerivation)
+lazy val config = project dependsOn (core, data, opticsCore, concurrent) settings (
+  defaultSettings,
+  libraryDependencies ++= List(typesafeConfig, magnolia, derevo),
+  macros,
+)
+
+lazy val coreModules = List(core, memo, env, concurrent, opticsCore, data)
+
+lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, config, dataDerivation)
 
 lazy val opticsCore = project
   .in(file("optics/core"))
   .settings(
     defaultSettings,
-    compile213,
-    libraryDependencies ++= Seq(catsCore, alleycats, scalatest),
+    libraryDependencies ++= List(catsCore, alleycats),
     publishName := "optics-core",
   )
 
 lazy val opticsInterop = project
   .in(file("optics/interop"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, compile213, libraryDependencies += monocle, publishName := "optics-interop")
+  .settings(defaultSettings, libraryDependencies += monocle, publishName := "optics-interop")
 
 lazy val opticsMacro = project
   .in(file("optics/macro"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, compile213, macros, libraryDependencies += scalatest, publishName := "optics-macro")
+  .settings(
+    defaultSettings,
+    scalacOptions --= List(
+      "-Ywarn-unused:params",
+      "-Ywarn-unused:patvars",
+    ),
+    macros,
+    publishName := "optics-macro"
+  )
 
 lazy val enums = project
   .dependsOn(loggingStr)
   .settings(
     defaultSettings,
-    compile213,
     libraryDependencies ++= List(enumeratum)
   )
 
 lazy val data =
   project
-    .settings(defaultSettings, compile213, libraryDependencies ++= List(catsFree))
+    .settings(defaultSettings, libraryDependencies ++= List(catsFree))
     .dependsOn(core, opticsCore)
 
 lazy val dataDerivation =
@@ -160,7 +175,6 @@ lazy val dataDerivation =
     .in(file("data-derivation"))
     .settings(
       defaultSettings,
-      compile213,
       libraryDependencies ++= List(magnolia, derevo),
       macros,
       publishName := "data-derivation"
@@ -182,7 +196,7 @@ lazy val scala213Options = List(
       case 12 =>
         List(
           "-Yno-adapted-args",                // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
-          "-Ypartial-unification",            // Enable partial unification in type constructor inference
+          "-Ypartial-unification",            // Enable partial unification lype constructor inference
           "-Ywarn-inaccessible",              // Warn about inaccessible types in method signatures.
           "-Ywarn-infer-any",                 // Warn when a type argument is inferred to be `Any`.
           "-Ywarn-nullary-override",          // Warn when non-nullary `def f()' overrides nullary `def f'.
@@ -234,18 +248,18 @@ lazy val defaultScalacOptions = scalacOptions ++= List(
 )
 
 lazy val publishSettings = List(
-  organization in ThisBuild := "ru.tinkoff",
+  organization := "ru.tinkoff",
   publishVersion := libVersion,
-  publishMavenStyle in ThisBuild := true,
+  publishMavenStyle := true,
   description := "Opinionated Set of tool for functional programming in scala",
-  crossScalaVersions in ThisBuild := Seq("2.12.9"),
-  publishTo := (if (!isSnapshot.value) {
-                  Some(Resolver.file("local-publish", new File("target/local-repo")))
-                } else {
-                  Some(Opts.resolver.sonatypeSnapshots)
-                }),
-  credentials in ThisBuild += Credentials(Path.userHome / ".sbt" / ".ossrh-credentials"),
-  version in ThisBuild := {
+  crossScalaVersions := List("2.12.9", "2.13.0"),
+  publishTo := {
+    if (isSnapshot.value) {
+      Some(Opts.resolver.sonatypeSnapshots)
+    } else sonatypePublishToBundle.value
+  },
+  credentials += Credentials(Path.userHome / ".sbt" / ".ossrh-credentials"),
+  version := {
     val branch = git.gitCurrentBranch.value
     if (branch == "master") publishVersion.value
     else s"${publishVersion.value}-$branch-SNAPSHOT"
@@ -260,6 +274,8 @@ lazy val publishSettings = List(
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
   homepage := Some(url("https://github.com/TinkoffCreditSystems/tofu")),
   developers := List(
-    Developer("odomontois", "Oleg Nizhnik", "odomontois@gmail.com", url("https://github.com/odomontois"))
+    Developer("odomontois", "Oleg Nizhnik", "odomontois@gmail.com", url("https://github.com/odomontois")),
+    Developer("danslapman", "Daniil Smirnov", "danslapman@gmail.com", url("https://github.com/danslapman")),
+    Developer("Phill101", "Nikita Filimonov", "holypics6@gmail.com", url("https://github.com/Phill101"))
   )
 )

@@ -3,7 +3,8 @@ package tofu.data
 object Embed{
   trait EmbedTag extends Any
 
-  type T[+F[+_], +G[+_], +A] <: EmbedTag
+  type Base = Any {type EmbedOpaque}
+  type T[+F[+_], +G[+_], +A] <: Base with EmbedTag
 
   def apply[F[+_], G[+_], A](tfa: F[G[A]]): T[F, G, A] = tfa.asInstanceOf[T[F, G, A]]
 

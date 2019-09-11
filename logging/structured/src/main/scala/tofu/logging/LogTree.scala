@@ -4,12 +4,10 @@ import cats.effect.SyncIO
 import cats.effect.concurrent.Ref
 import cats.instances.list._
 import cats.instances.unit._
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.apply._
+import tofu.syntax.monadic._
 import cats.syntax.foldable._
 import cats.syntax.traverse._
-import cats.syntax.functor._
+
 import cats.{Applicative, Monoid}
 import io.circe.Json
 

@@ -60,7 +60,7 @@ sealed trait Env[E, +A] {
   def flatMap[B](f: A => Env[E, B]): Env[E, B] =
     Env(ctx => run(ctx).flatMap(x => f(x).run(ctx)))
   def map2[B, C](eb: Env[E, B])(f: (A, B) => C): Env[E, C] =
-    Env(ctx => for (a <- run(ctx); b <- eb.run(ctx)) yield f(a, b))
+    mapTask2(eb)(Task.map2(_, _)(f))
   def map3[B, C, D](eb: Env[E, B], ec: Env[E, C])(f: (A, B, C) => D) =
     mapTask3(eb, ec)(Task.map3(_, _, _)(f))
 

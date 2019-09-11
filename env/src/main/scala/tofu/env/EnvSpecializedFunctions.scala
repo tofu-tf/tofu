@@ -10,6 +10,7 @@ import monix.execution.compat.BuildFrom
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
+import internal.CollectionMapper
 
 trait EnvSpecializedFunctions[E] {
   type F[A] = Env[E, A]
@@ -78,7 +79,7 @@ trait EnvSpecializedFunctions[E] {
       Env.opt.sequence(in)
 
     def traverse[A, B, M[+X] <: Iterable[X]](in: M[A])(f: A => Env[E, B])(
-        implicit cbf1: BuildFrom[Iterable[A], Env[E, B], M[Env[E, B]]],
+        implicit mapper : CollectionMapper[A, Env[E, B], M],
         cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
       Env.opt.traverse(in)(f)
 
@@ -87,7 +88,7 @@ trait EnvSpecializedFunctions[E] {
       Env.opt.gather(in)
 
     def wander[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B])(
-        implicit cbf1: BuildFrom[Iterable[A], Env[E, B], M[Env[E, B]]],
+        implicit mapper : CollectionMapper[A, Env[E, B], M],
         cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
       Env.opt.wander(in)(f)
 
