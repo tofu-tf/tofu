@@ -22,6 +22,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
   implicit override def executionContext: ExecutionContext = ExecutionContext.Implicits.global
   implicit val cs: ContextShift[IO] = IO.contextShift(executionContext)
   implicit val timer: Timer[IO] = IO.timer(executionContext)
+  val smallDelay = timer.sleep(20.millis)
 
   def rwOf(initial: Int, maxReaders: Int = 5): IO[ConcurrentReadWrite[IO, Int]] =
     ReadWrite.of[IO, Int](initial, maxReaders).map(_.asInstanceOf[ConcurrentReadWrite[IO, Int]])
@@ -54,8 +55,8 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           (i1, release1) <- rw.read
           (i2, release2) <- rw.read
           blockedReader1 <- rw.read.start
-          blockedReader2 <- IO.sleep(10.millis) *> rw.read.start
-          blockedState1  <- IO.sleep(10.millis) *> rw.getState
+          blockedReader2 <- smallDelay *> rw.read.start
+          blockedState1  <- smallDelay *> rw.getState
           _              <- release1
           (i3, release3) <- blockedReader1.join
           blockedState2  <- rw.getState
@@ -89,7 +90,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           initialState  <- rw.getState
           (i1, update)  <- rw.write
           f             <- rw.read.start
-          blockedState  <- IO.sleep(10.millis) *> rw.getState
+          blockedState  <- smallDelay *> rw.getState
           _             <- update(i1 + 1)
           releaseState1 <- rw.getState
           (i2, release) <- f.join
@@ -114,9 +115,9 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           rw             <- rwOf(1)
           initialState   <- rw.getState
           readers        <- rw.read.start.replicateA(3)
-          writer1        <- IO.sleep(10.millis) *> rw.write.start
-          reader4        <- IO.sleep(10.millis) *> rw.read.start
-          blockedState   <- IO.sleep(10.millis) *> rw.getState
+          writer1        <- smallDelay *> rw.write.start
+          reader4        <- smallDelay *> rw.read.start
+          blockedState   <- smallDelay *> rw.getState
           (xs, releases) <- readers.sequence.join.map(_.unzip)
           _              <- releases.parSequence
           writerState    <- rw.getState
@@ -171,7 +172,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           initialState  <- rw.getState
           (i1, update1) <- rw.write
           f             <- rw.write.start // blocked
-          blockedState  <- IO.sleep(10.millis) *> rw.getState
+          blockedState  <- smallDelay *> rw.getState
           _             <- update1(i1 + 1)
           releaseState1 <- rw.getState
           (i2, update2) <- f.join
@@ -197,7 +198,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           initialState  <- rw.getState
           (i1, release) <- rw.read
           f             <- rw.write.start // blocked
-          blockedState  <- IO.sleep(10.millis) *> rw.getState
+          blockedState  <- smallDelay *> rw.getState
           _             <- release
           releaseState1 <- rw.getState
           (i2, update2) <- f.join
@@ -228,7 +229,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           (_, release1)  <- rw.read
           f1             <- rw.read.start
           f2             <- rw.read.start
-          blockedState   <- IO.sleep(10.millis) *> rw.getState
+          blockedState   <- smallDelay *> rw.getState
           _              <- f1.cancel
           cancelState    <- rw.getState
           _              <- release1
@@ -261,7 +262,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           rw           <- rwOf(1)
           initialState <- rw.getState
           fs           <- rw.read.timeout(50.milli).attempt.start.replicateA(10)
-          blockedState <- IO.sleep(10.millis) *> rw.getState
+          blockedState <- smallDelay *> rw.getState
           _            <- fs.sequence.join
           cancelState  <- rw.getState
         } yield (initialState, blockedState, cancelState)
@@ -281,14 +282,14 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
 
       "cancel on write happened" in {
         val io = for {
-          rw <- rwOf(1)
-          initialState   <- rw.getState
-          _  <- rw.read
-          f  <- rw.write.start
-          _  <- rw.write.start
-          blockedState <- IO.sleep(10.millis) *> rw.getState
-          _ <- f.cancel
-          cancelState   <- rw.getState
+          rw           <- rwOf(1)
+          initialState <- rw.getState
+          _            <- rw.read
+          f            <- rw.write.start
+          _            <- rw.write.start
+          blockedState <- smallDelay *> rw.getState
+          _            <- f.cancel
+          cancelState  <- rw.getState
         } yield (initialState, blockedState, cancelState)
         io.unsafeToFuture.map { case (initial, blocked, cancel) =>
           initial shouldBe State(Queue(), 0, writeLocked = false, Set.empty[Deferred[IO, (Int, IO[Unit])]], Set.empty[Deferred[IO, (Int, Int => IO[Unit])]], 1)
@@ -310,7 +311,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           rw           <- rwOf(1)
           initialState <- rw.getState
           fs           <- rw.write.timeout(50.milli).attempt.start.replicateA(10)
-          blockedState <- IO.sleep(10.millis) *> rw.getState
+          blockedState <- smallDelay *> rw.getState
           _            <- fs.sequence.join
           cancelState  <- rw.getState
         } yield (initialState, blockedState, cancelState)
