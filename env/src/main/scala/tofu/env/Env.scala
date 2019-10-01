@@ -70,7 +70,7 @@ sealed trait Env[E, +A] {
     mapTask3(eb, ec)(Task.parMap3(_, _, _)(f))
 
   def zip[B](t: Env[E, B]): Env[E, (A, B)]                 = map2(t)((a, b) => (a, b))
-  def >>[B](t: Env[E, B]): Env[E, B]                       = map2(t)((_, x) => x)
+  def >>[B](t: => Env[E, B]): Env[E, B]                    = flatMap(_ => t)
   def <<[B](t: Env[E, B]): Env[E, B]                       = t.map2(this)((x, _) => x)
   def flatten[B](implicit _ev: A <:< Env[E, B]): Env[E, B] = flatMap(x => x)
   def flattenT[B](implicit _ev: A <:< Task[B]): Env[E, B]  = mapTask(_.flatten)
