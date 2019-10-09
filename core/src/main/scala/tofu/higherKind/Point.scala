@@ -1,5 +1,5 @@
 package tofu.higherKind
-import cats.{Contravariant, ContravariantMonoidal, MonoidK}
+import cats.{ContravariantMonoidal, MonoidK}
 
 /**
   * equivalent of UnitK ~> F

@@ -18,7 +18,7 @@ object Pre extends PreInstances {
 
   def apply[A] = new PreApplier[A](true)
 
-  class PreApplier[A](private val __ : true) extends AnyVal {
+  class PreApplier[A](private val __ : Boolean) extends AnyVal {
     def apply[F[_]](fu: F[Unit]): T[F, A] = fu.asInstanceOf[T[F, A]]
   }
 

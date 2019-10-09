@@ -25,7 +25,7 @@ val macros = Keys.libraryDependencies ++= {
 }
 
 lazy val defaultSettings = List(
-  scalaVersion := "2.13.0",
+  scalaVersion := "2.13.1",
   setMinorVersion,
   setModuleName,
   experimental,
