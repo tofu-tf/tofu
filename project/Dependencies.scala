@@ -36,6 +36,8 @@ object Dependencies {
     val magnolia = "0.11.0"
 
     val typesafeConfig = "1.3.4"
+
+    val silencer = "1.4.4"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"           % Version.cats
