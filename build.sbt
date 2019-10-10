@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.4.0"
+val libVersion = "0.5.0"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -30,16 +30,14 @@ lazy val defaultSettings = List(
   setModuleName,
   experimental,
   defaultScalacOptions,
-  libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
-  libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.0"),
+  libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.11.0" cross CrossVersion.patch),
+  libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
   libraryDependencies += scalatest,
-  libraryDependencies ++= {
-    val silencerVersion = "1.4.3"
+  libraryDependencies ++=
     List(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+      compilerPlugin("com.github.ghik" % "silencer-plugin" % Version.silencer cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % Version.silencer % Provided cross CrossVersion.full
     )
-  }
 ) ++ publishSettings ++ scala213Options
 
 moduleName := "tofu"
@@ -252,7 +250,7 @@ lazy val publishSettings = List(
   publishVersion := libVersion,
   publishMavenStyle := true,
   description := "Opinionated Set of tool for functional programming in scala",
-  crossScalaVersions := List("2.12.9", "2.13.0"),
+  crossScalaVersions := List("2.12.10", "2.13.1"),
   publishTo := {
     if (isSnapshot.value) {
       Some(Opts.resolver.sonatypeSnapshots)
