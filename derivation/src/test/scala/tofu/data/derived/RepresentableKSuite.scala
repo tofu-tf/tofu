@@ -1,18 +1,18 @@
 package tofu.data.derived
 
-import cats.data.{Tuple2K, WriterT}
+import cats.data.Tuple2K
 import tofu.data.derived.RepresentableKSuite.Foo
-import tofu.higherKind.{Embed, RepresentableK}
 import cats.syntax.functor._
 import cats.syntax.either._
 import cats.instances.either._
 import cats.{Id, ~>}
 import org.scalatest.{FlatSpec, Matchers}
 import tofu.data.Embedded
-import tofu.syntax.functionK
 import tofu.syntax.functionK.funK
 import cats.tagless.syntax.functorK._
 import cats.tagless.syntax.semigroupalK._
+import org.manatki.derevo.derive
+import tofu.higherKind.derived.representableK
 import tofu.syntax.embed._
 
 import scala.util.Try
@@ -61,8 +61,6 @@ class RepresentableKSuite extends FlatSpec with Matchers {
     val rightFoo = checkingFoo.asRight[String].embed
     val leftFoo = "failed".asLeft[Foo[Either[String, *]]].embed
 
-    def tuple[A](e: Either[String, A], a: A) = Tuple2K[Either[String, *], Id, A](e, a)
-
     rightFoo.foo(2, "2.3") should ===(Right(4.6))
     rightFoo.foo(2, "fail") should ===(Left("could not parse fail as double"))
 
@@ -79,10 +77,9 @@ class RepresentableKSuite extends FlatSpec with Matchers {
 }
 
 object RepresentableKSuite {
+  @derive(representableK)
   trait Foo[F[_]] {
     def foo(x: Int, s: String): F[Double]
     def bar(a: List[Int]): F[Unit]
   }
-
-  implicit val repk: RepresentableK[Foo] = genRepresentableK[Foo]
 }

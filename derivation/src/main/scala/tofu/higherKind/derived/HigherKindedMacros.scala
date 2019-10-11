@@ -1,4 +1,7 @@
-package tofu.data.derived
+package tofu.higherKind.derived
+
+import cats.tagless.InvariantK
+import org.manatki.derevo.{Derevo, DerivationK2, delegating}
 import tofu.higherKind.RepresentableK
 
 import scala.reflect.macros.blackbox
@@ -31,4 +34,10 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
   def representableK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
     instantiate[RepresentableK[Alg]](tag)(tabulate)
+}
+
+
+@delegating("tofu.higherKind.derived.genRepresentableK")
+object representableK extends DerivationK2[RepresentableK]{
+  def instance[T[_[_]]]: RepresentableK[T] = macro Derevo.delegateK2[RepresentableK, T]
 }
