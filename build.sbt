@@ -128,7 +128,7 @@ lazy val config = project dependsOn (core, data, opticsCore, concurrent) setting
 
 lazy val coreModules = List(core, memo, env, concurrent, opticsCore, data)
 
-lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, config, dataDerivation)
+lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, config, derivation)
 
 lazy val opticsCore = project
   .in(file("optics/core"))
@@ -168,14 +168,14 @@ lazy val data =
     .settings(defaultSettings, libraryDependencies ++= List(catsFree))
     .dependsOn(core, opticsCore)
 
-lazy val dataDerivation =
+lazy val derivation =
   project
-    .in(file("data-derivation"))
     .settings(
       defaultSettings,
-      libraryDependencies ++= List(magnolia, derevo),
+      libraryDependencies ++= List(magnolia, derevo, catsTagless),
       macros,
-      publishName := "data-derivation"
+      publishName := "derivation",
+      scalacOptions += "-Ymacro-debug-lite"
     )
     .dependsOn(data)
 
