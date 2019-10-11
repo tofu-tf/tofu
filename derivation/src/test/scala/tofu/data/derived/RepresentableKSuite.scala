@@ -32,17 +32,17 @@ class RepresentableKSuite extends FlatSpec with Matchers {
 
   "representableK" should "generate nice mapK" in {
     val eitherToList: Either[String, *] ~> Embedded[(String, +*), List, *] = funK {
-      case Left(err)  => Embedded((err, Nil))
-      case Right(res) => Embedded(("", List(res)))
+      case Left(err)  => Embedded(((err, Nil)))
+      case Right(res) => Embedded((("", List(res))))
     }
 
     val mappedFoo = checkingFoo.mapK(eitherToList)
 
-    mappedFoo.foo(2, "2.3") should ===(Embedded("", List(4.6)))
-    mappedFoo.foo(2, "fail") should ===(Embedded("could not parse fail as double", List()))
+    mappedFoo.foo(2, "2.3") should ===(Embedded(("", List(4.6))))
+    mappedFoo.foo(2, "fail") should ===(Embedded(("could not parse fail as double", List())))
 
-    mappedFoo.bar(List(4, 5, 6)) should ===(Embedded("", List(())))
-    mappedFoo.bar(List()) should ===(Embedded("must contain at least one element", List()))
+    mappedFoo.bar(List(4, 5, 6)) should ===(Embedded(("", List(()))))
+    mappedFoo.bar(List()) should ===(Embedded(("must contain at least one element", List())))
   }
 
   "representableK" should "generate nice productK" in {

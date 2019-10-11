@@ -1,5 +1,4 @@
 package tofu.data
-import cats.tagless.ApplyK
 import tofu.higherKind.RepresentableK
 
 package object derived {

@@ -175,7 +175,6 @@ lazy val derivation =
       libraryDependencies ++= List(magnolia, derevo, catsTagless),
       macros,
       publishName := "derivation",
-      scalacOptions += "-Ymacro-debug-lite"
     )
     .dependsOn(data)
 
