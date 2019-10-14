@@ -13,4 +13,5 @@ private [tofu] final case class CachedMatcher[-A, +B](f: A => Option[B]) extends
 
   def isDefinedAt(x: A): Boolean = calc(x).isDefined
   def apply(x: A): B             = calc(x).get
+
 }
