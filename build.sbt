@@ -184,15 +184,9 @@ lazy val dataDerivation =
 lazy val zioCore =
   project.in(file("zio/core")).settings(defaultSettings, libraryDependencies += zio).dependsOn(core)
 
-lazy val zioConcurrent =
-  project.in(file("zio/concurrent")).settings(defaultSettings, libraryDependencies += zio).dependsOn(concurrent)
-
-lazy val zioConfig =
-  project.in(file("zio/config")).settings(defaultSettings, libraryDependencies += zio).dependsOn(config)
-
 lazy val zioInterop = project.in(file("zio")).settings(defaultSettings)
-  .dependsOn(zioCore, zioConfig, zioConcurrent)
-  .aggregate(zioCore, zioConfig, zioConcurrent)
+  .dependsOn(zioCore)
+  .aggregate(zioCore)
 
 lazy val tofu = project
   .in(file("."))
