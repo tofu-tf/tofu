@@ -17,5 +17,6 @@ object functionK {
 
     def apply[A](fa: F[A]): G[A] = applyArbitrary(fa.asInstanceOf[F[Arbitrary]]).asInstanceOf[G[A]]
   }
+
   type Arbitrary
 }

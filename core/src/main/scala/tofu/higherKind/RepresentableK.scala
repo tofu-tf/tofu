@@ -13,12 +13,11 @@ object RepK {
   def apply[U[_[_]]] = new Applied[U](true)
 
   class Applied[T[_[_]]](private val __ : Boolean) extends AnyVal {
-    def apply[A](maker: MakeRepr[T, A]): RepK[T, A] = maker
+    type Arb[_]
+    def apply[A](maker: MakeRepr[T, A, Arb]): RepK[T, A] = maker
   }
 
-  abstract class MakeRepr[T[_[_]], A] extends RepK[T, A] {
-    type Arb[_]
-
+  abstract class MakeRepr[T[_[_]], A, Arb[_]] extends RepK[T, A] {
     def applyArbitrary(fk: T[Arb]): Arb[A]
 
     def apply[F[_]](fk: T[F]): F[A] = applyArbitrary(fk.asInstanceOf[T[Arb]]).asInstanceOf[F[A]]
@@ -41,7 +40,7 @@ object RepK {
   override def pureK[F[_]](p: Point[F]): U[F] = tabulate(funK(_ => p.point))
 }
 
-object RepresentableK {
+object RepresentableK{
 
   /** simply for reference
     * continuation form of RepK makes higher order index trivial */
