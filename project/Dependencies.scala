@@ -37,7 +37,9 @@ object Dependencies {
 
     val typesafeConfig = "1.3.4"
 
-    val zio = "1.0.0-RC12"
+    val silencer = "1.4.4"
+
+    val zio = "1.0.0-RC14"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"           % Version.cats

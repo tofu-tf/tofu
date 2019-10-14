@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.4.0"
+val libVersion = "0.5.0"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -25,21 +25,19 @@ val macros = Keys.libraryDependencies ++= {
 }
 
 lazy val defaultSettings = List(
-  scalaVersion := "2.13.0",
+  scalaVersion := "2.13.1",
   setMinorVersion,
   setModuleName,
   experimental,
   defaultScalacOptions,
-  libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
-  libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.0"),
+  libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.11.0" cross CrossVersion.patch),
+  libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
   libraryDependencies += scalatest,
-  libraryDependencies ++= {
-    val silencerVersion = "1.4.3"
+  libraryDependencies ++=
     List(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+      compilerPlugin("com.github.ghik" % "silencer-plugin" % Version.silencer cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % Version.silencer % Provided cross CrossVersion.full
     )
-  }
 ) ++ publishSettings ++ scala213Options
 
 moduleName := "tofu"
@@ -130,7 +128,7 @@ lazy val config = project dependsOn (core, data, opticsCore, concurrent) setting
 
 lazy val coreModules = List(core, memo, env, concurrent, opticsCore, data)
 
-lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, config, dataDerivation, zioInterop)
+lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop)
 
 lazy val opticsCore = project
   .in(file("optics/core"))
@@ -170,14 +168,13 @@ lazy val data =
     .settings(defaultSettings, libraryDependencies ++= List(catsFree))
     .dependsOn(core, opticsCore)
 
-lazy val dataDerivation =
+lazy val derivation =
   project
-    .in(file("data-derivation"))
     .settings(
       defaultSettings,
-      libraryDependencies ++= List(magnolia, derevo),
+      libraryDependencies ++= List(magnolia, derevo, catsTagless),
       macros,
-      publishName := "data-derivation"
+      publishName := "derivation",
     )
     .dependsOn(data)
 
@@ -194,6 +191,7 @@ lazy val tofu = project
   .aggregate((coreModules ++ commonModules).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
+libraryDependencies += scalatest
 libraryDependencies += scalatest
 
 lazy val scala213Options = List(
@@ -259,7 +257,7 @@ lazy val publishSettings = List(
   publishVersion := libVersion,
   publishMavenStyle := true,
   description := "Opinionated Set of tool for functional programming in scala",
-  crossScalaVersions := List("2.12.9", "2.13.0"),
+  crossScalaVersions := List("2.12.10", "2.13.1"),
   publishTo := {
     if (isSnapshot.value) {
       Some(Opts.resolver.sonatypeSnapshots)
