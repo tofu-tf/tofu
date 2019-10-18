@@ -5,7 +5,7 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val circe = "0.12.0-RC4"
+    val circe = "0.12.2"
 
     val tethys = "0.10.0"
 
