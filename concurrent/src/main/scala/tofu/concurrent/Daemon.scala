@@ -3,68 +3,77 @@ package concurrent
 
 import cats.data.StateT
 import cats.effect._
-import cats.effect.concurrent.MVar
+import cats.effect.concurrent.{MVar, TryableDeferred}
 import cats.effect.syntax.bracket._
 import cats.syntax.applicativeError._
-import cats.tagless.FunctorK
-import cats.{Apply, FlatMap, Monad, ~>}
-import simulacrum.typeclass
+import cats.tagless.autoApplyK
+import cats.{Apply, FlatMap, Monad}
 import tofu.syntax.monadic._
 import tofu.syntax.start._
 
-@typeclass
-trait Daemonic[F[_]] {
-  def daemonize(process: F[Unit]): F[Daemon[F]]
+trait Daemonic[F[_], E] {
+  def daemonize[A](process: F[A]): F[Daemon[F, E, A]]
 }
 
 object Daemonic {
-  implicit def instance[F[_]: Start: Deferreds: BracketThrow]: Daemonic[F] =
-    process =>
-      for {
-        exit  <- MakeDeferred[F, F, Daemon.Exit]
-        fiber <- process.guaranteeCase(exit.complete).start
-      } yield Daemon.Impl(fiber, exit.get)
+  def apply[F[_], E](implicit D: Daemonic[F, E]): Daemonic[F, E] = D
+
+  implicit def instance[F[_]: Start: TryableDeferreds: Bracket[*[_], E], E]: Daemonic[F, E] =
+    new Daemonic[F, E] {
+      override def daemonize[A](process: F[A]): F[Daemon[F, E, A]] =
+        for {
+          exit  <- MakeDeferred.tryable[F, Daemon.Exit[E]]
+          fiber <- process.guaranteeCase(exit.complete).start
+        } yield new Daemon.Impl(fiber, exit)
+    }
+
 }
 
-trait Daemon[F[_]] {
-  def process: Fiber[F, Unit]
-  def exit: F[Daemon.Exit]
+@autoApplyK
+trait Daemon[F[_], E, A] extends Fiber[F, A] {
+  def join: F[A]
+  def cancel: F[Unit]
+  def poll: F[Option[Daemon.Exit[E]]]
+  def exit: F[Daemon.Exit[E]]
+
+  final def process: Fiber[F, A] = this
 }
 
 /** Probably Infinite processes */
 object Daemon {
-  type Exit = ExitCase[Throwable]
+  type Exit[E] = ExitCase[E]
 
-  final case class Impl[F[_]](process: Fiber[F, Unit], exit: F[Daemon.Exit]) extends Daemon[F]
+  private[tofu] final class Impl[F[_], E, A](process: Fiber[F, A], end: TryableDeferred[F, Daemon.Exit[E]])
+      extends Daemon[F, E, A] {
 
-  implicit class DaemonOps[F[_]](val self: Daemon[F]) extends AnyVal {
-    def bindTo(daemon: Daemon[F])(implicit FS: Start[F], F: Apply[F]): F[Unit] = (daemon.exit *> kill).start.void
-
-    def kill = self.process.cancel
+    override def join: F[A]               = process.join
+    override def cancel: F[Unit]          = process.cancel
+    override def poll: F[Option[Exit[E]]] = end.tryGet
+    override def exit: F[Exit[E]]         = end.get
   }
 
-  implicit val functorKInstance: FunctorK[Daemon] = new FunctorK[Daemon] {
-    def mapK[F[_], G[_]](af: Daemon[F])(fk: F ~> G): Daemon[G] = new Daemon[G] {
-      val process: Fiber[G, Unit] = af.process.mapK(fk)
-      val exit: G[Exit]           = fk(af.exit)
-    }
+  implicit class DaemonOps[F[_], E, A](val self: Daemon[F, E, A]) extends AnyVal {
+    def bindTo[B](daemon: Daemon[F, E, B])(implicit FS: Start[F], F: Apply[F]): F[Unit] =
+      (daemon.exit *> self.cancel).start.void
+
+    def kill = self.cancel
   }
 
-  def apply[F[_]](process: F[Unit])(implicit D: Daemonic[F]): F[Daemon[F]] = D.daemonize(process)
+  def apply[F[_], E, A](process: F[A])(implicit D: Daemonic[F, E]): F[Daemon[F, E, A]] = D.daemonize(process)
 
-  def repeat[F[_]: Monad: Daemonic](step: F[Unit]): F[Daemon[F]] = apply(step.foreverM)
+  def repeat[F[_]: Monad: Daemonic[*[_], E], E, A, B](step: F[A]): F[Daemon[F, E, B]] = apply(step.foreverM)
 
-  def iterate[F[_]: Monad: Daemonic, A](init: A)(step: A => F[A]): F[Daemon[F]] =
-    apply(init.iterateWhileM(step)(_ => true).void)
+  def iterate[F[_]: Monad: Daemonic[*[_], E], E, A, B](init: A)(step: A => F[A]): F[Daemon[F, E, B]] =
+    apply(init.iterateForeverM(step))
 
-  def state[F[_]: Monad: Daemonic, S](init: S)(state: StateT[F, S, Unit]): F[Daemon[F]] =
+  def state[F[_]: Monad: Daemonic[*[_], E], E, S, A, B](init: S)(state: StateT[F, S, A]): F[Daemon[F, E, B]] =
     iterate(init)(state.runS)
 
-  def resource[F[_]: Monad: Daemonic, A](daemon: F[Daemon[F]]): Resource[F, Daemon[F]] =
-    Resource.make(daemon)(_.process.cancel)
+  def resource[F[_]: Monad: Daemonic[*[_], E], E, A](daemon: F[Daemon[F, E, A]]): Resource[F, Daemon[F, E, A]] =
+    Resource.make(daemon)(_.cancel)
 }
 
-final class Actor[F[_], A] private (queue: MVar[F, A], val daemon: Daemon[F]) {
+final class Actor[F[_], E, A] private (queue: MVar[F, A], val daemon: Daemon[F, E, Void]) {
 
   /** fire message waiting for receive */
   def !!(message: A): F[Unit] = queue.put(message)
@@ -82,7 +91,7 @@ final class Actor[F[_], A] private (queue: MVar[F, A], val daemon: Daemon[F]) {
 
   def onStop(action: F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] = watch(_ => action)
 
-  def watch(action: Daemon.Exit => F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] =
+  def watch(action: Daemon.Exit[E] => F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] =
     (daemon.exit >>= action).start
 
   def send(message: A): F[Unit] = this !! message
@@ -93,24 +102,28 @@ final class Actor[F[_], A] private (queue: MVar[F, A], val daemon: Daemon[F]) {
 object Actor {
   final case class Behavior[F[_], A](receive: A => F[Option[Behavior[F, A]]])
 
-  def spawn[F[_]: MVars: Monad: Daemonic, A](behavior: Behavior[F, A]): F[Actor[F, A]] =
+  def spawn[F[_]: MVars: Monad: Daemonic[*[_], E], E, A](behavior: Behavior[F, A]): F[Actor[F, E, A]] =
     for {
       mvar <- MakeMVar[F, F].empty[A]
-      daemon <- Daemon.iterate(behavior)(b =>
-                 for {
-                   a <- mvar.take
-                   r <- behavior.receive(a)
-                 } yield r.getOrElse(b))
+      daemon: Daemon[F, E, Void] <- Daemon.iterate(behavior)(
+                                     b =>
+                                       for {
+                                         a <- mvar.take
+                                         r <- behavior.receive(a)
+                                       } yield r.getOrElse(b)
+                                   )
     } yield new Actor(mvar, daemon)
 
-  def apply[F[_]: MVars: Monad: Daemonic, A](receive: A => F[Unit]): F[Actor[F, A]] =
+  def apply[F[_]: MVars: Monad: Daemonic[*[_], E], E, A](receive: A => F[Unit]): F[Actor[F, E, A]] =
     for {
-      mvar   <- MakeMVar[F, F].empty[A]
-      daemon <- Daemon.repeat(mvar.take >>= receive)
+      mvar                       <- MakeMVar[F, F].empty[A]
+      daemon: Daemon[F, E, Void] <- Daemon.repeat(mvar.take >>= receive)
     } yield new Actor(mvar, daemon)
 
-  def sync[F[_]: Concurrent, A](receive: A => Unit): F[Actor[F, A]] = apply(a => receive(a).pure[F])
+  def sync[F[_]: Concurrent, A](receive: A => Unit): F[Actor[F, Throwable, A]] = apply(a => receive(a).pure[F])
 
-  def syncSupervise[F[_]: Concurrent, A](receive: A => Unit)(strategy: Throwable => F[Unit]): F[Actor[F, A]] =
+  def syncSupervise[F[_]: Concurrent, A](
+      receive: A => Unit
+  )(strategy: Throwable => F[Unit]): F[Actor[F, Throwable, A]] =
     apply(a => Sync[F].delay(receive(a)).handleErrorWith(strategy))
 }
