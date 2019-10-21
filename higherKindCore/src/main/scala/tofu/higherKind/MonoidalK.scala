@@ -17,7 +17,7 @@ import simulacrum.typeclass
     zipWith2K(af, ag)(Function2K.untupled(f))
 
   override def mapK[F[_], G[_]](af: U[F])(fk: F ~> G): U[G] =
-    zipWith2K[F, UnitK, G](af, pureK[UnitK](Point.unit))(Function2K((f, _) => fk(f)))
+    zipWith2K[F, UnitK, G](af, unitK)(Function2K((f, _) => fk(f)))
 
   override def productK[F[_], G[_]](af: U[F], ag: U[G]): U[Tuple2K[F, G, *]] =
     zipWith2K(af, ag)(Function2K((f, g) => Tuple2K(f, g)))
