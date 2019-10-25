@@ -8,7 +8,7 @@ import cats.syntax.applicative._
 import cats.syntax.apply._
 import cats.syntax.parallel._
 import cats.syntax.traverse._
-import org.scalatest.{AsyncWordSpec, Inside, Matchers}
+import org.scalatest.{AsyncWordSpec, Ignore, Inside, Matchers}
 import tofu.concurrent.ReadWrite._
 import tofu.concurrent.ReadWrite.ConcurrentReadWrite
 
@@ -17,6 +17,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.Random
 
+@Ignore
 class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
 
   implicit override def executionContext: ExecutionContext = ExecutionContext.Implicits.global

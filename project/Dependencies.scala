@@ -5,7 +5,7 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val circe = "0.12.0-RC4"
+    val circe = "0.12.2"
 
     val tethys = "0.10.0"
 
@@ -36,6 +36,10 @@ object Dependencies {
     val magnolia = "0.11.0"
 
     val typesafeConfig = "1.3.4"
+
+    val silencer = "1.4.4"
+
+    val zio = "1.0.0-RC14"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"           % Version.cats
@@ -59,6 +63,7 @@ object Dependencies {
   val tethysJackson   = "com.tethys-json"            %% "tethys-jackson"      % Version.tethys
   val catsTagless     = "org.typelevel"              %% "cats-tagless-macros" % Version.catsTagless
   val typesafeConfig  = "com.typesafe"               % "config"               % Version.typesafeConfig
+  val zio             = "dev.zio"                    %% "zio"                 % Version.zio
   val scalatest       = "org.scalatest"              %% "scalatest"           % Version.scalatest % Test
 
 }

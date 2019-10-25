@@ -1,6 +1,6 @@
 package tofu.data
 
-object Embed{
+object Embedded{
   trait EmbedTag extends Any
 
   type Base = Any {type EmbedOpaque}

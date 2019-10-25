@@ -69,6 +69,8 @@ sealed trait Env[E, +A] {
   def mapAsync[B](f: A => Task[B]): Env[E, B] = mapTask(_.flatMap(f))
   def flatMap[B](f: A => Env[E, B]): Env[E, B] =
     Env(ctx => run(ctx).flatMap(x => f(x).run(ctx)))
+  def flatTap[B](f: A => Env[E, B]): Env[E, A] =
+    flatMap(x => f(x).map(_ => x))
   def map2[B, C](eb: Env[E, B])(f: (A, B) => C): Env[E, C] =
     mapTask2(eb)(Task.map2(_, _)(f))
   def map3[B, C, D](eb: Env[E, B], ec: Env[E, C])(f: (A, B, C) => D) =
@@ -80,8 +82,13 @@ sealed trait Env[E, +A] {
     mapTask3(eb, ec)(Task.parMap3(_, _, _)(f))
 
   def zip[B](t: Env[E, B]): Env[E, (A, B)]                 = map2(t)((a, b) => (a, b))
-  def >>[B](t: Env[E, B]): Env[E, B]                       = map2(t)((_, x) => x)
-  def <<[B](t: Env[E, B]): Env[E, B]                       = t.map2(this)((x, _) => x)
+  def >>[B](t: => Env[E, B]): Env[E, B]                    = flatMap(_ => t)
+  def <<[B](t: => Env[E, B]): Env[E, A]                    = flatTap(_ => t)
+  def *>[B](t: Env[E, B]): Env[E, B]                       = map2(t)((_, x) => x)
+  def <*[B](t: Env[E, B]): Env[E, A]                       = map2(t)((x, _) => x)
+  def &>[B](t: Env[E, B]): Env[E, B]                       = parMap2(t)((_, x) => x)
+  def <&[B](t: Env[E, B]): Env[E, A]                       = parMap2(t)((x, _) => x)
+
   def flatten[B](implicit _ev: A <:< Env[E, B]): Env[E, B] = flatMap(x => x)
   def flattenT[B](implicit _ev: A <:< Task[B]): Env[E, B]  = mapTask(_.flatten)
   def void: Env[E, Unit]                                   = mapTask(_.map(_ => ()))
