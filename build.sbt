@@ -181,6 +181,15 @@ lazy val dataDerivation =
     )
     .dependsOn(data)
 
+lazy val examples =
+  project
+    .in(file("examples"))
+    .settings(
+      defaultSettings,
+      noPublishSettings
+    )
+  .dependsOn((coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference]): _*)
+
 lazy val tofu = project
   .in(file("."))
   .settings(defaultSettings)
@@ -278,4 +287,8 @@ lazy val publishSettings = List(
     Developer("danslapman", "Daniil Smirnov", "danslapman@gmail.com", url("https://github.com/danslapman")),
     Developer("Phill101", "Nikita Filimonov", "holypics6@gmail.com", url("https://github.com/Phill101"))
   )
+)
+
+lazy val noPublishSettings = Seq(
+  skip in publish := true
 )
