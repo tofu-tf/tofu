@@ -1,4 +1,5 @@
-package tofu.sim
+package tofu.sim.mutable
+
 import cats.data.OptionT
 import cats.free.Free
 

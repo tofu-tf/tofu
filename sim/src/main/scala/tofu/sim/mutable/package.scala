@@ -1,8 +1,9 @@
-package tofu
+package tofu.sim
+
 import cats.data.{EitherT, OptionT}
 import cats.free.Free
 
-package object sim {
+package object mutable {
   type SimTF[A] = Journal => A
   type SimT[A]  = OptionT[Free[SimTF, *], A]
 

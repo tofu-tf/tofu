@@ -1,5 +1,7 @@
-package tofu.sim
-import cats.Functor
+package tofu.sim.mutable
+
+import cats.Monad
+import tofu.sim._
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable
@@ -38,7 +40,7 @@ class Runtime private[tofu] (chooser: Int => Int) {
     active += id -> proc(id)
   }
 
-  def step(): Result =
+  def step(): StepStatus =
     if (active.nonEmpty) activeStep()
     else if (sleeping.nonEmpty) moveSleep()
     else if (waiting.nonEmpty) Deadlock
@@ -46,7 +48,7 @@ class Runtime private[tofu] (chooser: Int => Int) {
 
   private def moveSleep(): Ready.type = Ready
 
-  private def activeStep(): Result = {
+  private def activeStep(): StepStatus = {
     val (idx, proc) = active.drop(chooser(active.size)).head
     proc.resume match {
       case Right(()) =>
@@ -57,7 +59,7 @@ class Runtime private[tofu] (chooser: Int => Int) {
         Ready
       case Left(Sleep(next, dur)) =>
         active -= idx
-        sleeping += (time + dur) -> (idx, next)
+        sleeping += (time + dur) -> (idx -> next)
         Ready
       case Left(Lock) =>
         active -= idx
@@ -72,6 +74,41 @@ object Runtime {
   def apply(random: Random): Runtime      = apply(random.nextInt(_: Int))
   def apply(seed: Long): Runtime          = apply(new Random(seed))
 
+
+//  def run[E, A](sim: Sim[E, A]): Result[E, A] = {
+//    val tvar = new SimTVar[E, A]()
+//  }
+
+  private val simAtomicAny: SimAtomic[Any] = new SimAtomic[Any]
+
+  implicit def simInstance[E]: SimAtomic[E] = simAtomicAny.asInstanceOf[SimAtomic[E]]
+
 }
 
+object SimTransact extends Transact[SimT, SimTVar] {
+  def readTVar[A](tvar: SimTVar[A]): SimT[A] = SimT.readTVar(tvar)
 
+  def writeTVar[A](tvar: SimTVar[A], value: A): SimT[Unit] = SimT.writeTVar(tvar)(value)
+
+  def fail[A]: SimT[A] = SimT.fail
+}
+
+class SimAtomic[E] private[sim] extends Atomic[Sim[E, *]] with Simulated[Sim[E, *]] {
+  type T[A]    = SimT[A]
+  type TVar[A] = SimTVar[A]
+  type FiberId = Long
+
+  implicit def transact: Transact[SimT, SimTVar] = SimTransact
+
+  def tmonad: Monad[SimT] = implicitly
+
+  def atomically[A](v: SimT[A]): Sim[E, A] = Sim.atomically(v)
+
+  def newTVal[A](a: A): Sim[E, SimTVar[A]] = Sim.newTVar(a)
+
+  def panic[A](s: String): Sim[E, A] = Sim.panic(s)
+
+  def cancel(threadId: Long): Sim[E, Unit] = Sim.cancel(threadId)
+
+  def fiberId: Sim[E, Long] = Sim.getFiberId
+}

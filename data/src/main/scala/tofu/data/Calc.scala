@@ -1,14 +1,16 @@
 package tofu.data
 
+import cats.data.IndexedState
 import cats.effect.ExitCase
 import cats.{MonadError, Monoid, StackSafeMonad}
 import tofu.optics.PContains
 import tofu.optics.PContains
 
 sealed trait Calc[-R, -S1, +S2, +E, +A] {
-  final def run(r: R, init: S1): (S2, Either[E, A])    = Calc.run(this, r, init)
-  final def runUnit(init: S1)(implicit ev: Unit <:< R) = run((), init)
-  def narrowRead[R1 <: R]: Calc[R1, S1, S2, E, A]      = this
+  final def run(r: R, init: S1): (S2, Either[E, A]) = Calc.run(this, r, init)
+
+  final def runUnit(init: S1)(implicit ev: Unit <:< R): (S2, Either[E, A]) = run((), init)
+  def narrowRead[R1 <: R]: Calc[R1, S1, S2, E, A]                          = this
 }
 
 object Calc {
@@ -54,8 +56,10 @@ object Calc {
   }
 
   implicit class invariantOps[R, S1, S2, E, A](private val calc: Calc[R, S1, S2, E, A]) extends AnyVal {
-    def cont[R1 <: R, E2, S3, B](f: A => Calc[R1, S2, S3, E2, B],
-                                 h: E => Calc[R1, S2, S3, E2, B]): Calc[R1, S1, S3, E2, B]     = Cont(calc, f, h)
+    def cont[R1 <: R, E2, S3, B](
+        f: A => Calc[R1, S2, S3, E2, B],
+        h: E => Calc[R1, S2, S3, E2, B]
+    ): Calc[R1, S1, S3, E2, B]                                                                 = Cont(calc, f, h)
     def flatMap[R1 <: R, E1 >: E, B](f: A => Calc[R1, S2, S2, E1, B]): Calc[R1, S1, S2, E1, B] = cont(f, raise(_: E))
     def >>=[R1 <: R, E1 >: E, B](f: A => Calc[R1, S2, S2, E1, B])                              = flatMap(f)
     def >>[R1 <: R, E1 >: E, B](c: => Calc[R1, S2, S2, E1, B])                                 = flatMap(_ => c)
@@ -75,9 +79,14 @@ object Calc {
   }
 
   implicit class CalcSuccessfullOps[R, S1, S2, A](private val calc: Calc[R, S1, S2, Nothing, A]) extends AnyVal {
-    def flatMapS[R1 <: R, S3, B, E](f: A => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B] = calc.cont(f, identity)
-    def productRS[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]  = flatMapS(_ => r)
-    def *>>[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]        = productRS(r)
+    final def flatMapS[R1 <: R, S3, B, E](f: A => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B] =
+      calc.cont(f, identity)
+    final def productRS[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B] = flatMapS(_ => r)
+    final def *>>[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]       = productRS(r)
+    final def runSuccess(r: R, init: S1): (S2, A) = {
+      val (s2, res) = calc.run(r, init)
+      s2 -> res.merge
+    }
   }
 
   implicit class CalcUnsuccessfullOps[R, S1, S2, E](private val calc: Calc[R, S1, S2, E, Nothing]) extends AnyVal {
@@ -87,6 +96,12 @@ object Calc {
 
   implicit class CalcFixedStateOps[R, S, E, A](private val calc: Calc[R, S, S, E, A]) extends AnyVal {
     def when(b: Boolean): Calc[R, S, S, E, Any] = if (b) calc else Calc.unit
+  }
+
+  implicit class CalcSimpleStateOps[S1, S2, A](private val calc: Calc[Any, S1, S2, Nothing, A]) extends AnyVal {
+    final def runSuccessUnit(init: S1): (S2, A) = calc.runSuccess((), init)
+
+    def toState: IndexedState[S1, S2, A] = IndexedState(runSuccessUnit)
   }
 
   def run[R, S1, S2, E, A](calc: Calc[R, S1, S2, E, A], r: R, init: S1): (S2, Either[E, A]) =
@@ -121,8 +136,9 @@ object Calc {
     def handleErrorWith[A](fa: Calc[R, S, S, E, A])(f: E => Calc[R, S, S, E, A]): Calc[R, S, S, E, A] = fa.handleWith(f)
     def flatMap[A, B](fa: Calc[R, S, S, E, A])(f: A => Calc[R, S, S, E, B]): Calc[R, S, S, E, B]      = fa.flatMap(f)
     def pure[A](x: A): Calc[R, S, S, E, A]                                                            = Calc.pure(x)
-    def bracketCase[A, B](acquire: Calc[R, S, S, E, A])(use: A => Calc[R, S, S, E, B])(
-        release: (A, ExitCase[E]) => Calc[R, S, S, E, Unit]): Calc[R, S, S, E, B] =
+    def bracketCase[A, B](
+        acquire: Calc[R, S, S, E, A]
+    )(use: A => Calc[R, S, S, E, B])(release: (A, ExitCase[E]) => Calc[R, S, S, E, Unit]): Calc[R, S, S, E, B] =
       acquire.flatMap { a =>
         use(a).cont(
           b => release(a, ExitCase.Completed).as(b),
