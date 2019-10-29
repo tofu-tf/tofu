@@ -291,7 +291,3 @@ lazy val publishSettings = List(
     Developer("Phill101", "Nikita Filimonov", "holypics6@gmail.com", url("https://github.com/Phill101"))
   )
 )
-
-lazy val noPublishSettings = Seq(
-  skip in publish := true
-)
