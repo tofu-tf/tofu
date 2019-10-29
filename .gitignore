@@ -3,3 +3,6 @@
 tasks/
 .metals
 .bloop
+node_modules/
+yarn.lock
+website/build
