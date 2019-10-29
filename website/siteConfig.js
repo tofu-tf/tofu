@@ -14,7 +14,7 @@ const users = [
     caption: 'Tinkoff bank',
     // You will need to prepend the image path with your baseUrl
     // if it is not '/', like: '/test-site/img/image.jpg'.
-    image: '/img/tinkoff-bank-general-logo-1.png',
+    image: '/tofu/img/tinkoff-bank-general-logo-1.png',
     infoLink: 'tinkoff.ru',
     pinned: true,
   },
@@ -23,11 +23,9 @@ const users = [
 const siteConfig = {
   title: 'Tofu', // Title for your website.
   tagline: 'Functional programming toolbox',
-  url: 'https://your-docusaurus-test-site.com', // Your website URL
-  baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
-  //   url: 'https://facebook.github.io',
-  //   baseUrl: '/test-site/',
+  url: 'https://TinkoffCreditSystems.github.io',
+  baseUrl: '/tofu/',
 
   // Used for publishing and more
   projectName: 'tofu',
