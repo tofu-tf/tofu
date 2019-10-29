@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://TinkoffCreditSystems.github.io/tofu/blog</id>
+    <title>Tofu Blog</title>
+    <updated>2017-10-29T06:00:00Z</updated>
+    <generator>Feed for Node.js</generator>
+    <link rel="alternate" href="https://TinkoffCreditSystems.github.io/tofu/blog"/>
+    <subtitle>The best place to stay up-to-date with the latest Tofu news and events.</subtitle>
+    <logo>https://TinkoffCreditSystems.github.io/tofu/img/favicon.ico</logo>
+    <rights>Copyright © 2019 Tinkoff.ru</rights>
+    <entry>
+        <title type="html"><![CDATA[Started docs]]></title>
+        <id>https://TinkoffCreditSystems.github.io/tofu/blog/2017/10/29/hello-docs.html</id>
+        <link href="https://TinkoffCreditSystems.github.io/tofu/blog/2017/10/29/hello-docs.html">
+        </link>
+        <updated>2017-10-29T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>Starting from today we have docs in tofu.<br> Also checkout the new logo. Spent over 9000h in draw.io</p> ]]></summary>
+        <author>
+            <name>Oleg Nizhnik</name>
+            <uri>https://github.com/Odomontois</uri>
+        </author>
+    </entry>
+</feed>
