@@ -200,7 +200,6 @@ lazy val tofu = project
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
 libraryDependencies += scalatest
-libraryDependencies += scalatest
 
 lazy val scala213Options = List(
   scalacOptions ++= {
