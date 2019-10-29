@@ -181,9 +181,17 @@ lazy val derivation =
 lazy val zioCore =
   project.in(file("zio/core")).settings(defaultSettings, libraryDependencies += zio).dependsOn(core)
 
-lazy val zioInterop = project.in(file("zio")).settings(defaultSettings)
+lazy val zioInterop = project
+  .in(file("zio"))
+  .settings(defaultSettings)
   .dependsOn(zioCore)
   .aggregate(zioCore)
+
+lazy val docs = project // new documentation project
+  .in(file("tofu-docs"))
+  .settings(defaultSettings)
+  .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
+  .enablePlugins(MdocPlugin, DocusaurusPlugin)
 
 lazy val tofu = project
   .in(file("."))
