@@ -18,6 +18,8 @@ trait Race[F[_]] extends Fire[F] {
   def never[A]: F[A]
 }
 
+object Race extends StartInstances[Race]
+
 @typeclass
 trait Start[F[_]] extends Fire[F] with Race[F] {
   def start[A](fa: F[A]): F[Fiber[F, A]]
