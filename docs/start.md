@@ -7,6 +7,5 @@ title: Getting started
 
 Comprehensive set of functional programming goods
 
-```scala mdoc
-import tofu.syntax.monadic._
-```
+Tofu is a library aimed to cover real-world problems targeting tagless-final approach
+and functional programming in general

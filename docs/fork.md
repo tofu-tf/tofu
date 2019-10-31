@@ -1,12 +1,8 @@
 ---
-id: Typeclasses
-title: Mastering Tofu typeclasses
+id: fork
+title: Forking and Racing
 ---
 
-### Typeclasses
-Tofu exposes a handful of useful typeclasses, which can come in handy if you are a fan of Tagless Final approach 
-(for basic understanding you can take a look [here](https://scalac.io/tagless-final-pattern-for-scala-code/) and [there](https://typelevel.org/blog/2018/05/09/tagless-final-streaming.html)).  
-They allow more granular access to functionality, allowing you to see what exactly your code does.   
 
 
 ##### Fire
@@ -30,7 +26,9 @@ import cats.syntax.functor._
 import tofu.Race
 import tofu.syntax.race._
 
-// will result in two computations started in parallel, then the first one to return will be handled 
+// will result in two computations started in parallel, 
+// then the first one to return will be handled
+// the other will be canceled 
 def raceAndPickFirst[F[_]: Race: Functor, A, B](f1: F[A], f2: F[B]): F[String] = {
   val aOrB: F[Either[A, B]] = f1.race(f2)
   
@@ -50,7 +48,8 @@ import cats.syntax.flatMap._
 import tofu.Start
 import tofu.syntax.start._
 
-// will result in computation being started in background and then immediately canceled
+// will result in computation being started 
+// in background and then immediately canceled
 def startAndCancel[F[_]: Start: FlatMap, A](f: F[A]): F[Unit] = {
   val fiber: F[Fiber[F, A]] = f.start
   fiber.flatMap(_.cancel)

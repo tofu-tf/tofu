@@ -5,17 +5,26 @@
     "previous": "Previous",
     "tagline": "Functional programming toolbox",
     "docs": {
+      "env": {
+        "title": "Learning Env"
+      },
+      "fork": {
+        "title": "Forking and Racing"
+      },
       "start": {
         "title": "Getting started"
+      },
+      "typeclasses": {
+        "title": "Typeclasses"
       }
     },
     "links": {
-      "Docs": "Docs"
+      "Docs": "Docs",
+      "API": "API"
     },
     "categories": {
-      "Docusaurus": "Docusaurus",
-      "First Category": "First Category",
-      "Second Category": "Second Category"
+      "Getting Started": "Getting Started",
+      "Module Documentation": "Module Documentation"
     }
   },
   "pages-strings": {
