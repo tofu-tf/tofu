@@ -33,7 +33,7 @@ class PostInstances extends PostInstances1 {
   implicit def postMonoidK[F[_]: Applicative]: MonoidK[Post[F, *]] = new PostMonoidK[F]
 
   implicit def postAlgebraMonoid[F[_]: Applicative, U[f[_]]: MonoidalK]: Monoid[U[Post[F, *]]] =
-    new PostAlgebraMonoid[F, U] пох
+    new PostAlgebraMonoid[F, U]
 }
 
 class PostInstances1 {
