@@ -9,6 +9,9 @@
 // site configuration options.
 
 // List of projects/orgs using your project for the users page.
+
+const baseUrl = '/tofu/'; // Base URL for your project *
+
 const users = [
   {
     caption: 'Tinkoff bank',
@@ -25,7 +28,7 @@ const siteConfig = {
   tagline: 'Functional programming toolbox',
   // For github.io type URLs, you would set the url and baseUrl like:
   url: 'https://TinkoffCreditSystems.github.io',
-  baseUrl: '/tofu/',
+  baseUrl: baseUrl,
 
   // Used for publishing and more
   projectName: 'tofu',
@@ -37,6 +40,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'start', label: 'Docs'},
+    { href: `${baseUrl}api/index.html`, label: 'API'}
   ],
 
   // If you have users set above, you add it here:
@@ -49,7 +53,7 @@ const siteConfig = {
 
   /* Colors for website */
   colors: {
-    primaryColor: 'rgb(0, 0, 0)',
+    primaryColor: 'darkcyan',
     secondaryColor: 'rgb(255, 221, 45)',
   },
 
@@ -77,6 +81,7 @@ const siteConfig = {
 
   // Add custom scripts here that would be placed in <script> tags.
   scripts: ['https://buttons.github.io/buttons.js'],
+  separateCss: ["api"],
 
   // On page navigation for the current documentation page.
   onPageNav: 'separate',

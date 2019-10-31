@@ -1,10 +1,18 @@
 {
   "docs": {
-    "Docusaurus": ["doc1"],
-    "First Category": ["doc2"],
-    "Second Category": ["doc3"]
-  },
-  "docs-other": {
-    "First Category": ["doc4", "doc5"]
+    "Getting Started": [
+      "start"
+    ],
+    "Module Documentation": [
+      {
+        "type": "subcategory",
+        "label": "Core",
+        "ids": [
+          "typeclasses",
+          "fork"
+        ]
+      },
+      "env"
+    ]
   }
 }
