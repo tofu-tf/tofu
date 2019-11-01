@@ -1,8 +1,10 @@
 package tofu.syntax
 import cats.syntax._
-import cats.{Apply, FlatMap, Functor}
+import cats.{Applicative, Apply, FlatMap, Functor}
 
 object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadSyntax {
+  def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit
+
   implicit class TofuFunctorOps[F[_], A](private val fa: F[A]) extends AnyVal {
     def map[B](f: A => B)(implicit F: Functor[F]): F[B]           = F.map(fa)(f)
     def fmap[B](f: A => B)(implicit F: Functor[F]): F[B]          = F.fmap(fa)(f)
