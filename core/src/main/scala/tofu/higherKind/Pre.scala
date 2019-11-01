@@ -1,7 +1,7 @@
 package tofu
 package higherKind
 import cats.tagless.ApplyK
-import cats.{Applicative, Apply, Monoid, MonoidK, Semigroup, SemigroupK}
+import cats.{Applicative, Apply, FlatMap, Monoid, MonoidK, Semigroup, SemigroupK, ~>}
 import tofu.syntax.functionK.funK
 import tofu.syntax.monadic._
 
@@ -25,6 +25,8 @@ object Pre extends PreInstances {
   implicit class TofuPreSyntax[F[_], A](private val self: T[F, A]) extends AnyVal {
     def value: F[Unit] = self.asInstanceOf[F[Unit]]
   }
+
+  def asMid[F[_]: Apply]: Pre[F, *] ~> Mid[F, *] = funK(p => fa => p.value *> fa)
 
   /** when unification falls */
   def attach[U[f[_]]: ApplyK, F[_]: Apply](up: U[T[F, *]])(alg: U[F]): U[F] = up.attach(alg)

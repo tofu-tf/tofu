@@ -1,6 +1,6 @@
 package tofu.higherKind
 import cats.tagless.ApplyK
-import cats.{Applicative, Apply, FlatMap, Monoid, MonoidK, Semigroup, SemigroupK}
+import cats.{Applicative, Apply, FlatMap, Monoid, MonoidK, Semigroup, SemigroupK, ~>}
 import tofu.syntax.functionK.funK
 import tofu.syntax.monadic._
 
@@ -20,6 +20,8 @@ object Post extends PostInstances {
 
   /** when unification falls */
   def attach[U[f[_]]: ApplyK, F[_]: FlatMap](up: U[Post[F, *]])(alg: U[F]): U[F] = up.attach(alg)
+
+  def asMid[F[_]: FlatMap]: Post[F, *] ~> Mid[F, *] = funK(p => fa => fa.flatTap(p(_)))
 
   implicit class TofuPostAlgebraSyntax[F[_], U[f[_]]](private val self: U[Post[F, *]]) extends AnyVal {
     def attach(alg: U[F])(implicit U: ApplyK[U], F: FlatMap[F]): U[F] =
