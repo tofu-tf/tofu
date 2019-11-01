@@ -8,7 +8,6 @@ import cats.effect.syntax.bracket._
 import cats.syntax.applicativeError._
 import cats.tagless.autoApplyK
 import cats.{Apply, FlatMap, Monad}
-import tofu.concurrent
 import tofu.higherKind.Function2K
 import tofu.syntax.monadic._
 import tofu.syntax.start._
@@ -20,8 +19,8 @@ trait Daemonic[F[_], E] {
 object Daemonic extends DaemonicInstances {
   def apply[F[_], E](implicit D: Daemonic[F, E]): Daemonic[F, E] = D
 
-  private type Promise[F[_], E, A] = TryableDeferred[F, Exit[E, A]]
-  private type Maker[F[_], E]      = Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]
+  private[tofu] type Promise[F[_], E, A] = TryableDeferred[F, Exit[E, A]]
+  private[tofu] type Maker[F[_], E]      = Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]
 
   private[tofu] def mkInstance[F[_]: Start: TryableDeferreds: Bracket[*[_], E], E](maker: Maker[F, E]): Daemonic[F, E] =
     new Daemonic[F, E] {
@@ -41,14 +40,18 @@ object Daemonic extends DaemonicInstances {
 
   /** instance making safe Daemons that throws exception on joining canceled fiber */
   implicit def safeInstance[F[_]: Start: TryableDeferreds: BracketThrow]: Daemonic[F, Throwable] =
-    mkInstance[F, Throwable](Function2K((fib, promise) => new Daemon.SafeImpl(fib, promise)))
+    mkInstance[F, Throwable](
+      Function2K[Fiber[F, *], Promise[F, Throwable, *], Daemon[F, Throwable, *]](
+        (fib, promise) => new Daemon.SafeImpl(fib, promise)
+      )
+    )
 
 }
 trait DaemonicInstances { self: Daemonic.type =>
 
   /** instance making Daemons keeping default underlying behaviour*/
   implicit def nativeInstance[F[_]: Start: TryableDeferreds: Bracket[*[_], E], E]: Daemonic[F, E] =
-    mkInstance[F, E](Function2K((fib, promise) => new Daemon.Impl(fib, promise)))
+    mkInstance[F, E](Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]((fib, promise) => new Daemon.Impl(fib, promise)))
 }
 
 @autoApplyK
