@@ -8,6 +8,7 @@ import cats.effect.syntax.bracket._
 import cats.syntax.applicativeError._
 import cats.tagless.autoApplyK
 import cats.{Apply, FlatMap, Monad}
+import tofu.higherKind.Function2K
 import tofu.syntax.monadic._
 import tofu.syntax.start._
 
@@ -15,41 +16,73 @@ trait Daemonic[F[_], E] {
   def daemonize[A](process: F[A]): F[Daemon[F, E, A]]
 }
 
-object Daemonic {
+object Daemonic extends DaemonicInstances {
   def apply[F[_], E](implicit D: Daemonic[F, E]): Daemonic[F, E] = D
 
-  implicit def instance[F[_]: Start: TryableDeferreds: Bracket[*[_], E], E]: Daemonic[F, E] =
+  private[tofu] type Promise[F[_], E, A] = TryableDeferred[F, Exit[E, A]]
+  private[tofu] type Maker[F[_], E]      = Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]
+
+  private[tofu] def mkInstance[F[_]: Start: TryableDeferreds: Bracket[*[_], E], E](maker: Maker[F, E]): Daemonic[F, E] =
     new Daemonic[F, E] {
       override def daemonize[A](process: F[A]): F[Daemon[F, E, A]] =
         for {
-          exit  <- MakeDeferred.tryable[F, Daemon.Exit[E]]
-          fiber <- process.guaranteeCase(exit.complete).start
-        } yield new Daemon.Impl(fiber, exit)
+          exit <- MakeDeferred.tryable[F, Exit[E, A]]
+          fiber <- process
+                    .flatTap(a => exit.complete(Exit.Completed(a)))
+                    .guaranteeCase {
+                      case ExitCase.Completed => unit
+                      case ExitCase.Canceled  => exit.complete(Exit.Canceled)
+                      case ExitCase.Error(e)  => exit.complete(Exit.Error(e))
+                    }
+                    .start
+        } yield maker(fiber, exit)
     }
 
+  /** instance making safe Daemons that throws exception on joining canceled fiber */
+  implicit def safeInstance[F[_]: Start: TryableDeferreds: BracketThrow]: Daemonic[F, Throwable] =
+    mkInstance[F, Throwable](
+      Function2K[Fiber[F, *], Promise[F, Throwable, *], Daemon[F, Throwable, *]](
+        (fib, promise) => new Daemon.SafeImpl(fib, promise)
+      )
+    )
+
+}
+trait DaemonicInstances { self: Daemonic.type =>
+
+  /** instance making Daemons keeping default underlying behaviour*/
+  implicit def nativeInstance[F[_]: Start: TryableDeferreds: Bracket[*[_], E], E]: Daemonic[F, E] =
+    mkInstance[F, E](Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]((fib, promise) => new Daemon.Impl(fib, promise)))
 }
 
 @autoApplyK
 trait Daemon[F[_], E, A] extends Fiber[F, A] {
   def join: F[A]
   def cancel: F[Unit]
-  def poll: F[Option[Daemon.Exit[E]]]
-  def exit: F[Daemon.Exit[E]]
+  def poll: F[Option[Exit[E, A]]]
+  def exit: F[Exit[E, A]]
 
   final def process: Fiber[F, A] = this
 }
 
 /** Probably Infinite processes */
 object Daemon {
-  type Exit[E] = ExitCase[E]
-
-  private[tofu] final class Impl[F[_], E, A](process: Fiber[F, A], end: TryableDeferred[F, Daemon.Exit[E]])
+  private[tofu] class Impl[F[_], E, A](process: Fiber[F, A], end: TryableDeferred[F, Exit[E, A]])
       extends Daemon[F, E, A] {
 
-    override def join: F[A]               = process.join
-    override def cancel: F[Unit]          = process.cancel
-    override def poll: F[Option[Exit[E]]] = end.tryGet
-    override def exit: F[Exit[E]]         = end.get
+    override def join: F[A]                  = process.join
+    override def cancel: F[Unit]             = process.cancel
+    override def poll: F[Option[Exit[E, A]]] = end.tryGet
+    override def exit: F[Exit[E, A]]         = end.get
+  }
+
+  /** safe implementation that would throw an exception on joining canceled process */
+  private[tofu] class SafeImpl[F[_]: MonadThrow, A](process: Fiber[F, A], end: TryableDeferred[F, Exit[Throwable, A]])
+      extends Impl[F, Throwable, A](process, end) {
+    override def join: F[A] = exit.flatMap {
+      case Exit.Error(e)     => e.raiseError
+      case Exit.Completed(a) => a.pure
+      case Exit.Canceled     => new TofuCanceledJoinException[F, A](this).raiseError
+    }
   }
 
   implicit class DaemonOps[F[_], E, A](val self: Daemon[F, E, A]) extends AnyVal {
@@ -91,7 +124,7 @@ final class Actor[F[_], E, A] private (queue: MVar[F, A], val daemon: Daemon[F, 
 
   def onStop(action: F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] = watch(_ => action)
 
-  def watch(action: Daemon.Exit[E] => F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] =
+  def watch(action: Exit[E, Void] => F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] =
     (daemon.exit >>= action).start
 
   def send(message: A): F[Unit] = this !! message
@@ -127,3 +160,6 @@ object Actor {
   )(strategy: Throwable => F[Unit]): F[Actor[F, Throwable, A]] =
     apply(a => Sync[F].delay(receive(a)).handleErrorWith(strategy))
 }
+
+final class TofuCanceledJoinException[F[_], A] private[tofu] (val daemon: Daemon[F, Throwable, A])
+    extends InterruptedException("trying to join canceled fiber")
