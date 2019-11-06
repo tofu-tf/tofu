@@ -9,6 +9,7 @@ import tofu.sim.SIM.IO
 import tofu.sim._
 import tofu.sim.mutable.MutSim.MutVar
 import tofu.syntax.functionK.funK
+import tofu.syntax.monadic._
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -55,4 +56,8 @@ object SimIO {
     } yield SimFiber[MutSim[E, *, *], E, A](MutVar[E, FiberRes[E, A]](tvar), id)
   }
 
+  def guarantee[E, A, B, C](
+      init: SimIO[E, A]
+  )(action: A => SimIO[E, B])(release: (A, Boolean) => SimIO[E, C]): SimIO[E, B] =
+    init.flatMapF(a => action(a).value.flatMap(res => release(a, res.isRight).value as res))
 }

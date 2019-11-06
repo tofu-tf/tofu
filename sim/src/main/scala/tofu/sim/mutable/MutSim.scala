@@ -2,6 +2,7 @@ package tofu.sim
 package mutable
 import cats.data.{EitherT, OptionT}
 import cats.{Monad, MonadError, StackSafeMonad}
+import tofu.Guarantee
 import tofu.sim.SIM.{IO, STM, TVAR}
 import tofu.sim.mutable.MutSim.{MutIO, MutSTM, MutVar}
 
@@ -22,9 +23,10 @@ object MutSim {
     def value: MutTVar[A] = sim match { case MutVar(fa) => fa }
   }
 
-  implicit def transact[E]: Transact[MutSim[E, *, *]]      = new MutSimTransact[E]
-  implicit def ioMonad[E]: MonadError[MutSim[E, IO, *], E] = new MutSimIOMonad[E]
-  implicit def stmMonad[E]: Monad[MutSim[E, STM, *]]       = new MutSimSTMMonad[E]
+  implicit def transact[E]: Transact[MutSim[E, *, *]] = new MutSimTransact[E]
+  implicit def ioMonad[E]: MonadError[MutSim[E, IO, *], E] with Guarantee[MutSim[E, IO, *]] =
+    new MutSimIOMonad[E]
+  implicit def stmMonad[E]: Monad[MutSim[E, STM, *]] = new MutSimSTMMonad[E]
 }
 
 private class MutSimTransact[E] extends Transact[MutSim[E, *, *]] {
@@ -39,7 +41,8 @@ private class MutSimTransact[E] extends Transact[MutSim[E, *, *]] {
   def fiberId: MutSim[E, IO, FiberId]                          = MutIO(SimIO.getFiberId)
 }
 
-private class MutSimIOMonad[E] extends StackSafeMonad[MutSim[E, IO, *]] with MonadError[MutSim[E, IO, *], E] {
+private class MutSimIOMonad[E]
+    extends StackSafeMonad[MutSim[E, IO, *]] with MonadError[MutSim[E, IO, *], E] with Guarantee[MutSim[E, IO, *]] {
   def flatMap[A, B](fa: MutSim[E, IO, A])(f: A => MutSim[E, IO, B]): MutSim[E, IO, B] =
     MutIO(fa.value.flatMap(a => f(a).value))
   def pure[A](x: A): MutSim[E, IO, A] =
@@ -50,6 +53,10 @@ private class MutSimIOMonad[E] extends StackSafeMonad[MutSim[E, IO, *]] with Mon
     MutIO(EitherT.leftT(e))
   def handleErrorWith[A](fa: MutSim[E, IO, A])(f: E => MutSim[E, IO, A]): MutSim[E, IO, A] =
     MutIO(fa.value.recoverWith { case e => f(e).value })
+  def bracket[A, B, C](
+      init: MutSim[E, IO, A]
+  )(action: A => MutSim[E, IO, B])(release: (A, Boolean) => MutSim[E, IO, C]): MutSim[E, IO, B] =
+    MutIO(SimIO.guarantee(init.value)(a => action(a).value)((a, s) => release(a, s).value))
 }
 
 private class MutSimSTMMonad[E] extends StackSafeMonad[MutSim[E, STM, *]] {

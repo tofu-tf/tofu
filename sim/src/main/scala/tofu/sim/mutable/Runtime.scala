@@ -1,6 +1,5 @@
 package tofu.sim.mutable
 
-import cats.Monad
 import tofu.sim._
 
 import scala.collection.immutable.TreeMap
@@ -10,14 +9,14 @@ import scala.util.Random
 class Runtime private[tofu] (chooser: Int => Int) {
   var nextFiberId: Long                                 = 0
   var time: Long                                        = 0
-  var active: TreeMap[Long, SimFiber]                   = TreeMap.empty
-  val waiting: mutable.LongMap[SimFiber]                = mutable.LongMap.empty
-  val sleeping: mutable.TreeMap[Long, (Long, SimFiber)] = mutable.TreeMap.empty
+  var active: TreeMap[Long, SimProc]                   = TreeMap.empty
+  val waiting: mutable.LongMap[SimProc]                = mutable.LongMap.empty
+  val sleeping: mutable.TreeMap[Long, (Long, SimProc)] = mutable.TreeMap.empty
 
   def notify(fiberId: Long): Unit =
     waiting.remove(fiberId).foreach(active += fiberId -> _)
 
-  private def deactivate(fiberId: Long)(f: SimFiber => Unit): Unit = {
+  private def deactivate(fiberId: Long)(f: SimProc => Unit): Unit = {
     active.get(fiberId).foreach(f)
     active -= fiberId
   }
@@ -34,7 +33,7 @@ class Runtime private[tofu] (chooser: Int => Int) {
     sleeping -= fiberId
   }
 
-  def exec(proc: Long => SimFiber): Unit = {
+  def exec(proc: Long => SimProc): Unit = {
     nextFiberId += 1
     val id = nextFiberId
     active += id -> proc(id)

@@ -10,5 +10,5 @@ package object mutable {
   type SimF[A] = (Runtime, Long) => Exit[A]
   type SimIO[E, A] = EitherT[Free[SimF, *], E, A]
 
-  type SimFiber = Free[Exit, Unit]
+  type SimProc = Free[Exit, Unit]
 }
