@@ -73,42 +73,5 @@ object Runtime {
   def apply(chooser: Int => Int): Runtime = new Runtime(chooser)
   def apply(random: Random): Runtime      = apply(random.nextInt(_: Int))
   def apply(seed: Long): Runtime          = apply(new Random(seed))
-
-
-//  def run[E, A](sim: Sim[E, A]): Result[E, A] = {
-//    val tvar = new SimTVar[E, A]()
-//  }
-
-  private val simAtomicAny: SimAtomic[Any] = new SimAtomic[Any]
-
-  implicit def simInstance[E]: SimAtomic[E] = simAtomicAny.asInstanceOf[SimAtomic[E]]
-
 }
 
-object SimTransact extends Transact[SimT, SimTVar] {
-  def readTVar[A](tvar: SimTVar[A]): SimT[A] = SimT.readTVar(tvar)
-
-  def writeTVar[A](tvar: SimTVar[A], value: A): SimT[Unit] = SimT.writeTVar(tvar)(value)
-
-  def fail[A]: SimT[A] = SimT.fail
-}
-
-class SimAtomic[E] private[sim] extends Atomic[Sim[E, *]] with Simulated[Sim[E, *]] {
-  type T[A]    = SimT[A]
-  type TVar[A] = SimTVar[A]
-  type FiberId = Long
-
-  implicit def transact: Transact[SimT, SimTVar] = SimTransact
-
-  def tmonad: Monad[SimT] = implicitly
-
-  def atomically[A](v: SimT[A]): Sim[E, A] = Sim.atomically(v)
-
-  def newTVal[A](a: A): Sim[E, SimTVar[A]] = Sim.newTVar(a)
-
-  def panic[A](s: String): Sim[E, A] = Sim.panic(s)
-
-  def cancel(threadId: Long): Sim[E, Unit] = Sim.cancel(threadId)
-
-  def fiberId: Sim[E, Long] = Sim.getFiberId
-}

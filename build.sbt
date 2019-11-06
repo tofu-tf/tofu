@@ -126,10 +126,6 @@ lazy val config = project dependsOn (core, data, opticsCore, concurrent) setting
   macros,
 )
 
-
-lazy val commonModules =
-  List(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop, sim)
-
 lazy val opticsCore = project
   .in(file("optics/core"))
   .settings(
@@ -189,10 +185,26 @@ lazy val zioInterop = project
   .dependsOn(zioCore)
   .aggregate(zioCore)
 
+lazy val coreModules = List(
+  core,
+  memo,
+  env,
+  concurrent,
+  opticsCore,
+  data
+)
 
-lazy val coreModules = List(core, memo, env, concurrent, opticsCore, data)
-
-lazy val commonModules = List(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop)
+lazy val commonModules = List(
+  observable,
+  opticsInterop,
+  opticsMacro,
+  logging,
+  enums,
+  config,
+  derivation,
+  zioInterop,
+  sim
+)
 
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
@@ -207,7 +219,7 @@ lazy val docs = project // new documentation project
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(unidoc in Compile).value,
     docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(unidoc in Compile).value,
   )
-  .dependsOn(allModuleDeps:_*)
+  .dependsOn(allModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
 lazy val tofu = project

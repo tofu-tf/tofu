@@ -3,8 +3,10 @@ import cats.Monad
 import cats.effect.Fiber
 import tofu.Raise
 import tofu.sim.FiberRes._
+import SIM.{IO, IOMonad, IORaise, STM, STMMonad, TVAR, stmMonad}
 import tofu.syntax.monadic._
 import tofu.syntax.raise._
+import Transact.{atomically, cancel, fail, newTVar, panic}
 
 sealed trait FiberRes[+E, +A]
 object FiberRes {
@@ -20,36 +22,28 @@ object FiberRes {
 }
 
 object SimFiber {
-  def apply[F[_]: Monad: Raise[*[_], E], E](
-      implicit sim: Simulated[F],
-      at: Atomic[F]
-  ): Applied[F, E, at.TVar, sim.FiberId] =
-    new Applied[F, E, at.TVar, sim.FiberId](at, sim)
-
-  class Applied[F[_]: Monad: Raise[*[_], E], E, TV[_], FId](
-      atomic: Atomic[F] { type TVar[a] = TV[a] },
-      sim: Simulated[F] { type FiberId = FId }
-  ) {
-    def of[A](tvar: atomic.TVar[FiberRes[E, A]], fiberId: sim.FiberId): Fiber[F, A] = new Fiber[F, A] {
-      import atomic._
-      def cancel: F[Unit] = atomic.atomically {
-        transact.readTVar(tvar).flatMap {
-          case Working => transact.writeTVar(tvar, Canceled)
-          case _       => tmonad.unit
+  def apply[F[_, _]: IOMonad: STMMonad: Transact, E: IORaise[F, *], A](
+      tvar: F[TVAR, FiberRes[E, A]],
+      fiberId: FiberId
+  ) =
+    new Fiber[F[IO, *], A] {
+      def cancel: F[IO, Unit] = atomically {
+        tvar.read.flatMap {
+          case Working => tvar.write(Canceled)
+          case _       => stmMonad[F].unit
         }
-      } *> sim.cancel(fiberId)
+      } *> Transact.cancel[F](fiberId)
 
-      def join: F[A] = atomically {
-        transact.readTVar(tvar).flatMap[FiberExit[E, A]] {
-          case Working               => transact.fail
-          case exit: FiberExit[E, A] => exit.pure[T]
+      def join: F[IO, A] = atomically {
+        tvar.read.flatMap[FiberExit[E, A]] {
+          case Working               => fail
+          case exit: FiberExit[E, A] => exit.pure[F[STM, *]]
         }
       }.flatMap {
-        case Succeed(a) => a.pure[F]
-        case Failed(e)  => e.raise[F, A]
-        case Canceled   => sim.panic[A]("joining canceled fiber")
+        case Succeed(a) => a.pure[F[IO, *]]
+        case Failed(e)  => e.raise[F[IO, *], A]
+        case Canceled   => panic[F, A]("joining canceled fiber")
       }
     }
-  }
 
 }
