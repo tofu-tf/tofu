@@ -64,11 +64,12 @@ class Runtime private[tofu] (chooser: Int => Int) {
     }
   }
 
-  def exec(proc: Long => SimProc): Unit = {
+  def exec(proc: Long => SimProc): Long = {
     nextFiberId += 1
     val id = nextFiberId
     active += id -> proc(id)
     infos(id) = new FiberInfo
+    id
   }
 
   def step(): StepStatus =

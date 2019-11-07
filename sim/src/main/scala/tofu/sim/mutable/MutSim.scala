@@ -2,10 +2,10 @@ package tofu.sim
 package mutable
 import cats.data.{EitherT, OptionT}
 import cats.effect.{Bracket, ExitCase}
-import cats.{Monad, MonadError, StackSafeMonad}
-import tofu.{Guarantee, HandleTo, Raise, Void}
+import cats.{Monad, StackSafeMonad}
 import tofu.sim.SIM.{RUN, STM, TVAR}
 import tofu.sim.mutable.MutSim.{MutIO, MutSTM, MutVar}
+import tofu.{HandleTo, Void}
 
 sealed trait MutSim[T, A]
 
@@ -42,7 +42,7 @@ private class MutSimTransact extends Transact[MutSim[*, *]] {
   def sleep[E](nanos: Long): MutSim[RUN[E], Unit]                               = MutIO(SimIO.sleep(nanos))
   def error[E, A](err: E): MutSim[RUN[E], A]                                    = MutIO(SimIO.raise(err))
   def attempt[E, E1, A](proc: MutSim[RUN[E], A]): MutSim[RUN[E1], Either[E, A]] = MutIO(SimIO.attempt(proc.value))
-  def exec[E](p: MutSim[RUN[Void], Unit]): MutSim[RUN[E], Unit] = MutIO(SimIO.exec(p.value))
+  def exec[E](p: MutSim[RUN[Void], Unit]): MutSim[RUN[E], FiberId] = MutIO(SimIO.exec(p.value))
 }
 
 class MutSimIOMonad[E]

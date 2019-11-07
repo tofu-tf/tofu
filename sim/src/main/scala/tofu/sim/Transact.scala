@@ -1,8 +1,7 @@
 package tofu.sim
 
-import cats.Monad
 import SIM._
-import cats.effect.Fiber
+import cats.Monad
 import tofu.{Guarantee, Raise, Void}
 
 sealed trait SIM
@@ -16,9 +15,6 @@ object SIM {
   type IOGuarantee[F[_, _], E] = Guarantee[F[RUN[E], *]]
   type STMMonad[F[_, _]]       = Monad[F[STM, *]]
   type IORaise[F[_, _], E]     = Raise[F[RUN[E], *], E]
-
-  def ioMonad[F[_, _], E](implicit F: IOMonad[F, E]): IOMonad[F, E] = F
-  def stmMonad[F[_, _]](implicit F: STMMonad[F]): STMMonad[F]       = F
 
   implicit class TVarOps[F[_, _], A](private val tvar: F[TVAR, A]) extends AnyVal {
     def read(implicit t: Transact[F]): F[STM, A]           = t.readTVar(tvar)
@@ -43,20 +39,21 @@ trait Transact[F[_, _]] {
   def sleep[E](nanos: Long): F[RUN[E], Unit]
   def error[E, A](error: E): F[RUN[E], A]
   def attempt[E, E1, A](proc: F[RUN[E], A]): F[RUN[E1], Either[E, A]]
-  def exec[E](p: F[RUN[Void], Unit]): F[RUN[E], Unit]
+  def exec[E](p: F[RUN[Void], Unit]): F[RUN[E], FiberId]
 }
 
 object Transact {
-  def atomically[F[_, _], E, A](v: F[STM, A])(implicit FA: Transact[F]): F[RUN[E], A]    = FA.atomically(v)
-  def newTVar[F[_, _], E](implicit at: Transact[F])                                      = new NewTVar[F, E](at)
-  def cancel[F[_, _], E](fiberId: FiberId)(implicit at: Transact[F]): F[RUN[E], Unit]    = at.cancel(fiberId)
-  def fail[F[_, _], A](implicit at: Transact[F]): F[STM, A]                              = at.fail
-  def panic[F[_, _], E, A](s: String)(implicit at: Transact[F]): F[RUN[E], A]            = at.panic(s)
-  def error[F[_, _], E, A](err: E)(implicit at: Transact[F]): F[RUN[E], A]               = at.error(err)
-  def exec[F[_, _], E](p: F[RUN[Void], Unit])(implicit at: Transact[F]): F[RUN[E], Unit] = at.exec(p)
+  def atomically[F[_, _], E, A](v: F[STM, A])(implicit FA: Transact[F]): F[RUN[E], A]       = FA.atomically(v)
+  def newTVar[F[_, _], E](implicit at: Transact[F])                                         = new NewTVar[F, E](at)
+  def cancel[F[_, _], E](fiberId: FiberId)(implicit at: Transact[F]): F[RUN[E], Unit]       = at.cancel(fiberId)
+  def fail[F[_, _], A](implicit at: Transact[F]): F[STM, A]                                 = at.fail
+  def panic[F[_, _], E, A](s: String)(implicit at: Transact[F]): F[RUN[E], A]               = at.panic(s)
+  def error[F[_, _], E, A](err: E)(implicit at: Transact[F]): F[RUN[E], A]                  = at.error(err)
+  def exec[F[_, _], E](p: F[RUN[Void], Unit])(implicit at: Transact[F]): F[RUN[E], FiberId] = at.exec(p)
+  def fiberId[F[_, _], E](implicit at: Transact[F]): F[RUN[E], FiberId]                     = at.fiberId[E]
 
   class NewTVar[F[_, _], E](private val at: Transact[F]) extends AnyVal {
-    def apply[A](a: A): F[RUN[E], F[TVAR, A]] = at.newTVar(a)
+    def of[A](a: A): F[RUN[E], F[TVAR, A]] = at.newTVar(a)
   }
 
   implicit class SIMPureOps[A](private val a: A) extends AnyVal {
@@ -67,4 +64,7 @@ object Transact {
   implicit class SIMFIOOps[F[_, _], E, A](private val fa: F[RUN[E], A]) extends AnyVal {
     def attempt[E1](implicit at: Transact[F]): F[RUN[E1], Either[E, A]] = at.attempt[E, E1, A](fa)
   }
+
+  def ioMonad[F[_, _], E](implicit F: IOMonad[F, E]): IOMonad[F, E] = F
+  def stmMonad[F[_, _]](implicit F: STMMonad[F]): STMMonad[F]       = F
 }

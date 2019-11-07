@@ -1,8 +1,7 @@
 package tofu.sim
-import SIM.{IOMonad, IORaise, RUN, STM, STMMonad, TVAR, stmMonad}
-import Transact.{fail, panic, error, SIMPureOps}
+import SIM.{IOMonad, RUN, STM, STMMonad, TVAR}
+import Transact.{cancel => _, _}
 import cats.effect.Fiber
-import tofu.Raise
 import tofu.sim.FiberRes._
 import tofu.syntax.monadic._
 
