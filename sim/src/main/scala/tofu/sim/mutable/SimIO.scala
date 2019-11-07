@@ -2,8 +2,10 @@ package tofu.sim.mutable
 
 import cats.Id
 import cats.data.EitherT
-import cats.effect.Fiber
+import cats.effect.{ExitCase, Fiber}
 import cats.free.Free
+import cats.syntax.applicativeError.catsSyntaxApplicativeError
+import cats.syntax.either._
 import tofu.Void
 import tofu.sim.SIM.RUN
 import tofu.sim._
@@ -38,8 +40,11 @@ object SimIO {
 
   def time[E]: SimIO[E, Long] = lift((runtime, _) => Success(runtime.time))
 
+  def toProc[E, A](simIO: SimIO[E, A])(runtime: Runtime, fiberId: FiberId): SimProc =
+    simIO.value.void.mapK[Exit](funK(_(runtime, fiberId)))
+
   def exec[E](process: SimIO[Void, Unit]): SimIO[E, Unit] = lift(
-    (runtime, _) => Success(runtime.exec(id => process.value.map(Void.mergeEither).mapK[Exit](funK(_(runtime, id)))))
+    (runtime, _) => Success(runtime.exec(id => toProc(process)(runtime, id)))
   )
   def cancel[E](fiberId: Long): SimIO[E, Unit]  = lift((runtime, _) => Success(runtime.cancel(fiberId)))
   def getFiberId[E]: SimIO[E, Long]             = lift((_, fiberId) => Success(fiberId))
@@ -47,6 +52,8 @@ object SimIO {
 
   def respondTo[E, A](proc: SimIO[E, A], tvar: MutTVar[FiberRes[E, A]]): SimIO[Void, Unit] =
     EitherT(proc.value.flatMap(res => SimIO.atomically(SimT.writeTVar(tvar)(FiberRes.fromEither(res))).value))
+
+  def attempt[E1, E, A](proc: SimIO[E, A]): SimIO[E1, Either[E, A]] = EitherT.right(proc.value)
 
   def fork[E, A](proc: MutSim[RUN[E], A]): SimIO[E, Fiber[MutSim[RUN[E], *], A]] = {
     for {
@@ -56,8 +63,34 @@ object SimIO {
     } yield SimFiber[MutSim[*, *], E, A](MutVar[FiberRes[E, A]](tvar), id)
   }
 
-  def guarantee[E, A, B, C](
+  def trace[E](message: String): SimIO[E, Unit] =
+    lift((runtime, fiberId) => Traced(runtime.trace(fiberId, message)))
+
+  def setUncancelable[E](uncancelable: Boolean): SimIO[E, Unit] =
+    lift((runtime, fiberId) => Success(runtime.setUncancelable(fiberId, uncancelable)))
+
+  def uncancelable[E, A](fa: SimIO[E, A]): SimIO[E, A] =
+    setUncancelable[E](true) *> fa <* setUncancelable(false)
+
+  def bracket[E, A, B, C](
       init: SimIO[E, A]
-  )(action: A => SimIO[E, B])(release: (A, Boolean) => SimIO[E, C]): SimIO[E, B] =
-    init.flatMapF(a => action(a).value.flatMap(res => release(a, res.isRight).value as res))
+  )(action: A => SimIO[E, B])(release: (A, ExitCase[E]) => SimIO[E, C]): SimIO[E, B] =
+    for {
+      _ <- setUncancelable[E](true)
+      a <- init
+      _ <- setUncancelable[E](false)
+      _ <- lift { (runtime, fiberId) =>
+            Traced {
+              runtime.regBracket(fiberId, true, toProc(release(a, ExitCase.Completed))(runtime, fiberId))
+              runtime.regBracket(fiberId, false, toProc(release(a, ExitCase.Canceled))(runtime, fiberId))
+            }
+          }
+      res <- action(a).onError {
+              case err =>
+                lift { (runtime, fiberId) =>
+                  Success(runtime.regBracket(fiberId, true, toProc(release(a, ExitCase.Error(err)))(runtime, fiberId)))
+                }
+            }
+    } yield res
+
 }

@@ -1,8 +1,9 @@
 package tofu.sim
 package mutable
 import cats.data.{EitherT, OptionT}
+import cats.effect.{Bracket, ExitCase}
 import cats.{Monad, MonadError, StackSafeMonad}
-import tofu.Guarantee
+import tofu.{Guarantee, HandleTo, Raise, Void}
 import tofu.sim.SIM.{RUN, STM, TVAR}
 import tofu.sim.mutable.MutSim.{MutIO, MutSTM, MutVar}
 
@@ -24,27 +25,29 @@ object MutSim {
   }
 
   implicit val transact: Transact[MutSim[*, *]] = new MutSimTransact
-  implicit def ioMonad[E]: MonadError[MutSim[RUN[E], *], E] with Guarantee[MutSim[RUN[E], *]] =
-    new MutSimIOMonad[E]
-  implicit def stmMonad[E]: Monad[MutSim[STM, *]] = new MutSimSTMMonad[E]
+  implicit def ioMonad[E]: MutSimIOMonad[E]     = new MutSimIOMonad[E]
+  implicit val stmMonad: Monad[MutSim[STM, *]]  = new MutSimSTMMonad
 }
 
 private class MutSimTransact extends Transact[MutSim[*, *]] {
-  def writeTVar[A](tvar: MutSim[TVAR, A], value: A): MutSim[STM, Unit] =
-    MutSTM(SimT.writeTVar(tvar.value)(value))
-  def readTVar[A](tvar: MutSim[TVAR, A]): MutSim[STM, A]     = MutSTM(SimT.readTVar(tvar.value))
-  def fail[A]: MutSim[STM, A]                                = MutSTM(SimT.fail)
-  def atomically[E, A](v: MutSim[STM, A]): MutSim[RUN[E], A] = MutIO(SimIO.atomically(v.value))
-  def newTVar[E, A](a: A): MutSim[RUN[E], MutSim[TVAR, A]]   = MutIO(SimIO.newTVar(a).map(MutVar(_)))
-  def panic[E, A](s: String): MutSim[RUN[E], A]              = MutIO(SimIO.panic(s))
-  def cancel[E](threadId: FiberId): MutSim[RUN[E], Unit]     = MutIO(SimIO.cancel(threadId))
-  def fiberId[E]: MutSim[RUN[E], FiberId]                    = MutIO(SimIO.getFiberId)
-  def time[E]: MutSim[RUN[E], Long]                          = MutIO(SimIO.time)
-  def sleep[E](nanos: Long): MutSim[RUN[E], Unit]            = MutIO(SimIO.sleep(nanos))
+  def writeTVar[A](tvar: MutSim[TVAR, A], value: A): MutSim[STM, Unit]          = MutSTM(SimT.writeTVar(tvar.value)(value))
+  def readTVar[A](tvar: MutSim[TVAR, A]): MutSim[STM, A]                        = MutSTM(SimT.readTVar(tvar.value))
+  def fail[A]: MutSim[STM, A]                                                   = MutSTM(SimT.fail)
+  def atomically[E, A](v: MutSim[STM, A]): MutSim[RUN[E], A]                    = MutIO(SimIO.atomically(v.value))
+  def newTVar[E, A](a: A): MutSim[RUN[E], MutSim[TVAR, A]]                      = MutIO(SimIO.newTVar(a).map(MutVar(_)))
+  def panic[E, A](s: String): MutSim[RUN[E], A]                                 = MutIO(SimIO.panic(s))
+  def cancel[E](threadId: FiberId): MutSim[RUN[E], Unit]                        = MutIO(SimIO.cancel(threadId))
+  def fiberId[E]: MutSim[RUN[E], FiberId]                                       = MutIO(SimIO.getFiberId)
+  def time[E]: MutSim[RUN[E], Long]                                             = MutIO(SimIO.time)
+  def sleep[E](nanos: Long): MutSim[RUN[E], Unit]                               = MutIO(SimIO.sleep(nanos))
+  def error[E, A](err: E): MutSim[RUN[E], A]                                    = MutIO(SimIO.raise(err))
+  def attempt[E, E1, A](proc: MutSim[RUN[E], A]): MutSim[RUN[E1], Either[E, A]] = MutIO(SimIO.attempt(proc.value))
+  def exec[E](p: MutSim[RUN[Void], Unit]): MutSim[RUN[E], Unit] = MutIO(SimIO.exec(p.value))
 }
 
 class MutSimIOMonad[E]
-    extends StackSafeMonad[MutSim[RUN[E], *]] with MonadError[MutSim[RUN[E], *], E] with Guarantee[MutSim[RUN[E], *]] {
+    extends StackSafeMonad[MutSim[RUN[E], *]] with Bracket[MutSim[RUN[E], *], E]
+    with HandleTo[MutSim[RUN[E], *], MutSim[RUN[Void], *], E] {
   def flatMap[A, B](fa: MutSim[RUN[E], A])(f: A => MutSim[RUN[E], B]): MutSim[RUN[E], B] =
     MutIO(fa.value.flatMap(a => f(a).value))
   def pure[A](x: A): MutSim[RUN[E], A] = MutIO(EitherT.pure(x))
@@ -54,13 +57,24 @@ class MutSimIOMonad[E]
     MutIO(EitherT.leftT(e))
   def handleErrorWith[A](fa: MutSim[RUN[E], A])(f: E => MutSim[RUN[E], A]): MutSim[RUN[E], A] =
     MutIO(fa.value.recoverWith { case e => f(e).value })
-  def bracket[A, B, C](
-      init: MutSim[RUN[E], A]
-  )(action: A => MutSim[RUN[E], B])(release: (A, Boolean) => MutSim[RUN[E], C]): MutSim[RUN[E], B] =
-    MutIO(SimIO.guarantee(init.value)(a => action(a).value)((a, s) => release(a, s).value))
+  def bracketCase[A, B](acquire: MutSim[RUN[E], A])(use: A => MutSim[RUN[E], B])(
+      release: (A, ExitCase[E]) => MutSim[RUN[E], Unit]
+  ): MutSim[RUN[E], B] =
+    MutIO(SimIO.bracket(acquire.value)(a => use(a).value)((a, ec) => release(a, ec).value))
+
+  def handleWith[A](fa: MutSim[RUN[E], A])(f: E => MutSim[RUN[Void], A]): MutSim[RUN[Void], A] =
+    MutIO(SimIO.attempt[Void, E, A](fa.value).flatMap {
+      case Right(x) => SimIO.pure(x)
+      case Left(e)  => f(e).value
+    })
+  def restore[A](fa: MutSim[RUN[E], A]): MutSim[RUN[Void], Option[A]] =
+    MutIO(SimIO.attempt(fa.value).flatMap {
+      case Right(x) => SimIO.pure(Some(x))
+      case Left(_)  => SimIO.pure(None)
+    })
 }
 
-private class MutSimSTMMonad[E] extends StackSafeMonad[MutSim[STM, *]] {
+private class MutSimSTMMonad extends StackSafeMonad[MutSim[STM, *]] {
   def flatMap[A, B](fa: MutSim[STM, A])(f: A => MutSim[STM, B]): MutSim[STM, B] =
     MutSTM(fa.value.flatMap(a => f(a).value))
   def pure[A](x: A): MutSim[STM, A] =

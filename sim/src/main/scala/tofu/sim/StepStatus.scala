@@ -17,6 +17,7 @@ sealed trait Exit[+A]
 case object Lock                      extends Exit[Nothing]
 case class Sleep[+A](a: A, dur: Long) extends Exit[A]
 case class Success[+A](a: A)          extends Exit[A]
+case class Traced[+A](a: A)           extends Exit[A]
 case class Panic(str: String)         extends StepExit with Exit[Nothing]
 
 object Exit {

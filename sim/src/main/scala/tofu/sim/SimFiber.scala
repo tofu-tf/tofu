@@ -1,10 +1,10 @@
 package tofu.sim
-import SIM.{RUN, IOMonad, IORaise, STM, STMMonad, TVAR, stmMonad}
-import Transact.{fail, panic}
+import SIM.{IOMonad, IORaise, RUN, STM, STMMonad, TVAR, stmMonad}
+import Transact.{fail, panic, error, SIMPureOps}
 import cats.effect.Fiber
+import tofu.Raise
 import tofu.sim.FiberRes._
 import tofu.syntax.monadic._
-import tofu.syntax.raise._
 
 sealed trait FiberRes[+E, +A]
 object FiberRes {
@@ -19,15 +19,15 @@ object FiberRes {
   def fromEither[E, A](e: Either[E, A]): FiberExit[E, A] = e.fold(Failed(_), Succeed(_))
 }
 
-case class SimFiber[F[_, _]: IOMonad[*[_, _], E]: STMMonad: Transact, E: IORaise[F, *], A](
+case class SimFiber[F[_, _]: IOMonad[*[_, _], E]: STMMonad: Transact, E, A](
     tvar: F[TVAR, FiberRes[E, A]],
     fiberId: FiberId
 ) extends Fiber[F[RUN[E], *], A] {
   def cancel: F[RUN[E], Unit] =
     tvar.read.flatMap {
-      case Working => tvar.write(Canceled)
-      case _       => stmMonad[F].unit
-    }.atomically[E] *> Transact.cancel[F, E](fiberId)
+      case Working => tvar.write(Canceled) as true
+      case _       => false.pureSTM[F]
+    }.atomically[E] >>= Transact.cancel[F, E](fiberId).whenA
 
   def join: F[RUN[E], A] =
     tvar.read
@@ -38,7 +38,7 @@ case class SimFiber[F[_, _]: IOMonad[*[_, _], E]: STMMonad: Transact, E: IORaise
       .atomically[E]
       .flatMap {
         case Succeed(a) => a.pure[F[RUN[E], *]]
-        case Failed(e)  => e.raise[F[RUN[E], *], A]
+        case Failed(e)  => error(e)
         case Canceled   => panic[F, E, A]("joining canceled fiber")
       }
 
