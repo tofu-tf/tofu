@@ -5,7 +5,7 @@ import cats.data.EitherT
 import cats.effect.Fiber
 import cats.free.Free
 import tofu.Void
-import tofu.sim.SIM.IO
+import tofu.sim.SIM.RUN
 import tofu.sim._
 import tofu.sim.mutable.MutSim.MutVar
 import tofu.syntax.functionK.funK
@@ -48,12 +48,12 @@ object SimIO {
   def respondTo[E, A](proc: SimIO[E, A], tvar: MutTVar[FiberRes[E, A]]): SimIO[Void, Unit] =
     EitherT(proc.value.flatMap(res => SimIO.atomically(SimT.writeTVar(tvar)(FiberRes.fromEither(res))).value))
 
-  def fork[E, A](proc: MutSim[E, IO, A]): SimIO[E, Fiber[MutSim[E, IO, *], A]] = {
+  def fork[E, A](proc: MutSim[RUN[E], A]): SimIO[E, Fiber[MutSim[RUN[E], *], A]] = {
     for {
       tvar <- newTVar[E, FiberRes[E, A]](FiberRes.Working)
       id   <- getFiberId[E]
       _    <- exec(respondTo(proc.value, tvar))
-    } yield SimFiber[MutSim[E, *, *], E, A](MutVar[E, FiberRes[E, A]](tvar), id)
+    } yield SimFiber[MutSim[*, *], E, A](MutVar[FiberRes[E, A]](tvar), id)
   }
 
   def guarantee[E, A, B, C](
