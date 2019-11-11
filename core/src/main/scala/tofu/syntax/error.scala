@@ -3,10 +3,16 @@ package syntax
 
 import cats.Applicative
 import tofu.Raise.ContravariantRaise
+import cats.Monad
 
 object raise {
-  final implicit class RaiseOps[E](val err: E) extends AnyVal {
+  final implicit class RaiseOps[E](private val err: E) extends AnyVal {
     def raise[F[_], A](implicit raise: Raise[F, E]): F[A] = raise.raise(err)
+  }
+
+  final implicit class RaiseMonadOps[F[_], A](private val fa: F[A]) extends AnyVal{
+    def verified[E](p: A => Boolean)(err: E)(implicit raise: Raise[F, E], F: Monad[F]): F[A] = 
+      F.flatMap(fa)(a => if(p(a)) F.pure(a) else raise.raise(err))
   }
 
   final implicit class RaiseOptionOps[A](val opt: Option[A]) extends AnyVal {

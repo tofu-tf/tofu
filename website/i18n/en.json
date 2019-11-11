@@ -8,6 +8,9 @@
       "env": {
         "title": "Learning Env"
       },
+      "errors": {
+        "title": "Error management"
+      },
       "fork": {
         "title": "Forking and Racing"
       },
