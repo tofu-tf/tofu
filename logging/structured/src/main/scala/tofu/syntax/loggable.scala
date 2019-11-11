@@ -22,6 +22,17 @@ object logging {
       logging.debug(sctx.s(braces(values.size): _*), values: _*)
     def trace[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
       logging.trace(sctx.s(braces(values.size): _*), values: _*)
+
+    def errorCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
+      logging.errorCause(sctx.s(braces(values.size): _*), ex, values: _*)
+    def warnCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
+      logging.warnCause(sctx.s(braces(values.size): _*), ex, values: _*)
+    def infoCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
+      logging.infoCause(sctx.s(braces(values.size): _*), ex, values: _*)
+    def debugCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
+      logging.debugCause(sctx.s(braces(values.size): _*), ex, values: _*)
+    def traceCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
+      logging.traceCause(sctx.s(braces(values.size): _*), ex, values: _*)
   }
 
   implicit class LoggingCauseOps(val message: String) extends AnyVal {
