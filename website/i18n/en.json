@@ -5,6 +5,9 @@
     "previous": "Previous",
     "tagline": "Functional programming toolbox",
     "docs": {
+      "Typeclasses": {
+        "title": "Mastering Tofu typeclasses"
+      },
       "env": {
         "title": "Learning Env"
       },
