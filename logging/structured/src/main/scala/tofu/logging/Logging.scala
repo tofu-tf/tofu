@@ -12,7 +12,6 @@ import tofu.logging.impl.EmbedLogging
 import tofu.syntax.functionK._
 
 import scala.reflect.ClassTag
-import scala.{specialized => sp}
 
 /** typeclass equivalent of Logger
   * may contain specified some Logger instance
@@ -33,8 +32,8 @@ trait LoggingBase[F[_]] {
     write(level, message, values: _*)
 
   /** could be overridden in the implementations, write message about some exception */
-  @silent def writeCause(level: Level, message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    write(level, message, values: _*)
+  def writeCause(level: Level, message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    write(level, message, values :+ LoggedValue.error(cause): _*)
 
   def trace(message: String, values: LoggedValue*): F[Unit] = write(Trace, message, values: _*)
   def debug(message: String, values: LoggedValue*): F[Unit] = write(Debug, message, values: _*)
@@ -104,14 +103,6 @@ object Logging {
   case object Info  extends Level
   case object Warn  extends Level
   case object Error extends Level
-
-  def errorvalue(ex: Throwable): LoggedValue =
-    new LoggedValue {
-      override def toString: String = ex.toString
-
-      def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R =
-        f.addString("stacktrace", ex.getStackTrace.mkString("\n"), input)
-    }
 }
 
 private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {

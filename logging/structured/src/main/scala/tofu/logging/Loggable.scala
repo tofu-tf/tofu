@@ -329,4 +329,13 @@ object LoggedValue {
   }
 
   implicit def loggableToLoggedValue[A](x: A)(implicit loggable: Loggable[A]): LoggedValue = loggable.loggedValue(x)
+
+  def error(cause: Throwable): LoggedThrowable = new LoggedThrowable(cause)
+}
+
+final class LoggedThrowable(cause: Throwable) extends Throwable(cause.getMessage, cause) with LoggedValue {
+  override def toString: String = cause.toString
+
+  def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R =
+    f.addString("stacktrace", cause.getStackTrace.mkString("\n"), input)
 }
