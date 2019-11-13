@@ -2,24 +2,24 @@ package tofu
 
 import cats.data.ReaderT
 import cats.syntax.either._
-import cats.{Applicative, ApplicativeError, Functor}
+import cats.{Applicative, ApplicativeError, Functor, Id}
 import errorInstances._
 import internal.{CachedMatcher, DataEffectComp}
 import tofu.optics.{Downcast, Subset, Upcast}
 
 import scala.reflect.ClassTag
+import cats.data.EitherT
+import cats.Monad
+import cats.data.OptionT
 
 trait Raise[F[_], E] extends Raise.ContravariantRaise[F, E] {
   def raise[A](err: E): F[A]
 }
 
-object Raise extends RaiseInstances with DataEffectComp[Raise] {
+object Raise extends RaiseInstances with DataEffectComp[Raise] with ErrorsInstanceChain[Raise] {
   trait ContravariantRaise[F[_], -E] {
     def raise[A](err: E): F[A]
   }
-
-  final implicit def raiseByCatsError[F[_]: ApplicativeError[*[_], E], E, E1: * <:< E]: Raise[F, E1] =
-    new FromAppErr[F, E, E1] with RaiseAppApErr[F, E, E1]
 }
 
 sealed class RaiseInstances {
@@ -31,18 +31,22 @@ trait RestoreTo[F[_], G[_]] {
   def restore[A](fa: F[A]): G[Option[A]]
 }
 
+object RestoreTo extends ErrorsToInstanceChain[λ[(f[_], g[_], e) => RestoreTo[f, g]]]
+
 trait Restore[F[_]] extends RestoreTo[F, F] {
   def restoreWith[A](fa: F[A])(ra: => F[A]): F[A]
 }
 
 trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
   def handleWith[A](fa: F[A])(f: E => G[A]): G[A]
+
   def handle[A](fa: F[A])(f: E => A)(implicit G: Applicative[G]): G[A] =
     handleWith(fa)(e => G.pure(f(e)))
 
   def attempt[A](fa: F[A])(implicit F: Functor[F], G: Applicative[G]): G[Either[E, A]] =
     handle(F.map(fa)(_.asRight[E]))(_.asLeft)
 }
+object HandleTo extends ErrorsToInstanceChain[HandleTo]
 
 trait Handle[F[_], E] extends HandleTo[F, F, E] with Restore[F] {
 
@@ -63,9 +67,7 @@ trait Handle[F[_], E] extends HandleTo[F, F, E] with Restore[F] {
   def restoreWith[A](fa: F[A])(ra: => F[A]): F[A] = handleWith(fa)(_ => ra)
 }
 
-object Handle extends HandleInstances with DataEffectComp[Handle] {
-  final implicit def handleByCatsError[F[_]: ApplicativeError[*[_], E], E, E1: ClassTag: * <:< E]: Handle[F, E1] =
-    new HandleApErr
+object Handle extends HandleInstances with DataEffectComp[Handle] with ErrorsInstanceChain[Handle] {
 
   trait ByRecover[F[_], E] extends Handle[F, E] {
     def recWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A]
@@ -76,7 +78,6 @@ object Handle extends HandleInstances with DataEffectComp[Handle] {
     override def recover[A](fa: F[A])(pf: PartialFunction[E, A])(implicit F: Applicative[F]): F[A] =
       recWith(fa)(pf andThen F.pure _)
   }
-
 }
 
 sealed class HandleInstances {
@@ -84,10 +85,26 @@ sealed class HandleInstances {
     new FromPrism[F, E, E1, Handle, Downcast] with HandlePrism[F, E, E1]
 }
 
-trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E]
+trait ErrorsTo[F[_], G[_], E] extends Raise[F, E] with HandleTo[F, G, E]
 
-object Errors extends ErrorInstances with DataEffectComp[Errors] {
-  final implicit def errorByCatsError[F[_]: ApplicativeError[*[_], E], E, E1: ClassTag: * <:< E]: Errors[F, E1] =
+object ErrorsTo extends ErrorsToInstanceChain[ErrorsTo]
+
+trait ErrorsToInstanceChain[TC[f[_], g[_], e] >: ErrorsTo[f, g, e]] 
+  extends ErrorsInstanceChain[Lambda[(f[_], e) => TC[f, f, e]]]  {
+  final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): TC[EitherT[F, E, *], F, E] =
+    new EitherTErrorsTo[F, E]
+  final implicit def optionTIntance[F[_]](implicit F: Monad[F]): TC[OptionT[F, *], F, Unit] = new OptionTErrorsTo[F]
+
+  final implicit def eitherIntance[E]: TC[Either[E, *], Id, E] = new EitherErrorsTo[E]
+  final implicit val optionTIntance: TC[Option, Id, Unit]      = OptionErrorsTo
+}
+
+trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E]
+
+object Errors extends ErrorInstances with DataEffectComp[Errors] with ErrorsInstanceChain[Errors]
+
+trait ErrorsInstanceChain[TC[f[_], e] >: Errors[f, e]] {
+  final implicit def errorByCatsError[F[_]: ApplicativeError[*[_], E], E, E1: ClassTag: * <:< E]: TC[F, E1] =
     new HandleApErr[F, E, E1] with RaiseAppApErr[F, E, E1] with Errors[F, E1]
 }
 

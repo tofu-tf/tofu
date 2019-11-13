@@ -9,6 +9,7 @@
         "label": "Core",
         "ids": [
           "typeclasses",
+          "errors",
           "fork"
         ]
       },
