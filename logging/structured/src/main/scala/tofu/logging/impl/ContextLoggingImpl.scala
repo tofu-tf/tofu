@@ -33,14 +33,14 @@ class ContextLoggingImpl[F[_]: Applicative, C: Loggable, Service: ClassTag](cont
   override def errorWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     context.ask(ctx => logger.error(ContextMarker(ctx).addMarker(marker), message, values: _*)).whenA(errorEnabled)
 
-  override def traceCause(message: String, cause: Throwable): F[Unit] =
-    context.ask(ctx => logger.trace(ContextMarker(ctx), message, cause)).whenA(errorEnabled)
-  override def debugCause(message: String, cause: Throwable): F[Unit] =
-    context.ask(ctx => logger.debug(ContextMarker(ctx), message, cause)).whenA(errorEnabled)
-  override def infoCause(message: String, cause: Throwable): F[Unit] =
-    context.ask(ctx => logger.info(ContextMarker(ctx), message, cause)).whenA(errorEnabled)
-  override def warnCause(message: String, cause: Throwable): F[Unit] =
-    context.ask(ctx => logger.error(ContextMarker(ctx), message, cause)).whenA(errorEnabled)
-  override def errorCause(message: String, cause: Throwable): F[Unit] =
-    context.ask(ctx => logger.error(ContextMarker(ctx), message, cause)).whenA(errorEnabled)
+  override def traceCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    context.ask(ctx => logger.trace(ContextMarker(ctx), message, values :+ cause: _*)).whenA(errorEnabled)
+  override def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    context.ask(ctx => logger.debug(ContextMarker(ctx), message, values :+ cause: _*)).whenA(errorEnabled)
+  override def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    context.ask(ctx => logger.info(ContextMarker(ctx), message, values :+ cause: _*)).whenA(errorEnabled)
+  override def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    context.ask(ctx => logger.error(ContextMarker(ctx), message, values :+ cause: _*)).whenA(errorEnabled)
+  override def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    context.ask(ctx => logger.error(ContextMarker(ctx), message, values :+ cause: _*)).whenA(errorEnabled)
 }

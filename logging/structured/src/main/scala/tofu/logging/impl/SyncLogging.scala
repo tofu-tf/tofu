@@ -17,14 +17,14 @@ class SyncLogging[F[_]](logger: Logger)(implicit F: Sync[F]) extends LoggingImpl
   override def error(message: String, values: LoggedValue*) =
     F.delay(logger.error(message, values: _*)).whenA(errorEnabled)
 
-  override def errorCause(message: String, cause: Throwable): F[Unit] =
-    F.delay(logger.error(message, cause)).whenA(errorEnabled)
-  override def warnCause(message: String, cause: Throwable): F[Unit] =
-    F.delay(logger.warn(message, cause)).whenA(errorEnabled)
-  override def infoCause(message: String, cause: Throwable): F[Unit] =
-    F.delay(logger.info(message, cause)).whenA(errorEnabled)
-  override def debugCause(message: String, cause: Throwable): F[Unit] =
-    F.delay(logger.debug(message, cause)).whenA(errorEnabled)
-  override def traceCause(message: String, cause: Throwable): F[Unit] =
-    F.delay(logger.trace(message, cause)).whenA(errorEnabled)
+  override def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    F.delay(logger.error(message, values :+ cause: _*)).whenA(errorEnabled)
+  override def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    F.delay(logger.warn(message, values :+ cause: _*)).whenA(errorEnabled)
+  override def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    F.delay(logger.info(message, values :+ cause: _*)).whenA(errorEnabled)
+  override def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    F.delay(logger.debug(message, values :+ cause: _*)).whenA(errorEnabled)
+  override def traceCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    F.delay(logger.trace(message, values :+ cause: _*)).whenA(errorEnabled)
 }

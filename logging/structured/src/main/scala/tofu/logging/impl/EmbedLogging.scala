@@ -12,8 +12,8 @@ class EmbedLogging[F[_]: FlatMap](underlying : F[Logging[F]]) extends Logging[F]
 
   override def writeMarker(level: Logging.Level, message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     underlying.flatMap(_.writeMarker(level, message, marker, values: _*))
-  override def writeCause(level: Logging.Level, message: String, cause: Throwable): F[Unit] =
-    underlying.flatMap(_.writeCause(level, message, cause))
+  override def writeCause(level: Logging.Level, message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    underlying.flatMap(_.writeCause(level, message, cause, values: _*))
   override def trace(message: String, values: LoggedValue*): F[Unit] =
     underlying.flatMap(_.trace(message, values: _*))
   override def debug(message: String, values: LoggedValue*): F[Unit] =
@@ -34,9 +34,14 @@ class EmbedLogging[F[_]: FlatMap](underlying : F[Logging[F]]) extends Logging[F]
     underlying.flatMap(_.warnWithMarker(message, marker, values))
   override def errorWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     underlying.flatMap(_.errorWithMarker(message, marker, values))
-  override def traceCause(message: String, cause: Throwable): F[Unit] = underlying.flatMap(_.traceCause(message, cause))
-  override def debugCause(message: String, cause: Throwable): F[Unit] = underlying.flatMap(_.debugCause(message, cause))
-  override def infoCause(message: String, cause: Throwable): F[Unit]  = underlying.flatMap(_.infoCause(message, cause))
-  override def warnCause(message: String, cause: Throwable): F[Unit]  = underlying.flatMap(_.warnCause(message, cause))
-  override def errorCause(message: String, cause: Throwable): F[Unit] = underlying.flatMap(_.errorCause(message, cause))
+  override def traceCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    underlying.flatMap(_.traceCause(message, cause, values: _*))
+  override def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    underlying.flatMap(_.debugCause(message, cause, values: _*))
+  override def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
+    underlying.flatMap(_.infoCause(message, cause, values: _*))
+  override def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
+    underlying.flatMap(_.warnCause(message, cause, values: _*))
+  override def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    underlying.flatMap(_.errorCause(message, cause, values: _*))
 }

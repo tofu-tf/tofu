@@ -12,7 +12,6 @@ import tofu.logging.impl.EmbedLogging
 import tofu.syntax.functionK._
 
 import scala.reflect.ClassTag
-import scala.{specialized => sp}
 
 /** typeclass equivalent of Logger
   * may contain specified some Logger instance
@@ -33,8 +32,8 @@ trait LoggingBase[F[_]] {
     write(level, message, values: _*)
 
   /** could be overridden in the implementations, write message about some exception */
-  def writeCause(level: Level, message: String, cause: Throwable): F[Unit] =
-    write(level, message, Logging.errorvalue(cause))
+  def writeCause(level: Level, message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    write(level, message, values :+ LoggedValue.error(cause): _*)
 
   def trace(message: String, values: LoggedValue*): F[Unit] = write(Trace, message, values: _*)
   def debug(message: String, values: LoggedValue*): F[Unit] = write(Debug, message, values: _*)
@@ -53,11 +52,16 @@ trait LoggingBase[F[_]] {
   def errorWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     writeMarker(Error, message, marker, values: _*)
 
-  def traceCause(message: String, cause: Throwable): F[Unit] = writeCause(Trace, message, cause)
-  def debugCause(message: String, cause: Throwable): F[Unit] = writeCause(Debug, message, cause)
-  def infoCause(message: String, cause: Throwable): F[Unit]  = writeCause(Info, message, cause)
-  def warnCause(message: String, cause: Throwable): F[Unit]  = writeCause(Warn, message, cause)
-  def errorCause(message: String, cause: Throwable): F[Unit] = writeCause(Error, message, cause)
+  def traceCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    writeCause(Trace, message, cause, values: _*)
+  def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    writeCause(Debug, message, cause, values: _*)
+  def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    writeCause(Info, message, cause, values: _*)
+  def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    writeCause(Warn, message, cause, values: _*)
+  def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    writeCause(Error, message, cause, values: _*)
 }
 
 /** Logging marked with Service type*/
@@ -99,14 +103,6 @@ object Logging {
   case object Info  extends Level
   case object Warn  extends Level
   case object Error extends Level
-
-  def errorvalue(ex: Throwable): LoggedValue =
-    new LoggedValue {
-      override def toString: String = ex.toString
-
-      def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R =
-        f.addString("stacktrace", ex.getStackTrace.mkString("\n"), input)
-    }
 }
 
 private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
