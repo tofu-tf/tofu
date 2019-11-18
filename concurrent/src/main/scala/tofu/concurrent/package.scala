@@ -15,4 +15,9 @@ package object concurrent {
   def newSemaphore[F[_]: Semaphores]  = MakeSemaphore[F, F]
   def newVar[F[_]: MVars]             = MakeMVar[F, F]
   def newDeffered[F[_]: Deferreds, A] = MakeDeferred[F, F, A]
+
+  type DaemonThrow[F[_], A] = Daemon[F, Throwable, A]
+  type DaemonTask[F[_]]     = DaemonThrow[F, Unit]
+
+  type DaemonicThrow[F[_]] = Daemonic[F, Throwable]
 }

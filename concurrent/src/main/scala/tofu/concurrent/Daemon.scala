@@ -7,7 +7,8 @@ import cats.effect.concurrent.{MVar, TryableDeferred}
 import cats.effect.syntax.bracket._
 import cats.syntax.applicativeError._
 import cats.tagless.autoApplyK
-import cats.{Apply, FlatMap, Monad}
+import cats.{Applicative, Apply, FlatMap, Monad}
+import tofu.control.ApplicativeZip
 import tofu.higherKind.Function2K
 import tofu.syntax.monadic._
 import tofu.syntax.start._
@@ -51,7 +52,9 @@ trait DaemonicInstances { self: Daemonic.type =>
 
   /** instance making Daemons keeping default underlying behaviour*/
   implicit def nativeInstance[F[_]: Start: TryableDeferreds: Bracket[*[_], E], E]: Daemonic[F, E] =
-    mkInstance[F, E](Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]((fib, promise) => new Daemon.Impl(fib, promise)))
+    mkInstance[F, E](
+      Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]((fib, promise) => new Daemon.Impl(fib, promise))
+    )
 }
 
 @autoApplyK
@@ -65,7 +68,7 @@ trait Daemon[F[_], E, A] extends Fiber[F, A] {
 }
 
 /** Probably Infinite processes */
-object Daemon {
+object Daemon extends DaemonInstances {
   private[tofu] class Impl[F[_], E, A](process: Fiber[F, A], end: TryableDeferred[F, Exit[E, A]])
       extends Daemon[F, E, A] {
 
@@ -80,7 +83,7 @@ object Daemon {
       extends Impl[F, Throwable, A](process, end) {
     override def join: F[A] = exit.flatMap {
       case Exit.Error(e)     => e.raiseError
-      case Exit.Completed(a) => a.pure
+      case Exit.Completed(a) => a.pure[F]
       case Exit.Canceled     => new TofuCanceledJoinException[F, A](this).raiseError
     }
   }
@@ -96,14 +99,24 @@ object Daemon {
 
   def repeat[F[_]: Monad: Daemonic[*[_], E], E, A, B](step: F[A]): F[Daemon[F, E, B]] = apply(step.foreverM)
 
+  def repeatThrow[F[_]: Monad: DaemonicThrow, A, B](step: F[A]): F[DaemonThrow[F, B]] = repeat(step)
+
+  def repeatTask[F[_]: Monad: DaemonicThrow, A](step: F[A]): F[DaemonTask[F]] = repeat(step)
+
   def iterate[F[_]: Monad: Daemonic[*[_], E], E, A, B](init: A)(step: A => F[A]): F[Daemon[F, E, B]] =
     apply(init.iterateForeverM(step))
+
+  def iterateThrow[F[_]: Monad: DaemonicThrow, A, B](init: A)(step: A => F[A]): F[DaemonThrow[F, B]] =
+    iterate(init)(step)
+
+  def iterateTask[F[_]: Monad: DaemonicThrow, A](init: A)(step: A => F[A]): F[DaemonTask[F]] = iterate(init)(step)
 
   def state[F[_]: Monad: Daemonic[*[_], E], E, S, A, B](init: S)(state: StateT[F, S, A]): F[Daemon[F, E, B]] =
     iterate(init)(state.runS)
 
   def resource[F[_]: Monad: Daemonic[*[_], E], E, A](daemon: F[Daemon[F, E, A]]): Resource[F, Daemon[F, E, A]] =
     Resource.make(daemon)(_.cancel)
+
 }
 
 final class Actor[F[_], E, A] private (queue: MVar[F, A], val daemon: Daemon[F, E, Void]) {
@@ -163,3 +176,37 @@ object Actor {
 
 final class TofuCanceledJoinException[F[_], A] private[tofu] (val daemon: Daemon[F, Throwable, A])
     extends InterruptedException("trying to join canceled fiber")
+
+trait DaemonInstances {
+  implicit def daemonApplicative[F[_], E](implicit F: Monad[F]): Applicative[Daemon[F, E, *]] =
+    new ApplicativeZip[Daemon[F, E, *]] {
+      def pure[A](x: A): Daemon[F, E, A] = new Daemon[F, E, A] {
+        def join: F[A]                  = F.pure(x)
+        def cancel: F[Unit]             = F.unit
+        def poll: F[Option[Exit[E, A]]] = F.pure(Some(Exit.Completed(x)))
+        def exit: F[Exit[E, A]]         = F.pure(Exit.Completed(x))
+      }
+
+      override def map[A, B](fa: Daemon[F, E, A])(f: A => B): Daemon[F, E, B] = new Daemon[F, E, B] {
+        def join: F[B]                  = fa.join.map(f)
+        def cancel: F[Unit]             = fa.cancel
+        def poll: F[Option[Exit[E, B]]] = fa.poll.map(_.map(_.map(f)))
+        def exit: F[Exit[E, B]]         = fa.exit.map(_.map(f))
+      }
+
+      def zipWith[A, B, C](fa: Daemon[F, E, A], fb: Daemon[F, E, B])(f: (A, B) => C): Daemon[F, E, C] =
+        new Daemon[F, E, C] {
+          def join: F[C]      = fa.join.map2(fb.join)(f)
+          def cancel: F[Unit] = fa.cancel *> fb.cancel
+          def poll: F[Option[Exit[E, C]]] = fa.poll.flatMap {
+            case fe @ (None | Some(_: Exit.Incomplete[E])) => F.pure(fe.asInstanceOf[Option[Exit[E, C]]])
+            case Some(Exit.Completed(a)) =>
+              fb.poll.map {
+                case fe @ (None | Some(_: Exit.Incomplete[E])) => fe.asInstanceOf[Option[Exit[E, C]]]
+                case Some(Exit.Completed(b))                   => Some(Exit.Completed(f(a, b)))
+              }
+          }
+          def exit: F[Exit[E, C]] = fa.exit.map2(fb.exit)(_.map2(_)(f))
+        }
+    }
+}
