@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.5.2"
+val libVersion = "0.5.3"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -38,14 +38,14 @@ lazy val defaultSettings = List(
       compilerPlugin("com.github.ghik" % "silencer-plugin" % Version.silencer cross CrossVersion.full),
       "com.github.ghik" % "silencer-lib" % Version.silencer % Provided cross CrossVersion.full
     )
-) ++ publishSettings ++ scala213Options
+) ++ publishSettings ++ scala213Options ++ simulacrumOptions
 
 moduleName := "tofu"
 
 lazy val core = project dependsOn (opticsCore) settings (
   defaultSettings,
   publishName := "core",
-  libraryDependencies ++= Seq(simulacrum, catsCore, catsEffect, catsTagless),
+  libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
   macros
 )
 
@@ -53,7 +53,7 @@ lazy val memo = project
   .dependsOn(core, concurrent)
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(catsCore, catsEffect, simulacrum),
+    libraryDependencies ++= Seq(catsCore, catsEffect),
     macros
   )
 
@@ -92,7 +92,7 @@ lazy val loggingLayout = project
   .in(file("logging/layout"))
   .settings(
     defaultSettings,
-    libraryDependencies ++= List(catsCore, catsEffect, simulacrum, logback, slf4j),
+    libraryDependencies ++= List(catsCore, catsEffect, logback, slf4j),
     macros,
     publishName := "logging-layout"
   )
@@ -116,7 +116,7 @@ lazy val observable = project.settings(
 lazy val concurrent =
   project dependsOn (core) settings (
     defaultSettings,
-    libraryDependencies ++= List(catsEffect, catsTagless, simulacrum),
+    libraryDependencies ++= List(catsEffect, catsTagless),
     macros,
 )
 
@@ -236,6 +236,27 @@ lazy val scala213Options = List(
   },
 )
 
+lazy val simulacrumOptions = Seq(
+  libraryDependencies ++= Seq(
+    scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided,
+    simulacrum % Provided
+  ),
+  pomPostProcess := { node =>
+    import scala.xml.transform.{RewriteRule, RuleTransformer}
+
+    new RuleTransformer(new RewriteRule {
+      override def transform(node: xml.Node): Seq[xml.Node] = node match {
+        case e: xml.Elem
+          if e.label == "dependency" &&
+            e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
+            e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
+          Nil
+        case _ => Seq(node)
+      }
+    }).transform(node).head
+  }
+)
+
 lazy val defaultScalacOptions = scalacOptions ++= List(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-encoding",
@@ -283,7 +304,9 @@ lazy val publishSettings = List(
       Some(Opts.resolver.sonatypeSnapshots)
     } else sonatypePublishToBundle.value
   },
-  credentials += Credentials(Path.userHome / ".sbt" / ".ossrh-credentials"),
+  credentials ++= ((Path.userHome / ".sbt" / ".ossrh-credentials") :: Nil)
+    .filter(_.exists())
+    .map(Credentials.apply),
   version := {
     val branch = git.gitCurrentBranch.value
     if (branch == "master") publishVersion.value

@@ -5,7 +5,7 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val circe = "0.12.2"
+    val circe = "0.12.3"
 
     val tethys = "0.10.0"
 
@@ -13,29 +13,29 @@ object Dependencies {
 
     val catsEffect = "2.0.0"
 
-    val catsTagless = "0.9"
+    val catsTagless = "0.10"
 
-    val monocle = "2.0.0-RC1"
+    val monocle = "2.0.0"
 
     val enumeratum = "1.5.13"
 
-    val derevo = "0.10.2"
+    val derevo = "0.10.5"
 
-    val slf4j = "1.7.26"
+    val slf4j = "1.7.29"
 
     val fs2 = "1.0.5"
 
     val logback = "1.2.3"
 
-    val simulacrum = "0.19.0"
+    val simulacrum = "1.0.0"
 
     val monix = "3.0.0"
 
     val scalatest = "3.0.8"
 
-    val magnolia = "0.11.0"
+    val magnolia = "0.12.0"
 
-    val typesafeConfig = "1.3.4"
+    val typesafeConfig = "1.4.0"
 
     val silencer = "1.4.4"
 
@@ -48,7 +48,7 @@ object Dependencies {
   val alleycats       = "org.typelevel"              %% "alleycats-core"      % Version.cats
   val catsEffect      = "org.typelevel"              %% "cats-effect"         % Version.catsEffect
   val monix           = "io.monix"                   %% "monix"               % Version.monix
-  val simulacrum      = "com.github.mpilquist"       %% "simulacrum"          % Version.simulacrum
+  val simulacrum      = "org.typelevel"              %% "simulacrum"          % Version.simulacrum
   val logback         = "ch.qos.logback"             % "logback-classic"      % Version.logback
   val slf4j           = "org.slf4j"                  % "slf4j-simple"         % Version.slf4j % Provided
   val circeCore       = "io.circe"                   %% "circe-core"          % Version.circe
@@ -65,5 +65,4 @@ object Dependencies {
   val typesafeConfig  = "com.typesafe"               % "config"               % Version.typesafeConfig
   val zio             = "dev.zio"                    %% "zio"                 % Version.zio
   val scalatest       = "org.scalatest"              %% "scalatest"           % Version.scalatest % Test
-
 }
