@@ -211,7 +211,7 @@ trait MagnoliaDerivation extends Derivation[Configurable] {
                     .typeclass[F](cfg)
                     .map(x => sub.typeName.short -> (x: T))
                     .local(_ :+ Variant(sub.typeName.short))
-                    .restore[F]
+                    .restore
               )
               .flatMap(_.unite match {
                 case Nil                => F.error(NoVariantFound)
