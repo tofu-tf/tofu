@@ -13,7 +13,7 @@ see [the docs on the site](https://tinkoffcreditsystems.github.io/tofu)
 To use the whole utils pack just add to your `build.sbt`: 
 
 ```scala
-libraryDependencies += "ru.tinkoff" %% "tofu" % "0.5.3"
+libraryDependencies += "ru.tinkoff" %% "tofu" % "0.5.4"
 ```
 
 Of course you can also specify the exact subproject that you wanna add to yours dependencies (used in place of `"tofu"`):
