@@ -99,12 +99,17 @@ object Daemon extends DaemonInstances {
 
   def repeat[F[_]: Monad: Daemonic[*[_], E], E, A, B](step: F[A]): F[Daemon[F, E, B]] = apply(step.foreverM)
 
+  def repeatUnit[F[_]: Monad: Daemonic[*[_], E], E, A](step: F[A]): F[Daemon[F, E, Unit]] = repeat(step)
+
   def repeatThrow[F[_]: Monad: DaemonicThrow, A, B](step: F[A]): F[DaemonThrow[F, B]] = repeat(step)
 
   def repeatTask[F[_]: Monad: DaemonicThrow, A](step: F[A]): F[DaemonTask[F]] = repeat(step)
 
   def iterate[F[_]: Monad: Daemonic[*[_], E], E, A, B](init: A)(step: A => F[A]): F[Daemon[F, E, B]] =
     apply(init.iterateForeverM(step))
+
+  def iterateUnit[F[_]: Monad: Daemonic[*[_], E], E, A](init: A)(step: A => F[A]): F[Daemon[F, E, Unit]] =
+    iterate(init)(step)
 
   def iterateThrow[F[_]: Monad: DaemonicThrow, A, B](init: A)(step: A => F[A]): F[DaemonThrow[F, B]] =
     iterate(init)(step)

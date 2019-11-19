@@ -42,15 +42,21 @@ object raise {
 
 object handle {
   final implicit class HandleOps[F[_], A](val fa: F[A]) extends AnyVal {
-    def restore[G[_]](implicit FE: RestoreTo[F, G]): G[Option[A]]                                     = FE.restore(fa)
-    def restoreWith(ra: => F[A])(implicit FE: Restore[F]): F[A]                                       = FE.restoreWith(fa)(ra)
-    def retry(count: Int)(implicit FE: Restore[F]): F[A]                                              = if (count <= 1) fa else restoreWith(retry(count - 1))
-    def handleWith[G[_], E](f: E => G[A])(implicit FE: HandleTo[F, G, E]): G[A]                       = FE.handleWith(fa)(f)
-    def tryHandleWith[E](f: E => Option[F[A]])(implicit FE: Handle[F, E]): F[A]                       = FE.tryHandleWith(fa)(f)
-    def tryHandle[E](f: E => Option[A])(implicit F: Applicative[F], FE: Handle[F, E]): F[A]           = FE.tryHandle(fa)(f)
-    def handle[G[_]: Applicative, E](f: E => A)(implicit FE: HandleTo[F, G, E]): G[A]                 = FE.handle(fa)(f)
-    def recoverWith[E](pf: PartialFunction[E, F[A]])(implicit FE: Handle[F, E]): F[A]                 = FE.recoverWith(fa)(pf)
-    def recover[E](pf: PartialFunction[E, A])(implicit F: Applicative[F], FE: Handle[F, E]): F[A]     = FE.recover(fa)(pf)
-    def attempt[G[_]: Applicative, E](implicit F: Functor[F], FE: HandleTo[F, G, E]): G[Either[E, A]] = FE.attempt(fa)
+    def restore(implicit FE: RestoreTo[F, F]): F[Option[A]]                                             = FE.restore(fa)
+    def restoreTo[G[_]](implicit FE: RestoreTo[F, G]): G[Option[A]]                                     = FE.restore(fa)
+    def restoreWith(ra: => F[A])(implicit FE: Restore[F]): F[A]                                         = FE.restoreWith(fa)(ra)
+    def retry(count: Int)(implicit FE: Restore[F]): F[A]                                                = if (count <= 1) fa else restoreWith(retry(count - 1))
+    def handleWith[E](f: E => F[A])(implicit FE: HandleTo[F, F, E]): F[A]                               = FE.handleWith(fa)(f)
+    def handleToWith[G[_], E](f: E => G[A])(implicit FE: HandleTo[F, G, E]): G[A]                       = FE.handleWith(fa)(f)
+    def tryHandleWith[E](f: E => Option[F[A]])(implicit FE: Handle[F, E]): F[A]                         = FE.tryHandleWith(fa)(f)
+    def tryHandle[E](f: E => Option[A])(implicit F: Applicative[F], FE: Handle[F, E]): F[A]             = FE.tryHandle(fa)(f)
+    def handle[E](f: E => A)(implicit FE: HandleTo[F, F, E], F: Applicative[F]): F[A]                   = FE.handle(fa)(f)
+    def handleTo[G[_]: Applicative, E](f: E => A)(implicit FE: HandleTo[F, G, E]): G[A]                 = FE.handle(fa)(f)
+    def recoverWith[E](pf: PartialFunction[E, F[A]])(implicit FE: Handle[F, E]): F[A]                   = FE.recoverWith(fa)(pf)
+    def recover[E](pf: PartialFunction[E, A])(implicit F: Applicative[F], FE: Handle[F, E]): F[A]       = FE.recover(fa)(pf)
+    def attempt[E](implicit F: Applicative[F], FE: HandleTo[F, F, E]): F[Either[E, A]]                  = FE.attempt(fa)
+    def attemptTo[G[_]: Applicative, E](implicit F: Functor[F], FE: HandleTo[F, G, E]): G[Either[E, A]] = FE.attempt(fa)
+    def onError[B, E](f: E => F[B])(implicit FE: Errors[F, E], F: Applicative[F]): F[A] =
+      FE.handleWith(fa)(e => F.productR(f(e))(FE.raise(e)))
   }
 }
