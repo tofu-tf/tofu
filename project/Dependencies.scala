@@ -39,7 +39,7 @@ object Dependencies {
 
     val silencer = "1.4.4"
 
-    val zio = "1.0.0-RC14"
+    val zio = "1.0.0-RC17"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"           % Version.cats
