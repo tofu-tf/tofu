@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.5.4"
+val libVersion = "0.5.5"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -42,7 +42,7 @@ lazy val defaultSettings = List(
 
 moduleName := "tofu"
 
-lazy val core = project dependsOn (opticsCore) settings (
+lazy val core = project dependsOn opticsCore settings (
   defaultSettings,
   publishName := "core",
   libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
@@ -114,7 +114,7 @@ lazy val observable = project.settings(
 )
 
 lazy val concurrent =
-  project dependsOn (core) settings (
+  project dependsOn core settings (
     defaultSettings,
     libraryDependencies ++= List(catsEffect, catsTagless),
     macros,

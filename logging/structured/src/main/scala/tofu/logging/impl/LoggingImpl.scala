@@ -4,7 +4,8 @@ package impl
 import org.slf4j.{Logger, Marker}
 import tofu.logging.Logging.{Debug, Error, Info, Level, Trace, Warn}
 
-abstract class LoggingImpl[F[_]](logger: Logger) extends Logging[F] {
+/* */
+private[tofu] abstract class LoggingImpl[F[_]](logger: Logger) extends Logging[F] {
 
   def traceEnabled: Boolean = logger.isTraceEnabled
   def debugEnabled: Boolean = logger.isDebugEnabled
