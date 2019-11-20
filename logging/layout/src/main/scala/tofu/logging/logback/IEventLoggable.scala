@@ -62,6 +62,21 @@ class EventArgumentsLoggable extends EventLoggable {
     }
 }
 
+class EventArgumentsArrayLoggable(fieldName: String) extends EventLoggable {
+  def fields[I, V, R, S](evt: ILoggingEvent, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
+    evt.getArgumentArray match {
+      case null => i.noop
+      case array =>
+        i.subDictList(fieldName, array.length)(
+          (inner, idx) =>
+            array(idx) match {
+              case lv: LoggedValue => lv.logFields(inner)
+              case _               => inner.noop
+            }
+        )
+    }
+}
+
 class EventExceptionLoggable extends EventLoggable {
   def fields[I, V, R, S](evt: ILoggingEvent, i: I)(implicit rec: LogRenderer[I, V, R, S]): R =
     evt.getThrowableProxy match {
@@ -75,10 +90,13 @@ class EventExceptionLoggable extends EventLoggable {
 }
 
 object EventLoggable {
-  val buildin: Loggable[ILoggingEvent]    = new EventBuiltInLoggable
-  val fromMarker: Loggable[ILoggingEvent] = new EventMarkerLoggable
-  val arguments: Loggable[ILoggingEvent]  = new EventArgumentsLoggable
-  val exception: Loggable[ILoggingEvent]  = new EventExceptionLoggable
+  val builtin: Loggable[ILoggingEvent]                         = new EventBuiltInLoggable
+  val marker: Loggable[ILoggingEvent]                      = new EventMarkerLoggable
+  val arguments: Loggable[ILoggingEvent]                       = new EventArgumentsLoggable
+  def argumentArray(argField: String): Loggable[ILoggingEvent] = new EventArgumentsArrayLoggable(argField)
+  val exception: Loggable[ILoggingEvent]                       = new EventExceptionLoggable
 
-  val default: Loggable[ILoggingEvent] = buildin + fromMarker + arguments + exception
+  val default: Loggable[ILoggingEvent] = builtin + marker + arguments + exception
+  def defaultArray(argField: String): Loggable[ILoggingEvent] =
+    builtin + marker + argumentArray(argField) + exception
 }

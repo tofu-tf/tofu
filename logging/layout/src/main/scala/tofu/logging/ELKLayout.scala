@@ -8,9 +8,16 @@ import tofu.logging.logback.EventLoggable
 
 /** logging layout writing JSON receivable by logstash */
 class ELKLayout extends PatternLayout {
-  import ELKLayout.iLoggingEventLoggable
+  var argumentField: Option[String] = None
 
-  override def doLayout(event: ILoggingEvent): String = ELKLayout.builder(event)
+  def setArgumentsField(name: String): Unit = argumentField = Some(name)
+
+  override def doLayout(event: ILoggingEvent): String = {
+    implicit val loggable: Loggable[ILoggingEvent] =
+      argumentField.fold(EventLoggable.default)(EventLoggable.argumentArray)
+
+    ELKLayout.builder(event)
+  }
 }
 
 object ELKLayout {
@@ -27,8 +34,4 @@ object ELKLayout {
   val StackTraceField = "stackTrace"
 
   val builder: TethysBuilder = TethysBuilder(postfix = EOL)
-
-  implicit val iLoggingEventLoggable: Loggable[ILoggingEvent] = EventLoggable.default
 }
-
-
