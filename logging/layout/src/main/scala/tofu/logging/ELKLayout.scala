@@ -14,7 +14,7 @@ class ELKLayout extends PatternLayout {
 
   override def doLayout(event: ILoggingEvent): String = {
     implicit val loggable: Loggable[ILoggingEvent] =
-      argumentField.fold(EventLoggable.default)(EventLoggable.argumentArray)
+      argumentField.fold(EventLoggable.default)(EventLoggable.defaultArray)
 
     ELKLayout.builder(event)
   }
