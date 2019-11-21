@@ -9,4 +9,6 @@ package object tofu {
   type ApplicativeThrow[F[_]] = ApplicativeError[F, Throwable]
   type MonadThrow[F[_]]       = MonadError[F, Throwable]
   type BracketThrow[F[_]]     = Bracket[F, Throwable]
+
+  type TConst[A, B] = A
 }
