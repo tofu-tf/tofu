@@ -58,6 +58,9 @@ object Loggable {
   trait Base[-A] {
     self =>
 
+    def typeName: String  = ""
+    def shortName: String = ""
+
     /** write all fields of current value in the current object - context */
     def fields[I, V, R, S](a: A, i: I)(implicit r: LogRenderer[I, V, R, S]): R
 
@@ -95,6 +98,8 @@ object Loggable {
       override def logFields[I, V, @sp(Unit) R, @sp M](i: I)(implicit r: LogRenderer[I, V, R, M]): R =
         fields[I, V, R, M](a, i)
       override def toString: String = logShow(a)
+      override def typeName: String = self.typeName
+      def shortName: String             = self.shortName
     }
 
     /** transform input value befor logging */
@@ -141,7 +146,8 @@ object Loggable {
   final implicit val stringValue: Loggable[String] = new SingleValueLoggable[String] {
     def logValue(a: String): LogParamValue = StrValue(a)
     override def putField[I, V, R, M](a: String, name: String, input: I)(
-        implicit receiver: LogRenderer[I, V, R, M]): R =
+        implicit receiver: LogRenderer[I, V, R, M]
+    ): R =
       receiver.addString(name, a, input)
   }
 
@@ -172,14 +178,16 @@ object Loggable {
   final implicit val bigIngLoggable: Loggable[BigInt] = new SingleValueLoggable[BigInt] {
     def logValue(a: BigInt): LogParamValue = BigIntValue(a)
     override def putField[I, V, R, M](a: BigInt, name: String, input: I)(
-        implicit receiver: LogRenderer[I, V, R, M]): R =
+        implicit receiver: LogRenderer[I, V, R, M]
+    ): R =
       receiver.addBigInt(name, a, input)
   }
 
   final implicit val bigDecimalLoggable: Loggable[BigDecimal] = new SingleValueLoggable[BigDecimal] {
     def logValue(a: BigDecimal): LogParamValue = DecimalValue(a)
     override def putField[I, V, R, M](a: BigDecimal, name: String, input: I)(
-        implicit receiver: LogRenderer[I, V, R, M]): R =
+        implicit receiver: LogRenderer[I, V, R, M]
+    ): R =
       receiver.addDecimal(name, a, input)
   }
 
@@ -192,14 +200,16 @@ object Loggable {
   final implicit val doubleLoggable: Loggable[Double] = new SingleValueLoggable[Double] {
     def logValue(a: Double): LogParamValue = FloatValue(a)
     override def putField[I, V, R, M](a: Double, name: String, input: I)(
-        implicit receiver: LogRenderer[I, V, R, M]): R =
+        implicit receiver: LogRenderer[I, V, R, M]
+    ): R =
       receiver.addFloat(name, a, input)
   }
 
   final implicit val booleanLoggable: Loggable[Boolean] = new SingleValueLoggable[Boolean] {
     def logValue(a: Boolean): LogParamValue = BoolValue(a)
     override def putField[I, V, R, M](a: Boolean, name: String, input: I)(
-        implicit receiver: LogRenderer[I, V, R, M]): R =
+        implicit receiver: LogRenderer[I, V, R, M]
+    ): R =
       receiver.addBool(name, a, input)
   }
 
@@ -267,7 +277,8 @@ object Loggable {
     }
 
     override def putField[I, V, R, M](oa: Option[T], name: String, input: I)(
-        implicit receiver: LogRenderer[I, V, R, M]): R =
+        implicit receiver: LogRenderer[I, V, R, M]
+    ): R =
       oa match {
         case None    => input.noop
         case Some(a) => loggable.putField(a, name, input)
@@ -315,6 +326,9 @@ trait SingleValueLoggable[@specialized A] extends Loggable[A] with SubLoggable[A
 }
 
 trait LoggedValue {
+  def typeName: String
+  def shortName: String
+
   def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit r: LogRenderer[I, V, R, M]): R
 
   def foreachLog(f: (String, Any) => Unit): Unit =
@@ -338,4 +352,7 @@ final class LoggedThrowable(cause: Throwable) extends Throwable(cause.getMessage
 
   def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R =
     f.addString("stacktrace", cause.getStackTrace.mkString("\n"), input)
+
+  override def typeName: String = cause.getClass.getTypeName
+  def shortName: String             = "exception"
 }

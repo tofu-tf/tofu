@@ -2,7 +2,7 @@ package tofu.logging
 package derivation
 
 import cats.Show
-import magnolia.{CaseClass, Magnolia, SealedTrait}
+import magnolia.{CaseClass, Magnolia, SealedTrait, TypeName}
 import org.manatki.derevo.Derivation
 
 object loggable extends Derivation[Loggable] {
@@ -10,9 +10,23 @@ object loggable extends Derivation[Loggable] {
     Loggable.stringValue.contramap(show.show).named(name)
 
   type Typeclass[A] = Loggable[A]
+
+  private[this] def calcTypeName(typeName: TypeName, seen: Set[TypeName] = Set()): String =
+    if (seen(typeName)) "#"
+    else {
+      val args = typeName.typeArguments
+      val name = typeName.full
+
+      if (args.isEmpty) name
+      else args.iterator.map(calcTypeName(_, seen + typeName)).mkString(name + "[", ",", "]")
+    }
+
   def combine[T](caseClass: CaseClass[Typeclass, T]): Loggable[T] =
     new DictLoggable[T] {
       private[this] val doNotShow = caseClass.annotations.contains(hidden())
+
+      override val typeName  = calcTypeName(caseClass.typeName)
+      override val shortName = caseClass.typeName.short
 
       def fields[I, V, R, M](a: T, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
         caseClass.parameters.iterator
@@ -37,6 +51,9 @@ object loggable extends Derivation[Loggable] {
     }
 
   def dispatch[T](ctx: SealedTrait[Typeclass, T]): Loggable[T] = new Typeclass[T] {
+    override val typeName = calcTypeName(ctx.typeName)
+    override val shortName    = ctx.typeName.short
+
     def fields[I, V, R, M](a: T, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
       ctx.dispatch(a)(sub => sub.typeclass.fields(sub.cast(a), input))
 
