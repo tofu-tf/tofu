@@ -75,6 +75,7 @@ class EventArgumentsGroupLoggable extends EventLoggable {
         array.collect { case lv: LoggedValue => lv }
           .groupBy(_.shortName)
           .foldLeft(i.noop) {
+            case (r, ("", values))         => values.foldLeft(r)(_ |+| _.logFields(i))
             case (r, (name, Array(value))) => r |+| i.subDict(name)(value.logFields(_))
             case (r, (name, values))       => r |+| i.subDictList(name, values.length)((si, idx) => values(idx).logFields(si))
           }
