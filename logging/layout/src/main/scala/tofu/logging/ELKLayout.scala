@@ -4,20 +4,33 @@ package logging
 import ch.qos.logback.classic.PatternLayout
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.CoreConstants.{LINE_SEPARATOR => EOL}
+import tofu.logging.ELKLayout.Arguments
 import tofu.logging.logback.EventLoggable
 
 /** logging layout writing JSON receivable by logstash */
 class ELKLayout extends PatternLayout {
-  var argumentField: Option[String] = None
+  private var arguments: Arguments = Arguments.Merge
 
-  def setArgumentsField(name: String): Unit = argumentField = Some(name)
+  private[this] implicit var eventLoggable: Loggable[ILoggingEvent] = EventLoggable.merge
 
-  override def doLayout(event: ILoggingEvent): String = {
-    implicit val loggable: Loggable[ILoggingEvent] =
-      argumentField.fold(EventLoggable.default)(EventLoggable.defaultArray)
-
-    ELKLayout.builder(event)
+  def setArgumentsField(name: String): Unit = {
+    arguments = Arguments.Collect(name)
+    updateEventLoggable()
   }
+  def setArguments(value: String): Unit = {
+    arguments = Arguments.parse(value)
+    updateEventLoggable()
+  }
+
+  private def updateEventLoggable(): Unit =
+    eventLoggable = arguments match {
+      case Arguments.Merge         => EventLoggable.merge
+      case Arguments.Group         => EventLoggable.group
+      case Arguments.Collect(name) => EventLoggable.collect(name)
+    }
+
+  override def doLayout(event: ILoggingEvent): String =
+    ELKLayout.builder(event)
 }
 
 object ELKLayout {
@@ -34,4 +47,19 @@ object ELKLayout {
   val StackTraceField = "stackTrace"
 
   val builder: TethysBuilder = TethysBuilder(postfix = EOL)
+
+  sealed trait Arguments
+
+  object Arguments {
+    case object Merge                 extends Arguments
+    case object Group                 extends Arguments
+    case class Collect(field: String) extends Arguments
+
+    def parse(name: String): Arguments = name match {
+      case "merge" => Merge
+      case "group" => Group
+    }
+  }
+
+  case class ArgumentParsingException(value: String) extends RuntimeException(s"could not parse $value")
 }

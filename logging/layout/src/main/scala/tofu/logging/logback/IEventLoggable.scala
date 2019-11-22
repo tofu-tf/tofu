@@ -5,22 +5,12 @@ package logback
 import java.time.Instant
 
 import cats.syntax.monoid._
-import ch.qos.logback.classic.PatternLayout
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.CoreConstants.{LINE_SEPARATOR => EOL}
-import tofu.data.PArray
 import impl.ContextMarker
 import syntax.logRenderer._
-import tofu.logging.ELKLayout.{
-  ExceptionField,
-  LevelField,
-  LoggerNameField,
-  MarkersField,
-  MessageField,
-  StackTraceField,
-  ThreadNameField,
-  TimeStampField
-}
+import tofu.data.PArray
+import tofu.logging.ELKLayout._
 
 trait EventLoggable extends DictLoggable[ILoggingEvent] with ToStringLoggable[ILoggingEvent]
 
@@ -77,6 +67,21 @@ class EventArgumentsArrayLoggable(fieldName: String) extends EventLoggable {
     }
 }
 
+class EventArgumentsGroupLoggable extends EventLoggable {
+  def fields[I, V, R, S](evt: ILoggingEvent, i: I)(implicit render: LogRenderer[I, V, R, S]): R =
+    evt.getArgumentArray match {
+      case null => i.noop
+      case array =>
+        array.collect { case lv: LoggedValue => lv }
+          .groupBy(_.shortName)
+          .foldLeft(i.noop) {
+            case (r, ("", values))         => values.foldLeft(r)(_ |+| _.logFields(i))
+            case (r, (name, Array(value))) => r |+| i.subDict(name)(value.logFields(_))
+            case (r, (name, values))       => r |+| i.subDictList(name, values.length)((si, idx) => values(idx).logFields(si))
+          }
+    }
+}
+
 class EventExceptionLoggable extends EventLoggable {
   def fields[I, V, R, S](evt: ILoggingEvent, i: I)(implicit rec: LogRenderer[I, V, R, S]): R =
     evt.getThrowableProxy match {
@@ -91,12 +96,14 @@ class EventExceptionLoggable extends EventLoggable {
 
 object EventLoggable {
   val builtin: Loggable[ILoggingEvent]                         = new EventBuiltInLoggable
-  val marker: Loggable[ILoggingEvent]                      = new EventMarkerLoggable
+  val marker: Loggable[ILoggingEvent]                          = new EventMarkerLoggable
   val arguments: Loggable[ILoggingEvent]                       = new EventArgumentsLoggable
   def argumentArray(argField: String): Loggable[ILoggingEvent] = new EventArgumentsArrayLoggable(argField)
   val exception: Loggable[ILoggingEvent]                       = new EventExceptionLoggable
+  val argumentGroup: Loggable[ILoggingEvent]                   = new EventArgumentsGroupLoggable
 
-  val default: Loggable[ILoggingEvent] = builtin + marker + arguments + exception
-  def defaultArray(argField: String): Loggable[ILoggingEvent] =
+  val merge: Loggable[ILoggingEvent] = builtin + marker + arguments + exception
+  def collect(argField: String): Loggable[ILoggingEvent] =
     builtin + marker + argumentArray(argField) + exception
+  val group = builtin + marker + argumentGroup + exception
 }
