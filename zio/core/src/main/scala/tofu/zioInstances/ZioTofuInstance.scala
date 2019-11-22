@@ -50,7 +50,7 @@ class ZioTofuInstance[R, E]
 
 
   final def finallyCase[A, B, C](init: ZIO[R, E, A])(action: A => ZIO[R, E, B])(release: (A, Exit[E, B]) => ZIO[R, E, C]): ZIO[R, E, B] =
-    init.bracketExit((a, e) => release(a, e).ignore, action)
+    init.bracketExit[R, E, B]((a, e) => release(a, e).ignore, action)
 }
 
 class ZIOTofuTimeoutInstance[R <: Clock, E] extends Timeout[ZIO[R, E, *]] {
