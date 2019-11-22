@@ -72,9 +72,9 @@ lazy val loggingStr = project
       alleycats,
       scalatest,
       derevo,
-      catsTagless,
+      catsTagless
     ),
-    macros,
+    macros
   )
   .dependsOn(core, data)
 
@@ -110,7 +110,7 @@ lazy val env = project
 lazy val observable = project.settings(
   defaultSettings,
   libraryDependencies += monix,
-  libraryDependencies += scalatest,
+  libraryDependencies += scalatest
 )
 
 lazy val concurrent =
@@ -126,14 +126,12 @@ lazy val config = project dependsOn (core, data, opticsCore, concurrent) setting
   macros,
 )
 
-
-
 lazy val opticsCore = project
   .in(file("optics/core"))
   .settings(
     defaultSettings,
     libraryDependencies ++= List(catsCore, alleycats),
-    publishName := "optics-core",
+    publishName := "optics-core"
   )
 
 lazy val opticsInterop = project
@@ -148,7 +146,7 @@ lazy val opticsMacro = project
     defaultSettings,
     scalacOptions --= List(
       "-Ywarn-unused:params",
-      "-Ywarn-unused:patvars",
+      "-Ywarn-unused:patvars"
     ),
     macros,
     publishName := "optics-macro"
@@ -172,19 +170,18 @@ lazy val derivation =
       defaultSettings,
       libraryDependencies ++= List(magnolia, derevo, catsTagless),
       macros,
-      publishName := "derivation",
+      publishName := "derivation"
     )
     .dependsOn(data)
 
 lazy val zioCore =
-  project.in(file("zio/core")).settings(defaultSettings, libraryDependencies += zio).dependsOn(core)
+  project.in(file("zio/core")).settings(defaultSettings, libraryDependencies ++= List(zio, zioCats)).dependsOn(core, concurrent)
 
 lazy val zioInterop = project
   .in(file("zio"))
   .settings(defaultSettings)
   .dependsOn(zioCore)
   .aggregate(zioCore)
-
 
 lazy val coreModules = List(core, memo, env, concurrent, opticsCore, data)
 
@@ -201,9 +198,9 @@ lazy val docs = project // new documentation project
     target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
     cleanFiles += (target in (ScalaUnidoc, unidoc)).value,
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(unidoc in Compile).value,
-    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(unidoc in Compile).value,
+    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(unidoc in Compile).value
   )
-  .dependsOn(allModuleDeps:_*)
+  .dependsOn(allModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
 lazy val tofu = project
@@ -230,16 +227,16 @@ lazy val scala213Options = List(
           "-Ywarn-value-discard",             // Warn when non-Unit expression results are unused.
           "-Xlint:unsound-match",             // Pattern match may not be typesafe.
           "-Xlint:by-name-right-associative", // By-name parameter of right associative operator.
-          "-Xfuture",                         // Turn on future language features.
+          "-Xfuture"                          // Turn on future language features.
         )
     }
-  },
+  }
 )
 
 lazy val simulacrumOptions = Seq(
   libraryDependencies ++= Seq(
     scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided,
-    simulacrum % Provided
+    simulacrum              % Provided
   ),
   pomPostProcess := { node =>
     import scala.xml.transform.{RewriteRule, RuleTransformer}
@@ -247,9 +244,9 @@ lazy val simulacrumOptions = Seq(
     new RuleTransformer(new RewriteRule {
       override def transform(node: xml.Node): Seq[xml.Node] = node match {
         case e: xml.Elem
-          if e.label == "dependency" &&
-            e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
-            e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
+            if e.label == "dependency" &&
+              e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
+              e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
           Nil
         case _ => Seq(node)
       }
@@ -290,7 +287,7 @@ lazy val defaultScalacOptions = scalacOptions ++= List(
   "-Ywarn-unused:patvars",         // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates",        // Warn if a private member is unused.
   "-Ywarn-unused:implicits",       // Warn if an implicit parameter is unused.
-  "-Ywarn-extra-implicit",         // Warn when more than one implicit parameter section is defined.
+  "-Ywarn-extra-implicit"          // Warn when more than one implicit parameter section is defined.
 )
 
 lazy val publishSettings = List(
