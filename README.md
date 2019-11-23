@@ -8,7 +8,7 @@
 
 ### Quick Start
 
-see [the docs on the site](https://tinkoffcreditsystems.github.io/tofu)
+## see [the docs on the microsite](https://tinkoffcreditsystems.github.io/tofu)
 
 To use the whole utils pack just add to your `build.sbt`: 
 
@@ -33,7 +33,4 @@ Of course you can also specify the exact subproject that you wanna add to yours 
 * `tofu-logging-layout` for logging layout only
 * `tofu-observable` for observable
 * `tofu-enums` for enums ([Enumeratum](https://github.com/lloydmeta/enumeratum) utils)
-
-
-_Here will be glorious readme soon with link to the gorgeous microsite_
 
