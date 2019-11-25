@@ -40,6 +40,8 @@ object Dependencies {
     val silencer = "1.4.4"
 
     val zio = "1.0.0-RC17"
+
+    val zioCats = "2.0.0.0-RC8"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"           % Version.cats
@@ -64,5 +66,6 @@ object Dependencies {
   val catsTagless     = "org.typelevel"              %% "cats-tagless-macros" % Version.catsTagless
   val typesafeConfig  = "com.typesafe"               % "config"               % Version.typesafeConfig
   val zio             = "dev.zio"                    %% "zio"                 % Version.zio
+  val zioCats         = "dev.zio"                    %% "zio-interop-cats"    % Version.zioCats
   val scalatest       = "org.scalatest"              %% "scalatest"           % Version.scalatest % Test
 }

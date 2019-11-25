@@ -11,7 +11,7 @@ import scala.concurrent.duration.FiniteDuration
 
 class ZioTofuInstance[R, E]
     extends RunContext[ZIO[R, E, *]] with Errors[ZIO[R, E, *], E] with Start[ZIO[R, E, *]]
-    with Guarantee[ZIO[R, E, *]] {
+    with Finally[ZIO[R, E, *], Exit[E, *]] {
   type Ctx      = R
   type Lower[a] = ZIO[Any, E, a]
   val context: ZIO[R, E, R] = ZIO.access[R](r => r)
@@ -46,7 +46,11 @@ class ZioTofuInstance[R, E]
   final def bracket[A, B, C](
       init: ZIO[R, E, A]
   )(action: A => ZIO[R, E, B])(release: (A, Boolean) => ZIO[R, E, C]): ZIO[R, E, B] =
-    init.bracketExit[R, E, B]((a, e) => release(a, e.succeeded).either, action)
+    init.bracketExit[R, E, B]((a, e) => release(a, e.succeeded).ignore, action)
+
+
+  final def finallyCase[A, B, C](init: ZIO[R, E, A])(action: A => ZIO[R, E, B])(release: (A, Exit[E, B]) => ZIO[R, E, C]): ZIO[R, E, B] =
+    init.bracketExit[R, E, B]((a, e) => release(a, e).ignore, action)
 }
 
 class ZIOTofuTimeoutInstance[R <: Clock, E] extends Timeout[ZIO[R, E, *]] {
