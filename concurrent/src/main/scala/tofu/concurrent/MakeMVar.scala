@@ -3,7 +3,8 @@ package tofu.concurrent
 import cats.effect.concurrent.MVar
 import cats.effect.{Concurrent, Sync}
 
-trait MakeMVar[I[_], F[_]] {
+
+trait MakeMVar[I[_], F[_]]{
   def mvarOf[A](a: A): I[MVar[F, A]]
   def mvarEmpty[A]: I[MVar[F, A]]
 }
