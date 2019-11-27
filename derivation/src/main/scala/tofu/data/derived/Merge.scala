@@ -58,7 +58,7 @@ object Merged {
 
   def apply[A](value: A): Mer[A] = value.asInstanceOf[Mer[A]]
 
-  implicit class MergedOps[A](private val mer: Mer[A]) extends AnyVal {
+  implicit final class MergedOps[A](private val mer: Mer[A]) extends AnyVal {
     def value: A = mer.asInstanceOf[A]
   }
 

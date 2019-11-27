@@ -11,7 +11,7 @@ import cats.syntax.either._
 import tofu.{Finally, Guarantee}
 
 object bracket {
-  implicit class TofuBracketOps[F[_], A](val fa: F[A]) extends AnyVal {
+  implicit final class TofuBracketOps[F[_], A](private val fa: F[A]) extends AnyVal {
     def bracketIncomplete[B, C](
         use: A => F[B]
     )(release: A => F[C])(implicit F: Applicative[F], FG: Guarantee[F]): F[B] =
@@ -35,13 +35,12 @@ object bracket {
       FG.finallyCase(fa)(use)(release)
   }
 
-  implicit class TofuBracketMVarOps[F[_], A](val mvar: MVar[F, A]) extends AnyVal {
+  implicit final class TofuBracketMVarOps[F[_], A](private val mvar: MVar[F, A]) extends AnyVal {
     def bracketUpdate[B, E](use: A => F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[B] =
       mvar.take.bracketIncomplete(use)(mvar.put)
   }
 
-  implicit class TofuBracketEitherTOps[F[_], E, A](val e: EitherT[F, E, A]) extends AnyVal {
-
+  implicit final class TofuBracketEitherTOps[F[_], E, A](private val e: EitherT[F, E, A]) extends AnyVal {
     /** special bracket form that could handle both Either logic error and F underlying error */
     def bracketCaseErr[U, B](
         use: A => EitherT[F, E, B]

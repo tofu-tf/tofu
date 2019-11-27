@@ -22,7 +22,7 @@ object Pre extends PreInstances {
     def apply[F[_]](fu: F[Unit]): T[F, A] = fu.asInstanceOf[T[F, A]]
   }
 
-  implicit class TofuPreSyntax[F[_], A](private val self: T[F, A]) extends AnyVal {
+  implicit final class TofuPreSyntax[F[_], A](private val self: T[F, A]) extends AnyVal {
     def value: F[Unit] = self.asInstanceOf[F[Unit]]
   }
 
@@ -31,7 +31,7 @@ object Pre extends PreInstances {
   /** when unification falls */
   def attach[U[f[_]]: ApplyK, F[_]: Apply](up: U[T[F, *]])(alg: U[F]): U[F] = up.attach(alg)
 
-  implicit class TofuPreAlgebraSyntax[F[_], U[f[_]]](private val self: U[T[F, *]]) extends AnyVal {
+  implicit final class TofuPreAlgebraSyntax[F[_], U[f[_]]](private val self: U[T[F, *]]) extends AnyVal {
     def attach(alg: U[F])(implicit U: ApplyK[U], F: Apply[F]): U[F] =
       U.map2K(self, alg)(funK(t2k => t2k.first.value *> t2k.second))
   }

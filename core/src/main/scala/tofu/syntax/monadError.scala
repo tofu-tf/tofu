@@ -8,7 +8,7 @@ import cats.syntax.functor._
 import either._
 
 object monadError {
-  implicit class MonadErrorFOps[F[_], A](val fa: F[A]) extends AnyVal {
+  implicit final class MonadErrorFOps[F[_], A](private val fa: F[A]) extends AnyVal {
     def retryAttempt[E](count: Int)(implicit F: MonadError[F, E]): F[Either[List[E], A]] =
       F.tailRecM((count, List.empty[E])) {
         case (cnt, acc) =>
@@ -27,8 +27,7 @@ object monadError {
       }
   }
 
-  implicit class MonadErrorEitherTOps[F[_], E, A](val fea: EitherT[F, E, A]) extends AnyVal {
-
+  implicit final class MonadErrorEitherTOps[F[_], E, A](private val fea: EitherT[F, E, A]) extends AnyVal {
     /** sums logic error with underlying error */
     def attemptXor[U](implicit F: ApplicativeError[F, U]): EitherT[F, Either[U, E], A] =
       EitherT(fea.value.attempt.map(_.assocR))

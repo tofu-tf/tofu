@@ -8,7 +8,7 @@ import cats.{Parallel, Traverse}
 import tofu.syntax.monadic._
 
 object traverse {
-  implicit class TraverseOps[T[_], A](val ta: T[A]) extends AnyVal {
+  implicit final class TraverseOps[T[_], A](val ta: T[A]) extends AnyVal {
     def limitedTraverse[F[_], B](
         batchSize: Int
     )(f: A => F[B])(implicit T: Traverse[T], F: Concurrent[F], P: Parallel[F]): F[T[B]] =

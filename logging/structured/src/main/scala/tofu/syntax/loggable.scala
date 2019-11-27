@@ -11,7 +11,7 @@ object loggable extends Loggable.ToLoggableOps with Loggable.Base.ToBaseOps
 object logging {
   val braces = Array.range(0, 30).map(Array.fill(_)("{}"))
 
-  implicit class LoggingInterpolator(val sctx: StringContext) extends AnyVal {
+  implicit final class LoggingInterpolator(private val sctx: StringContext) extends AnyVal {
     def error[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
       logging.error(sctx.s(braces(values.size): _*), values: _*)
     def warn[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
@@ -35,14 +35,13 @@ object logging {
       logging.traceCause(sctx.s(braces(values.size): _*), ex, values: _*)
   }
 
-  implicit class LoggingCauseOps(val message: String) extends AnyVal {
+  implicit final class LoggingCauseOps(private val message: String) extends AnyVal {
     def cause[F[_]](ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] = logging.errorCause(message, ex)
   }
 }
 
 object logRenderer {
-
-  implicit class LogRendererValueContextOps[I, V, R, M](val v: V) extends AnyVal {
+  implicit final class LogRendererValueContextOps[I, V, R, M](private val v: V) extends AnyVal {
     def zero(implicit r: LogRenderer[I, V, R, M]): M                                    = r.zero(v)
     def putLogValue(value: LogParamValue)(implicit r: LogRenderer[I, V, R, M]): M       = r.putValue(value, v)
     def list(size: Int)(receive: (V, Int) => M)(implicit r: LogRenderer[I, V, R, M]): M = r.list(size, v)(receive)
@@ -75,7 +74,7 @@ object logRenderer {
     def putBool(value: Boolean)(implicit r: LogRenderer[I, V, R, M]): M       = r.putBool(value, v)
   }
 
-  implicit class LogRendererTopContextOps[I, V, R, M](val i: I) extends AnyVal {
+  implicit final class LogRendererTopContextOps[I, V, R, M](private val i: I) extends AnyVal {
     def noop(implicit r: LogRenderer[I, V, R, M]): R = r.noop(i)
 
     def sub(name: String)(receive: V => M)(implicit r: LogRenderer[I, V, R, M]): R =

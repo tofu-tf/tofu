@@ -29,7 +29,7 @@ object Folded extends MonoOpticCompanion(PFolded) {
 }
 
 object PFolded extends OpticCompanion[PFolded] {
-  implicit class TofuFoldedOps[S, T, A, B](private val self: PFolded[S, T, A, B]) extends AnyVal {
+  implicit final class TofuFoldedOps[S, T, A, B](private val self: PFolded[S, T, A, B]) extends AnyVal {
     def ++[S1 <: S, T1, A1 >: A, V1](that: PFolded[S1, T1, A1, V1]): PFolded[S1, T1, A1, V1] =
       new PFolded[S1, T1, A1, V1] {
         def foldMap[X: Monoid](s: S1)(f: A1 => X): X = self.foldMap(s)(f) |+| that.foldMap(s)(f)

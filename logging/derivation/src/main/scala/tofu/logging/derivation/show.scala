@@ -61,7 +61,7 @@ object show extends Derivation[Show] {
     case _       => maskString(shown, erase)
   }
 
-  implicit class MaskingOps(val value: String) extends AnyVal {
+  implicit final class MaskingOps(private val value: String) extends AnyVal {
     def mask: String = maskString(value, erase = false)
   }
 }

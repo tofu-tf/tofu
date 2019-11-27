@@ -179,7 +179,7 @@ trait EnvSpecializedFunctions[E] {
   }
 
   object converters {
-    implicit class TaskAsEnv[A](val task: Task[A]) {
+    implicit class TaskAsEnv[A](private val task: Task[A]) {
       def env: Env[E, A] = fromTask(task)
     }
 

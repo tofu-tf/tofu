@@ -18,7 +18,7 @@ object context {
       runCtx.runContext(fa)(ctx)
   }
 
-  implicit class ContextFOps[F[_], A, C](val fa: F[A])(implicit loc: F HasLocal C) {
+  implicit final class ContextFOps[F[_], A, C](private val fa: F[A])(implicit loc: F HasLocal C) {
     def local(project: C => C): F[A] = loc.local(fa)(project)
   }
 }

@@ -106,7 +106,7 @@ object ConfigItem {
   def dict[F[_]: Applicative](dict: Map[String, ConfigItem[F]]): Dict[F] =
     Dict[F](indexed(dict.lift), Flux.Stream[F](dict.keys.toList))
 
-  implicit class SyncConfigItemOps[F[_]](val item: ConfigItem[F]) extends AnyVal {
+  implicit final class SyncConfigItemOps[F[_]](private val item: ConfigItem[F]) extends AnyVal {
     def tryParseSync[A: Configurable](
         implicit FR: Refs[F],
         FM: Monad[F],
@@ -122,7 +122,7 @@ object ConfigItem {
       } yield res
   }
 
-  implicit class IdConfigItemOps(val item: ConfigItem[Identity]) extends AnyVal {
+  implicit final class IdConfigItemOps(private val item: ConfigItem[Identity]) extends AnyVal {
     def liftF[F[_]](implicit F: Applicative[F]): ConfigItem[F] =
       item.mapK(new (Id ~> F) { def apply[A](x: A) = F.pure(x) })
     def tryParseF[F[_]: Sync, A: Configurable]: F[(MessageList, Option[A])] = liftF[F].tryParseSync[A]

@@ -85,7 +85,7 @@ object PContains extends OpticCompanion[PContains] {
         })(fb)(a)
     }
 
-  implicit class PContainsOps[S, T, A, B](private val self: PContains[S, T, A, B]) extends AnyVal {
+  implicit final class PContainsOps[S, T, A, B](private val self: PContains[S, T, A, B]) extends AnyVal {
     def focusState[F[+_]: Functor, R](state: IndexedStateT[F, A, B, R]): IndexedStateT[F, S, T, R] =
       IndexedStateT.applyF(state.runF.map(afbr => (s: S) => afbr(self.extract(s)).map(_.leftMap(self.set(s, _)))))
   }
