@@ -1,6 +1,6 @@
 package tofu.syntax
 import cats.syntax._
-import cats.{Applicative, Apply, FlatMap, Functor}
+import cats.{Applicative, Apply, FlatMap, Functor, Semigroupal}
 
 object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadSyntax {
   def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit
@@ -14,6 +14,10 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def as[B](b: B)(implicit F: Functor[F]): F[B]                 = F.as(fa, b)
     def tupleLeft[B](b: B)(implicit F: Functor[F]): F[(B, A)]     = F.tupleLeft(fa, b)
     def tupleRight[B](b: B)(implicit F: Functor[F]): F[(A, B)]    = F.tupleRight(fa, b)
+  }
+
+  implicit class TofuSemigroupalOps[F[_], A](private val fa: F[A]) extends AnyVal{
+    def product[B](fb: F[B])(implicit F: Semigroupal[F]): F[(A, B)] = F.product(fa, fb)
   }
 
   implicit class TofuApplyFuncOps[F[_], A, B](private val fab: F[A => B]) extends AnyVal {

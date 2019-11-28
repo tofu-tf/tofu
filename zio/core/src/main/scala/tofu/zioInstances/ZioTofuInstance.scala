@@ -1,6 +1,6 @@
 package tofu
 package zioInstances
-import cats.Functor
+import cats.{Applicative, Functor}
 import cats.effect.{CancelToken, Fiber}
 import tofu.internal.CachedMatcher
 import tofu.zioInstances.ZioTofuInstance.convertFiber
@@ -48,8 +48,9 @@ class ZioTofuInstance[R, E]
   )(action: A => ZIO[R, E, B])(release: (A, Boolean) => ZIO[R, E, C]): ZIO[R, E, B] =
     init.bracketExit[R, E, B]((a, e) => release(a, e.succeeded).ignore, action)
 
-
-  final def finallyCase[A, B, C](init: ZIO[R, E, A])(action: A => ZIO[R, E, B])(release: (A, Exit[E, B]) => ZIO[R, E, C]): ZIO[R, E, B] =
+  final def finallyCase[A, B, C](
+      init: ZIO[R, E, A]
+  )(action: A => ZIO[R, E, B])(release: (A, Exit[E, B]) => ZIO[R, E, C]): ZIO[R, E, B] =
     init.bracketExit[R, E, B]((a, e) => release(a, e).ignore, action)
 }
 
@@ -65,4 +66,17 @@ object ZioTofuInstance {
   }
 }
 
+class ZioTofuErrorsToInstance[R, E, E1] extends ErrorsTo[ZIO[R, E, *], ZIO[R, E1, *], E] {
+  final def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E1, A]): ZIO[R, E1, A] = fa.catchAll(f)
+  final def restore[A](fa: ZIO[R, E, A]): ZIO[R, E1, Option[A]]                   = fa.option
+  final def raise[A](err: E): ZIO[R, E, A]                                        = ZIO.fail(err)
 
+  final override def handle[A](fa: ZIO[R, E, A])(f: E => A)(implicit G: Applicative[ZIO[R, E1, *]]): ZIO[R, E1, A] =
+    fa.catchAll(e => ZIO.succeed(f(e)))
+
+  final override def attempt[A](
+      fa: ZIO[R, E, A]
+  )(implicit F: Functor[ZIO[R, E, *]], G: Applicative[ZIO[R, E1, *]]): ZIO[R, E1, Either[E, A]] =
+    fa.either
+
+}
