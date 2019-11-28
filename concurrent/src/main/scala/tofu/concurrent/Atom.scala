@@ -49,7 +49,7 @@ trait Atom[F[_], A] {
 }
 
 object Atom {
-  implicit def representableKInstance[A]: RepresentableK[Atom[*[_], A]] = derived.genRepresentableK
+  implicit def representableKInstance[A]: RepresentableK[Atom[*[_], A]] = derived.genRepresentableK[Atom[*[_], A]]
 
   final case class AtomByRef[F[_], A](ref: Ref[F, A]) extends Atom[F, A] {
     override def get: F[A]                       = ref.get

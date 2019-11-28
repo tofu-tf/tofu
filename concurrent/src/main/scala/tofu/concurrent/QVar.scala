@@ -55,7 +55,7 @@ trait QVar[F[_], A] {
 }
 
 object QVar {
-  implicit def representableK[A]: RepresentableK[QVar[*[_], A]] = derived.genRepresentableK
+  implicit def representableK[A]: RepresentableK[QVar[*[_], A]] = derived.genRepresentableK[QVar[*[_], A]]
 
   final case class QVarByMVar[F[_], A](mvar: MVar[F, A]) extends QVar[F, A] {
     override def isEmpty: F[Boolean] = mvar.isEmpty

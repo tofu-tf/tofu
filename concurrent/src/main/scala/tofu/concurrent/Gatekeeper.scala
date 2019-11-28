@@ -1,11 +1,11 @@
 package tofu.concurrent
-import cats.{Applicative, InvariantMonoidal, Monad}
-import cats.effect.{Async, Bracket, Concurrent, IO, Resource, Sync}
 import cats.effect.concurrent.Semaphore
-import tofu.{ApplicativeThrow, BracketThrow}
-import tofu.syntax.monadic._
 import cats.effect.syntax.bracket._
+import cats.effect.{Async, Concurrent, Sync}
+import cats.{InvariantMonoidal, Monad}
+import tofu.BracketThrow
 import tofu.concurrent.Gatekeeper.{BlockedMutex, MutexBySemaphore, StoplightBySemaphore}
+import tofu.syntax.monadic._
 
 /** Semaphore-like structure */
 trait Gatekeeper[F[_], A] {
