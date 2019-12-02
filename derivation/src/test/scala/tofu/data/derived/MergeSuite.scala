@@ -1,11 +1,11 @@
 package tofu.data.derived
 
-import org.scalatest.FlatSpec
 import cats.syntax.option._
 import org.manatki.derevo.derive
 import MergeSuite.{Bar, Foo}
+import org.scalatest.flatspec.AnyFlatSpec
 
-class MergeSuite extends FlatSpec {
+class MergeSuite extends AnyFlatSpec {
   "simple merge" should "prefer left value" in {
     assert(Merge[Int].merge(1, 2) === 1)
   }

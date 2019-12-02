@@ -3,11 +3,12 @@ package tofu.env
 import cats.Parallel
 import cats.instances.list._
 import monix.execution.Scheduler.Implicits.global
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.duration._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ParEnvSuite extends FlatSpec with Matchers {
+class ParEnvSuite extends AnyFlatSpec with Matchers {
   "parSequence" should "not stack overflow on large collection" in {
 
     Parallel.parSequence(

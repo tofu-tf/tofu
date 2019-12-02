@@ -6,7 +6,6 @@ import cats.syntax.functor._
 import cats.syntax.either._
 import cats.instances.either._
 import cats.{Id, ~>}
-import org.scalatest.{FlatSpec, Matchers}
 import tofu.data.Embedded
 import tofu.syntax.functionK.funK
 import cats.tagless.syntax.functorK._
@@ -16,8 +15,10 @@ import tofu.higherKind.derived.representableK
 import tofu.syntax.embed._
 
 import scala.util.Try
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class RepresentableKSuite extends FlatSpec with Matchers {
+class RepresentableKSuite extends AnyFlatSpec with Matchers {
   val checkingFoo: Foo[Either[String, *]] = new Foo[Either[String, *]] {
     override def foo(x: Int, s: String): Either[String, Double] =
       Try(s.toDouble).toEither.left.map(_ => s"could not parse $s as double").map(_ * x)

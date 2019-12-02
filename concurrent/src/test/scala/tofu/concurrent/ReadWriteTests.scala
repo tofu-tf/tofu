@@ -8,7 +8,7 @@ import cats.syntax.applicative._
 import cats.syntax.apply._
 import cats.syntax.parallel._
 import cats.syntax.traverse._
-import org.scalatest.{AsyncWordSpec, Ignore, Inside, Matchers}
+import org.scalatest.{Ignore, Inside}
 import tofu.concurrent.ReadWrite._
 import tofu.concurrent.ReadWrite.ConcurrentReadWrite
 
@@ -16,6 +16,8 @@ import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.Random
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AsyncWordSpec
 
 @Ignore
 class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {

@@ -1,6 +1,4 @@
 package tofu.config
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
 import org.manatki.derevo.derive
 import com.typesafe.config.ConfigFactory
 import cats.syntax.option._
@@ -8,8 +6,10 @@ import ConfigSuite.{Foe, Skill}
 import Key.{Index, Prop}
 import tofu.config.ConfigItem.ValueType
 import tofu.config.ConfigError.{BadType, NotFound, BadNumber}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ConfigSuite extends FlatSpec with Matchers {
+class ConfigSuite extends AnyFlatSpec with Matchers {
   import ConfigSuite.{tryParse, fallenParse}
 
   "sync parsing" should "parse lists" in {

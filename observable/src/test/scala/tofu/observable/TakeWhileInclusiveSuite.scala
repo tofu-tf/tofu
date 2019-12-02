@@ -4,11 +4,12 @@ import monix.catnap.MVar
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import monix.reactive.Observable
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.duration._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TakeWhileInclusiveSuite extends FlatSpec with Matchers {
+class TakeWhileInclusiveSuite extends AnyFlatSpec with Matchers {
 
   private def writeElement[A](mvar: MVar[Task, Vector[A]])(a: A): Task[Unit] =
     mvar.take.flatMap(v => mvar.put(v :+ a))
