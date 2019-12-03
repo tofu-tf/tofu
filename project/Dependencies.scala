@@ -33,7 +33,7 @@ object Dependencies {
 
     val scalatest = "3.0.8"
 
-    val magnolia = "0.12.0"
+    val magnolia = "0.12.2"
 
     val typesafeConfig = "1.4.0"
 
@@ -41,7 +41,7 @@ object Dependencies {
 
     val zio = "1.0.0-RC17"
 
-    val zioCats = "2.0.0.0-RC8"
+    val zioCats = "2.0.0.0-RC10"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"           % Version.cats

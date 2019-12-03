@@ -16,7 +16,7 @@ object PArray extends Newtype1Covariant{
 
   def fromColl[A](xs: TraversableOnce[A]): PArray[A] = fromArray((xs: TraversableOnce[Any]).toArray)
 
-  implicit class ArrOps[A](val xs: Type[A]) extends AnyVal {
+  implicit final class ArrOps[A](private val xs: Type[A]) extends AnyVal {
     private[PArray] def toArray: Array[A] = xs.asInstanceOf[Array[A]]
 
     def apply(i: Int): A                  = xs.toArray(i)

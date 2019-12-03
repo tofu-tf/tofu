@@ -19,7 +19,7 @@ object Flux extends FluxInstances {
 
   def apply[F[_], G[_], A](tfa: F[G[(A, Flux[F, G, A])]]): FluxRepr[F, G, A] = tfa.asInstanceOf[FluxRepr[F, G, A]]
 
-  implicit class FluxValueExtract[F[_], G[_], A](private val repr: FluxRepr[F, G, A]) extends AnyVal {
+  implicit final class FluxValueExtract[F[_], G[_], A](private val repr: FluxRepr[F, G, A]) extends AnyVal {
     def value: F[G[(A, Flux[F, G, A])]] = repr.asInstanceOf[F[G[(A, Flux[F, G, A])]]]
   }
 
