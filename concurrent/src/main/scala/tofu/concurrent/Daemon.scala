@@ -88,11 +88,11 @@ object Daemon extends DaemonInstances {
     }
   }
 
-  implicit class DaemonOps[F[_], E, A](val self: Daemon[F, E, A]) extends AnyVal {
+  implicit final class DaemonOps[F[_], E, A](private val self: Daemon[F, E, A]) extends AnyVal {
     def bindTo[B](daemon: Daemon[F, E, B])(implicit FS: Start[F], F: Apply[F]): F[Unit] =
       (daemon.exit *> self.cancel).start.void
 
-    def kill = self.cancel
+    def kill: F[Unit] = self.cancel
   }
 
   def apply[F[_], E, A](process: F[A])(implicit D: Daemonic[F, E]): F[Daemon[F, E, A]] = D.daemonize(process)

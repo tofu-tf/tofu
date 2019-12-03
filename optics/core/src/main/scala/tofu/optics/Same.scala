@@ -52,7 +52,7 @@ object PSame extends OpticCompanion[PSame] {
   private def invert[S, T, A, B](self: PSame[S, T, A, B]): PSame[B, A, T, S] =
     self.rsubst[Inv[-*, +*, A, B]](PSame.id)
 
-  implicit class SameOps[A, B](private val s: PSame[A, A, B, B]) extends AnyVal {
+  implicit final class SameOps[A, B](private val s: PSame[A, A, B, B]) extends AnyVal {
     def subst[F[+ _]](fa: F[A]): F[B] = s.inverse.rsubst[λ[(`-s`, `+t`) => F[t]]](fa)
   }
 }

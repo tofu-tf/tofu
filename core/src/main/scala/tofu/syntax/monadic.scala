@@ -5,7 +5,7 @@ import cats.{Applicative, Apply, FlatMap, Functor}
 object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadSyntax {
   def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit
 
-  implicit class TofuFunctorOps[F[_], A](private val fa: F[A]) extends AnyVal {
+  implicit final class TofuFunctorOps[F[_], A](private val fa: F[A]) extends AnyVal {
     def map[B](f: A => B)(implicit F: Functor[F]): F[B]           = F.map(fa)(f)
     def fmap[B](f: A => B)(implicit F: Functor[F]): F[B]          = F.fmap(fa)(f)
     def widen[B >: A](implicit F: Functor[F]): F[B]               = F.widen(fa)
@@ -16,16 +16,16 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def tupleRight[B](b: B)(implicit F: Functor[F]): F[(A, B)]    = F.tupleRight(fa, b)
   }
 
-  implicit class TofuApplyFuncOps[F[_], A, B](private val fab: F[A => B]) extends AnyVal {
+  implicit final class TofuApplyFuncOps[F[_], A, B](private val fab: F[A => B]) extends AnyVal {
     def ap(fa: F[A])(implicit F: Apply[F]): F[B]  = F.ap(fab)(fa)
     def <*>(fa: F[A])(implicit F: Apply[F]): F[B] = F.ap(fab)(fa)
   }
 
-  implicit class TofuApplyFunc2Ops[F[_], A, B, C](private val fab: F[(A, B) => C]) extends AnyVal {
+  implicit final class TofuApplyFunc2Ops[F[_], A, B, C](private val fab: F[(A, B) => C]) extends AnyVal {
     def ap2(fa: F[A], fb: F[B])(implicit F: Apply[F]): F[C] = F.ap2(fab)(fa, fb)
   }
 
-  implicit class TofuApplyOps[F[_], C](private val fa: F[C]) extends AnyVal {
+  implicit final class TofuApplyOps[F[_], C](private val fa: F[C]) extends AnyVal {
     def productR[B](fb: F[B])(implicit F: Apply[F]): F[B]                = F.productR(fa)(fb)
     def productL[B](fb: F[B])(implicit F: Apply[F]): F[C]                = F.productL(fa)(fb)
     def *>[B](fb: F[B])(implicit F: Apply[F]): F[B]                      = F.productR(fa)(fb)
@@ -35,7 +35,7 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
       F.map2Eval(fa, fb)(f)
   }
 
-  implicit class TofuFlatMapOps[F[_], C](private val fa: F[C]) extends AnyVal {
+  implicit final class TofuFlatMapOps[F[_], C](private val fa: F[C]) extends AnyVal {
     def flatMap[B](f: C => F[B])(implicit F: FlatMap[F]): F[B]             = F.flatMap(fa)(f)
     def productREval[B](fb: cats.Eval[F[B]])(implicit F: FlatMap[F]): F[B] = F.productREval(fa)(fb)
     def productLEval[B](fb: cats.Eval[F[B]])(implicit F: FlatMap[F]): F[C] = F.productLEval(fa)(fb)

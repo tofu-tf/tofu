@@ -8,7 +8,7 @@ import scala.reflect.macros.blackbox
 class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.DeriveMacros(c) {
   import c.universe._
 
-  implicit class MethodOps(val m: Method) {
+  implicit final class MethodOps(private val m: Method) {
     def occursInParams(symbol: Symbol): Boolean =
       m.paramLists.exists(_.exists {
         case ValDef(_, _, tpe, _) =>

@@ -5,21 +5,21 @@ import cats.{Applicative, Functor, Monad}
 import tofu.Raise.ContravariantRaise
 
 object raise {
-  final implicit class RaiseOps[E](private val err: E) extends AnyVal {
+  implicit final class RaiseOps[E](private val err: E) extends AnyVal {
     def raise[F[_], A](implicit raise: Raise[F, E]): F[A] = raise.raise(err)
   }
 
-  final implicit class RaiseMonadOps[F[_], A](private val fa: F[A]) extends AnyVal {
+  implicit final class RaiseMonadOps[F[_], A](private val fa: F[A]) extends AnyVal {
     def verified[E](p: A => Boolean)(err: E)(implicit raise: Raise[F, E], F: Monad[F]): F[A] =
       F.flatMap(fa)(a => if (p(a)) F.pure(a) else raise.raise(err))
   }
 
-  final implicit class RaiseOptionOps[A](val opt: Option[A]) extends AnyVal {
+  implicit final class RaiseOptionOps[A](private val opt: Option[A]) extends AnyVal {
     // name changed from `liftTo` to avoid conflicts with cats.syntax.option
     def orRaise[F[_]] = new RaiseOptionApplied[F, A](opt)
   }
 
-  final implicit class RaiseEitherOps[E, A](val either: Either[E, A]) extends AnyVal {
+  implicit final class RaiseEitherOps[E, A](private val either: Either[E, A]) extends AnyVal {
     def toRaise[F[_]](
         implicit
         app: Applicative[F],
@@ -41,7 +41,7 @@ object raise {
 }
 
 object handle {
-  final implicit class HandleOps[F[_], A](val fa: F[A]) extends AnyVal {
+  implicit final class HandleOps[F[_], A](private val fa: F[A]) extends AnyVal {
     def restore(implicit FE: RestoreTo[F, F]): F[Option[A]]                                             = FE.restore(fa)
     def restoreTo[G[_]](implicit FE: RestoreTo[F, G]): G[Option[A]]                                     = FE.restore(fa)
     def restoreWith(ra: => F[A])(implicit FE: Restore[F]): F[A]                                         = FE.restoreWith(fa)(ra)
