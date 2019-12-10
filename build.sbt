@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.5.5.1"
+val libVersion = "0.5.6"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -46,7 +46,7 @@ lazy val core = project dependsOn opticsCore settings (
   defaultSettings,
   publishName := "core",
   libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
-  macros
+  macros,
 )
 
 lazy val memo = project
@@ -175,11 +175,17 @@ lazy val derivation =
     .dependsOn(data)
 
 lazy val zioCore =
-  project.in(file("zio/core")).settings(defaultSettings, libraryDependencies ++= Seq(zio, zioCats)).dependsOn(core, concurrent)
+  project
+    .in(file("zio/core"))
+    .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats))
+    .dependsOn(core, concurrent)
 
 lazy val zioInterop = project
   .in(file("zio"))
-  .settings(defaultSettings)
+  .settings(
+    publishName := "zio-interop",
+    defaultSettings
+  )
   .dependsOn(zioCore)
   .aggregate(zioCore)
 

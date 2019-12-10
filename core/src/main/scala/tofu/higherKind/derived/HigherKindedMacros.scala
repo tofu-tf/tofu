@@ -1,6 +1,5 @@
 package tofu.higherKind.derived
 
-import org.manatki.derevo.{Derevo, DerivationK2, delegating}
 import tofu.higherKind.RepresentableK
 
 import scala.reflect.macros.blackbox
@@ -28,26 +27,28 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
         val ff = algebra match {
           case PolyType(List(ff1), _) => ff1
         }
-        val methods = delegateMethods(algebra, members, algebra.typeSymbol) {
+        val methods = delegateMethods(algebra, members, NoSymbol) {
           case method if method.occursInParams(ff) =>
             abort(s"Type parameter $ff appears in contravariant position in method ${method.name}")
 
           case method if method.occursInReturn(ff) =>
             val params = method.paramLists.map(_.map(_.name))
-            val body   = q"$hom($repk[$algebra](($algv => $alg.${method.name}(...$params))))"
-            method.copy(body = body, returnType = NoType)
+            val tresult = method.returnType match {
+              case TypeRef(__, _, List(param)) => param
+              case _                           => abort(method.returnType.toString)
+            }
+            val body = q"$hom($repk[$algebra](($algv => $alg.${method.name}(...$params))))"
+            val tpe = appliedType(f, method.returnType.typeArgs)
+            method.copy(body = body, returnType = tpe)
 
           case method =>
             abort(s"Type parameter $ff does not appear in return in method ${method.name}")
         }
 
-        implement(algebra)(f)(types ++ methods)
+        val res = implement(algebra)(f)(types ++ methods)
+        res
     }
 
   def representableK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[RepresentableK[Alg]](tag)(tabulate)
-}
-@delegating("tofu.higherKind.derived.genRepresentableK")
-object representableK extends DerivationK2[RepresentableK] {
-  def instance[T[_[_]]]: RepresentableK[T] = macro Derevo.delegateK2[RepresentableK, T]
+    instantiate[RepresentableK[Alg]](tag)(tabulate, productK, mapK)
 }
