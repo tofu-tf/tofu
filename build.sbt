@@ -180,14 +180,20 @@ lazy val zioCore =
     .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats))
     .dependsOn(core, concurrent)
 
+lazy val zioLogging =
+  project
+    .in(file("zio/logging"))
+    .settings(defaultSettings, libraryDependencies ++= List(zio, slf4j))
+    .dependsOn(loggingStr)
+
 lazy val zioInterop = project
   .in(file("zio"))
   .settings(
     publishName := "zio-interop",
     defaultSettings
   )
-  .dependsOn(zioCore)
-  .aggregate(zioCore)
+  .dependsOn(zioCore, zioLogging)
+  .aggregate(zioCore, zioLogging)
 
 lazy val coreModules = Seq(core, memo, env, concurrent, opticsCore, data)
 
