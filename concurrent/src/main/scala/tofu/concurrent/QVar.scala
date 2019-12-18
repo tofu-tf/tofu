@@ -1,8 +1,11 @@
 package tofu.concurrent
-import cats.effect.{Concurrent, Sync}
 import cats.effect.concurrent.MVar
+import cats.effect.{Concurrent, Sync}
+import cats.{Applicative, Functor}
+import tofu.Guarantee
 import tofu.concurrent.QVar.QVarByMVar
 import tofu.higherKind.{RepresentableK, derived}
+import tofu.optics.Contains
 import tofu.syntax.monadic._
 
 /** a middleground between cats.concurrent.MVar and zio.Queue.bounded(1) */
@@ -56,6 +59,10 @@ trait QVar[F[_], A] {
 
 object QVar {
   implicit def representableK[A]: RepresentableK[QVar[*[_], A]] = derived.genRepresentableK[QVar[*[_], A]]
+
+  final implicit class QVarOps[F[_], A](private val self: QVar[F, A]) extends AnyVal {
+    def toAtom(implicit F: Applicative[F], FG: Guarantee[F]): Atom[F, A] = Atom.QAtom(self)
+  }
 
   final case class QVarByMVar[F[_], A](mvar: MVar[F, A]) extends QVar[F, A] {
     override def isEmpty: F[Boolean] = mvar.isEmpty
