@@ -42,13 +42,13 @@ class ContextSyncLoggingImpl[F[_], C: Loggable](context: F HasContext C, logger:
       .whenA(errorEnabled)
 
   override def traceCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    context.askF(ctx => F.delay(logger.trace(ContextMarker(ctx), message, values :+ cause: _*))).whenA(errorEnabled)
+    context.askF(ctx => F.delay(logger.trace(ContextMarker(ctx), message, values :+ cause: _*))).whenA(traceEnabled)
   override def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    context.askF(ctx => F.delay(logger.debug(ContextMarker(ctx), message, values :+ cause: _*))).whenA(errorEnabled)
+    context.askF(ctx => F.delay(logger.debug(ContextMarker(ctx), message, values :+ cause: _*))).whenA(debugEnabled)
   override def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    context.askF(ctx => F.delay(logger.info(ContextMarker(ctx), message, values :+ cause: _*))).whenA(errorEnabled)
+    context.askF(ctx => F.delay(logger.info(ContextMarker(ctx), message, values :+ cause: _*))).whenA(infoEnabled)
   override def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    context.askF(ctx => F.delay(logger.warn(ContextMarker(ctx), message, values :+ cause: _*))).whenA(errorEnabled)
+    context.askF(ctx => F.delay(logger.warn(ContextMarker(ctx), message, values :+ cause: _*))).whenA(warnEnabled)
   override def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     context.askF(ctx => F.delay(logger.error(ContextMarker(ctx), message, values :+ cause: _*))).whenA(errorEnabled)
 }
