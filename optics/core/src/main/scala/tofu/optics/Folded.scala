@@ -7,7 +7,7 @@ import tofu.optics.data.Constant
 
 /** S has some or none occurrences of A
   * and can collect them */
-trait PFolded[-S, +T, +A, -B] {
+trait PFolded[-S, +T, +A, -B] extends PBase[S, T, A, B]{
   def foldMap[X: Monoid](s: S)(f: A => X): X
 
   def getAll(s: S): List[A] = foldMap(s)(List(_))
