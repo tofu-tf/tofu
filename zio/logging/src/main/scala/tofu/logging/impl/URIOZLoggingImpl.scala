@@ -40,19 +40,19 @@ class URIOZLoggingImpl[R: Loggable](logger: Logger) extends LoggingImpl[URIO[R, 
   override def traceCause(message: String, cause: Throwable, values: LoggedValue*): URIO[R, Unit] =
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.trace(ContextMarker(ctx), message, values :+ cause: _*)))
-      .when(errorEnabled)
+      .when(traceEnabled)
   override def debugCause(message: String, cause: Throwable, values: LoggedValue*): URIO[R, Unit] =
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.debug(ContextMarker(ctx), message, values :+ cause: _*)))
-      .when(errorEnabled)
+      .when(debugEnabled)
   override def infoCause(message: String, cause: Throwable, values: LoggedValue*): URIO[R, Unit] =
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.info(ContextMarker(ctx), message, values :+ cause: _*)))
-      .when(errorEnabled)
+      .when(infoEnabled)
   override def warnCause(message: String, cause: Throwable, values: LoggedValue*): URIO[R, Unit] =
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.warn(ContextMarker(ctx), message, values :+ cause: _*)))
-      .when(errorEnabled)
+      .when(warnEnabled)
   override def errorCause(message: String, cause: Throwable, values: LoggedValue*): URIO[R, Unit] =
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.error(ContextMarker(ctx), message, values :+ cause: _*)))

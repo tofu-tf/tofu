@@ -20,11 +20,11 @@ class SyncLogging[F[_]](logger: Logger)(implicit F: Sync[F]) extends LoggingImpl
   override def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     F.delay(logger.error(message, values :+ cause: _*)).whenA(errorEnabled)
   override def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    F.delay(logger.warn(message, values :+ cause: _*)).whenA(errorEnabled)
+    F.delay(logger.warn(message, values :+ cause: _*)).whenA(warnEnabled)
   override def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    F.delay(logger.info(message, values :+ cause: _*)).whenA(errorEnabled)
+    F.delay(logger.info(message, values :+ cause: _*)).whenA(infoEnabled)
   override def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    F.delay(logger.debug(message, values :+ cause: _*)).whenA(errorEnabled)
+    F.delay(logger.debug(message, values :+ cause: _*)).whenA(debugEnabled)
   override def traceCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    F.delay(logger.trace(message, values :+ cause: _*)).whenA(errorEnabled)
+    F.delay(logger.trace(message, values :+ cause: _*)).whenA(traceEnabled)
 }
