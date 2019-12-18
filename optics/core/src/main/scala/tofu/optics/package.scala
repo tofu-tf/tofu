@@ -23,4 +23,10 @@ package object optics {
   type Extract[A, B]    = PExtract[A, A, B, B]
   type Folded[A, B]     = PFolded[A, A, B, B]
   type Update[A, B]     = PUpdate[A, A, B, B]
+
+  /** label provider for instance discrimination
+    * like Contains[A, B] with Label["first"] */
+  type Label[label] = Any {
+    type Label = label
+  }
 }
