@@ -6,6 +6,8 @@ import cats.kernel.Monoid
 import cats.{Applicative, Apply, FlatMap, Functor}
 import impl.{ContextSyncLoggingImpl, SyncLogging}
 import org.slf4j.LoggerFactory
+import tofu.higherKind
+import tofu.higherKind.RepresentableK
 import tofu.syntax.monadic._
 
 import scala.reflect.ClassTag
@@ -13,10 +15,18 @@ import scala.reflect.ClassTag
 trait Logs[I[_], F[_]] {
   def forService[Svc: ClassTag]: I[Logging[F]]
   def byName(name: String): I[Logging[F]]
+
+  final def biwiden[I1[a] >: I[a], F1[a] >: F[a]]: Logs[I1, F1] = this.asInstanceOf[Logs[I1, F1]]
 }
 
 object Logs {
   def apply[I[_], F[_]](implicit logs: Logs[I, F]): Logs[I, F] = logs
+
+  private [this] val logsRepresentableAny: RepresentableK[Logs[*[_], Any]] =
+    higherKind.derived.genRepresentableK[Logs[*[_], Any]]
+
+  implicit def logsRepresentable[Y[_]]: RepresentableK[Logs[*[_], Y]] =
+    logsRepresentableAny.asInstanceOf[RepresentableK[Logs[*[_], Y]]]
 
   def provide[I[_], F[_]]  = new Provide[I, F]
   def provideM[I[_], F[_]] = new ProvideM[I, F]

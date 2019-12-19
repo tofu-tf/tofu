@@ -3,11 +3,11 @@ package tofu.logging
 import Logging._
 import cats.kernel.Monoid
 import cats.syntax.apply._
-import cats.tagless.{ApplyK, Derive}
 import cats.{Applicative, Apply, FlatMap}
 import com.github.ghik.silencer.silent
 import org.slf4j.{Logger, LoggerFactory, Marker}
-import tofu.higherKind.Embed
+import tofu.higherKind
+import tofu.higherKind.{Embed, RepresentableK}
 import tofu.logging.impl.EmbedLogging
 import tofu.syntax.functionK._
 
@@ -69,7 +69,9 @@ trait ServiceLogging[F[_], +Service] extends LoggingBase[F]
 
 /** typeclass for logging using specified logger or set of loggers
   * see `Logs` for creating instances of that*/
-trait Logging[F[_]] extends ServiceLogging[F, Nothing]
+trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
+  final def widen[G[a] >: F[a]]: Logging[G] = this.asInstanceOf[Logging[G]]
+}
 
 object Logging {
   def apply[F[_]](implicit logging: Logging[F]): Logging[F] = logging
@@ -79,14 +81,14 @@ object Logging {
 
   /** having two logging implementation call `first` after `second` */
   def combine[F[_]: Apply](first: Logging[F], second: Logging[F]): Logging[F] =
-    loggingApplyK.map2K(first, second)(makeFunctionK(t => t.first *> t.second))
+    loggingRepresentable.map2K(first, second)(makeFunctionK(t => t.first *> t.second))
 
   private[logging] def loggerForService[S](implicit ct: ClassTag[S]): Logger =
     LoggerFactory.getLogger(ct.runtimeClass)
 
   def flatten[F[_]: FlatMap](underlying: F[Logging[F]]): Logging[F] = new EmbedLogging[F](underlying)
 
-  implicit val loggingApplyK: ApplyK[Logging] = Derive.applyK[Logging]
+  implicit val loggingRepresentable: RepresentableK[Logging] = higherKind.derived.genRepresentableK[Logging]
 
   implicit def loggingMonoid[F[_]: Applicative]: Monoid[Logging[F]] = new Monoid[Logging[F]] {
     val empty: Logging[F]                                 = Logging.empty[F]
