@@ -202,7 +202,7 @@ lazy val zioInterop = project
   .dependsOn(zioCore, zioLogging)
   .aggregate(zioCore, zioLogging)
 
-lazy val coreModules = Seq(core, memo, env, concurrent, opticsCore, data)
+lazy val coreModules = Seq(higherKindCore, core, memo, env, concurrent, opticsCore, data)
 
 lazy val commonModules = Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop)
 
