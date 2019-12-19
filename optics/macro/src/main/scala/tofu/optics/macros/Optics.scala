@@ -87,7 +87,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
 
           lazy val (resClassy, classyT) = labelClass(param, res)(s, s, a, a)
           if (classy) q"implicit def $lensName[..$tparams] : $classyT = $resClassy"
-          q"""def $lensName[..$tparams] = $res"""
+          else q"""def $lensName[..$tparams] = $res"""
         }
       }
     }

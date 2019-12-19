@@ -10,4 +10,5 @@ object TestClassyContains {
   implicitly[Contains[FooBar4[Double], String]]
   implicitly[Update[FooBar4[Double], String]]
   implicitly[PContains[FooBar4[Double], FooBar4[Long], Double, Long] with Label["x"]]
+  implicitly[Contains[FooBar5[String], List[String]] with Label["x"]]
 }

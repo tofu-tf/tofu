@@ -67,6 +67,14 @@ trait LoggingBase[F[_]] {
 /** Logging marked with Service type*/
 trait ServiceLogging[F[_], +Service] extends LoggingBase[F]
 
+object ServiceLogging{
+  private [this] val representableAny: RepresentableK[ServiceLogging[*[_], Any]] =
+    higherKind.derived.genRepresentableK[ServiceLogging[*[_], Any]]
+
+  final implicit def serviceLoggingRepresentable[Svc] : RepresentableK[ServiceLogging[*[_], Any]] =
+    representableAny.asInstanceOf[RepresentableK[ServiceLogging[*[_], Any]]]
+}
+
 /** typeclass for logging using specified logger or set of loggers
   * see `Logs` for creating instances of that*/
 trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
