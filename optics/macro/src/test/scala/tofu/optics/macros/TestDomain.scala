@@ -17,3 +17,4 @@ case class Foo(b: Bar)
 
 @POptics("contains_") case class FooBar3[X](i: Int, j: String, x: X)
 @ClassyPOptics("contains_") case class FooBar4[X](i: Int, j: String, x: X)
+@ClassyOptics case class FooBar5[Y](i: Int, j: String, x: List[Y])
