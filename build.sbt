@@ -42,7 +42,14 @@ lazy val defaultSettings = Seq(
 
 moduleName := "tofu"
 
-lazy val core = project dependsOn opticsCore settings (
+lazy val higherKindCore = project  settings (
+  defaultSettings,
+  publishName := "core-higher-kind",
+  libraryDependencies ++= Seq(catsCore, catsTagless),
+  macros,
+)
+
+lazy val core = project dependsOn (opticsCore, higherKindCore) settings (
   defaultSettings,
   publishName := "core",
   libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
