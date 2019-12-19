@@ -1,7 +1,6 @@
 package tofu.optics.macros
 
 import org.scalatest.{FunSuite, Matchers}
-import tofu.optics.{Contains, Label, PContains}
 
 class GenContainsSpec extends FunSuite with Matchers {
 

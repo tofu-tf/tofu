@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.5.6"
+val libVersion = "0.5.7"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -42,7 +42,14 @@ lazy val defaultSettings = Seq(
 
 moduleName := "tofu"
 
-lazy val core = project dependsOn opticsCore settings (
+lazy val higherKindCore = project  settings (
+  defaultSettings,
+  publishName := "core-higher-kind",
+  libraryDependencies ++= Seq(catsCore, catsTagless),
+  macros,
+)
+
+lazy val core = project dependsOn (opticsCore, higherKindCore) settings (
   defaultSettings,
   publishName := "core",
   libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
@@ -177,13 +184,13 @@ lazy val derivation =
 lazy val zioCore =
   project
     .in(file("zio/core"))
-    .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats))
+    .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), publishName := "zio-core")
     .dependsOn(core, concurrent)
 
 lazy val zioLogging =
   project
     .in(file("zio/logging"))
-    .settings(defaultSettings, libraryDependencies ++= List(zio, slf4j))
+    .settings(defaultSettings, libraryDependencies ++= List(zio, slf4j), publishName := "zio-logging")
     .dependsOn(loggingStr)
 
 lazy val zioInterop = project
@@ -279,10 +286,10 @@ lazy val defaultScalacOptions = scalacOptions ++= Seq(
   "-unchecked",                    // Enable additional warnings where generated code depends on assumptions.
 
   // Inlining options. More at https://www.lightbend.com/blog/scala-inliner-optimizer, https://github.com/scala/scala/pull/4858, https://github.com/scala/bug/issues/8790
-  "-opt:l:method",                 // Enable intra-method optimizations: unreachable-code,simplify-jumps,compact-locals,copy-propagation,redundant-casts,box-unbox,nullness-tracking,closure-invocations,allow-skip-core-module-init,assume-modules-non-null,allow-skip-class-loading.
-  "-opt:l:inline",                 // Enable cross-method optimizations (note: inlining requires -opt-inline-from): l:method,inline.
-  "-opt-inline-from:tofu.**",      // Patterns for classfile names from which to allow inlining
-  "-opt-warnings:none",            // No optimizer warnings.
+  "-opt:l:method",            // Enable intra-method optimizations: unreachable-code,simplify-jumps,compact-locals,copy-propagation,redundant-casts,box-unbox,nullness-tracking,closure-invocations,allow-skip-core-module-init,assume-modules-non-null,allow-skip-class-loading.
+  "-opt:l:inline",            // Enable cross-method optimizations (note: inlining requires -opt-inline-from): l:method,inline.
+  "-opt-inline-from:tofu.**", // Patterns for classfile names from which to allow inlining
+  "-opt-warnings:none",       // No optimizer warnings.
 
 //  "-Xcheckinit",                   // Wrap field accessors to throw an exception on uninitialized access. (SHOULD BE USED ONLY IN DEV)
   "-Xlint:adapted-args",           // Warn if an argument list is modified to match the receiver.

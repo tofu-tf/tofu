@@ -33,10 +33,6 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
           case method if method.occursInReturn(ff) =>
             val params = method.paramLists.map(_.map(_.name))
-            val tresult = method.returnType match {
-              case TypeRef(__, _, List(param)) => param
-              case _                           => abort(method.returnType.toString)
-            }
             val body = q"$hom($repk[$algebra](($algv => $alg.${method.name}(...$params))))"
             val tpe = appliedType(f, method.returnType.typeArgs)
             method.copy(body = body, returnType = tpe)

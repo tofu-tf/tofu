@@ -1,11 +1,12 @@
 package tofu.generate
 
 import cats.effect.Sync
+import cats.syntax.functor._
+import simulacrum.typeclass
+import tofu.higherKind
+import tofu.higherKind.RepresentableK
 
 import scala.util.Random
-import cats.syntax.functor._
-import cats.tagless.ApplyK
-import simulacrum.typeclass
 
 @typeclass
 trait GenRandom[F[_]] {
@@ -41,5 +42,5 @@ object GenRandom {
     def nextInt(max: Int): F[Int] = F.delay(rnd.nextInt(max))
   }
 
-  implicit val applyK: ApplyK[GenRandom] = cats.tagless.Derive.applyK
+  implicit val genRandomRepresentableK: RepresentableK[GenRandom] = higherKind.derived.genRepresentableK[GenRandom]
 }
