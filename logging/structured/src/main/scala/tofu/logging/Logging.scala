@@ -71,8 +71,8 @@ object ServiceLogging{
   private [this] val representableAny: RepresentableK[ServiceLogging[*[_], Any]] =
     higherKind.derived.genRepresentableK[ServiceLogging[*[_], Any]]
 
-  final implicit def serviceLoggingRepresentable[Svc] : RepresentableK[ServiceLogging[*[_], Any]] =
-    representableAny.asInstanceOf[RepresentableK[ServiceLogging[*[_], Any]]]
+  final implicit def serviceLoggingRepresentable[Svc] : RepresentableK[ServiceLogging[*[_], Svc]] =
+    representableAny.asInstanceOf[RepresentableK[ServiceLogging[*[_], Svc]]]
 }
 
 /** typeclass for logging using specified logger or set of loggers
