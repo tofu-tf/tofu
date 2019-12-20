@@ -11,6 +11,6 @@ trait EnvBioSpecializedFunctions[R, E] {
   def pure[A](x: A): EnvBio[R, E, A]                        = EnvBio.pure(x)
   def raiseError(e: E): EnvBio[R, E, Nothing]               = EnvBio.raiseError(e)
 
-  def context: EnvBio[R, Any, R]                  = EnvBio.context
+  def context: EnvBio[R, E, R]                    = EnvBio.context
   def fromTask[A](task: Task[A]): EnvBio[R, E, A] = EnvBio.fromTask(task)
 }

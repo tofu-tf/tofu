@@ -2,41 +2,34 @@ package tofu.env.bio
 
 import monix.eval.Task
 
-sealed trait EnvBio[-R, +E, +A] {
-  def run(ctx: R): Task[Either[E, A]]
+abstract class EnvBio[-R, +E, +A] {
+  // todo should expose this to user?
+  protected def runF(ctx: R): Task[A]
+
+  final def run(ctx: R): Task[Either[E, A]] = runF(ctx).attempt.flatMap {
+    case Left(UserError(err: E)) => Task.pure(Left(err)) // todo erasure elimination?
+    case Left(fatalErr)          => Task.raiseError(fatalErr)
+    case Right(value)            => Task.pure(Right(value))
+  }
 
   def map[B](f: A => B): EnvBio[R, E, B] =
     flatMap(value => EnvBio.pure(f(value)))
 
   def flatMap[R1 <: R, E1 >: E, B](f: A => EnvBio[R1, E1, B]): EnvBio[R1, E1, B] =
-    EnvBio(ctx => run(ctx).flatMap(_.fold(raiseUserError, f(_).run(ctx))))
+    EnvBio.applyFatal(ctx => runF(ctx).flatMap(f(_).runF(ctx)))
 
-  def mapTask[E1 >: E, B](f: Task[Either[E, A]] => Task[Either[E1, B]]): EnvBio[R, E1, B] =
-    EnvBio(ctx => f(run(ctx)))
+  def handleErrorWith[R1 <: R, E1 >: E, A1 >: A](f: E => EnvBio[R1, E1, A1]): EnvBio[R1, E1, A1] =
+    EnvBio.applyFatal(ctx =>
+      runF(ctx).onErrorHandleWith {
+        case UserError(e: E) => f(e).runF(ctx)
+        case t               => Task.raiseError(t)
+      }
+    )
 
-  private def raiseUserError[E1](e: E1): Task[Either[E1, Nothing]] = Task.raiseError(UserError(e))
+  def mapError[E1 >: E](f: E => E1): EnvBio[R, E1, A] =
+    handleErrorWith(e => EnvBio.raiseError(f(e)))
 }
 
 object EnvBio extends EnvBioFunctions {}
 
-/** Context aware variation of `EnvBio` that allows specifying error type */
-final case class EnvBioCtx[R, +E, +A](runF: R => Task[Either[E, A]]) extends EnvBio[R, E, A] {
-  def run(ctx: R): Task[Either[E, A]] = Task.defer(runF(ctx)).attempt.flatMap {
-    case Left(UserError(err: E)) => Task.pure(Left(err))
-    case Left(fatalErr)          => Task.raiseError(fatalErr)
-    case Right(Left(userErr))    => Task.pure(Left(userErr))
-    case Right(Right(value))     => Task.pure(Right(value))
-  }
-}
-
-/** Context aware variation of `Env` that has no notion of error type, thus all errors to underlying 'Task' are considered fatal */
-final case class EnvUioCtx[R, +A](runF: R => Task[A]) extends EnvBio[R, Nothing, A] {
-  def run(ctx: R): Task[Either[Nothing, A]] = Task.defer(runF(ctx).map(Right.apply))
-}
-
-/** Context independent variation of `EnvBio` that allows specifying error type for underlying 'Task' */
-final case class EnvBioTask[R, +E, +A](ta: Task[Either[E, A]]) extends EnvBio[R, E, A] {
-  def run(ctx: R): Task[Either[E, A]] = ta
-}
-
-final case class UserError[E](err: E) extends Throwable
+private[bio] final case class UserError[E](err: E) extends Throwable
