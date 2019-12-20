@@ -65,13 +65,15 @@ trait LoggingBase[F[_]] {
 }
 
 /** Logging marked with Service type*/
-trait ServiceLogging[F[_], +Service] extends LoggingBase[F]
+trait ServiceLogging[F[_], Service] extends LoggingBase[F] {
+  final def to[Svc2]: ServiceLogging[F, Svc2] = this.asInstanceOf[ServiceLogging[F, Svc2]]
+}
 
-object ServiceLogging{
-  private [this] val representableAny: RepresentableK[ServiceLogging[*[_], Any]] =
+object ServiceLogging {
+  private[this] val representableAny: RepresentableK[ServiceLogging[*[_], Any]] =
     higherKind.derived.genRepresentableK[ServiceLogging[*[_], Any]]
 
-  final implicit def serviceLoggingRepresentable[Svc] : RepresentableK[ServiceLogging[*[_], Svc]] =
+  final implicit def serviceLoggingRepresentable[Svc]: RepresentableK[ServiceLogging[*[_], Svc]] =
     representableAny.asInstanceOf[RepresentableK[ServiceLogging[*[_], Svc]]]
 }
 
@@ -82,6 +84,8 @@ trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
 }
 
 object Logging {
+  type ForService[F[_], Svc] <: Logging[F]
+
   def apply[F[_]](implicit logging: Logging[F]): Logging[F] = logging
 
   /** the do-nothing Logging */
