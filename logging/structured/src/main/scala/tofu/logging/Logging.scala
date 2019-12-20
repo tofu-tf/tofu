@@ -64,7 +64,8 @@ trait LoggingBase[F[_]] {
     writeCause(Error, message, cause, values: _*)
 }
 
-/** Logging marked with Service type*/
+/** Logging tagged with some arbitrary tag type
+  *  note there are not any guarantees that `Service` correspond to the type parameter of `Logs.forService` method*/
 trait ServiceLogging[F[_], Service] extends LoggingBase[F] {
   final def to[Svc2]: ServiceLogging[F, Svc2] = this.asInstanceOf[ServiceLogging[F, Svc2]]
 }
