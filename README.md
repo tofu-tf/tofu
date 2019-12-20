@@ -1,19 +1,21 @@
+<img align="right" src="logos/tofu-mascot.png" height="170px" style="padding-left: 20px"/>
+
 # ToFu
+
+**Functional programming toolkit by Tinkoff scala team aimed at taming the complexity of Tagless Final approach.** 
 
 | CI | Release | Chat |
 | --- | --- | --- |
 | [![Build Status](https://travis-ci.com/TinkoffCreditSystems/tofu.svg?branch=master)](https://travis-ci.com/TinkoffCreditSystems/tofu) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu-core_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu-core) | [![Gitter chat](https://badges.gitter.im/tinkoff-tofu/community.png)](https://gitter.im/tinkoff-tofu/community)
 
-**Functional programming toolkit by Tinkoff scala team aimed at taming the complexity of Tagless Final approach.** 
-
-### Quick Start
+# Quick Start
 
 ## see [the docs on the microsite](https://tinkoffcreditsystems.github.io/tofu)
 
 To use the whole utils pack just add to your `build.sbt`: 
 
 ```scala
-libraryDependencies += "ru.tinkoff" %% "tofu" % "0.5.4"
+libraryDependencies += "ru.tinkoff" %% "tofu" % "latest version in badge"
 ```
 
 Of course you can also specify the exact subproject that you wanna add to yours dependencies (used in place of `"tofu"`):
@@ -34,3 +36,9 @@ Of course you can also specify the exact subproject that you wanna add to yours 
 * `tofu-observable` for observable
 * `tofu-enums` for enums ([Enumeratum](https://github.com/lloydmeta/enumeratum) utils)
 
+<img align="right" src="logos/tofu-logo.png" height="100px" style="padding-left: 5px"/>
+
+# Copyright
+Copyright the maintainers, 2019
+
+Logos made with love by [@impurepics](https://twitter.com/impurepics)
