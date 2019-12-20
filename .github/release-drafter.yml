@@ -10,6 +10,7 @@ categories:
       - 'fix'
       - 'bugfix'
       - 'bug'
+      - 'invalid'
   - title: 'Maintenance'
     labels:
       - 'chore'
