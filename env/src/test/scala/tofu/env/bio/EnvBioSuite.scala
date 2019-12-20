@@ -67,4 +67,56 @@ class EnvBioSuite extends FlatSpec with Matchers {
       .run(())
       .runSyncUnsafe(Duration.Inf) shouldBe Left("err1")
   }
+
+  "map2" should "transform values" in {
+    val bio1 = EnvBio.pure(1)
+    val bio2 = EnvBio.pure(1)
+    EnvBio.map2(bio1, bio2)(_ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(2)
+  }
+
+  it should "fail if either of computation fails" in {
+    val bio1: EnvBio[Any, String, Int] = EnvBio.pure(1)
+    val bio2: EnvBio[Any, String, Int] = EnvBio.raiseError("Error")
+    EnvBio.map2(bio1, bio2)(_ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left("Error")
+  }
+
+  "map3" should "transform values" in {
+    val bio1 = EnvBio.pure(1)
+    val bio2 = EnvBio.pure(1)
+    val bio3 = EnvBio.pure(1)
+    EnvBio.map3(bio1, bio2, bio3)(_ + _ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(3)
+  }
+
+  it should "fail if either of computation fails" in {
+    val bio1: EnvBio[Any, Nothing, Int] = EnvBio.pure(1)
+    val bio2: EnvBio[Any, String, Int] = EnvBio.raiseError("Error")
+    val bio3: EnvBio[Any, Nothing, Int] = EnvBio.pure(1)
+    EnvBio.map3(bio1, bio2, bio3)(_ + _ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left("Error")
+  }
+
+  "parMap2" should "transform values in parallel" in {
+    val bio1 = EnvBio.pure(1)
+    val bio2 = EnvBio.pure(1)
+    EnvBio.parMap2(bio1, bio2)(_ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(2)
+  }
+
+  it should "fail if either of computation fails" in {
+    val bio1: EnvBio[Any, String, Int] = EnvBio.pure(1)
+    val bio2: EnvBio[Any, String, Int] = EnvBio.raiseError("Error")
+    EnvBio.parMap2(bio1, bio2)(_ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left("Error")
+  }
+
+  "parMap3" should "transform values" in {
+    val bio1 = EnvBio.pure(1)
+    val bio2 = EnvBio.pure(1)
+    val bio3 = EnvBio.pure(1)
+    EnvBio.parMap3(bio1, bio2, bio3)(_ + _ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(3)
+  }
+
+  it should "fail if either of computation fails" in {
+    val bio1: EnvBio[Any, Nothing, Int] = EnvBio.pure(1)
+    val bio2: EnvBio[Any, String, Int] = EnvBio.raiseError("Error")
+    val bio3: EnvBio[Any, Nothing, Int] = EnvBio.pure(1)
+    EnvBio.parMap3(bio1, bio2, bio3)(_ + _ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left("Error")
+  }
 }

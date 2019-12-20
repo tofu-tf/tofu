@@ -13,4 +13,19 @@ trait EnvBioSpecializedFunctions[R, E] {
 
   def context: EnvBio[R, E, R]                    = EnvBio.context
   def fromTask[A](task: Task[A]): EnvBio[R, E, A] = EnvBio.fromTask(task)
+
+  def map2[A, B, C, R1 <: R, E1 >: E](ea: EnvBio[R, E, A], eb: EnvBio[R1, E1, B])(f: (A, B) => C): EnvBio[R1, E1, C] =
+    EnvBio.map2(ea, eb)(f)
+
+  def map3[A, B, C, D, R1 <: R, E1 >: E](ea: EnvBio[R, E, A], eb: EnvBio[R1, E1, B], ec: EnvBio[R1, E1, C])(
+      f: (A, B, C) => D
+  ): EnvBio[R1, E1, D] = EnvBio.map3(ea, eb, ec)(f)
+
+  def parMap2[A, B, C, R1 <: R, E1 >: E](ea: EnvBio[R, E, A], eb: EnvBio[R1, E1, B])(
+      f: (A, B) => C
+  ): EnvBio[R1, E1, C] = EnvBio.parMap2(ea, eb)(f)
+
+  def parMap3[A, B, C, D, R1 <: R, E1 >: E](ea: EnvBio[R, E, A], eb: EnvBio[R1, E1, B], ec: EnvBio[R1, E1, C])(
+      f: (A, B, C) => D
+  ): EnvBio[R1, E1, D] = EnvBio.parMap3(ea, eb, ec)(f)
 }
