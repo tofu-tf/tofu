@@ -1,17 +1,22 @@
 package tofu
 package zioInstances
-import cats.{Applicative, Functor}
+import cats.{Applicative, Functor, ~>}
 import cats.effect.{CancelToken, Fiber}
 import tofu.internal.CachedMatcher
+import tofu.lift.Unlift
+import tofu.optics.{Contains, Subset}
+import tofu.syntax.functionK
+import tofu.syntax.functionK.funK
 import tofu.zioInstances.ZioTofuInstance.convertFiber
 import zio.clock.Clock
 import zio.{Fiber => ZFiber, _}
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
 
 class ZioTofuInstance[R, E]
     extends RunContext[ZIO[R, E, *]] with Errors[ZIO[R, E, *], E] with Start[ZIO[R, E, *]]
-    with Finally[ZIO[R, E, *], Exit[E, *]] {
+    with Finally[ZIO[R, E, *], Exit[E, *]] with Execute[ZIO[R, E, *]] {
   type Ctx      = R
   type Lower[a] = ZIO[Any, E, a]
   val context: ZIO[R, E, R] = ZIO.access[R](r => r)
@@ -52,6 +57,14 @@ class ZioTofuInstance[R, E]
       init: ZIO[R, E, A]
   )(action: A => ZIO[R, E, B])(release: (A, Exit[E, B]) => ZIO[R, E, C]): ZIO[R, E, B] =
     init.bracketExit[R, E, B]((a, e) => release(a, e).ignore, action)
+
+  def executionContext: ZIO[R, E, ExecutionContext] = ZIO.runtime[R].map(_.platform.executor.asEC)
+
+  def deferFutureAction[A](f: ExecutionContext => Future[A]): ZIO[R, E, A] = ZIO.fromFuture(f).orDie
+}
+
+class RioTofuInstance[R] extends ZioTofuInstance[R, Throwable] {
+  override def deferFutureAction[A](f: ExecutionContext => Future[A]): ZIO[R, Throwable, A] = ZIO.fromFuture(f)
 }
 
 class ZIOTofuTimeoutInstance[R <: Clock, E] extends Timeout[ZIO[R, E, *]] {
@@ -79,4 +92,10 @@ class ZioTofuErrorsToInstance[R, E, E1] extends ErrorsTo[ZIO[R, E, *], ZIO[R, E1
   )(implicit F: Functor[ZIO[R, E, *]], G: Applicative[ZIO[R, E1, *]]): ZIO[R, E1, Either[E, A]] =
     fa.either
 
+}
+
+class ZIOUnliftInstance[R1, R2, E](implicit lens: Contains[R2, R1]) extends Unlift[ZIO[R1, E, *], ZIO[R2, E, *]] {
+  def lift[A](fa: ZIO[R1, E, A]): ZIO[R2, E, A] = fa.provideSome(lens.extract)
+  def unlift: ZIO[R2, E, ZIO[R2, E, *] ~> ZIO[R1, E, *]] =
+    ZIO.access[R2](r2 => funK(_.provideSome(r1 => lens.set(r2, r1))))
 }
