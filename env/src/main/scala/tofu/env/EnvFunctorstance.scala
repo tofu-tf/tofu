@@ -21,8 +21,6 @@ private[env] class EnvFunctorstance[E]
   import Env._
 
   override def functor: Functor[Env[E, *]] = this
-  override def async: Async[Env[E, *]]     = this
-
   //Functor
   override def map[A, B](fa: Env[E, A])(f: A => B): Env[E, B] = fa.map(f)
 
