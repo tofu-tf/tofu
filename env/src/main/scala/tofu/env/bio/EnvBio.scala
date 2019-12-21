@@ -12,8 +12,11 @@ abstract class EnvBio[-R, +E, +A] {
     case Right(value)            => Task.pure(Right(value))
   }
 
+  def mapTask[B](f: Task[A] => Task[B]): EnvBio[R, E, B] =
+    EnvBio.applyFatal(ctx => f(runF(ctx)))
+
   def map[B](f: A => B): EnvBio[R, E, B] =
-    flatMap(value => EnvBio.pure(f(value)))
+    mapTask(_.map(f))
 
   def flatMap[R1 <: R, E1 >: E, B](f: A => EnvBio[R1, E1, B]): EnvBio[R1, E1, B] =
     EnvBio.applyFatal(ctx => runF(ctx).flatMap(f(_).runF(ctx)))
@@ -47,6 +50,9 @@ abstract class EnvBio[-R, +E, +A] {
 
   def mapError[E1 >: E](f: E => E1): EnvBio[R, E1, A] =
     handleErrorWith(e => EnvBio.raiseError(f(e)))
+
+  def tapError[R1 <: R, E1 >: E](f: E => EnvBio[R1, E1, Any]): EnvBio[R1, E1, A] =
+    handleErrorWith(e => f(e).flatMap(_ => EnvBio.raiseError(e)))
 }
 
 object EnvBio extends EnvBioFunctions {}

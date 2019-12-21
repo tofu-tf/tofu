@@ -10,12 +10,12 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
     }
 
   // todo naming
-  def applyFatal[R, E, A](f: R => Task[A]): EnvBio[R, E, A] = (ctx: R) => f(ctx)
+  def applyFatal[R, E, A](f: R => Task[A]): EnvBio[R, E, A] = f(_)
 
   def later[A](x: => A): EnvBio[Any, Nothing, A]   = fromTask(Task.delay(x))
   def pure[A](x: A): EnvBio[Any, Nothing, A]       = fromTask(Task.pure(x))
-  def raiseError[E](e: E): EnvBio[Any, E, Nothing] = apply(_ => Task.pure(Left(e)))
+  def raiseError[E](e: E): EnvBio[Any, E, Nothing] = fromTask(Task.raiseError(UserError(e)))
 
-  def context[R, E]: EnvBio[R, E, R]                       = applyFatal(Task.now)
-  def fromTask[R, A](task: Task[A]): EnvBio[R, Nothing, A] = applyFatal(_ => task)
+  def context[R, E]: EnvBio[R, E, R]                       = Task.now
+  def fromTask[R, A](task: Task[A]): EnvBio[R, Nothing, A] = _ => task
 }

@@ -1,5 +1,6 @@
 package tofu.env.bio
 
+import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -31,6 +32,15 @@ class EnvBioSuite extends FlatSpec with Matchers {
     EnvBio.pure(1).map(_ + 1).map(_ => throw ex).run(()).attempt.runSyncUnsafe(Duration.Inf) shouldBe Left(ex)
   }
 
+  "mapTask" should "transform value in Task context" in {
+    EnvBio.pure(1).mapTask(_.map(_ => 2)).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(2)
+  }
+
+  it should "result in fatal error if function returns failed Task" in {
+    val ex = new Exception("Test")
+    EnvBio.pure(1).mapTask(_ => Task.raiseError(ex)).run(()).attempt.runSyncUnsafe(Duration.Inf) shouldBe Left(ex)
+  }
+
   "flatMap" should "chain computations" in {
     (for {
       v1 <- EnvBio.pure(1)
@@ -50,6 +60,18 @@ class EnvBioSuite extends FlatSpec with Matchers {
       .mapError(_ => "err3")
       .run(())
       .runSyncUnsafe(Duration.Inf) shouldBe Left("err3")
+  }
+
+  "tapError" should "effectfully peek at error without changing original error" in {
+    EnvBio.raiseError("Err1").tapError(_ => EnvBio.pure(1)).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left("Err1")
+  }
+
+  it should "return new error if effectful computation fails" in {
+    EnvBio
+      .raiseError("Err1")
+      .tapError(_ => EnvBio.raiseError("Err2"))
+      .run(())
+      .runSyncUnsafe(Duration.Inf) shouldBe Left("Err2")
   }
 
   "handleErrorWith" should "recover failed computation with given function" in {
@@ -89,7 +111,7 @@ class EnvBioSuite extends FlatSpec with Matchers {
 
   it should "fail if either of computation fails" in {
     val bio1: EnvBio[Any, Nothing, Int] = EnvBio.pure(1)
-    val bio2: EnvBio[Any, String, Int] = EnvBio.raiseError("Error")
+    val bio2: EnvBio[Any, String, Int]  = EnvBio.raiseError("Error")
     val bio3: EnvBio[Any, Nothing, Int] = EnvBio.pure(1)
     EnvBio.map3(bio1, bio2, bio3)(_ + _ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left("Error")
   }
@@ -115,7 +137,7 @@ class EnvBioSuite extends FlatSpec with Matchers {
 
   it should "fail if either of computation fails" in {
     val bio1: EnvBio[Any, Nothing, Int] = EnvBio.pure(1)
-    val bio2: EnvBio[Any, String, Int] = EnvBio.raiseError("Error")
+    val bio2: EnvBio[Any, String, Int]  = EnvBio.raiseError("Error")
     val bio3: EnvBio[Any, Nothing, Int] = EnvBio.pure(1)
     EnvBio.parMap3(bio1, bio2, bio3)(_ + _ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left("Error")
   }
