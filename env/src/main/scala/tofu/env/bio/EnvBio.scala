@@ -40,7 +40,7 @@ abstract class EnvBio[-R, +E, +A] {
   ): EnvBio[R1, E1, D] =
     EnvBio.applyFatal(ctx => Task.parMap3(runF(ctx), eb.runF(ctx), ec.runF(ctx))(f))
 
-  def handleErrorWith[R1 <: R, E1 >: E, A1 >: A](f: E => EnvBio[R1, E1, A1]): EnvBio[R1, E1, A1] =
+  def onErrorHandleWith[R1 <: R, E1 >: E, A1 >: A](f: E => EnvBio[R1, E1, A1]): EnvBio[R1, E1, A1] =
     EnvBio.applyFatal(ctx =>
       runF(ctx).onErrorHandleWith {
         case UserError(e: E) => f(e).runF(ctx)
@@ -48,11 +48,25 @@ abstract class EnvBio[-R, +E, +A] {
       }
     )
 
+  def onErrorHandle[A1 >: A](f: E => A1): EnvBio[R, E, A1] =
+    onErrorHandleWith(e => EnvBio.pure(f(e)))
+
+  def onErrorRecoverWith[R1 <: R, E1 >: E, A1 >: A](f: PartialFunction[E, EnvBio[R1, E1, A1]]): EnvBio[R1, E1, A1] =
+    EnvBio.applyFatal(ctx =>
+      runF(ctx).onErrorRecoverWith {
+        case UserError(e: E) if f.isDefinedAt(e) => f(e).runF(ctx)
+        case t                                   => Task.raiseError(t)
+      }
+    )
+
+  def onErrorRecover[A1 >: A](f: PartialFunction[E, A1]): EnvBio[R, E, A1] =
+    onErrorRecoverWith(f.andThen(a1 => EnvBio.pure(a1)))
+
   def mapError[E1 >: E](f: E => E1): EnvBio[R, E1, A] =
-    handleErrorWith(e => EnvBio.raiseError(f(e)))
+    onErrorHandleWith(e => EnvBio.raiseError(f(e)))
 
   def tapError[R1 <: R, E1 >: E](f: E => EnvBio[R1, E1, Any]): EnvBio[R1, E1, A] =
-    handleErrorWith(e => f(e).flatMap(_ => EnvBio.raiseError(e)))
+    onErrorHandleWith(e => f(e).flatMap(_ => EnvBio.raiseError(e)))
 }
 
 object EnvBio extends EnvBioFunctions {}

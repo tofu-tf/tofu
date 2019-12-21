@@ -74,10 +74,10 @@ class EnvBioSuite extends FlatSpec with Matchers {
       .runSyncUnsafe(Duration.Inf) shouldBe Left("Err2")
   }
 
-  "handleErrorWith" should "recover failed computation with given function" in {
+  "onErrorHandleWith" should "recover failed computation with given function" in {
     EnvBio
       .raiseError("err")
-      .handleErrorWith(e => EnvBio.pure(e + "1"))
+      .onErrorHandleWith(e => EnvBio.pure(e + "1"))
       .run(())
       .runSyncUnsafe(Duration.Inf) shouldBe Right("err1")
   }
@@ -85,9 +85,61 @@ class EnvBioSuite extends FlatSpec with Matchers {
   it should "return error value if recover results in failure" in {
     EnvBio
       .raiseError("err")
-      .handleErrorWith(e => EnvBio.raiseError(e + "1"))
+      .onErrorHandleWith(e => EnvBio.raiseError(e + "1"))
       .run(())
       .runSyncUnsafe(Duration.Inf) shouldBe Left("err1")
+  }
+
+  "onErrorHandle" should "recover failed computation" in {
+    EnvBio.raiseError("err").onErrorHandle(_ + "1").run(()).runSyncUnsafe(Duration.Inf) shouldBe Right("err1")
+  }
+
+  "onErrorRecover" should "recover using partial function" in {
+    sealed trait Error
+    case object Err1 extends Error
+    case object Err2 extends Error
+
+    EnvBio
+      .raiseError[Error](Err1)
+      .onErrorRecover { case Err1 => "Result" }
+      .run(())
+      .runSyncUnsafe(Duration.Inf) shouldBe Right("Result")
+  }
+
+  it should "ignore recover function if partial function is not defined at error" in {
+    sealed trait Error
+    case object Err1 extends Error
+    case object Err2 extends Error
+
+    EnvBio
+      .raiseError[Error](Err1)
+      .onErrorRecover { case Err2 => "Result" }
+      .run(())
+      .runSyncUnsafe(Duration.Inf) shouldBe Left(Err1)
+  }
+
+  "onErrorRecoverWith" should "recover using effectful partial function" in {
+    sealed trait Error
+    case object Err1 extends Error
+    case object Err2 extends Error
+
+    EnvBio
+      .raiseError[Error](Err1)
+      .onErrorRecoverWith { case Err1 => EnvBio.pure("Result") }
+      .run(())
+      .runSyncUnsafe(Duration.Inf) shouldBe Right("Result")
+  }
+
+  it should "ignore recover function if partial function is not defined at error" in {
+    sealed trait Error
+    case object Err1 extends Error
+    case object Err2 extends Error
+
+    EnvBio
+      .raiseError[Error](Err1)
+      .onErrorRecoverWith { case Err2 => EnvBio.pure("Result") }
+      .run(())
+      .runSyncUnsafe(Duration.Inf) shouldBe Left(Err1)
   }
 
   "map2" should "transform values" in {
