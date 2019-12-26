@@ -7,7 +7,7 @@ object Dependencies {
   object Version {
     val circe = "0.12.3"
 
-    val tethys = "0.10.0"
+    val tethys = "0.11.0"
 
     val cats = "2.0.0"
 
