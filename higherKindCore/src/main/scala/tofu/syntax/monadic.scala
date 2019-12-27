@@ -25,9 +25,9 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def <*>(fa: F[A])(implicit F: Apply[F]): F[B] = F.ap(fab)(fa)
   }
   
-  implicit class TofuApplicativeOps[F[_], A](private val fa: F[A]) extends AnyVal {
-    def whenOpt(condition: Boolean)(implicit F: Applicative[F]): F[Option[A]]   = if (condition) F.map(fa)(Some(_)) else F.pure(None)
-    def unlessOpt(condition: Boolean)(implicit F: Applicative[F]): F[Option[A]] = if (condition) F.pure(None) else F.map(fa)(Some(_))
+  implicit class TofuApplicativeOps[F[_], A](private val condition: Boolean) extends AnyVal {
+    def whenOpt(fa: =>F[A])(implicit F: Applicative[F]): F[Option[A]]   = if (condition) F.map(fa)(Some(_)) else F.pure(None)
+    def unlessOpt(fa: =>F[A])(implicit F: Applicative[F]): F[Option[A]] = if (condition) F.pure(None) else F.map(fa)(Some(_))
   }
   
   implicit final class TofuApplyFunc2Ops[F[_], A, B, C](private val fab: F[(A, B) => C]) extends AnyVal {
