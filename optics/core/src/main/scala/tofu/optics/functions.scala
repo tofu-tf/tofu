@@ -2,6 +2,7 @@ package tofu.optics
 
 import cats.Apply
 import cats.syntax.apply._
+import cats.syntax.either._
 import cats.instances.all._
 import alleycats.std.map._
 
@@ -47,4 +48,12 @@ object functions {
 
   def everyTuple4[A, B]: PItems[(A, A, A, A), (B, B, B, B), A, B] =
     PItems[(A, A, A, A), A, B](implicit A => (s, f) => (f(s._1), f(s._2), f(s._3), f(s._4)).tupled)
+
+  def right[A, B]: Subset[Either[A, B], A] = Subset[Either[A, B]](_.fold(Some(_), _ => None))(_.asLeft)
+
+  def left[A, B]: Subset[Either[A, B], B] = Subset[Either[A, B]](_.toOption)(_.asRight)
+
+  def some[A]: Subset[Option[A], A] = Subset[Option[A]](identity)(Some(_))
+
+  def none[A]: Subset[Option[A], Unit] = Subset[Option[A]](_ => Some(()))(_ => None)
 }
