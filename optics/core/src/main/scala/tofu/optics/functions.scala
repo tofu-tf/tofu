@@ -49,9 +49,9 @@ object functions {
   def everyTuple4[A, B]: PItems[(A, A, A, A), (B, B, B, B), A, B] =
     PItems[(A, A, A, A), A, B](implicit A => (s, f) => (f(s._1), f(s._2), f(s._3), f(s._4)).tupled)
 
-  def right[A, B]: Subset[Either[A, B], A] = Subset[Either[A, B]](_.fold(Some(_), _ => None))(_.asLeft)
+  def right[A, B]: Subset[Either[A, B], B] = Subset[Either[A, B]](_.toOption)(_.asRight)
 
-  def left[A, B]: Subset[Either[A, B], B] = Subset[Either[A, B]](_.toOption)(_.asRight)
+  def left[A, B]: Subset[Either[A, B], A] = Subset[Either[A, B]](_.fold(Some(_), _ => None))(_.asLeft)
 
   def some[A]: Subset[Option[A], A] = Subset[Option[A]](identity)(Some(_))
 
