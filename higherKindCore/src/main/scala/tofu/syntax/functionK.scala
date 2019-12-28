@@ -1,5 +1,4 @@
 package tofu.syntax
-
 import cats.~>
 
 object functionK {

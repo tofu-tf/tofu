@@ -1,5 +1,5 @@
 package tofu.higherKind
-import cats.{ContravariantMonoidal, MonoidK}
+import cats.{ContravariantMonoidal, MonoidK, ~>}
 
 /**
   * equivalent of UnitK ~> F
@@ -30,5 +30,11 @@ object Point {
 
   def contraMonoidal[F[_]](implicit F: ContravariantMonoidal[F]) = new Point[F] {
     override def point[A]: F[A] = F.trivial
+  }
+
+  implicit val pointRepresentable: RepresentableK[Point] = new RepresentableK[Point] {
+    def tabulate[F[_]](hom: RepK[Point, *] ~> F): Point[F] = new Point[F] {
+      def point[A]: F[A] = hom(RepK[Point](_.point))
+    }
   }
 }

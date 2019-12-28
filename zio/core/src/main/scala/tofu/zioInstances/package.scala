@@ -1,6 +1,9 @@
 package tofu
+import tofu.optics.Contains
 import tofu.zioInstances.{
+  RioTofuInstance,
   ZIOTofuTimeoutInstance,
+  ZIOUnliftInstance,
   ZioTofuConcurrentInstance,
   ZioTofuConcurrentInstanceUIO,
   ZioTofuErrorsToInstance,
@@ -10,9 +13,9 @@ import zio.clock.Clock
 
 package object zioInstances extends ZioInstances1
 
-class ZioInstances1 {
-  private[this] val zioTofuInstanceAny: ZioTofuInstance[Any, Any] = new ZioTofuInstance
-  final def zioTofuInstance[R, E]: ZioTofuInstance[R, E]          = zioTofuInstanceAny.asInstanceOf[ZioTofuInstance[R, E]]
+class ZioInstances1 extends ZioInstances2 {
+  private[this] val rioTofuInstanceAny: RioTofuInstance[Any] = new RioTofuInstance
+  final def rioTofuInstance[R]: RioTofuInstance[R]           = rioTofuInstanceAny.asInstanceOf[RioTofuInstance[R]]
 
   private[this] val zioErrorsToInstanceAny: ZioTofuErrorsToInstance[Any, Any, Nothing] = new ZioTofuErrorsToInstance
   final def zioTofuErrorsToInstance[R, E, E1]: ZioTofuErrorsToInstance[R, E, E1] =
@@ -27,4 +30,12 @@ class ZioInstances1 {
 
   final def zioTofuConcurrentInstance[R1, E1, R, E]: ZioTofuConcurrentInstance[R1, E1, R, E] =
     zioTofuConcurrentInstanceAny.asInstanceOf[ZioTofuConcurrentInstance[R1, E1, R, E]]
+
+  final implicit def zioUnliftInstance[R1, R2, E](implicit _r12: R2 Contains R1): ZIOUnliftInstance[R1, R2, E] =
+    new ZIOUnliftInstance[R1, R2, E]
+}
+trait ZioInstances2 {
+
+  private[this] val zioTofuInstanceAny: ZioTofuInstance[Any, Any] = new ZioTofuInstance
+  final def zioTofuInstance[R, E]: ZioTofuInstance[R, E]          = zioTofuInstanceAny.asInstanceOf[ZioTofuInstance[R, E]]
 }

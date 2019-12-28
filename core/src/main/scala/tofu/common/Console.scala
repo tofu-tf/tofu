@@ -1,6 +1,7 @@
 package tofu.common
 import cats.effect.Sync
-import cats.tagless.ApplyK
+import tofu.higherKind
+import tofu.higherKind.RepresentableK
 
 import scala.io.StdIn
 
@@ -16,7 +17,7 @@ object Console {
   def putStrLn[F[_]](s: String)(implicit C: Console[F]): F[Unit] = C.putStrLn(s)
   def readStrLn[F[_]](implicit C: Console[F]): F[String]         = C.readStrLn
 
-  implicit val applyKInstance: ApplyK[Console] = cats.tagless.Derive.applyK
+  implicit val representableKInstance: RepresentableK[Console] = higherKind.derived.genRepresentableK[Console]
 
   implicit def syncInstance[F[_]](implicit F: Sync[F]): Console[F] = new Console[F] {
     def putStr(s: String): F[Unit]   = F.delay(print(s))

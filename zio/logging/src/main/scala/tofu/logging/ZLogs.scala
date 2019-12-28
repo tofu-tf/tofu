@@ -9,7 +9,7 @@ import scala.reflect.ClassTag
 trait ZLogs[R] extends Logs[UIO, URIO[R, *]]
 
 object ZLogs {
-  val urio: Logs[UIO, UIO] = new Logs[UIO, UIO] {
+  val uio: Logs[UIO, UIO] = new Logs[UIO, UIO] {
     def forService[Svc: ClassTag]: UIO[Logging[UIO]] =
       UIO.effectTotal(new UIOZLogging(loggerForService[Svc]))
     def byName(name: String): UIO[Logging[UIO]] = UIO.effectTotal(new UIOZLogging(LoggerFactory.getLogger(name)))

@@ -6,10 +6,9 @@ import cats.effect._
 import cats.effect.concurrent.{MVar, TryableDeferred}
 import cats.effect.syntax.bracket._
 import cats.syntax.applicativeError._
-import cats.tagless.autoApplyK
 import cats.{Applicative, Apply, FlatMap, Monad}
 import tofu.control.ApplicativeZip
-import tofu.higherKind.Function2K
+import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.syntax.monadic._
 import tofu.syntax.start._
 
@@ -57,7 +56,6 @@ trait DaemonicInstances { self: Daemonic.type =>
     )
 }
 
-@autoApplyK
 trait Daemon[F[_], E, A] extends Fiber[F, A] {
   def join: F[A]
   def cancel: F[Unit]
@@ -183,7 +181,12 @@ final class TofuCanceledJoinException[F[_], A] private[tofu] (val daemon: Daemon
     extends InterruptedException("trying to join canceled fiber")
 
 trait DaemonInstances {
-  implicit def daemonApplicative[F[_], E](implicit F: Monad[F]): Applicative[Daemon[F, E, *]] =
+  private[this] val representableAny = higherKind.derived.genRepresentableK[Daemon[*[_], Any, Any]]
+
+  final implicit def daemonRepresentable[E, A]: RepresentableK[Daemon[*[_], E, A]] =
+    representableAny.asInstanceOf[RepresentableK[Daemon[*[_], E, A]]]
+
+  final implicit def daemonApplicative[F[_], E](implicit F: Monad[F]): Applicative[Daemon[F, E, *]] =
     new ApplicativeZip[Daemon[F, E, *]] {
       def pure[A](x: A): Daemon[F, E, A] = new Daemon[F, E, A] {
         def join: F[A]                  = F.pure(x)

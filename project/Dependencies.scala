@@ -7,7 +7,7 @@ object Dependencies {
   object Version {
     val circe = "0.12.3"
 
-    val tethys = "0.10.0"
+    val tethys = "0.11.0"
 
     val cats = "2.0.0"
 
@@ -33,7 +33,7 @@ object Dependencies {
 
     val scalatest = "3.0.8"
 
-    val magnolia = "0.12.2"
+    val magnolia = "0.12.5"
 
     val typesafeConfig = "1.4.0"
 

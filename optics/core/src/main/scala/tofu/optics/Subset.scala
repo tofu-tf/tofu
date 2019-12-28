@@ -37,7 +37,7 @@ object Subset extends MonoOpticCompanion(PSubset) {
     }
   }
 
-  def subType[A, B <: A: ClassTag]: Subset[A, B] = new ByDowncast[A, B] {
+  implicit def subType[A, B <: A: ClassTag]: Subset[A, B] = new ByDowncast[A, B] {
     def cast(a: A): Option[B] = Some(a).collect { case b: B => b }
     def upcast(b: B): A       = b
   }
