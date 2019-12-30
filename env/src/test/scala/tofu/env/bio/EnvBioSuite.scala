@@ -1,5 +1,6 @@
 package tofu.env.bio
 
+import cats.effect.concurrent.Ref
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalatest.{FlatSpec, Matchers}
@@ -50,7 +51,7 @@ class EnvBioSuite extends FlatSpec with Matchers {
   }
 
   "context" should "return computation context" in {
-    EnvBio.context[String, Nothing].run("ctx").runSyncUnsafe(Duration.Inf) shouldBe Right("ctx")
+    EnvBio.context[String].run("ctx").runSyncUnsafe(Duration.Inf) shouldBe Right("ctx")
   }
 
   "mapError" should "transform error value" in {
@@ -192,5 +193,28 @@ class EnvBioSuite extends FlatSpec with Matchers {
     val bio2: EnvBio[Any, String, Int]  = EnvBio.raiseError("Error")
     val bio3: EnvBio[Any, Nothing, Int] = EnvBio.pure(1)
     EnvBio.parMap3(bio1, bio2, bio3)(_ + _ + _).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left("Error")
+  }
+
+  "local" should "change context of computation" in {
+    val strRef: Ref[Task, String] = Ref.unsafe("")
+    EnvBio.unit
+    EnvBio
+      .context[String]
+      .mapTask(ctx => ctx.flatMap(strRef.set))
+      .local[String](_ + "1")
+      .run("ctx")
+      .runSyncUnsafe(Duration.Inf)
+
+    strRef.get.runSyncUnsafe(Duration.Inf) shouldBe "ctx1"
+  }
+
+  "delay" should "use thrown exception as typed error" in {
+    val ex = new Exception("Test")
+    EnvBio.delay(throw ex).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left(ex)
+  }
+
+  "delayTotal" should "throw exception when being run" in {
+    val ex = new Exception("Test")
+    EnvBio.delayTotal(throw ex).run(()).attempt.runSyncUnsafe(Duration.Inf) shouldBe Left(ex)
   }
 }

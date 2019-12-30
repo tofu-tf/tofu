@@ -7,7 +7,6 @@ trait EnvBioSpecializedFunctions[R, E] {
 
   def apply[A](f: R => Task[Either[E, A]]): EnvBio[R, E, A] = EnvBio.apply(f)
   def applyFatal[A](f: R => Task[A]): EnvBio[R, E, A]       = EnvBio.applyFatal(f)
-  def later[A](x: => A): EnvBio[R, E, A]                    = EnvBio.later(x)
   def pure[A](x: A): EnvBio[R, E, A]                        = EnvBio.pure(x)
   def raiseError(e: E): EnvBio[R, E, Nothing]               = EnvBio.raiseError(e)
 

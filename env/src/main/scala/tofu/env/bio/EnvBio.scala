@@ -67,6 +67,20 @@ abstract class EnvBio[-R, +E, +A] {
 
   def tapError[R1 <: R, E1 >: E](f: E => EnvBio[R1, E1, Any]): EnvBio[R1, E1, A] =
     onErrorHandleWith(e => f(e).flatMap(_ => EnvBio.raiseError(e)))
+
+  /** Creates new EnvBio with polymorphic environment switching */
+  def localP[R1](f: R1 => R): EnvBio[R1, Nothing, A] =
+    EnvBio.applyFatal(ctx => runF(f(ctx)))
+  def localPT[R1](f: R1 => Task[R]): EnvBio[R1, E, A] =
+    EnvBio.applyFatal(ctx => f(ctx).flatMap(runF))
+  def localPB[R1](f: R1 => EnvBio[Any, Any, R]): EnvBio[R1, E, A] =
+    EnvBio.applyFatal(ctx => f(ctx).runF(ctx).flatMap(runF))
+
+  /** Convenient alias for [[localP]] for better type inference.
+    * Creates a new `EnvBio` that uses transformed context `R1`
+    * which is a result of applying given function to current context. */
+  def local[R1 <: R](f: R1 => R1): EnvBio[R1, Nothing, A] =
+    localP[R1](f)
 }
 
 object EnvBio extends EnvBioFunctions {}
