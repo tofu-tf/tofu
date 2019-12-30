@@ -6,7 +6,7 @@ import java.time.{Instant, LocalDateTime, ZonedDateTime}
 import cats.kernel.Semigroup
 import magnolia.{CaseClass, Magnolia, SealedTrait}
 import simulacrum.typeclass
-import org.manatki.derevo.Derivation
+import derevo.Derivation
 
 @typeclass trait Merge[A] {
   def merge(a: A, b: A): A

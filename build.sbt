@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.6.0.1"
+val libVersion = "0.7.0"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -125,7 +125,7 @@ lazy val concurrent =
     defaultSettings,
     libraryDependencies ++= Seq(catsEffect, catsTagless),
     macros,
-)
+  )
 
 lazy val config = project dependsOn (core, data, opticsCore, concurrent) settings (
   defaultSettings,
@@ -263,9 +263,9 @@ lazy val simulacrumOptions = Seq(
     new RuleTransformer(new RewriteRule {
       override def transform(node: xml.Node): Seq[xml.Node] = node match {
         case e: xml.Elem
-            if e.label == "dependency" &&
-              e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
-              e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
+          if e.label == "dependency" &&
+            e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
+            e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
           Nil
         case _ => Seq(node)
       }
@@ -291,7 +291,7 @@ lazy val defaultScalacOptions = scalacOptions ++= Seq(
   "-opt-inline-from:tofu.**", // Patterns for classfile names from which to allow inlining
   "-opt-warnings:none",       // No optimizer warnings.
 
-//  "-Xcheckinit",                   // Wrap field accessors to throw an exception on uninitialized access. (SHOULD BE USED ONLY IN DEV)
+  //  "-Xcheckinit",                   // Wrap field accessors to throw an exception on uninitialized access. (SHOULD BE USED ONLY IN DEV)
   "-Xlint:adapted-args",           // Warn if an argument list is modified to match the receiver.
   "-Xlint:delayedinit-select",     // Selecting member of DelayedInit.
   "-Xlint:doc-detached",           // A Scaladoc comment appears to be detached from its element.

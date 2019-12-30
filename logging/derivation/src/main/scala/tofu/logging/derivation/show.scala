@@ -3,7 +3,7 @@ package tofu.logging.derivation
 import cats.Show
 
 import magnolia.{CaseClass, Magnolia, SealedTrait}
-import org.manatki.derevo.Derivation
+import derevo.Derivation
 
 object show extends Derivation[Show] {
   /** the type constructor for new [[Show]] instances
