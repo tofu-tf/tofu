@@ -2,7 +2,7 @@ package tofu.logging
 package derivation
 
 import cats.Show
-import magnolia.{CaseClass, Magnolia, SealedTrait, TypeName}
+import magnolia.{CaseClass, Magnolia, SealedTrait}
 import org.manatki.derevo.Derivation
 
 object loggable extends Derivation[Loggable] {

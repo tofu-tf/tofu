@@ -1,11 +1,10 @@
 package tofu.concurrent
 import cats.effect.concurrent.MVar
 import cats.effect.{Concurrent, Sync}
-import cats.{Applicative, Functor}
+import cats.Applicative
 import tofu.Guarantee
 import tofu.concurrent.QVar.QVarByMVar
 import tofu.higherKind.{RepresentableK, derived}
-import tofu.optics.Contains
 import tofu.syntax.monadic._
 
 /** a middleground between cats.concurrent.MVar and zio.Queue.bounded(1) */
