@@ -12,6 +12,24 @@ class EnvBioSuite extends FlatSpec with Matchers {
     EnvBio.pure("str").run(()).runSyncUnsafe(Duration.Inf) shouldBe Right("str")
   }
 
+  "fromTask" should "return Left(Throwable) on failed Task" in {
+    val ex = new Exception("test")
+    EnvBio.fromTask(Task.raiseError(ex)).run(()).runSyncUnsafe(Duration.Inf) shouldBe Left(ex)
+  }
+
+  it should "return Right on successful Task" in {
+    EnvBio.fromTask(Task.pure(1)).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(1)
+  }
+
+  "fromTaskTotal" should "fail with fatal error on failed Task" in {
+    val ex = new Exception("test")
+    EnvBio.fromTaskTotal(Task.raiseError(ex)).run(()).attempt.runSyncUnsafe(Duration.Inf) shouldBe Left(ex)
+  }
+
+  it should "return Right on successful Task" in {
+    EnvBio.fromTaskTotal(Task.pure(1)).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(1)
+  }
+
   "raiseError" should "raise user-defined error" in {
     EnvBio.raiseError("Error").run(()).runSyncUnsafe(Duration.Inf) shouldBe Left("Error")
   }
