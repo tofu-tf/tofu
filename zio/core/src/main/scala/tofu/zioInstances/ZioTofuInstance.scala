@@ -4,8 +4,7 @@ import cats.{Applicative, Functor, ~>}
 import cats.effect.{CancelToken, Fiber}
 import tofu.internal.CachedMatcher
 import tofu.lift.Unlift
-import tofu.optics.{Contains, Subset}
-import tofu.syntax.functionK
+import tofu.optics.Contains
 import tofu.syntax.functionK.funK
 import tofu.zioInstances.ZioTofuInstance.convertFiber
 import zio.clock.Clock

@@ -1,5 +1,5 @@
 package tofu.concurrent
-import cats.{Applicative, Functor, Monad}
+import cats.{Applicative, Functor}
 import cats.effect.Sync
 import cats.effect.concurrent.Ref
 import tofu.Guarantee
