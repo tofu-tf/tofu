@@ -26,7 +26,7 @@ class AgentSuite extends AsyncWordSpec with Matchers {
       } yield assert(count === 3 && s === "I am agent!")).unsafeToFuture()
     }
 
-    "apply asyncronous mutations" in {
+    "apply asynchronous mutations" in {
       (for {
         agent <- newAgent[IO].of("")
         _     <- agent.fireUpdateM(s => IO.sleep(30.millis).as(s + "I "))

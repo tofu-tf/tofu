@@ -1,6 +1,6 @@
 package tofu.concurrent
 import cats.Monad
-import cats.effect.Concurrent
+import cats.effect.{Concurrent, Fiber}
 import cats.effect.concurrent.{Deferred, Ref}
 import cats.instances.list._
 import cats.syntax.traverse._
@@ -18,6 +18,7 @@ trait Agent[F[_], A] {
   def updateM(f: A => F[A]): F[A]
   def fireUpdateM(f: A => F[A]): F[Unit]
   def modifyM[B](f: A => F[(A, B)]): F[B]
+  def terminate: F[Unit]
 }
 
 trait WatchedAgent[F[_], A] extends Agent[F, A] {
@@ -44,7 +45,8 @@ object Agent {
   final case class WatchedAgentOnRef[F[_]: Monad: Deferreds, K, A](
       ref: Ref[F, A],
       mutations: InspectableQueue[F, Mutation[F, A, _]],
-      watchesRef: Ref[F, List[Watch[F, A]]]
+      watchesRef: Ref[F, List[Watch[F, A]]],
+      worker: Fiber[F, Unit]
   )(implicit compiler: Compiler[F, F])
       extends WatchedAgent[F, A] {
     def get: F[A] = ref.get
@@ -65,6 +67,7 @@ object Agent {
       }
     def onNextUpdate(action: (A, A) => F[Unit]): F[Unit] = watchesRef.update(DisposableWatch(action) :: _)
     def onEachUpdate(action: (A, A) => F[Unit]): F[Unit] = watchesRef.update(ConstantWatch(action) :: _)
+    def terminate: F[Unit]                               = worker.cancel
   }
 }
 
@@ -91,14 +94,14 @@ object MakeAgent {
           ref        <- newRef.of(a)
           mutations  <- InspectableQueue.bounded[F, Agent.Mutation[F, A, _]](n)
           watchesRef <- newRef.of(List.empty[Agent.Watch[F, A]])
-          _ <- (for {
-                mutation <- mutations.dequeue1
-                oldA     <- ref.get
-                watches <- watchesRef.modify(watches =>
-                            (watches.collect { case watch @ Agent.ConstantWatch(_) => watch }, watches)
-                          )
-                _ <- mutation.run(oldA, ref, watches)
-              } yield ()).foreverM.void.start
-        } yield WatchedAgentOnRef(ref, mutations, watchesRef)
+          worker <- (for {
+                     mutation <- mutations.dequeue1
+                     oldA     <- ref.get
+                     watches <- watchesRef.modify(watches =>
+                                 (watches.collect { case watch @ Agent.ConstantWatch(_) => watch }, watches)
+                               )
+                     _ <- mutation.run(oldA, ref, watches)
+                   } yield ()).foreverM.void.start
+        } yield WatchedAgentOnRef(ref, mutations, watchesRef, worker)
     }
 }
