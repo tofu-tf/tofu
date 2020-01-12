@@ -1,28 +1,85 @@
 package tofu.concurrent
+
 import cats.Monad
 import cats.effect.{Concurrent, Fiber}
 import cats.effect.concurrent.{Deferred, Ref}
 import cats.instances.list._
 import cats.syntax.traverse._
 import fs2.Stream.Compiler
-import fs2.concurrent.InspectableQueue
+import fs2.concurrent.Queue
 import tofu.Start
 import tofu.concurrent.Agent.WatchedAgentOnRef
 import tofu.syntax.monadic._
 import tofu.syntax.start._
 
+/**
+  * The analogue of [[Ref]] or [[Atom]] which allows effectful transformations
+  * of shared state, both coordinated (like `modifyM`) and not (`fireUpdateM`))
+  */
 trait Agent[F[_], A] {
+
+  /**
+    * Returns current value immediately
+    */
   def get: F[A]
+
+  /**
+    * Waits for all scheduled transformations to complete and returns resulting value.
+    * Only scheduled before the method invocation transformations are considered
+    */
   def await: F[A]
+
+  /**
+    * Schedules effectful update to concrete value and waits for its completion
+    * @param fa should not result in error
+    */
   def setM(fa: F[A]): F[A] = updateM(_ => fa)
+
+  /**
+    * Schedules effectful transformation and waits for its completion
+    * @param f is a total function, which result should not result in error
+    */
   def updateM(f: A => F[A]): F[A]
+
+  /**
+    * Schedules effectful transformation, and returns immediately
+    * @param f is a total function, which result should not result in error
+    */
   def fireUpdateM(f: A => F[A]): F[Unit]
+
+  /**
+    * Schedules effectful transformation and waits for its completion
+    * @param f is a total function, which result should not result in error
+    */
   def modifyM[B](f: A => F[(A, B)]): F[B]
+
+  /**
+    * Terminates processing of scheduled transformations. Note that
+    * after termination methods `await`, `setM`, `updateM`, `modifyM`
+    * will stuck indefinitely
+    */
   def terminate: F[Unit]
 }
 
+/**
+  * An extended variant of [[Agent]] which allows to set watches (i.e. subscribe)
+  * on updates of the shared variable. It guarantees to perform all watch actions
+  * before reporting a success of shared variable modification
+  */
 trait WatchedAgent[F[_], A] extends Agent[F, A] {
+
+  /**
+    * Addes a watch on next change of the shared variable
+    * @param action is a total function, which accepts both old and new value of
+    *               the shared variable, and performs some action
+    */
   def onNextUpdate(action: (A, A) => F[Unit]): F[Unit]
+
+  /**
+    * Addes a watch on each subsequent change of the shared variable
+    * @param action is a total function, which accepts both old and new value of
+    *               the shared variable, and performs some action
+    */
   def onEachUpdate(action: (A, A) => F[Unit]): F[Unit]
 }
 
@@ -44,17 +101,13 @@ object Agent {
 
   final case class WatchedAgentOnRef[F[_]: Monad: Deferreds, K, A](
       ref: Ref[F, A],
-      mutations: InspectableQueue[F, Mutation[F, A, _]],
+      mutations: Queue[F, Mutation[F, A, _]],
       watchesRef: Ref[F, List[Watch[F, A]]],
       worker: Fiber[F, Unit]
   )(implicit compiler: Compiler[F, F])
       extends WatchedAgent[F, A] {
-    def get: F[A] = ref.get
-    def await: F[A] =
-      mutations.size.map {
-        case 0 => None
-        case x => Some(x)
-      }.unNoneTerminate.compile.drain *> ref.get
+    def get: F[A]   = ref.get
+    def await: F[A] = updateM(_.pure[F])
     def updateM(f: A => F[A]): F[A] =
       modifyM(a => f(a).map(a => (a, a)))
     def fireUpdateM(f: A => F[A]): F[Unit] =
@@ -92,7 +145,7 @@ object MakeAgent {
       def watchedAgent[A](a: A, n: Int = 1000): F[WatchedAgent[F, A]] =
         for {
           ref        <- newRef.of(a)
-          mutations  <- InspectableQueue.bounded[F, Agent.Mutation[F, A, _]](n)
+          mutations  <- Queue.bounded[F, Agent.Mutation[F, A, _]](n)
           watchesRef <- newRef.of(List.empty[Agent.Watch[F, A]])
           worker <- (for {
                      mutation <- mutations.dequeue1
