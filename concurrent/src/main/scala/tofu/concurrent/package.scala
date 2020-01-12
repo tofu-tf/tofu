@@ -17,6 +17,7 @@ package object concurrent {
   type Deferreds[F[_]]  = MakeDeferred[F, F]
 
   type Atoms[F[_]]      = MakeAtom[F, F]
+  type Agents[F[_]]     = MakeAgent[F]
   type QVars[F[_]]      = MakeQVar[F, F]
   type Stoplights[F[_]] = MakeStoplight[F, F]
   type Mutexes[F[_]]    = MakeMutex[F, F]
@@ -27,6 +28,7 @@ package object concurrent {
   def newDeffered[F[_]: Deferreds, A] = MakeDeferred[F, F, A]
 
   def newAtom[F[_]: Atoms] = MakeAtom[F, F]
+  def newAgent[F[_]: Agents] = MakeAgent[F]
   def newQVar[F[_]: QVars] = MakeQVar[F, F]
   def newGatekeeper[F[_]]  = MakeGatekeeper[F, F]
 
