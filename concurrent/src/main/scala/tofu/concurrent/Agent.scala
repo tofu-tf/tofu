@@ -4,8 +4,8 @@ import cats.effect.Concurrent
 import cats.effect.concurrent.{Deferred, Ref}
 import cats.instances.list._
 import cats.syntax.traverse._
-import fs2.concurrent.InspectableQueue
 import fs2.Stream.Compiler
+import fs2.concurrent.InspectableQueue
 import tofu.Start
 import tofu.concurrent.Agent.WatchedAgentOnRef
 import tofu.syntax.monadic._
@@ -27,9 +27,11 @@ trait WatchedAgent[F[_], A] extends Agent[F, A] {
 
 object Agent {
   final case class Mutation[F[_]: Monad, A, B](mutation: A => F[(A, B)], promise: Deferred[F, B]) {
-    def run(a: A, ref: Ref[F, A]): F[A] =
-      mutation(a) >>= {
-        case (a, b) => ref.set(a) *> promise.complete(b) as a
+    def run(oldA: A, ref: Ref[F, A], watches: List[Watch[F, A]]): F[A] =
+      mutation(oldA) >>= {
+        case (newA, b) =>
+          ref.set(newA) *> watches.traverse(w => w.onChange(oldA, newA)) *>
+            promise.complete(b) as newA
       }
   }
 
@@ -92,11 +94,10 @@ object MakeAgent {
           _ <- (for {
                 mutation <- mutations.dequeue1
                 oldA     <- ref.get
-                newA     <- mutation.run(oldA, ref)
                 watches <- watchesRef.modify(watches =>
                             (watches.collect { case watch @ Agent.ConstantWatch(_) => watch }, watches)
                           )
-                _ <- watches.traverse(w => w.onChange(oldA, newA).start)
+                _ <- mutation.run(oldA, ref, watches)
               } yield ()).foreverM.void.start
         } yield WatchedAgentOnRef(ref, mutations, watchesRef)
     }

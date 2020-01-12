@@ -35,5 +35,32 @@ class AgentSuite extends AsyncWordSpec with Matchers {
         s     <- agent.await
       } yield assert(s === "I am agent!")).unsafeToFuture()
     }
+
+    "invoke disposable watches only once" in {
+      (for {
+        ref   <- newRef[IO].of("")
+        agent <- newAgent[IO].watched("")
+        _     <- agent.onNextUpdate((_, newS) => ref.set(newS))
+        _     <- agent.updateM(s => (s + "I ").pure[IO])
+        _     <- agent.updateM(s => (s + "am ").pure[IO])
+        _     <- agent.updateM(s => (s + "agent!").pure[IO])
+        s     <- ref.get
+      } yield assert(s === "I ")).unsafeToFuture()
+    }
+
+    "invoke constant watches on each update" in {
+      (for {
+        ref1  <- newRef[IO].of("")
+        ref2  <- newRef[IO].of("")
+        agent <- newAgent[IO].watched("")
+        _     <- agent.onNextUpdate((_, newS) => ref1.set(newS))
+        _     <- agent.onEachUpdate((_, newS) => ref2.set(newS))
+        _     <- agent.updateM(s => (s + "I ").pure[IO])
+        _     <- agent.updateM(s => (s + "am ").pure[IO])
+        _     <- agent.updateM(s => (s + "agent!").pure[IO])
+        s1    <- ref1.get
+        s2    <- ref2.get
+      } yield assert(s1 === "I " && s2 === "I am agent!")).unsafeToFuture()
+    }
   }
 }
