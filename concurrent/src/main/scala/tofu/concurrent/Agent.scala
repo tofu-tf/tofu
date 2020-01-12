@@ -37,19 +37,19 @@ trait Agent[F[_], A] {
 
   /**
     * Schedules effectful transformation and waits for its completion
-    * @param f is a total function, which result should not result in error
+    * @param f is a total function, which result should not produce an error
     */
   def updateM(f: A => F[A]): F[A]
 
   /**
     * Schedules effectful transformation, and returns immediately
-    * @param f is a total function, which result should not result in error
+    * @param f is a total function, which result should not produce an error
     */
   def fireUpdateM(f: A => F[A]): F[Unit]
 
   /**
     * Schedules effectful transformation and waits for its completion
-    * @param f is a total function, which result should not result in error
+    * @param f is a total function, which result should not produce an error
     */
   def modifyM[B](f: A => F[(A, B)]): F[B]
 
