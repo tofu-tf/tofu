@@ -23,7 +23,7 @@ object Dependencies {
 
     val slf4j = "1.7.30"
 
-    val fs2 = "1.0.5"
+    val fs2 = "2.1.0"
 
     val logback = "1.2.3"
 
@@ -60,7 +60,8 @@ object Dependencies {
   val derevo          = "org.manatki"                %% "derevo-core"         % Version.derevo
   val derevoTagless   = "org.manatki"                %% "derevo-cats-tagless" % Version.derevo
   val enumeratum      = "com.beachape"               %% "enumeratum"          % Version.enumeratum
-  val fs2             = "co.fs2"                     %% "fs2-io"              % Version.fs2
+  val fs2Io           = "co.fs2"                     %% "fs2-io"              % Version.fs2
+  val fs2Core         = "co.fs2"                     %% "fs2-core"            % Version.fs2
   val tethys          = "com.tethys-json"            %% "tethys-core"         % Version.tethys
   val tethysJackson   = "com.tethys-json"            %% "tethys-jackson"      % Version.tethys
   val catsTagless     = "org.typelevel"              %% "cats-tagless-macros" % Version.catsTagless

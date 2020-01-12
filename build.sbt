@@ -123,7 +123,7 @@ lazy val observable = project.settings(
 lazy val concurrent =
   project dependsOn core settings (
     defaultSettings,
-    libraryDependencies ++= Seq(catsEffect, catsTagless),
+    libraryDependencies ++= Seq(catsEffect, catsTagless, fs2Core),
     macros,
 )
 
