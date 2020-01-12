@@ -125,24 +125,24 @@ object Agent {
 }
 
 trait MakeAgent[F[_]] {
-  def agent[A](a: A, n: Int = 1000): F[Agent[F, A]]
-  def watchedAgent[A](a: A, n: Int = 1000): F[WatchedAgent[F, A]]
+  def agent[A](a: A, n: Int): F[Agent[F, A]]
+  def watchedAgent[A](a: A, n: Int): F[WatchedAgent[F, A]]
 }
 
 object MakeAgent {
   def apply[F[_]](implicit makeAgent: MakeAgent[F]) = new Applier[F](makeAgent)
 
   class Applier[F[_]](val makeAgent: MakeAgent[F]) extends AnyVal {
-    def of[A](a: A): F[Agent[F, A]]             = makeAgent.agent(a)
-    def watched[A](a: A): F[WatchedAgent[F, A]] = makeAgent.watchedAgent(a)
+    def of[A](a: A, n: Int = 1000): F[Agent[F, A]]             = makeAgent.agent(a, n)
+    def watched[A](a: A, n: Int = 1000): F[WatchedAgent[F, A]] = makeAgent.watchedAgent(a, n)
   }
 
   implicit def syncInstance[F[_]: Concurrent: Deferreds: Start]: MakeAgent[F] =
     new MakeAgent[F] {
-      def agent[A](a: A, n: Int = 1000): F[Agent[F, A]] =
+      def agent[A](a: A, n: Int): F[Agent[F, A]] =
         watchedAgent(a, n).widen
 
-      def watchedAgent[A](a: A, n: Int = 1000): F[WatchedAgent[F, A]] =
+      def watchedAgent[A](a: A, n: Int): F[WatchedAgent[F, A]] =
         for {
           ref        <- newRef.of(a)
           mutations  <- Queue.bounded[F, Agent.Mutation[F, A, _]](n)
