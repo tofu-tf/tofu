@@ -15,9 +15,9 @@ object Dependencies {
 
     val catsTagless = "0.10"
 
-    val monocle = "2.0.0"
+    val monocle = "2.0.1"
 
-    val enumeratum = "1.5.14"
+    val enumeratum = "1.5.15"
 
     val derevo = "0.10.5"
 
@@ -33,7 +33,7 @@ object Dependencies {
 
     val scalatest = "3.0.8"
 
-    val magnolia = "0.12.5"
+    val magnolia = "0.12.6"
 
     val typesafeConfig = "1.4.0"
 
