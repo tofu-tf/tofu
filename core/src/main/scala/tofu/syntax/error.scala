@@ -6,11 +6,11 @@ import tofu.Raise.ContravariantRaise
 
 object raise {
   implicit final class RaiseOps[E](private val err: E) extends AnyVal {
-    def raise[F[_], A](implicit raise: Raise[F, E]): F[A] = raise.raise(err)
+    def raise[F[_], A](implicit raise: ContravariantRaise[F, E]): F[A] = raise.raise(err)
   }
 
   implicit final class RaiseMonadOps[F[_], A](private val fa: F[A]) extends AnyVal {
-    def verified[E](p: A => Boolean)(err: E)(implicit raise: Raise[F, E], F: Monad[F]): F[A] =
+    def verified[E](p: A => Boolean)(err: E)(implicit raise: ContravariantRaise[F, E], F: Monad[F]): F[A] =
       F.flatMap(fa)(a => if (p(a)) F.pure(a) else raise.raise(err))
   }
 
@@ -23,7 +23,7 @@ object raise {
     def toRaise[F[_]](
         implicit
         app: Applicative[F],
-        raise: Raise[F, E]
+        raise: ContravariantRaise[F, E]
     ): F[A] =
       either match {
         case Left(err)    => raise.raise(err)
