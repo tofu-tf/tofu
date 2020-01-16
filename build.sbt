@@ -285,12 +285,6 @@ lazy val defaultScalacOptions = scalacOptions ++= Seq(
   "-language:implicitConversions", // Allow definition of implicit functions called views
   "-unchecked",                    // Enable additional warnings where generated code depends on assumptions.
 
-  // Inlining options. More at https://www.lightbend.com/blog/scala-inliner-optimizer, https://github.com/scala/scala/pull/4858, https://github.com/scala/bug/issues/8790
-  "-opt:l:method",            // Enable intra-method optimizations: unreachable-code,simplify-jumps,compact-locals,copy-propagation,redundant-casts,box-unbox,nullness-tracking,closure-invocations,allow-skip-core-module-init,assume-modules-non-null,allow-skip-class-loading.
-  "-opt:l:inline",            // Enable cross-method optimizations (note: inlining requires -opt-inline-from): l:method,inline.
-  "-opt-inline-from:tofu.**", // Patterns for classfile names from which to allow inlining
-  "-opt-warnings:none",       // No optimizer warnings.
-
 //  "-Xcheckinit",                   // Wrap field accessors to throw an exception on uninitialized access. (SHOULD BE USED ONLY IN DEV)
   "-Xlint:adapted-args",           // Warn if an argument list is modified to match the receiver.
   "-Xlint:delayedinit-select",     // Selecting member of DelayedInit.
