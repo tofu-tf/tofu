@@ -6,7 +6,7 @@ import tofu._
 object context {
   def context[F[_]](implicit ctx: Context[F]): F[ctx.Ctx] = ctx.context
 
-  def context[F[_], C](implicit ctx: F HasContext C): F[C] = ctx.context
+  def hasContext[F[_], C](implicit ctx: F HasContext C): F[C] = ctx.context
 
   def ask[F[_]] = new AskPA[F](true)
 
