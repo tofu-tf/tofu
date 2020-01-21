@@ -173,6 +173,19 @@ sealed trait Env[E, +A] {
   def timeoutTo[B >: A](dur: FiniteDuration, backup: Env[E, B]): Env[E, B] =
     mapTask2(backup)(_.timeoutTo(dur, _))
 
+  /** Times the Env execution, returning its duration and the computed value in case of success.
+    * Delegates to underlying [[monix.eval.Task.timed]].
+    * Usage example:
+    * {{{
+    *   for {
+    *     r <- Env.delay(1 + 1).timed
+    *     (duration, value) = r
+    *     _ <- Env.delay(println("executed in " + duration.toMillis + " ms"))
+    *   } yield value
+    * }}}*/
+  def timed: Env[E, (FiniteDuration, A)] =
+    mapTask(_.timed)
+
   // concurrency
   def doOnCancel(callback: Env[E, Unit]): Env[E, A] =
     Env(ctx => run(ctx).doOnCancel(callback.run(ctx)))
