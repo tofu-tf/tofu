@@ -108,6 +108,7 @@ object ConfigTContext {
       def restoreWith[A](fa: ConfigT[F, A])(ra: => ConfigT[F, A]): ConfigT[F, A] =
         ReaderT(ctx => FR.restoreWith(fa.run(ctx))(ra.run(ctx)))
       def restore[A](fa: ConfigT[F, A]): ConfigT[F, Option[A]] = ReaderT(ctx => FR.restore(fa.run(ctx)))
+      def lift[A](fa: ConfigT[F, A]): ConfigT[F, A] = fa
     }
   }
   case object Fail extends Exception

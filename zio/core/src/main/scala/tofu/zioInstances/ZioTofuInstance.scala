@@ -29,6 +29,7 @@ class ZioTofuInstance[R, E]
 
   final def restore[A](fa: ZIO[R, E, A]): ZIO[R, E, Option[A]] = fa.option
   final def raise[A](err: E): ZIO[R, E, A]                     = ZIO.fail(err)
+  final def lift[A](fa: ZIO[R, E, A]): ZIO[R, E, A]            = fa
   final def tryHandleWith[A](fa: ZIO[R, E, A])(f: E => Option[ZIO[R, E, A]]): ZIO[R, E, A] =
     fa.catchSome(CachedMatcher(f))
   final override def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E, A]): ZIO[R, E, A] = fa.catchAll(f)
@@ -78,10 +79,12 @@ object ZioTofuInstance {
   }
 }
 
-class ZioTofuErrorsToInstance[R, E, E1] extends ErrorsTo[ZIO[R, E, *], ZIO[R, E1, *], E] {
+class ZioTofuErrorsToInstance[R, E, E1](implicit lens: Contains[E1, E])
+    extends ErrorsTo[ZIO[R, E, *], ZIO[R, E1, *], E] {
   final def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E1, A]): ZIO[R, E1, A] = fa.catchAll(f)
   final def restore[A](fa: ZIO[R, E, A]): ZIO[R, E1, Option[A]]                   = fa.option
   final def raise[A](err: E): ZIO[R, E, A]                                        = ZIO.fail(err)
+  final def lift[A](fa: ZIO[R, E1, A]): ZIO[R, E, A]                              = fa.mapError(lens.extract)
 
   final override def handle[A](fa: ZIO[R, E, A])(f: E => A)(implicit G: Applicative[ZIO[R, E1, *]]): ZIO[R, E1, A] =
     fa.catchAll(e => ZIO.succeed(f(e)))
