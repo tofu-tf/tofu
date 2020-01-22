@@ -20,7 +20,7 @@ class ZioInstances1 extends ZioInstances2 {
   private[this] implicit val containsInstanceAny: Contains[Nothing, Any] =
     new Contains[Nothing, Any] {
       def set(s: Nothing, b: Any): Nothing = s
-      def extract(s: Nothing): Any = s.asInstanceOf[Any]
+      def extract(s: Nothing): Any = s
     }
 
   private[this] def zioErrorsToInstanceAny: ZioTofuErrorsToInstance[Any, Any, Nothing] = new ZioTofuErrorsToInstance[Any, Any, Nothing]
