@@ -1,8 +1,8 @@
 package tofu.logging
 
-import _root_.zio.{UIO, URIO}
+import zio.{UIO, URIO}
 
-package object zio {
+package object zlogs {
   type ZLogs[R]    = Logs[UIO, URIO[R, *]]
   type ZLogging[R] = Logging[URIO[R, *]]
 }
