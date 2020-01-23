@@ -56,4 +56,6 @@ object functions {
   def some[A]: Subset[Option[A], A] = Subset[Option[A]](identity)(Some(_))
 
   def none[A]: Subset[Option[A], Unit] = Subset[Option[A]](_ => Some(()))(_ => None)
+
+  def extractAnyFromNothing: Extract[Nothing, Any] = (s: Nothing) => s
 }

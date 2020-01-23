@@ -4,7 +4,7 @@ import cats.{Applicative, Functor, ~>}
 import cats.effect.{CancelToken, Fiber}
 import tofu.internal.CachedMatcher
 import tofu.lift.Unlift
-import tofu.optics.Contains
+import tofu.optics.{Contains, Extract}
 import tofu.syntax.functionK.funK
 import tofu.zioInstances.ZioTofuInstance.convertFiber
 import zio.clock.Clock
@@ -79,7 +79,7 @@ object ZioTofuInstance {
   }
 }
 
-class ZioTofuErrorsToInstance[R, E, E1](implicit lens: Contains[E1, E])
+class ZioTofuErrorsToInstance[R, E, E1](implicit lens: Extract[E1, E])
     extends ErrorsTo[ZIO[R, E, *], ZIO[R, E1, *], E] {
   final def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E1, A]): ZIO[R, E1, A] = fa.catchAll(f)
   final def restore[A](fa: ZIO[R, E, A]): ZIO[R, E1, Option[A]]                   = fa.option
