@@ -12,7 +12,7 @@ import tofu.syntax.monadic._
 
 import scala.reflect.ClassTag
 
-trait Logs[I[_], F[_]] extends LogsVOps[I, F] {
+trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
   def forService[Svc: ClassTag]: I[Logging[F]]
   def byName(name: String): I[Logging[F]]
 
@@ -53,7 +53,7 @@ object Logs {
     def byName(name: String): I[Logging[F]]      = logging.pure[I]
   }
 
-  def empty[I[_]: Applicative, F[_]: Applicative]: Logs[I, F] = const(Logging.empty[F])
+  def empty[I[_]: Applicative, F[_]: Applicative]: Logs[I, F] = const[I, F](Logging.empty[F])
 
   def combine[I[_]: Apply, F[_]: Apply](las: Logs[I, F], lbs: Logs[I, F]): Logs[I, F] = new Logs[I, F] {
     def forService[Svc: ClassTag]: I[Logging[F]] = las.forService.map2(lbs.forService)(Logging.combine[F])
@@ -61,7 +61,7 @@ object Logs {
   }
 
   implicit def logsMonoid[I[_]: Applicative, F[_]: Applicative]: Monoid[Logs[I, F]] = new Monoid[Logs[I, F]] {
-    def empty: Logs[I, F]                                 = Logs.empty
+    def empty: Logs[I, F]                                 = Logs.empty[I, F]
     def combine(x: Logs[I, F], y: Logs[I, F]): Logs[I, F] = Logs.combine(x, y)
   }
 

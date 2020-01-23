@@ -19,7 +19,7 @@ object bracket {
 
     def bracketAlways[B, C](
         use: A => F[B]
-    )(release: A => F[C])(implicit F: Applicative[F], FG: Guarantee[F]): F[B] =
+    )(release: A => F[C])(FG: Guarantee[F]): F[B] =
       FG.bracket(fa)(use) { case (a, _) => release(a) }
 
     def guaranteeIncomplete[B](release: F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[A] =
