@@ -7,9 +7,9 @@ import cats.{Applicative, Apply, FlatMap}
 import com.github.ghik.silencer.silent
 import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.higherKind
-import tofu.higherKind.{Embed, RepresentableK}
+import tofu.higherKind.{Embed, Function2K, RepresentableK}
 import tofu.logging.impl.EmbedLogging
-import tofu.syntax.functionK._
+import tofu.syntax.monoidalK._
 
 import scala.reflect.ClassTag
 
@@ -94,7 +94,7 @@ object Logging {
 
   /** having two logging implementation call `first` after `second` */
   def combine[F[_]: Apply](first: Logging[F], second: Logging[F]): Logging[F] =
-    loggingRepresentable.map2K(first, second)(makeFunctionK(t => t.first *> t.second))
+    first.zipWithK(second)(Function2K[F, F, F](_ *> _))
 
   private[logging] def loggerForService[S](implicit ct: ClassTag[S]): Logger =
     LoggerFactory.getLogger(ct.runtimeClass)

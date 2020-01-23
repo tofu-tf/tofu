@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.6.1"
+val libVersion = "0.6.2"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -105,9 +105,20 @@ lazy val loggingLayout = project
   )
   .dependsOn(loggingStr)
 
+lazy val loggingUtil = project
+  .in(file("logging/util"))
+  .settings(
+    defaultSettings,
+    publishName := "logging-util",
+    libraryDependencies += slf4j,
+  )
+  .dependsOn(loggingStr, concurrent)
+
+
+
 lazy val logging = project
-  .dependsOn(loggingStr, loggingDer, loggingLayout)
-  .aggregate(loggingStr, loggingDer, loggingLayout)
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil)
+  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil)
   .settings(defaultSettings)
 
 lazy val env = project
