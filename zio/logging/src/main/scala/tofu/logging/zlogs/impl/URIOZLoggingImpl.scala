@@ -1,4 +1,4 @@
-package tofu.logging.zio.impl
+package tofu.logging.zlogs.impl
 
 import tofu.logging.{Loggable, LoggedValue}
 import org.slf4j.{Logger, Marker}

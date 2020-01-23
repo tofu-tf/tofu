@@ -1,9 +1,9 @@
-package tofu.logging.zio
+package tofu.logging.zlogs
 
 import org.slf4j.LoggerFactory
 import tofu.logging.{Loggable, Logging}
 import tofu.logging.Logging.loggerForService
-import tofu.logging.zio.impl.{UIOZLogging, URIOZLoggingImpl}
+import tofu.logging.zlogs.impl.{UIOZLogging, URIOZLoggingImpl}
 import zio.UIO
 import scala.reflect.ClassTag
 
