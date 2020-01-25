@@ -1,6 +1,7 @@
 package tofu.env.bio
 
 import monix.eval.Task
+import scala.concurrent.duration.FiniteDuration
 
 abstract class EnvBio[-R, +E, +A] {
   // todo should expose this to user?
@@ -81,8 +82,11 @@ abstract class EnvBio[-R, +E, +A] {
     * which is a result of applying given function to current context. */
   def local[R1 <: R](f: R1 => R1): EnvBio[R1, Nothing, A] =
     localP[R1](f)
+
+  /** Times the `EnvBio` execution, returning elapsed time along with computed value */
+  def timed: EnvBio[R, E, (FiniteDuration, A)] = mapTask(_.timed)
 }
 
 object EnvBio extends EnvBioFunctions {}
 
-private[bio] final case class UserError[E](err: E) extends Throwable
+private[bio] final case class UserError(err: Any) extends Throwable

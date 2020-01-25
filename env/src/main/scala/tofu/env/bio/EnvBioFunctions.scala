@@ -1,6 +1,8 @@
 package tofu.env.bio
 
 import monix.eval.Task
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.ExecutionContext
 
 private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
   def apply[R, E, A](f: R => Task[Either[E, A]]): EnvBio[R, E, A] = (ctx: R) =>
@@ -51,10 +53,10 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
     *   import monix.execution.Scheduler.Implicits.global
     *   import tofu.env.bio.EnvBio
     *   import scala.concurrent.duration.Duration
-    * 
+    *
     *   val env: EnvBio[Any, Nothing, Unit] = EnvBio.fromTaskTotal(Task.delay(1))
     *   val res = env.run(()).runSyncUnsafe(Duration.Inf)
-    * 
+    *
     *   // res = Right(1)
     * }}} */
   def fromTaskTotal[A](task: Task[A]): EnvBio[Any, Nothing, A] = _ => task
@@ -73,6 +75,30 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
     * Any `Throwable` raised by `x` will result in failed `EnvBio` fixed to Left side. */
   def delay[A](x: => A): EnvBio[Any, Throwable, A] =
     fromTask(Task.delay(x))
+
+  /**
+    * Introduces an asynchronous boundary, effectfully shifting execution
+    * to another thread or call stack.
+    * An implementaion delegates to Monix's implementation (see [[monix.eval.Task.shift]])
+    */
+  def shift: EnvBio[Any, Nothing, Unit] = fromTaskTotal(Task.shift)
+
+  /**
+    * Introduces an asynchronous boundary, effectfully shifting execution
+    * to another thread or call stack. This implementation differs in that underlying
+    * Monix `Task` will be executed on injected `Scheduler`.
+    * An implementaion delegates to Monix's implementation (see [[monix.eval.Task.shift]])
+    */
+  def shift(ec: ExecutionContext): EnvBio[Any, Nothing, Unit] = fromTaskTotal(Task.shift(ec))
+
+  /**
+    * Creates a new `EnvBio` that will sleep for given duration, and then continue execution.
+    * This operation doesn't block a thread, the blocking is semantic.
+    *
+    * @param duration duration for 'sleeping', after which a tick will be emitted and execution will go on
+    */
+  def sleep(duration: FiniteDuration): EnvBio[Any, Nothing, Unit] =
+    fromTaskTotal(Task.sleep(duration))
 
   private[this] val anyUnit: EnvBio[Any, Nothing, Unit] = fromTaskTotal(Task.unit)
   def unit: EnvBio[Any, Nothing, Unit]                  = anyUnit.asInstanceOf[EnvBio[Any, Nothing, Unit]]
