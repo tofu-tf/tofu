@@ -44,7 +44,19 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
   def context[R]: EnvBio[R, Nothing, R] = Task.now
 
   /** Creates `EnvBio` from total, non-failing `Task`.
-    * Any `Throwable` raised by Task will result in fatal error being thrown. */
+    * Any `Throwable` raised by Task will result in fatal error being thrown.
+    * Example:
+    * {{{
+    *   import monix.eval.Task
+    *   import monix.execution.Scheduler.Implicits.global
+    *   import tofu.env.bio.EnvBio
+    *   import scala.concurrent.duration.Duration
+    * 
+    *   val env: EnvBio[Any, Nothing, Unit] = EnvBio.fromTaskTotal(Task.delay(1))
+    *   val res = env.run(()).runSyncUnsafe(Duration.Inf)
+    * 
+    *   // res = Right(1)
+    * }}} */
   def fromTaskTotal[A](task: Task[A]): EnvBio[Any, Nothing, A] = _ => task
 
   /** Creates `EnvBio` from `Task`.
