@@ -12,13 +12,13 @@ import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
 /** Env is a monad, allowing composition of functions that are context(environment)-aware.
-  * For example, you may have several functions that depend on some common environment/runtime. 
+  * For example, you may have several functions that depend on some common environment/runtime.
   * Env provides a way to compose such functions, allowing access to this environment in a monadic way.
   * It is possible to override context locally for concrete functions that you may want to use with another context.
-  * Under the hood, Env is just a function `E => Task[A]`. 
+  * Under the hood, Env is just a function `E => Task[A]`.
   * Since it's primary based on Monix task, it mirrors most of its methods and functions, including parallel execution, error handling,
   * memoization, forking and working with resources.
-  * Env plays well with Cats and Cats-Effect, providing instances for most of typeclasses (see [[tofu.env.EnvInstances]]), 
+  * Env plays well with Cats and Cats-Effect, providing instances for most of typeclasses (see [[tofu.env.EnvInstances]]),
   * except Effect and ConcurrentEffect (which allow starting computation at any place, so it contradicts Env, which requires context being passed).
   */
 sealed trait Env[E, +A] {
@@ -81,13 +81,13 @@ sealed trait Env[E, +A] {
   def parMap3[B, C, D](eb: Env[E, B], ec: Env[E, C])(f: (A, B, C) => D) =
     mapTask3(eb, ec)(Task.parMap3(_, _, _)(f))
 
-  def zip[B](t: Env[E, B]): Env[E, (A, B)]                 = map2(t)((a, b) => (a, b))
-  def >>[B](t: => Env[E, B]): Env[E, B]                    = flatMap(_ => t)
-  def <<[B](t: => Env[E, B]): Env[E, A]                    = flatTap(_ => t)
-  def *>[B](t: Env[E, B]): Env[E, B]                       = map2(t)((_, x) => x)
-  def <*[B](t: Env[E, B]): Env[E, A]                       = map2(t)((x, _) => x)
-  def &>[B](t: Env[E, B]): Env[E, B]                       = parMap2(t)((_, x) => x)
-  def <&[B](t: Env[E, B]): Env[E, A]                       = parMap2(t)((x, _) => x)
+  def zip[B](t: Env[E, B]): Env[E, (A, B)] = map2(t)((a, b) => (a, b))
+  def >>[B](t: => Env[E, B]): Env[E, B]    = flatMap(_ => t)
+  def <<[B](t: => Env[E, B]): Env[E, A]    = flatTap(_ => t)
+  def *>[B](t: Env[E, B]): Env[E, B]       = map2(t)((_, x) => x)
+  def <*[B](t: Env[E, B]): Env[E, A]       = map2(t)((x, _) => x)
+  def &>[B](t: Env[E, B]): Env[E, B]       = parMap2(t)((_, x) => x)
+  def <&[B](t: Env[E, B]): Env[E, A]       = parMap2(t)((x, _) => x)
 
   def flatten[B](implicit _ev: A <:< Env[E, B]): Env[E, B] = flatMap(x => x)
   def flattenT[B](implicit _ev: A <:< Task[B]): Env[E, B]  = mapTask(_.flatten)
@@ -215,8 +215,8 @@ sealed trait Env[E, +A] {
     mapTask(_.executeOn(s, forceAsync))
   def fork: Env[E, Fiber[Env[E, *], A @uv]] = executeAsync.start
   @scala.deprecated("Replaced with startAndForget", "0.3.0")
-  def forkAndForget: Env[E, Unit]           = mapTask(_.startAndForget)
-  def startAndForget: Env[E, Unit]          = mapTask(_.startAndForget)
+  def forkAndForget: Env[E, Unit]  = mapTask(_.startAndForget)
+  def startAndForget: Env[E, Unit] = mapTask(_.startAndForget)
 
   //profunctorial syntax
   def choose[B, C](g: Env[B, C]): Env[Either[E, B], Either[A, C]] =

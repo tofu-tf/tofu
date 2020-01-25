@@ -11,7 +11,7 @@ import tofu.optics.data.Constant
 trait PExtract[-S, +T, +A, -B] extends PDowncast[S, T, A, B] with PReduced[S, T, A, B] {
   def extract(s: S): A
 
-  def downcast(s: S): Option[A]                           = Some(extract(s))
+  def downcast(s: S): Option[A]                       = Some(extract(s))
   def reduceMap[X: Semigroup](s: S)(f: A => X): X     = f(extract(s))
   override def foldMap[X: Monoid](s: S)(f: A => X): X = f(extract(s))
 }

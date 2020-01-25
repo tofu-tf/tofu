@@ -7,7 +7,7 @@ import magnolia.Param
 
 sealed trait MaskMode
 object MaskMode {
-  case object Full extends MaskMode
+  case object Full  extends MaskMode
   case object Erase extends MaskMode
   case class ForLength(offset: Int, maxLength: Int = -1) extends MaskMode {
     def this(length: Int) = this(0, length)
@@ -34,16 +34,17 @@ object masking {
     mode match {
       case MaskMode.Erase =>
         "..."
-      case MaskMode.Full  =>
+      case MaskMode.Full =>
         loop(shown.toCharArray, 0, shown.length)
       case MaskMode.Regexp(pattern) =>
         pattern
           .findFirstMatchIn(shown)
-          .collect { case m if m.groupCount == 1 =>
-            val start = m.start(1)
-            val end = m.end(1)
+          .collect {
+            case m if m.groupCount == 1 =>
+              val start = m.start(1)
+              val end   = m.end(1)
 
-            loop(shown.toCharArray, start, end - start)
+              loop(shown.toCharArray, start, end - start)
           }
           .getOrElse(shown)
       case MaskMode.ForLength(offset, maxLength) =>
@@ -61,16 +62,14 @@ object masking {
       tpe: Type,
       params: Seq[Param[TypeClass, Type]]
   )(fn: TypeClass[Any] => Any => String) =
-    params
-      .iterator
+    params.iterator
       .filterNot(_.annotations.contains(hidden()))
       .map { param =>
         import param._
 
         val value: PType = dereference(tpe)
-        val shown = fn(typeclass.asInstanceOf[TypeClass[Any]])(value)
-        val repr = annotations
-          .collectFirst { case masked(mode) => field(value, shown, mode) }
+        val shown        = fn(typeclass.asInstanceOf[TypeClass[Any]])(value)
+        val repr = annotations.collectFirst { case masked(mode) => field(value, shown, mode) }
           .getOrElse(shown)
 
         s"$label=$repr"

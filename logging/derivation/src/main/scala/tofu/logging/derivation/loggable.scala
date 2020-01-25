@@ -14,7 +14,7 @@ object loggable extends Derivation[Loggable] {
   def combine[T](ctx: CaseClass[Typeclass, T]): Loggable[T] = new DictLoggable[T] {
     private[this] val doNotShow = ctx.annotations.contains(hidden())
 
-    override val typeName: String = calcTypeName(ctx.typeName)
+    override val typeName: String  = calcTypeName(ctx.typeName)
     override val shortName: String = ctx.typeName.short
 
     def fields[I, V, R, M](a: T, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
@@ -38,7 +38,7 @@ object loggable extends Derivation[Loggable] {
   }
 
   def dispatch[T](ctx: SealedTrait[Typeclass, T]): Loggable[T] = new Typeclass[T] {
-    override val typeName: String = calcTypeName(ctx.typeName)
+    override val typeName: String  = calcTypeName(ctx.typeName)
     override val shortName: String = ctx.typeName.short
 
     def fields[I, V, R, M](a: T, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =

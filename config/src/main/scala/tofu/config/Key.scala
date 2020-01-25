@@ -20,4 +20,3 @@ object Key {
   implicit val order: Order[Key] = data.instances.order.derive
 
 }
-

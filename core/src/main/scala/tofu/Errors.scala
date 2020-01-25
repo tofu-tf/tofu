@@ -89,8 +89,8 @@ trait ErrorsTo[F[_], G[_], E] extends Raise[F, E] with HandleTo[F, G, E]
 
 object ErrorsTo extends ErrorsToInstanceChain[ErrorsTo]
 
-trait ErrorsToInstanceChain[TC[f[_], g[_], e] >: ErrorsTo[f, g, e]] 
-  extends ErrorsInstanceChain[Lambda[(f[_], e) => TC[f, f, e]]]  {
+trait ErrorsToInstanceChain[TC[f[_], g[_], e] >: ErrorsTo[f, g, e]]
+    extends ErrorsInstanceChain[Lambda[(f[_], e) => TC[f, f, e]]] {
   final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): TC[EitherT[F, E, *], F, E] =
     new EitherTErrorsTo[F, E]
   final implicit def optionTIntance[F[_]](implicit F: Monad[F]): TC[OptionT[F, *], F, Unit] = new OptionTErrorsTo[F]

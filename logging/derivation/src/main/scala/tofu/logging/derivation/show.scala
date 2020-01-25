@@ -6,6 +6,7 @@ import magnolia.{CaseClass, Magnolia, SealedTrait}
 import org.manatki.derevo.Derivation
 
 object show extends Derivation[Show] {
+
   /** the type constructor for new [[Show]] instances
     *
     *  The first parameter is fixed as `String`, and the second parameter varies generically. */
@@ -17,8 +18,7 @@ object show extends Derivation[Show] {
     if (ctx.isValueClass) {
       val param = ctx.parameters.head
       param.typeclass.show(param.dereference(value))
-    }
-    else join(ctx.typeName.short, masking.params[Typeclass, T](value, ctx.parameters)(_.show))
+    } else join(ctx.typeName.short, masking.params[Typeclass, T](value, ctx.parameters)(_.show))
 
   /** choose which typeclass to use based on the subtype of the sealed trait */
   def dispatch[T](ctx: SealedTrait[Typeclass, T]): Show[T] = value =>

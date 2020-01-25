@@ -51,7 +51,7 @@ object interop {
 
   implicit final class ItemsInteropOps[S, T, A, B](private val items: PItems[S, T, A, B]) extends AnyVal {
     def toTraversal: PTraversal[S, T, A, B] = new PTraversal[S, T, A, B] {
-      def modifyF[F[_]: Applicative](f: A => F[B])(s: S): F[T] =  {
+      def modifyF[F[_]: Applicative](f: A => F[B])(s: S): F[T] = {
         type F1[+x] = F[x @uncheckedVariance]
         items.traverse[F1](s)(f)
       }

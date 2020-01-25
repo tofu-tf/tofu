@@ -73,13 +73,9 @@ object Optic {
   def id[Ctx <: OpticContext, S, A]: Optic[Ctx, S, A, S, A] =
     PSame.toGeneric(PSame.id)
 
-  implicit def opticCategoryInstance[Ctx <: OpticContext]: Category[Mono[Ctx, ?, ?]] =
+  implicit def opticCategoryInstance[Ctx <: OpticContext]: Category[Mono[Ctx, *, *]] =
     new Category[Mono[Ctx, *, *]] {
       def id[A]: Mono[Ctx, A, A]                                                    = Optic.id
       def compose[A, B, C](f: Mono[Ctx, B, C], g: Mono[Ctx, A, B]): Mono[Ctx, A, C] = g.andThen(f)
     }
 }
-
-
-
-

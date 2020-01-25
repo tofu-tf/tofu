@@ -32,13 +32,11 @@ object ConfigError {
 
 final case class ConfigParseMessage(path: Path, error: ConfigError)
 
-object ConfigParseMessage{
+object ConfigParseMessage {
   implicit val messageShow: Show[ConfigParseMessage] = message => {
-    val pathShown = message.path.iterator.map(_.show).mkString(".")  
+    val pathShown = message.path.iterator.map(_.show).mkString(".")
     show"$pathShown : ${message.error}"
   }
 }
 
 final case class ConfigParseErrors(ms: MessageList) extends RuntimeException(ms.mkString_("\n"))
-
-

@@ -35,7 +35,7 @@ object Mut {
   }
 
   private[Mut] class FocusedMut[F[_], A, B](v: Mut[F, A], focus: Contains[A, B])(implicit F: Functor[F])
-    extends Mut[F, B] {
+      extends Mut[F, B] {
     def get: F[B]                   = v.get.map(focus.extract)
     def update(f: B => B): F[Unit]  = v.update(focus.update(_, f))
     override def set(b: B): F[Unit] = v.update(focus.set(_, b))

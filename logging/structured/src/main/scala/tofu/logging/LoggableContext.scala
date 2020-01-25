@@ -12,7 +12,7 @@ trait LoggableContext[F[_]] {
 
 object LoggableContext {
   def of[F[_]](implicit ctx: Context[F]) = new LoggableContextPA[F, ctx.Ctx](ctx)
-  class LoggableContextPA[F[_], C](private val ctx: F HasContext C) extends AnyVal{
+  class LoggableContextPA[F[_], C](private val ctx: F HasContext C) extends AnyVal {
     def instance(implicit ctxLog: Loggable[C]): LoggableContext[F] = new LoggableContext[F] {
       type Ctx = C
       val loggable: Loggable[C]   = ctxLog

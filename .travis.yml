@@ -7,6 +7,10 @@ scala:
 
 jdk:
   - openjdk8
+script:
+  - sbt check
+  - sbt compile
+  - sbt test
 
 cache:
   directories:

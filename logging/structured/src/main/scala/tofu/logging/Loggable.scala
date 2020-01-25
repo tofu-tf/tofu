@@ -99,7 +99,7 @@ object Loggable {
         fields[I, V, R, M](a, i)
       override def toString: String = logShow(a)
       override def typeName: String = self.typeName
-      def shortName: String             = self.shortName
+      def shortName: String         = self.shortName
     }
 
     /** transform input value befor logging */
@@ -354,5 +354,5 @@ final class LoggedThrowable(cause: Throwable) extends Throwable(cause.getMessage
     f.addString("stacktrace", cause.getStackTrace.mkString("\n"), input)
 
   override def typeName: String = cause.getClass.getTypeName
-  def shortName: String             = "exception"
+  def shortName: String         = "exception"
 }

@@ -8,8 +8,8 @@ import tofu.syntax.monoidalK._
 
 trait Mid[F[_], A] {
   def apply(fa: F[A]): F[A]
-  @inline def attach(fa: F[A]): F[A]      = apply(fa)
-  
+  @inline def attach(fa: F[A]): F[A] = apply(fa)
+
   def compose(that: Mid[F, A]): Mid[F, A] = that.andThen(this)
   def andThen(that: Mid[F, A]): Mid[F, A] = MidCompose(Chain(this, that))
 }

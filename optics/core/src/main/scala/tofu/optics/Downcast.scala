@@ -9,7 +9,7 @@ import tofu.optics.data.Constant
   * partial function from S to T
   * and part of prism
   */
-trait PDowncast[-S, +T, +A, -B]  extends PFolded[S, T, A, B] {
+trait PDowncast[-S, +T, +A, -B] extends PFolded[S, T, A, B] {
   def downcast(s: S): Option[A]
 
   def getOption(s: S): Option[A] = downcast(s)

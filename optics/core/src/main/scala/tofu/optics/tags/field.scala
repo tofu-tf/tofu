@@ -1,7 +1,7 @@
 package tofu.optics.tags
 import tofu.optics.PContains
 
-object field extends TaggerObj[PContains]{
+object field extends TaggerObj[PContains] {
   implicit def field1T2[A, B, A1]: PTagApply[PContains, (A, B), (A1, B), A, A1, this.type, first.type] =
     _ => PContains[(A, B), A1](_._1)((t, x) => t.copy(_1 = x))
 
