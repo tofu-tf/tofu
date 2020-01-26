@@ -1,7 +1,8 @@
-package tofu.logging.impl
+package tofu.logging.zlogs.impl
 
 import org.slf4j.Logger
 import tofu.logging.LoggedValue
+import tofu.logging.impl.LoggingImpl
 import zio.UIO
 
 class UIOZLogging(logger: Logger) extends LoggingImpl[UIO](logger) {

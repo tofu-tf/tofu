@@ -12,13 +12,13 @@ class LoggableSuite extends FlatSpec with Matchers {
   implicit val testIntLoggable: Loggable[TestInt] = new Loggable[Int] {
     def fields[I, V, R, S](a: Int, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
       i.sub("missing")(r.zero) |+|
-        i.sub("sign")(
-          (v: V) =>
-            r.coalesce(
-              v => v.whenVal(a < 0)(v.putString("negative")),
-              v => v.whenVal(a > 0)(v.putString("positive")),
-              v
-          )) |+|
+        i.sub("sign")((v: V) =>
+          r.coalesce(
+            v => v.whenVal(a < 0)(v.putString("negative")),
+            v => v.whenVal(a > 0)(v.putString("positive")),
+            v
+          )
+        ) |+|
         r.sub("value", i)(_.putInt(a.toLong))
     def putValue[I, V, R, S](a: Int, v: V)(implicit r: LogRenderer[I, V, R, S]): S = v.putInt(a.toLong)
     def logShow(a: Int): String                                                    = a.toString
@@ -49,6 +49,20 @@ class LoggableSuite extends FlatSpec with Matchers {
     1.asRight[String].logShow shouldBe "1"
   }
 
+  "hide after named" should "hide value in message" in {
+    case class ResponseTime(value: Int)
+
+    val hideAfterNamed: Loggable[ResponseTime] =
+      Loggable.intLoggable.named("responseTime").hide.contramap(_.value)
+
+    val namedAfterHide: Loggable[ResponseTime] =
+      Loggable.intLoggable.hide.named("responseTime").contramap(_.value)
+
+    val sample = ResponseTime(1337)
+
+    assert(hideAfterNamed.loggedValue(sample).toString.isEmpty)
+    assert(namedAfterHide.loggedValue(sample).toString.isEmpty)
+  }
 }
 
 object LoggableSuite {
