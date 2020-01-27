@@ -2,6 +2,7 @@
 **/target
 tasks/
 .metals
+project/metals.sbt
 .bloop
 website/build
 website/translated_docs
