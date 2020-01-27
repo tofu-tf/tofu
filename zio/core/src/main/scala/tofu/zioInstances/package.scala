@@ -1,7 +1,15 @@
 package tofu
 import tofu.optics.{Contains, Extract}
 import tofu.optics.functions.extractSubtype
-import tofu.zioInstances.{RioTofuInstance, ZIOTofuTimeoutInstance, ZIOUnliftInstance, ZioTofuConcurrentInstance, ZioTofuConcurrentInstanceUIO, ZioTofuErrorsToInstance, ZioTofuInstance}
+import tofu.zioInstances.{
+  RioTofuInstance,
+  ZIOTofuTimeoutInstance,
+  ZIOUnliftInstance,
+  ZioTofuConcurrentInstance,
+  ZioTofuConcurrentInstanceUIO,
+  ZioTofuErrorsToInstance,
+  ZioTofuInstance
+}
 import zio.clock.Clock
 
 package object zioInstances extends ZioInstances1
