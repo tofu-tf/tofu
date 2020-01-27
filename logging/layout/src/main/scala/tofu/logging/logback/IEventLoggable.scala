@@ -42,12 +42,11 @@ class EventArgumentsLoggable extends EventLoggable {
     evt.getArgumentArray match {
       case null => i.noop
       case array =>
-        array.foldLeft(i.noop)(
-          (acc, arg) =>
-            acc |+| (arg match {
-              case lv: LoggedValue => lv.logFields(i)
-              case _               => i.noop
-            })
+        array.foldLeft(i.noop)((acc, arg) =>
+          acc |+| (arg match {
+            case lv: LoggedValue => lv.logFields(i)
+            case _               => i.noop
+          })
         )
     }
 }
@@ -57,12 +56,11 @@ class EventArgumentsArrayLoggable(fieldName: String) extends EventLoggable {
     evt.getArgumentArray match {
       case null => i.noop
       case array =>
-        i.subDictList(fieldName, array.length)(
-          (inner, idx) =>
-            array(idx) match {
-              case lv: LoggedValue => lv.logFields(inner)
-              case _               => inner.noop
-            }
+        i.subDictList(fieldName, array.length)((inner, idx) =>
+          array(idx) match {
+            case lv: LoggedValue => lv.logFields(inner)
+            case _               => inner.noop
+          }
         )
     }
 }

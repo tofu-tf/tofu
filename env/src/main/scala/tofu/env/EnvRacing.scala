@@ -12,8 +12,10 @@ private[env] trait EnvRacing {
     case Right((fibA, b)) => Right((EnvFiber(fibA), b))
   }
 
-  def racePair[E, A, B](ta: Env[E, A],
-                        tb: Env[E, B]): Env[E, Either[(A, Fiber[Env[E, *], B]), (Fiber[Env[E, *], A], B)]] =
+  def racePair[E, A, B](
+      ta: Env[E, A],
+      tb: Env[E, B]
+  ): Env[E, Either[(A, Fiber[Env[E, *], B]), (Fiber[Env[E, *], A], B)]] =
     (ta, tb) match {
       case (EnvTask(taskA), EnvTask(taskB)) =>
         fromTask(Task.racePair(taskA, taskB).map(convertRacingFibers))

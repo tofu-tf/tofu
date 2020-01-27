@@ -10,10 +10,13 @@ import scala.concurrent.duration._
 class ParEnvSuite extends FlatSpec with Matchers {
   "parSequence" should "not stack overflow on large collection" in {
 
-    Parallel.parSequence(
+    Parallel
+      .parSequence(
         List
           .range(1, 10000)
           .map(i => Env.fromFunc((j: Int) => i * j))
-    ).run(3).runSyncUnsafe(Duration.Inf) shouldBe List.range(3, 30000, 3)
+      )
+      .run(3)
+      .runSyncUnsafe(Duration.Inf) shouldBe List.range(3, 30000, 3)
   }
 }

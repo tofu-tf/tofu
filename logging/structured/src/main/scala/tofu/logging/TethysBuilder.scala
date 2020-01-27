@@ -25,7 +25,7 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
     case DecimalValue(v) => writer.writeNumber(v)
     case FloatValue(v)   => writer.writeNumber(v)
     case BoolValue(v)    => writer.writeBoolean(v)
-    case NullValue => writer.writeNull()
+    case NullValue       => writer.writeNull()
   }
 
   def checkWritten(res: Boolean, writer: TokenWriter): Unit =

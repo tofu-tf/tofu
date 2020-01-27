@@ -59,7 +59,7 @@ class RepresentableKSuite extends FlatSpec with Matchers {
 
   "representableK" should "generate nice embed" in {
     val rightFoo = checkingFoo.asRight[String].embed
-    val leftFoo = "failed".asLeft[Foo[Either[String, *]]].embed
+    val leftFoo  = "failed".asLeft[Foo[Either[String, *]]].embed
 
     rightFoo.foo(2, "2.3") should ===(Right(4.6))
     rightFoo.foo(2, "fail") should ===(Left("could not parse fail as double"))

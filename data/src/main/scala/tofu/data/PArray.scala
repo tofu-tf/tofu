@@ -4,7 +4,7 @@ import cats.{Eval, Foldable, Monad, MonoidK}
 import tofu.internal.Newtype1Covariant
 import cats.syntax.foldable._
 
-object PArray extends Newtype1Covariant{
+object PArray extends Newtype1Covariant {
   private def fromArray[X, A](xs: Array[X]): Type[A] = xs.asInstanceOf[Type[A]]
 
   val empty: PArray[Nothing] = fromArray(Array())
@@ -19,9 +19,9 @@ object PArray extends Newtype1Covariant{
   implicit final class ArrOps[A](private val xs: Type[A]) extends AnyVal {
     private[PArray] def toArray: Array[A] = xs.asInstanceOf[Array[A]]
 
-    def apply(i: Int): A                  = xs.toArray(i)
-    def get(i: Int): Option[A]            = xs.toArray.lift(i)
-    def length: Int                       = xs.toArray.length
+    def apply(i: Int): A                     = xs.toArray(i)
+    def get(i: Int): Option[A]               = xs.toArray.lift(i)
+    def length: Int                          = xs.toArray.length
     def slice(from: Int, to: Int): PArray[A] = fromArray(xs.toArray.slice(from, to))
   }
 
@@ -36,11 +36,11 @@ object PArray extends Newtype1Covariant{
         else Eval.defer(f(fa(i), go(i + 1)))
       go(0)
     }
-    override def get[A](fa: PArray[A])(idx: Long): Option[A] = fa.get(idx.toInt)
-    override def map[A, B](fa: PArray[A])(f: A => B): PArray[B] = fromArray(fa.toArray.map(f : A => Any))
-    def pure[A](x: A): PArray[A]                             = PArray(x)
+    override def get[A](fa: PArray[A])(idx: Long): Option[A]    = fa.get(idx.toInt)
+    override def map[A, B](fa: PArray[A])(f: A => B): PArray[B] = fromArray(fa.toArray.map(f: A => Any))
+    def pure[A](x: A): PArray[A]                                = PArray(x)
     def flatMap[A, B](fa: PArray[A])(f: A => PArray[B]): PArray[B] =
-      fromArray(fa.toArray.flatMap(a => (f(a).toArray : Iterable[Any])))
+      fromArray(fa.toArray.flatMap(a => (f(a).toArray: Iterable[Any])))
 
     def tailRecM[A, B](a: A)(f: A => PArray[Either[A, B]]): PArray[B] = {
       val bldr = Array.newBuilder[Any]
@@ -48,7 +48,8 @@ object PArray extends Newtype1Covariant{
         if (i >= part.length) parts match {
           case (first, j) :: rest => go(first, j, rest)
           case Nil                =>
-        } else
+        }
+        else
           part(i) match {
             case Right(b) =>
               bldr += b
@@ -59,7 +60,7 @@ object PArray extends Newtype1Covariant{
       go(f(a), 0, Nil)
       fromArray(bldr.result())
     }
-    def empty[A]: PArray[A]                          = PArray.empty
+    def empty[A]: PArray[A]                                = PArray.empty
     def combineK[A](x: PArray[A], y: PArray[A]): PArray[A] = PArray.fromArray[Any, A](x.toArray ++ y.toArray)
   }
 }

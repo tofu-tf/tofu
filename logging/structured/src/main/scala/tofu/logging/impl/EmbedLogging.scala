@@ -6,7 +6,7 @@ import cats.FlatMap
 import org.slf4j.Marker
 import tofu.syntax.monadic._
 
-class EmbedLogging[F[_]: FlatMap](underlying : F[Logging[F]]) extends Logging[F] {
+class EmbedLogging[F[_]: FlatMap](underlying: F[Logging[F]]) extends Logging[F] {
   def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit] =
     underlying.flatMap(_.write(level, message, values))
 
@@ -38,9 +38,9 @@ class EmbedLogging[F[_]: FlatMap](underlying : F[Logging[F]]) extends Logging[F]
     underlying.flatMap(_.traceCause(message, cause, values: _*))
   override def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     underlying.flatMap(_.debugCause(message, cause, values: _*))
-  override def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
+  override def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     underlying.flatMap(_.infoCause(message, cause, values: _*))
-  override def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
+  override def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     underlying.flatMap(_.warnCause(message, cause, values: _*))
   override def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     underlying.flatMap(_.errorCause(message, cause, values: _*))

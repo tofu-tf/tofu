@@ -42,7 +42,7 @@ lazy val defaultSettings = Seq(
 
 moduleName := "tofu"
 
-lazy val higherKindCore = project  settings (
+lazy val higherKindCore = project settings (
   defaultSettings,
   publishName := "core-higher-kind",
   libraryDependencies ++= Seq(catsCore, catsTagless),
@@ -113,8 +113,6 @@ lazy val loggingUtil = project
     libraryDependencies += slf4j,
   )
   .dependsOn(loggingStr, concurrent)
-
-
 
 lazy val logging = project
   .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil)
@@ -355,3 +353,5 @@ lazy val publishSettings = Seq(
     Developer("Phill101", "Nikita Filimonov", "holypics6@gmail.com", url("https://github.com/Phill101"))
   )
 )
+addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
+addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")

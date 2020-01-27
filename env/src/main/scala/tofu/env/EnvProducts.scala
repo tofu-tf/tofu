@@ -22,7 +22,8 @@ private[env] trait EnvProducts {
     }
 
   def parMap4[E, A1, A2, A3, A4, R](fa1: Env[E, A1], fa2: Env[E, A2], fa3: Env[E, A3], fa4: Env[E, A4])(
-      f: (A1, A2, A3, A4) => R): Env[E, R] =
+      f: (A1, A2, A3, A4) => R
+  ): Env[E, R] =
     (fa1, fa2, fa3, fa4) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4)) =>
         EnvTask(Task.parMap4(ta1, ta2, ta3, ta4)(f))
@@ -30,11 +31,13 @@ private[env] trait EnvProducts {
         Env(ctx => Task.parMap4(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx))(f))
     }
 
-  def parMap5[E, A1, A2, A3, A4, A5, R](fa1: Env[E, A1],
-                                        fa2: Env[E, A2],
-                                        fa3: Env[E, A3],
-                                        fa4: Env[E, A4],
-                                        fa5: Env[E, A5])(f: (A1, A2, A3, A4, A5) => R): Env[E, R] =
+  def parMap5[E, A1, A2, A3, A4, A5, R](
+      fa1: Env[E, A1],
+      fa2: Env[E, A2],
+      fa3: Env[E, A3],
+      fa4: Env[E, A4],
+      fa5: Env[E, A5]
+  )(f: (A1, A2, A3, A4, A5) => R): Env[E, R] =
     (fa1, fa2, fa3, fa4, fa5) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4), EnvTask(ta5)) =>
         EnvTask(Task.parMap5(ta1, ta2, ta3, ta4, ta5)(f))
@@ -42,12 +45,14 @@ private[env] trait EnvProducts {
         Env(ctx => Task.parMap5(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx), fa5.run(ctx))(f))
     }
 
-  def parMap6[E, A1, A2, A3, A4, A5, A6, R](fa1: Env[E, A1],
-                                            fa2: Env[E, A2],
-                                            fa3: Env[E, A3],
-                                            fa4: Env[E, A4],
-                                            fa5: Env[E, A5],
-                                            fa6: Env[E, A6])(f: (A1, A2, A3, A4, A5, A6) => R): Env[E, R] =
+  def parMap6[E, A1, A2, A3, A4, A5, A6, R](
+      fa1: Env[E, A1],
+      fa2: Env[E, A2],
+      fa3: Env[E, A3],
+      fa4: Env[E, A4],
+      fa5: Env[E, A5],
+      fa6: Env[E, A6]
+  )(f: (A1, A2, A3, A4, A5, A6) => R): Env[E, R] =
     (fa1, fa2, fa3, fa4, fa5, fa6) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4), EnvTask(ta5), EnvTask(ta6)) =>
         EnvTask(Task.parMap6(ta1, ta2, ta3, ta4, ta5, ta6)(f))
@@ -70,7 +75,8 @@ private[env] trait EnvProducts {
     }
 
   def map4[E, A1, A2, A3, A4, R](fa1: Env[E, A1], fa2: Env[E, A2], fa3: Env[E, A3], fa4: Env[E, A4])(
-      f: (A1, A2, A3, A4) => R): Env[E, R] =
+      f: (A1, A2, A3, A4) => R
+  ): Env[E, R] =
     (fa1, fa2, fa3, fa4) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4)) =>
         EnvTask(Task.map4(ta1, ta2, ta3, ta4)(f))
@@ -78,11 +84,13 @@ private[env] trait EnvProducts {
         Env(ctx => Task.map4(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx))(f))
     }
 
-  def map5[E, A1, A2, A3, A4, A5, R](fa1: Env[E, A1],
-                                     fa2: Env[E, A2],
-                                     fa3: Env[E, A3],
-                                     fa4: Env[E, A4],
-                                     fa5: Env[E, A5])(f: (A1, A2, A3, A4, A5) => R): Env[E, R] =
+  def map5[E, A1, A2, A3, A4, A5, R](
+      fa1: Env[E, A1],
+      fa2: Env[E, A2],
+      fa3: Env[E, A3],
+      fa4: Env[E, A4],
+      fa5: Env[E, A5]
+  )(f: (A1, A2, A3, A4, A5) => R): Env[E, R] =
     (fa1, fa2, fa3, fa4, fa5) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4), EnvTask(ta5)) =>
         EnvTask(Task.map5(ta1, ta2, ta3, ta4, ta5)(f))
@@ -90,12 +98,14 @@ private[env] trait EnvProducts {
         Env(ctx => Task.map5(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx), fa5.run(ctx))(f))
     }
 
-  def map6[E, A1, A2, A3, A4, A5, A6, R](fa1: Env[E, A1],
-                                         fa2: Env[E, A2],
-                                         fa3: Env[E, A3],
-                                         fa4: Env[E, A4],
-                                         fa5: Env[E, A5],
-                                         fa6: Env[E, A6])(f: (A1, A2, A3, A4, A5, A6) => R): Env[E, R] =
+  def map6[E, A1, A2, A3, A4, A5, A6, R](
+      fa1: Env[E, A1],
+      fa2: Env[E, A2],
+      fa3: Env[E, A3],
+      fa4: Env[E, A4],
+      fa5: Env[E, A5],
+      fa6: Env[E, A6]
+  )(f: (A1, A2, A3, A4, A5, A6) => R): Env[E, R] =
     (fa1, fa2, fa3, fa4, fa5, fa6) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4), EnvTask(ta5), EnvTask(ta6)) =>
         EnvTask(Task.map6(ta1, ta2, ta3, ta4, ta5, ta6)(f))
@@ -109,29 +119,35 @@ private[env] trait EnvProducts {
   def parZip3[E, A1, A2, A3](fa1: Env[E, A1], fa2: Env[E, A2], fa3: Env[E, A3]): Env[E, (A1, A2, A3)] =
     fa1.mapTask3(fa2, fa3)(Task.parZip3)
 
-  def parZip4[E, A1, A2, A3, A4](fa1: Env[E, A1],
-                                 fa2: Env[E, A2],
-                                 fa3: Env[E, A3],
-                                 fa4: Env[E, A4]): Env[E, (A1, A2, A3, A4)] =
+  def parZip4[E, A1, A2, A3, A4](
+      fa1: Env[E, A1],
+      fa2: Env[E, A2],
+      fa3: Env[E, A3],
+      fa4: Env[E, A4]
+  ): Env[E, (A1, A2, A3, A4)] =
     fa1.mapTask4(fa2, fa3, fa4)(Task.parZip4)
 
-  def parZip5[E, A1, A2, A3, A4, A5](fa1: Env[E, A1],
-                                     fa2: Env[E, A2],
-                                     fa3: Env[E, A3],
-                                     fa4: Env[E, A4],
-                                     fa5: Env[E, A5]): Env[E, (A1, A2, A3, A4, A5)] =
+  def parZip5[E, A1, A2, A3, A4, A5](
+      fa1: Env[E, A1],
+      fa2: Env[E, A2],
+      fa3: Env[E, A3],
+      fa4: Env[E, A4],
+      fa5: Env[E, A5]
+  ): Env[E, (A1, A2, A3, A4, A5)] =
     fa1.mapTask5(fa2, fa3, fa4, fa5)(Task.parZip5)
 
-  def parZip6[E, A1, A2, A3, A4, A5, A6](fa1: Env[E, A1],
-                                         fa2: Env[E, A2],
-                                         fa3: Env[E, A3],
-                                         fa4: Env[E, A4],
-                                         fa5: Env[E, A5],
-                                         fa6: Env[E, A6]): Env[E, (A1, A2, A3, A4, A5, A6)] =
+  def parZip6[E, A1, A2, A3, A4, A5, A6](
+      fa1: Env[E, A1],
+      fa2: Env[E, A2],
+      fa3: Env[E, A3],
+      fa4: Env[E, A4],
+      fa5: Env[E, A5],
+      fa6: Env[E, A6]
+  ): Env[E, (A1, A2, A3, A4, A5, A6)] =
     fa1.mapTask6(fa2, fa3, fa4, fa5, fa6)(Task.parZip6)
 }
 
-private [env] trait EnvTransformations {
+private[env] trait EnvTransformations {
   final def taskNat[E]: Task ~> Env[E, *] = new FunctionK[Task, Env[E, *]] {
     override def apply[A](fa: Task[A]): Env[E, A] = Env.fromTask(fa)
   }

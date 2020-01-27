@@ -36,10 +36,10 @@ object Console {
   def instance[F[_]: Sync](in: BufferedReader, out: PrintStream, err: PrintStream): Console[F] = new Console[F] {
     def readStrLn: F[String] = Sync[F].delay(in.readLine())
 
-    def putStr(s: String): F[Unit] = Sync[F].delay(out.print(s))
+    def putStr(s: String): F[Unit]   = Sync[F].delay(out.print(s))
     def putStrLn(s: String): F[Unit] = Sync[F].delay(out.println(s))
 
-    def putErr(e: String): F[Unit] = Sync[F].delay(err.print(e))
+    def putErr(e: String): F[Unit]   = Sync[F].delay(err.print(e))
     def putErrLn(e: String): F[Unit] = Sync[F].delay(err.println(e))
   }
 }
