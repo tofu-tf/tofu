@@ -42,3 +42,9 @@ Of course you can also specify the exact subproject that you wanna add to yours 
 Copyright the maintainers, 2019
 
 Logos made with love by [@impurepics](https://twitter.com/impurepics)
+
+# Contributing
+
+Please note we use following labels for automated release descriptions:
+  * `chore` if your PR does not change any types and runtime semantics
+  * `fix` if your PR merely fixes incorrect behavior
