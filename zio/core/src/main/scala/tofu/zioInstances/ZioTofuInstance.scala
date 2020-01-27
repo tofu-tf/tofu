@@ -1,13 +1,18 @@
 package tofu
 package zioInstances
+import java.io.IOException
+
 import cats.{Applicative, Functor, ~>}
 import cats.effect.{CancelToken, Fiber}
+import tofu.generate.{GenRandom, GenUUID}
 import tofu.internal.CachedMatcher
 import tofu.lift.Unlift
 import tofu.optics.{Contains, Extract}
 import tofu.syntax.functionK.funK
 import tofu.zioInstances.ZioTofuInstance.convertFiber
 import zio.clock.Clock
+import zio.console.Console
+import zio.random.Random
 import zio.{Fiber => ZFiber, _}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -70,6 +75,19 @@ class RioTofuInstance[R] extends ZioTofuInstance[R, Throwable] {
 class ZIOTofuTimeoutInstance[R <: Clock, E] extends Timeout[ZIO[R, E, *]] {
   final def timeoutTo[A](fa: ZIO[R, E, A], after: FiniteDuration, fallback: ZIO[R, E, A]): ZIO[R, E, A] =
     fa.timeoutTo[R, E, A, ZIO[R, E, A]](fallback)(ZIO.succeed)(zio.duration.Duration.fromScala(after)).flatten
+}
+
+class ZIOTofuRandomInstance[R <: Random, E] extends GenRandom[ZIO[R, E, *]] {
+  override def nextLong: ZIO[R, E, Long]       = random.nextLong
+  override def nextInt(n: Int): ZIO[R, E, Int] = random.nextInt(n)
+}
+
+class ZIOTofuConsoleInstance[R <: Console, E >: IOException] extends tofu.common.Console[ZIO[R, E, *]] {
+  override def readStrLn: ZIO[R, E, String]           = console.getStrLn
+  override def putStr(s: String): ZIO[R, E, Unit]     = console.putStr(s)
+  override def putStrLn(s: String): ZIO[R, E, Unit]   = console.putStrLn(s)
+  override def putErr(err: String): ZIO[R, E, Unit]   = console.putStr(err)
+  override def putErrLn(err: String): ZIO[R, E, Unit] = console.putStrLn(err)
 }
 
 object ZioTofuInstance {
