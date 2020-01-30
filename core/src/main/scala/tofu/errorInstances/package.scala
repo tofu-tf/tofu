@@ -25,6 +25,8 @@ private[tofu] class HandleApErr[F[_]: ApplicativeError[*[_], E], E, E1: ClassTag
     appErr.recoverWith(fa)({ case e1: E1 if pf.isDefinedAt(e1) => pf(e1) })
 
   def restore[A](fa: F[A]): F[Option[A]] = appErr.handleError[Option[A]](appErr.map(fa)(Some(_)))(_ => None)
+
+  def lift[A](fa: F[A]): F[A] = fa
 }
 
 private[tofu] class FromPrism[F[_], E, E1, +TC[_[_], _], +P[_, _]](
@@ -46,6 +48,8 @@ private[tofu] trait HandlePrism[F[_], E, E1] extends Handle[F, E1] {
     instance.tryHandleWith(fa)(e => prism.downcast(e).flatMap(f))
 
   def restore[A](fa: F[A]): F[Option[A]] = instance.restore(fa)
+
+  def lift[A](fa: F[A]): F[A] = fa
 }
 
 private[tofu] class EitherTErrorsTo[F[_]: Monad, E] extends ErrorsTo[EitherT[F, E, *], F, E] {
@@ -56,6 +60,9 @@ private[tofu] class EitherTErrorsTo[F[_]: Monad, E] extends ErrorsTo[EitherT[F, 
 
   // Members declared in tofu.RestoreTo
   def restore[A](fa: EitherT[F, E, A]): F[Option[A]] = fa.toOption.value
+
+  // Members declared in tofu.Lift
+  def lift[A](fa: F[A]): EitherT[F, E, A] = EitherT.liftF(fa)
 }
 
 private[tofu] class OptionTErrorsTo[F[_]: Monad] extends ErrorsTo[OptionT[F, *], F, Unit] {
@@ -66,6 +73,9 @@ private[tofu] class OptionTErrorsTo[F[_]: Monad] extends ErrorsTo[OptionT[F, *],
 
   // Members declared in tofu.RestoreTo
   def restore[A](fa: OptionT[F, A]): F[Option[A]] = fa.value
+
+  // Members declared in tofu.Lift
+  def lift[A](fa: F[A]): OptionT[F, A] = OptionT.liftF(fa)
 }
 
 private[tofu] class EitherErrorsTo[E] extends ErrorsTo[Either[E, *], Id, E] {
@@ -76,6 +86,9 @@ private[tofu] class EitherErrorsTo[E] extends ErrorsTo[Either[E, *], Id, E] {
 
   // Members declared in tofu.RestoreTo
   def restore[A](fa: Either[E, A]): Option[A] = fa.toOption
+
+  // Members declared in tofu.Lift
+  def lift[A](fa: Id[A]): Either[E, A] = Right(fa)
 }
 
 private[tofu] object OptionErrorsTo extends ErrorsTo[Option, Id, Unit] {
@@ -86,4 +99,7 @@ private[tofu] object OptionErrorsTo extends ErrorsTo[Option, Id, Unit] {
 
   // Members declared in tofu.RestoreTo
   def restore[A](fa: Option[A]): Option[A] = fa
+
+  // Members declared in tofu.Lift
+  def lift[A](fa: Id[A]): Option[A] = Some(fa)
 }
