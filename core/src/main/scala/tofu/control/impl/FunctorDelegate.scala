@@ -4,7 +4,7 @@ import cats.{Contravariant, Functor}
 trait FunctorDelegate[F[_]] extends Functor[F] {
   val F: Functor[F]
 
-  final override def map[A, B](fa: F[A])(f: A => B): F[B]                                     = F.map(fa)(f)
+  final override def map[A, B](fa: F[A])(f: A => B): F[B]                            = F.map(fa)(f)
   final override def widen[A, B >: A](fa: F[A]): F[B]                                = F.widen(fa)
   final override def lift[A, B](f: A => B): F[A] => F[B]                             = F.lift(f)
   final override def void[A](fa: F[A]): F[Unit]                                      = F.void(fa)

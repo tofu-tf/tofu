@@ -4,9 +4,9 @@ import cats.{Apply, Eval, Functor, Invariant, InvariantSemigroupal}
 trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
   val F: Apply[F]
 
-  final override def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]                                    = F.ap(ff)(fa)
+  final override def ap[A, B](ff: F[A => B])(fa: F[A]): F[B] = F.ap(ff)(fa)
 
-  final override def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B] = F.imap(fa)(f)(g)
+  final override def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B]                        = F.imap(fa)(f)(g)
   final override def productR[A, B](fa: F[A])(fb: F[B]): F[B]                                = F.productR(fa)(fb)
   final override def productL[A, B](fa: F[A])(fb: F[B]): F[A]                                = F.productL(fa)(fb)
   final override def product[A, B](fa: F[A], fb: F[B]): F[(A, B)]                            = F.product(fa, fb)
@@ -23,9 +23,13 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
   final override def map3[A0, A1, A2, Z](f0: F[A0], f1: F[A1], f2: F[A2])(f: (A0, A1, A2) => Z): F[Z] =
     F.map3(f0, f1, f2)(f)
   final override def tuple3[A0, A1, A2, Z](f0: F[A0], f1: F[A1], f2: F[A2]): F[(A0, A1, A2)] = F.tuple3(f0, f1, f2)
-  final override def ap4[A0, A1, A2, A3, Z](f: F[(A0, A1, A2, A3) => Z])(f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3]): F[Z] =
+  final override def ap4[A0, A1, A2, A3, Z](
+      f: F[(A0, A1, A2, A3) => Z]
+  )(f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3]): F[Z] =
     F.ap4(f)(f0, f1, f2, f3)
-  final override def map4[A0, A1, A2, A3, Z](f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3])(f: (A0, A1, A2, A3) => Z): F[Z] =
+  final override def map4[A0, A1, A2, A3, Z](f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3])(
+      f: (A0, A1, A2, A3) => Z
+  ): F[Z] =
     F.map4(f0, f1, f2, f3)(f)
   final override def tuple4[A0, A1, A2, A3, Z](f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3]): F[(A0, A1, A2, A3)] =
     F.tuple4(f0, f1, f2, f3)
@@ -128,7 +132,9 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f7: F[A7],
       f8: F[A8]
   ): F[(A0, A1, A2, A3, A4, A5, A6, A7, A8)] = F.tuple9(f0, f1, f2, f3, f4, f5, f6, f7, f8)
-  final override def ap10[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, Z](f: F[(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9) => Z])(
+  final override def ap10[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, Z](
+      f: F[(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9) => Z]
+  )(
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -705,7 +711,29 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f19: F[A19]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19) => Z): F[Z] =
     F.map20(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19)(f)
-  final override def tuple20[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, Z](
+  final override def tuple20[
+      A0,
+      A1,
+      A2,
+      A3,
+      A4,
+      A5,
+      A6,
+      A7,
+      A8,
+      A9,
+      A10,
+      A11,
+      A12,
+      A13,
+      A14,
+      A15,
+      A16,
+      A17,
+      A18,
+      A19,
+      Z
+  ](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -728,7 +756,30 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f19: F[A19]
   ): F[(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19)] =
     F.tuple20(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19)
-  final override def ap21[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, Z](
+  final override def ap21[
+      A0,
+      A1,
+      A2,
+      A3,
+      A4,
+      A5,
+      A6,
+      A7,
+      A8,
+      A9,
+      A10,
+      A11,
+      A12,
+      A13,
+      A14,
+      A15,
+      A16,
+      A17,
+      A18,
+      A19,
+      A20,
+      Z
+  ](
       f: F[(A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20) => Z]
   )(
       f0: F[A0],
