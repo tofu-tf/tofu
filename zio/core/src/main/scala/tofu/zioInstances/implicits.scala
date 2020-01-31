@@ -1,6 +1,7 @@
 package tofu.zioInstances
 import java.io.IOException
 
+import tofu.optics.Extract
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
@@ -8,8 +9,11 @@ import zio.random.Random
 object implicits {
   @inline final implicit def rioTofuImplicit[R]: RioTofuInstance[R] = rioTofuInstance
 
-  @inline final implicit def zioTofuErrorsToImplicit[R, E, E1]: ZioTofuErrorsToInstance[R, E, E1] =
+  @inline final implicit def zioTofuErrorsToImplicit[R, E, E1]: ZioTofuErrorsToInstance[R, E, Nothing] =
     zioTofuErrorsToInstance
+
+  @inline final implicit def zioTofuErrorsExtractToImplicit[R, E, E1: * Extract E]: ZioTofuErrorsToInstance[R, E, E1] =
+    zioTofuExtractErrorsInstance
 
   @inline final implicit def zioTofuTimeoutImplicit[R <: Clock, E]: ZIOTofuTimeoutInstance[R, E] =
     zioTofuTimeoutInstance
