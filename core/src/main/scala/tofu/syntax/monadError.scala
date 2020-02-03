@@ -28,6 +28,7 @@ object monadError {
   }
 
   implicit final class MonadErrorEitherTOps[F[_], E, A](private val fea: EitherT[F, E, A]) extends AnyVal {
+
     /** sums logic error with underlying error */
     def attemptXor[U](implicit F: ApplicativeError[F, U]): EitherT[F, Either[U, E], A] =
       EitherT(fea.value.attempt.map(_.assocR))

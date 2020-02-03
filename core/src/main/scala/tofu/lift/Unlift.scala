@@ -31,7 +31,8 @@ trait Unlift[F[_], G[_]] extends Lift[F, G] {
       new IsoK[F, G] {
         def to[A](fa: F[A]): G[A]   = self.lift(fa)
         def from[A](ga: G[A]): F[A] = gf(ga)
-    })
+      }
+    )
 
   def andThen[H[_]: Monad](ugh: Unlift[G, H]): Unlift[F, H] =
     new Unlift[F, H] {

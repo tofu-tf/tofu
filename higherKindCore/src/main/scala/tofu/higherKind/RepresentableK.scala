@@ -40,7 +40,7 @@ object RepK {
   override def pureK[F[_]](p: Point[F]): U[F] = tabulate(funK(_ => p.point))
 }
 
-object RepresentableK{
+object RepresentableK {
 
   /** simply for reference
     * continuation form of RepK makes higher order index trivial */

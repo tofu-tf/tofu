@@ -34,5 +34,3 @@ class EnvTraverseSuite extends FlatSpec with Matchers {
   }
 
 }
-
-

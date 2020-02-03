@@ -45,26 +45,25 @@ trait Configurable[A] extends ConfigArr[ConfigItem, A] { self =>
   }
 
   def flatMake[B] =
-    ConfigArr.Builder[λ[`f[_]` => A], B, Configurable[B]](
-      f =>
-        new Configurable[B] {
-          def apply[F[_]: ConfigMonad](cfg: ConfigItem[F]): F[B] = self(cfg).flatMap(f(_))
-        }
+    ConfigArr.Builder[λ[`f[_]` => A], B, Configurable[B]](f =>
+      new Configurable[B] {
+        def apply[F[_]: ConfigMonad](cfg: ConfigItem[F]): F[B] = self(cfg).flatMap(f(_))
+      }
     )
 
   def catching[B](f: A => B)(message: ConfigFunc[(A, Throwable), B]): Configurable[B] =
     flatMake[B] { implicit F => x =>
-      try F.monad.pure(f(x))
-      catch { case NonFatal(ex) => message((x, ex)) }
+      try {
+        F.monad.pure(f(x))
+      } catch { case NonFatal(ex) => message((x, ex)) }
     }
 
   def catchMake[B](f: A => B) =
-    ConfigArr.Builder[λ[`f[_]` => (A, Throwable)], B, Configurable[B]](
-      g =>
-        flatMake[B] { implicit F => x =>
-          try F.monad.pure(f(x))
-          catch { case NonFatal(ex) => g((x, ex)) }
-        }
+    ConfigArr.Builder[λ[`f[_]` => (A, Throwable)], B, Configurable[B]](g =>
+      flatMake[B] { implicit F => x =>
+        try F.monad.pure(f(x))
+        catch { case NonFatal(ex) => g((x, ex)) }
+      }
     )
 
   def widen[A1 >: A]: Configurable[A1] = this.asInstanceOf[Configurable[A1]]
@@ -140,10 +139,12 @@ trait BaseGetters { self: Configurable.type =>
               }
               .flatten
           case ValueType.Stream(items) =>
-            items.zipWithIndex.foldLeft(F.pure(Monoid.empty[C])){
-              case (fc, (x, i)) => 
-              (fc, parse[F, A](x).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
-            }.flatten
+            items.zipWithIndex
+              .foldLeft(F.pure(Monoid.empty[C])) {
+                case (fc, (x, i)) =>
+                  (fc, parse[F, A](x).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
+              }
+              .flatten
           case Null => Monoid.empty[C].pure[F]
           case it   => F.error(BadType(List[ValueTag](ValueType.Array, ValueType.Stream), it.valueType))
         }
@@ -186,8 +187,8 @@ trait MagnoliaDerivation extends Derivation[Configurable] {
             case ValueType.Dict(get, _) =>
               Chain
                 .fromSeq(ctx.parameters)
-                .parTraverse[F, Any](
-                  param => get(param.label).flatMap(param.typeclass.apply[F]).local(_ :+ Prop(param.label)).map(x => x)
+                .parTraverse[F, Any](param =>
+                  get(param.label).flatMap(param.typeclass.apply[F]).local(_ :+ Prop(param.label)).map(x => x)
                 )
                 .map(c => ctx.rawConstruct(c.toList))
             case ConfigItem.Null => F.error(NotFound)
@@ -205,13 +206,12 @@ trait MagnoliaDerivation extends Derivation[Configurable] {
         new Typeclass[T] {
           def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[T] =
             ctx.subtypes.toList
-              .parTraverse[F, Option[(String, T)]](
-                sub =>
-                  sub
-                    .typeclass[F](cfg)
-                    .map(x => sub.typeName.short -> (x: T))
-                    .local(_ :+ Variant(sub.typeName.short))
-                    .restore
+              .parTraverse[F, Option[(String, T)]](sub =>
+                sub
+                  .typeclass[F](cfg)
+                  .map(x => sub.typeName.short -> (x: T))
+                  .local(_ :+ Variant(sub.typeName.short))
+                  .restore
               )
               .flatMap(_.unite match {
                 case Nil                => F.error(NoVariantFound)

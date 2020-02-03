@@ -20,9 +20,11 @@ trait PushInstances extends PushInstances1 {
 }
 
 trait PushInstances1 {
-  final implicit def pushFolded[F[_], A, B](implicit push: Push[F, B],
-                                            fold: Folded[A, B],
-                                            F: Applicative[F]): Push[F, A] = {
+  final implicit def pushFolded[F[_], A, B](
+      implicit push: Push[F, B],
+      fold: Folded[A, B],
+      F: Applicative[F]
+  ): Push[F, A] = {
     implicit val monoid: Monoid[F[Unit]] = new Monoid[F[Unit]] {
       def empty: F[Unit]                           = F.unit
       def combine(x: F[Unit], y: F[Unit]): F[Unit] = F.productR(x)(y)
@@ -39,9 +41,11 @@ trait Pull[F[_], A] {
 
 object Pull extends PullInstances with DataEffectComp[Pull]
 trait PullInstances {
-  final implicit def pullTransformed[F[_], A, B](implicit p: Pull[F, A],
-                                                 F: Functor[F],
-                                                 transform: Transform[A, B]): Pull[F, B] =
+  final implicit def pullTransformed[F[_], A, B](
+      implicit p: Pull[F, A],
+      F: Functor[F],
+      transform: Transform[A, B]
+  ): Pull[F, B] =
     new Pull[F, B] {
       def pull: F[B] = F.map(p.pull)(transform.apply)
     }

@@ -8,8 +8,8 @@ import tofu.syntax.monoidalK._
 
 trait Mid[F[_], A] {
   def apply(fa: F[A]): F[A]
-  @inline def attach(fa: F[A]): F[A]      = apply(fa)
-  
+  @inline def attach(fa: F[A]): F[A] = apply(fa)
+
   def compose(that: Mid[F, A]): Mid[F, A] = that.andThen(this)
   def andThen(that: Mid[F, A]): Mid[F, A] = MidCompose(Chain(this, that))
 }
@@ -17,6 +17,14 @@ trait Mid[F[_], A] {
 object Mid extends MidInstances {
   def point[F[_]]: Point[Mid[F, *]] = new Point[Mid[F, *]] {
     override def point[A]: Mid[F, A] = x => x
+  }
+
+  /** when unification falls */
+  def attach[U[f[_]]: ApplyK, F[_]](up: U[Mid[F, *]])(alg: U[F]): U[F] = up.attach(alg)
+
+  implicit final class TofuMidAlgebraSyntax[F[_], U[f[_]]](private val self: U[Mid[F, *]]) extends AnyVal {
+    def attach(alg: U[F])(implicit U: ApplyK[U]): U[F] =
+      U.map2K(alg, self)(funK(t2k => t2k.second(t2k.first)))
   }
 
   private final case class MidCompose[F[_], A](elems: Chain[Mid[F, A]]) extends Mid[F, A] {

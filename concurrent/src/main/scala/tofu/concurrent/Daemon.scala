@@ -41,8 +41,8 @@ object Daemonic extends DaemonicInstances {
   /** instance making safe Daemons that throws exception on joining canceled fiber */
   implicit def safeInstance[F[_]: Start: TryableDeferreds: BracketThrow]: Daemonic[F, Throwable] =
     mkInstance[F, Throwable](
-      Function2K[Fiber[F, *], Promise[F, Throwable, *], Daemon[F, Throwable, *]](
-        (fib, promise) => new Daemon.SafeImpl(fib, promise)
+      Function2K[Fiber[F, *], Promise[F, Throwable, *], Daemon[F, Throwable, *]]((fib, promise) =>
+        new Daemon.SafeImpl(fib, promise)
       )
     )
 
@@ -154,12 +154,11 @@ object Actor {
   def spawn[F[_]: MVars: Monad: Daemonic[*[_], E], E, A](behavior: Behavior[F, A]): F[Actor[F, E, A]] =
     for {
       mvar <- MakeMVar[F, F].empty[A]
-      daemon: Daemon[F, E, Void] <- Daemon.iterate(behavior)(
-                                     b =>
-                                       for {
-                                         a <- mvar.take
-                                         r <- behavior.receive(a)
-                                       } yield r.getOrElse(b)
+      daemon: Daemon[F, E, Void] <- Daemon.iterate(behavior)(b =>
+                                     for {
+                                       a <- mvar.take
+                                       r <- behavior.receive(a)
+                                     } yield r.getOrElse(b)
                                    )
     } yield new Actor(mvar, daemon)
 

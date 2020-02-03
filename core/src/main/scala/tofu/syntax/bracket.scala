@@ -41,6 +41,7 @@ object bracket {
   }
 
   implicit final class TofuBracketEitherTOps[F[_], E, A](private val e: EitherT[F, E, A]) extends AnyVal {
+
     /** special bracket form that could handle both Either logic error and F underlying error */
     def bracketCaseErr[U, B](
         use: A => EitherT[F, E, B]
@@ -51,18 +52,17 @@ object bracket {
           case Left(err) => bracket.pure(err.asLeft[B])
           //case logic error
           case Right(res) => use(res).leftSemiflatMap(e => release(res, ExitCase.error(e.asLeft[U])) as e).value
-        }(
-          (res, cas) =>
-            res match {
-              case Left(_) => bracket.unit
-              case Right(v) =>
-                cas match {
-                  //case F underlying error
-                  case ExitCase.Error(e)  => release(v, ExitCase.error(e.asRight[E]))
-                  case ExitCase.Canceled  => release(v, ExitCase.Canceled)
-                  case ExitCase.Completed => release(v, ExitCase.Completed)
-                }
-            }
+        }((res, cas) =>
+          res match {
+            case Left(_) => bracket.unit
+            case Right(v) =>
+              cas match {
+                //case F underlying error
+                case ExitCase.Error(e)  => release(v, ExitCase.error(e.asRight[E]))
+                case ExitCase.Canceled  => release(v, ExitCase.Canceled)
+                case ExitCase.Completed => release(v, ExitCase.Completed)
+              }
+          }
         )
       )
 

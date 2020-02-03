@@ -6,6 +6,7 @@ import scala.reflect.internal.SymbolTable
 import scala.reflect.macros.{blackbox, whitebox}
 
 object GenEquivalent {
+
   /** Generate an [[Equivalent]] between a case class `S` and its unique field of type `A`. */
   def apply[S, A]: Equivalent[S, A] = macro GenEquivalentImpl.genEquiv_impl[S, A]
 
@@ -38,8 +39,8 @@ sealed abstract class GenEquivalentImplBase {
 
     if (sTpe.typeSymbol.isModuleClass) {
       val table = c.universe.asInstanceOf[SymbolTable]
-      val tree = table.gen
-      val obj = tree.mkAttributedQualifier(sTpe.asInstanceOf[tree.global.Type]).asInstanceOf[Tree]
+      val tree  = table.gen
+      val obj   = tree.mkAttributedQualifier(sTpe.asInstanceOf[tree.global.Type]).asInstanceOf[Tree]
       q"""
         _root_.tofu.optics.Equivalent[${sTpe}, Unit](Function.const(()))(Function.const(${obj}))
       """
@@ -50,7 +51,7 @@ sealed abstract class GenEquivalentImplBase {
           q"""
             _root_.tofu.optics.Equivalent[${sTpe}, Unit](Function.const(()))(Function.const(${sTpeSym}()))
           """
-        case _   => fail(s"$sTpe needs to be a case class with no accessor or an object.")
+        case _ => fail(s"$sTpe needs to be a case class with no accessor or an object.")
       }
     }
   }
@@ -64,8 +65,10 @@ class GenEquivalentImpl(override val c: blackbox.Context) extends GenEquivalentI
 
     val fieldMethod = caseAccessorsOf[S] match {
       case m :: Nil => m
-      case Nil      => fail(s"Cannot find a case class accessor for $sTpe, $sTpe needs to be a case class with a single accessor.")
-      case _        => fail(s"Found several case class accessor for $sTpe, $sTpe needs to be a case class with a single accessor.")
+      case Nil =>
+        fail(s"Cannot find a case class accessor for $sTpe, $sTpe needs to be a case class with a single accessor.")
+      case _ =>
+        fail(s"Found several case class accessor for $sTpe, $sTpe needs to be a case class with a single accessor.")
     }
 
     val sTpeSym = sTpe.typeSymbol.companion
@@ -111,9 +114,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
     if (!sTpeSym.isCaseClass)
       fail(s"$sTpe is not a case class.")
 
-    val paramLists = sTpe
-      .decls
-      .collectFirst { case m: MethodSymbol if m.isPrimaryConstructor => m }
+    val paramLists = sTpe.decls.collectFirst { case m: MethodSymbol if m.isPrimaryConstructor => m }
       .getOrElse(fail(s"Unable to discern primary constructor for $sTpe."))
       .paramLists
 
@@ -134,7 +135,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
       case params :: Nil =>
         var readField = List.empty[Tree]
         var readTuple = List.empty[Tree]
-        var types = List.empty[Type]
+        var types     = List.empty[Type]
         for ((param, i) <- params.zipWithIndex.reverse) {
           val (pName, pType) = nameAndType(sTpe, param)
           readField ::= q"s.$pName"

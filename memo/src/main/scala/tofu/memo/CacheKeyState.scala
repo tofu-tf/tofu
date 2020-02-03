@@ -37,19 +37,21 @@ object CacheKeyState {
     apply[I, F, K, A](keyMethod)(CacheState(valueMethod, _))
 
   def apply[I[_]: Functor, F[_]: Monad: Guarantee, K, A](keyMethod: CacheMethod)(
-      factory: CacheVal[A] => F[CacheState[F, A]])(implicit refs: MakeRef[I, F],
-                                                   mvars: MakeMVar[I, F]): I[CacheKeyState[F, K, A]] =
+      factory: CacheVal[A] => F[CacheState[F, A]]
+  )(implicit refs: MakeRef[I, F], mvars: MakeMVar[I, F]): I[CacheKeyState[F, K, A]] =
     keyMethod match {
       case CacheMethod.MVar => mvar[I, F, K, A](factory)
       case CacheMethod.Ref  => ref[I, F, K, A](factory)
     }
 
-  def mvar[I[_]: Functor, F[_]: Monad: Guarantee, K, A](factory: CacheVal[A] => F[CacheState[F, A]])(
-      implicit mvars: MakeMVar[I, F]): I[CacheKeyState[F, K, A]] =
+  def mvar[I[_]: Functor, F[_]: Monad: Guarantee, K, A](
+      factory: CacheVal[A] => F[CacheState[F, A]]
+  )(implicit mvars: MakeMVar[I, F]): I[CacheKeyState[F, K, A]] =
     mvars.mvarOf[CacheMap[F, K, A]](Map.empty).map(CacheKeyStateMVar(_, factory))
 
-  def ref[I[_]: Functor, F[_]: Monad, K, A](factory: CacheVal[A] => F[CacheState[F, A]])(
-      implicit refs: MakeRef[I, F]): I[CacheKeyState[F, K, A]] =
+  def ref[I[_]: Functor, F[_]: Monad, K, A](
+      factory: CacheVal[A] => F[CacheState[F, A]]
+  )(implicit refs: MakeRef[I, F]): I[CacheKeyState[F, K, A]] =
     refs.refOf[CacheMap[F, K, A]](Map.empty).map(CacheKeyStateRef(_, factory))
 }
 
@@ -67,7 +69,8 @@ final case class CacheKeyStateMVar[F[_]: Monad: Guarantee, K, A](
                   for {
                     (newVal, res) <- op.update(CacheVal.none)
                     _ <- newVal.fold(state.put(freshMap))((_, _) =>
-                          factory(newVal) >>= (cell => state.put(freshMap + (key -> cell))))
+                          factory(newVal) >>= (cell => state.put(freshMap + (key -> cell)))
+                        )
                   } yield res
                 }
               }))

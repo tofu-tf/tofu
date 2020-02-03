@@ -2,7 +2,7 @@ package tofu.env
 
 import monix.eval.Task
 
-private [env] trait EnvSyntax {
+private[env] trait EnvSyntax {
   implicit def toEnvOptionOps[E, A](env: Env[E, Option[A]]): EnvOptionOps[E, A] = new EnvOptionOps(env)
 }
 

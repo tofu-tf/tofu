@@ -13,7 +13,7 @@ import cats.syntax.either._
 
 object Flux extends FluxInstances {
   trait FluxTag extends Any
-  type Base = Any {type FluxOpaque}
+  type Base = Any { type FluxOpaque }
 
   type FluxRepr[+F[_], +G[_], +A] <: Base with FluxTag
 

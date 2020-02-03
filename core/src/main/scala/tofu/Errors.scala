@@ -11,6 +11,7 @@ import scala.reflect.ClassTag
 import cats.data.EitherT
 import cats.Monad
 import cats.data.OptionT
+import tofu.lift.Lift
 
 trait Raise[F[_], E] extends Raise.ContravariantRaise[F, E] {
   def raise[A](err: E): F[A]
@@ -27,7 +28,7 @@ sealed class RaiseInstances {
     new FromPrism[F, E, E1, Raise, Upcast] with RaisePrism[F, E, E1]
 }
 
-trait RestoreTo[F[_], G[_]] {
+trait RestoreTo[F[_], G[_]] extends Lift[G, F] {
   def restore[A](fa: F[A]): G[Option[A]]
 }
 
@@ -89,8 +90,8 @@ trait ErrorsTo[F[_], G[_], E] extends Raise[F, E] with HandleTo[F, G, E]
 
 object ErrorsTo extends ErrorsToInstanceChain[ErrorsTo]
 
-trait ErrorsToInstanceChain[TC[f[_], g[_], e] >: ErrorsTo[f, g, e]] 
-  extends ErrorsInstanceChain[Lambda[(f[_], e) => TC[f, f, e]]]  {
+trait ErrorsToInstanceChain[TC[f[_], g[_], e] >: ErrorsTo[f, g, e]]
+    extends ErrorsInstanceChain[Lambda[(f[_], e) => TC[f, f, e]]] {
   final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): TC[EitherT[F, E, *], F, E] =
     new EitherTErrorsTo[F, E]
   final implicit def optionTIntance[F[_]](implicit F: Monad[F]): TC[OptionT[F, *], F, Unit] = new OptionTErrorsTo[F]
@@ -120,5 +121,6 @@ trait ErrorInstances {
         ReaderT(r => F.tryHandleWith(fa.run(r))(e => f(e).map(_.run(r))))
       def restore[A](fa: ReaderT[F, R, A]): ReaderT[F, R, Option[A]] =
         ReaderT(r => F.restore(fa.run(r)))
+      def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
     }
 }

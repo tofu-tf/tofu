@@ -2,7 +2,7 @@ package tofu
 
 import cats.effect.{Bracket, ExitCase}
 
-/** Bracket-like typeclass allowing to understand if operation was succeded
+/** Bracket-like typeclass allowing to understand if operation was succeed
   * @tparam F effect process */
 trait Guarantee[F[_]] {
 

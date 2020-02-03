@@ -23,7 +23,6 @@ object Exit {
     override def exitCase = ExitCase.Completed
   }
 
-
   private[this] object exitInstanceAny extends Traverse[Exit[Any, *]] with ApplicativeZip[Exit[Any, *]] {
     def traverse[G[_], A, B](fa: Exit[Any, A])(f: A => G[B])(implicit G: Applicative[G]): G[Exit[Any, B]] =
       fa match {

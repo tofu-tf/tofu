@@ -1,6 +1,6 @@
 package tofu.memo
 
-final case class CacheControl(invalidated: InvalidationTS) extends CacheKeyControl[Any]{
+final case class CacheControl(invalidated: InvalidationTS) extends CacheKeyControl[Any] {
   override def keyInvalidated(key: Any): InvalidationTS = invalidated
 }
 
@@ -14,6 +14,6 @@ object InvalidationTS {
   val zero = InvalidationTS(0L)
 }
 
-trait CacheKeyControl[-K]{
+trait CacheKeyControl[-K] {
   def keyInvalidated(key: K): InvalidationTS
 }
