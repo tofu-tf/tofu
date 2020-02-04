@@ -8,7 +8,7 @@ scala:
 jdk:
   - openjdk8
 script:
-  - sbt check
+  - sbt checkfmt
   - sbt compile
   - sbt test
 
