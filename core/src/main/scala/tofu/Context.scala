@@ -23,9 +23,9 @@ object Context extends ContextInstances {
   type Aux[F[_], C] = HasContext[F, C]
 
   def const[F[_]: Applicative, C](c: C): HasContext[F, C] = new Context[F] {
-    def functor: Functor[F] = Functor[F]
     type Ctx = C
-    def context: F[C] = Applicative[F].pure(c)
+    val functor: Functor[F] = Functor[F]
+    val context: F[C]       = Applicative[F].pure(c)
   }
 }
 
