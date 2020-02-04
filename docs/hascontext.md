@@ -6,11 +6,11 @@ title: Learning HasContext
 ### What if you don't need Env
 
 Env is a powerful monad, but what if you're sure that you don't need it?
-You can still use convenient Tofu concepts to work with your own Environment (Context).  
+You can still use convenient Tofu concepts to work with your own Environment (`Context`).  
 
 #### Usage example and a short use case description  
 
-The short story long, it is possible to use ReaderT:
+The short story long, it is possible to use `ReaderT`:
  
 ```scala mdoc
 import tofu.optics._
@@ -69,5 +69,45 @@ def age[F[_]: HasContext[*[_], MyEnv]](implicit m: MyEnv Extract Metadata): F[In
   Context[F].extract(m).ask(_.age)
 
 // ~voilà
-program[ReaderT[Option, MyEnv, *]].run(MyEnv(User(0, "Tofu"), Metadata(60, 18))) //> Some(Tofu: 18): Option[String]
+program[ReaderT[Option, MyEnv, *]]
+  .run(MyEnv(User(0, "Tofu"), Metadata(60, 18))) //> Some(Tofu: 18): Option[String]
+```
+
+It is also possible to do define some `Context` explicitly without having a need in `Env` or `ReaderT` monads:
+
+```scala mdoc
+import tofu.optics._
+
+import cats.syntax.apply._
+import cats.instances.option._
+import cats._
+
+// defining our own Env that stores a User and some related Metadata
+case class User(id: Int, name: String)
+case class Metadata(height: Double, age: Int)
+case class MyEnv(user: User, md: Metadata)
+
+// defining extractors
+implicit val userExtractor: Extract[MyEnv, User]   = _.user
+implicit val mdExtractor: Extract[MyEnv, Metadata] = _.md
+
+// what if we don't need or don't know what ReaderT is
+// we can define a const Context than
+implicit val ctx: HasContext[Option, MyEnv] =
+  Context.const[Option, MyEnv](MyEnv(User(0, "Tofu"), Metadata(60, 18)))
+
+// it is still possible to define a program that only has a context
+def program[F[_]: Apply: HasContext[*[_], MyEnv]]: F[String] =
+  (name[F], age[F]).mapN { (name, age) => s"$name: $age" }
+
+// and all the functions that were called inside a program
+// have on demand and only necessary extractors
+def name[F[_]: HasContext[*[_], MyEnv]](implicit u: MyEnv Extract User): F[String] =
+  Context[F].extract(u).ask(_.name)
+
+def age[F[_]: HasContext[*[_], MyEnv]](implicit m: MyEnv Extract Metadata): F[Int] =
+  Context[F].extract(m).ask(_.age)
+
+// ~voilà
+program[Option] //> Some(Tofu: 18): Option[String]
 ```
