@@ -21,6 +21,12 @@ trait Context[F[_]] {
 object Context extends ContextInstances {
   def apply[F[_]](implicit ctx: Context[F]): HasContext[F, ctx.Ctx] = ctx
   type Aux[F[_], C] = HasContext[F, C]
+
+  def const[F[_]: Applicative, C](c: C): HasContext[F, C] = new Context[F] {
+    def functor: Functor[F] = Functor[F]
+    type Ctx = C
+    def context: F[C] = Applicative[F].pure(c)
+  }
 }
 
 trait ContextInstances extends LocalInstances[λ[(f[_], g[_], r) => HasContext[f, r]]]

@@ -52,8 +52,7 @@ case class User(id: Int, name: String)
 case class Metadata(height: Double, age: Int)
 case class MyEnv(user: User, md: Metadata)
 
-// defining an extractor, extractor is a common lens that you can read about
-// in a paragraph about lenses
+// defining extractors
 implicit val userExtractor: Extract[MyEnv, User]   = _.user
 implicit val mdExtractor: Extract[MyEnv, Metadata] = _.md
 
