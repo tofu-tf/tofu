@@ -84,18 +84,6 @@ object Handle extends HandleInstances with DataEffectComp[Handle] with ErrorsIns
   }
 }
 
-object HasContext {
-  def apply[F[_], C](implicit hc: HasContext[F, C]): HasContext[F, C] = hc
-}
-
-object HasLocal {
-  def apply[F[_], C](implicit hl: HasLocal[F, C]): HasLocal[F, C] = hl
-}
-
-object HasContextRun {
-  def apply[F[_], G[_], C](implicit hcr: HasContextRun[F, G, C]): HasContextRun[F, G, C] = hcr
-}
-
 sealed class HandleInstances {
   final implicit def handleDowncast[F[_], E, E1](implicit h: Handle[F, E], prism: Downcast[E, E1]): Handle[F, E1] =
     new FromPrism[F, E, E1, Handle, Downcast] with HandlePrism[F, E, E1]
@@ -122,7 +110,7 @@ trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, 
 object Errors extends ErrorInstances with DataEffectComp[Errors] with ErrorsInstanceChain[Errors]
 
 trait ErrorsInstanceChain[TC[f[_], e] >: Errors[f, e]] {
-  final implicit def errorByCatsError[F[_] : ApplicativeError[*[_], E], E, E1: ClassTag : * <:< E]: TC[F, E1] =
+  final implicit def errorByCatsError[F[_]: ApplicativeError[*[_], E], E, E1: ClassTag: * <:< E]: TC[F, E1] =
     new HandleApErr[F, E, E1] with RaiseAppApErr[F, E, E1] with Errors[F, E1]
 }
 
@@ -143,4 +131,16 @@ trait ErrorInstances {
 
       def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
     }
+}
+
+object HasContext {
+  def apply[F[_], C](implicit hc: HasContext[F, C]): HasContext[F, C] = hc
+}
+
+object HasLocal {
+  def apply[F[_], C](implicit hl: HasLocal[F, C]): HasLocal[F, C] = hl
+}
+
+object HasContextRun {
+  def apply[F[_], G[_], C](implicit hcr: HasContextRun[F, G, C]): HasContextRun[F, G, C] = hcr
 }
