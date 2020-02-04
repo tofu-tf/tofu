@@ -43,11 +43,11 @@ trait Restore[F[_]] extends RestoreTo[F, F] {
 trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
   def handleWith[A](fa: F[A])(f: E => G[A]): G[A]
 
-  def handle[A](fa: F[A])(f: E => A)(implicit G: Applicative[G]): G[A] =
-    handleWith(fa)(e => G.pure(f(e)))
-
   def attempt[A](fa: F[A])(implicit F: Functor[F], G: Applicative[G]): G[Either[E, A]] =
     handle(F.map(fa)(_.asRight[E]))(_.asLeft)
+
+  def handle[A](fa: F[A])(f: E => A)(implicit G: Applicative[G]): G[A] =
+    handleWith(fa)(e => G.pure(f(e)))
 }
 
 object HandleTo extends ErrorsToInstanceChain[HandleTo]
@@ -59,16 +59,16 @@ trait Handle[F[_], E] extends HandleTo[F, F, E] with Restore[F] {
   def recover[A](fa: F[A])(pf: PartialFunction[E, A])(implicit F: Applicative[F]): F[A] =
     tryHandle(fa)(pf.lift)
 
-  def handleWith[A](fa: F[A])(f: E => F[A]): F[A] =
-    tryHandleWith(fa)(e => Some(f(e)))
+  def tryHandle[A](fa: F[A])(f: E => Option[A])(implicit F: Applicative[F]): F[A] =
+    tryHandleWith(fa)(e => f(e).map(F.pure))
 
   def recoverWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A] =
     tryHandleWith(fa)(pf.lift)
 
-  def tryHandle[A](fa: F[A])(f: E => Option[A])(implicit F: Applicative[F]): F[A] =
-    tryHandleWith(fa)(e => f(e).map(F.pure))
-
   def restoreWith[A](fa: F[A])(ra: => F[A]): F[A] = handleWith(fa)(_ => ra)
+
+  def handleWith[A](fa: F[A])(f: E => F[A]): F[A] =
+    tryHandleWith(fa)(e => Some(f(e)))
 }
 
 object Handle extends HandleInstances with DataEffectComp[Handle] with ErrorsInstanceChain[Handle] {
