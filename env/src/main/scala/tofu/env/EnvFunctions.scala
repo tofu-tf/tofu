@@ -54,7 +54,7 @@ private[env] trait EnvFunctions extends EnvProducts with EnvTraversing with EnvR
   def fromReaderT[E, A](reader: ReaderT[Task, E, A]): Env[E, A] =
     Env(reader.run)
   def fromTry[E, A](t: Try[A]): Env[E, A]                  = fromTask(Task.fromTry(t))
-  def fromEither[E, A](e: Either[Throwable, A]): Env[E, A] = fromTask(Task.fromTry(catsSyntaxEither(e).toTry))
+  def fromEither[E, A](e: Either[Throwable, A]): Env[E, A] = fromTask(Task.fromTry(e.toTry))
   def fromFuture[E, A](future: Future[A]): Env[E, A]       = EnvTask(Task.fromFuture(future))
   def fromTryFunc[E, A](ft: E => Try[A]): Env[E, A] =
     Env(ctx => Task.fromTry(ft(ctx)))

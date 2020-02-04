@@ -51,7 +51,7 @@ sealed trait Env[E, +A] {
   def foreachL(f: A => Unit)(ctx: E): Task[Unit] = run(ctx).foreachL(f)
   def foreachEnv(f: A => Unit): Env[E, Unit]     = mapTask(_.foreachL(f))
   def runOnComplete(f: Try[A] => Unit)(ctx: E)(implicit s: Scheduler): Cancelable =
-    run(ctx).runAsync(e => f(catsSyntaxEither(e).toTry))
+    run(ctx).runAsync(e => f(e.toTry))
 
   /** convenient alias boosting inference */
   def local(f: E => E): Env[E, A]        = localP(f)

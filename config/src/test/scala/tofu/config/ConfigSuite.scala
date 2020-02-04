@@ -66,9 +66,9 @@ object ConfigSuite {
 
   val cfg = ConfigFactory.parseResources("suite.conf")
 
-  def tryParse[A: Configurable](path: String) =
-    typesafe.syncParseValue[A](cfg.getValue(path)).right.get
+  def tryParse[A: Configurable](path: String): A =
+    typesafe.syncParseValue[A](cfg.getValue(path)).getOrElse(throw new RuntimeException("no parse"))
 
-  def fallenParse[A: Configurable](path: String) =
+  def fallenParse[A: Configurable](path: String): Either[A, MessageList] =
     typesafe.syncParseValue[A](cfg.getValue(path)).swap
 }
