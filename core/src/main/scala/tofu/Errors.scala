@@ -1,17 +1,14 @@
 package tofu
 
-import cats.data.ReaderT
+import cats.data.{EitherT, OptionT, ReaderT}
 import cats.syntax.either._
-import cats.{Applicative, ApplicativeError, Functor, Id}
-import errorInstances._
-import internal.{CachedMatcher, DataEffectComp}
+import cats.{Applicative, ApplicativeError, Functor, Id, Monad}
+import tofu.errorInstances._
+import tofu.internal.{CachedMatcher, DataEffectComp}
+import tofu.lift.Lift
 import tofu.optics.{Downcast, Subset, Upcast}
 
 import scala.reflect.ClassTag
-import cats.data.EitherT
-import cats.Monad
-import cats.data.OptionT
-import tofu.lift.Lift
 
 trait Raise[F[_], E] extends Raise.ContravariantRaise[F, E] {
   def raise[A](err: E): F[A]
