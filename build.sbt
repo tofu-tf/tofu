@@ -18,7 +18,7 @@ val macros = Keys.libraryDependencies ++= {
     case 13 => Seq(scalaOrganization.value % "scala-reflect" % scalaVersion.value)
     case 12 =>
       Seq(
-        compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
+        compilerPlugin(macroParadise),
         scalaOrganization.value % "scala-reflect" % scalaVersion.value
       )
   }
@@ -30,14 +30,13 @@ lazy val defaultSettings = Seq(
   setModuleName,
   experimental,
   defaultScalacOptions,
-  libraryDependencies += compilerPlugin("org.typelevel" %% "kind-projector"     % "0.11.0" cross CrossVersion.patch),
-  libraryDependencies += compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
-  libraryDependencies += scalatest,
-  libraryDependencies ++=
-    Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % Version.silencer cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % Version.silencer % Provided cross CrossVersion.full
-    )
+  libraryDependencies ++= Seq(
+    compilerPlugin(kindProjector),
+    compilerPlugin(betterMonadicFor),
+    compilerPlugin(silencerPlugin),
+    silencerLib,
+    scalatest
+  )
 ) ++ publishSettings ++ scala213Options ++ simulacrumOptions
 
 moduleName := "tofu"

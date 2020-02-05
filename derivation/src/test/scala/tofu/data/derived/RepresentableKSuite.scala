@@ -11,7 +11,7 @@ import tofu.data.Embedded
 import tofu.syntax.functionK.funK
 import cats.tagless.syntax.functorK._
 import cats.tagless.syntax.semigroupalK._
-import org.manatki.derevo.derive
+import derevo.derive
 import tofu.higherKind.derived.representableK
 import tofu.syntax.embed._
 

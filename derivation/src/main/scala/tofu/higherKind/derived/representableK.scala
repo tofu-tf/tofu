@@ -1,6 +1,7 @@
 package tofu.higherKind.derived
-import org.manatki.derevo.{Derevo, DerivationK2, delegating}
+import derevo.{Derevo, delegating}
 import tofu.higherKind.RepresentableK
+import derevo.DerivationK2
 
 @delegating("tofu.higherKind.derived.genRepresentableK")
 object representableK extends DerivationK2[RepresentableK] {

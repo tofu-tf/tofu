@@ -2,7 +2,7 @@ package tofu.data.derived
 
 import org.scalatest.FlatSpec
 import cats.syntax.option._
-import org.manatki.derevo.derive
+import derevo.derive
 import MergeSuite.{Bar, Foo}
 
 class MergeSuite extends FlatSpec {

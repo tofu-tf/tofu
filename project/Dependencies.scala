@@ -19,15 +19,13 @@ object Dependencies {
 
     val enumeratum = "1.5.15"
 
-    val derevo = "0.10.5"
+    val derevo = "0.11.0"
 
     val slf4j = "1.7.30"
 
     val fs2 = "1.0.5"
 
     val logback = "1.2.3"
-
-    val simulacrum = "1.0.0"
 
     val monix = "3.1.0"
 
@@ -37,11 +35,20 @@ object Dependencies {
 
     val typesafeConfig = "1.4.0"
 
-    val silencer = "1.4.4"
-
     val zio = "1.0.0-RC17"
 
     val zioCats = "2.0.0.0-RC10"
+
+    // Compile time only
+    val macroParadise = "2.1.1"
+
+    val simulacrum = "1.0.0"
+
+    val silencer = "1.4.4"
+
+    val kindProjector = "0.11.0"
+
+    val betterMonadicFor = "0.3.1"
   }
 
   val catsCore        = "org.typelevel"              %% "cats-core"           % Version.cats
@@ -50,7 +57,6 @@ object Dependencies {
   val alleycats       = "org.typelevel"              %% "alleycats-core"      % Version.cats
   val catsEffect      = "org.typelevel"              %% "cats-effect"         % Version.catsEffect
   val monix           = "io.monix"                   %% "monix"               % Version.monix
-  val simulacrum      = "org.typelevel"              %% "simulacrum"          % Version.simulacrum
   val logback         = "ch.qos.logback"             % "logback-classic"      % Version.logback
   val slf4j           = "org.slf4j"                  % "slf4j-simple"         % Version.slf4j % Provided
   val circeCore       = "io.circe"                   %% "circe-core"          % Version.circe
@@ -68,4 +74,12 @@ object Dependencies {
   val zio             = "dev.zio"                    %% "zio"                 % Version.zio
   val zioCats         = "dev.zio"                    %% "zio-interop-cats"    % Version.zioCats
   val scalatest       = "org.scalatest"              %% "scalatest"           % Version.scalatest % Test
+
+  // Compile-time only
+  val macroParadise    = "org.scalamacros" % "paradise"            % Version.macroParadise cross CrossVersion.patch
+  val kindProjector    = "org.typelevel"   %% "kind-projector"     % Version.kindProjector cross CrossVersion.patch
+  val simulacrum       = "org.typelevel"   %% "simulacrum"         % Version.simulacrum
+  val betterMonadicFor = "com.olegpy"      %% "better-monadic-for" % Version.betterMonadicFor
+  val silencerPlugin   = "com.github.ghik" % "silencer-plugin"     % Version.silencer cross CrossVersion.full
+  val silencerLib      = "com.github.ghik" % "silencer-lib"        % Version.silencer % Provided cross CrossVersion.full
 }

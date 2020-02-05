@@ -1,7 +1,7 @@
 package tofu.logging
 package derivation
 
-import org.manatki.derevo.derive
+import derevo.derive
 import org.scalatest.{FlatSpec, Matchers}
 
 class DerivedLoggableSuite extends FlatSpec with Matchers {
