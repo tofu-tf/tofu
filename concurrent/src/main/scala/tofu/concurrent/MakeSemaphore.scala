@@ -7,7 +7,7 @@ trait MakeSemaphore[I[_], F[_]] {
   def semaphore(count: Long): I[Semaphore[F]]
 }
 
-object Semaphores{
+object Semaphores {
   def apply[F[_]](implicit agents: Semaphores[F]): MakeSemaphore.Applier[F, F] = new MakeSemaphore.Applier[F, F](agents)
 }
 

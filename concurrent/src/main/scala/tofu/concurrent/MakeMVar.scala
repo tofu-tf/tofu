@@ -8,7 +8,7 @@ trait MakeMVar[I[_], F[_]] {
   def mvarEmpty[A]: I[MVar[F, A]]
 }
 
-object MVars{
+object MVars {
   def apply[F[_]](implicit agents: MVars[F]): MakeMVar.Applier[F, F] = new MakeMVar.Applier[F, F](agents)
 }
 

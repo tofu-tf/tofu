@@ -7,7 +7,7 @@ trait MakeRef[I[_], F[_]] {
   def refOf[A](a: A): I[Ref[F, A]]
 }
 
-object Refs{
+object Refs {
   def apply[F[_]](implicit agents: Refs[F]): MakeRef.Applier[F, F] = new MakeRef.Applier[F, F](agents)
 }
 
