@@ -76,10 +76,14 @@ trait MakeQVar[I[_], F[_]] {
   def qvarEmpty[A]: I[QVar[F, A]]
 }
 
+object QVars {
+  def apply[F[_]](implicit qvars: QVars[F]): MakeQVar.Applier[F, F] = new MakeQVar.Applier(qvars)
+}
+
 object MakeQVar {
   def apply[I[_], F[_]](implicit mkvar: MakeQVar[I, F]) = new Applier[I, F](mkvar)
 
-  class Applier[I[_], F[_]](val makeMVar: MakeQVar[I, F]) extends AnyVal {
+  final class Applier[I[_], F[_]](private val makeMVar: MakeQVar[I, F]) extends AnyVal {
     def empty[A]: I[QVar[F, A]]    = makeMVar.qvarEmpty[A]
     def of[A](a: A): I[QVar[F, A]] = makeMVar.qvarOf(a)
   }
