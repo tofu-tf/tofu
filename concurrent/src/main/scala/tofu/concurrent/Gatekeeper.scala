@@ -107,7 +107,6 @@ object MakeMutex {
     new MakeGatekeeper.Maker(maker)
 }
 
-
 object MakeGatekeeper {
   def apply[I[_], F[_]]: Applier[I, F]                                           = new Applier[I, F](true)
   def mk[I[_], F[_], A](implicit maker: MakeGatekeeper[I, F, A]): Maker[I, F, A] = new Maker[I, F, A](maker)
