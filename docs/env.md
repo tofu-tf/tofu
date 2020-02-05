@@ -60,7 +60,7 @@ import monix.eval.Task
 
 import scala.concurrent.duration._
 
-object EnvExamples extends App {
+object EnvExamples extends scala.App {
 
   /** This is sample context for our computation  */
   case class MyContext(userId: String)

@@ -11,6 +11,7 @@ script:
   - sbt checkfmt
   - sbt compile
   - sbt test
+  - sbt docs/mdoc
 
 cache:
   directories:
