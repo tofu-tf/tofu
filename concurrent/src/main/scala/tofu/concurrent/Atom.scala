@@ -99,7 +99,7 @@ trait MakeAtom[I[_], F[_]] {
 object MakeAtom {
   def apply[I[_], F[_]](implicit makeAtom: MakeAtom[I, F]) = new Applier[I, F](makeAtom)
 
-  class Applier[I[_], F[_]](val makeAtom: MakeAtom[I, F]) extends AnyVal {
+  final class Applier[I[_], F[_]](private val makeAtom: MakeAtom[I, F]) extends AnyVal {
     def of[A](a: A): I[Atom[F, A]] = makeAtom.atom(a)
   }
 

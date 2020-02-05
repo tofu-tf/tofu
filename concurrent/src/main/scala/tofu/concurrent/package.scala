@@ -20,6 +20,7 @@ package object concurrent {
   type QVars[F[_]]      = MakeQVar[F, F]
   type Stoplights[F[_]] = MakeStoplight[F, F]
   type Mutexes[F[_]]    = MakeMutex[F, F]
+  type Agents[F[_]]     = MakeAgent[F, F]
 
   def newRef[F[_]: Refs]              = MakeRef[F, F]
   def newSemaphore[F[_]: Semaphores]  = MakeSemaphore[F, F]

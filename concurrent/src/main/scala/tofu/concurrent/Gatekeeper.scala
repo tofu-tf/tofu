@@ -87,11 +87,37 @@ trait MakeGatekeeper[I[_], F[_], A] {
   def gatekeeper(available: A): I[Gatekeeper[F, A]]
 }
 
+object Stoplights {
+  def apply[F[_]](implicit stoplights: Stoplights[F]): MakeGatekeeper.Maker[F, F, Long] =
+    new MakeGatekeeper.Maker(stoplights)
+}
+
+object Mutexes {
+  def apply[F[_]](implicit mutexes: Mutexes[F]): MakeGatekeeper.Maker[F, F, Boolean] =
+    new MakeGatekeeper.Maker(mutexes)
+}
+
+object MakeStoplight {
+  def apply[I[_], F[_]](implicit maker: MakeStoplight[I, F]): MakeGatekeeper.Maker[I, F, Long] =
+    new MakeGatekeeper.Maker(maker)
+}
+
+object MakeMutex {
+  def apply[I[_], F[_]](implicit maker: MakeMutex[I, F]): MakeGatekeeper.Maker[I, F, Boolean] =
+    new MakeGatekeeper.Maker(maker)
+}
+
+
 object MakeGatekeeper {
-  def apply[I[_], F[_]] = new Applier[I, F](true)
+  def apply[I[_], F[_]]: Applier[I, F]                                           = new Applier[I, F](true)
+  def mk[I[_], F[_], A](implicit maker: MakeGatekeeper[I, F, A]): Maker[I, F, A] = new Maker[I, F, A](maker)
 
   class Applier[I[_], F[_]](private val dummy: Boolean) extends AnyVal {
-    def of[A](count: A)(implicit mksem: MakeGatekeeper[I, F, A]): I[Gatekeeper[F, A]] = mksem.gatekeeper(count)
+    def of[A](count: A)(implicit maker: MakeGatekeeper[I, F, A]): I[Gatekeeper[F, A]] = maker.gatekeeper(count)
+  }
+
+  class Maker[I[_], F[_], A](private val maker: MakeGatekeeper[I, F, A]) extends AnyVal {
+    def of(count: A): I[Gatekeeper[F, A]] = maker.gatekeeper(count)
   }
 
   implicit def concurrentStoplight[I[_]: Sync, F[_]: Concurrent]: MakeStoplight[I, F] =

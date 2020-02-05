@@ -22,6 +22,8 @@ class ZioTofuConcurrentInstanceUIO[R, E] extends ZioTofuConcurrentInstance[Any, 
 
   def atom[A](a: A): ZIO[Any, Nothing, Atom[ZIO[R, E, *], A]] = Ref.make(a).map(ZioAtom(_))
 
+  def agentOf[A](a: A): ZIO[Any, Nothing, Agent[ZIO[R, E, *], A]] = RefM.make(a).map(ZioAgent(_))
+
   def daemonize[A](process: ZIO[R, E, A]): ZIO[R, E, Daemon[ZIO[R, E, *], Cause[E], A]] =
     process.fork.map(ZIODaemon(_))
 }
@@ -53,11 +55,20 @@ final case class ZioGatekeeper[R, E](r: zio.Semaphore, size: Long) extends Gatek
   def withPermitN[B](take: Long)(t: ZIO[R, E, B]): ZIO[R, E, B] = r.withPermits(take)(t)
 }
 
-case class ZIODaemon[R, E, A](fib: zio.Fiber[E, A]) extends Daemon[ZIO[R, E, *], Cause[E], A] {
+final case class ZIODaemon[R, E, A](fib: zio.Fiber[E, A]) extends Daemon[ZIO[R, E, *], Cause[E], A] {
   def join: ZIO[R, E, A]                         = fib.join
   def cancel: ZIO[R, E, Unit]                    = fib.interrupt.unit
   def poll: ZIO[R, E, Option[Exit[Cause[E], A]]] = fib.poll.map(_.map(exitMap))
   def exit: ZIO[R, E, Exit[Cause[E], A]]         = fib.await.map(exitMap)
+}
+
+final case class ZioAgent[R, E, A](refm: RefM[A]) extends Agent[ZIO[R, E, *], A] {
+  def get: ZIO[R, E, A]                                                                  = refm.get
+  def updateM(f: A => ZIO[R, E, A]): ZIO[R, E, A]                                        = refm.update(f)
+  def fireUpdateM(f: A => ZIO[R, E, A]): ZIO[R, E, Unit]                                 = refm.update(f).fork.unit
+  def modifyM[B](f: A => ZIO[R, E, (B, A)]): ZIO[R, E, B]                                = refm.modify(f)
+  def updateSomeM(f: PartialFunction[A, ZIO[R, E, A]]): ZIO[R, E, A]                     = refm.updateSome(f)
+  def modifySomeM[B](default: B)(f: PartialFunction[A, ZIO[R, E, (B, A)]]): ZIO[R, E, B] = refm.modifySome(default)(f)
 }
 
 object ZIODaemon {

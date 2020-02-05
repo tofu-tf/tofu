@@ -11,6 +11,10 @@ trait TryableDeferreds[F[_]] extends MakeDeferred[F, F] {
   def tryable[A]: F[TryableDeferred[F, A]]
 }
 
+object Deferreds{
+  def apply[F[_], A](implicit make: Deferreds[F]): F[Deferred[F, A]] = make.deferred[A]
+}
+
 object MakeDeferred extends PolymorphicMakeDefferedInstance {
   def apply[I[_], F[_], A](implicit make: MakeDeferred[I, F]): I[Deferred[F, A]] = make.deferred[A]
 
