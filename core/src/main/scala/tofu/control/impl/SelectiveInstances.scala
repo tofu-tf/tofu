@@ -1,5 +1,5 @@
 package tofu.control.impl
-import cats.data.{EitherT, OptionT, ReaderT, StateT, WriterT}
+import cats.data.{EitherT, OptionT, ReaderT, WriterT}
 import cats.instances.either._
 import cats.instances.option._
 import cats.instances.tuple._
