@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Learning HasContext · Tofu</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="### What if you don&#x27;t need Env"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Learning HasContext · Tofu"/><meta property="og:type" content="website"/><meta property="og:url" content="https://TinkoffCreditSystems.github.io/tofu/"/><meta property="og:description" content="### What if you don&#x27;t need Env"/><meta property="og:image" content="https://TinkoffCreditSystems.github.io/tofu/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://TinkoffCreditSystems.github.io/tofu/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/tofu/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/tofu/js/scrollSpy.js"></script><link rel="stylesheet" href="/tofu/css/main.css"/><script src="/tofu/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/tofu/"><img class="logo" src="/tofu/img/favicon.ico" alt="Tofu"/><h2 class="headerTitleWithLogo">Tofu</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/tofu/docs/start" target="_self">Docs</a></li><li class=""><a href="/tofu/api/index.html" target="_self">API</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Learning HasContext</h1></header><article><div><span><h3><a class="anchor" aria-hidden="true" id="what-if-you-dont-need-env"></a><a href="#what-if-you-dont-need-env" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What if you don't need Env</h3>
+<p>Env is a powerful monad, but what if you're sure that you don't need it?
+You can still use convenient Tofu concepts to work with your own Environment (<code>Context</code>).</p>
+<h4><a class="anchor" aria-hidden="true" id="usage-example-and-a-short-use-case-description"></a><a href="#usage-example-and-a-short-use-case-description" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage example and a short use case description</h4>
+<p>The short story long, it is possible to use <code>ReaderT</code>:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> tofu.optics._
+<span class="hljs-keyword">import</span> tofu._
+
+<span class="hljs-keyword">import</span> cats.instances.option._
+<span class="hljs-keyword">import</span> cats._
+<span class="hljs-keyword">import</span> cats.data.<span class="hljs-type">ReaderT</span>
+
+<span class="hljs-comment">// defining our own Env that stores some User</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span>(<span class="hljs-params">id: <span class="hljs-type">Int</span>, name: <span class="hljs-type">String</span></span>)</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyEnv</span>(<span class="hljs-params">user: <span class="hljs-type">User</span></span>)</span>
+
+<span class="hljs-comment">// defining an extractor, extractor is a common lens that you can read about</span>
+<span class="hljs-comment">// in a paragraph about lenses</span>
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> extractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">User</span>] = _.user
+<span class="hljs-comment">// extractor: Extract[MyEnv, User] = repl.Session$App$$anonfun$1@8706536</span>
+      
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">program</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]](<span class="hljs-keyword">implicit</span> u: <span class="hljs-type">MyEnv</span> <span class="hljs-type">Extract</span> <span class="hljs-type">User</span>): <span class="hljs-type">F</span>[<span class="hljs-type">String</span>] = 
+  <span class="hljs-type">Context</span>[<span class="hljs-type">F</span>].extract(u).ask(_.name)
+
+<span class="hljs-comment">// ~voilà</span>
+program[<span class="hljs-type">ReaderT</span>[<span class="hljs-type">Option</span>, <span class="hljs-type">MyEnv</span>, *]].run(<span class="hljs-type">MyEnv</span>(<span class="hljs-type">User</span>(<span class="hljs-number">0</span>, <span class="hljs-string">"Tofu"</span>))) <span class="hljs-comment">//&gt; Some(Tofu): Option[String]</span>
+<span class="hljs-comment">// res0: Option[String] = Some("Tofu")</span>
+</code></pre>
+<p>A bit more complicated example, that shows lenses usage only in the functions that require them:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> tofu.optics._
+<span class="hljs-keyword">import</span> tofu._
+
+<span class="hljs-keyword">import</span> cats.syntax.apply._
+<span class="hljs-keyword">import</span> cats.instances.option._
+<span class="hljs-keyword">import</span> cats._
+<span class="hljs-keyword">import</span> cats.data.<span class="hljs-type">ReaderT</span>
+
+<span class="hljs-comment">// defining our own Env that stores a User and some related Metadata</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span>(<span class="hljs-params">id: <span class="hljs-type">Int</span>, name: <span class="hljs-type">String</span></span>)</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Metadata</span>(<span class="hljs-params">height: <span class="hljs-type">Double</span>, age: <span class="hljs-type">Int</span></span>)</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyEnv</span>(<span class="hljs-params">user: <span class="hljs-type">User</span>, md: <span class="hljs-type">Metadata</span></span>)</span>
+
+<span class="hljs-comment">// defining extractors</span>
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> userExtractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">User</span>]   = _.user
+<span class="hljs-comment">// userExtractor: Extract[MyEnv, User] = repl.Session$App1$$anonfun$4@604949e1</span>
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> mdExtractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">Metadata</span>] = _.md
+<span class="hljs-comment">// mdExtractor: Extract[MyEnv, Metadata] = repl.Session$App1$$anonfun$6@51359854</span>
+
+<span class="hljs-comment">// it is possible to define a program that only has a context</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">program</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">Apply</span>: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]]: <span class="hljs-type">F</span>[<span class="hljs-type">String</span>] = 
+  (name[<span class="hljs-type">F</span>], age[<span class="hljs-type">F</span>]).mapN { (name, age) =&gt; <span class="hljs-string">s"<span class="hljs-subst">$name</span>: <span class="hljs-subst">$age</span>"</span> }
+
+<span class="hljs-comment">// but all the functions that were called inside a program</span>
+<span class="hljs-comment">// have on demand and only necessary extractors</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">name</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]](<span class="hljs-keyword">implicit</span> u: <span class="hljs-type">MyEnv</span> <span class="hljs-type">Extract</span> <span class="hljs-type">User</span>): <span class="hljs-type">F</span>[<span class="hljs-type">String</span>] = 
+  <span class="hljs-type">Context</span>[<span class="hljs-type">F</span>].extract(u).ask(_.name)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">age</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]](<span class="hljs-keyword">implicit</span> m: <span class="hljs-type">MyEnv</span> <span class="hljs-type">Extract</span> <span class="hljs-type">Metadata</span>): <span class="hljs-type">F</span>[<span class="hljs-type">Int</span>] = 
+  <span class="hljs-type">Context</span>[<span class="hljs-type">F</span>].extract(m).ask(_.age)
+
+<span class="hljs-comment">// ~voilà</span>
+program[<span class="hljs-type">ReaderT</span>[<span class="hljs-type">Option</span>, <span class="hljs-type">MyEnv</span>, *]]
+  .run(<span class="hljs-type">MyEnv</span>(<span class="hljs-type">User</span>(<span class="hljs-number">0</span>, <span class="hljs-string">"Tofu"</span>), <span class="hljs-type">Metadata</span>(<span class="hljs-number">60</span>, <span class="hljs-number">18</span>))) <span class="hljs-comment">//&gt; Some(Tofu: 18): Option[String]</span>
+<span class="hljs-comment">// res2: Option[String] = Some("Tofu: 18")</span>
+</code></pre>
+<p>It is also possible to do define some <code>Context</code> explicitly without having a need in <code>Env</code> or <code>ReaderT</code> monads:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> tofu.optics._
+<span class="hljs-keyword">import</span> tofu._
+
+<span class="hljs-keyword">import</span> cats.syntax.apply._
+<span class="hljs-keyword">import</span> cats.instances.option._
+<span class="hljs-keyword">import</span> cats._
+
+<span class="hljs-comment">// defining our own Env that stores a User and some related Metadata</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span>(<span class="hljs-params">id: <span class="hljs-type">Int</span>, name: <span class="hljs-type">String</span></span>)</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Metadata</span>(<span class="hljs-params">height: <span class="hljs-type">Double</span>, age: <span class="hljs-type">Int</span></span>)</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyEnv</span>(<span class="hljs-params">user: <span class="hljs-type">User</span>, md: <span class="hljs-type">Metadata</span></span>)</span>
+
+<span class="hljs-comment">// defining extractors</span>
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> userExtractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">User</span>]   = _.user
+<span class="hljs-comment">// userExtractor: Extract[MyEnv, User] = repl.Session$App3$$anonfun$9@4b9a44c8</span>
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> mdExtractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">Metadata</span>] = _.md
+<span class="hljs-comment">// mdExtractor: Extract[MyEnv, Metadata] = repl.Session$App3$$anonfun$11@40c8c158</span>
+
+<span class="hljs-comment">// what if we don't need or don't know what ReaderT is</span>
+<span class="hljs-comment">// we can define a const Context than</span>
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> ctx: <span class="hljs-type">HasContext</span>[<span class="hljs-type">Option</span>, <span class="hljs-type">MyEnv</span>] =
+  <span class="hljs-type">Context</span>.const[<span class="hljs-type">Option</span>, <span class="hljs-type">MyEnv</span>](<span class="hljs-type">MyEnv</span>(<span class="hljs-type">User</span>(<span class="hljs-number">0</span>, <span class="hljs-string">"Tofu"</span>), <span class="hljs-type">Metadata</span>(<span class="hljs-number">60</span>, <span class="hljs-number">18</span>)))
+<span class="hljs-comment">// ctx: HasContext[Option, MyEnv] = tofu.Context$$anon$1@6a648ee1</span>
+
+<span class="hljs-comment">// it is still possible to define a program that only has a context</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">program</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">Apply</span>: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]]: <span class="hljs-type">F</span>[<span class="hljs-type">String</span>] =
+  (name[<span class="hljs-type">F</span>], age[<span class="hljs-type">F</span>]).mapN { (name, age) =&gt; <span class="hljs-string">s"<span class="hljs-subst">$name</span>: <span class="hljs-subst">$age</span>"</span> }
+
+<span class="hljs-comment">// and all the functions that were called inside a program</span>
+<span class="hljs-comment">// have on demand and only necessary extractors</span>
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">name</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]](<span class="hljs-keyword">implicit</span> u: <span class="hljs-type">MyEnv</span> <span class="hljs-type">Extract</span> <span class="hljs-type">User</span>): <span class="hljs-type">F</span>[<span class="hljs-type">String</span>] =
+  <span class="hljs-type">Context</span>[<span class="hljs-type">F</span>].extract(u).ask(_.name)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">age</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]](<span class="hljs-keyword">implicit</span> m: <span class="hljs-type">MyEnv</span> <span class="hljs-type">Extract</span> <span class="hljs-type">Metadata</span>): <span class="hljs-type">F</span>[<span class="hljs-type">Int</span>] =
+  <span class="hljs-type">Context</span>[<span class="hljs-type">F</span>].extract(m).ask(_.age)
+
+<span class="hljs-comment">// ~voilà</span>
+program[<span class="hljs-type">Option</span>] <span class="hljs-comment">//&gt; Some(Tofu: 18): Option[String]</span>
+<span class="hljs-comment">// res4: Option[String] = Some("Tofu: 18")</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/tofu/" class="nav-home"><img src="/tofu/img/favicon.ico" alt="Tofu" width="66" height="58"/></a><div><h5>Docs</h5><a href="/tofu/docs/start.html">Getting Started</a></div><div><h5>Community</h5><a href="/tofu/en/users.html">User Showcase</a><a href="https://stackoverflow.com/questions/tagged/tofu" target="tofu" rel="noreferrer noopener">Stack Overflow</a><a href="https://t.me/tofu_scala">Telegram Group (EN|RU)</a><a href="https://gitter.im/tinkoff-tofu/community">Gitter Group (EN)</a></div><div><h5>More</h5><a href="/tofu/blog">Blog</a><a href="https://github.com/TinkoffCreditSystems/tofu">GitHub</a><a class="github-button" href="https://github.com/TinkoffCreditSystems/tofu" data-icon="octicon-star" data-count-href="/TinkoffCreditSystems/tofu/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Tinkoff.ru</section></footer></div></body></html>
