@@ -29,8 +29,8 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.util.control.NonFatal
 import tofu.config.MagnoliaDerivation.SingletonConfigurable
 import tofu.config.MagnoliaDerivation.EnumConfigurable
-import org.manatki.derevo.Derivation
 import tofu.config.ConfigError.NotFound
+import derevo.Derivation
 
 trait Configurable[A] extends ConfigArr[ConfigItem, A] { self =>
   import ConfigMonad.promote._
