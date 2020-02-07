@@ -1,7 +1,7 @@
 package tofu.config
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
-import org.manatki.derevo.derive
+import derevo.derive
 import com.typesafe.config.ConfigFactory
 import cats.syntax.option._
 import ConfigSuite.{Foe, Skill}

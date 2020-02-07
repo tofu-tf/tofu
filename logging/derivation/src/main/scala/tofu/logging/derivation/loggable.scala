@@ -3,7 +3,7 @@ package derivation
 
 import cats.Show
 import magnolia.{CaseClass, Magnolia, SealedTrait}
-import org.manatki.derevo.Derivation
+import derevo.Derivation
 
 object loggable extends Derivation[Loggable] {
   type Typeclass[A] = Loggable[A]
