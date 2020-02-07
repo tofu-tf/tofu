@@ -8,10 +8,10 @@ scala:
 jdk:
   - openjdk8
 script:
-  - sbt checkfmt
+  - if [ "$TRAVIS_SCALA_VERSION" = "2.13.1" ]; then sbt checkfmt; fi
   - sbt compile
   - sbt test
-  - sbt docs/mdoc
+  - if [ "$TRAVIS_SCALA_VERSION" = "2.13.1" ]; then sbt docs/mdoc; fi
 
 cache:
   directories:
