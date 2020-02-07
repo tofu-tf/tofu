@@ -1,5 +1,6 @@
 package tofu.higherKind
 import cats.data.Tuple2K
+import cats.tagless.IdK
 import cats.{FlatMap, ~>}
 import simulacrum.typeclass
 import tofu.syntax.functionK.funK
@@ -40,9 +41,24 @@ object RepK {
   override def pureK[F[_]](p: Point[F]): U[F] = tabulate(funK(_ => p.point))
 }
 
-object RepresentableK {
+object RepresentableK extends RepresentableKInstanceChain[RepresentableK] {
 
   /** simply for reference
     * continuation form of RepK makes higher order index trivial */
   def index[U[_[_]], F[_], A](tf: U[F])(repr: RepK[U, A]): F[A] = repr(tf)
+}
+
+trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
+  private[this] def idKRepresentableInst[A]: RepresentableK[IdK[A]#λ] = new RepresentableK[IdK[A]#λ] {
+    def tabulate[F[_]](hom: RepK[IdK[A]#λ, *] ~> F): F[A]                                       = hom(RepK.apply(x => x))
+    override def mapK[F[_], G[_]](af: F[A])(fk: F ~> G): G[A]                                   = fk(af)
+    override def productK[F[_], G[_]](af: F[A], ag: G[A]): Tuple2K[F, G, A]                     = Tuple2K(af, ag)
+    override def embed[F[_]: FlatMap](ft: F[F[A]]): F[A]                                        = ft.flatten
+    override def zipWith2K[F[_], G[_], H[_]](af: F[A], ag: G[A])(f2: Function2K[F, G, H]): H[A] = f2(af, ag)
+    override def pureK[F[_]](p: Point[F]): F[A]                                                 = p.point[A]
+  }
+
+  private[this] val idKRepresentableAny = idKRepresentableInst[Any]
+
+  final implicit def idKRepresentable[A]: TC[IdK[A]#λ] = idKRepresentableAny.asInstanceOf[TC[IdK[A]#λ]]
 }

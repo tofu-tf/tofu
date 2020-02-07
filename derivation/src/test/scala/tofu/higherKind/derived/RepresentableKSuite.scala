@@ -1,16 +1,18 @@
-package tofu.data.derived
+package tofu.higherKind.derived
 
 import cats.data.Tuple2K
-import tofu.data.derived.RepresentableKSuite.Foo
-import cats.syntax.functor._
-import cats.syntax.either._
 import cats.instances.either._
+import cats.syntax.either._
+import cats.syntax.functor._
 import cats.{Id, ~>}
 import org.scalatest.{FlatSpec, Matchers}
 import tofu.data.Embedded
+import RepresentableKSuite.Foo
 import tofu.syntax.functionK.funK
+import tofu.syntax.embed._
 import cats.tagless.syntax.functorK._
 import cats.tagless.syntax.semigroupalK._
+import cats.tagless.syntax.applyK._
 import derevo.derive
 import tofu.higherKind.derived.representableK
 import tofu.syntax.embed._
