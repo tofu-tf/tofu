@@ -38,7 +38,7 @@ program[ReaderT[Option, MyEnv, *]].run(MyEnv(User(0, "Tofu"))) //> Some(Tofu): O
 
 A bit more complicated example, that shows lenses usage only in the functions that require them:
 
-```scala mdoc
+```scala mdoc:reset
 import tofu.optics._
 import tofu._
 
@@ -75,8 +75,9 @@ program[ReaderT[Option, MyEnv, *]]
 
 It is also possible to do define some `Context` explicitly without having a need in `Env` or `ReaderT` monads:
 
-```scala mdoc
+```scala mdoc:reset
 import tofu.optics._
+import tofu._
 
 import cats.syntax.apply._
 import cats.instances.option._

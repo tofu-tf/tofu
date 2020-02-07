@@ -112,7 +112,7 @@ def splitErrors[
   F[_]: Functor, G[_]: Applicative, E, A](ls: T[F[A]])(
     implicit errors: ErrorsTo[F, G, E]
 ): G[(T[E], T[A])] =
-  ls.traverse(_.attempt[G, E]).map(_.partitionEither(identity))
+  ls.traverse(_.attemptTo[G, E]).map(_.partitionEither(identity))
 
 def parseInt[F[_]: Applicative: Raise[*[_], String]](s: String): F[Int] =
   s.toIntOption.orRaise(s"could not parse $s")

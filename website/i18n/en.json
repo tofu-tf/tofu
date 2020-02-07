@@ -17,6 +17,9 @@
       "fork": {
         "title": "Forking and Racing"
       },
+      "hascontext": {
+        "title": "Learning HasContext"
+      },
       "start": {
         "title": "Getting started"
       },
