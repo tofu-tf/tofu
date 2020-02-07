@@ -1,6 +1,6 @@
 package tofu.higherKind.derived
 import cats.free.Free
-import org.manatki.derevo.derive
+import derevo.derive
 import tofu.higherKind.Embed
 
 object EmbedKSuite {
