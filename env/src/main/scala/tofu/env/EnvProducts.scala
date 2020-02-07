@@ -148,6 +148,7 @@ private[env] trait EnvProducts {
 }
 
 private[env] trait EnvTransformations {
+  self: Env.type =>
   final def taskNat[E]: Task ~> Env[E, *] = new FunctionK[Task, Env[E, *]] {
     override def apply[A](fa: Task[A]): Env[E, A] = Env.fromTask(fa)
   }

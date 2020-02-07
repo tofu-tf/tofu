@@ -13,7 +13,8 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-private[env] trait EnvFunctions extends EnvProducts with EnvTraversing with EnvRacing with EnvSyntax {
+private[env] trait EnvFunctions
+    extends EnvProducts with EnvTraversing with EnvRacing with EnvSyntax with EnvTransformations {
   self: Env.type =>
   def apply[E, A](f: E => Task[A]): Env[E, A] = EnvCtx(f)
   def later[E, A](x: => A): Env[E, A]         = fromTask(Task.delay(x))
