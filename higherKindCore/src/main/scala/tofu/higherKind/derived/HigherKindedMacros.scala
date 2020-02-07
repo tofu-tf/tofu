@@ -68,7 +68,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
             makeMethod(method)(params => q"$fmonad.flatMap($faf)(_.${method.name}(...$params))")
           case method if method.occursInReturn(f) =>
             makeMethod(method) { params =>
-              val F  = summon[Embed[Any]](polyType(f :: Nil, method.returnType))
+              val F = summon[Embed[Any]](polyType(f :: Nil, method.returnType))
               q"$F.embed($fmonad.map($faf)(_.${method.name}(...$params)))"
             }
           case method =>
