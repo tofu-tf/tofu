@@ -44,7 +44,7 @@ moduleName := "tofu"
 lazy val higherKindCore = project settings (
   defaultSettings,
   publishName := "core-higher-kind",
-  libraryDependencies ++= Seq(catsCore, catsTagless),
+  libraryDependencies ++= Seq(catsCore, catsFree, catsTagless),
   macros,
 )
 
