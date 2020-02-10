@@ -185,7 +185,7 @@ lazy val derivation =
       defaultSettings,
       libraryDependencies ++= Seq(magnolia, derevo, catsTagless),
       macros,
-      publishName := "derivation"
+      publishName := "derivation",
     )
     .dependsOn(data)
 

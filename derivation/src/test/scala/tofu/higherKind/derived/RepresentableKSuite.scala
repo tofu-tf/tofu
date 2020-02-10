@@ -1,21 +1,19 @@
 package tofu.higherKind.derived
 
-import cats.data.Tuple2K
+import RepresentableKSuite.Foo
+import cats.data.{OptionT, Tuple2K}
 import cats.instances.either._
 import cats.syntax.either._
 import cats.syntax.functor._
-import cats.{Id, ~>}
-import org.scalatest.{FlatSpec, Matchers}
-import tofu.data.Embedded
-import RepresentableKSuite.Foo
-import tofu.syntax.functionK.funK
-import tofu.syntax.embed._
 import cats.tagless.syntax.functorK._
 import cats.tagless.syntax.semigroupalK._
-import cats.tagless.syntax.applyK._
+import cats.{Id, ~>}
 import derevo.derive
-import tofu.higherKind.derived.representableK
+import org.scalatest.{FlatSpec, Matchers}
+import tofu.data.Embedded
+import tofu.higherKind.{RepK, RepresentableK}
 import tofu.syntax.embed._
+import tofu.syntax.functionK.funK
 
 import scala.util.Try
 
@@ -25,11 +23,13 @@ class RepresentableKSuite extends FlatSpec with Matchers {
       Try(s.toDouble).toEither.left.map(_ => s"could not parse $s as double").map(_ * x)
     override def bar(a: List[Int]): Either[String, Unit] =
       a.headOption.toRight("must contain at least one element").void
+    def baz(a: List[Int]): OptionT[Either[String, *], Unit] = OptionT.liftF(Left("hello"))
   }
 
   val defaultFoo: Foo[Id] = new Foo[Id] {
     override def foo(x: Int, s: String): Double = x.toDouble
     override def bar(a: List[Int]): Unit        = ()
+    def baz(a: List[Int]): OptionT[Id, Unit]    = OptionT.none
   }
 
   "representableK" should "generate nice mapK" in {
@@ -82,6 +82,28 @@ object RepresentableKSuite {
   @derive(representableK)
   trait Foo[F[_]] {
     def foo(x: Int, s: String): F[Double]
+
     def bar(a: List[Int]): F[Unit]
+
+    def baz(a: List[Int]): OptionT[F, Unit]
+  }
+
+  trait Foo1[F[_]] {
+    def foo(x: Int, s: String): F[Double]
+
+    def bar(a: List[Int]): F[Unit]
+
+    def baz(a: List[Int]): OptionT[F, Unit]
+  }
+
+  new RepresentableK[Foo1] {
+    def tabulate[F[_]](hom: RepK[Foo1, *] ~> F): Foo1[F] = new Foo1[F] {
+      def foo(x: Int, s: String): F[Double] = hom(RepK.mk(_.foo(x, s)))
+      def bar(a: List[Int]): F[Unit]        = hom(RepK.mk(_.bar(a)))
+      def baz(a: List[Int]): OptionT[F, Unit] = {
+        val OT = RepresentableK[OptionT[*[_], Unit]]
+        OT.tabulate[F](funK(rep => hom(RepK[Foo1](foo => rep(foo.baz(a))))))
+      }
+    }
   }
 }
