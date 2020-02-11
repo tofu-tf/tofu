@@ -100,11 +100,13 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
       override def mapK[F[_], G[_]](af: EitherT[F, E, A])(fk: F ~> G): EitherT[G, E, A] = af.mapK(fk)
       override def productK[F[_], G[_]](af: EitherT[F, E, A], ag: EitherT[G, E, A]): EitherT[Tuple2K[F, G, *], E, A] =
         EitherT(Tuple2K(af.value, ag.value))
-      override def zipWith2K[F[_], G[_], H[_]](af: EitherT[F, E, A], ag: EitherT[G, E, A])(f2: Function2K[F, G, H]): EitherT[H, E, A] =
+      override def zipWith2K[F[_], G[_], H[_]](af: EitherT[F, E, A], ag: EitherT[G, E, A])(
+          f2: Function2K[F, G, H]
+      ): EitherT[H, E, A] =
         EitherT(f2(af.value, ag.value))
       override def pureK[F[_]](p: Point[F]): EitherT[F, E, A] =
         EitherT(p.point)
-      override val unitK: EitherT[UnitK, E, A] = super.unitK
+      override val unitK: EitherT[UnitK, E, A]                                     = super.unitK
       override def embed[F[_]: FlatMap](ft: F[EitherT[F, E, A]]): EitherT[F, E, A] = EitherT(ft.flatMap(_.value))
     }
 
@@ -116,10 +118,12 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
       override def mapK[F[_], G[_]](af: WriterT[F, W, A])(fk: F ~> G): WriterT[G, W, A] = af.mapK(fk)
       override def productK[F[_], G[_]](af: WriterT[F, W, A], ag: WriterT[G, W, A]): WriterT[Tuple2K[F, G, *], W, A] =
         WriterT(Tuple2K(af.run, ag.run))
-      override def zipWith2K[F[_], G[_], H[_]](af: WriterT[F, W, A], ag: WriterT[G, W, A])(f2: Function2K[F, G, H]): WriterT[H, W, A] =
+      override def zipWith2K[F[_], G[_], H[_]](af: WriterT[F, W, A], ag: WriterT[G, W, A])(
+          f2: Function2K[F, G, H]
+      ): WriterT[H, W, A] =
         WriterT(f2(af.run, ag.run))
-      override def pureK[F[_]](p: Point[F]): WriterT[F, W, A] = WriterT(p.point)
-      override val unitK: WriterT[UnitK, W, A] = super.unitK
+      override def pureK[F[_]](p: Point[F]): WriterT[F, W, A]                      = WriterT(p.point)
+      override val unitK: WriterT[UnitK, W, A]                                     = super.unitK
       override def embed[F[_]: FlatMap](ft: F[WriterT[F, W, A]]): WriterT[F, W, A] = WriterT(ft.flatMap(_.run))
     }
 
@@ -131,10 +135,12 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
       af.mapK(fk)
     override def productK[F[_], G[_]](af: IorT[F, E, A], ag: IorT[G, E, A]): IorT[Tuple2K[F, G, *], E, A] =
       IorT(Tuple2K(af.value, ag.value))
-    override def zipWith2K[F[_], G[_], H[_]](af: IorT[F, E, A], ag: IorT[G, E, A])(f2: Function2K[F, G, H]): IorT[H, E, A] =
+    override def zipWith2K[F[_], G[_], H[_]](af: IorT[F, E, A], ag: IorT[G, E, A])(
+        f2: Function2K[F, G, H]
+    ): IorT[H, E, A] =
       IorT(f2(af.value, ag.value))
-    override def pureK[F[_]](p: Point[F]): IorT[F, E, A] = IorT(p.point)
-    override val unitK: IorT[UnitK, E, A] = super.unitK
+    override def pureK[F[_]](p: Point[F]): IorT[F, E, A]                   = IorT(p.point)
+    override val unitK: IorT[UnitK, E, A]                                  = super.unitK
     override def embed[F[_]: FlatMap](ft: F[IorT[F, E, A]]): IorT[F, E, A] = IorT(ft.flatMap(_.value))
   }
 
