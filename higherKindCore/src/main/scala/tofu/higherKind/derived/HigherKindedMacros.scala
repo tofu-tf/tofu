@@ -87,7 +87,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
     }
 
   def representableK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[RepresentableK[Alg]](tag)(tabulate, productK, mapK)
+    instantiate[RepresentableK[Alg]](tag)(tabulate, productK, mapK, embedf)
 
   def embed[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
     instantiate[Embed[Alg]](tag)(embedf)
