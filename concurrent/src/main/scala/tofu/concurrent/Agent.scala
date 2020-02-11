@@ -2,7 +2,6 @@ package tofu.concurrent
 import cats.{FlatMap, Monad}
 import cats.effect.concurrent.{Ref, Semaphore}
 import tofu.Fire
-import tofu.higherKind.{RepresentableK, derived}
 import tofu.syntax.fire._
 import tofu.syntax.monadic._
 

@@ -4,7 +4,7 @@ import java.io.IOException
 
 import cats.{Applicative, Functor, ~>}
 import cats.effect.{CancelToken, Fiber}
-import tofu.generate.{GenRandom, GenUUID}
+import tofu.generate.GenRandom
 import tofu.internal.CachedMatcher
 import tofu.lift.Unlift
 import tofu.optics.{Contains, Extract}

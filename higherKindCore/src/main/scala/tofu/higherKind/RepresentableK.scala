@@ -52,7 +52,7 @@ object RepresentableK extends RepresentableKInstanceChain[RepresentableK] {
 
 trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
   private[this] def idKRepresentableInst[A]: RepresentableK[IdK[A]#λ] = new RepresentableK[IdK[A]#λ] {
-    def tabulate[F[_]](hom: RepK[IdK[A]#λ, *] ~> F): F[A]                                       = hom(RepK.apply(x => x))
+    def tabulate[F[_]](hom: RepK[IdK[A]#λ, *] ~> F): F[A]                                       = hom(RepK[IdK[A]#λ](x => x))
     override def mapK[F[_], G[_]](af: F[A])(fk: F ~> G): G[A]                                   = fk(af)
     override def productK[F[_], G[_]](af: F[A], ag: G[A]): Tuple2K[F, G, A]                     = Tuple2K(af, ag)
     override def embed[F[_]: FlatMap](ft: F[F[A]]): F[A]                                        = ft.flatten
@@ -62,8 +62,8 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
 
   private[this] def readerTInstance[R, A]: RepresentableK[ReaderT[*[_], R, A]] =
     new RepresentableK[ReaderT[*[_], R, A]] {
-      def tabulate[F[_]](hom: RepK[ReaderT[*[_], R, A], *] ~> F): ReaderT[F, R, A] = ReaderT(r => hom(RepK.mk(_.run(r)))
-      )
+      def tabulate[F[_]](hom: RepK[ReaderT[*[_], R, A], *] ~> F): ReaderT[F, R, A] =
+        ReaderT(r => hom(RepK[ReaderT[*[_], R, A]](_.run(r))))
       override def embed[F[_]: FlatMap](ft: F[ReaderT[F, R, A]]): ReaderT[F, R, A]      = ReaderT(r => ft.flatMap(_.run(r)))
       override def pureK[F[_]](p: Point[F]): ReaderT[F, R, A]                           = ReaderT(r => p.point[A])
       override val unitK: ReaderT[UnitK, R, A]                                          = super.unitK
@@ -78,7 +78,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
     }
 
   private[this] def optionTInstance[A]: RepresentableK[OptionT[*[_], A]] = new RepresentableK[OptionT[*[_], A]] {
-    def tabulate[F[_]](hom: RepK[OptionT[*[_], A], *] ~> F): OptionT[F, A] = OptionT(hom(RepK.mk(_.value)))
+    def tabulate[F[_]](hom: RepK[OptionT[*[_], A], *] ~> F): OptionT[F, A] = OptionT(hom(RepK[OptionT[*[_], A]](_.value)))
 
     override def mapK[F[_], G[_]](af: OptionT[F, A])(fk: F ~> G): OptionT[G, A] = af.mapK(fk)
     override def productK[F[_], G[_]](af: OptionT[F, A], ag: OptionT[G, A]): OptionT[Tuple2K[F, G, *], A] =
@@ -95,7 +95,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
   private[this] def eitherTInstance[E, A]: RepresentableK[EitherT[*[_], E, A]] =
     new RepresentableK[EitherT[*[_], E, A]] {
       def tabulate[F[_]](hom: RepK[EitherT[*[_], E, A], *] ~> F): EitherT[F, E, A] =
-        EitherT(hom(RepK.mk(_.value)))
+        EitherT(hom(RepK[EitherT[*[_], E, A]](_.value)))
 
       override def mapK[F[_], G[_]](af: EitherT[F, E, A])(fk: F ~> G): EitherT[G, E, A] = af.mapK(fk)
       override def productK[F[_], G[_]](af: EitherT[F, E, A], ag: EitherT[G, E, A]): EitherT[Tuple2K[F, G, *], E, A] =
@@ -113,7 +113,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
   private[this] def writerTInstance[W, A]: RepresentableK[WriterT[*[_], W, A]] =
     new RepresentableK[WriterT[*[_], W, A]] {
 
-      def tabulate[F[_]](hom: RepK[WriterT[*[_], W, A], *] ~> F): WriterT[F, W, A] = WriterT(hom(RepK.mk(_.run)))
+      def tabulate[F[_]](hom: RepK[WriterT[*[_], W, A], *] ~> F): WriterT[F, W, A] = WriterT(hom(RepK[WriterT[*[_], W, A]](_.run)))
 
       override def mapK[F[_], G[_]](af: WriterT[F, W, A])(fk: F ~> G): WriterT[G, W, A] = af.mapK(fk)
       override def productK[F[_], G[_]](af: WriterT[F, W, A], ag: WriterT[G, W, A]): WriterT[Tuple2K[F, G, *], W, A] =
@@ -129,7 +129,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
 
   private[this] def iorTInstance[E, A]: RepresentableK[IorT[*[_], E, A]] = new RepresentableK[IorT[*[_], E, A]] {
 
-    def tabulate[F[_]](hom: RepK[IorT[*[_], E, A], *] ~> F): IorT[F, E, A] = IorT(hom(RepK.mk(_.value)))
+    def tabulate[F[_]](hom: RepK[IorT[*[_], E, A], *] ~> F): IorT[F, E, A] = IorT(hom(RepK[IorT[*[_], E, A]](_.value)))
 
     override def mapK[F[_], G[_]](af: IorT[F, E, A])(fk: F ~> G): IorT[G, E, A] =
       af.mapK(fk)
