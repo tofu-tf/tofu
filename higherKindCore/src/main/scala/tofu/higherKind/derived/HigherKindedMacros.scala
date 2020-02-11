@@ -18,28 +18,36 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
   def tabulate(algebra: Type): (String, Type => Tree) =
     "tabulate" -> {
-      case PolyType(List(f), MethodType(List(hom), _)) =>
-        val members = overridableMembersOf(algebra)
-        val types   = delegateAbstractTypes(algebra, members, algebra)
+      case PolyType(List(f), MethodType(List(hom), af)) =>
+        val members = overridableMembersOf(af)
+        val types   = delegateAbstractTypes(af, members, af)
         val repk    = reify(tofu.higherKind.RepK).tree
+        val funk    = reify(tofu.syntax.functionK).tree
         val alg     = TermName(c.freshName("alg"))
+        val rep     = TermName(c.freshName("rep"))
         val et      = tq""
         val algv    = q"val $alg: $et"
-        val ff = algebra match {
-          case PolyType(List(ff1), _) => ff1
-        }
-        val methods = delegateMethods(algebra, members, NoSymbol) {
-          case method if method.occursInParams(ff) =>
-            abort(s"Type parameter $ff appears in contravariant position in method ${method.name}")
+        val repv    = q"val $rep: $et"
 
-          case method if method.occursInReturn(ff) =>
+        val methods = delegateMethods(af, members, NoSymbol) {
+          case method if method.occursInParams(f) =>
+            abort(s"Type parameter $f appears in contravariant position in method ${method.name}")
+
+          case method if method.returnType.typeConstructor.typeSymbol == f =>
             val params = method.paramLists.map(_.map(_.name))
             val body   = q"$hom($repk[$algebra](($algv => $alg.${method.name}(...$params))))"
-            val tpe    = appliedType(f, method.returnType.typeArgs)
-            method.copy(body = body, returnType = tpe)
+            method.copy(body = body)
+
+          case method if method.occursInReturn(f) =>
+            val params = method.paramLists.map(_.map(_.name))
+            val tt     = polyType(f :: Nil, method.returnType)
+            val F      = summon[RepresentableK[Any]](tt)
+            val body =
+              q"$F.tabulate($funk.funK($repv => $hom($repk[$algebra]($algv => $rep($alg.${method.name}(...$params))))))"
+            method.copy(body = body)
 
           case method =>
-            abort(s"Type parameter $ff does not appear in return in method ${method.name}")
+            abort(s"Type parameter $f does not appear in return in method ${method.name}")
         }
 
         val res = implement(algebra)(f)(types ++ methods)
@@ -79,7 +87,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
     }
 
   def representableK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[RepresentableK[Alg]](tag)(tabulate, productK, mapK)
+    instantiate[RepresentableK[Alg]](tag)(tabulate, productK, mapK, embedf)
 
   def embed[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
     instantiate[Embed[Alg]](tag)(embedf)
