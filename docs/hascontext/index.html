@@ -17,7 +17,7 @@ You can still use convenient Tofu concepts to work with your own Environment (<c
 <span class="hljs-comment">// defining an extractor, extractor is a common lens that you can read about</span>
 <span class="hljs-comment">// in a paragraph about lenses</span>
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> extractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">User</span>] = _.user
-<span class="hljs-comment">// extractor: Extract[MyEnv, User] = repl.Session$App$$anonfun$1@8706536</span>
+<span class="hljs-comment">// extractor: Extract[MyEnv, User] = repl.Session$App$$anonfun$1@2b271dbb</span>
       
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">program</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]](<span class="hljs-keyword">implicit</span> u: <span class="hljs-type">MyEnv</span> <span class="hljs-type">Extract</span> <span class="hljs-type">User</span>): <span class="hljs-type">F</span>[<span class="hljs-type">String</span>] = 
   <span class="hljs-type">Context</span>[<span class="hljs-type">F</span>].extract(u).ask(_.name)
@@ -42,9 +42,9 @@ program[<span class="hljs-type">ReaderT</span>[<span class="hljs-type">Option</s
 
 <span class="hljs-comment">// defining extractors</span>
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> userExtractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">User</span>]   = _.user
-<span class="hljs-comment">// userExtractor: Extract[MyEnv, User] = repl.Session$App1$$anonfun$4@604949e1</span>
+<span class="hljs-comment">// userExtractor: Extract[MyEnv, User] = repl.Session$App1$$anonfun$4@7d7a75d9</span>
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> mdExtractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">Metadata</span>] = _.md
-<span class="hljs-comment">// mdExtractor: Extract[MyEnv, Metadata] = repl.Session$App1$$anonfun$6@51359854</span>
+<span class="hljs-comment">// mdExtractor: Extract[MyEnv, Metadata] = repl.Session$App1$$anonfun$6@3f310f82</span>
 
 <span class="hljs-comment">// it is possible to define a program that only has a context</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">program</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">Apply</span>: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]]: <span class="hljs-type">F</span>[<span class="hljs-type">String</span>] = 
@@ -78,15 +78,15 @@ program[<span class="hljs-type">ReaderT</span>[<span class="hljs-type">Option</s
 
 <span class="hljs-comment">// defining extractors</span>
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> userExtractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">User</span>]   = _.user
-<span class="hljs-comment">// userExtractor: Extract[MyEnv, User] = repl.Session$App3$$anonfun$9@4b9a44c8</span>
+<span class="hljs-comment">// userExtractor: Extract[MyEnv, User] = repl.Session$App3$$anonfun$9@2cdc4811</span>
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> mdExtractor: <span class="hljs-type">Extract</span>[<span class="hljs-type">MyEnv</span>, <span class="hljs-type">Metadata</span>] = _.md
-<span class="hljs-comment">// mdExtractor: Extract[MyEnv, Metadata] = repl.Session$App3$$anonfun$11@40c8c158</span>
+<span class="hljs-comment">// mdExtractor: Extract[MyEnv, Metadata] = repl.Session$App3$$anonfun$11@3f8552f4</span>
 
 <span class="hljs-comment">// what if we don't need or don't know what ReaderT is</span>
 <span class="hljs-comment">// we can define a const Context than</span>
 <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> ctx: <span class="hljs-type">HasContext</span>[<span class="hljs-type">Option</span>, <span class="hljs-type">MyEnv</span>] =
   <span class="hljs-type">Context</span>.const[<span class="hljs-type">Option</span>, <span class="hljs-type">MyEnv</span>](<span class="hljs-type">MyEnv</span>(<span class="hljs-type">User</span>(<span class="hljs-number">0</span>, <span class="hljs-string">"Tofu"</span>), <span class="hljs-type">Metadata</span>(<span class="hljs-number">60</span>, <span class="hljs-number">18</span>)))
-<span class="hljs-comment">// ctx: HasContext[Option, MyEnv] = tofu.Context$$anon$1@6a648ee1</span>
+<span class="hljs-comment">// ctx: HasContext[Option, MyEnv] = tofu.Context$$anon$1@117f3c60</span>
 
 <span class="hljs-comment">// it is still possible to define a program that only has a context</span>
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">program</span></span>[<span class="hljs-type">F</span>[_]: <span class="hljs-type">Apply</span>: <span class="hljs-type">HasContext</span>[*[_], <span class="hljs-type">MyEnv</span>]]: <span class="hljs-type">F</span>[<span class="hljs-type">String</span>] =
