@@ -78,7 +78,9 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
     }
 
   private[this] def optionTInstance[A]: RepresentableK[OptionT[*[_], A]] = new RepresentableK[OptionT[*[_], A]] {
-    def tabulate[F[_]](hom: RepK[OptionT[*[_], A], *] ~> F): OptionT[F, A] = OptionT(hom(RepK[OptionT[*[_], A]](_.value)))
+    def tabulate[F[_]](hom: RepK[OptionT[*[_], A], *] ~> F): OptionT[F, A] = OptionT(
+      hom(RepK[OptionT[*[_], A]](_.value))
+    )
 
     override def mapK[F[_], G[_]](af: OptionT[F, A])(fk: F ~> G): OptionT[G, A] = af.mapK(fk)
     override def productK[F[_], G[_]](af: OptionT[F, A], ag: OptionT[G, A]): OptionT[Tuple2K[F, G, *], A] =
@@ -113,7 +115,9 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
   private[this] def writerTInstance[W, A]: RepresentableK[WriterT[*[_], W, A]] =
     new RepresentableK[WriterT[*[_], W, A]] {
 
-      def tabulate[F[_]](hom: RepK[WriterT[*[_], W, A], *] ~> F): WriterT[F, W, A] = WriterT(hom(RepK[WriterT[*[_], W, A]](_.run)))
+      def tabulate[F[_]](hom: RepK[WriterT[*[_], W, A], *] ~> F): WriterT[F, W, A] = WriterT(
+        hom(RepK[WriterT[*[_], W, A]](_.run))
+      )
 
       override def mapK[F[_], G[_]](af: WriterT[F, W, A])(fk: F ~> G): WriterT[G, W, A] = af.mapK(fk)
       override def productK[F[_], G[_]](af: WriterT[F, W, A], ag: WriterT[G, W, A]): WriterT[Tuple2K[F, G, *], W, A] =
