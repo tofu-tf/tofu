@@ -1,7 +1,7 @@
 # Memo
 
 ## Dependency
-It is in the core Tofu dependency - `"ru.tinkoff" %% "tofu" % Versions.tofu`.
+It is available in general package `"ru.tinkoff" %% "tofu" % Versions.tofu` and as standalone dependency `"ru.tinkoff" %% "tofu-memo" % Versions.tofu`
 
 ## Functionality
 * A cache of a single value on access.
