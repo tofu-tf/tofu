@@ -13,7 +13,14 @@
           "fork"
         ]
       },
-      "env"
+      {
+        "type": "subcategory",
+        "label": "Contextual",
+        "ids": [
+          "env",
+          "hascontext"
+        ]
+      }
     ]
   }
 }
