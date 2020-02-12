@@ -48,3 +48,7 @@ Logos made with love by [@impurepics](https://twitter.com/impurepics)
 Please note we use following labels for automated release descriptions:
   * `chore` if your PR does not change any types and runtime semantics
   * `fix` if your PR merely fixes incorrect behavior
+
+## Formatting
+  We have automated check for style conformance. You can run `sbt fmt` before PR.
+  If you have any trouble during this check, just run `sbt fmt` and commit again.
