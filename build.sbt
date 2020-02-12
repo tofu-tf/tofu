@@ -210,9 +210,19 @@ lazy val zioInterop = project
   .dependsOn(zioCore, zioLogging)
   .aggregate(zioCore, zioLogging)
 
+lazy val fs2Interop = project
+  .in(file("fs2"))
+  .settings(
+    publishName := "fs2-interop",
+    libraryDependencies += fs2,
+    defaultSettings
+  )
+  .dependsOn(concurrent)
+
 lazy val coreModules = Seq(higherKindCore, core, memo, env, concurrent, opticsCore, data)
 
-lazy val commonModules = Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop)
+lazy val commonModules =
+  Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop, fs2Interop)
 
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
