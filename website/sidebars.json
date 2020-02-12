@@ -10,7 +10,8 @@
         "ids": [
           "typeclasses",
           "errors",
-          "fork"
+          "fork",
+          "memo"
         ]
       },
       {
