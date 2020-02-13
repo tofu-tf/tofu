@@ -9,7 +9,7 @@ It is available in general package `"ru.tinkoff" %% "tofu" % Versions.tofu` and 
 * TTL. Expired values are discarded on access.
 * Forced invalidation based on time.
 
-Missed:
+There are no
 * Infinite caching (workaround is ttl `FiniteDuration(Long.MaxValue, TimeUnit.NANOSECONDS)` = 292 days).
 * Background renewal of cached values.
 * Forced invalidation of single key (mapping cache).
@@ -27,7 +27,7 @@ import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.duration.FiniteDuration
 import java.util.concurrent.TimeUnit
 
-def effect[F[_] : Sync]: F[Int] = Sync[F].delay(println("called")) >> 335.pure[F]
+def effect[F[_] : Sync]: F[Int] = Sync[F].delay(println("called")).as(335)
 
 def f[F[_] : Sync : Clock] =
   for {
@@ -58,8 +58,7 @@ import java.util.concurrent.TimeUnit
 
 def effect[F[_] : Sync]: Int => F[String] =
   x => 
-    Sync[F].delay(println("called")) >> 
-    s"Number $x".pure[F]
+    Sync[F].delay(println("called")).as(s"Number $x")
 
 def f[F[_] : Sync : Clock] =
   for {
@@ -98,8 +97,7 @@ import java.util.concurrent.TimeUnit
 def longEffect[F[_] : Sync : Timer]: Int => F[String] =
   x =>
     Timer[F].sleep(FiniteDuration(1L, TimeUnit.SECONDS)) >>
-    Sync[F].delay(println("called")) >>
-    s"Number $x".pure[F]
+    Sync[F].delay(println("called")).as(s"Number $x")
 
 def f[F[_] : Sync : Clock : Timer](ttl : FiniteDuration) =
   for {
@@ -129,8 +127,7 @@ There is a pitfall with TTL. Cached value keeps time of access to cache and not 
 def longEffect[F[_] : Sync : Timer]: Int => F[String] =
   x =>
     Timer[F].sleep(FiniteDuration(3L, TimeUnit.SECONDS)) >>
-    Sync[F].delay(println("called")) >>
-    s"Number $x".pure[F]
+    Sync[F].delay(println("called")).as(s"Number $x")
 ```
 returns
 
@@ -157,8 +154,7 @@ import java.util.concurrent.TimeUnit
 
 def effect[F[_] : Sync : Timer]: Int => F[String] =
   x =>
-    Sync[F].delay(println("called")) >>
-    s"Number $x".pure[F]
+    Sync[F].delay(println("called")).as(s"Number $x")
 
 def f[F[_] : Sync : Clock : Timer](ttl : FiniteDuration) =
   for {
