@@ -10,8 +10,7 @@
         "ids": [
           "typeclasses",
           "errors",
-          "fork",
-          "memo"
+          "fork"
         ]
       },
       {
@@ -20,6 +19,13 @@
         "ids": [
           "env",
           "hascontext"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Utils",
+        "ids": [
+          "memo"
         ]
       }
     ]
