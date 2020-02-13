@@ -20,6 +20,13 @@
           "env",
           "hascontext"
         ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Utilities",
+        "ids": [
+          "memo"
+        ]
       }
     ]
   }
