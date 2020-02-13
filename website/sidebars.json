@@ -23,7 +23,7 @@
       },
       {
         "type": "subcategory",
-        "label": "Utils",
+        "label": "Utilities",
         "ids": [
           "memo"
         ]
