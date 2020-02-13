@@ -300,7 +300,7 @@ object ReadWrite {
       }
 
   /**
-    *  Builds a `ReadWrite` value for data types that are [[Sync]]
+    *  Builds a `ReadWrite` value for data types that are [[cats.effect.Sync]]
     *  Like [[of]] but initializes state using another effect constructor
     */
   def in[F[_]: Sync, G[_]: Concurrent, A](initial: A, maxReaders: Int = Int.MaxValue): F[ReadWrite[G, A]] =

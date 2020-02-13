@@ -2,12 +2,12 @@ package tofu.common
 
 import java.io.{BufferedReader, PrintStream}
 
-import scala.{Console => ScalaConsole}
-
 import cats.effect.Sync
 import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
+
+import scala.{Console => ScalaConsole}
 
 @typeclass
 trait Console[F[_]] {
@@ -21,13 +21,20 @@ trait Console[F[_]] {
 }
 
 object Console {
-  def readStrLn[F[_]: Console]: F[String] = Console[F].readStrLn
+  @deprecated("use tofu.syntax.console", since = "0.7.2")
+  def readStrLn[F[_]](implicit F: Console[F]): F[String] = F.readStrLn
 
-  def putStr[F[_]: Console](s: String): F[Unit]   = Console[F].putStr(s)
-  def putStrLn[F[_]: Console](s: String): F[Unit] = Console[F].putStrLn(s)
+  @deprecated("use tofu.syntax.console", since = "0.7.2")
+  def putStr[F[_]](s: String)(implicit F: Console[F]): F[Unit] = Console[F].putStr(s)
 
-  def putErr[F[_]: Console](e: String): F[Unit]   = Console[F].putErr(e)
-  def putErrLn[F[_]: Console](e: String): F[Unit] = Console[F].putErrLn(e)
+  @deprecated("use tofu.syntax.console", since = "0.7.2")
+  def putStrLn[F[_]](s: String)(implicit F: Console[F]): F[Unit] = Console[F].putStrLn(s)
+
+  @deprecated("use tofu.syntax.console", since = "0.7.2")
+  def putErr[F[_]](e: String)(implicit F: Console[F]): F[Unit] = Console[F].putErr(e)
+
+  @deprecated("use tofu.syntax.console", since = "0.7.2")
+  def putErrLn[F[_]](e: String)(implicit F: Console[F]): F[Unit] = Console[F].putErrLn(e)
 
   implicit val representableKInstance: RepresentableK[Console] = higherKind.derived.genRepresentableK[Console]
 
