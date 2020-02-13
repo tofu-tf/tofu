@@ -16,118 +16,102 @@ There are no
 
 ## Examples
 ### Single value cache
-```scala
+```scala mdoc
 import tofu.memo._
-import cats.effect.{Clock, Sync}
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
+import cats.effect.Clock
+import tofu.concurrent._
+import cats._
+import tofu.syntax.monadic._
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
-import scala.concurrent.duration.FiniteDuration
-import java.util.concurrent.TimeUnit
+import scala.concurrent.duration._
+import tofu.common.Console
+import tofu.syntax.console._
 
-def effect[F[_] : Sync]: F[Int] = Sync[F].delay(println("called")).as(335)
+def effect[F[_] : Console: Functor]: F[Int] = putStrLn("called").as(335)
 
-def f[F[_] : Sync : Clock] =
+def f[F[_] : Console : Clock: Monad : Refs] =
   for {
-    kasha <- Cached[F](effect)(FiniteDuration(10L, TimeUnit.MINUTES), CacheControl.empty.pure[F]).ref
+    kasha <- Cached[F](effect)(10.minutes, CacheControl.empty.pure[F]).ref
     v1 <- kasha
     v2 <- kasha
     v3 <- kasha
   } yield List(v1,v2,v3).sum
 
 f[Task].runSyncUnsafe()
-
-/*
-called
-res0: Int = 1005
-*/
 ```
 ### Value mapping cache
-```scala
+```scala mdoc:reset
 import tofu.memo._
-import cats.effect.{Clock, Sync}
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
+import cats.effect.Clock
+import cats._
+import tofu.concurrent._
+import tofu.syntax.monadic._
+import tofu.syntax.console._
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
-import scala.concurrent.duration.FiniteDuration
-import java.util.concurrent.TimeUnit
+import scala.concurrent.duration._
+import tofu.common.Console
 
-def effect[F[_] : Sync]: Int => F[String] =
-  x => 
-    Sync[F].delay(println("called")).as(s"Number $x")
 
-def f[F[_] : Sync : Clock] =
+def effect[F[_] : Console: Functor]: Int => F[String] =
+  x => putStrLn("called").as(s"Number $x")
+
+def f[F[_] : Console : Clock: Monad: Refs] =
   for {
-    kasha <- CachedFunc[F](effect)(FiniteDuration(10L, TimeUnit.MINUTES), CacheControl.empty.pure[F]).refVals.ref
+    kasha <- CachedFunc[F](effect)(10.minutes, CacheControl.empty.pure[F]).refVals.ref
     v1 <- kasha(335)
-    _ <- Sync[F].delay(println(v1))
+    _  <- putStrLn(v1)
     v2 <- kasha(335)
-    _ <- Sync[F].delay(println(v2))
+    _  <- putStrLn(v2)
     v3 <- kasha(336)
-    _ <- Sync[F].delay(println(v3))
+    _  <- putStrLn(v3)
   } yield ()
 
 f[Task].runSyncUnsafe()
-
-/*
-called
-Number 335
-Number 335
-called
-Number 336
- */
 ```
 
 ### TTL
-```scala
+```scala mdoc
 import tofu.memo._
-import cats.effect.{Clock, Sync, Timer}
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
+import cats.effect.{Clock, Timer}
+import tofu.common.Console
+import cats._
+import tofu.concurrent._
+import tofu.syntax.monadic._
+import tofu.syntax.console._
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
-import scala.concurrent.duration.FiniteDuration
-import java.util.concurrent.TimeUnit
+import scala.concurrent.duration._
+import tofu.syntax.timer._
 
-def longEffect[F[_] : Sync : Timer]: Int => F[String] =
+
+def longEffect[F[_]: Console: Monad: Timer]: Int => F[String] =
   x =>
-    Timer[F].sleep(FiniteDuration(1L, TimeUnit.SECONDS)) >>
-    Sync[F].delay(println("called")).as(s"Number $x")
+    Timer[F].sleep(1.second) >>
+    putStrLn("called").as(s"Number $x")
 
-def f[F[_] : Sync : Clock : Timer](ttl : FiniteDuration) =
+def f[F[_]: Console: Refs: Clock: Timer: Monad](ttl : FiniteDuration) =
   for {
     kasha <- CachedFunc[F](longEffect)(ttl, CacheControl.empty.pure[F]).refVals.ref
     v1 <- kasha(335)
-    _ <- Sync[F].delay(println(v1))
-    _ <- Timer[F].sleep(ttl - FiniteDuration(2L, TimeUnit.SECONDS))
+    _  <- putStrLn(v1)
+    _  <- sleep(ttl - 2.seconds)
     v2 <- kasha(335)
-    _ <- Sync[F].delay(println(v2))
-    _ <- Timer[F].sleep(FiniteDuration(3L, TimeUnit.SECONDS))
+    _  <- putStrLn(v2)
+    _  <- sleep(3.seconds)
     v3 <- kasha(335)
-    _ <- Sync[F].delay(println(v3))
+    _  <- putStrLn(v3)
   } yield ()
 
-f[Task](FiniteDuration(10L, TimeUnit.SECONDS)).runSyncUnsafe()
-
-/*
-called
-Number 335
-Number 335
-called
-Number 335
- */
+f[Task](10.seconds).runSyncUnsafe()
 ```
 There is a pitfall with TTL. Cached value keeps time of access to cache and not time when the effect completes. Just keep it in mind. Modification of the last example 
 ```scala
-def longEffect[F[_] : Sync : Timer]: Int => F[String] =
+def longEffect[F[_]: Console: Monad: Timer]: Int => F[String] =
   x =>
-    Timer[F].sleep(FiniteDuration(3L, TimeUnit.SECONDS)) >>
-    Sync[F].delay(println("called")).as(s"Number $x")
+    sleep(3.seconds) >>
+    putStrLn("called").as(s"Number $x")
 ```
 returns
 
@@ -140,46 +124,40 @@ Number 335
 ```
 ### Forced invalidation
 To invalidate cache update CacheControl and set it to current time:
-```scala
+```scala mdoc:reset
 import tofu.memo._
-import cats.effect.{Clock, Sync, Timer}
-import cats.effect.concurrent.Ref
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
+import cats.effect.{Clock, Timer}
+import tofu.common.Console
+import cats._
+import tofu.concurrent._
+import tofu.syntax.monadic._
+import tofu.syntax.console._
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
+import tofu.syntax.timer._
 
-def effect[F[_] : Sync : Timer]: Int => F[String] =
-  x =>
-    Sync[F].delay(println("called")).as(s"Number $x")
 
-def f[F[_] : Sync : Clock : Timer](ttl : FiniteDuration) =
+def effect[F[_]: Functor: Console: Timer]: Int => F[String] =
+  x => putStrLn("called").as(s"Number $x")
+
+def f[F[_]: Monad :Refs : Clock: Timer: Console](ttl : FiniteDuration) =
   for {
-    ref <- Ref.of[F, CacheControl](CacheControl.empty)
-    kasha <- CachedFunc[F](effect)(ttl, ref.get).refVals.ref
-    v1 <- kasha(335)
-    _ <- Sync[F].delay(println(v1))
-    _ <- Timer[F].sleep(FiniteDuration(2L, TimeUnit.SECONDS))
-    v2 <- kasha(335)
-    _ <- Sync[F].delay(println(v2))
-    now <- Clock[F].realTime(TimeUnit.MILLISECONDS)
-    _ <- ref.update(_.copy(InvalidationTS(now)))
-    _ <- Timer[F].sleep(FiniteDuration(3L, TimeUnit.SECONDS))
-    v3 <- kasha(335)
-    _ <- Sync[F].delay(println(v3))
+    ref   <- Refs[F].of(CacheControl.empty)
+    kasha <- CachedFunc[F](effect[F])(ttl, ref.get).refVals.ref
+    v1    <- kasha(335)
+    _     <- putStrLn(v1)
+    _     <- sleep(2.seconds)
+    v2    <- kasha(335)
+    _     <- putStrLn(v2)
+    now   <- Clock[F].realTime(TimeUnit.MILLISECONDS)
+    _     <- ref.update(_.copy(InvalidationTS(now)))
+    _     <- sleep(3.seconds)
+    v3    <- kasha(335)
+    _     <- putStrLn(v3)
   } yield ()
 
-f[Task](FiniteDuration(1000L, TimeUnit.SECONDS)).runSyncUnsafe()
-
-/*
-called
-Number 335
-Number 335
-called
-Number 335
- */
+f[Task](1000.seconds).runSyncUnsafe()
 ```
 How it works. Cached value remembers time of read access during update (T_update). On any read access tofu selects a time to compare with T_update (update value when `T_selected > T_update`). Selection is based on a formula `max(T_now - TTL, T_CacheControl)`. If you set `T_CacheControl = T_now` then always T_CacheControl is more than T_update. After update of a value, T_update equals T_CacheControl.
