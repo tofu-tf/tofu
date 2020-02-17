@@ -19,10 +19,7 @@ trait MergeInstances1 {
     (a, b) => caseClass.construct(p => p.typeclass.merge(p.dereference(a), p.dereference(b)))
 
   def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
-    (a, b) =>
-      sealedTrait.dispatch(a) { h =>
-        if (h.cast.isDefinedAt(b)) h.typeclass.merge(h.cast(a), h.cast(b)) else a
-      }
+    (a, b) => sealedTrait.dispatch(a) { h => if (h.cast.isDefinedAt(b)) h.typeclass.merge(h.cast(a), h.cast(b)) else a }
 
   implicit def instance[A]: Merge[A] = macro Magnolia.gen[A]
 }

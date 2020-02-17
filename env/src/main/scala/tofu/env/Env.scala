@@ -154,9 +154,7 @@ sealed trait Env[E, +A] {
   }
 
   def memoSuccess: Env[E, Env[E, A]] =
-    Env.fromTask(Memoization[A].map { memo =>
-      Env(ctx => memo.flatMap(_.getOrElse(run(ctx))))
-    })
+    Env.fromTask(Memoization[A].map { memo => Env(ctx => memo.flatMap(_.getOrElse(run(ctx)))) })
 
   def memo: Env[E, Env[E, A]] =
     Env.fromTask(Memoization[Try[A]].map { memo =>
