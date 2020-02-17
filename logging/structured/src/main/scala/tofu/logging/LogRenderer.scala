@@ -121,9 +121,7 @@ trait LogBuilder[U] {
 
   /** accept several loggable values and produce the result */
   def build[A](as: A*)(implicit L: Loggable[A]): U =
-    make { d =>
-      as.foldLeft(d.noop)((acc, a) => acc |+| L.fields(a, d))
-    }
+    make { d => as.foldLeft(d.noop)((acc, a) => acc |+| L.fields(a, d)) }
 
   /** accept loggable value and produce the result */
   def apply[A](a: A)(implicit L: Loggable[A]): U =

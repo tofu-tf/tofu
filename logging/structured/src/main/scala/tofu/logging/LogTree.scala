@@ -15,9 +15,7 @@ sealed trait LogTree {
   import LogTree._
   def json: SyncIO[Json] = this match {
     case LogDict(values) =>
-      values.get.flatMap { d =>
-        d.toList.traverse { case (name, t) => t.json.map(name -> _) }.map(Json.obj(_: _*))
-      }
+      values.get.flatMap { d => d.toList.traverse { case (name, t) => t.json.map(name -> _) }.map(Json.obj(_: _*)) }
     case LogArr(items)        => items.toList.traverse(_.json).map(Json.arr(_: _*))
     case value: LogParamValue => value.jsonVal.pure[SyncIO]
   }
