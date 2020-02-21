@@ -1,11 +1,9 @@
 package tofu.syntax
 
 import cats.Monad
-import cats.syntax.applicative._
-import cats.syntax.flatMap._
-import cats.syntax.functor._
 import cats.syntax.option._
 import tofu.Raise
+import tofu.syntax.monadic._
 
 object foption {
   implicit final class FOptionOps[F[_], A](private val lhs: F[Option[A]]) extends AnyVal {
