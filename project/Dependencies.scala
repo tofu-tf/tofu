@@ -44,7 +44,7 @@ object Dependencies {
 
     val simulacrum = "1.0.0"
 
-    val silencer = "1.5.0"
+    val silencer = "1.6.0"
 
     val kindProjector = "0.11.0"
 
