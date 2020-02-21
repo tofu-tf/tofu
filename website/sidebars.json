@@ -25,7 +25,8 @@
         "type": "subcategory",
         "label": "Utilities",
         "ids": [
-          "memo"
+          "memo",
+          "logging"
         ]
       }
     ]
