@@ -40,7 +40,7 @@ trait Selective[F[_]] extends Applicative[F] {
 object Selective extends SelectiveInstances
 
 trait SelectiveInstances extends SelectiveInstances2 {
-  final implicit def selectiveOverMonad[F[_]: Monad]: Selective[F] = new SelectiveOverMonad[F]
+  final implicit def selectiveOverMonad[F[_]: Monad]: SelectiveOverMonad[F] = new SelectiveOverMonad[F]
 }
 trait SelectiveInstances2 {
   final implicit def selectiveOptionT[F[_]: Selective]: Selective[OptionT[F, *]]       = new SelectiveOptionT[F]
