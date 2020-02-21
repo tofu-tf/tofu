@@ -10,7 +10,10 @@ object foption {
     def getOrElseF(fa: => F[A])(implicit F: Monad[F]): F[A] =
       lhs.flatMap(_.fold(fa)(_.pure[F]))
     def orElseF(fa: => F[Option[A]])(implicit F: Monad[F]): F[Option[A]] =
-      lhs.flatMap(_.fold(fa)(_.some.pure[F]))
+      lhs.flatMap {
+        case None => fa
+        case x => x.pure[F]
+      }
     def orThrow[E](err: => E)(implicit F: Monad[F], FE: Raise[F, E]): F[A] =
       lhs.getOrElseF(FE.raise(err))
     def flatMapOpt[B](f: A => F[B])(implicit F: Monad[F]): F[Option[B]] =
