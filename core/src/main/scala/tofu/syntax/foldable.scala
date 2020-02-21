@@ -34,6 +34,5 @@ object foldable {
       */
     def takeWhileM[G[_], B](f: A => G[Option[B]])(implicit F: Foldable[F], G: Monad[G]): G[List[B]] =
       G.map(foldWhileM(List.empty[B])((acc, a) => G.map(f(a))(_.map(acc.::))))(_.reverse)
-
   }
 }
