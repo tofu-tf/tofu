@@ -25,6 +25,6 @@ object foption {
     def flatMapOpt[B](f: A => F[B])(implicit F: Monad[F]): F[Option[B]] =
       lhs.doubleFlatMap(f(_).map(_.some))
     def doubleFlatMap[B](f: A => F[Option[B]])(implicit F: Monad[F]): F[Option[B]] =
-      lhs.flatMap(_.fold(none[B].pure[F])(f(_)))
+      lhs.flatMap(_.fold(noneF[F, B])(f(_)))
   }
 }
