@@ -12,7 +12,7 @@ Ref is a mutable reference which is non-blocking, accessed and modified concurre
 Provides safe concurrent access and modification of its content, but no functionality for synchronisation, which is instead handled by Deferred.
 For this reason, a Ref is always initialised to a value.
 
-```scala mdoc
+```scala
 abstract class Ref[F[_], A] {
   def get: F[A]
   def set(a: A): F[Unit]
@@ -24,11 +24,14 @@ abstract class Ref[F[_], A] {
 
 Ref's companion object contains some methods which creates new Ref instance:
 
-```scala mdoc
+```scala
+import cats.effect.Sync
+import cats.effect.concurrent.Ref
+
 object Ref {
-    def of[F[_], A](a: A)(implicit F: Sync[F]): F[Ref[F, A]]
-    def in[F[_], G[_], A](a: A)(implicit F: Sync[F], G: Sync[G]): F[Ref[G, A]]
-    ...
+    def of[F[_], A](a: A)(implicit F: Sync[F]): F[Ref[F, A]]  = ???
+    def in[F[_], G[_], A](a: A)(implicit F: Sync[F], G: Sync[G]): F[Ref[G, A]] = ???
+    //...
 }
 ```
 
@@ -40,8 +43,8 @@ Althought, this methods needs to given Sync instances for our effects.
 
 Tofu offers an easy and understandable initialyzer for Ref.  
 
-```scala mdoc
-package tofu.concurrent
+```scala
+import cats.effect.concurrent.Ref
 
 trait MakeRef[I[_], F[_]] {
   def refOf[A](a: A): I[Ref[F, A]]
@@ -51,11 +54,13 @@ trait MakeRef[I[_], F[_]] {
 MakeRef has a companion object that offers easier initialization of Ref instances.
 There is defined implicit syncInstance that helps in creating Ref on Sync based effects.
 
-```scala mdoc
+```scala
+import tofu.concurrent.MakeRef
+import cats.effect.Sync
 
 object MakeRef {
-  def apply[I[_], F[_]](implicit makeRef: MakeRef[I, F])
-  implicit def syncInstance[I[_]: Sync, F[_]: Sync]: MakeRef[I, F]
+  def apply[I[_], F[_]](implicit makeRef: MakeRef[I, F]) = ???
+  implicit def syncInstance[I[_]: Sync, F[_]: Sync]: MakeRef[I, F] = ???
 }
 ```
 
@@ -81,11 +86,27 @@ program.unsafeRunSync() // (42, 43)
 You can simplify this by using Refs[F[]] type alias defined in `tofu.concurrent` package object. 
 
 ```scala mdoc
-    ref <- Refs[IO].of[Int](42)      
+import tofu.concurrent.Refs
+import cats.effect.IO
+
+for {
+    ref <- Refs[IO].of[Int](42)
+    c1  <- ref.get
+    _   <- ref.modify(x => (x + 1, x))
+    c2  <- ref.get
+} yield (c1,c2)
 ```
 
 You can also omit the explicit indication of the value type.
 
 ```scala mdoc
+import tofu.concurrent.Refs
+import cats.effect.IO
+
+for {
     ref <- Refs[IO].of(42)
+    c1  <- ref.get
+    _   <- ref.modify(x => (x + 1, x))
+    c2  <- ref.get
+} yield (c1,c2)
 ```
