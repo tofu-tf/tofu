@@ -46,7 +46,7 @@ object Merge extends Derivation[Merge] with MergeInstances1 {
   final implicit object primitiveBigInt        extends Primitive[BigInt]
   final implicit object primitiveLocalDateTime extends Primitive[LocalDateTime]
   final implicit object primitiveZonedDateTime extends Primitive[ZonedDateTime]
-  final implicit object primitiveDateTime      extends Primitive[LocalDate]
+  final implicit object primitiveLocalDate     extends Primitive[LocalDate]
   final implicit object primitiveInstant       extends Primitive[Instant]
   final implicit object primitiveString        extends Primitive[String]
 }
