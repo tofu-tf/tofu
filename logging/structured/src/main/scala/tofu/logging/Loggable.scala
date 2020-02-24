@@ -1,6 +1,6 @@
 package tofu.logging
 
-import java.time.{Instant, LocalDateTime, ZonedDateTime}
+import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 
 import alleycats.std.iterable._
 import alleycats.std.set._
@@ -99,7 +99,7 @@ object Loggable {
         fields[I, V, R, M](a, i)
       override def toString: String = logShow(a)
       override def typeName: String = self.typeName
-      def shortName: String             = self.shortName
+      def shortName: String         = self.shortName
     }
 
     /** transform input value befor logging */
@@ -245,6 +245,7 @@ object Loggable {
   final implicit val instantLoggable: Loggable[Instant]             = stringValue.contramap(_.toString)
   final implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime] = stringValue.contramap(_.toString)
   final implicit val localDateTimeLoggable: Loggable[LocalDateTime] = stringValue.contramap(_.toString)
+  final implicit val localDateLoggable: Loggable[LocalDate]         = stringValue.contramap(_.toString)
   final implicit val durationLoggable: Loggable[java.time.Duration] = stringValue.contramap(_.toString)
 
   final implicit def mapLoggable[A](implicit A: Loggable[A]): Loggable[Map[String, A]] =
@@ -354,5 +355,5 @@ final class LoggedThrowable(cause: Throwable) extends Throwable(cause.getMessage
     f.addString("stacktrace", cause.getStackTrace.mkString("\n"), input)
 
   override def typeName: String = cause.getClass.getTypeName
-  def shortName: String             = "exception"
+  def shortName: String         = "exception"
 }
