@@ -1,6 +1,6 @@
 package tofu.logging
 
-import java.time.{Instant, LocalDateTime, ZonedDateTime}
+import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 
 import alleycats.std.iterable._
 import alleycats.std.set._
@@ -245,6 +245,7 @@ object Loggable {
   final implicit val instantLoggable: Loggable[Instant]             = stringValue.contramap(_.toString)
   final implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime] = stringValue.contramap(_.toString)
   final implicit val localDateTimeLoggable: Loggable[LocalDateTime] = stringValue.contramap(_.toString)
+  final implicit val localDateLoggable: Loggable[LocalDate]         = stringValue.contramap(_.toString)
   final implicit val durationLoggable: Loggable[java.time.Duration] = stringValue.contramap(_.toString)
 
   final implicit def mapLoggable[A](implicit A: Loggable[A]): Loggable[Map[String, A]] =
