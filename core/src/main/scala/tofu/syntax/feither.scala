@@ -1,9 +1,8 @@
 package tofu.syntax
 
 import cats.syntax.either._
-import cats.{Applicative, Functor, Monad, Traverse, ~>}
+import cats.{Applicative, Functor, Monad, Traverse}
 import tofu.Raise
-import tofu.lift.Lift
 
 object feither {
 
@@ -78,13 +77,6 @@ object feither {
       F.map(e)(_.leftFlatMap(f))
     }
 
-    def flatMapF[L1 >: L, B](f: R => F[Either[L1, B]])(implicit F: Monad[F]): F[Either[L1, B]] = {
-      F.flatMap(e) {
-        case Right(right)   => f(right)
-        case left @ Left(_) => F.pure(left.rightCast)
-      }
-    }
-
     def leftFlatMapF[R1 >: R, L1](f: L => F[Either[L1, R1]])(implicit F: Monad[F]): F[Either[L1, R1]] = {
       F.flatMap(e) {
         case Left(left)       => f(left)
@@ -92,7 +84,7 @@ object feither {
       }
     }
 
-    def doubleFlatMap[L1 >: L, R1 >: R](f: R => F[Either[L1, R1]])(implicit F: Monad[F]): F[Either[L1, R1]] = {
+    def doubleFlatMap[L1 >: L, R1](f: R => F[Either[L1, R1]])(implicit F: Monad[F]): F[Either[L1, R1]] = {
       F.flatMap(e) {
         case Right(right)   => f(right)
         case left @ Left(_) => F.pure(left.rightCast)
@@ -108,7 +100,7 @@ object feither {
     }
 
     def ensureF[L1 >: L](f: R => F[Boolean], err: => F[L1])(implicit F: Monad[F]): F[Either[L1, R]] = {
-      flatMapF(right => F.flatMap(f(right))(p => Either.condF(p, F.pure(right), err)))
+      doubleFlatMap(right => F.flatMap(f(right))(p => Either.condF(p, F.pure(right), err)))
     }
 
     def traverseF[G[_]: Applicative, R1](f: R => G[R1])(implicit F: Functor[F]): F[G[Either[L, R1]]] = {
@@ -177,15 +169,7 @@ object feither {
       F.flatMap(productF(eb))(_.traverse { case (r, r1) => f(r, r1) })
     }
 
-    def mapK[G[_]](implicit F: ~>[F, G]): G[Either[L, R]] = {
-      F(e)
-    }
-
-    def liftTo[G[_]](implicit F: Lift[F, G]): G[Either[L, R]] = {
-      F.lift(e)
-    }
-
-    def mergeF(implicit ev: L =:= R, F: Functor[F]): F[R] = {
+    def mergeF[A >: R](implicit ev: L <:< A, F: Functor[F]): F[A] = {
       F.map(e) {
         case Left(value)  => ev(value)
         case Right(value) => value

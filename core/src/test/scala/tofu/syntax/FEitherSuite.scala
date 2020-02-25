@@ -5,10 +5,8 @@ import cats.instances.option._
 import cats.syntax.option.catsSyntaxOptionId
 import cats.syntax.option.none
 import cats.syntax.either._
-import cats.~>
 import org.scalatest.{MustMatchers, WordSpec}
 import tofu.Raise
-import tofu.lift.Lift
 import tofu.syntax.feither._
 
 class FEitherSuite extends WordSpec with MustMatchers {
@@ -529,34 +527,6 @@ class FEitherSuite extends WordSpec with MustMatchers {
 
     "check lazyness" in {
       defaultLeft.flatMap2F(boomRight)((_, _: Any) => Some("")) mustBe Some(Left(4))
-    }
-  }
-
-  "EitherFOps#mapK" should {
-    "successful map kind" in {
-      implicit val funkK = new ~>[Option, Either[Unit, *]] {
-        override def apply[A](fa: Option[A]): Either[Unit, A] = fa match {
-          case Some(value) => Right(value)
-          case None        => Left(())
-        }
-      }
-
-      defaultRight.mapK[Either[Unit, *]] mustBe Right(Right(4))
-      none[Either[String, Int]].mapK[Either[Unit, *]] mustBe Left(())
-    }
-  }
-
-  "EitherFOps#liftTo" should {
-    "successful map kind" in {
-      implicit val funkK = new Lift[Option, Either[Unit, *]] {
-        override def lift[A](fa: Option[A]): Either[Unit, A] = fa match {
-          case Some(value) => Right(value)
-          case None        => Left(())
-        }
-      }
-
-      defaultRight.liftTo[Either[Unit, *]] mustBe Right(Right(4))
-      none[Either[String, Int]].liftTo[Either[Unit, *]] mustBe Left(())
     }
   }
 
