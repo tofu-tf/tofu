@@ -13,8 +13,8 @@ object foption {
   }
 
   implicit final class FOptionSyntax[F[_], A](private val lhs: F[Option[A]]) extends AnyVal {
-    def getOrElseF(fa: => F[A])(implicit F: Monad[F]): F[A] =
-      lhs.flatMap(_.fold(fa)(_.pure[F]))
+    def getOrElseF[B >: A](fa: => F[B])(implicit F: Monad[F]): F[B] =
+      lhs.flatMap(_.fold(fa)(F.pure))
     def orElseF(fa: => F[Option[A]])(implicit F: Monad[F]): F[Option[A]] =
       lhs.flatMap {
         case None => fa
