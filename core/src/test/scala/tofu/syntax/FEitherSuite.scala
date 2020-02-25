@@ -458,7 +458,7 @@ class FEitherSuite extends WordSpec with MustMatchers {
   "EitherFOps#apF" should {
 
     def defaultRightFunc = defaultRight.map(_.map(i => (l: Int) => i + l))
-    def defaultLeftFunc = defaultLeft.map(_.map(i => (l: Int) => i + l))
+    def defaultLeftFunc  = defaultLeft.map(_.map(i => (l: Int) => i + l))
     def defaultLeftLFunc = defaultLeft.map(_.map(i => (l: String) => i + l.length))
 
     "return None" in {
@@ -537,7 +537,7 @@ class FEitherSuite extends WordSpec with MustMatchers {
       implicit val funkK = new ~>[Option, Either[Unit, *]] {
         override def apply[A](fa: Option[A]): Either[Unit, A] = fa match {
           case Some(value) => Right(value)
-          case None => Left(())
+          case None        => Left(())
         }
       }
 
@@ -551,7 +551,7 @@ class FEitherSuite extends WordSpec with MustMatchers {
       implicit val funkK = new Lift[Option, Either[Unit, *]] {
         override def lift[A](fa: Option[A]): Either[Unit, A] = fa match {
           case Some(value) => Right(value)
-          case None => Left(())
+          case None        => Left(())
         }
       }
 

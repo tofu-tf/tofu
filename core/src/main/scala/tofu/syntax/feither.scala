@@ -75,8 +75,7 @@ object feither {
     }
 
     def leftFlatMapIn[L1, R1 >: R](f: L => Either[L1, R1])(implicit F: Functor[F]): F[Either[L1, R1]] = {
-      F.map(e) {_.leftFlatMap(f)
-      }
+      F.map(e)(_.leftFlatMap(f))
     }
 
     def flatMapF[L1 >: L, B](f: R => F[Either[L1, B]])(implicit F: Monad[F]): F[Either[L1, B]] = {
@@ -188,7 +187,7 @@ object feither {
 
     def mergeF(implicit ev: L =:= R, F: Functor[F]): F[R] = {
       F.map(e) {
-        case Left(value) => ev(value)
+        case Left(value)  => ev(value)
         case Right(value) => value
       }
     }
