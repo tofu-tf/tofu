@@ -29,7 +29,7 @@ object MakeRef {
     * Makes a `Ref` instance
     *
     * Uses the
-    * [[https://tpolecat.github.io/2015/07/30/infer.html Kinda-Curried Type Parameters]]
+    * [[https://typelevel.org/cats/guidelines.html#partially-applied-type-params Partially-Applied Type]]
     * technique.
     *
     * {{{
