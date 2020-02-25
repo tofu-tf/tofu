@@ -60,10 +60,7 @@ object feither {
     }
 
     def mapF[B](f: R => F[B])(implicit F: Monad[F]): F[Either[L, B]] = {
-      F.flatMap(e) {
-        case Right(right)   => F.map(f(right))(_.asRight)
-        case left @ Left(_) => F.pure(left.rightCast)
-      }
+      F.flatMap(e)(_.traverse(f))
     }
 
     def leftMapF[L1](f: L => F[L1])(implicit F: Monad[F]): F[Either[L1, R]] = {
@@ -74,16 +71,11 @@ object feither {
     }
 
     def flatMapIn[L1 >: L, B](f: R => Either[L1, B])(implicit F: Functor[F]): F[Either[L1, B]] = {
-      F.map(e) {
-        case Right(right)   => f(right)
-        case left @ Left(_) => left.rightCast
-      }
+      F.map(e)(_.flatMap(f))
     }
 
     def leftFlatMapIn[L1, R1 >: R](f: L => Either[L1, R1])(implicit F: Functor[F]): F[Either[L1, R1]] = {
-      F.map(e) {
-        case right @ Right(_) => right.leftCast
-        case Left(left)       => f(left)
+      F.map(e) {_.leftFlatMap(f)
       }
     }
 
@@ -113,17 +105,11 @@ object feither {
     }
 
     def ensure[L1 >: L](f: R => Boolean, err: => L1)(implicit F: Functor[F]): F[Either[L1, R]] = {
-      F.map(e) {
-        case Right(right) => Either.cond(f(right), right, err)
-        case left         => left
-      }
+      flatMapIn(right => Either.cond(f(right), right, err))
     }
 
     def ensureF[L1 >: L](f: R => F[Boolean], err: => F[L1])(implicit F: Monad[F]): F[Either[L1, R]] = {
-      F.flatMap(e) {
-        case Right(right)   => F.flatMap(f(right))(p => Either.condF(p, F.pure(right), err))
-        case left @ Left(_) => F.pure(left.rightCast)
-      }
+      flatMapF(right => F.flatMap(f(right))(p => Either.condF(p, F.pure(right), err)))
     }
 
     def traverseF[G[_]: Applicative, R1](f: R => G[R1])(implicit F: Functor[F]): F[G[Either[L, R1]]] = {
@@ -183,27 +169,13 @@ object feither {
     def map2F[L1 >: L, R1, Z](
         eb: => F[Either[L1, R1]]
     )(f: (R, R1) => Z)(implicit F: Monad[F]): F[Either[L1, Z]] = {
-      F.flatMap(e) {
-        case left @ Left(_) => F.pure(left.rightCast)
-        case Right(r) =>
-          F.flatMap(eb) {
-            case Right(r1)      => f(r, r1).asRightF
-            case left @ Left(_) => F.pure(left.rightCast)
-          }
-      }
+      F.map(productF(eb))(_.map { case (r, r1) => f(r, r1) })
     }
 
     def flatMap2F[L1 >: L, R1, Z](
         eb: => F[Either[L1, R1]]
     )(f: (R, R1) => F[Z])(implicit F: Monad[F]): F[Either[L1, Z]] = {
-      F.flatMap(e) {
-        case left @ Left(_) => F.pure(left.rightCast)
-        case Right(a) =>
-          F.flatMap(eb) {
-            case Right(b)       => F.map(f(a, b))(_.asRight)
-            case left @ Left(_) => F.pure(left.rightCast)
-          }
-      }
+      F.flatMap(productF(eb))(_.traverse { case (r, r1) => f(r, r1) })
     }
 
     def mapK[G[_]](implicit F: ~>[F, G]): G[Either[L, R]] = {
@@ -212,6 +184,13 @@ object feither {
 
     def liftTo[G[_]](implicit F: Lift[F, G]): G[Either[L, R]] = {
       F.lift(e)
+    }
+
+    def mergeF(implicit ev: L =:= R, F: Functor[F]): F[R] = {
+      F.map(e) {
+        case Left(value) => ev(value)
+        case Right(value) => value
+      }
     }
   }
 
