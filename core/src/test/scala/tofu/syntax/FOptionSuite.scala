@@ -44,25 +44,25 @@ class FOptionSuite extends AnyFlatSpec {
 
   "flatMapOpt" should "run when non empty" in {
     assert(
-      42.someF[List].flatMapOpt(x => List(x + 1)) === List(Some(43))
+      42.someF[List].semiflatMap(x => List(x + 1)) === List(Some(43))
     )
   }
 
   "flatMapOpt" should "keep empty when empty" in {
     assert(
-      noneF[List, Int].flatMapOpt(x => List(x + 1)) === List(None)
+      noneF[List, Int].semiflatMap(x => List(x + 1)) === List(None)
     )
   }
 
   "doubleFlatMap" should "run when non empty" in {
     assert(
-      42.someF[List].doubleFlatMap(x => List(Some(x + 1))) === List(Some(43))
+      42.someF[List].flatMapF(x => List(Some(x + 1))) === List(Some(43))
     )
   }
 
   "doubleFlatMap" should "keep empty when empty" in {
     assert(
-      noneF[List, Int].doubleFlatMap(x => List(Some(x + 1))) === List(None)
+      noneF[List, Int].flatMapF(x => List(Some(x + 1))) === List(None)
     )
   }
 }
