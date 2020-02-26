@@ -7,15 +7,15 @@ title: Logging
 
 Almost every application nowadays does logging, whether it's logging of business events, history of some state of 
 application or even debug record sequences. We log to files, distributed systems, standard outputs of OSes, and we 
-got used to it so much it seems really simply to us. Many existing libraries provide many ways of logging from 
+got used to it so much it seems really simple to us. Many existing libraries provide many ways of logging from 
 your application's code, either automatic or manual.
 
 ### What's wrong?
 
-First, in fact, logging is a side effect. Whether we log anything to a standard output, or a file - it's an interaction 
+First, logging is, in fact, a side effect. Whether we log anything to a standard output, or a file - it's an interaction 
 with the outside world ('outside' relative to our program). Thus, logging as a process can be represented as an effect and operations - as an algebra.  
 Second, logging itself seems easy, but stuff around it - not so much. MDC, contexts, structured logging - all these 
-things are very helpful on a day-to-day basis, helping us to read and write our logs, making them clean, comprehensible 
+things are very helpful on a day-to-day basis, allowing us to read and write our logs, making them clean, comprehensible 
 and useful for many purposes. But there are few simple ways to provide all this functionality without bleeding and 
 screaming from seeing over-engineered solutions.
 
@@ -122,12 +122,9 @@ as a JSON fields.
 #### Syntax extensions
 It's much more convenient to use pre-defined syntax extensions for logging operations since they do all heavy lifting for you:
 ```scala mdoc:reset
-import cats.Monad
-import cats.Show
-import cats.syntax.functor._
+import cats.{Monad, Show}
 import cats.effect._
-
-import tofu.logging._
+import cats.syntax.functor._
 import tofu.syntax.logging._
 
 case class User(name: String, surname: String)
@@ -141,17 +138,27 @@ val user: User = User("name", "surname")
 class MyService[F[_]: Logging: Monad] {
   def doLogging: F[Unit] =
     for {
-        _ <- info"This is a syntax demo: $user"
-    } yield () 
+      _ <- info"This is a syntax demo: $user"
+    } yield ()
 }
 
 object MyService {
-  // note, that creating service may require Sync instance, but class itself does not!
-  def apply[F[_]: Sync]: F[MyService[F]] = {
-    val logs = Logs.sync[F, F]
+  def apply[I[_]: Functor, F[_]: Monad](implicit logs: Logs[I, F]): I[MyService[F]] = {
     logs.forService[MyService[F]].map(implicit l => new MyService[F])
   }
 }
+
+// An instance of `Logs` is supposed to be shared between mupltiple classes (or a single one for a whole application)
+// Note that initializing effect of your application may differ from logging effect.
+implicit val logs: Logs[IO, IO] = Logs.sync[IO, IO]
+
+val io: IO[Unit] = for {
+  service <- MyService[IO, IO]
+  _       <- service.doLogging
+} yield ()
+
+io.unsafeRunSync()
+// 13:56:26.918 [main] INFO tofu.logging.Test$MyService - This is a syntax demo: name=name, surname=surname
 ```
 
 Using a syntax we achieve a few important goals.  
