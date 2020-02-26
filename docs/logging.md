@@ -10,17 +10,14 @@ application or even debug record sequences. We log to files, distributed systems
 got used to it so much it seems really simple to us. Many existing libraries provide many ways of logging from 
 your application's code, either automatic or manual.
 
-### What's wrong?
+### What's wrong (and how to fix that)?
 
 First, logging is, in fact, a side effect. Whether we log anything to a standard output, or a file - it's an interaction 
 with the outside world ('outside' relative to our program). Thus, logging as a process can be represented as an effect and operations - as an algebra.  
 Second, logging itself seems easy, but stuff around it - not so much. MDC, contexts, structured logging - all these 
 things are very helpful on a day-to-day basis, allowing us to read and write our logs, making them clean, comprehensible 
 and useful for many purposes. But there are few simple ways to provide all this functionality without bleeding and 
-screaming from seeing over-engineered solutions.
-
-### The solution: Logging
-
+screaming from seeing over-engineered solutions.  
 Tofu offers an easy and understandable abstraction over logging (it's even named like this!) but keeping in mind that 
 logging is an effect that can be composed.  
 It looks very similar to interfaces we all are used to (from SLF4J and other logging libraries and facades), introducing some new concepts:
@@ -56,7 +53,7 @@ class MyService
 // defines simple logging behaviour without any notion of contexts
 val syncLogs = Logs.sync[F, F]
 
-// desribing creation of logging instances and logging itself. When being run, this will log a message
+// describing creation of logging instances and logging itself. When being run, this will log a message
 val effect: F[Unit] = for {
     loggingBN <- syncLogs.byName("my-logger") // you can create instances by name
     loggingFS <- syncLogs.forService[MyService] // you can create instances by type tags
@@ -83,7 +80,7 @@ You can log that context to string as well as use it as a part of structured log
 #### What LoggedValue and Loggable is
 `LoggedValue` is a representation of a value that can be written to a log in a string form. 
 It's used internally, and you do not need to use it directly most of the time. Instead, what you want is a `Loggable` 
-typeclass, that describes how a value of some type `A` can be logged, either as a string representation in log message 
+typeclass, that describes how a value of some type `A` can be logged, both as a string representation in log message 
 and as a component of structured logging. Given an instance of `Loggable` for a type, a value of the type can be converted 
 into `LoggedValue` and thus logged in a way that you provided. 
 There are multiple predefined ways to create an instance of `Loggable`, many of them can be found in `tofu.logging.Loggable` object:  
@@ -122,9 +119,10 @@ as a JSON fields.
 #### Syntax extensions
 It's much more convenient to use pre-defined syntax extensions for logging operations since they do all heavy lifting for you:
 ```scala mdoc:reset
-import cats.{Monad, Show}
+import cats.{Monad, Show, Functor}
 import cats.effect._
 import cats.syntax.functor._
+import tofu.logging._
 import tofu.syntax.logging._
 
 case class User(name: String, surname: String)
