@@ -69,6 +69,10 @@ trait Agent[F[_], A] {
 object Agent {
 //  private[this] val representableAny: RepresentableK[Agent[*[_], Any]] = derived.genRepresentableK[Agent[*[_], Any]]
 
+  /**
+   * Default implementation of [[tofu.concurrent.Agent]]
+   * that consists of [[cats.effect.concurrent.Ref]] and [[cats.effect.concurrent.Semaphore]]
+   */
   final case class SemRef[F[_]: Monad: Fire, A](ref: Ref[F, A], sem: Semaphore[F]) extends Agent[F, A] {
     def get: F[A]                          = ref.get
     def updateM(f: A => F[A]): F[A]        = sem.withPermit(ref.get >>= (f(_) flatTap ref.set))
