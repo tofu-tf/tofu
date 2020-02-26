@@ -32,7 +32,8 @@
         "type": "subcategory",
         "label": "Concurrent",
         "ids": [
-          "concurrent-makeref"
+          "concurrent-makeref",
+          "agent"
         ]
       }
     ]
