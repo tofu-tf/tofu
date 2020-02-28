@@ -33,12 +33,12 @@ import scala.reflect.ClassTag
   */
 trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
 
-  /** Creates an instance of [[tofu.logging.Logging]] with a given arbitrary type tag.
-    * In a simple way that means creating a Logger for a given class. */
+  /** Creates an instance of [[tofu.logging.Logging]] with a given arbitrary type tag,
+    * using it as a class to create underlying [[org.slf4j.Logger]] with. */
   def forService[Svc: ClassTag]: I[Logging[F]]
 
-  /** Creates an instance of [[tofu.logging.Logging]] for a given artitrary string name.
-    *  In a simple way that means creating a Logger with a given name.
+  /** Creates an instance of [[tofu.logging.Logging]] for a given arbitrary string name,
+    * using it to create underlying [[org.slf4j.Logger]] with.
     */
   def byName(name: String): I[Logging[F]]
 
@@ -88,13 +88,14 @@ object Logs {
   }
 
   /**
-    * Retuns an instance of [[tofu.logging.Logs]] that will produce a no-op [[tofu.logging.Logging]] instances.
+    * Returns an instance of [[tofu.logging.Logs]] that will produce a no-op [[tofu.logging.Logging]] instances.
     */
   def empty[I[_]: Applicative, F[_]: Applicative]: Logs[I, F] = const[I, F](Logging.empty[F])
 
   /**
     * Combines two instances of [[tofu.logging.Logs]], resulting in a single one that will produce
     * instances of [[tofu.logging.Logging]] by combining.
+    * Resulting [[tofu.logging.Logging]] instance will call both implementations in order.
     */
   def combine[I[_]: Apply, F[_]: Apply](las: Logs[I, F], lbs: Logs[I, F]): Logs[I, F] = new Logs[I, F] {
     def forService[Svc: ClassTag]: I[Logging[F]] = las.forService.map2(lbs.forService)(Logging.combine[F])

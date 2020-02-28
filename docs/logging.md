@@ -12,7 +12,7 @@ your application's code, either automatic or manual.
 
 ### What's wrong (and how to fix that)?
 
-First, logging is, in fact, a side effect. Whether we log anything to a standard output, or a file - it's an interaction 
+First, logging is, in fact, a side effect. Whether we log anything to standard output or a file - it's an interaction 
 with the outside world ('outside' relative to our program). Thus, logging as a process can be represented as an effect and operations - as an algebra.  
 Second, logging itself seems easy, but stuff around it - not so much. MDC, contexts, structured logging - all these 
 things are very helpful on a day-to-day basis, allowing us to read and write our logs, making them clean, comprehensible 
@@ -63,22 +63,18 @@ val effect: F[Unit] = for {
 ```
 
 There are multiple ways to create `Logs` instance, among them:
-* `Logs.sync`, requiring a `cats.effect.Sync` instance for delaying side-effects
-* `Logs.withContext`, requiring a `cats.effect.Sync` instance for delaying side-effects and a proof that `F` has a context to log
+* `Logs.sync` that requires a `cats.effect.Sync` instance for delaying side-effects
+* `Logs.withContext` that requires a `cats.effect.Sync` instance for delaying side-effects and a proof that `F` has a context to log
 * `Logs.const` that wraps single `Logging` thus always returning the same instance
 * `Logs.empty` that will produce a no-op `Logging` instances
-* `Logs.combine` that can combine two instances of `Logs` thus combining produces instances
+* `Logs.combine` that combines two instances of `Logs`. 
+`Logging` instance that is created this way will be a combination of two underlying instances, produced by both `Logs`. 
+This means that both `Logging` implementations will be called in sequence    
+ 
 
-
-#### Context logging
-It is possible to log the context of your computations (MDC, remember?) if you have an instance of `tofu.Context` for your
-effect type and a `Loggable` for your context. 
-That's natural - describe how we can obtain a context from a computation `F` and a way to represent that context in log, 
-and we will ensure it will be logged anytime you use `Logging` operations. 
-You can log that context to string as well as use it as a part of structured logging. 
-
-#### What LoggedValue and Loggable is
-`LoggedValue` is a representation of a value that can be written to a log in a string form. 
+#### Logs representation (using LoggedValue and Loggable)
+User API in `Logging` typeclass showcases `LoggedValue` as a parameter to pass. 
+In fact, `LoggedValue` is a representation of a value that can be written to a log in a string form. 
 It's used internally, and you do not need to use it directly most of the time. Instead, what you want is a `Loggable` 
 typeclass, that describes how a value of some type `A` can be logged, both as a string representation in log message 
 and as a component of structured logging. Given an instance of `Loggable` for a type, a value of the type can be converted 
@@ -94,6 +90,13 @@ Of course, you can describe your `Loggable` instance yourself by extending exist
 * `DictLoggable` for multi-field objects
 * `ToStringLoggable` for using `.toString` for logging
 * `HideLoggable` to exclude value from logging
+
+#### Context logging
+It is possible to log the context of your computations (MDC, remember?) if you have an instance of `tofu.Context` for your
+effect type and a `Loggable` for your context. 
+That's natural - describe how we can obtain a context from a computation `F` and a way to represent that context in log, 
+and we will ensure it will be logged anytime you use `Logging` operations. 
+You can log that context to string as well as use it as a part of structured logging.
 
 #### Loggable example
 ```scala mdoc
@@ -114,7 +117,7 @@ implicit val userLoggable = new DictLoggable[User] {
 Here, we defined our `Loggable` as a `DictLoggable` that has a notion of `fields`. 
 Fields are a structure of your `Loggable` that is used for structured logging by your `LogRendered`.
 Tofu comes with a `tofu.logging.ElkLayout` (present in `tofu-logging-layout` library), that will log the structure (fields) of your `Loggable`
-as a JSON fields.
+as JSON fields.
 
 #### Syntax extensions
 It's much more convenient to use pre-defined syntax extensions for logging operations since they do all heavy lifting for you:
