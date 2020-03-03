@@ -2,7 +2,7 @@ package tofu.common
 
 import java.io.{BufferedReader, PrintStream}
 
-import cats.effect.{ExitCode, IO, IOApp, Sync}
+import cats.effect.Sync
 import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
