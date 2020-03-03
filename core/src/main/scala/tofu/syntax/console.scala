@@ -17,6 +17,6 @@ object console {
   def putShowLn[F[_]: Console, A](a: A)(implicit A: Show[A]): F[Unit] = putStrLn(A.show(a))
 
   final implicit class ConsoleShowExtension(private val ctx: StringContext) extends AnyVal {
-    def puts[F[_]: Console](xs: Shown*): F[Unit] = putStrLn(ctx.show(xs: _*))
+  def puts[F[_]: Console](xs: Shown*): F[Unit] = putStrLn(ctx.show(xs: _*))
   }
 }
