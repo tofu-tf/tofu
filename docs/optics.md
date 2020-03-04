@@ -19,7 +19,7 @@ If You ever used [lens](https://github.com/ekmett/lens) optics' names will be qu
 but for a [Monocle](https://github.com/julien-truffaut/Monocle) user Tofu's naming may be confusing. The following table may clear things up:
 
 | Monocle | tofu |
-------------------
+|---------|------|
 | Iso | Equivalent |
 | Prism | Subset |
 | Lens | Contains |
