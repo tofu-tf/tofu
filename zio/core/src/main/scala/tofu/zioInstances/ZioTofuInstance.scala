@@ -45,8 +45,8 @@ class ZioTofuInstance[R, E]
       fb: ZIO[R, E, B]
   ): ZIO[R, E, Either[(A, Fiber[ZIO[R, E, *], B]), (Fiber[ZIO[R, E, *], A], B)]] =
     (fa raceWith fb)(
-      { case (l, f) => l.fold(f.interrupt *> ZIO.halt(_), RIO.succeed).map(lv => Left((lv, convertFiber(f)))) },
-      { case (r, f) => r.fold(f.interrupt *> ZIO.halt(_), RIO.succeed).map(rv => Right((convertFiber(f), rv))) }
+      { case (l, f) => l.fold(f.interrupt *> ZIO.halt(_), RIO.succeed(_)).map(lv => Left((lv, convertFiber(f)))) },
+      { case (r, f) => r.fold(f.interrupt *> ZIO.halt(_), RIO.succeed(_)).map(rv => Right((convertFiber(f), rv))) }
     )
 
   final def race[A, B](fa: ZIO[R, E, A], fb: ZIO[R, E, B]): ZIO[R, E, Either[A, B]] = fa.raceEither(fb)
@@ -74,7 +74,7 @@ class RioTofuInstance[R] extends ZioTofuInstance[R, Throwable] {
 
 class ZIOTofuTimeoutInstance[R <: Clock, E] extends Timeout[ZIO[R, E, *]] {
   final def timeoutTo[A](fa: ZIO[R, E, A], after: FiniteDuration, fallback: ZIO[R, E, A]): ZIO[R, E, A] =
-    fa.timeoutTo[R, E, A, ZIO[R, E, A]](fallback)(ZIO.succeed)(zio.duration.Duration.fromScala(after)).flatten
+    fa.timeoutTo[R, E, A, ZIO[R, E, A]](fallback)(ZIO.succeed(_))(zio.duration.Duration.fromScala(after)).flatten
 }
 
 class ZIOTofuRandomInstance[R <: Random, E] extends GenRandom[ZIO[R, E, *]] {
