@@ -34,6 +34,13 @@
         "ids": [
           "concurrent-makeref"
         ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Optics",
+        "ids": [
+          "optics"
+        ]
       }
     ]
   }
