@@ -20,5 +20,5 @@ class FoldableSuite extends FlatSpec {
     )
 
   "takeWhileM" should "filter elements" in
-    assert(elems.takeWhileM(look).run === (Chain.fromSeq(1 to 9), List.range(1, 10).map(_.toString)))
+    assert(elems.takeWhileM(look).run === ((Chain.fromSeq(1 to 9), List.range(1, 10).map(_.toString))))
 }

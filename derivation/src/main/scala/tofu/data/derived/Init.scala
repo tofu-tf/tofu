@@ -1,5 +1,6 @@
 package tofu.data.derived
 import cats.Monad
+import derevo.Derivation
 import magnolia.{CaseClass, Magnolia}
 import mercator.Monadic
 
@@ -13,7 +14,7 @@ trait Init[F[_], A] {
   def init: F[A]
 }
 
-class InitDerivation[F[_]: Monad] {
+class InitDerivation[F[_]: Monad] extends Derivation[Init[F, *]] {
   private[this] implicit val magnoliaMonad: Monadic[F] = new MerkatorFromCats[F]
 
   type Typeclass[A] = Init[F, A]

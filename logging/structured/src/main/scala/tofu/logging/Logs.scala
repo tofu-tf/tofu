@@ -4,11 +4,17 @@ import Logging.loggerForService
 import cats.data.Tuple2K
 import cats.effect.Sync
 import cats.kernel.Monoid
+import cats.{Applicative, Apply, FlatMap, Functor, Id, Monad}
+import impl.{CachedLogs, ContextSyncLoggingImpl, SyncLogging, UniversalEmbedLogs}
 import cats.tagless.{ApplyK, FunctorK}
 import cats.tagless.syntax.functorK._
 import cats.{Applicative, Apply, FlatMap, Functor, ~>}
 import impl.{ContextSyncLoggingImpl, SyncLogging}
 import org.slf4j.LoggerFactory
+import tofu.concurrent.QVars
+import tofu.{Guarantee, higherKind}
+import tofu.higherKind.RepresentableK
+import tofu.lift.Lift
 import tofu.higherKind
 import tofu.higherKind.{Function2K, MonoidalK, Point, RepresentableK}
 import tofu.syntax.monadic._
@@ -23,9 +29,12 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
   final def biwiden[I1[a] >: I[a], F1[a] >: F[a]]: Logs[I1, F1] = this.asInstanceOf[Logs[I1, F1]]
 
   final def service[Svc: ClassTag]: I[ServiceLogging[F, Svc]] = forService[Svc].asInstanceOf[I[ServiceLogging[F, Svc]]]
+
 }
 
 object Logs extends LogsInstances0 {
+  type Universal[F[_]] = Logs[Id, F]
+
   def apply[I[_], F[_]](implicit logs: Logs[I, F]): Logs[I, F] = logs
 
   private[this] val logs1RepresentableAny: RepresentableK[Logs[*[_], Any]] =
@@ -78,6 +87,25 @@ object Logs extends LogsInstances0 {
   class ProvideM[I[_], F[_]] {
     def apply[X: ClassTag](f: Logging[F] => I[X])(implicit logs: Logs[I, F], I: FlatMap[I]) =
       logs.forService[X].flatMap(f)
+  }
+
+  final implicit class LogsOps[I[_], F[_]](private val logs: Logs[I, F]) extends AnyVal {
+    def cached(implicit IM: Monad[I], IQ: QVars[I], IG: Guarantee[I]): I[Logs[I, F]] =
+      QVars[I]
+        .of(Map.empty[String, Logging[F]])
+        .map2(
+          QVars[I].of(Map.empty[ClassTag[_], Logging[F]])
+        )(new CachedLogs[I, F](logs, _, _))
+
+    def universal(implicit il: Lift[I, F], F: FlatMap[F]): Universal[F] = new UniversalEmbedLogs(logs)
+
+    def cachedUniversal(
+        implicit IM: Monad[I],
+        IQ: QVars[I],
+        IG: Guarantee[I],
+        il: Lift[I, F],
+        F: FlatMap[F]
+    ): I[Universal[F]] = cached.map(_.universal)
   }
 }
 
