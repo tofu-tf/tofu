@@ -72,7 +72,7 @@ private[env] trait EnvInstances {
         Env.parZip2(f, g)
     }
 
-  private [this] val envUnliftAny = new EnvUnliftTask[Any]
+  private[this] val envUnliftAny = new EnvUnliftTask[Any]
 
   final implicit def envUnliftTask[E]: EnvUnliftTask[E] = envUnliftAny.asInstanceOf[EnvUnliftTask[E]]
 

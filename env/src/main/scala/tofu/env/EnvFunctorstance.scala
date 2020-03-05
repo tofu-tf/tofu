@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 private[env] class EnvFunctorstance[E]
     extends Concurrent[Env[E, *]] with Timer[Env[E, *]] with RunContext[Env[E, *]] with Execute[Env[E, *]]
-    with Memoize[Env[E, *]] with ContextShift[Env[E, *]] with Timeout[Env[E, *]] with Race[Env[E, *]]  {
+    with Memoize[Env[E, *]] with ContextShift[Env[E, *]] with Timeout[Env[E, *]] with Race[Env[E, *]] {
   override type Lower[A] = Task[A]
   override type Ctx      = E
 
