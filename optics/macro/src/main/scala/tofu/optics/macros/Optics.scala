@@ -76,8 +76,6 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
       else List(q"val $lensName = $res")
     }
 
-
-
     def optics(tpname: TypeName, tparams: List[TypeDef], params: List[ValDef], classy: Boolean): List[Tree] = {
       if (tparams.isEmpty) {
         monolenses(tpname, params, classy)
@@ -183,7 +181,6 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
       val tpar = tq"$PContainsC[$a, $a, $t, $t]"
       List(q"""implicit def $name[$t, ..$tparams](implicit ev: $tpar): $tres = $lens >> ev""")
     } else Nil
-
 
   private def isPromote(tree: Tree) = c.typecheck(tree) match {
     case q"new $c" => c.symbol == promoteC
