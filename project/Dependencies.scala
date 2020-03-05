@@ -31,11 +31,11 @@ object Dependencies {
 
     val scalatest = "3.1.1"
 
-    val magnolia = "0.12.7"
+    val magnolia = "0.12.8"
 
     val typesafeConfig = "1.4.0"
 
-    val zio = "1.0.0-RC17"
+    val zio = "1.0.0-RC18-1"
 
     val zioCats = "2.0.0.0-RC10"
 

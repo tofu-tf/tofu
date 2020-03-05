@@ -25,7 +25,8 @@
         "type": "subcategory",
         "label": "Utilities",
         "ids": [
-          "memo"
+          "memo",
+          "console"
         ]
       },
       {
@@ -37,9 +38,9 @@
       },
       {
         "type": "subcategory",
-        "label": "Utilities",
+        "label": "Optics",
         "ids": [
-          "console"
+          "optics"
         ]
       }
     ]
