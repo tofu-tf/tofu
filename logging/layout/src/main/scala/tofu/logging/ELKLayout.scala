@@ -1,14 +1,14 @@
 package tofu
 package logging
 
-import ch.qos.logback.classic.PatternLayout
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.CoreConstants.{LINE_SEPARATOR => EOL}
+import ch.qos.logback.core.LayoutBase
 import tofu.logging.ELKLayout.Arguments
 import tofu.logging.logback.EventLoggable
 
 /** logging layout writing JSON receivable by logstash */
-class ELKLayout extends PatternLayout {
+class ELKLayout extends LayoutBase[ILoggingEvent] {
   private var arguments: Arguments = Arguments.Merge
 
   private[this] implicit var eventLoggable: Loggable[ILoggingEvent] = EventLoggable.merge
