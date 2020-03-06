@@ -13,10 +13,12 @@ trait Lift[F[_], G[_]] {
   def liftF: FunctionK[F, G] = makeFunctionK(lift(_))
 }
 
-object Lift {
+object Lift extends LiftInstances {
   def apply[F[_], G[_]](implicit lift: Lift[F, G]): Lift[F, G] = lift
   def trans[F[_], G[_]](implicit lift: Lift[F, G]): F ~> G     = lift.liftF
 }
+
+trait LiftInstances extends UnliftInstances[Lift]
 
 /** embedded transformation
   * can be used instead of direct F ~> G
@@ -45,13 +47,15 @@ trait Unlift[F[_], G[_]] extends Lift[F, G] {
     }
 }
 
-object Unlift {
-  implicit def identity[F[_]: Applicative]: Unlift[F, F] = new Unlift[F, F] {
+object Unlift extends UnliftInstances[Unlift]
+
+trait UnliftInstances[TCA[f[_], g[_]] >: Unlift[f, g]] {
+  implicit def identity[F[_]: Applicative]: TCA[F, F] = new Unlift[F, F] {
     def lift[A](fa: F[A]): F[A] = fa
     def unlift: F[F ~> F]       = FunctionK.id[F].pure[F]
   }
 
-  implicit def reader[F[_]: Applicative, R]: Unlift[F, ReaderT[F, R, *]] = {
+  implicit def reader[F[_]: Applicative, R]: TCA[F, ReaderT[F, R, *]] = {
     type RT[a] = ReaderT[F, R, a]
     new Unlift[F, RT] {
       def lift[A](fa: F[A]): RT[A] = ReaderT.liftF(fa)
@@ -59,7 +63,7 @@ object Unlift {
     }
   }
 
-  def byIso[F[_], G[_]: Applicative](iso: IsoK[F, G]): Unlift[F, G] =
+  def byIso[F[_], G[_]: Applicative](iso: IsoK[F, G]): TCA[F, G] =
     new Unlift[F, G] {
       def lift[A](fa: F[A]): G[A] = iso.to(fa)
       def unlift: G[G ~> F]       = iso.fromF.pure[G]
