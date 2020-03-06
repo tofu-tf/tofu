@@ -96,7 +96,7 @@ trait Logs2FunctorK[Y[_]] extends FunctorK[Logs[Y, *[_]]] {
 
   def mapK[F[_], G[_]](af: Logs[Y, F])(fk: F ~> G): Logs[Y, G] = new Logs[Y, G] {
     def forService[Svc: ClassTag]: Y[Logging[G]] = af.forService[Svc].map(_.mapK(fk))
-    def byName(name: String): Y[Logging[G]] = af.byName(name).map(_.mapK(fk))
+    def byName(name: String): Y[Logging[G]]      = af.byName(name).map(_.mapK(fk))
   }
 }
 
@@ -106,7 +106,7 @@ trait Logs2ApplyK[Y[_]] extends Logs2FunctorK[Y] with ApplyK[Logs[Y, *[_]]] {
   def zipWith2K[F[_], G[_], H[_]](af: Logs[Y, F], ag: Logs[Y, G])(f2: Function2K[F, G, H]): Logs[Y, H] =
     new Logs[Y, H] {
       def forService[Svc: ClassTag]: Y[Logging[H]] = (af.forService[Svc], ag.forService[Svc]).mapN(_.zipWithK(_)(f2))
-      def byName(name: String): Y[Logging[H]] = (af.byName(name), ag.byName(name)).mapN(_.zipWithK(_)(f2))
+      def byName(name: String): Y[Logging[H]]      = (af.byName(name), ag.byName(name)).mapN(_.zipWithK(_)(f2))
     }
 
   def productK[F[_], G[_]](af: Logs[Y, F], ag: Logs[Y, G]): Logs[Y, Tuple2K[F, G, *]] =
@@ -118,6 +118,6 @@ trait Logs2MonoidalK[Y[_]] extends Logs2ApplyK[Y] with MonoidalK[Logs[Y, *[_]]] 
 
   def pureK[F[_]](p: Point[F]): Logs[Y, F] = new Logs[Y, F] {
     def forService[Svc: ClassTag]: Y[Logging[F]] = p.pureK[Logging].pure[Y]
-    def byName(name: String): Y[Logging[F]] = p.pureK[Logging].pure[Y]
+    def byName(name: String): Y[Logging[F]]      = p.pureK[Logging].pure[Y]
   }
 }
