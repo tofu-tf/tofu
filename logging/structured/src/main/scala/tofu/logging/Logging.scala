@@ -108,10 +108,6 @@ object Logging {
     def combine(x: Logging[F], y: Logging[F]): Logging[F] = Logging.combine(x, y)
   }
 
-  implicit val loggingEmbed: Embed[Logging] = new Embed[Logging] {
-    def embed[F[_]: FlatMap](ft: F[Logging[F]]): Logging[F] = new EmbedLogging[F](ft)
-  }
-
   /** log level enumeration */
   sealed trait Level
 
