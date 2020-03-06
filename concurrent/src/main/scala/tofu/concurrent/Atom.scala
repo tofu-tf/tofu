@@ -10,7 +10,7 @@ import tofu.syntax.monadic._
 import tofu.syntax.bracket._
 
 /** a middleground between cats.concurrent.Ref and zio.Ref */
-trait Atom[F[_], A] {
+trait Atom[+F[_], A] {
 
   /**
     * Obtains the current value.

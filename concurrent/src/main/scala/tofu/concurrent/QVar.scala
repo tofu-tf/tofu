@@ -8,7 +8,7 @@ import tofu.higherKind.{RepresentableK, derived}
 import tofu.syntax.monadic._
 
 /** a middleground between cats.concurrent.MVar and zio.Queue.bounded(1) */
-trait QVar[F[_], A] {
+trait QVar[+F[_], A] {
 
   /**
     * Returns `true` if the `MVar` is empty and can receive a `put`, or

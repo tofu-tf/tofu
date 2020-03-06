@@ -3,7 +3,7 @@ import cats.~>
 import monix.eval.Task
 import tofu.lift.Unlift
 import tofu.optics.Contains
-import tofu.syntax.functionK.funK
+import tofu.syntax.functionk.funK
 
 class EnvUnliftTask[E] extends Unlift[Task, Env[E, *]] {
   def lift[A](fa: Task[A]): Env[E, A]   = Env.fromTask(fa)
