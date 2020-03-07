@@ -14,4 +14,5 @@ package object tofu {
 
   type TConst[A, B] = A
 
+  private[tofu] type AnyK[_] = Any
 }
