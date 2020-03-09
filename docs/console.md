@@ -5,11 +5,11 @@ title: Using Console
 
 ### What if you need to keep things simple?
 
-Let's say you're writing something simple and you need some of that good ol' console IO. Of course you can use plain `println` but we are nice and pure here. So let me introduce you to `tofu.Console`.
+Let's say you're writing something simple and you need some of that good ol' console IO. Of course you can use plain `println` but we are nice and pure here. It is way better to use `tofu.Console` in such case.
 
 #### Console
 
-So the `Console[F]` does three things:
+The `Console[F]` does three things:
 
 * lets you read from standard input in `F`
 * lets you write to standard output in `F`
@@ -46,14 +46,16 @@ Let's make our cat program a little nicer by adding one import and removing dupl
 
 ```scala mdoc
 import tofu.syntax.console._ //this one gets you all the goodies
-
 object catWithSyntax extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     catProgramStep[IO].foreverM
 
-  def catProgramStep[F[_] : FlatMap : Console]: F[Unit] = for {
+  def catProgramStep[F[_]: FlatMap: Console]: F[Unit] = for {
     input <- readStrLn
-    _ <- putStrLn(input) // or putErrLn if you want some red color in your life
+    _ <- if (input != "dog")
+          putStrLn(input)
+        else
+          putErrLn("Do not scare the cat!")
   } yield ()
 }
 ```
@@ -65,6 +67,8 @@ cat
 >cat
 kitten
 >kitten
+dog
+>Do not scare the cat! //written in red because of 'putErrLn'
 ```
 
 ##### Show
@@ -96,12 +100,13 @@ def putCat[F[_]: Console]: F[Unit] = puts"$cat, not a Person"
 putCat[IO].unsafeRunSync()
 ```
 As you can see it uses `Show` inside so you'd want to have instances for values inside `puts`-string.
-It is needed to say that error message is a bit frustrating when you do not have `Show` instance in scope:
+The error message when you do not have `Show` instance in scope look like that:
 ```sbtshell
 [error] ...: type mismatch
 [error]  found   : tofu.cat.Person
 [error]  required: cats.Show.Shown
 [error]   def putCat[F[_]: Console] = puts"$cat that is not a Person"
 [error]                                     ^
-``` 
+```
+
 
