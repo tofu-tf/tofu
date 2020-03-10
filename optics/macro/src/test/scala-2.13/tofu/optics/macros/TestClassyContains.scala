@@ -4,7 +4,6 @@ import tofu.optics.{Contains, Label, PContains, Update}
 object TestClassyContains {
   // compile test for searching classy optics
   implicitly[Contains[FooBar2, Int] with Label["i"]]
-  implicitly[Contains[FooBar2, Int] with Label["i"]]
   implicitly[Contains[FooBar2, String] with Label["j"]]
 
   implicitly[Contains[FooBar4[Double], Int] with Label["i"]]
