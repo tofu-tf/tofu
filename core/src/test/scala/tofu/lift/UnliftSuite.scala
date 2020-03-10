@@ -18,13 +18,13 @@ class UnliftSuite extends AnyFlatSpec {
 
 object UnliftSuite {
 
-  def summonLiftInstaces[F[_], R](): Unit = {
+  def summonLiftInstances[F[_], R](): Unit = {
     implicitly[Lift[F, F]]
     implicitly[Lift[F, ReaderT[F, R, *]]]
     ()
   }
 
-  def summonUnliftInstaces[F[_]: Applicative, R](): Unit = {
+  def summonUnliftInstances[F[_]: Applicative, R](): Unit = {
     implicitly[Unlift[F, F]]
     implicitly[Unlift[F, ReaderT[F, R, *]]]
     ()
