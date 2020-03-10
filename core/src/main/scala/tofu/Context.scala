@@ -44,10 +44,24 @@ object Local extends LocalInstances[λ[(f[_], g[_], r) => HasLocal[f, r]]] {
 
 trait LocalInstances[TCA[f[_], g[_], r] >: HasLocal[f, r]] extends RunContextInstances[TCA]
 
-trait RunContext[F[_]] extends Local[F] {
+trait Provide[F[_]] {
+  type Ctx
   type Lower[A]
+
   def runContext[A](fa: F[A])(ctx: Ctx): Lower[A]
 
+  def runExtract[A](extract: A Extract Ctx): HasProvide[F, Lower, A] =
+    new ProvideExtractInstance[F, Lower, Ctx, A](this, extract)
+}
+
+trait ProvideInstances[TCA[f[_], g[_], r] >: HasProvide[f, g, r]] extends RunContextInstances[TCA]
+
+object Provide extends ProvideInstances[HasProvide] {
+  def apply[F[_]](implicit p: Provide[F]): HasProvide[F, p.Lower, p.Ctx] = p
+  type Aux[F[_], G[_], C] = HasProvide[F, G, C]
+}
+
+trait RunContext[F[_]] extends Local[F] with Provide[F] {
   def runEquivalent[A](eq: Equivalent[Ctx, A]): HasContextRun[F, Lower, A] =
     new RunContextEquivalentInstance[F, Lower, Ctx, A](this, eq)
 }
@@ -78,6 +92,17 @@ private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F HasContext C1, e
 private[tofu] class LocalContainsInstance[F[_], C1, C2](ctx: F HasLocal C1, contains: C1 Contains C2)
     extends ContextExtractInstance[F, C1, C2](ctx, contains) with Local[F] {
   def local[A](fa: F[A])(project: C2 => C2): F[A] = ctx.local(fa)(contains.update(_, project))
+}
+
+private[tofu] class ProvideExtractInstance[F[_], G[_], C1, C2](
+    ctx: HasProvide[F, G, C1],
+    extract: C2 Extract C1
+) extends Provide[F] {
+  type Ctx      = C2
+  type Lower[a] = G[a]
+
+  def runContext[A](fa: F[A])(c: Ctx): G[A] =
+    ctx.runContext(fa)(extract.extract(c))
 }
 
 private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](
