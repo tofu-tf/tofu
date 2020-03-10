@@ -6,7 +6,7 @@ import cats.syntax.apply._
 import cats.{Applicative, Apply, FlatMap}
 import com.github.ghik.silencer.silent
 import org.slf4j.{Logger, LoggerFactory, Marker}
-import tofu.higherKind
+import tofu.{Init, higherKind}
 import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.logging.impl.EmbedLogging
 import tofu.syntax.monoidalK._
@@ -73,6 +73,11 @@ trait ServiceLogging[F[_], Service] extends LoggingBase[F] {
 object ServiceLogging {
   private[this] val representableAny: RepresentableK[ServiceLogging[*[_], Any]] =
     higherKind.derived.genRepresentableK[ServiceLogging[*[_], Any]]
+
+  implicit def initByLogs[I[_], F[_], Svc: ClassTag](implicit logs: Logs[I, F]): Init[I, ServiceLogging[F, Svc]] =
+    new Init[I, ServiceLogging[F, Svc]] {
+      def init: I[ServiceLogging[F, Svc]] = logs.service[Svc]
+    }
 
   final implicit def serviceLoggingRepresentable[Svc]: RepresentableK[ServiceLogging[*[_], Svc]] =
     representableAny.asInstanceOf[RepresentableK[ServiceLogging[*[_], Svc]]]

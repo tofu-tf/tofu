@@ -3,16 +3,7 @@ import cats.Monad
 import derevo.Derivation
 import magnolia.{CaseClass, Magnolia}
 import mercator.Monadic
-
-/**
-  * Initialize value of type A in type F
-  *
-  * @tparam F initialization effect type
-  * @tparam A result type
-  */
-trait Init[F[_], A] {
-  def init: F[A]
-}
+import tofu.Init
 
 class InitDerivation[F[_]: Monad] extends Derivation[Init[F, *]] {
   private[this] implicit val magnoliaMonad: Monadic[F] = new MerkatorFromCats[F]
