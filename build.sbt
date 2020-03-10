@@ -82,7 +82,7 @@ lazy val loggingStr = project
     ),
     macros
   )
-  .dependsOn(core, data)
+  .dependsOn(core, concurrent, data)
 
 lazy val loggingDer = project
   .in(file("logging/derivation"))
