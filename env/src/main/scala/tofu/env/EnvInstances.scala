@@ -4,10 +4,9 @@ import cats.arrow.{ArrowChoice, FunctionK, Profunctor}
 import cats.{Applicative, Monad, Parallel, ~>}
 import monix.eval.Task
 import monix.execution.Scheduler
-import tofu.lift.{Unlift, UnsafeExecFuture}
-import tofu.syntax.functionK._
-import tofu.lift.Unlift
+import tofu.lift.UnsafeExecFuture
 import tofu.optics.Contains
+import tofu.syntax.functionk._
 
 import scala.concurrent.Future
 
