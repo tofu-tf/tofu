@@ -6,7 +6,7 @@ import monix.eval.Task
 import monix.execution.Scheduler
 import tofu.lift.UnsafeExecFuture
 import tofu.optics.Contains
-import tofu.syntax.functionk._
+import tofu.syntax.funk._
 
 import scala.concurrent.Future
 

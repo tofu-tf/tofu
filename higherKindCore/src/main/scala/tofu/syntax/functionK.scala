@@ -21,7 +21,7 @@ object functionK {
   type Arbitrary
 }
 
-object functionk {
+object funk {
 
   /** simple constructor of FunctionK
     * you can use it as makeFunctionK[List, Option](_.headOption)

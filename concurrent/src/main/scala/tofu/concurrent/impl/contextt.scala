@@ -6,7 +6,7 @@ import cats.instances.tuple._
 import cats.syntax.bifunctor._
 import cats._
 import tofu.{Context, HasContextRun, RunContext}
-import tofu.syntax.functionk.funKFrom
+import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
 
 trait ContextTInvariant[F[+_], C[_[_]]] extends Invariant[ContextT[F, C, *]] {

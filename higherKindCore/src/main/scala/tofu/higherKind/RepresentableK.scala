@@ -3,7 +3,7 @@ import cats.data._
 import cats.tagless.IdK
 import cats.{FlatMap, ~>}
 import simulacrum.typeclass
-import tofu.syntax.functionk.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
 
 trait RepK[U[_[_]], A] {
