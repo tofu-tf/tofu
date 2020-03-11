@@ -64,10 +64,10 @@ final case class ZIODaemon[R, E, A](fib: zio.Fiber[E, A]) extends Daemon[ZIO[R, 
 
 final case class ZioAgent[R, E, A](refm: RefM[A]) extends Agent[ZIO[R, E, *], A] {
   def get: ZIO[R, E, A]                                                                  = refm.get
-  def updateM(f: A => ZIO[R, E, A]): ZIO[R, E, A]                                        = refm.update(f)
+  def updateM(f: A => ZIO[R, E, A]): ZIO[R, E, A]                                        = refm.getAndUpdate(f)
   def fireUpdateM(f: A => ZIO[R, E, A]): ZIO[R, E, Unit]                                 = refm.update(f).fork.unit
   def modifyM[B](f: A => ZIO[R, E, (B, A)]): ZIO[R, E, B]                                = refm.modify(f)
-  def updateSomeM(f: PartialFunction[A, ZIO[R, E, A]]): ZIO[R, E, A]                     = refm.updateSome(f)
+  def updateSomeM(f: PartialFunction[A, ZIO[R, E, A]]): ZIO[R, E, A]                     = refm.getAndUpdateSome(f)
   def modifySomeM[B](default: B)(f: PartialFunction[A, ZIO[R, E, (B, A)]]): ZIO[R, E, B] = refm.modifySome(default)(f)
 }
 

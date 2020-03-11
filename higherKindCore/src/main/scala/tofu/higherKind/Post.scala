@@ -1,7 +1,7 @@
 package tofu.higherKind
 import cats.tagless.ApplyK
 import cats.{Applicative, Apply, FlatMap, Monoid, MonoidK, Semigroup, SemigroupK, ~>}
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
 
 /**

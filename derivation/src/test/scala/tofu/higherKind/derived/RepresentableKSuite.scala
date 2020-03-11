@@ -15,7 +15,7 @@ import derevo.derive
 import org.scalatest.{FlatSpec, Matchers}
 import tofu.data.Embedded
 import tofu.syntax.embed._
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 
 import scala.util.Try
 

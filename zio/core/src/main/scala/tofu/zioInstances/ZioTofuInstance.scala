@@ -8,7 +8,7 @@ import tofu.generate.GenRandom
 import tofu.internal.CachedMatcher
 import tofu.lift.Unlift
 import tofu.optics.{Contains, Extract}
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.zioInstances.ZioTofuInstance.convertFiber
 import zio.clock.Clock
 import zio.console.Console
@@ -45,8 +45,8 @@ class ZioTofuInstance[R, E]
       fb: ZIO[R, E, B]
   ): ZIO[R, E, Either[(A, Fiber[ZIO[R, E, *], B]), (Fiber[ZIO[R, E, *], A], B)]] =
     (fa raceWith fb)(
-      { case (l, f) => l.fold(f.interrupt *> ZIO.halt(_), RIO.succeed).map(lv => Left((lv, convertFiber(f)))) },
-      { case (r, f) => r.fold(f.interrupt *> ZIO.halt(_), RIO.succeed).map(rv => Right((convertFiber(f), rv))) }
+      { case (l, f) => l.fold(f.interrupt *> ZIO.halt(_), RIO.succeed(_)).map(lv => Left((lv, convertFiber(f)))) },
+      { case (r, f) => r.fold(f.interrupt *> ZIO.halt(_), RIO.succeed(_)).map(rv => Right((convertFiber(f), rv))) }
     )
 
   final def race[A, B](fa: ZIO[R, E, A], fb: ZIO[R, E, B]): ZIO[R, E, Either[A, B]] = fa.raceEither(fb)
@@ -74,7 +74,7 @@ class RioTofuInstance[R] extends ZioTofuInstance[R, Throwable] {
 
 class ZIOTofuTimeoutInstance[R <: Clock, E] extends Timeout[ZIO[R, E, *]] {
   final def timeoutTo[A](fa: ZIO[R, E, A], after: FiniteDuration, fallback: ZIO[R, E, A]): ZIO[R, E, A] =
-    fa.timeoutTo[R, E, A, ZIO[R, E, A]](fallback)(ZIO.succeed)(zio.duration.Duration.fromScala(after)).flatten
+    fa.timeoutTo[R, E, A, ZIO[R, E, A]](fallback)(ZIO.succeed(_))(zio.duration.Duration.fromScala(after)).flatten
 }
 
 class ZIOTofuRandomInstance[R <: Random, E] extends GenRandom[ZIO[R, E, *]] {
@@ -114,7 +114,7 @@ class ZioTofuErrorsToInstance[R, E, E1](implicit lens: Extract[E1, E])
 
 }
 
-class ZIOUnliftInstance[R1, R2, E](implicit lens: Contains[R2, R1]) extends Unlift[ZIO[R1, E, *], ZIO[R2, E, *]] {
+class ZioTofuUnliftInstance[R1, R2, E](implicit lens: Contains[R2, R1]) extends Unlift[ZIO[R1, E, *], ZIO[R2, E, *]] {
   def lift[A](fa: ZIO[R1, E, A]): ZIO[R2, E, A] = fa.provideSome(lens.extract)
   def unlift: ZIO[R2, E, ZIO[R2, E, *] ~> ZIO[R1, E, *]] =
     ZIO.access[R2](r2 => funK(_.provideSome(r1 => lens.set(r2, r1))))

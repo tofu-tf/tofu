@@ -26,7 +26,23 @@
         "label": "Utilities",
         "ids": [
           "memo",
+          "console",
           "logging"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Concurrent",
+        "ids": [
+          "concurrent-makeref",
+          "agent"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Optics",
+        "ids": [
+          "optics"
         ]
       }
     ]

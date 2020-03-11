@@ -3,7 +3,7 @@ import cats.data.Chain
 import cats.tagless.ApplyK
 import cats.{Monoid, MonoidK, Semigroup}
 import tofu.higherKind.Mid.MidCompose
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monoidalK._
 
 trait Mid[F[_], A] {

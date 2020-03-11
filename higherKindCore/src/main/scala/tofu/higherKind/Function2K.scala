@@ -1,7 +1,7 @@
 package tofu.higherKind
 import cats.data.Tuple2K
 import cats.{FlatMap, ~>}
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
 
 trait Function2K[F[_], G[_], H[_]] {

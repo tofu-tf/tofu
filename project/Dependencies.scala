@@ -9,13 +9,13 @@ object Dependencies {
 
     val tethys = "0.11.0"
 
-    val cats = "2.1.0"
+    val cats = "2.1.1"
 
-    val catsEffect = "2.1.1"
+    val catsEffect = "2.1.2"
 
     val catsTagless = "0.11"
 
-    val monocle = "2.0.1"
+    val monocle = "2.0.4"
 
     val enumeratum = "1.5.15"
 
@@ -31,20 +31,20 @@ object Dependencies {
 
     val scalatest = "3.1.1"
 
-    val magnolia = "0.12.6"
+    val magnolia = "0.12.8"
 
     val typesafeConfig = "1.4.0"
 
-    val zio = "1.0.0-RC17"
+    val zio = "1.0.0-RC18-1"
 
-    val zioCats = "2.0.0.0-RC10"
+    val zioCats = "2.0.0.0-RC11"
 
     // Compile time only
     val macroParadise = "2.1.1"
 
     val simulacrum = "1.0.0"
 
-    val silencer = "1.5.0"
+    val silencer = "1.6.0"
 
     val kindProjector = "0.11.0"
 

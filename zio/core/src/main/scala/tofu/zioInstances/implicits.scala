@@ -1,7 +1,7 @@
 package tofu.zioInstances
 import java.io.IOException
 
-import tofu.optics.Extract
+import tofu.optics.{Contains, Extract}
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
@@ -9,7 +9,7 @@ import zio.random.Random
 object implicits {
   @inline final implicit def rioTofuImplicit[R]: RioTofuInstance[R] = rioTofuInstance
 
-  @inline final implicit def zioTofuErrorsToImplicit[R, E, E1]: ZioTofuErrorsToInstance[R, E, Nothing] =
+  @inline final implicit def zioTofuErrorsToImplicit[R, E]: ZioTofuErrorsToInstance[R, E, Nothing] =
     zioTofuErrorsToInstance
 
   @inline final implicit def zioTofuErrorsExtractToImplicit[R, E, E1: * Extract E]: ZioTofuErrorsToInstance[R, E, E1] =
@@ -25,4 +25,9 @@ object implicits {
     zioTofuConsoleInstance
 
   @inline final implicit def zioTofuRandomImplicit[R <: Random, E]: ZIOTofuRandomInstance[R, E] = zioTofuRandomInstance
+
+  @inline final implicit def zioTofuUnliftImplicit[R, E]: ZioTofuUnliftInstance[Any, R, E] = zioTofuUnliftInstance
+
+  @inline final implicit def zioTofuContainsUnliftImplicit[R1, R2: * Contains R1, E]: ZioTofuUnliftInstance[R1, R2, E] =
+    zioTofuContainsUnliftInstance[R1, R2, E]
 }

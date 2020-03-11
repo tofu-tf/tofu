@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.7.1"
+val libVersion = "0.7.2.1"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -82,7 +82,7 @@ lazy val loggingStr = project
     ),
     macros
   )
-  .dependsOn(core, data)
+  .dependsOn(core, concurrent, data)
 
 lazy val loggingDer = project
   .in(file("logging/derivation"))

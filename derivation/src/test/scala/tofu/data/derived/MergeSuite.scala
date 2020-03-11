@@ -1,5 +1,7 @@
 package tofu.data.derived
 
+import java.time.LocalDate
+
 import org.scalatest.FlatSpec
 import cats.syntax.option._
 import derevo.derive
@@ -161,6 +163,15 @@ class MergeSuite extends FlatSpec {
         Bar(Foo(11, "11".some, None), Foo(12, None, 1.2.some).some),
         Bar(Foo(21, "21".some, 2.1.some), None),
       ) === Bar(Foo(11, "11".some, 2.1.some), Foo(12, None, 1.2.some).some)
+    )
+  }
+
+  "local date" should "have merge instance" in {
+    assert(
+      Merge[LocalDate].merge(
+        LocalDate.ofYearDay(1999, 256),
+        LocalDate.ofYearDay(2000, 128)
+      ) === LocalDate.ofYearDay(1999, 256),
     )
   }
 

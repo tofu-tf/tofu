@@ -4,9 +4,9 @@ import cats.arrow.{ArrowChoice, FunctionK, Profunctor}
 import cats.{Applicative, Monad, Parallel, ~>}
 import monix.eval.Task
 import monix.execution.Scheduler
-import tofu.lift.{Unlift, UnsafeExecFuture}
-import tofu.syntax.functionK._
-import tofu.lift.Unlift
+import tofu.lift.UnsafeExecFuture
+import tofu.optics.Contains
+import tofu.syntax.funk._
 
 import scala.concurrent.Future
 
@@ -15,7 +15,7 @@ private[env] trait EnvInstances {
 
   private object anyEnvInstance extends EnvFunctorstance[Any]
 
-  implicit def envInstance[E]: EnvFunctorstance[E] = anyEnvInstance.asInstanceOf[EnvFunctorstance[E]]
+  final implicit def envInstance[E]: EnvFunctorstance[E] = anyEnvInstance.asInstanceOf[EnvFunctorstance[E]]
 
   private object envParallelInstance extends Applicative[Env[Any, *]] {
     override def pure[A](x: A): Env[Any, A] = Env.pure(x)
@@ -37,10 +37,10 @@ private[env] trait EnvInstances {
     override val parallel: ~>[Env[Any, *], Env[Any, *]]   = FunctionK.id
   }
 
-  implicit def envParallelInstance[E]: Parallel[Env[E, *]] =
+  final implicit def envParallelInstance[E]: Parallel[Env[E, *]] =
     anyEnvParallelInstance.asInstanceOf[Parallel[Env[E, *]]]
 
-  implicit val envProfuctorInstance: Profunctor[Env] with ArrowChoice[Env] =
+  final implicit val envProfuctorInstance: Profunctor[Env] with ArrowChoice[Env] =
     new Profunctor[Env] with ArrowChoice[Env] {
       override def choose[A, B, C, D](f: Env[A, C])(g: Env[B, D]): Env[Either[A, B], Either[C, D]] =
         Env {
@@ -71,11 +71,11 @@ private[env] trait EnvInstances {
         Env.parZip2(f, g)
     }
 
-  implicit def envUnliftTask[E]: Unlift[Task, Env[E, *]] =
-    new Unlift[Task, Env[E, *]] {
-      def lift[A](fa: Task[A]): Env[E, A]   = Env.fromTask(fa)
-      def unlift: Env[E, Env[E, *] ~> Task] = Env.fromFunc(r => makeFunctionK(_.run(r)))
-    }
+  private[this] val envUnliftAny = new EnvUnliftTask[Any]
+
+  final implicit def envUnliftTask[E]: EnvUnliftTask[E] = envUnliftAny.asInstanceOf[EnvUnliftTask[E]]
+
+  final implicit def envUnliftSubContext[E, E1: E Contains *]: EnvUnliftSubContext[E, E1] = new EnvUnliftSubContext
 
   def envUnsafeExecFuture[E](implicit sc: Scheduler): UnsafeExecFuture[Env[E, *]] =
     new UnsafeExecFuture[Env[E, *]] {

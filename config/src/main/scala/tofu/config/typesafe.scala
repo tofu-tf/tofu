@@ -8,7 +8,7 @@ import com.typesafe.config.{Config, ConfigValue}
 import scala.collection.JavaConverters._
 import tofu.concurrent.Refs
 import tofu.syntax.monadic._
-import tofu.syntax.functionK._
+import tofu.syntax.funk._
 import cats.effect.SyncIO
 
 object typesafe {

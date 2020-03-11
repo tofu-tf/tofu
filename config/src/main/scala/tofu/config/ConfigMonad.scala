@@ -11,7 +11,7 @@ import tofu.syntax.monadic._
 import cats.MonadError
 import cats.Applicative
 import cats.~>
-import tofu.syntax.functionK._
+import tofu.syntax.funk._
 import cats.syntax.applicativeError._
 
 trait ConfigMonad[F[_]] {

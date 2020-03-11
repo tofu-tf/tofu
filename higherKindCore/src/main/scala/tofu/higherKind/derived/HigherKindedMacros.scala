@@ -22,7 +22,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
         val members = overridableMembersOf(af)
         val types   = delegateAbstractTypes(af, members, af)
         val repk    = reify(tofu.higherKind.RepK).tree
-        val funk    = reify(tofu.syntax.functionK).tree
+        val funk    = reify(tofu.syntax.funk).tree
         val alg     = TermName(c.freshName("alg"))
         val rep     = TermName(c.freshName("rep"))
         val et      = tq""

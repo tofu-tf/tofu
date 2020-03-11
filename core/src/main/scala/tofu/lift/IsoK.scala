@@ -1,7 +1,7 @@
 package tofu.lift
 
 import cats.~>
-import tofu.syntax.functionK._
+import tofu.syntax.funk._
 
 /** bidirectional transformation */
 trait IsoK[F[_], G[_]] { self =>

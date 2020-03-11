@@ -1,10 +1,9 @@
 package tofu.higherKind
-import cats.data.{EitherT, IorT, OptionT, ReaderT, Tuple2K, WriterT}
-import cats.free.Cofree
+import cats.data._
 import cats.tagless.IdK
 import cats.{FlatMap, ~>}
 import simulacrum.typeclass
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
 
 trait RepK[U[_[_]], A] {

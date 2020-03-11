@@ -1,14 +1,24 @@
 package tofu.logging
 
 import Logging.loggerForService
+import cats.data.Tuple2K
 import cats.effect.Sync
 import cats.kernel.Monoid
-import cats.{Applicative, Apply, FlatMap, Functor}
+import cats.{Applicative, Apply, FlatMap, Functor, Id, Monad}
+import impl.{CachedLogs, ContextSyncLoggingImpl, SyncLogging, UniversalEmbedLogs}
+import cats.tagless.{ApplyK, FunctorK}
+import cats.tagless.syntax.functorK._
+import cats.{Applicative, Apply, FlatMap, Functor, ~>}
 import impl.{ContextSyncLoggingImpl, SyncLogging}
 import org.slf4j.LoggerFactory
-import tofu.higherKind
+import tofu.concurrent.QVars
+import tofu.{Guarantee, higherKind}
 import tofu.higherKind.RepresentableK
+import tofu.lift.Lift
+import tofu.higherKind
+import tofu.higherKind.{Function2K, MonoidalK, Point, RepresentableK}
 import tofu.syntax.monadic._
+import tofu.syntax.monoidalK._
 
 import scala.reflect.ClassTag
 
@@ -45,16 +55,22 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
   final def biwiden[I1[a] >: I[a], F1[a] >: F[a]]: Logs[I1, F1] = this.asInstanceOf[Logs[I1, F1]]
 
   final def service[Svc: ClassTag]: I[ServiceLogging[F, Svc]] = forService[Svc].asInstanceOf[I[ServiceLogging[F, Svc]]]
+
 }
 
-object Logs {
+object Logs extends LogsInstances0 {
+  type Universal[F[_]] = Logs[Id, F]
+
   def apply[I[_], F[_]](implicit logs: Logs[I, F]): Logs[I, F] = logs
 
-  private[this] val logsRepresentableAny: RepresentableK[Logs[*[_], Any]] =
+  private[this] val logs1RepresentableAny: RepresentableK[Logs[*[_], Any]] =
     higherKind.derived.genRepresentableK[Logs[*[_], Any]]
 
-  implicit def logsRepresentable[Y[_]]: RepresentableK[Logs[*[_], Y]] =
-    logsRepresentableAny.asInstanceOf[RepresentableK[Logs[*[_], Y]]]
+  implicit def logs1Representable[Y[_]]: RepresentableK[Logs[*[_], Y]] =
+    logs1RepresentableAny.asInstanceOf[RepresentableK[Logs[*[_], Y]]]
+
+  implicit def logs2MonoidalK[Y[_]](implicit Y: Applicative[Y]): MonoidalK[Logs[Y, *[_]]] =
+    new Logs2MonoidalK[Y] { def I: Applicative[Y] = Y }
 
   def provide[I[_], F[_]]  = new Provide[I, F]
   def provideM[I[_], F[_]] = new ProvideM[I, F]
@@ -113,5 +129,65 @@ object Logs {
   class ProvideM[I[_], F[_]] {
     def apply[X: ClassTag](f: Logging[F] => I[X])(implicit logs: Logs[I, F], I: FlatMap[I]) =
       logs.forService[X].flatMap(f)
+  }
+
+  final implicit class LogsOps[I[_], F[_]](private val logs: Logs[I, F]) extends AnyVal {
+    def cached(implicit IM: Monad[I], IQ: QVars[I], IG: Guarantee[I]): I[Logs[I, F]] =
+      QVars[I]
+        .of(Map.empty[String, Logging[F]])
+        .map2(
+          QVars[I].of(Map.empty[ClassTag[_], Logging[F]])
+        )(new CachedLogs[I, F](logs, _, _))
+
+    def universal(implicit il: Lift[I, F], F: FlatMap[F]): Universal[F] = new UniversalEmbedLogs(logs)
+
+    def cachedUniversal(
+        implicit IM: Monad[I],
+        IQ: QVars[I],
+        IG: Guarantee[I],
+        il: Lift[I, F],
+        F: FlatMap[F]
+    ): I[Universal[F]] = cached.map(_.universal)
+  }
+}
+
+private[logging] trait LogsInstances0 extends LogsInstances1 {
+  implicit def logs2ApplyK[Y[_]](implicit Y: Apply[Y]): ApplyK[Logs[Y, *[_]]] =
+    new Logs2ApplyK[Y] { def I: Apply[Y] = Y }
+}
+
+private[logging] trait LogsInstances1 {
+  implicit def logs2FunctorK[Y[_]](implicit Y: Functor[Y]): FunctorK[Logs[Y, *[_]]] =
+    new Logs2FunctorK[Y] { def I: Functor[Y] = Y }
+}
+
+trait Logs2FunctorK[Y[_]] extends FunctorK[Logs[Y, *[_]]] {
+  implicit def I: Functor[Y]
+
+  def mapK[F[_], G[_]](af: Logs[Y, F])(fk: F ~> G): Logs[Y, G] = new Logs[Y, G] {
+    def forService[Svc: ClassTag]: Y[Logging[G]] = af.forService[Svc].map(_.mapK(fk))
+    def byName(name: String): Y[Logging[G]]      = af.byName(name).map(_.mapK(fk))
+  }
+}
+
+trait Logs2ApplyK[Y[_]] extends Logs2FunctorK[Y] with ApplyK[Logs[Y, *[_]]] {
+  implicit def I: Apply[Y]
+
+  def zipWith2K[F[_], G[_], H[_]](af: Logs[Y, F], ag: Logs[Y, G])(f2: Function2K[F, G, H]): Logs[Y, H] =
+    new Logs[Y, H] {
+      def forService[Svc: ClassTag]: Y[Logging[H]] = (af.forService[Svc], ag.forService[Svc]).mapN(_.zipWithK(_)(f2))
+      def byName(name: String): Y[Logging[H]]      = (af.byName(name), ag.byName(name)).mapN(_.zipWithK(_)(f2))
+    }
+
+  def productK[F[_], G[_]](af: Logs[Y, F], ag: Logs[Y, G]): Logs[Y, Tuple2K[F, G, *]] =
+    zipWith2K(af, ag)(Function2K((f, g) => Tuple2K(f, g)))
+}
+
+trait Logs2MonoidalK[Y[_]] extends Logs2ApplyK[Y] with MonoidalK[Logs[Y, *[_]]] {
+  implicit def I: Applicative[Y]
+
+  def pureK[F[_]](p: Point[F]): Logs[Y, F] = new Logs[Y, F] {
+    def forService[Svc: ClassTag]: Y[Logging[F]] = p.pureK[Logging].pure[Y]
+    def byName(name: String): Y[Logging[F]]      = p.pureK[Logging].pure[Y]
   }
 }

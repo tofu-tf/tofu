@@ -1,5 +1,7 @@
 package tofu.logging
 
+import java.time.LocalDate
+
 import cats.syntax.either._
 import cats.syntax.monoid._
 import org.scalatest.{FlatSpec, Matchers}
@@ -62,6 +64,10 @@ class LoggableSuite extends FlatSpec with Matchers {
 
     assert(hideAfterNamed.loggedValue(sample).toString.isEmpty)
     assert(namedAfterHide.loggedValue(sample).toString.isEmpty)
+  }
+
+  "local date" should "have loggable instance" in {
+    LocalDate.ofYearDay(1999, 256).logShow shouldBe "1999-09-13"
   }
 }
 

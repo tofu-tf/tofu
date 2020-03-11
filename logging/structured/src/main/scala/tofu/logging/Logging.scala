@@ -6,8 +6,8 @@ import cats.syntax.apply._
 import cats.{Applicative, Apply, FlatMap}
 import com.github.ghik.silencer.silent
 import org.slf4j.{Logger, LoggerFactory, Marker}
-import tofu.higherKind
-import tofu.higherKind.{Embed, Function2K, RepresentableK}
+import tofu.{Init, higherKind}
+import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.logging.impl.EmbedLogging
 import tofu.syntax.monoidalK._
 
@@ -74,8 +74,16 @@ object ServiceLogging {
   private[this] val representableAny: RepresentableK[ServiceLogging[*[_], Any]] =
     higherKind.derived.genRepresentableK[ServiceLogging[*[_], Any]]
 
+  implicit def initByLogs[I[_], F[_], Svc: ClassTag](implicit logs: Logs[I, F]): Init[I, ServiceLogging[F, Svc]] =
+    new Init[I, ServiceLogging[F, Svc]] {
+      def init: I[ServiceLogging[F, Svc]] = logs.service[Svc]
+    }
+
   final implicit def serviceLoggingRepresentable[Svc]: RepresentableK[ServiceLogging[*[_], Svc]] =
     representableAny.asInstanceOf[RepresentableK[ServiceLogging[*[_], Svc]]]
+
+  final implicit def byUniversal[F[_], Svc: ClassTag](implicit unilogs: Logs.Universal[F]): ServiceLogging[F, Svc] =
+    unilogs.service[Svc]
 }
 
 /** typeclass for logging using specified logger or set of loggers
@@ -108,10 +116,6 @@ object Logging {
     def combine(x: Logging[F], y: Logging[F]): Logging[F] = Logging.combine(x, y)
   }
 
-  implicit val loggingEmbed: Embed[Logging] = new Embed[Logging] {
-    def embed[F[_]: FlatMap](ft: F[Logging[F]]): Logging[F] = new EmbedLogging[F](ft)
-  }
-
   /** log level enumeration */
   sealed trait Level
 
@@ -125,4 +129,8 @@ object Logging {
 private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
   private[this] val noop                                                  = Applicative[F].unit
   def write(level: Level, message: String, values: LoggedValue*): F[Unit] = noop
+}
+
+trait LoggingCompanion[U[_[_]]] {
+  type Log[F[_]] = ServiceLogging[F, U[Any]]
 }
