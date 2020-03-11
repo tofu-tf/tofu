@@ -8,7 +8,7 @@ import tofu.generate.GenRandom
 import tofu.internal.CachedMatcher
 import tofu.lift.Unlift
 import tofu.optics.{Contains, Extract}
-import tofu.syntax.functionk.funK
+import tofu.syntax.funk.funK
 import tofu.zioInstances.ZioTofuInstance.convertFiber
 import zio.clock.Clock
 import zio.console.Console

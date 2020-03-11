@@ -4,7 +4,7 @@ import cats.effect._
 import cats.instances.either._
 import tofu.HasContextRun
 import tofu.concurrent.impl._
-import tofu.syntax.functionk.funKFrom
+import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
 
 /** a ReaderT analog, allowing to have context referring resulting type
