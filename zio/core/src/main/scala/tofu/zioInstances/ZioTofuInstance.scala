@@ -114,7 +114,7 @@ class ZioTofuErrorsToInstance[R, E, E1](implicit lens: Extract[E1, E])
 
 }
 
-class ZIOUnliftInstance[R1, R2, E](implicit lens: Contains[R2, R1]) extends Unlift[ZIO[R1, E, *], ZIO[R2, E, *]] {
+class ZioTofuUnliftInstance[R1, R2, E](implicit lens: Contains[R2, R1]) extends Unlift[ZIO[R1, E, *], ZIO[R2, E, *]] {
   def lift[A](fa: ZIO[R1, E, A]): ZIO[R2, E, A] = fa.provideSome(lens.extract)
   def unlift: ZIO[R2, E, ZIO[R2, E, *] ~> ZIO[R1, E, *]] =
     ZIO.access[R2](r2 => funK(_.provideSome(r1 => lens.set(r2, r1))))

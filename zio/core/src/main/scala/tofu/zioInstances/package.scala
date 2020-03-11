@@ -1,15 +1,14 @@
 package tofu
 import java.io.IOException
 
-import tofu.optics.Contains
 import tofu.optics.{Contains, Extract}
-import tofu.optics.functions.extractSubtype
+import tofu.optics.functions.{containsUnit, extractSubtype}
 import tofu.zioInstances.{
   RioTofuInstance,
   ZIOTofuConsoleInstance,
   ZIOTofuRandomInstance,
   ZIOTofuTimeoutInstance,
-  ZIOUnliftInstance,
+  ZioTofuUnliftInstance,
   ZioTofuConcurrentInstance,
   ZioTofuConcurrentInstanceUIO,
   ZioTofuErrorsToInstance,
@@ -25,7 +24,7 @@ class ZioInstances1 extends ZioInstances2 {
   private[this] val rioTofuInstanceAny: RioTofuInstance[Any] = new RioTofuInstance
   final def rioTofuInstance[R]: RioTofuInstance[R]           = rioTofuInstanceAny.asInstanceOf[RioTofuInstance[R]]
 
-  private[this] def zioErrorsToInstanceAny: ZioTofuErrorsToInstance[Any, Any, Nothing] =
+  private[this] val zioErrorsToInstanceAny: ZioTofuErrorsToInstance[Any, Any, Nothing] =
     new ZioTofuErrorsToInstance[Any, Any, Nothing]()(extractSubtype[Nothing, Any])
   final def zioTofuErrorsToInstance[R, E]: ZioTofuErrorsToInstance[R, E, Nothing] =
     zioErrorsToInstanceAny.asInstanceOf[ZioTofuErrorsToInstance[R, E, Nothing]]
@@ -52,8 +51,11 @@ class ZioInstances1 extends ZioInstances2 {
   final def zioTofuRandomInstance[R <: Random, E]: ZIOTofuRandomInstance[R, E] =
     zioTofuRandomInstanceAny.asInstanceOf[ZIOTofuRandomInstance[R, E]]
 
-  final implicit def zioUnliftInstance[R1, R2, E](implicit _r12: R2 Contains R1): ZIOUnliftInstance[R1, R2, E] =
-    new ZIOUnliftInstance[R1, R2, E]
+  private[this] val zioTofuUnliftInstanceAny = new ZioTofuUnliftInstance[Any, Any, Any]()(containsUnit[Any, Any])
+  final def zioTofuUnliftInstance[R, E]: ZioTofuUnliftInstance[Any, R, E] =
+    zioTofuUnliftInstanceAny.asInstanceOf[ZioTofuUnliftInstance[Any, R, E]]
+  final def zioTofuContainsUnliftInstance[R1, R2: * Contains R1, E]: ZioTofuUnliftInstance[R1, R2, E] =
+    new ZioTofuUnliftInstance[R1, R2, E]
 }
 trait ZioInstances2 {
 
