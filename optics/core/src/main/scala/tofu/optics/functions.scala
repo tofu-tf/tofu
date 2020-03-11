@@ -58,4 +58,9 @@ object functions {
   def none[A]: Subset[Option[A], Unit] = Subset[Option[A]](_ => Some(()))(_ => None)
 
   def extractSubtype[A <: B, B]: Extract[A, B] = (s: B) => s
+
+  def containsUnit[A, B >: Unit]: Contains[A, B] = new Contains[A, B] {
+    def extract(s: A): B   = ()
+    def set(s: A, b: B): A = s
+  }
 }
