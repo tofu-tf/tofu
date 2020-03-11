@@ -132,15 +132,3 @@ trait ErrorInstances {
       def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
     }
 }
-
-object HasContext {
-  def apply[F[_], C](implicit hc: HasContext[F, C]): HasContext[F, C] = hc
-}
-
-object HasLocal {
-  def apply[F[_], C](implicit hl: HasLocal[F, C]): HasLocal[F, C] = hl
-}
-
-object HasContextRun {
-  def apply[F[_], G[_], C](implicit hcr: HasContextRun[F, G, C]): HasContextRun[F, G, C] = hcr
-}
