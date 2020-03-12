@@ -5,7 +5,7 @@ import cats.instances.either._
 import cats.instances.tuple._
 import cats.syntax.bifunctor._
 import cats._
-import tofu.{Context, HasContextRun, RunContext}
+import tofu.{Context, HasContextRun, RunContext, WithContext, WithRun}
 import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
 
@@ -304,17 +304,14 @@ trait ContextTConcurrent[F[+_], C[_[_]]] extends Concurrent[ContextT[F, C, *]] w
 
 final class ContextTConcurrentI[F[+_], C[_[_]]](implicit val F: Concurrent[F]) extends ContextTConcurrent[F, C]
 
-class ContextTContext[F[+_]: Applicative, C[_[_]]] extends Context[ContextT[F, C, *]] {
-  type Ctx = C[ContextT[F, C, *]]
+class ContextTContext[F[+_]: Applicative, C[_[_]]] extends WithContext[ContextT[F, C, *], C[ContextT[F, C, *]]] {
   val functor: Functor[ContextT[F, C, *]] = new ContextTFunctorI
 
   final def context: ContextT[F, C, C[ContextT[F, C, *]]] = _.pure[F]
 }
 
 final class ContextTRunContext[F[+_]: Applicative, C[_[_]]](implicit FD: Defer[F])
-    extends ContextTContext[F, C] with RunContext[ContextT[F, C, *]] {
-  type Lower[+A] = F[A]
-
+    extends ContextTContext[F, C] with WithRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] {
   def runContext[A](fa: ContextT[F, C, A])(ctx: C[ContextT[F, C, *]]): F[A] = fa.run(ctx)
   def local[A](fa: ContextT[F, C, A])(project: C[ContextT[F, C, *]] => C[ContextT[F, C, *]]): ContextT[F, C, A] =
     c => FD.defer(fa.run(project(c)))

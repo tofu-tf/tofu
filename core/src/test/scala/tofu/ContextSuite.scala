@@ -8,8 +8,11 @@ object ContextSuite {
 
   def testInstancesForReaderT[F[_]: Applicative](): Unit = {
     implicitly[HasContext[ReaderT[F, Ctx, *], Ctx]]
+    implicitly[WithContext[ReaderT[F, Ctx, *], Ctx]]
     implicitly[HasLocal[ReaderT[F, Ctx, *], Ctx]]
+    implicitly[WithLocal[ReaderT[F, Ctx, *], Ctx]]
     implicitly[HasContextRun[ReaderT[F, Ctx, *], F, Ctx]]
+    implicitly[WithRun[ReaderT[F, Ctx, *], F, Ctx]]
     ()
   }
 

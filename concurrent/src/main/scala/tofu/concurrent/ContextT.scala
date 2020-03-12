@@ -2,7 +2,7 @@ package tofu.concurrent
 import cats._
 import cats.effect._
 import cats.instances.either._
-import tofu.HasContextRun
+import tofu.{HasContextRun, WithRun}
 import tofu.concurrent.impl._
 import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
@@ -110,8 +110,8 @@ trait ContextTInstancesQ extends ContextTInstancesR {
   final implicit def contextTConcurrent[F[+_]: Concurrent, C[_[_]]]: Concurrent[ContextT[F, C, *]] =
     new ContextTConcurrentI
 
-  final implicit def contextTRunContext[F[+_]: Applicative: Defer, C[_[_]]]: ContextTRunContext[F, C] =
-    new ContextTRunContext
+  final implicit def contextTRunContext[F[+_]: Applicative: Defer, C[_[_]]]
+      : WithRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] = new ContextTRunContext[F, C]
 
   final def runContextUnsafe[F[+_]: Applicative, C[_[_]]]: HasContextRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] =
     new ContextTRunContextUnsafe[F, C]

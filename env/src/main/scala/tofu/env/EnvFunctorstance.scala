@@ -1,22 +1,18 @@
-package tofu.env
+package tofu
+package env
 
 import cats.effect._
 import cats.{Functor, Monad}
 import monix.eval.Task
 import monix.execution.Scheduler
 import tofu.memo.Memoize
-import tofu.{Execute, Race, RunContext, Timeout}
-import tofu.{Execute, RunContext, Timeout}
 
 import scala.concurrent.duration.{FiniteDuration, TimeUnit}
 import scala.concurrent.{ExecutionContext, Future}
 
 private[env] class EnvFunctorstance[E]
-    extends Concurrent[Env[E, *]] with Timer[Env[E, *]] with RunContext[Env[E, *]] with Execute[Env[E, *]]
+    extends Concurrent[Env[E, *]] with Timer[Env[E, *]] with WithRun[Env[E, *], Task, E] with Execute[Env[E, *]]
     with Memoize[Env[E, *]] with ContextShift[Env[E, *]] with Timeout[Env[E, *]] with Race[Env[E, *]] {
-  override type Lower[A] = Task[A]
-  override type Ctx      = E
-
   import Env._
 
   override def functor: Functor[Env[E, *]] = this
