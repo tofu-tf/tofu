@@ -32,7 +32,7 @@ jobs:
     
      - uses: olafurpg/setup-scala@v5
        with:
-         java-version: graalvm@
+         java-version: graalvm@20.0.0
     
      - name: Check format
        run: sbt checkfmt
@@ -68,7 +68,7 @@ jobs:
     
     - uses: olafurpg/setup-scala@v5
       with:
-        java-version: graalvm@
+        java-version: graalvm@20.0.0
     
     - name: Test
       run: sbt ++${{matrix.scala}} test
@@ -99,7 +99,7 @@ jobs:
     
      - uses: olafurpg/setup-scala@v5
        with:
-         java-version: graalvm@
+         java-version: graalvm@20.0.0
     
      - name: Doc
        run: sbt docs/mdoc
