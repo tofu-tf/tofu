@@ -24,7 +24,7 @@ class CachedLogs[I[_]: Monad: Guarantee, F[_]](
         mvar.take.bracketIncomplete { map =>
           map.getOrElse(key, NoneLogging) match {
             case NoneLogging => create.flatTap(logging => mvar.put(map.updated(key, logging)))
-            case logging     => logging.pure[I]
+            case logging     => mvar.put(map) as logging
           }
         }(mvar.put)
       case logging => logging.pure[I]
