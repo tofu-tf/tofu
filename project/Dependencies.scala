@@ -37,7 +37,7 @@ object Dependencies {
 
     val zio = "1.0.0-RC18-1"
 
-    val zioCats = "2.0.0.0-RC11"
+    val zioCats = "2.0.0.0-RC12"
 
     // Compile time only
     val macroParadise = "2.1.1"
