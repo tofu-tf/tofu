@@ -12,4 +12,10 @@ object ContextTSummonCheck {
     implicitly[I2]
     implicitly[I2 <:< I1]
   }
+
+  def check2[F[+_]: Applicative] = {
+
+    type I1 = WithContext[ContextT[F, Foo, *], Foo[ContextT[F, Foo, *]]]
+    implicitly[I1]
+  }
 }

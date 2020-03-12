@@ -37,7 +37,6 @@ jobs:
      - name: Check format
        run: sbt checkfmt
   test:
-    needs: checkfmt
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
@@ -74,7 +73,6 @@ jobs:
       run: sbt ++${{matrix.scala}} test
       
   docs:
-    needs: checkfmt
     runs-on: [ubuntu-latest]
     steps:
      - uses: actions/checkout@v2
