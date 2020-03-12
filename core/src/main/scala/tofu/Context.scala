@@ -112,3 +112,15 @@ private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](
   type Lower[a] = G[a]
   def runContext[A](fa: F[A])(c: C2): G[A] = ctx.runContext(fa)(equivalent.upcast(c))
 }
+
+object HasContext {
+  def apply[F[_], C](implicit hc: HasContext[F, C]): HasContext[F, C] = hc
+}
+
+object HasLocal {
+  def apply[F[_], C](implicit hl: HasLocal[F, C]): HasLocal[F, C] = hl
+}
+
+object HasContextRun {
+  def apply[F[_], G[_], C](implicit hcr: HasContextRun[F, G, C]): HasContextRun[F, G, C] = hcr
+}
