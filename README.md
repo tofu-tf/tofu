@@ -6,7 +6,7 @@
 
 | CI | Release | Chat |
 | --- | --- | --- |
-| [![Build Status](https://travis-ci.com/TinkoffCreditSystems/tofu.svg?branch=master)](https://travis-ci.com/TinkoffCreditSystems/tofu) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu-core_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu-core) | [![Discord Chat](https://img.shields.io/discord/657318688025739283.svg)](https://discord.gg/qPD5GGH)
+| ![Scala CI](https://github.com/TinkoffCreditSystems/tofu/workflows/Scala%20CI/badge.svg) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu-core_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu-core) | [![Discord Chat](https://img.shields.io/discord/657318688025739283.svg)](https://discord.gg/qPD5GGH)
 
 # Quick Start
 
