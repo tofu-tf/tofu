@@ -22,8 +22,34 @@ import tofu.syntax.monoidalK._
 
 import scala.reflect.ClassTag
 
+/**
+  * A helper for creating instances of [[tofu.logging.Logging]], defining a way these instances will behave while doing logging.
+  * Can create instances either on a by-name basic or a type tag basic.
+  * An instance of [[tofu.logging.Logs]] can be shared between different pieces of code depending
+  * on whether logging behaviour should be shared.
+  * However it's not uncommon to use different [[Logs]] for different parts of program.
+  *
+  * Sample usage would be:
+  * {{{
+  *   val logs: Logs[F, F] = Logs.sync[F, F]
+  *
+  *   def program[F[_]: Sync] =
+  *     for {
+  *       logging <- logs.byName("my-logger")
+  *       _       <- logging.info("this is a message")
+  *       _       <- logging.info("this is another message")
+  *     } yield ()
+  * }}}
+  */
 trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
+
+  /** Creates an instance of [[tofu.logging.Logging]] with a given arbitrary type tag,
+    * using it as a class to create underlying [[org.slf4j.Logger]] with. */
   def forService[Svc: ClassTag]: I[Logging[F]]
+
+  /** Creates an instance of [[tofu.logging.Logging]] for a given arbitrary string name,
+    * using it to create underlying [[org.slf4j.Logger]] with.
+    */
   def byName(name: String): I[Logging[F]]
 
   final def biwiden[I1[a] >: I[a], F1[a] >: F[a]]: Logs[I1, F1] = this.asInstanceOf[Logs[I1, F1]]
@@ -49,6 +75,10 @@ object Logs extends LogsInstances0 {
   def provide[I[_], F[_]]  = new Provide[I, F]
   def provideM[I[_], F[_]] = new ProvideM[I, F]
 
+  /**
+    * Returns an instance of [[tofu.logging.Logs]] that requires [[cats.effect.Sync]] to perform logging side-effects.
+    * Has no notion of context.
+    */
   def sync[I[_]: Sync, F[_]: Sync]: Logs[I, F] = new Logs[I, F] {
     def forService[Svc: ClassTag]: I[Logging[F]] =
       Sync[I].delay(new SyncLogging[F](loggerForService[Svc]))
@@ -64,13 +94,25 @@ object Logs extends LogsInstances0 {
         Sync[I].delay(new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, LoggerFactory.getLogger(name)))
     }
   }
+
+  /**
+    * Returns an instance of [[tofu.logging.Logs]] that will produce the same constant [[tofu.logging.Logging]] instances.
+    */
   def const[I[_]: Applicative, F[_]](logging: Logging[F]): Logs[I, F] = new Logs[I, F] {
     def forService[Svc: ClassTag]: I[Logging[F]] = logging.pure[I]
     def byName(name: String): I[Logging[F]]      = logging.pure[I]
   }
 
+  /**
+    * Returns an instance of [[tofu.logging.Logs]] that will produce a no-op [[tofu.logging.Logging]] instances.
+    */
   def empty[I[_]: Applicative, F[_]: Applicative]: Logs[I, F] = const[I, F](Logging.empty[F])
 
+  /**
+    * Combines two instances of [[tofu.logging.Logs]], resulting in a single one that will produce
+    * instances of [[tofu.logging.Logging]] by combining.
+    * Resulting [[tofu.logging.Logging]] instance will call both implementations in order.
+    */
   def combine[I[_]: Apply, F[_]: Apply](las: Logs[I, F], lbs: Logs[I, F]): Logs[I, F] = new Logs[I, F] {
     def forService[Svc: ClassTag]: I[Logging[F]] = las.forService.map2(lbs.forService)(Logging.combine[F])
     def byName(name: String): I[Logging[F]]      = las.byName(name).map2(lbs.byName(name))(Logging.combine[F])
