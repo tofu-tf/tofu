@@ -1,0 +1,227 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Logging · Tofu</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="### Logging"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Logging · Tofu"/><meta property="og:type" content="website"/><meta property="og:url" content="https://TinkoffCreditSystems.github.io/tofu/"/><meta property="og:description" content="### Logging"/><meta property="og:image" content="https://TinkoffCreditSystems.github.io/tofu/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://TinkoffCreditSystems.github.io/tofu/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/tofu/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/tofu/js/scrollSpy.js"></script><link rel="stylesheet" href="/tofu/css/main.css"/><script src="/tofu/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/tofu/"><img class="logo" src="/tofu/img/favicon.ico" alt="Tofu"/><h2 class="headerTitleWithLogo">Tofu</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/tofu/docs/start" target="_self">Docs</a></li><li class=""><a href="/tofu/api/index.html" target="_self">API</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Utilities</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/tofu/docs/start">Getting started</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Module Documentation</h3><ul class=""><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Core</h4><ul><li class="navListItem"><a class="navItem" href="/tofu/docs/typeclasses">Typeclasses</a></li><li class="navListItem"><a class="navItem" href="/tofu/docs/errors">Error management</a></li><li class="navListItem"><a class="navItem" href="/tofu/docs/fork">Forking and Racing</a></li></ul></div><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Contextual</h4><ul><li class="navListItem"><a class="navItem" href="/tofu/docs/env">Learning Env</a></li><li class="navListItem"><a class="navItem" href="/tofu/docs/hascontext">Learning HasContext</a></li></ul></div><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Utilities</h4><ul><li class="navListItem"><a class="navItem" href="/tofu/docs/memo">memo</a></li><li class="navListItem"><a class="navItem" href="/tofu/docs/console">Using Console</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/tofu/docs/logging">Logging</a></li></ul></div><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Concurrent</h4><ul><li class="navListItem"><a class="navItem" href="/tofu/docs/concurrent-makeref">MakeRef</a></li><li class="navListItem"><a class="navItem" href="/tofu/docs/agent">agent</a></li></ul></div><div class="navGroup subNavGroup"><h4 class="navGroupSubcategoryTitle">Optics</h4><ul><li class="navListItem"><a class="navItem" href="/tofu/docs/optics">Tofu optics</a></li></ul></div></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Logging</h1></header><article><div><span><h3><a class="anchor" aria-hidden="true" id="logging"></a><a href="#logging" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Logging</h3>
+<p>Almost every application nowadays does logging, whether it's logging of business events, history of some state of
+application or even debug record sequences. We log to files, distributed systems, standard outputs of OSes, and we
+got used to it so much it seems really simple to us. Many existing libraries provide many ways of logging from
+your application's code, either automatic or manual.</p>
+<h3><a class="anchor" aria-hidden="true" id="whats-wrong-and-how-to-fix-that"></a><a href="#whats-wrong-and-how-to-fix-that" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>What's wrong (and how to fix that)?</h3>
+<p>First, logging is, in fact, a side effect. Whether we log anything to standard output or a file - it's an interaction
+with the outside world ('outside' relative to our program). Thus, logging as a process can be represented as an effect and operations - as an algebra.<br>
+Second, logging itself seems easy, but stuff around it - not so much. MDC, contexts, structured logging - all these
+things are very helpful on a day-to-day basis, allowing us to read and write our logs, making them clean, comprehensible
+and useful for many purposes. But there are few simple ways to provide all this functionality without bleeding and
+screaming from seeing over-engineered solutions.<br>
+Tofu offers an easy and understandable abstraction over logging (it's even named like this!) but keeping in mind that
+logging is an effect that can be composed.<br>
+It looks very similar to interfaces we all are used to (from SLF4J and other logging libraries and facades), introducing some new concepts:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> tofu.logging.<span class="hljs-type">LoggedValue</span>
+
+<span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Logging</span>[<span class="hljs-type">F</span>[_]] </span>{
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">trace</span></span>(message: <span class="hljs-type">String</span>, values: <span class="hljs-type">LoggedValue</span>*): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>]
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">debug</span></span>(message: <span class="hljs-type">String</span>, values: <span class="hljs-type">LoggedValue</span>*): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>]
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">info</span></span>(message: <span class="hljs-type">String</span>, values: <span class="hljs-type">LoggedValue</span>*): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>]
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">warn</span></span>(message: <span class="hljs-type">String</span>, values: <span class="hljs-type">LoggedValue</span>*): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>]
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">error</span></span>(message: <span class="hljs-type">String</span>, values: <span class="hljs-type">LoggedValue</span>*): <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>]
+}
+</code></pre>
+<p>Basically, that's the main user API you can interact with throughout your code.
+It resembles well-known solutions, keeping in mind that logging is an effect, though introducing the concept of <code>LoggedValue</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="logs-representation-using-loggable"></a><a href="#logs-representation-using-loggable" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Logs representation (using Loggable)</h4>
+<p>To represent a value in logs we use a concept of <code>Loggable</code> (it's a typeclass).
+It describes how a value of some type can be logged, both as a string representation in log message
+and as a component of structured logging. Given an instance of <code>Loggable</code> for a type, a value of the type can be converted into the final internal representation called <code>LoggedValue</code> and thus logged in a way that you provided.<br>
+There are multiple predefined ways to create an instance of <code>Loggable</code>, many of them can be found in <code>tofu.logging.Loggable</code> object:</p>
+<ul>
+<li><code>Loggable.empty</code> for no-op logging of value</li>
+<li><code>Loggable.show</code> for using <code>cats.Show</code> instance as string representaion</li>
+<li><code>Loggable.either</code> for logging either of <code>A</code> and <code>B</code></li>
+<li>provided instances for all primitive types, as well as stdlib's collections and collections from Cats</li>
+<li>java.time.* instances</li>
+</ul>
+<p>Of course, you can describe your <code>Loggable</code> instance yourself by extending existing traits that pre-implement some functionality:</p>
+<ul>
+<li><code>DictLoggable</code> for multi-field objects</li>
+<li><code>ToStringLoggable</code> for using <code>.toString</code> for logging</li>
+<li><code>HideLoggable</code> to exclude value from logging</li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="loggable-example"></a><a href="#loggable-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Loggable example</h4>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> tofu.logging._
+<span class="hljs-keyword">import</span> cats.syntax.semigroup._
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, surname: <span class="hljs-type">String</span></span>)</span>
+
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> userLoggable = <span class="hljs-keyword">new</span> <span class="hljs-type">DictLoggable</span>[<span class="hljs-type">User</span>] {
+  <span class="hljs-keyword">override</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">fields</span></span>[<span class="hljs-type">I</span>, <span class="hljs-type">V</span>, <span class="hljs-type">R</span>, <span class="hljs-type">S</span>](a: <span class="hljs-type">User</span>, i: <span class="hljs-type">I</span>)(<span class="hljs-keyword">implicit</span> r: <span class="hljs-type">LogRenderer</span>[<span class="hljs-type">I</span>, <span class="hljs-type">V</span>, <span class="hljs-type">R</span>, <span class="hljs-type">S</span>]): <span class="hljs-type">R</span> = {
+    r.addString(<span class="hljs-string">"name"</span>, a.name, i) |+| r.addString(<span class="hljs-string">"surname"</span>, a.surname, i)
+  }
+
+  <span class="hljs-keyword">override</span> <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">logShow</span></span>(a: <span class="hljs-type">User</span>): <span class="hljs-type">String</span> = <span class="hljs-string">s"name = <span class="hljs-subst">${a.name}</span>, surname = <span class="hljs-subst">${a.surname}</span>"</span>
+}
+<span class="hljs-comment">// userLoggable: AnyRef with DictLoggable[User] = repl.Session$App$$anon$1@621a50e9</span>
+</code></pre>
+<p>Let's take a look at this example.<br>
+First, we define a loggable for our <code>User</code> class as a <code>DictLoggable</code> which means
+that we want to log it as a multi-field object with structure.<br>
+Second, we define two methods that describe how <code>User</code> should be logged:</p>
+<ul>
+<li><code>fields</code>, that represents <code>User</code> as a structure, containing two fields with their
+respective names and values</li>
+<li><code>logShow</code>, that represents <code>User</code> as a string in a log message</li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="logging-creation"></a><a href="#logging-creation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Logging creation</h4>
+<p>Creating an instance of <code>Logging</code> in Tofu is an effect itself. You can use helper class <code>Logs</code> that can produce values of
+type <code>I[Logging[F]]</code> (where <code>I</code> and <code>F</code> can be two different effects) and define a behaviour of your <code>Logging</code> instances.
+An instance of <code>Logs</code> is supposed to be shared by different parts of user code. though it's not a restriction.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> tofu.logging._
+
+<span class="hljs-comment">// for simplification, you can use whatever F you like</span>
+<span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">F</span>[<span class="hljs-type">A</span>] </span>= cats.effect.<span class="hljs-type">IO</span>[<span class="hljs-type">A</span>]
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyService</span></span>
+
+<span class="hljs-comment">// defines simple logging behaviour without any notion of contexts</span>
+<span class="hljs-keyword">val</span> syncLogs = <span class="hljs-type">Logs</span>.sync[<span class="hljs-type">F</span>, <span class="hljs-type">F</span>]
+<span class="hljs-comment">// syncLogs: Logs[F, F] = tofu.logging.Logs$$anon$4@48f8c0d4</span>
+
+<span class="hljs-comment">// describing creation of logging instances and logging itself. When being run, this will log a message</span>
+<span class="hljs-keyword">val</span> effect: <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] = <span class="hljs-keyword">for</span> {
+    loggingBN &lt;- syncLogs.byName(<span class="hljs-string">"my-logger"</span>) <span class="hljs-comment">// you can create instances by name</span>
+    loggingFS &lt;- syncLogs.forService[<span class="hljs-type">MyService</span>] <span class="hljs-comment">// you can create instances by type tags</span>
+    _         &lt;- loggingBN.info(<span class="hljs-string">"This is an INFO message"</span>)
+    _         &lt;- loggingFS.warn(<span class="hljs-string">"This is a WARN message"</span>)
+} <span class="hljs-keyword">yield</span> ()
+<span class="hljs-comment">// effect: F[Unit] = Bind(</span>
+<span class="hljs-comment">//   Delay(tofu.logging.Logs$$anon$4$$Lambda$8623/470194432@7e17ac5),</span>
+<span class="hljs-comment">//   &lt;function1&gt;</span>
+<span class="hljs-comment">// )</span>
+</code></pre>
+<p>There are multiple ways to create <code>Logs</code> instance, among them:</p>
+<ul>
+<li><code>Logs.sync</code> that requires a <code>cats.effect.Sync</code> instance for delaying side-effects</li>
+<li><code>Logs.withContext</code> that requires a <code>cats.effect.Sync</code> instance for delaying side-effects and a proof that <code>F</code> has a context to log</li>
+<li><code>Logs.const</code> that wraps single <code>Logging</code> thus always returning the same instance</li>
+<li><code>Logs.empty</code> that will produce a no-op <code>Logging</code> instances</li>
+<li><code>Logs.combine</code> that combines two instances of <code>Logs</code>.
+<code>Logging</code> instance that is created this way will be a combination of two underlying instances, produced by both <code>Logs</code>.
+This means that both <code>Logging</code> implementations will be called in sequence</li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="context-logging"></a><a href="#context-logging" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Context logging</h4>
+<p>It is possible to log the context of your computations (MDC, remember?) if you have an instance of <code>tofu.Context</code> for your
+effect type and a <code>Loggable</code> for your context.
+That's natural - describe how we can obtain a context from a computation <code>F</code> and a way to represent that context in log,
+and we will ensure it will be logged anytime you use <code>Logging</code> operations.
+You can log that context to string as well as use it as a part of structured logging.</p>
+<p>Here, we defined our <code>Loggable</code> as a <code>DictLoggable</code> that has a notion of <code>fields</code>.
+Fields are a structure of your <code>Loggable</code> that is used for structured logging by your <code>LogRendered</code>.
+Tofu comes with a <code>tofu.logging.ElkLayout</code> (present in <code>tofu-logging-layout</code> library), that will log the structure (fields) of your <code>Loggable</code>
+as JSON fields.</p>
+<h4><a class="anchor" aria-hidden="true" id="syntax-extensions"></a><a href="#syntax-extensions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Syntax extensions</h4>
+<p>It's much more convenient to use pre-defined syntax extensions for logging operations since they do all heavy lifting for you:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">import</span> cats.{<span class="hljs-type">Monad</span>, <span class="hljs-type">Show</span>, <span class="hljs-type">Functor</span>}
+<span class="hljs-keyword">import</span> cats.effect._
+<span class="hljs-keyword">import</span> cats.syntax.functor._
+<span class="hljs-keyword">import</span> tofu.logging._
+<span class="hljs-keyword">import</span> tofu.syntax.logging._
+
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span>(<span class="hljs-params">name: <span class="hljs-type">String</span>, surname: <span class="hljs-type">String</span></span>)</span>
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">User</span> </span>{
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> userShow: <span class="hljs-type">Show</span>[<span class="hljs-type">User</span>]         = user =&gt; <span class="hljs-string">s"name=<span class="hljs-subst">${user.name}</span>, surname=<span class="hljs-subst">${user.surname}</span>"</span>
+  <span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> userInstance: <span class="hljs-type">Loggable</span>[<span class="hljs-type">User</span>] = <span class="hljs-type">Loggable</span>.show
+}
+
+<span class="hljs-keyword">val</span> user: <span class="hljs-type">User</span> = <span class="hljs-type">User</span>(<span class="hljs-string">"name"</span>, <span class="hljs-string">"surname"</span>)
+<span class="hljs-comment">// user: User = User("name", "surname")</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyService</span>[<span class="hljs-type">F</span>[_]</span>: <span class="hljs-type">Logging</span>: <span class="hljs-type">Monad</span>] {
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">doLogging</span></span>: <span class="hljs-type">F</span>[<span class="hljs-type">Unit</span>] =
+    <span class="hljs-keyword">for</span> {
+      _ &lt;- <span class="hljs-string">info"This is a syntax demo: <span class="hljs-subst">$user</span>"</span>
+    } <span class="hljs-keyword">yield</span> ()
+}
+
+<span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">MyService</span> </span>{
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">apply</span></span>[<span class="hljs-type">I</span>[_]: <span class="hljs-type">Functor</span>, <span class="hljs-type">F</span>[_]: <span class="hljs-type">Monad</span>](<span class="hljs-keyword">implicit</span> logs: <span class="hljs-type">Logs</span>[<span class="hljs-type">I</span>, <span class="hljs-type">F</span>]): <span class="hljs-type">I</span>[<span class="hljs-type">MyService</span>[<span class="hljs-type">F</span>]] = {
+    logs.forService[<span class="hljs-type">MyService</span>[<span class="hljs-type">F</span>]].map(<span class="hljs-keyword">implicit</span> l =&gt; <span class="hljs-keyword">new</span> <span class="hljs-type">MyService</span>[<span class="hljs-type">F</span>])
+  }
+}
+
+<span class="hljs-comment">// An instance of `Logs` is supposed to be shared between mupltiple classes (or a single one for a whole application)</span>
+<span class="hljs-comment">// Note that initializing effect of your application may differ from logging effect.</span>
+<span class="hljs-keyword">implicit</span> <span class="hljs-keyword">val</span> logs: <span class="hljs-type">Logs</span>[<span class="hljs-type">IO</span>, <span class="hljs-type">IO</span>] = <span class="hljs-type">Logs</span>.sync[<span class="hljs-type">IO</span>, <span class="hljs-type">IO</span>]
+<span class="hljs-comment">// logs: Logs[IO, IO] = tofu.logging.Logs$$anon$4@14429e4d</span>
+
+<span class="hljs-keyword">val</span> io: <span class="hljs-type">IO</span>[<span class="hljs-type">Unit</span>] = <span class="hljs-keyword">for</span> {
+  service &lt;- <span class="hljs-type">MyService</span>[<span class="hljs-type">IO</span>, <span class="hljs-type">IO</span>]
+  _       &lt;- service.doLogging
+} <span class="hljs-keyword">yield</span> ()
+<span class="hljs-comment">// io: IO[Unit] = Bind(</span>
+<span class="hljs-comment">//   Map(</span>
+<span class="hljs-comment">//     Delay(tofu.logging.Logs$$anon$4$$Lambda$8624/1258390318@154b598d),</span>
+<span class="hljs-comment">//     &lt;function1&gt;,</span>
+<span class="hljs-comment">//     0</span>
+<span class="hljs-comment">//   ),</span>
+<span class="hljs-comment">//   &lt;function1&gt;</span>
+<span class="hljs-comment">// )</span>
+
+io.unsafeRunSync()
+</code></pre>
+<p>Using a syntax we achieve a few important goals.<br>
+First, it will log a message containing a string representation of your value of type <code>User</code> as you defined it in <code>Loggable</code> instance.<br>
+Second, it will create a <code>LoggedValue</code> from your <code>Loggable</code> description and pass it to underlying logger and your <code>LogRendered</code>,
+so your structured logging will work as expected.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/tofu/docs/console"><span class="arrow-prev">← </span><span>Using Console</span></a><a class="docs-next button" href="/tofu/docs/concurrent-makeref"><span class="function-name-prevnext">MakeRef</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/tofu/" class="nav-home"><img src="/tofu/img/favicon.ico" alt="Tofu" width="66" height="58"/></a><div><h5>Docs</h5><a href="/tofu/docs/start.html">Getting Started</a></div><div><h5>Community</h5><a href="/tofu/en/users.html">User Showcase</a><a href="https://stackoverflow.com/questions/tagged/tofu" target="tofu" rel="noreferrer noopener">Stack Overflow</a><a href="https://t.me/tofu_scala">Telegram Group (EN|RU)</a><a href="https://gitter.im/tinkoff-tofu/community">Gitter Group (EN)</a></div><div><h5>More</h5><a href="/tofu/blog">Blog</a><a href="https://github.com/TinkoffCreditSystems/tofu">GitHub</a><a class="github-button" href="https://github.com/TinkoffCreditSystems/tofu" data-icon="octicon-star" data-count-href="/TinkoffCreditSystems/tofu/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Tinkoff.ru</section></footer></div></body></html>
