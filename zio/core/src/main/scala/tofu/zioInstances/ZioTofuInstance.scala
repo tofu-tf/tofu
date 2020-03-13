@@ -19,10 +19,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
 
 class ZioTofuInstance[R, E]
-    extends RunContext[ZIO[R, E, *]] with Errors[ZIO[R, E, *], E] with Start[ZIO[R, E, *]]
+    extends WithRun[ZIO[R, E, *], ZIO[Any, E, *], R] with Errors[ZIO[R, E, *], E] with Start[ZIO[R, E, *]]
     with Finally[ZIO[R, E, *], Exit[E, *]] with Execute[ZIO[R, E, *]] {
-  type Ctx      = R
-  type Lower[a] = ZIO[Any, E, a]
   val context: ZIO[R, E, R] = ZIO.access[R](r => r)
   val functor: Functor[ZIO[R, E, *]] = new Functor[ZIO[R, E, *]] {
     def map[A, B](fa: ZIO[R, E, A])(f: A => B): ZIO[R, E, B] = fa.map(f)

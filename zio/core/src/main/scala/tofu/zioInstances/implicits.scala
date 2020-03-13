@@ -6,7 +6,9 @@ import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
 
-object implicits {
+object implicits extends ZioTofuImplicits1
+
+class ZioTofuImplicits1 extends ZioTofuImplicits2 {
   @inline final implicit def rioTofuImplicit[R]: RioTofuInstance[R] = rioTofuInstance
 
   @inline final implicit def zioTofuErrorsToImplicit[R, E]: ZioTofuErrorsToInstance[R, E, Nothing] =
@@ -30,4 +32,7 @@ object implicits {
 
   @inline final implicit def zioTofuContainsUnliftImplicit[R1, R2: * Contains R1, E]: ZioTofuUnliftInstance[R1, R2, E] =
     zioTofuContainsUnliftInstance[R1, R2, E]
+}
+trait ZioTofuImplicits2 {
+  @inline final implicit def zioTofuImplicit[R, E]: ZioTofuInstance[R, E] = zioTofuInstance
 }
