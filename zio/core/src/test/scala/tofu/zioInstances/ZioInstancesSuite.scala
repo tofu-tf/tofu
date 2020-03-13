@@ -4,7 +4,7 @@ import tofu.{HasContextRun, WithRun}
 import tofu.lift.{Lift, Unlift}
 import tofu.optics.Contains
 import tofu.zioInstances.implicits._
-import zio.{IO, RIO, Task, URIO, ZIO}
+import zio.{IO, RIO, Task, UIO, URIO, ZIO}
 
 object ZioInstancesSuite {
 
@@ -15,6 +15,10 @@ object ZioInstancesSuite {
     implicitly[Unlift[ZIO[R1, E, *], ZIO[R2, E, *]]]
     implicitly[HasContextRun[RIO[R1, *], Task, R1]]
     implicitly[WithRun[RIO[R1, *], Task, R1]]
+    implicitly[HasContextRun[URIO[R1, *], UIO, R1]]
+    implicitly[WithRun[URIO[R1, *], UIO, R1]]
+    implicitly[HasContextRun[ZIO[R1, E, *], IO[E, *], R1]]
+    implicitly[WithRun[ZIO[R1, E, *], IO[E, *], R1]]
     ()
   }
 
