@@ -21,7 +21,7 @@ object PSame extends OpticCompanion[PSame] {
   type Context             = OpticContext
   override type Mono[A, B] = Same[A, B]
 
-  @silent private type Inv[-s, +t, +a, -b] = PSame[b, a, t, s]
+  @silent("never used") private type Inv[-s, +t, +a, -b] = PSame[b, a, t, s]
 
   private def refl[A, B]: PSame[A, B, A, B] = new PSame[A, B, A, B] {
     def rsubst[K[_, _]](k: K[A, B]): K[A, B] = k

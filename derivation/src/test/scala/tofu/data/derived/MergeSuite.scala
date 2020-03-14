@@ -2,12 +2,12 @@ package tofu.data.derived
 
 import java.time.LocalDate
 
-import org.scalatest.FlatSpec
 import cats.syntax.option._
 import derevo.derive
 import MergeSuite.{Bar, Foo}
+import org.scalatest.flatspec.AnyFlatSpec
 
-class MergeSuite extends FlatSpec {
+class MergeSuite extends AnyFlatSpec {
   "simple merge" should "prefer left value" in {
     assert(Merge[Int].merge(1, 2) === 1)
   }

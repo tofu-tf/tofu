@@ -1,5 +1,6 @@
 package tofu.higherKind.derived
 
+import com.github.ghik.silencer.silent
 import tofu.higherKind.{Embed, RepresentableK}
 
 import scala.reflect.macros.blackbox
@@ -54,7 +55,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
         res
     }
 
-  def embedf(algebra: Type): (String, Type => Tree) =
+  def embedf(@silent("never used") algebra: Type): (String, Type => Tree) =
     "embed" -> {
       case PolyType(List(f), MethodType(List(faf), MethodType(List(fmonad), _))) =>
         def makeMethod(method: Method)(body: List[List[TermName]] => Tree): Method = {
@@ -64,7 +65,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
         val Af = singleType(NoPrefix, faf).widen match {
           case TypeRef(_, _, List(af1)) => af1
-          case other =>
+          case other @ _ =>
             abort(s"something wrong with $faf parameter, this should not happen, also I hate macros")
         }
 

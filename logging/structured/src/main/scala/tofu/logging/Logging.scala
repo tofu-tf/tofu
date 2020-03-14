@@ -28,7 +28,7 @@ trait LoggingBase[F[_]] {
   def write(level: Level, message: String, values: LoggedValue*): F[Unit]
 
   /** could be overridden in the implementation, same as `write` but add additional info via marker */
-  @silent def writeMarker(level: Level, message: String, marker: Marker, values: LoggedValue*): F[Unit] =
+  def writeMarker(level: Level, message: String, @silent("never used") marker: Marker, values: LoggedValue*): F[Unit] =
     write(level, message, values: _*)
 
   /** could be overridden in the implementations, write message about some exception */

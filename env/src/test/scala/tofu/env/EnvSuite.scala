@@ -1,11 +1,12 @@
 package tofu.env
 
 import monix.execution.Scheduler.Implicits.global
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration._
 
-class EnvSuite extends FlatSpec with Matchers {
+class EnvSuite extends AnyFlatSpec with Matchers {
   "flatMap" should "not stack overflow on folding large collection" in {
     (0 to 100000).toList
       .foldLeft(Env.pure[Unit, Int](3)) {

@@ -1,13 +1,12 @@
 package tofu.concurrent
 package impl
+import cats._
 import cats.effect._
 import cats.instances.either._
 import cats.instances.tuple._
 import cats.syntax.bifunctor._
-import cats._
-import tofu.{Context, HasContextRun, RunContext, WithContext, WithRun}
-import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
+import tofu.{RunContext, WithContext, WithRun}
 
 trait ContextTInvariant[F[+_], C[_[_]]] extends Invariant[ContextT[F, C, *]] {
   implicit def F: Invariant[F]

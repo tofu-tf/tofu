@@ -12,14 +12,15 @@ import cats.tagless.syntax.functorK._
 import cats.tagless.syntax.semigroupalK._
 import cats.{Id, ~>}
 import derevo.derive
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import tofu.data.Embedded
 import tofu.syntax.embed._
 import tofu.syntax.funk.funK
 
 import scala.util.Try
 
-class RepresentableKSuite extends FlatSpec with Matchers {
+class RepresentableKSuite extends AnyFlatSpec with Matchers {
   val checkingFoo: Foo[Either[String, *]] = new Foo[Either[String, *]] {
     override def foo(x: Int, s: String): Either[String, Double] =
       Try(s.toDouble).toEither.left.map(_ => s"could not parse $s as double").map(_ * x)

@@ -3,10 +3,8 @@ package tofu.syntax
 import cats.data.Writer
 import tofu.syntax.monadic._
 import cats.data.Chain
-import cats.Monad
 import tofu.syntax.foldable._
 import cats.instances.stream._
-import cats.instances.int._
 import org.scalatest.flatspec.AnyFlatSpec
 
 class FoldableSuite extends AnyFlatSpec {
