@@ -1,8 +1,7 @@
 package tofu.concurrent
 import cats._
 import cats.effect._
-import cats.instances.either._
-import tofu.{HasContextRun, WithContext, WithRun}
+import tofu.HasContextRun
 import tofu.concurrent.impl._
 import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._

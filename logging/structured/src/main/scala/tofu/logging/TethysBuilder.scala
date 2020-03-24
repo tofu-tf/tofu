@@ -16,7 +16,7 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
   type Output = Unit
 
   /** override to add predefined fields */
-  @silent def predefined(tokenWriter: TokenWriter): Unit = {}
+  def predefined(@silent("never used") tokenWriter: TokenWriter): Unit = {}
 
   def writeValue(value: LogParamValue, writer: TokenWriter): Unit = value match {
     case StrValue(v)     => writer.writeString(v)

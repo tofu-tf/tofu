@@ -1,11 +1,12 @@
 package tofu.optics
 package core
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers.convertToAnyShouldWrapper
+
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import tofu.optics.tags.{every, index}
 import language.postfixOps
 
-class ChainSuite extends FlatSpec {
+class ChainSuite extends AnyFlatSpec {
   def onion(x: Int, y: Int, z: Int) =
     Map("hello" -> Vector(List(Map(true -> x))), "world" -> Vector(), "!!!" -> Vector(List(Map(true -> y, false -> z))))
 

@@ -1,7 +1,7 @@
 package tofu.syntax
 import cats.~>
 
-@deprecated("use tofu.syntax.functionk._", since = "0.7.2")
+@deprecated("use tofu.syntax.funk._", since = "0.7.2")
 object functionK {
 
   /** simple constructor of FunctionK

@@ -2,9 +2,10 @@ package tofu.logging
 package derivation
 
 import derevo.derive
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DerivedLoggableSuite extends FlatSpec with Matchers {
+class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
 
   import DerivedLoggableSuite._
 

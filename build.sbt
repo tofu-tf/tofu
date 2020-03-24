@@ -325,7 +325,8 @@ lazy val defaultScalacOptions = scalacOptions ++= Seq(
   "-Ywarn-unused:patvars",         // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates",        // Warn if a private member is unused.
   "-Ywarn-unused:implicits",       // Warn if an implicit parameter is unused.
-  "-Ywarn-extra-implicit"          // Warn when more than one implicit parameter section is defined.
+  "-Ywarn-extra-implicit",         // Warn when more than one implicit parameter section is defined.
+  "-P:silencer:checkUnused"        // Report an error if a @silent annotation does not actually suppress any warnings
 )
 
 lazy val publishSettings = Seq(

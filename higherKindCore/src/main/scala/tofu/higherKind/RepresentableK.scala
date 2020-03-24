@@ -64,7 +64,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
       def tabulate[F[_]](hom: RepK[ReaderT[*[_], R, A], *] ~> F): ReaderT[F, R, A] =
         ReaderT(r => hom(RepK[ReaderT[*[_], R, A]](_.run(r))))
       override def embed[F[_]: FlatMap](ft: F[ReaderT[F, R, A]]): ReaderT[F, R, A]      = ReaderT(r => ft.flatMap(_.run(r)))
-      override def pureK[F[_]](p: Point[F]): ReaderT[F, R, A]                           = ReaderT(r => p.point[A])
+      override def pureK[F[_]](p: Point[F]): ReaderT[F, R, A]                           = ReaderT(_ => p.point[A])
       override val unitK: ReaderT[UnitK, R, A]                                          = super.unitK
       override def mapK[F[_], G[_]](af: ReaderT[F, R, A])(fk: F ~> G): ReaderT[G, R, A] = af.mapK(fk)
 

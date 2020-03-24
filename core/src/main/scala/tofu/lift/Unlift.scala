@@ -4,13 +4,13 @@ package lift
 import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.{Applicative, Functor, Monad, ~>}
-import syntax.functionK._
+import syntax.funk._
 import tofu.syntax.monadic._
 
 trait Lift[F[_], G[_]] {
   def lift[A](fa: F[A]): G[A]
 
-  def liftF: FunctionK[F, G] = makeFunctionK(lift(_))
+  def liftF: FunctionK[F, G] = funK(lift(_))
 }
 
 object Lift {
@@ -73,7 +73,7 @@ object Unlift {
     type RT[a] = ReaderT[F, R, a]
     new Unlift[F, RT] {
       def lift[A](fa: F[A]): RT[A] = ReaderT.liftF(fa)
-      def unlift: RT[RT ~> F]      = ReaderT(r => makeFunctionK[RT, F](_.run(r)).pure[F])
+      def unlift: RT[RT ~> F]      = ReaderT(r => funK[RT, F](_.run(r)).pure[F])
     }
   }
 

@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 import cats.Eval
 import cats.data.ReaderT
 import cats.effect._
-import cats.syntax.either._
 import monix.eval.{Coeval, Task}
 import monix.execution.Scheduler
 

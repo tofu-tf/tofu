@@ -4,7 +4,6 @@ import cats.data.ReaderT
 import cats.effect._
 import monix.eval.Task
 import monix.execution.{Cancelable, CancelableFuture, Scheduler}
-import cats.syntax.either._
 import monix.execution.annotations.UnsafeBecauseImpure
 
 import scala.annotation.unchecked.{uncheckedVariance => uv}
