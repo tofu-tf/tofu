@@ -5,14 +5,16 @@ import tofu.optics.{Contains, Extract}
 import tofu.optics.functions.{containsUnit, extractSubtype}
 import tofu.zioInstances.{
   RioTofuInstance,
+  RioTofuUnliftIOInstance,
+  RioTofuUnsafeExecFutureInstance,
   ZIOTofuConsoleInstance,
   ZIOTofuRandomInstance,
   ZIOTofuTimeoutInstance,
-  ZioTofuUnliftInstance,
   ZioTofuConcurrentInstance,
   ZioTofuConcurrentInstanceUIO,
   ZioTofuErrorsToInstance,
-  ZioTofuInstance
+  ZioTofuInstance,
+  ZioTofuUnliftInstance
 }
 import zio.clock.Clock
 import zio.console.Console
@@ -56,6 +58,15 @@ class ZioInstances1 extends ZioInstances2 {
     zioTofuUnliftInstanceAny.asInstanceOf[ZioTofuUnliftInstance[Any, R, E]]
   final def zioTofuContainsUnliftInstance[R1, R2: * Contains R1, E]: ZioTofuUnliftInstance[R1, R2, E] =
     new ZioTofuUnliftInstance[R1, R2, E]
+
+  private[this] val rioTofuUnliftIOInstanceAny: RioTofuUnliftIOInstance[Any] = new RioTofuUnliftIOInstance
+  final def rioTofuUnliftIOInstance[R]: RioTofuUnliftIOInstance[R] =
+    rioTofuUnliftIOInstanceAny.asInstanceOf[RioTofuUnliftIOInstance[R]]
+
+  private[this] val rioTofuUnsafeExecFutureInstanceAny: RioTofuUnsafeExecFutureInstance[Any] =
+    new RioTofuUnsafeExecFutureInstance
+  final def rioTofuUnsafeExecFutureInstance[R]: RioTofuUnsafeExecFutureInstance[R] =
+    rioTofuUnsafeExecFutureInstanceAny.asInstanceOf[RioTofuUnsafeExecFutureInstance[R]]
 }
 trait ZioInstances2 {
 

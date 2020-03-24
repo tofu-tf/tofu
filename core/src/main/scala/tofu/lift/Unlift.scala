@@ -64,6 +64,8 @@ trait Unlift[F[_], G[_]] extends Lift[F, G] {
 }
 
 object Unlift {
+  def apply[F[_], G[_]](implicit unlift: Unlift[F, G]): Unlift[F, G] = unlift
+
   implicit def unliftIdentity[F[_]: Applicative]: Unlift[F, F] = new Unlift[F, F] {
     def lift[A](fa: F[A]): F[A] = fa
     def unlift: F[F ~> F]       = FunctionK.id[F].pure[F]

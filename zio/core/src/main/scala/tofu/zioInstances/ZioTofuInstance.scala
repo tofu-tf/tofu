@@ -2,21 +2,22 @@ package tofu
 package zioInstances
 import java.io.IOException
 
+import cats.effect.{CancelToken, Fiber, IO => CIO}
 import cats.{Applicative, Functor, ~>}
-import cats.effect.{CancelToken, Fiber}
 import tofu.generate.GenRandom
 import tofu.internal.CachedMatcher
-import tofu.lift.Unlift
+import tofu.lift.{Unlift, UnliftIO, UnsafeExecFuture}
 import tofu.optics.{Contains, Extract}
-import tofu.syntax.funk.funK
+import tofu.syntax.funk._
 import tofu.zioInstances.ZioTofuInstance.convertFiber
 import zio.clock.Clock
 import zio.console.Console
+import zio.interop.catz.{console => _, _}
 import zio.random.Random
 import zio.{Fiber => ZFiber, _}
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
 
 class ZioTofuInstance[R, E]
     extends WithRun[ZIO[R, E, *], ZIO[Any, E, *], R] with Errors[ZIO[R, E, *], E] with Start[ZIO[R, E, *]]
@@ -116,4 +117,14 @@ class ZioTofuUnliftInstance[R1, R2, E](implicit lens: Contains[R2, R1]) extends 
   def lift[A](fa: ZIO[R1, E, A]): ZIO[R2, E, A] = fa.provideSome(lens.extract)
   def unlift: ZIO[R2, E, ZIO[R2, E, *] ~> ZIO[R1, E, *]] =
     ZIO.access[R2](r2 => funK(_.provideSome(r1 => lens.set(r2, r1))))
+}
+
+class RioTofuUnliftIOInstance[R] extends UnliftIO[RIO[R, *]] {
+  def lift[A](fa: CIO[A]): RIO[R, A]   = RIO.concurrentEffectWith[R, Throwable, A](_.liftIO(fa))
+  def unlift: RIO[R, RIO[R, *] ~> CIO] = RIO.concurrentEffect[R].map(CE => funK(CE.toIO))
+}
+
+class RioTofuUnsafeExecFutureInstance[R] extends UnsafeExecFuture[RIO[R, *]] {
+  def lift[A](fa: Future[A]): RIO[R, A]   = RIO.fromFuture(_ => fa)
+  def unlift: RIO[R, RIO[R, *] ~> Future] = RIO.runtime[R].map(r => funK(r.unsafeRunToFuture))
 }
