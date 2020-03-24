@@ -1,7 +1,7 @@
 package tofu.zioInstances
 
 import tofu.{ErrorsTo, HasContextRun, RunContext, WithRun}
-import tofu.lift.{Lift, Unlift, UnliftIO, UnsafeExecFuture}
+import tofu.lift.{Lift, Unlift, UnliftIO}
 import tofu.optics.{Contains, Extract}
 import tofu.zioInstances.implicits._
 import zio.{IO, RIO, Task, UIO, URIO, ZIO}

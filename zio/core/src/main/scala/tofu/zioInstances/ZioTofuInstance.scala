@@ -121,10 +121,10 @@ class ZioTofuUnliftInstance[R1, R2, E](implicit lens: Contains[R2, R1]) extends 
 
 class RioTofuUnliftIOInstance[R] extends UnliftIO[RIO[R, *]] {
   def lift[A](fa: CIO[A]): RIO[R, A]   = RIO.concurrentEffectWith[R, Throwable, A](_.liftIO(fa))
-  def unlift: RIO[R, RIO[R, *] ~> CIO] = RIO.concurrentEffect[R].map(CE => funK(CE.toIO))
+  def unlift: RIO[R, RIO[R, *] ~> CIO] = RIO.concurrentEffect[R].map(CE => funK(CE.toIO(_)))
 }
 
 class RioTofuUnsafeExecFutureInstance[R] extends UnsafeExecFuture[RIO[R, *]] {
   def lift[A](fa: Future[A]): RIO[R, A]   = RIO.fromFuture(_ => fa)
-  def unlift: RIO[R, RIO[R, *] ~> Future] = RIO.runtime[R].map(r => funK(r.unsafeRunToFuture))
+  def unlift: RIO[R, RIO[R, *] ~> Future] = RIO.runtime[R].map(r => funK(r.unsafeRunToFuture(_)))
 }
