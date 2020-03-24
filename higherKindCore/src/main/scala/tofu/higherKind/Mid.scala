@@ -19,7 +19,7 @@ object Mid extends MidInstances {
     override def point[A]: Mid[F, A] = x => x
   }
 
-  /** when unification falls */
+  /** when unification fails */
   def attach[U[f[_]]: ApplyK, F[_]](up: U[Mid[F, *]])(alg: U[F]): U[F] = up.attach(alg)
 
   implicit final class TofuMidAlgebraSyntax[F[_], U[f[_]]](private val self: U[Mid[F, *]]) extends AnyVal {
@@ -41,13 +41,13 @@ object Mid extends MidInstances {
 
 }
 trait MidInstances extends MidInstances1 {
-  implicit def preMonoidK[F[_]]: MonoidK[Mid[F, *]] = new MidMonoidK[F]
+  implicit def midMonoidK[F[_]]: MonoidK[Mid[F, *]] = new MidMonoidK[F]
 
-  implicit def preAlgebraMonoid[F[_], U[f[_]]: MonoidalK]: Monoid[U[Mid[F, *]]] = new MidAlgebraMonoid[F, U]
+  implicit def midAlgebraMonoid[F[_], U[f[_]]: MonoidalK]: Monoid[U[Mid[F, *]]] = new MidAlgebraMonoid[F, U]
 }
 
 trait MidInstances1 {
-  implicit def preAlgebraMonoid[F[_], U[f[_]]: ApplyK]: Semigroup[U[Mid[F, *]]] = new MidAlgebraSemigroup[F, U]
+  implicit def midAlgebraSemigroup[F[_], U[f[_]]: ApplyK]: Semigroup[U[Mid[F, *]]] = new MidAlgebraSemigroup[F, U]
 }
 
 class MidMonoidK[F[_]] extends MonoidK[Mid[F, *]] {
