@@ -1,7 +1,7 @@
 package tofu.zioInstances
 
 import tofu.{ErrorsTo, HasContextRun, RunContext, WithRun}
-import tofu.lift.{Lift, Unlift}
+import tofu.lift.{Lift, Unlift, UnliftIO}
 import tofu.optics.{Contains, Extract}
 import tofu.zioInstances.implicits._
 import zio.{IO, RIO, Task, UIO, URIO, ZIO}
@@ -14,6 +14,8 @@ object ZioInstancesSuite {
 
     implicitly[Unlift[IO[E1, *], ZIO[R1, E1, *]]]
     implicitly[Unlift[ZIO[R1, E1, *], ZIO[R2, E1, *]]]
+
+    implicitly[UnliftIO[RIO[R1, *]]]
 
     implicitly[ErrorsTo[IO[E1, *], IO[E1, *], E1]]
     implicitly[ErrorsTo[ZIO[R1, E1, *], ZIO[R1, E1, *], E1]]

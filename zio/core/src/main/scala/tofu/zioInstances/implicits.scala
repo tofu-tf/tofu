@@ -32,6 +32,8 @@ class ZioTofuImplicits1 extends ZioTofuImplicits2 {
 
   @inline final implicit def zioTofuContainsUnliftImplicit[R1, R2: * Contains R1, E]: ZioTofuUnliftInstance[R1, R2, E] =
     zioTofuContainsUnliftInstance[R1, R2, E]
+
+  @inline final implicit def rioTofuUnliftIOImplicit[R]: RioTofuUnliftIOInstance[R] = rioTofuUnliftIOInstance
 }
 trait ZioTofuImplicits2 {
   @inline final implicit def zioTofuImplicit[R, E]: ZioTofuInstance[R, E] = zioTofuInstance
