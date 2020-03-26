@@ -88,10 +88,13 @@ private[env] class EnvFunctorstance[E]
   //Context
   override val context: Env[E, E]                                                  = Env.fromFunc(identity)
   override def ask[A](f: E => A): Env[E, A]                                        = Env.fromFunc(f)
-  override def local[A](fa: Env[E, A])(project: E => E): Env[E, A]                 = fa.local(project)
   override def askF[A](f: E => Env[E, A])(implicit F: Monad[Env[E, *]]): Env[E, A] = Env.withContext(f)
 
-  //RunContext
+  //Local
+  override def local[A](fa: Env[E, A])(project: E => E): Env[E, A] = fa.local(project)
+
+  //Provide
+  override def lift[A](fa: Task[A]): Env[E, A]               = Env.fromTask(fa)
   override def runContext[A](fa: Env[E, A])(ctx: E): Task[A] = fa.run(ctx)
 
   //Memoize

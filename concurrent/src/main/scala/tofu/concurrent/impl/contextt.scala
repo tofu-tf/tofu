@@ -314,6 +314,7 @@ final class ContextTRunContext[F[+_]: Applicative, C[_[_]]](implicit FD: Defer[F
   def runContext[A](fa: ContextT[F, C, A])(ctx: C[ContextT[F, C, *]]): F[A] = fa.run(ctx)
   def local[A](fa: ContextT[F, C, A])(project: C[ContextT[F, C, *]] => C[ContextT[F, C, *]]): ContextT[F, C, A] =
     c => FD.defer(fa.run(project(c)))
+  def lift[A](fa: F[A]): ContextT[F, C, A] = ContextT.lift(fa)
 }
 
 // instance that does not defer locals. could be stack-unsafe
@@ -324,4 +325,5 @@ final class ContextTRunContextUnsafe[F[+_]: Applicative, C[_[_]]]
   def runContext[A](fa: ContextT[F, C, A])(ctx: C[ContextT[F, C, *]]): F[A] = fa.run(ctx)
   def local[A](fa: ContextT[F, C, A])(project: C[ContextT[F, C, *]] => C[ContextT[F, C, *]]): ContextT[F, C, A] =
     c => fa.run(project(c))
+  def lift[A](fa: F[A]): ContextT[F, C, A] = ContextT.lift(fa)
 }

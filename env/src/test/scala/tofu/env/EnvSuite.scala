@@ -1,8 +1,11 @@
 package tofu.env
 
+import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import tofu.{HasContextRun, RunContext, WithRun}
+import tofu.lift.{Lift, Unlift, UnliftIO}
 
 import scala.concurrent.duration._
 
@@ -59,5 +62,19 @@ class EnvSuite extends AnyFlatSpec with Matchers {
       }
       .run(())
       .runSyncUnsafe(Duration.Inf) shouldBe 3
+  }
+}
+
+object EnvSuite {
+  def summonEnvInstances[E](): Unit = {
+    implicitly[Lift[Task, Env[E, *]]]
+    implicitly[Unlift[Task, Env[E, *]]]
+
+    implicitly[UnliftIO[Env[E, *]]]
+
+    implicitly[RunContext[Env[E, *]]]
+    implicitly[HasContextRun[Env[E, *], Task, E]]
+    implicitly[WithRun[Env[E, *], Task, E]]
+    ()
   }
 }
