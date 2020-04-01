@@ -17,7 +17,7 @@ trait Context[F[_]] {
 
   def askF[A](f: Ctx => F[A])(implicit F: Monad[F]): F[A] = F.flatMap(context)(f)
 
-  def extract[A](extr: Extract[Ctx, A]): HasContext[F, A] = new ContextExtractInstance[F, Ctx, A](this, extr)
+  def extract[A](extr: Extract[Ctx, A]): WithContext[F, A] = new ContextExtractInstance[F, Ctx, A](this, extr)
 }
 
 object Context extends ContextInstances[HasContext] {
@@ -45,7 +45,7 @@ trait ContextInstances[TC[f[_], r] >: WithContext[f, r]] extends LocalInstances[
 trait Local[F[_]] extends Context[F] {
   def local[A](fa: F[A])(project: Ctx => Ctx): F[A]
 
-  def subcontext[A](contains: Ctx Contains A): HasLocal[F, A] = new LocalContainsInstance[F, Ctx, A](this, contains)
+  def subcontext[A](contains: Ctx Contains A): WithLocal[F, A] = new LocalContainsInstance[F, Ctx, A](this, contains)
 }
 
 object Local extends LocalInstances[HasLocal] {
@@ -59,7 +59,7 @@ object WithLocal extends LocalInstances[WithLocal] {
   def apply[F[_], C](implicit ctx: WithLocal[F, C]): WithLocal[F, C] = ctx
 }
 
-trait LocalInstances[TCA[f[_], r] >: WithLocal[f, r]] extends RunContextInstances[λ[(`f[_]`, `g[_]`, r) => TCA[f, r]]]
+trait LocalInstances[TCA[f[_], r] >: WithLocal[f, r]] extends RunContextInstances[λ[(f[_], g[_], r) => TCA[f, r]]]
 
 trait Provide[F[_]] {
   type Ctx
@@ -69,7 +69,7 @@ trait Provide[F[_]] {
 
   def lift[A](la: Lower[A]): F[A]
 
-  def runExtract[A](extract: A Extract Ctx): HasProvide[F, Lower, A] =
+  def runExtract[A](extract: A Extract Ctx): WithProvide[F, Lower, A] =
     new ProvideExtractInstance[F, Lower, Ctx, A](this, extract)
 }
 
@@ -90,7 +90,7 @@ trait ProvideInstances[TCA[f[_], g[_], r] >: WithProvide[f, g, r]] extends RunCo
 
 trait RunContext[F[_]] extends Local[F] with Provide[F] {
   def unlift: F[F ~> Lower] = ask(ctx => funK(runContext(_)(ctx)))
-  def runEquivalent[A](eq: Equivalent[Ctx, A]): HasContextRun[F, Lower, A] =
+  def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, Lower, A] =
     new RunContextEquivalentInstance[F, Lower, Ctx, A](this, eq)
 }
 
@@ -131,10 +131,7 @@ private[tofu] class LocalContainsInstance[F[_], C1, C2](ctx: F HasLocal C1, cont
 private[tofu] class ProvideExtractInstance[F[_], G[_], C1, C2](
     ctx: HasProvide[F, G, C1],
     extract: C2 Extract C1
-) extends Provide[F] {
-  type Ctx      = C2
-  type Lower[a] = G[a]
-
+) extends WithProvide[F, G, C2] {
   def runContext[A](fa: F[A])(c: Ctx): G[A] =
     ctx.runContext(fa)(extract.extract(c))
   def lift[A](ga: G[A]): F[A] = ctx.lift(ga)
