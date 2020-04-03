@@ -55,6 +55,7 @@ trait FS2Provide[F[_], G[_], R] extends WithProvide[Stream[F, *], Stream[G, *], 
   implicit def F: HasProvide[F, G, R]
 
   def runContext[A](fa: Stream[F, A])(ctx: R): Stream[G, A] = fa.translate(funKFrom[F](F.runContext(_)(ctx)))
+  def lift[A](fa: Stream[G, A]): Stream[F, A] = fa.translate(funKFrom[G](F.lift(_)))
 }
 
 trait FS2RunContext[F[_], G[_], R]
