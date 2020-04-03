@@ -3,7 +3,7 @@ package tofu.env
 import cats.arrow.{ArrowChoice, FunctionK, Profunctor}
 import cats.effect.IO
 import cats.{Applicative, Monad, Parallel, ~>}
-import monix.eval.Task
+import monix.eval.{Task, TaskLift}
 import monix.execution.Scheduler
 import tofu.lift.{UnliftIO, UnsafeExecFuture}
 import tofu.optics.Contains
@@ -80,7 +80,7 @@ private[env] trait EnvInstances {
       def unlift: Env[E, Env[E, *] ~> Future] = Env.fromFunc(r => makeFunctionK(_.run(r).runToFuture))
     }
 
-  implicit def envUnliftIO[E](implicit sc: Scheduler): UnliftIO[Env[E, *]] = new UnliftIO[Env[E, *]] {
+  implicit def envUnliftIO[E](implicit toIO: TaskLift[IO]): UnliftIO[Env[E, *]] = new UnliftIO[Env[E, *]] {
     def lift[A](fa: IO[A]): Env[E, A]   = Env.fromIO(fa)
     def unlift: Env[E, Env[E, *] ~> IO] = Env.fromFunc(r => funK(_.run(r).to[IO]))
   }
