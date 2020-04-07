@@ -31,7 +31,7 @@ object Dependencies {
 
     val scalatest = "3.1.1"
 
-    val magnolia = "0.12.8"
+    val magnolia = "0.13.1"
 
     val typesafeConfig = "1.4.0"
 
