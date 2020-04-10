@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.7.3"
+val libVersion = "0.7.4"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -13,7 +13,7 @@ lazy val setMinorVersion = minorVersion := {
 lazy val setModuleName = moduleName := { s"tofu-${(publishName or name).value}" }
 lazy val experimental  = scalacOptions ++= { if (scalaVersion.value < "2.12") Seq("-Xexperimental") else Nil }
 
-val macros = Keys.libraryDependencies ++= {
+val macros = libraryDependencies ++= {
   minorVersion.value match {
     case 13 => Seq(scalaOrganization.value % "scala-reflect" % scalaVersion.value)
     case 12 =>
@@ -24,11 +24,19 @@ val macros = Keys.libraryDependencies ++= {
   }
 }
 
+lazy val paradise = libraryDependencies ++= {
+  minorVersion.value match {
+    case 13 => Seq()
+    case 12 => Seq(compilerPlugin(macroParadise))
+  }
+}
+
 lazy val defaultSettings = Seq(
   scalaVersion := "2.13.1",
   setMinorVersion,
   setModuleName,
   experimental,
+  paradise,
   defaultScalacOptions,
   libraryDependencies ++= Seq(
     compilerPlugin(kindProjector),
@@ -198,8 +206,12 @@ lazy val zioCore =
 lazy val zioLogging =
   project
     .in(file("zio/logging"))
-    .settings(defaultSettings, libraryDependencies ++= List(zio, slf4j), publishName := "zio-logging")
-    .dependsOn(loggingStr)
+    .settings(
+      defaultSettings,
+      libraryDependencies ++= List(zio, zioCats, slf4j, logback % Test),
+      publishName := "zio-logging"
+    )
+    .dependsOn(loggingStr, loggingDer % "test")
 
 lazy val zioInterop = project
   .in(file("zio"))
