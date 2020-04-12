@@ -15,16 +15,15 @@ import cats.syntax.foldable._
 import cats.syntax.monoid._
 import cats.syntax.show._
 import cats.{Foldable, Show}
-import impl._
-import tofu.control.Consume
-import tofu.logging.Loggable.Base
-import tofu.syntax.logRenderer._
 import simulacrum.typeclass
 import tofu.control.Consume
+import tofu.logging.Loggable.Base
+import tofu.logging.impl._
+import tofu.syntax.logRenderer._
 
 import scala.collection.immutable.SortedSet
 import scala.collection.{immutable, mutable}
-import scala.{PartialFunction => =?>, specialized => sp}
+import scala.{PartialFunction => PF, specialized => sp}
 
 /**
   * Typeclass for adding custom log values to message
@@ -36,19 +35,24 @@ trait Loggable[A] extends Loggable.Base[A] {
   def hide: Loggable[A] = new HiddenLoggable(this)
 
   /** combine two loggables: put fields of both, choose value of first that suits  */
-  def +(that: Loggable.Base[A]): Loggable[A] = new PlusLoggable[A](this, that)
+  def +(that: Loggable.Base[A]): Loggable[A] = that match {
+    case EmptyLoggable => this
+    case _             => new PlusLoggable[A](this, that)
+  }
 
   def plus[B <: A](that: Loggable.Base[B]): Loggable.Base[B] = new PlusLoggable[B](this, that)
 
   /** log this value whenever predicate holds */
   def filter(p: A => Boolean): Loggable[A]      = new FilterLoggable[A](this, p)
   def filterC[B <: A](p: B => Boolean): Base[B] = new FilterLoggable[B](this, p)
-  def contraCollect[B](f: B =?> A): Loggable[B] = contramap(f).filter(f.isDefinedAt)
+  def contraCollect[B](f: B PF A): Loggable[B]  = contramap(f).filter(f.isDefinedAt)
 
   /** whenever fields  are called it would be a single field named `name` and corresponding value */
   def named(name: String): Loggable[A] = new NamedLoggable[A](name, this)
 
   def showInstance: Show[A] = logShow
+
+  def narrow[B <: A]: Loggable[B] = this.asInstanceOf[Loggable[B]]
 }
 
 object Loggable {
@@ -115,21 +119,18 @@ object Loggable {
     def filterC[B <: A](p: B => Boolean): Base[B]
 
     /** contravariant version of `collect` - log values of type `B` when they could be converted to `A` */
-    def contraCollect[B](f: B =?> A): Base[B]
+    def contraCollect[B](f: B PF A): Base[B]
 
     /** whenever full log is needed it would be an object with single field `name` and corresponding value */
     def named(name: String): Base[A]
 
     def showInstance: Show.ContravariantShow[A]
+
+    def narrow[B <: A]: Loggable[B]
   }
 
   /** do nothing log*/
-  def empty[A]: SingleValueLoggable[A] = new SingleValueLoggable[A] {
-    def logValue(a: A): LogParamValue = NullValue
-    override def putField[I, V, R, M](a: A, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
-      input.noop
-    override def logShow(a: A): String = ""
-  }
+  def empty[A]: SingleValueLoggable[A] = EmptyLoggable.narrow[A]
 
   /** put no field, not value, but render as Show string */
   def show[A: Show] = new SubLoggable[A] {

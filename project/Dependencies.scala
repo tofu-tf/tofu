@@ -58,7 +58,7 @@ object Dependencies {
   val catsEffect      = "org.typelevel"              %% "cats-effect"         % Version.catsEffect
   val monix           = "io.monix"                   %% "monix"               % Version.monix
   val logback         = "ch.qos.logback"             % "logback-classic"      % Version.logback
-  val slf4j           = "org.slf4j"                  % "slf4j-simple"         % Version.slf4j % Provided
+  val slf4j           = "org.slf4j"                  % "slf4j-api"            % Version.slf4j % Provided
   val circeCore       = "io.circe"                   %% "circe-core"          % Version.circe
   val circeJava8      = "io.circe"                   %% "circe-java8"         % Version.circe
   val circeDerivation = "io.circe"                   %% "circe-derivation"    % Version.circe
