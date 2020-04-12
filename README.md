@@ -33,7 +33,7 @@ Of course you can also specify the exact subproject that you wanna add to yours 
 * `tofu-logging-derivation` for logging derivation only
 * `tofu-logging-structured` for logging structured only
 * `tofu-logging-layout` for logging layout only
-* `tofu-observable` for observable
+* `tofu-zio-interop` for interop with [ZIO](https://zio.dev)
 * `tofu-enums` for enums ([Enumeratum](https://github.com/lloydmeta/enumeratum) utils)
 
 <img align="right" src="logos/tofu-logo.png" height="100px" style="padding-left: 5px"/>
