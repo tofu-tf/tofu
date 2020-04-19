@@ -121,6 +121,15 @@ lazy val loggingUtil = project
   )
   .dependsOn(loggingStr, concurrent)
 
+lazy val loggingShapeless = project
+  .in(file("logging/interop/shapeless"))
+  .settings(
+    defaultSettings,
+    publishName := "logging-shapeless",
+    libraryDependencies += shapeless
+  )
+  .dependsOn(loggingStr)
+
 lazy val logging = project
   .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil)
   .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil)
