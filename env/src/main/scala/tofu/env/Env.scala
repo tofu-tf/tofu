@@ -3,8 +3,9 @@ package tofu.env
 import cats.data.ReaderT
 import cats.effect._
 import monix.eval.Task
-import monix.execution.{Cancelable, CancelableFuture, Scheduler}
 import monix.execution.annotations.UnsafeBecauseImpure
+import monix.execution.{Cancelable, CancelableFuture, Scheduler}
+import tofu.internal.IsTofu
 
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.duration.FiniteDuration
@@ -298,6 +299,8 @@ final case class EnvCtx[E, +A](runF: E => Task[A]) extends Env[E, A] {
 }
 
 object Env extends EnvInstances with EnvFunctions {
+  final implicit def preventDelegation[E]: IsTofu[Env[E, *]] = IsTofu
+
   private def convertExitCase(ec: Either[Option[Throwable], Any]): ExitCase[Throwable] = ec match {
     case Right(_)        => ExitCase.Completed
     case Left(None)      => ExitCase.Canceled

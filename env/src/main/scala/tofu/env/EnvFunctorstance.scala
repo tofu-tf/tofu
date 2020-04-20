@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 private[env] class EnvFunctorstance[E]
     extends Concurrent[Env[E, *]] with Timer[Env[E, *]] with WithRun[Env[E, *], Task, E] with Execute[Env[E, *]]
-    with Memoize[Env[E, *]] with ContextShift[Env[E, *]] with Timeout[Env[E, *]] with Race[Env[E, *]] {
+    with Memoize[Env[E, *]] with ContextShift[Env[E, *]] with Timeout[Env[E, *]] with Start[Env[E, *]] {
   import Env._
 
   override def functor: Functor[Env[E, *]] = this
