@@ -39,6 +39,8 @@ object Dependencies {
 
     val zioCats = "2.0.0.0-RC12"
 
+    val shapeless = "2.3.3"
+
     // Compile time only
     val macroParadise = "2.1.1"
 
@@ -74,6 +76,7 @@ object Dependencies {
   val zio             = "dev.zio"                    %% "zio"                 % Version.zio
   val zioCats         = "dev.zio"                    %% "zio-interop-cats"    % Version.zioCats
   val scalatest       = "org.scalatest"              %% "scalatest"           % Version.scalatest % Test
+  val shapeless       = "com.chuusai"                %% "shapeless"           % Version.shapeless
 
   // Compile-time only
   val macroParadise    = "org.scalamacros" % "paradise"            % Version.macroParadise cross CrossVersion.patch
