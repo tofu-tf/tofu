@@ -34,6 +34,7 @@ Of course you can also specify the exact subproject that you wanna add to yours 
 * `tofu-logging-structured` for logging structured only
 * `tofu-logging-layout` for logging layout only
 * `tofu-logging-shapeless` for interop between tofu-logging with [Shapeless](https://github.com/milessabin/shapeless) tag
+* `tofu-logging-refined` for interop between tofu-logging with [Refined](https://github.com/fthomas/refined) 
 * `tofu-zio-interop` for interop with [ZIO](https://zio.dev)
 * `tofu-enums` for enums ([Enumeratum](https://github.com/lloydmeta/enumeratum) utils)
 

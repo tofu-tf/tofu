@@ -130,6 +130,15 @@ lazy val loggingShapeless = project
   )
   .dependsOn(loggingStr)
 
+lazy val loggingRefined = project
+  .in(file("logging/interop/refined"))
+  .settings(
+    defaultSettings,
+    publishName := "logging-refined",
+    libraryDependencies += refined
+  )
+  .dependsOn(loggingStr)
+
 lazy val logging = project
   .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil)
   .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil)
