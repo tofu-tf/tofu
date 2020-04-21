@@ -14,10 +14,10 @@ class DoSyntaxCheck {
   def bar2[F[_]: Do, A, B, C, D](f: F[(A, B) => C], g: F[C => D], fa: F[A], fb: F[B]) =
     g <*> f.ap2(fa, fb)
 
-  def eitherCheck[A, B, C, E, E1 <: E, E2 <: E, E3 <: E](
-      fa: Either[E1, A],
-      f: A => Either[E2, B],
-      g: B => Either[E3, C],
+  def covCheck[A, B, C, E, F[_], F1[x] >: F[x], F2[x] >: F1[x]: Do](
+      fa: F[A],
+      f: A => F1[B],
+      g: B => F2[C],
   ) = for {
     x <- fa
     y <- f(x)

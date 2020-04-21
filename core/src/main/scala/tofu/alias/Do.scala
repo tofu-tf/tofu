@@ -30,15 +30,15 @@ object DoMonad extends DoMonadInstances {
     def map2Eval[F1[x] >: F[x], B, Z](fb: cats.Eval[F[B]])(f: (A, B) => Z)(implicit F: Do[F]): cats.Eval[F1[Z]] =
       F.!.map2Eval(fa, fb)(f)
 
-    def flatMap[F1[x] >: F[x], B](f: A => F[B])(implicit F: Do[F1]): F1[B] = F.!.flatMap(fa)(f)
-    def >>=[F1[x] >: F[x], B](f: A => F[B])(implicit F: Do[F]): F[B]       = F.!.flatMap(fa)(f)
+    def flatMap[F1[x] >: F[x], B](f: A => F1[B])(implicit F: Do[F1]): F1[B] = F.!.flatMap(fa)(f)
+    def >>=[F1[x] >: F[x], B](f: A => F1[B])(implicit F: Do[F1]): F1[B]     = F.!.flatMap(fa)(f)
 
     def foreverM[B](implicit F: Do[F]): F[B] = F.!.foreverM[A, B](fa)
 
-    def productREval[F1[x] >: F[x], B](fb: cats.Eval[F[B]])(implicit F: Do[F1]): F1[B] = F.!.productREval(fa)(fb)
-    def productLEval[F1[x] >: F[x], B](fb: cats.Eval[F[B]])(implicit F: Do[F1]): F1[A] = F.!.productLEval(fa)(fb)
-    def mproduct[F1[x] >: F[x], B](f: A => F[B])(implicit F: Do[F1]): F1[(A, B)]       = F.!.mproduct(fa)(f)
-    def flatTap[F1[x] >: F[x], B](f: A => F[B])(implicit F: Do[F1]): F1[A]             = F.!.flatTap(fa)(f)
+    def productREval[F1[x] >: F[x], B](fb: cats.Eval[F1[B]])(implicit F: Do[F1]): F1[B] = F.!.productREval(fa)(fb)
+    def productLEval[F1[x] >: F[x], B](fb: cats.Eval[F1[B]])(implicit F: Do[F1]): F1[A] = F.!.productLEval(fa)(fb)
+    def mproduct[F1[x] >: F[x], B](f: A => F1[B])(implicit F: Do[F1]): F1[(A, B)]       = F.!.mproduct(fa)(f)
+    def flatTap[F1[x] >: F[x], B](f: A => F1[B])(implicit F: Do[F1]): F1[A]             = F.!.flatTap(fa)(f)
 
     def flatten[F1[x] >: F[x], B](implicit ev: A <:< F1[B], F: Do[F1]): F1[B] = F.!.flatten(fa.asInstanceOf[F1[F1[B]]])
 
