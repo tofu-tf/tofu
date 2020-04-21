@@ -1,4 +1,4 @@
-package tofu.syntax
+package tofu.alias
 
 class ScalaSpecificDoMonadInstances {
   import cats.instances.lazyList._
