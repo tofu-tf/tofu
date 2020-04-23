@@ -36,8 +36,15 @@ object bracket {
   }
 
   implicit final class TofuBracketMVarOps[F[_], A](private val mvar: MVar[F, A]) extends AnyVal {
+
+    /**
+      * Update value with effectful transformation, wait for the new result.
+      * Works similarly to [[tofu.concurrent.Agent.updateM]]
+      * @param use function to atomically modify value contained in `Bracket`
+      * @return `F[A]` modified value contained in `Bracket`
+      */
     def bracketUpdate[B, E](use: A => F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[B] =
-      mvar.take.bracketIncomplete(use)(mvar.put)
+      mvar.take.bracketOpt(use)((b, isUpdated) => mvar.put(b).whenA(isUpdated))
   }
 
   implicit final class TofuBracketEitherTOps[F[_], E, A](private val e: EitherT[F, E, A]) extends AnyVal {
