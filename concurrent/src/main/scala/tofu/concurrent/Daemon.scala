@@ -6,6 +6,7 @@ import cats.effect._
 import cats.effect.concurrent.{MVar, TryableDeferred}
 import cats.effect.syntax.bracket._
 import cats.syntax.applicativeError._
+import cats.syntax.option._
 import cats.{Applicative, Apply, FlatMap, Monad}
 import tofu.control.ApplicativeZip
 import tofu.higherKind.{Function2K, RepresentableK}
@@ -22,15 +23,18 @@ object Daemonic extends DaemonicInstances {
   private[tofu] type Promise[F[_], E, A] = TryableDeferred[F, Exit[E, A]]
   private[tofu] type Maker[F[_], E]      = Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]
 
-  private[tofu] def mkInstance[F[_]: Start: TryableDeferreds: Bracket[*[_], E], E](maker: Maker[F, E]): Daemonic[F, E] =
+  private[tofu] def mkInstance[F[_]: Start: TryableDeferreds: Refs: Bracket[*[_], E], E](
+      maker: Maker[F, E]
+  ): Daemonic[F, E] =
     new Daemonic[F, E] {
       override def daemonize[A](process: F[A]): F[Daemon[F, E, A]] =
         for {
           exit <- MakeDeferred.tryable[F, Exit[E, A]]
+          ref  <- Refs[F].of(none[A])
           fiber <- process
-                    .flatTap(a => exit.complete(Exit.Completed(a)))
+                    .flatTap(a => ref.set(a.some))
                     .guaranteeCase {
-                      case ExitCase.Completed => unit
+                      case ExitCase.Completed => ref.get.flatMap(opt => exit.complete(Exit.Completed(opt.get)))
                       case ExitCase.Canceled  => exit.complete(Exit.Canceled)
                       case ExitCase.Error(e)  => exit.complete(Exit.Error(e))
                     }
@@ -39,7 +43,7 @@ object Daemonic extends DaemonicInstances {
     }
 
   /** instance making safe Daemons that throws exception on joining canceled fiber */
-  implicit def safeInstance[F[_]: Start: TryableDeferreds: BracketThrow]: Daemonic[F, Throwable] =
+  implicit def safeInstance[F[_]: Start: TryableDeferreds: Refs: BracketThrow]: Daemonic[F, Throwable] =
     mkInstance[F, Throwable](
       Function2K[Fiber[F, *], Promise[F, Throwable, *], Daemon[F, Throwable, *]]((fib, promise) =>
         new Daemon.SafeImpl(fib, promise)
@@ -50,7 +54,7 @@ object Daemonic extends DaemonicInstances {
 trait DaemonicInstances { self: Daemonic.type =>
 
   /** instance making Daemons keeping default underlying behaviour*/
-  implicit def nativeInstance[F[_]: Start: TryableDeferreds: Bracket[*[_], E], E]: Daemonic[F, E] =
+  implicit def nativeInstance[F[_]: Start: TryableDeferreds: Refs: Bracket[*[_], E], E]: Daemonic[F, E] =
     mkInstance[F, E](
       Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]((fib, promise) => new Daemon.Impl(fib, promise))
     )
