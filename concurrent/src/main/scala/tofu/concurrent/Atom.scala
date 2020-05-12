@@ -21,7 +21,7 @@ trait Atom[+F[_], A] {
   def get: F[A]
 
   /**
-    * Sets the current value to `a`.
+    * Sets the current value to `a`.Agent
     *
     * The returned action completes after the reference has been successfully set.
     *

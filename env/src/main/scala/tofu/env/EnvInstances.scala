@@ -27,7 +27,7 @@ private[env] trait EnvInstances {
     override val unit: Env[Any, Unit]                               = Env.unit
     override def map[A, B](fa: Env[Any, A])(f: A => B): Env[Any, B] = fa.map(f)
     override def replicateA[A](n: Int, fa: Env[Any, A]): Env[Any, List[A]] =
-      fa.mapTask(t => Task.gather(Iterable.fill(n)(t)).map(_.toList))
+      fa.mapTask(t => Task.parSequence(Iterable.fill(n)(t)).map(_.toList))
   }
 
   private object anyEnvParallelInstance extends Parallel[Env[Any, *]] {
