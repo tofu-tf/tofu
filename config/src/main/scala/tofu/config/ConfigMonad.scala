@@ -82,6 +82,8 @@ object ConfigMonad {
 final case class ConfigTContext[F[_]](path: Path, ref: Ref[F, MessageList])
 
 object ConfigTContext {
+  case object Fail extends Exception
+
   implicit def configTParallelConfigMonad[F[_]: ParallelReader](
       implicit F: Monad[F],
       FE: Errors[F, Fail.type]
@@ -110,8 +112,6 @@ object ConfigTContext {
       def lift[A](fa: ConfigT[F, A]): ConfigT[F, A]            = fa
     }
   }
-  case object Fail extends Exception
-
 }
 
 final case class ParallelReader[F[_]](paralleled: Parallel[ConfigT[F, *]]) extends AnyVal
