@@ -41,7 +41,9 @@ class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
   }
 
   it should "respect complex primitive collections" in {
-    json(Baz(zs = Some(List(List("one", "two"), List("three"))))) shouldBe """{"foos":[],"ys":[],"zs":[["one","two"],["three"]]}"""
+    json(
+      Baz(zs = Some(List(List("one", "two"), List("three"))))
+    ) shouldBe """{"foos":[],"ys":[],"zs":[["one","two"],["three"]]}"""
   }
 
 }

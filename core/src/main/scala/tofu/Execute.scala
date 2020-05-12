@@ -17,13 +17,12 @@ trait Execute[F[_]] {
 }
 
 object Execute {
-  final implicit def asyncExecute[F[_]](
-      implicit
+  final implicit def asyncExecute[F[_]](implicit
       ec: ExecutionContext,
       cs: ContextShift[F],
       asyncF: Async[F]
   ): Execute[F] = new Execute[F] {
-    def executionContext: F[ExecutionContext] = ec.pure[F]
+    def executionContext: F[ExecutionContext]                        = ec.pure[F]
     def deferFutureAction[A](f: ExecutionContext => Future[A]): F[A] =
       Async.fromFuture(asyncF.delay(f(ec)))
   }

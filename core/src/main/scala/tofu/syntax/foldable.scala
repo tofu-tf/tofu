@@ -17,7 +17,7 @@ object foldable {
       */
     def foldWhileM[G[_], S](initial: S)(f: (S, A) => G[Option[S]])(implicit F: Foldable[F], G: Monad[G]): G[S] =
       G.tailRecM((initial, FoldableStream.from(fa))) {
-        case (s, FoldableStream.Empty) => G.pure(Right(s))
+        case (s, FoldableStream.Empty)      => G.pure(Right(s))
         case (s, FoldableStream.Cons(h, t)) =>
           G.map(f(s, h)) {
             case None     => Right(s)

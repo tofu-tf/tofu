@@ -70,9 +70,9 @@ abstract class EnvBio[-R, +E, +A] {
     onErrorHandleWith(e => f(e).flatMap(_ => EnvBio.raiseError(e)))
 
   /** Creates new EnvBio with polymorphic environment switching */
-  def localP[R1](f: R1 => R): EnvBio[R1, Nothing, A] =
+  def localP[R1](f: R1 => R): EnvBio[R1, Nothing, A]              =
     EnvBio.applyFatal(ctx => runF(f(ctx)))
-  def localPT[R1](f: R1 => Task[R]): EnvBio[R1, E, A] =
+  def localPT[R1](f: R1 => Task[R]): EnvBio[R1, E, A]             =
     EnvBio.applyFatal(ctx => f(ctx).flatMap(runF))
   def localPB[R1](f: R1 => EnvBio[Any, Any, R]): EnvBio[R1, E, A] =
     EnvBio.applyFatal(ctx => f(ctx).runF(ctx).flatMap(runF))

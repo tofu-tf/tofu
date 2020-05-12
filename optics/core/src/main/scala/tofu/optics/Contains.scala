@@ -23,7 +23,7 @@ trait PContains[-S, +T, +A, -B] extends PExtract[S, T, A, B] with PRepeated[S, T
   def project[F[+_]](s: S)(fab: A => F[B])(implicit F: Functor[F]): F[T] =
     F.map(fab(extract(s)))(set(s, _))
 
-  override def reduceMap[X: Semigroup](s: S)(f: A => X): X = f(extract(s))
+  override def reduceMap[X: Semigroup](s: S)(f: A => X): X             = f(extract(s))
   def traverse1[F[+_]](a: S)(f: A => F[B])(implicit F: Apply[F]): F[T] =
     F.map(f(extract(a)))(b => set(a, b))
 

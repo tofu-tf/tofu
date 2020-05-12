@@ -27,7 +27,7 @@ class CachedLogs[I[_]: Monad: Guarantee, F[_]](
             case logging     => mvar.put(map) as logging
           }
         }(mvar.put)
-      case logging => logging.pure[I]
+      case logging     => logging.pure[I]
     })
 
   def forService[Svc: ClassTag]: I[Logging[F]] = safeGet(tagCache, underlying.forService[Svc], classTag[Svc])

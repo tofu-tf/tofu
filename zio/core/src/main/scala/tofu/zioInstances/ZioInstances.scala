@@ -13,15 +13,15 @@ private[zioInstances] class ZioInstances {
   private[this] val rioTofuInstanceAny: RioTofuInstance[Any] = new RioTofuInstance
   final def rioTofuInstance[R]: RioTofuInstance[R]           = rioTofuInstanceAny.asInstanceOf[RioTofuInstance[R]]
 
-  private[this] val zioErrorsToInstanceAny: ZioTofuErrorsToInstance[Any, Any, Nothing] =
+  private[this] val zioErrorsToInstanceAny: ZioTofuErrorsToInstance[Any, Any, Nothing]             =
     new ZioTofuErrorsToInstance[Any, Any, Nothing]()(extractSubtype[Nothing, Any])
-  final def zioTofuErrorsToInstance[R, E]: ZioTofuErrorsToInstance[R, E, Nothing] =
+  final def zioTofuErrorsToInstance[R, E]: ZioTofuErrorsToInstance[R, E, Nothing]                  =
     zioErrorsToInstanceAny.asInstanceOf[ZioTofuErrorsToInstance[R, E, Nothing]]
   final def zioTofuExtractErrorsInstance[R, E, E1: * Extract E]: ZioTofuErrorsToInstance[R, E, E1] =
     new ZioTofuErrorsToInstance
 
   private[this] val zioTofuTimeoutInstanceAny: ZioTofuTimeoutInstance[Clock, Any] = new ZioTofuTimeoutInstance
-  final def zioTofuTimeoutInstance[R <: Clock, E]: ZioTofuTimeoutInstance[R, E] =
+  final def zioTofuTimeoutInstance[R <: Clock, E]: ZioTofuTimeoutInstance[R, E]   =
     zioTofuTimeoutInstanceAny.asInstanceOf[ZioTofuTimeoutInstance[R, E]]
 
   private[this] val zioTofuConcurrentInstanceAny: ZioTofuConcurrentInstance[Any, Nothing, Any, Nothing] =
@@ -44,18 +44,18 @@ private[zioInstances] class ZioInstances {
     new ZioTofuContainsUnliftInstance[R1, R2, E]
 
   private[this] val rioTofuUnliftIOInstanceAny: RioTofuUnliftIOInstance[Any] = new RioTofuUnliftIOInstance
-  final def rioTofuUnliftIOInstance[R]: RioTofuUnliftIOInstance[R] =
+  final def rioTofuUnliftIOInstance[R]: RioTofuUnliftIOInstance[R]           =
     rioTofuUnliftIOInstanceAny.asInstanceOf[RioTofuUnliftIOInstance[R]]
 
   private[this] val rioTofuUnsafeExecFutureInstanceAny: RioTofuUnsafeExecFutureInstance[Any] =
     new RioTofuUnsafeExecFutureInstance
-  final def rioTofuUnsafeExecFutureInstance[R]: RioTofuUnsafeExecFutureInstance[R] =
+  final def rioTofuUnsafeExecFutureInstance[R]: RioTofuUnsafeExecFutureInstance[R]           =
     rioTofuUnsafeExecFutureInstanceAny.asInstanceOf[RioTofuUnsafeExecFutureInstance[R]]
 
   private[this] val zioTofuInstanceAny: ZioTofuInstance[Any, Any] = new ZioTofuInstance
   final def zioTofuInstance[R, E]: ZioTofuInstance[R, E]          = zioTofuInstanceAny.asInstanceOf[ZioTofuInstance[R, E]]
 
-  private[this] val zioTofuWithRunInstanceAny = new ZioTofuWithRunInstance[Any, Any]
+  private[this] val zioTofuWithRunInstanceAny                          = new ZioTofuWithRunInstance[Any, Any]
   final def zioTofuWithRunInstance[R, E]: ZioTofuWithRunInstance[R, E] =
     zioTofuWithRunInstanceAny.asInstanceOf[ZioTofuWithRunInstance[R, E]]
 }

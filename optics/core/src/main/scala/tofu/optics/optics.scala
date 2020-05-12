@@ -46,8 +46,8 @@ abstract class MonoOpticCompanion[PO[s, t, a, b] >: PSame[s, t, a, b]](
 }
 
 class OpticComposeOps[O[s, t, a, b], S, T, A, B](private val o: O[S, T, A, B]) extends AnyVal {
-  def andThen[O1[s, t, a, b] >: O[s, t, a, b], U, V](o1: O1[A, B, U, V])(
-      implicit category2: Category2[O1]
+  def andThen[O1[s, t, a, b] >: O[s, t, a, b], U, V](o1: O1[A, B, U, V])(implicit
+      category2: Category2[O1]
   ): O1[S, T, U, V] = category2.compose(o1, o)
 
   def >>[O1[s, t, a, b] >: O[s, t, a, b]: Category2, U, V](o1: O1[A, B, U, V]): O1[S, T, U, V] = andThen(o1)

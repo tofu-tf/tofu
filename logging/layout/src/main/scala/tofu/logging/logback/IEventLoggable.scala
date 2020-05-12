@@ -28,19 +28,19 @@ class EventMarkerLoggable extends EventLoggable {
     evt.getMarker match {
       case null                         => i.noop
       case ContextMarker(marker, Seq()) => marker.logFields(i)
-      case ContextMarker(marker, rest) =>
+      case ContextMarker(marker, rest)  =>
         import PArray.arrInstance // scala 2.11
         val restArr = PArray.fromColl(rest)
         marker.logFields(i) |+|
           i.sub(MarkersField)((v: V) => v.foldable(restArr)(_ putString _.getName))
-      case marker => i.sub(MarkersField)((v: V) => v.list(1)((v, _) => v.putString(marker.getName)))
+      case marker                       => i.sub(MarkersField)((v: V) => v.list(1)((v, _) => v.putString(marker.getName)))
     }
 }
 
 class EventArgumentsLoggable extends EventLoggable {
   def fields[I, V, R, S](evt: ILoggingEvent, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
     evt.getArgumentArray match {
-      case null => i.noop
+      case null  => i.noop
       case array =>
         array.foldLeft(i.noop)((acc, arg) =>
           acc |+| (arg match {
@@ -54,7 +54,7 @@ class EventArgumentsLoggable extends EventLoggable {
 class EventArgumentsArrayLoggable(fieldName: String) extends EventLoggable {
   def fields[I, V, R, S](evt: ILoggingEvent, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
     evt.getArgumentArray match {
-      case null => i.noop
+      case null  => i.noop
       case array =>
         i.subDictList(fieldName, array.length)((inner, idx) =>
           array(idx) match {
@@ -68,7 +68,7 @@ class EventArgumentsArrayLoggable(fieldName: String) extends EventLoggable {
 class EventArgumentsGroupLoggable extends EventLoggable {
   def fields[I, V, R, S](evt: ILoggingEvent, i: I)(implicit render: LogRenderer[I, V, R, S]): R =
     evt.getArgumentArray match {
-      case null => i.noop
+      case null  => i.noop
       case array =>
         array.collect { case lv: LoggedValue => lv }
           .groupBy(_.shortName)
@@ -83,7 +83,7 @@ class EventArgumentsGroupLoggable extends EventLoggable {
 class EventExceptionLoggable extends EventLoggable {
   def fields[I, V, R, S](evt: ILoggingEvent, i: I)(implicit rec: LogRenderer[I, V, R, S]): R =
     evt.getThrowableProxy match {
-      case null => i.noop
+      case null           => i.noop
       case throwableProxy =>
         i.addString(ExceptionField, s"${throwableProxy.getClassName}: ${throwableProxy.getMessage}") |+| {
           val stackTrace = throwableProxy.getStackTraceElementProxyArray
@@ -100,8 +100,8 @@ object EventLoggable {
   val exception: Loggable[ILoggingEvent]                       = new EventExceptionLoggable
   val argumentGroup: Loggable[ILoggingEvent]                   = new EventArgumentsGroupLoggable
 
-  val merge: Loggable[ILoggingEvent] = builtin + marker + arguments + exception
+  val merge: Loggable[ILoggingEvent]                     = builtin + marker + arguments + exception
   def collect(argField: String): Loggable[ILoggingEvent] =
     builtin + marker + argumentArray(argField) + exception
-  val group = builtin + marker + argumentGroup + exception
+  val group                                              = builtin + marker + argumentGroup + exception
 }

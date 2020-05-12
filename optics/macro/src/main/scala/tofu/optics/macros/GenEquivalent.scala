@@ -51,7 +51,7 @@ sealed abstract class GenEquivalentImplBase {
           q"""
             _root_.tofu.optics.Equivalent[${sTpe}, Unit](Function.const(()))(Function.const(${sTpeSym}()))
           """
-        case _ => fail(s"$sTpe needs to be a case class with no accessor or an object.")
+        case _   => fail(s"$sTpe needs to be a case class with no accessor or an object.")
       }
     }
   }
@@ -65,9 +65,9 @@ class GenEquivalentImpl(override val c: blackbox.Context) extends GenEquivalentI
 
     val fieldMethod = caseAccessorsOf[S] match {
       case m :: Nil => m
-      case Nil =>
+      case Nil      =>
         fail(s"Cannot find a case class accessor for $sTpe, $sTpe needs to be a case class with a single accessor.")
-      case _ =>
+      case _        =>
         fail(s"Found several case class accessor for $sTpe, $sTpe needs to be a case class with a single accessor.")
     }
 
@@ -119,7 +119,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
       .paramLists
 
     paramLists match {
-      case Nil | Nil :: Nil =>
+      case Nil | Nil :: Nil      =>
         genEquiv_unit_tree[S]
 
       case (param :: Nil) :: Nil =>
@@ -132,7 +132,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
           }
         """
 
-      case params :: Nil =>
+      case params :: Nil         =>
         var readField = List.empty[Tree]
         var readTuple = List.empty[Tree]
         var types     = List.empty[Type]
@@ -150,7 +150,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
           }
         """
 
-      case _ :: _ :: _ =>
+      case _ :: _ :: _           =>
         fail(s"Found several parameter-lists for $sTpe, $sTpe needs to be a case class with a single parameter-list.")
     }
   }

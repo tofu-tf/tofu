@@ -28,7 +28,7 @@ class ZLogsSuite extends AnyFlatSpec with Matchers {
   "ZLogs" should "log the context" in {
     val appender = ZLogsSuite.attachList()
     Runtime.default.unsafeRun(expr.provideLayer(ZLogsSuite.fullLayer))
-    val items = appender.list.asScala
+    val items    = appender.list.asScala
 
     val expected = JsonObject("foo" -> "kojima".asJson, "bar" -> 2.asJson).asJson
 

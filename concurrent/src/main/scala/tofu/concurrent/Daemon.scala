@@ -29,16 +29,16 @@ object Daemonic extends DaemonicInstances {
     new Daemonic[F, E] {
       override def daemonize[A](process: F[A]): F[Daemon[F, E, A]] =
         for {
-          exit <- MakeDeferred.tryable[F, Exit[E, A]]
-          ref  <- Refs[F].of(none[A])
+          exit  <- MakeDeferred.tryable[F, Exit[E, A]]
+          ref   <- Refs[F].of(none[A])
           fiber <- process
-                    .flatTap(a => ref.set(a.some))
-                    .guaranteeCase {
-                      case ExitCase.Completed => ref.get.flatMap(opt => exit.complete(Exit.Completed(opt.get)))
-                      case ExitCase.Canceled  => exit.complete(Exit.Canceled)
-                      case ExitCase.Error(e)  => exit.complete(Exit.Error(e))
-                    }
-                    .start
+                     .flatTap(a => ref.set(a.some))
+                     .guaranteeCase {
+                       case ExitCase.Completed => ref.get.flatMap(opt => exit.complete(Exit.Completed(opt.get)))
+                       case ExitCase.Canceled  => exit.complete(Exit.Canceled)
+                       case ExitCase.Error(e)  => exit.complete(Exit.Error(e))
+                     }
+                     .start
         } yield maker(fiber, exit)
     }
 
@@ -60,7 +60,7 @@ trait DaemonicInstances { self: Daemonic.type =>
     )
 }
 
-trait Daemon[F[_], E, A] extends Fiber[F, A] {
+trait Daemon[F[_], E, A] extends Fiber[F, A]     {
   def join: F[A]
   def cancel: F[Unit]
   def poll: F[Option[Exit[E, A]]]
@@ -70,7 +70,7 @@ trait Daemon[F[_], E, A] extends Fiber[F, A] {
 }
 
 /** Probably Infinite processes */
-object Daemon extends DaemonInstances {
+object Daemon            extends DaemonInstances {
   private[tofu] class Impl[F[_], E, A](process: Fiber[F, A], end: TryableDeferred[F, Exit[E, A]])
       extends Daemon[F, E, A] {
 
@@ -157,13 +157,13 @@ object Actor {
 
   def spawn[F[_]: MVars: Monad: Daemonic[*[_], E], E, A](behavior: Behavior[F, A]): F[Actor[F, E, A]] =
     for {
-      mvar <- MakeMVar[F, F].empty[A]
+      mvar                       <- MakeMVar[F, F].empty[A]
       daemon: Daemon[F, E, Void] <- Daemon.iterate(behavior)(b =>
-                                     for {
-                                       a <- mvar.take
-                                       r <- behavior.receive(a)
-                                     } yield r.getOrElse(b)
-                                   )
+                                      for {
+                                        a <- mvar.take
+                                        r <- behavior.receive(a)
+                                      } yield r.getOrElse(b)
+                                    )
     } yield new Actor(mvar, daemon)
 
   def apply[F[_]: MVars: Monad: Daemonic[*[_], E], E, A](receive: A => F[Unit]): F[Actor[F, E, A]] =
@@ -207,17 +207,17 @@ trait DaemonInstances {
 
       def zipWith[A, B, C](fa: Daemon[F, E, A], fb: Daemon[F, E, B])(f: (A, B) => C): Daemon[F, E, C] =
         new Daemon[F, E, C] {
-          def join: F[C]      = fa.join.map2(fb.join)(f)
-          def cancel: F[Unit] = fa.cancel *> fb.cancel
+          def join: F[C]                  = fa.join.map2(fb.join)(f)
+          def cancel: F[Unit]             = fa.cancel *> fb.cancel
           def poll: F[Option[Exit[E, C]]] = fa.poll.flatMap {
             case fe @ (None | Some(_: Exit.Incomplete[E])) => F.pure(fe.asInstanceOf[Option[Exit[E, C]]])
-            case Some(Exit.Completed(a)) =>
+            case Some(Exit.Completed(a))                   =>
               fb.poll.map {
                 case fe @ (None | Some(_: Exit.Incomplete[E])) => fe.asInstanceOf[Option[Exit[E, C]]]
                 case Some(Exit.Completed(b))                   => Some(Exit.Completed(f(a, b)))
               }
           }
-          def exit: F[Exit[E, C]] = fa.exit.map2(fb.exit)(_.map2(_)(f))
+          def exit: F[Exit[E, C]]         = fa.exit.map2(fb.exit)(_.map2(_)(f))
         }
     }
 }

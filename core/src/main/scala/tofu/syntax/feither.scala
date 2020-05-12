@@ -33,7 +33,7 @@ object feither {
 
     def assocR[A, B](implicit F: Functor[F], ev: R <:< Either[A, B]): F[Either[Either[L, A], B]] = {
       e.map {
-        case Right(r) =>
+        case Right(r)       =>
           ev(r) match {
             case Left(a)      => Left(Right(a))
             case b @ Right(_) => b.leftCast
@@ -45,7 +45,7 @@ object feither {
     def assocL[A, B](implicit F: Functor[F], ev: L <:< Either[A, B]): F[Either[A, Either[B, R]]] = {
       e.map {
         case r @ Right(_) => r.leftCast.asRight
-        case Left(l) =>
+        case Left(l)      =>
           ev(l) match {
             case left @ Left(_) => left.rightCast
             case Right(b)       => b.asLeft.asRight

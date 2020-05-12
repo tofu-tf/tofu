@@ -29,7 +29,7 @@ object Repeated extends MonoOpticCompanion(PRepeated) {
 }
 
 object PRepeated extends OpticCompanion[PRepeated] {
-  def compose[S, T, A, B, U, V](f: PRepeated[A, B, U, V], g: PRepeated[S, T, A, B]): PRepeated[S, T, U, V] =
+  def compose[S, T, A, B, U, V](f: PRepeated[A, B, U, V], g: PRepeated[S, T, A, B]): PRepeated[S, T, U, V]    =
     new PRepeated[S, T, U, V] {
       def traverse1[F[+_]: Apply](s: S)(fuv: U => F[V]): F[T] = g.traverse1(s)(f.traverse1(_)(fuv))
     }

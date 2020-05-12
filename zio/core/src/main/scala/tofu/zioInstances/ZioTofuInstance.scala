@@ -21,14 +21,14 @@ import scala.concurrent.{ExecutionContext, Future}
 class ZioTofuInstance[R, E]
     extends Errors[ZIO[R, E, *], E] with Start[ZIO[R, E, *]] with Finally[ZIO[R, E, *], Exit[E, *]]
     with Execute[ZIO[R, E, *]] {
-  final def restore[A](fa: ZIO[R, E, A]): ZIO[R, E, Option[A]] = fa.option
-  final def raise[A](err: E): ZIO[R, E, A]                     = ZIO.fail(err)
-  final def lift[A](fa: ZIO[R, E, A]): ZIO[R, E, A]            = fa
+  final def restore[A](fa: ZIO[R, E, A]): ZIO[R, E, Option[A]]                             = fa.option
+  final def raise[A](err: E): ZIO[R, E, A]                                                 = ZIO.fail(err)
+  final def lift[A](fa: ZIO[R, E, A]): ZIO[R, E, A]                                        = fa
   final def tryHandleWith[A](fa: ZIO[R, E, A])(f: E => Option[ZIO[R, E, A]]): ZIO[R, E, A] =
     fa.catchSome(CachedMatcher(f))
-  final override def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E, A]): ZIO[R, E, A] = fa.catchAll(f)
+  final override def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E, A]): ZIO[R, E, A]   = fa.catchAll(f)
 
-  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, *], A]] = fa.forkDaemon.map(convertFiber)
+  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, *], A]]        = fa.forkDaemon.map(convertFiber)
   final def racePair[A, B](
       fa: ZIO[R, E, A],
       fb: ZIO[R, E, B]
@@ -62,8 +62,8 @@ class RioTofuInstance[R] extends ZioTofuInstance[R, Throwable] {
 }
 
 class ZioTofuWithRunInstance[R, E] extends WithRun[ZIO[R, E, *], ZIO[Any, E, *], R] {
-  val context: ZIO[R, E, R] = ZIO.environment[R]
-  val functor: Functor[ZIO[R, E, *]] = new Functor[ZIO[R, E, *]] {
+  val context: ZIO[R, E, R]                                           = ZIO.environment[R]
+  val functor: Functor[ZIO[R, E, *]]                                  = new Functor[ZIO[R, E, *]] {
     def map[A, B](fa: ZIO[R, E, A])(f: A => B): ZIO[R, E, B] = fa.map(f)
   }
   final def runContext[A](fa: ZIO[R, E, A])(ctx: R): ZIO[Any, E, A]   = fa.provide(ctx)
@@ -115,7 +115,7 @@ class ZioTofuErrorsToInstance[R, E, E1](implicit lens: Extract[E1, E])
 
 class ZioTofuContainsUnliftInstance[R1, R2, E](implicit lens: Contains[R2, R1])
     extends Unlift[ZIO[R1, E, *], ZIO[R2, E, *]] {
-  def lift[A](fa: ZIO[R1, E, A]): ZIO[R2, E, A] = fa.provideSome(lens.extract)
+  def lift[A](fa: ZIO[R1, E, A]): ZIO[R2, E, A]          = fa.provideSome(lens.extract)
   def unlift: ZIO[R2, E, ZIO[R2, E, *] ~> ZIO[R1, E, *]] =
     ZIO.access[R2](r2 => funK(_.provideSome(r1 => lens.set(r2, r1))))
 }

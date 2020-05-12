@@ -20,7 +20,7 @@ object Lift {
   private val liftIdentityAny: Lift[AnyK, AnyK] = new Lift[AnyK, AnyK] {
     def lift[A](fa: Any): Any = fa
   }
-  implicit def liftIdentity[F[_]]: Lift[F, F] = liftIdentityAny.asInstanceOf[Lift[F, F]]
+  implicit def liftIdentity[F[_]]: Lift[F, F]   = liftIdentityAny.asInstanceOf[Lift[F, F]]
 
   private val liftReaderTAny: Lift[AnyK, ReaderT[AnyK, Any, *]] = {
     type RT[a] = ReaderT[AnyK, Any, a]
@@ -55,7 +55,7 @@ trait Unlift[F[_], G[_]] extends Lift[F, G] {
   def andThen[H[_]: Monad](ugh: Unlift[G, H]): Unlift[F, H] =
     new Unlift[F, H] {
       def lift[A](fa: F[A]): H[A] = ugh.lift(self.lift(fa))
-      def unlift: H[H ~> F] =
+      def unlift: H[H ~> F]       =
         for {
           tfg <- ugh.lift(self.unlift)
           tgh <- ugh.unlift

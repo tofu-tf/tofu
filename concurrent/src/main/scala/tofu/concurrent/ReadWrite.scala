@@ -160,12 +160,12 @@ object ReadWrite {
         state.modify {
           case s @ State(q, r, false, _, _, a) if r < maxReaders && q.headOption.forall(!_.isWriter) =>
             s.copy(currentReaders = r + 1) -> d.complete(a -> releaseRead)
-          case s @ State(q, _, _, _, _, _) => s.copy(q = q :+ Reader(d)) -> F.unit
+          case s @ State(q, _, _, _, _, _)                                                           => s.copy(q = q :+ Reader(d)) -> F.unit
         }.flatten *> d.get
       } {
         case (d, ExitCase.Canceled | ExitCase.Error(_)) =>
           state.update(s => s.copy(trashedReaders = s.trashedReaders + d))
-        case _ => F.unit
+        case _                                          => F.unit
       }
 
     override def write: F[(A, A => F[Unit])] =
@@ -173,12 +173,12 @@ object ReadWrite {
         state.modify {
           case s @ State(q, 0, false, _, _, a) if q.isEmpty =>
             s.copy(writeLocked = true) -> d.complete(a -> releaseWrite)
-          case s @ State(q, _, _, _, _, _) => s.copy(q = q :+ Writer(d)) -> F.unit
+          case s @ State(q, _, _, _, _, _)                  => s.copy(q = q :+ Writer(d)) -> F.unit
         }.flatten *> d.get
       } {
         case (d, ExitCase.Canceled | ExitCase.Error(_)) =>
           state.update(s => s.copy(trashedWriters = s.trashedWriters + d))
-        case _ => F.unit
+        case _                                          => F.unit
       }
 
     private def dropPrecedingTrashed(state: State[F, A]): State[F, A] =
@@ -187,7 +187,7 @@ object ReadWrite {
           dropPrecedingTrashed(state.copy(q = tl, trashedReaders = state.trashedReaders - d))
         case Writer(d) +: tl if state.trashedWriters(d) =>
           dropPrecedingTrashed(state.copy(q = tl, trashedWriters = state.trashedWriters - d))
-        case _ => state
+        case _                                          => state
       }
 
     private def extractReadersBatch(state: State[F, A], quantity: Int): (State[F, A], List[Reader[F, A]], Int) = {
@@ -200,7 +200,7 @@ object ReadWrite {
         if (remain <= 0) (state, batch, size)
         else
           dropPrecedingTrashed(state) match {
-            case s if s.q.isEmpty || s.q.head.isWriter => (state, batch, size)
+            case s if s.q.isEmpty || s.q.head.isWriter           => (state, batch, size)
             case s @ State((r @ Reader(_)) +: tl, _, _, _, _, _) =>
               impl(s.copy(q = tl), r :: batch, remain - 1, size + 1)
           }
@@ -215,17 +215,17 @@ object ReadWrite {
           case state @ State(Reader(d) +: tl, _, _, _, _, a) => state.copy(q = tl)                 -> d.complete(a -> releaseRead)
           case state @ State(Writer(d) +: tl, 1, _, _, _, a) =>
             state.copy(q = tl, currentReaders = 0, writeLocked = true) -> d.complete(a -> releaseWrite)
-          case state @ State(Writer(_) +: _, r, _, _, _, _) => state.copy(currentReaders = r - 1) -> F.unit
+          case state @ State(Writer(_) +: _, r, _, _, _, _)  => state.copy(currentReaders = r - 1) -> F.unit
         }
       }.flatten
 
     private def releaseWrite(newA: A): F[Unit] =
       state.modify {
         dropPrecedingTrashed(_) match {
-          case state @ State(q, _, _, _, _, _) if q.isEmpty => state.copy(a = newA, writeLocked = false) -> F.unit
+          case state @ State(q, _, _, _, _, _) if q.isEmpty  => state.copy(a = newA, writeLocked = false) -> F.unit
           case state @ State(Writer(d) +: tl, _, _, _, _, _) =>
             state.copy(q = tl, a = newA) -> d.complete(newA -> releaseWrite)
-          case s =>
+          case s                                             =>
             val (cleanState, readersBatch, batchSize) = extractReadersBatch(s, maxReaders)
             val readers                               = readersBatch.map(_.d.complete(newA -> releaseRead))
             cleanState.copy(a = newA, writeLocked = false, currentReaders = batchSize) -> readers.foldRight(F.unit)(
@@ -246,7 +246,7 @@ object ReadWrite {
       state.modify {
         case s @ State(q, r, false, _, _, a) if r < maxReaders && q.headOption.forall(!_.isWriter) =>
           s.copy(currentReaders = r + 1) -> (a -> releaseRead).some
-        case s => s -> none
+        case s                                                                                     => s -> none
       }
 
     override def tryWrite: F[Option[(A, A => F[Unit])]] =
@@ -271,7 +271,7 @@ object ReadWrite {
         case Some((a, putAndRelease)) =>
           val (u, b) = f(a)
           putAndRelease(u).as(b.some)
-        case _ => F.pure(none)
+        case _                        => F.pure(none)
       }
 
   }

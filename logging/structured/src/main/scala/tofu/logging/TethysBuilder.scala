@@ -88,18 +88,18 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
       input.writeFieldName(name)
       input.writeBoolean(value)
     }
-    override def putString(value: String, input: TokenWriter): Boolean      = { input.writeString(value); true }
-    override def putInt(value: Long, input: TokenWriter): Boolean           = { input.writeNumber(value); true }
-    override def putFloat(value: Double, input: TokenWriter): Boolean       = { input.writeNumber(value); true }
-    override def putBigInt(value: BigInt, input: TokenWriter): Boolean      = { input.writeNumber(value); true }
+    override def putString(value: String, input: TokenWriter): Boolean = { input.writeString(value); true }
+    override def putInt(value: Long, input: TokenWriter): Boolean = { input.writeNumber(value); true }
+    override def putFloat(value: Double, input: TokenWriter): Boolean = { input.writeNumber(value); true }
+    override def putBigInt(value: BigInt, input: TokenWriter): Boolean = { input.writeNumber(value); true }
     override def putDecimal(value: BigDecimal, input: TokenWriter): Boolean = { input.writeNumber(value); true }
-    override def putBool(value: Boolean, input: TokenWriter): Boolean       = { input.writeBoolean(value); true }
+    override def putBool(value: Boolean, input: TokenWriter): Boolean = { input.writeBoolean(value); true }
   }
 
   def monoid: Monoid[Unit] = implicitly
 
   def make(f: TokenWriter => Unit): String = {
-    val sw = new StringWriter()
+    val sw     = new StringWriter()
     sw.append(prefix)
     val writer = tethys.jackson.jacksonTokenWriterProducer.forWriter(sw)
     writer.writeObjectStart()

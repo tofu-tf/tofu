@@ -23,19 +23,19 @@ sealed trait ConfigItem[+F[_]] {
 }
 
 object ConfigItem {
-  sealed trait Value[+F[_], U[_[_]]] extends ConfigItem[F] {
+  sealed trait Value[+F[_], U[_[_]]] extends ConfigItem[F]                    {
     type T[f[_]] = U[f]
   }
-  sealed trait SimpleValue[A] extends Value[Nothing, SimpleC[*[_], A]] {
+  sealed trait SimpleValue[A]        extends Value[Nothing, SimpleC[*[_], A]] {
     def valueType: ValueTypeSimple[A]
     def mapK[G[_]: Functor](fk: Nothing ~> G): ConfigItem[G] = this
   }
-  sealed trait IndexedValue[F[_], I] extends Value[F, IndexedC[*[_], I]] {
+  sealed trait IndexedValue[F[_], I] extends Value[F, IndexedC[*[_], I]]      {
     self =>
     def valueType: ValueTypeIndexed[I]
     def keys: Flux.Stream[F, I]
     def get: I => F[ConfigItem[F]]
-    def value = (get, keys)
+    def value                                          = (get, keys)
     def mapK[G[_]: Functor](fk: F ~> G): ConfigItem[G] = new IndexedValue[G, I] {
       def valueType = self.valueType
       def keys      = self.keys.mapK(fk)
@@ -69,17 +69,17 @@ object ConfigItem {
     case object Dict   extends ValueTypeIndexed[String]
   }
 
-  case object Null extends SimpleValue[Unit] {
+  case object Null                        extends SimpleValue[Unit]       {
     def value     = ()
     def valueType = ValueType.Null
   }
-  final case class Bool(value: Boolean) extends SimpleValue[Boolean] {
+  final case class Bool(value: Boolean)   extends SimpleValue[Boolean]    {
     def valueType = ValueType.Bool
   }
   final case class Num(value: BigDecimal) extends SimpleValue[BigDecimal] {
     def valueType = ValueType.Num
   }
-  final case class Str(value: String) extends SimpleValue[String] {
+  final case class Str(value: String)     extends SimpleValue[String]     {
     def valueType = ValueType.Str
   }
 
@@ -107,8 +107,8 @@ object ConfigItem {
     Dict[F](indexed(dict.lift), Flux.Stream[F](dict.keys.toList))
 
   implicit final class SyncConfigItemOps[F[_]](private val item: ConfigItem[F]) extends AnyVal {
-    def tryParseSync[A: Configurable](
-        implicit FR: Refs[F],
+    def tryParseSync[A: Configurable](implicit
+        FR: Refs[F],
         FM: Monad[F],
         FE: ErrorsFail[F],
         PR: ParallelReader[F]
@@ -123,7 +123,7 @@ object ConfigItem {
   }
 
   implicit final class IdConfigItemOps(private val item: ConfigItem[Identity]) extends AnyVal {
-    def liftF[F[_]](implicit F: Applicative[F]): ConfigItem[F] =
+    def liftF[F[_]](implicit F: Applicative[F]): ConfigItem[F]              =
       item.mapK(new (Id ~> F) { def apply[A](x: A) = F.pure(x) })
     def tryParseF[F[_]: Sync, A: Configurable]: F[(MessageList, Option[A])] = liftF[F].tryParseSync[A]
     def parseF[F[_]: Sync, A: Configurable]: F[A]                           = liftF[F].parseSync[A]

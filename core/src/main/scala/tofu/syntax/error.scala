@@ -20,8 +20,7 @@ object raise {
   }
 
   implicit final class RaiseEitherOps[E, A](private val either: Either[E, A]) extends AnyVal {
-    def toRaise[F[_]](
-        implicit
+    def toRaise[F[_]](implicit
         app: Applicative[F],
         raise: ContravariantRaise[F, E]
     ): F[A] =
@@ -56,7 +55,7 @@ object handle {
     def recover[E](pf: PartialFunction[E, A])(implicit F: Applicative[F], FE: Handle[F, E]): F[A]       = FE.recover(fa)(pf)
     def attempt[E](implicit F: Applicative[F], FE: HandleTo[F, F, E]): F[Either[E, A]]                  = FE.attempt(fa)
     def attemptTo[G[_]: Applicative, E](implicit F: Functor[F], FE: HandleTo[F, G, E]): G[Either[E, A]] = FE.attempt(fa)
-    def onError[B, E](f: E => F[B])(implicit FE: Errors[F, E], F: Applicative[F]): F[A] =
+    def onError[B, E](f: E => F[B])(implicit FE: Errors[F, E], F: Applicative[F]): F[A]                 =
       FE.handleWith(fa)(e => F.productR(f(e))(FE.raise(e)))
   }
 }

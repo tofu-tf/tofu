@@ -14,12 +14,12 @@ object bracket {
   implicit final class TofuBracketOps[F[_], A](private val fa: F[A]) extends AnyVal {
     def bracketIncomplete[B, C](
         use: A => F[B]
-    )(release: A => F[C])(implicit F: Applicative[F], FG: Guarantee[F]): F[B] =
+    )(release: A => F[C])(implicit F: Applicative[F], FG: Guarantee[F]): F[B]                     =
       FG.bracket(fa)(use) { case (a, success) => release(a).whenA(!success) }
 
     def bracketAlways[B, C](
         use: A => F[B]
-    )(release: A => F[C])(FG: Guarantee[F]): F[B] =
+    )(release: A => F[C])(FG: Guarantee[F]): F[B]                                                 =
       FG.bracket(fa)(use) { case (a, _) => release(a) }
 
     def guaranteeIncomplete[B](release: F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[A] =
@@ -49,12 +49,12 @@ object bracket {
       EitherT(
         e.value.bracketCase[Either[E, B]] {
           //could not acquire resource
-          case Left(err) => bracket.pure(err.asLeft[B])
+          case Left(err)  => bracket.pure(err.asLeft[B])
           //case logic error
           case Right(res) => use(res).leftSemiflatMap(e => release(res, ExitCase.error(e.asLeft[U])) as e).value
         }((res, cas) =>
           res match {
-            case Left(_) => bracket.unit
+            case Left(_)  => bracket.unit
             case Right(v) =>
               cas match {
                 //case F underlying error

@@ -9,7 +9,7 @@ class ContramapLoggable[A, B](val self: Loggable.Base[A], val f: B => A) extends
 
   override def putField[I, V, R, M](a: B, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
     self.putField(f(a), name, input)
-  override def logVia(a: B, addParam: (String, Any) => Unit): Unit = self.logVia(f(a), addParam)
-  override def logShow(a: B): String                               = self.logShow(f(a))
-  override def contramap[C](g: C => B): Loggable[C]                = self.contramap(AndThen(g).andThen(f))
+  override def logVia(a: B, addParam: (String, Any) => Unit): Unit                                               = self.logVia(f(a), addParam)
+  override def logShow(a: B): String                                                                             = self.logShow(f(a))
+  override def contramap[C](g: C => B): Loggable[C]                                                              = self.contramap(AndThen(g).andThen(f))
 }

@@ -31,7 +31,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
         val repv    = q"val $rep: $et"
 
         val methods = delegateMethods(af, members, NoSymbol) {
-          case method if method.occursInParams(f) =>
+          case method if method.occursInParams(f)                          =>
             abort(s"Type parameter $f appears in contravariant position in method ${method.name}")
 
           case method if method.returnType.typeConstructor.typeSymbol == f =>
@@ -39,15 +39,15 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
             val body   = q"$hom($repk[$algebra](($algv => $alg.${method.name}(...$params))))"
             method.copy(body = body)
 
-          case method if method.occursInReturn(f) =>
+          case method if method.occursInReturn(f)                          =>
             val params = method.paramLists.map(_.map(_.name))
             val tt     = polyType(f :: Nil, method.returnType)
             val F      = summon[RepresentableK[Any]](tt)
-            val body =
+            val body   =
               q"$F.tabulate($funk.funK($repv => $hom($repk[$algebra]($algv => $rep($alg.${method.name}(...$params))))))"
             method.copy(body = body)
 
-          case method =>
+          case method                                                      =>
             abort(s"Type parameter $f does not appear in return in method ${method.name}")
         }
 
@@ -65,7 +65,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
         val Af = singleType(NoPrefix, faf).widen match {
           case TypeRef(_, _, List(af1)) => af1
-          case other @ _ =>
+          case other @ _                =>
             abort(s"something wrong with $faf parameter, this should not happen, also I hate macros")
         }
 
@@ -75,12 +75,12 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
         val methods = delegateMethods(Af, members, faf) {
           case method if method.returnType.typeConstructor.typeSymbol == f =>
             makeMethod(method)(params => q"$fmonad.flatMap($faf)(_.${method.name}(...$params))")
-          case method if method.occursInReturn(f) =>
+          case method if method.occursInReturn(f)                          =>
             makeMethod(method) { params =>
               val F = summon[Embed[Any]](polyType(f :: Nil, method.returnType))
               q"$F.embed($fmonad.map($faf)(_.${method.name}(...$params)))"
             }
-          case method =>
+          case method                                                      =>
             abort(s"Type parameter $f does not appear in return in method ${method.name}")
         }
 

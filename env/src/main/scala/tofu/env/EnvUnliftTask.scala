@@ -11,7 +11,7 @@ class EnvUnliftTask[E] extends Unlift[Task, Env[E, *]] {
 }
 
 class EnvUnliftSubContext[E, E1](implicit e1InE: E Contains E1) extends Unlift[Env[E1, *], Env[E, *]] {
-  def lift[A](fa: Env[E1, A]): Env[E, A] = fa.localP(e1InE.extract)
+  def lift[A](fa: Env[E1, A]): Env[E, A]      = fa.localP(e1InE.extract)
   def unlift: Env[E, Env[E, *] ~> Env[E1, *]] =
     Env.fromFunc(e => funK(_.localP(e1InE.set(e, _))))
 }

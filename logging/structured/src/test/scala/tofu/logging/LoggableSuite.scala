@@ -13,7 +13,7 @@ import tofu.syntax.loggable._
 class LoggableSuite extends AnyFlatSpec with Matchers {
 
   implicit val testIntLoggable: Loggable[TestInt] = new Loggable[Int] {
-    def fields[I, V, R, S](a: Int, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
+    def fields[I, V, R, S](a: Int, i: I)(implicit r: LogRenderer[I, V, R, S]): R   =
       i.sub("missing")(r.zero) |+|
         i.sub("sign")((v: V) =>
           r.coalesce(

@@ -44,11 +44,11 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
   }
 
   implicit final class TofuApplyOps[F[_], C](private val fa: F[C]) extends AnyVal {
-    def productR[B](fb: F[B])(implicit F: Apply[F]): F[B]                = F.productR(fa)(fb)
-    def productL[B](fb: F[B])(implicit F: Apply[F]): F[C]                = F.productL(fa)(fb)
-    def *>[B](fb: F[B])(implicit F: Apply[F]): F[B]                      = F.productR(fa)(fb)
-    def <*[B](fb: F[B])(implicit F: Apply[F]): F[C]                      = F.productL(fa)(fb)
-    def map2[B, Z](fb: F[B])(f: (C, B) => Z)(implicit F: Apply[F]): F[Z] = F.map2(fa, fb)(f)
+    def productR[B](fb: F[B])(implicit F: Apply[F]): F[B]                                          = F.productR(fa)(fb)
+    def productL[B](fb: F[B])(implicit F: Apply[F]): F[C]                                          = F.productL(fa)(fb)
+    def *>[B](fb: F[B])(implicit F: Apply[F]): F[B]                                                = F.productR(fa)(fb)
+    def <*[B](fb: F[B])(implicit F: Apply[F]): F[C]                                                = F.productL(fa)(fb)
+    def map2[B, Z](fb: F[B])(f: (C, B) => Z)(implicit F: Apply[F]): F[Z]                           = F.map2(fa, fb)(f)
     def map2Eval[B, Z](fb: cats.Eval[F[B]])(f: (C, B) => Z)(implicit F: Apply[F]): cats.Eval[F[Z]] =
       F.map2Eval(fa, fb)(f)
   }

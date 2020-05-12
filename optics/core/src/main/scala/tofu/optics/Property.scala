@@ -70,7 +70,7 @@ object PProperty extends OpticCompanion[PProperty] {
     def narrow(s: S): Either[T, A]                                                               = traj[Either[A, +*]](s)(a => Left(a)).swap
   }
 
-  override def toGeneric[S, T, A, B](o: PProperty[S, T, A, B]): Optic[Context, S, T, A, B] =
+  override def toGeneric[S, T, A, B](o: PProperty[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => c.F[B]): S => c.F[T] = s => o.traject(s)(p)(c.pure, c.functor)
     }

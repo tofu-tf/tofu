@@ -38,6 +38,6 @@ class AtomLogging[F[_]: FlatMap: Clock](log: Atom[F, Vector[LogLine]], name: Str
 final case class AtomLogs[I[_]: Applicative, F[_]: FlatMap: Clock](flog: F[Atom[F, Vector[LogLine]]])
     extends Logs[I, F] {
   def forService[Svc: ClassTag]: I[Logging[F]] = byName(classTag[Svc].runtimeClass.getName)
-  def byName(name: String): I[Logging[F]] =
+  def byName(name: String): I[Logging[F]]      =
     Embed.of(flog.map[Logging[F]](new AtomLogging[F](_, name))).pure[I]
 }

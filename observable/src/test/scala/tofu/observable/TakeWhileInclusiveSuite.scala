@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 
 class TakeWhileInclusiveSuite extends AnyFlatSpec with Matchers {
 
-  private def writeElement[A](mvar: MVar[Task, Vector[A]])(a: A): Task[Unit] =
+  private def writeElement[A](mvar: MVar[Task, Vector[A]])(a: A): Task[Unit]                        =
     mvar.take.flatMap(v => mvar.put(v :+ a))
   private def inclusiveElements[A](obs: Observable[A])(p: A => Boolean): Task[(Vector[A], List[A])] =
     for {

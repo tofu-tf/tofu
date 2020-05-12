@@ -45,9 +45,9 @@ trait LoggingBase[F[_]] {
     writeMarker(Trace, message, marker, values: _*)
   def debugWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     writeMarker(Debug, message, marker, values: _*)
-  def infoWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
+  def infoWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit]  =
     writeMarker(Info, message, marker, values: _*)
-  def warnWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
+  def warnWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit]  =
     writeMarker(Warn, message, marker, values: _*)
   def errorWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     writeMarker(Error, message, marker, values: _*)
@@ -56,9 +56,9 @@ trait LoggingBase[F[_]] {
     writeCause(Trace, message, cause, values: _*)
   def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     writeCause(Debug, message, cause, values: _*)
-  def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+  def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
     writeCause(Info, message, cause, values: _*)
-  def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+  def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
     writeCause(Warn, message, cause, values: _*)
   def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     writeCause(Error, message, cause, values: _*)
