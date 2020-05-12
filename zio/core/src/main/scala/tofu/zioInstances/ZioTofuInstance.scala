@@ -28,7 +28,7 @@ class ZioTofuInstance[R, E]
     fa.catchSome(CachedMatcher(f))
   final override def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E, A]): ZIO[R, E, A] = fa.catchAll(f)
 
-  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, *], A]] = fa.fork.map(convertFiber)
+  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, *], A]] = fa.forkDaemon.map(convertFiber)
   final def racePair[A, B](
       fa: ZIO[R, E, A],
       fb: ZIO[R, E, B]
@@ -40,7 +40,7 @@ class ZioTofuInstance[R, E]
 
   final def race[A, B](fa: ZIO[R, E, A], fb: ZIO[R, E, B]): ZIO[R, E, Either[A, B]] = fa.raceEither(fb)
   final def never[A]: ZIO[R, E, A]                                                  = ZIO.never
-  final def fireAndForget[A](fa: ZIO[R, E, A]): ZIO[R, E, Unit]                     = fa.fork.unit
+  final def fireAndForget[A](fa: ZIO[R, E, A]): ZIO[R, E, Unit]                     = fa.forkDaemon.unit
 
   final def bracket[A, B, C](
       init: ZIO[R, E, A]
