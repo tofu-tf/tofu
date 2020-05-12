@@ -34,7 +34,7 @@ sealed trait Env[E, +A] {
   ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx)))
   def mapTask5[B1, B2, B3, B4, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3], e4: Env[E, B4])(
-      f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4]) => Task[R]
+    f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4]) => Task[R]
   ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx), e4.run(ctx)))
   def mapTask6[B1, B2, B3, B4, B5, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3], e4: Env[E, B4], e5: Env[E, B5])(
