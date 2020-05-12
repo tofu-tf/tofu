@@ -28,7 +28,7 @@ object Mid extends MidInstances {
   }
 
   private final case class MidCompose[F[_], A](elems: Chain[Mid[F, A]]) extends Mid[F, A] {
-    override def apply(fa: F[A]): F[A] = elems.foldLeft(fa)((x, m) => m(x))
+    override def apply(fa: F[A]): F[A]               = elems.foldLeft(fa)((x, m) => m(x))
     override def compose(that: Mid[F, A]): Mid[F, A] = that match {
       case MidCompose(es) => MidCompose(elems ++ es)
       case _              => MidCompose(elems :+ that)

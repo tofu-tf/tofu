@@ -78,18 +78,18 @@ object Provide extends ProvideInstances[HasProvide] {
   type Aux[F[_], G[_], C] = HasProvide[F, G, C]
 }
 
-trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
+trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F]    {
   override type Lower[A] = G[A]
   override type Ctx      = C
 }
-object WithProvide extends ProvideInstances[WithProvide] {
+object WithProvide               extends ProvideInstances[WithProvide] {
   def apply[F[_], G[_], C](implicit p: WithProvide[F, G, C]): WithProvide[F, G, C] = p
 }
 
 trait ProvideInstances[TCA[f[_], g[_], r] >: WithProvide[f, g, r]] extends RunContextInstances[TCA]
 
 trait RunContext[F[_]] extends Local[F] with Provide[F] {
-  def unlift: F[F ~> Lower] = ask(ctx => funK(runContext(_)(ctx)))
+  def unlift: F[F ~> Lower]                                          = ask(ctx => funK(runContext(_)(ctx)))
   def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, Lower, A] =
     new RunContextEquivalentInstance[F, Lower, Ctx, A](this, eq)
 }
@@ -134,7 +134,7 @@ private[tofu] class ProvideExtractInstance[F[_], G[_], C1, C2](
 ) extends WithProvide[F, G, C2] {
   def runContext[A](fa: F[A])(c: Ctx): G[A] =
     ctx.runContext(fa)(extract.extract(c))
-  def lift[A](ga: G[A]): F[A] = ctx.lift(ga)
+  def lift[A](ga: G[A]): F[A]               = ctx.lift(ga)
 }
 
 private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](

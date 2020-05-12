@@ -24,9 +24,9 @@ class RepresentableKSuite extends AnyFlatSpec with Matchers {
   val checkingFoo: Foo[Either[String, *]] = new Foo[Either[String, *]] {
     override def foo(x: Int, s: String): Either[String, Double] =
       Try(s.toDouble).toEither.left.map(_ => s"could not parse $s as double").map(_ * x)
-    override def bar(a: List[Int]): Either[String, Unit] =
+    override def bar(a: List[Int]): Either[String, Unit]        =
       a.headOption.toRight("must contain at least one element").void
-    def baz(a: List[String]): OptionT[Either[String, *], Unit] =
+    def baz(a: List[String]): OptionT[Either[String, *], Unit]  =
       OptionT(a.headOption.traverse(_.asLeft[Unit]))
   }
 

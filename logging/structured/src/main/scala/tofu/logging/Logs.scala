@@ -72,8 +72,8 @@ object Logs extends LogsInstances0 {
   implicit def logs2MonoidalK[Y[_]](implicit Y: Applicative[Y]): MonoidalK[Logs[Y, *[_]]] =
     new Logs2MonoidalK[Y] { def I: Applicative[Y] = Y }
 
-  def provide[I[_], F[_]]  = new Provide[I, F]
-  def provideM[I[_], F[_]] = new ProvideM[I, F]
+  def provide[I[_], F[_]]                                                                 = new Provide[I, F]
+  def provideM[I[_], F[_]]                                                                = new ProvideM[I, F]
 
   /**
     * Returns an instance of [[tofu.logging.Logs]] that requires [[cats.effect.Sync]] to perform logging side-effects.
@@ -82,13 +82,13 @@ object Logs extends LogsInstances0 {
   def sync[I[_]: Sync, F[_]: Sync]: Logs[I, F] = new Logs[I, F] {
     def forService[Svc: ClassTag]: I[Logging[F]] =
       Sync[I].delay(new SyncLogging[F](loggerForService[Svc]))
-    def byName(name: String): I[Logging[F]] = Sync[I].delay(new SyncLogging[F](LoggerFactory.getLogger(name)))
+    def byName(name: String): I[Logging[F]]      = Sync[I].delay(new SyncLogging[F](LoggerFactory.getLogger(name)))
   }
 
   def withContext[I[_]: Sync, F[_]: Sync](implicit ctx: LoggableContext[F]): Logs[I, F] = {
     import ctx.loggable
     new Logs[I, F] {
-      def forService[Svc: ClassTag]: I[Logging[F]] =
+      def forService[Svc: ClassTag]: I[Logging[F]]     =
         Sync[I].delay(new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, loggerForService[Svc]))
       override def byName(name: String): I[Logging[F]] =
         Sync[I].delay(new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, LoggerFactory.getLogger(name)))
@@ -123,7 +123,7 @@ object Logs extends LogsInstances0 {
     def combine(x: Logs[I, F], y: Logs[I, F]): Logs[I, F] = Logs.combine(x, y)
   }
 
-  class Provide[I[_], F[_]] {
+  class Provide[I[_], F[_]]  {
     def apply[X: ClassTag](f: Logging[F] => X)(implicit logs: Logs[I, F], I: Functor[I]) = logs.forService[X].map(f)
   }
   class ProvideM[I[_], F[_]] {
@@ -141,8 +141,8 @@ object Logs extends LogsInstances0 {
 
     def universal(implicit il: Lift[I, F], F: FlatMap[F]): Universal[F] = new UniversalEmbedLogs(logs)
 
-    def cachedUniversal(
-        implicit IM: Monad[I],
+    def cachedUniversal(implicit
+        IM: Monad[I],
         IQ: QVars[I],
         IG: Guarantee[I],
         il: Lift[I, F],

@@ -61,9 +61,9 @@ object Gatekeeper {
     }
 
   final case class StoplightBySemaphore[F[_]: BracketThrow](semaphore: Semaphore[F]) extends Gatekeeper[F, Long] {
-    override def available: F[Long]           = semaphore.available
-    override def taken: F[Long]               = semaphore.count
-    override def withPermit[B](t: F[B]): F[B] = semaphore.withPermit(t)
+    override def available: F[Long]                        = semaphore.available
+    override def taken: F[Long]                            = semaphore.count
+    override def withPermit[B](t: F[B]): F[B]              = semaphore.withPermit(t)
     override def withPermitN[B](take: Long)(t: F[B]): F[B] =
       semaphore.acquireN(take).bracket(_ => t)(_ => semaphore.releaseN(take))
   }

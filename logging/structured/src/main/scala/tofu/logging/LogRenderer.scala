@@ -146,11 +146,11 @@ object LogRenderer {
 
   /** simple imperative renderer, log everything with accumulated prefix */
   def prefixed(f: (String, Any) => Unit): Iso[String, Unit] = new IsoLogRendererUnit[String] {
-    def putValue(value: LogParamValue, input: String): Unit             = f(input, value.value)
-    def sub(name: String, input: String)(receive: String => Unit): Unit = receive(join(input, name))
+    def putValue(value: LogParamValue, input: String): Unit                  = f(input, value.value)
+    def sub(name: String, input: String)(receive: String => Unit): Unit      = receive(join(input, name))
     def list(size: Int, input: String)(receive: (String, Int) => Unit): Unit =
       for (i <- 0 until size) receive(join(input, i), i)
-    def dict(input: String)(receive: String => Unit): Unit = receive(input)
+    def dict(input: String)(receive: String => Unit): Unit                   = receive(input)
   }
 
   /**  */
@@ -161,10 +161,10 @@ object LogRenderer {
   }
 
   def idxPrefixed(f: (String, Any) => Unit): IsoLogRendererUnit[IdxPrefix] = new IsoLogRendererUnit[IdxPrefix] {
-    def putValue(value: LogParamValue, input: IdxPrefix): Unit                = f(input.loc, value.value)
-    def sub(name: String, input: IdxPrefix)(receive: IdxPrefix => Unit): Unit = receive(input.sub(name))
+    def putValue(value: LogParamValue, input: IdxPrefix): Unit                     = f(input.loc, value.value)
+    def sub(name: String, input: IdxPrefix)(receive: IdxPrefix => Unit): Unit      = receive(input.sub(name))
     def list(size: Int, input: IdxPrefix)(receive: (IdxPrefix, Int) => Unit): Unit =
       for (i <- 0 until size) receive(input.idx(i), i)
-    def dict(input: IdxPrefix)(receive: IdxPrefix => Unit): Unit = receive(input)
+    def dict(input: IdxPrefix)(receive: IdxPrefix => Unit): Unit                   = receive(input)
   }
 }

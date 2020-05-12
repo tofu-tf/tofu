@@ -38,7 +38,7 @@ trait FinallyInstanceChain[T[f[_], exit[_]] >: Finally[f, exit]] {
         F.bracketCase(init)(action) {
           case (a, exit) => F.void(release(a, exit))
         }
-      def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B] =
+      def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]         =
         F.bracketCase(init)(action) {
           case (a, ExitCase.Completed) => F.void(release(a, true))
           case (a, _)                  => F.void(release(a, false))

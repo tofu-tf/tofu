@@ -21,10 +21,10 @@ trait PSubset[-S, +T, +A, -B]
     extends PUpcast[S, T, A, B] with PDowncast[S, T, A, B] with PItems[S, T, A, B] with PProperty[S, T, A, B] {
   def narrow(s: S): Either[T, A]
 
-  def set(s: S, b: B): T = upcast(b)
+  def set(s: S, b: B): T                                                                                       = upcast(b)
   def inject[F[+_], P[-_, +_]](pb: P[A, F[B]])(implicit FP: Pure[F], F: Functor[F], P: PChoice[P]): P[S, F[T]] =
     P.right[A, F[B], T](pb).dimap[S, F[T]](narrow)(_.fold[F[T]](FP.pure, F.map(_)(upcast)))
-  override def foldMap[X: Monoid](a: S)(f: A => X): X = downcast(a).foldMap(f)
+  override def foldMap[X: Monoid](a: S)(f: A => X): X                                                          = downcast(a).foldMap(f)
 }
 
 object Subset extends MonoOpticCompanion(PSubset) {

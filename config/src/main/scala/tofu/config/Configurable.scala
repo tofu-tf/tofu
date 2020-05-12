@@ -36,7 +36,7 @@ trait Configurable[A] extends ConfigArr[ConfigItem, A] { self =>
   import ConfigMonad.promote._
   def apply[F[_]: ConfigMonad](cfg: ConfigItem[F]): F[A]
 
-  def map[B](f: A => B): Configurable[B] = new Configurable[B] {
+  def map[B](f: A => B): Configurable[B]               = new Configurable[B] {
     def apply[F[_]: ConfigMonad](cfg: ConfigItem[F]): F[B] = self(cfg).map(f)
   }
   def flatMap[B](f: ConfigFunc[A, B]): Configurable[B] = new Configurable[B] {
@@ -109,8 +109,8 @@ trait BaseGetters { self: Configurable.type =>
   implicit val floatConfigurable: Configurable[Float]   = requireSimple(ValueType.Num).map(_.toFloat)
   implicit val doubleConfigurable: Configurable[Double] = requireSimple(ValueType.Num).map(_.toDouble)
 
-  implicit val booleanConfigurable: Configurable[Boolean] = requireSimple(ValueType.Bool)
-  implicit val stringConfigurable: Configurable[String]   = requireSimple(ValueType.Str)
+  implicit val booleanConfigurable: Configurable[Boolean]   = requireSimple(ValueType.Bool)
+  implicit val stringConfigurable: Configurable[String]     = requireSimple(ValueType.Str)
   implicit val durationConfigurable: Configurable[Duration] =
     requireSimple(ValueType.Str).catching[Duration](Duration(_))(ConfigFunc.apply(F => {
       case (s, _) => F.error(BadString(s, "bad duration"))
@@ -121,7 +121,7 @@ trait BaseGetters { self: Configurable.type =>
       case d: FiniteDuration => F.pure(d)
       case d                 => F.error(Invalid(s"duration $d is not finite"))
     })
-  implicit val urlConfigurable: Configurable[URL] =
+  implicit val urlConfigurable: Configurable[URL]                       =
     requireSimple(ValueType.Str).catchMake(new URL(_))(F => p => F.error(BadString(p._1, "bad URL")))
 
   implicit val uriConfigurable: Configurable[URI] =
@@ -138,31 +138,31 @@ trait BaseGetters { self: Configurable.type =>
                 (fc, get(i).flatMap(parse[F, A](_)).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
               }
               .flatten
-          case ValueType.Stream(items) =>
+          case ValueType.Stream(items)    =>
             items.zipWithIndex
               .foldLeft(F.pure(Monoid.empty[C])) {
                 case (fc, (x, i)) =>
                   (fc, parse[F, A](x).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
               }
               .flatten
-          case Null => Monoid.empty[C].pure[F]
-          case it   => F.error(BadType(List[ValueTag](ValueType.Array, ValueType.Stream), it.valueType))
+          case Null                       => Monoid.empty[C].pure[F]
+          case it                         => F.error(BadType(List[ValueTag](ValueType.Array, ValueType.Stream), it.valueType))
         }
       }
     }
 
   implicit def indexedSeqConfigurable[A: Configurable]: Configurable[IndexedSeq[A]] = vectorConfigurable[A].widen
   implicit def seqConfigurable[A: Configurable]: Configurable[Seq[A]]               = listConfigurable[A].widen
-  implicit def vectorConfigurable[A: Configurable]: Configurable[Vector[A]] =
+  implicit def vectorConfigurable[A: Configurable]: Configurable[Vector[A]]         =
     monoidConfigurable[A, Vector[A]](Vector[A](_))
-  implicit def listConfigurable[A: Configurable]: Configurable[List[A]]   = monoidConfigurable[A, List[A]](List[A](_))
-  implicit def chainConfigurable[A: Configurable]: Configurable[Chain[A]] = monoidConfigurable[A, Chain[A]](Chain.one)
-  implicit def mapConfigurable[A: Configurable]: Configurable[Map[String, A]] =
+  implicit def listConfigurable[A: Configurable]: Configurable[List[A]]             = monoidConfigurable[A, List[A]](List[A](_))
+  implicit def chainConfigurable[A: Configurable]: Configurable[Chain[A]]           = monoidConfigurable[A, Chain[A]](Chain.one)
+  implicit def mapConfigurable[A: Configurable]: Configurable[Map[String, A]]       =
     new Configurable[Map[String, A]] {
       def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[Map[String, A]] = cfg match {
         case ValueType.Dict(get, is) =>
           is.flatMapF(k => get(k).flatMap(parse[F, A](_)).tupleLeft(k))(F.monad, implicitly).foldMapK(Map(_))
-        case it => F.error(BadType(List(ValueType.Dict), it.valueType))
+        case it                      => F.error(BadType(List(ValueType.Dict), it.valueType))
       }
     }
 
@@ -191,8 +191,8 @@ trait MagnoliaDerivation extends Derivation[Configurable] {
                   get(param.label).flatMap(param.typeclass.apply[F]).local(_ :+ Prop(param.label)).map(x => x)
                 )
                 .map(c => ctx.rawConstruct(c.toList))
-            case ConfigItem.Null => F.error(NotFound)
-            case it              => F.error(BadType(List(ValueType.Dict), it.valueType))
+            case ConfigItem.Null        => F.error(NotFound)
+            case it                     => F.error(BadType(List(ValueType.Dict), it.valueType))
           }
       }
 
@@ -202,7 +202,7 @@ trait MagnoliaDerivation extends Derivation[Configurable] {
       case _                       => None
     } match {
       case Some(maps) => new EnumConfigurable(maps.reduceLeft(_ ++ _))
-      case None =>
+      case None       =>
         new Typeclass[T] {
           def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[T] =
             ctx.subtypes.toList
@@ -232,12 +232,12 @@ object MagnoliaDerivation {
         case Str(tag) =>
           if (tag == name) value.pure[F]
           else F.error(ConfigError.BadString(tag, s"expected $name"))
-        case t => F.error(ConfigError.BadType(List(ValueType.Str), t.valueType))
+        case t        => F.error(ConfigError.BadType(List(ValueType.Str), t.valueType))
       }
   }
 
   class EnumConfigurable[A](val nameMap: Map[String, A]) extends Configurable[A] {
-    private val names = nameMap.keys.mkString(",")
+    private val names                                                     = nameMap.keys.mkString(",")
     def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[A] =
       cfg match {
         case Str(tag) => nameMap.get(tag).orRaise[F](ConfigError.BadString(tag, s"expected one of: $names"))

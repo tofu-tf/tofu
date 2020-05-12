@@ -4,10 +4,10 @@ import tofu.logging._
 import tofu.syntax.logRenderer._
 
 class EmptyLoggable[A] extends SingleValueLoggable[A] {
-  def logValue(a: A): LogParamValue = NullValue
+  def logValue(a: A): LogParamValue                                                                              = NullValue
   override def putField[I, V, R, M](a: A, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
     input.noop
-  override def logShow(a: A): String = ""
+  override def logShow(a: A): String                                                                             = ""
 
   override def hide: Loggable[A] = this
 

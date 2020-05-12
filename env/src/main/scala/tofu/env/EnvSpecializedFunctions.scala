@@ -56,18 +56,18 @@ trait EnvSpecializedFunctions[E] {
   def race[A, B](ta: F[A], tb: F[B]): F[Either[A, B]]            = Env.race(ta, tb)
   def raceMany[A](tta: Iterable[F[A]]): F[A]                     = Env.raceMany(tta)
 
-  def racePair[A, B](ta: F[A], tb: F[B]): F[Either[(A, Fiber[F, B]), (Fiber[F, A], B)]] =
+  def racePair[A, B](ta: F[A], tb: F[B]): F[Either[(A, Fiber[F, B]), (Fiber[F, A], B)]]                            =
     Env.racePair(ta, tb)
-  def sequence[A, M[X] <: Iterable[X]](in: M[F[A]])(implicit cbf: BuildFrom[M[F[A]], A, M[A]]): F[M[A]] =
+  def sequence[A, M[X] <: Iterable[X]](in: M[F[A]])(implicit cbf: BuildFrom[M[F[A]], A, M[A]]): F[M[A]]            =
     Env.sequence(in)
   def traverse[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => F[B])(implicit cbf: BuildFrom[M[A], B, M[B]]): F[M[B]] =
     Env.traverse(in)(f)
-  def gather[A, M[X] <: Iterable[X]](in: M[F[A]])(implicit cbf: BuildFrom[M[F[A]], A, M[A]]): F[M[A]] =
+  def gather[A, M[X] <: Iterable[X]](in: M[F[A]])(implicit cbf: BuildFrom[M[F[A]], A, M[A]]): F[M[A]]              =
     Env.gather(in)
-  def wander[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => F[B])(implicit cbf: BuildFrom[M[A], B, M[B]]): F[M[B]] =
+  def wander[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => F[B])(implicit cbf: BuildFrom[M[A], B, M[B]]): F[M[B]]   =
     Env.wander(in)(f)
-  def gatherUnordered[A](in: Iterable[F[A]]): F[List[A]] = Env.gatherUnordered(in)
-  def wanderUnordered[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => F[B]): F[List[B]] =
+  def gatherUnordered[A](in: Iterable[F[A]]): F[List[A]]                                                           = Env.gatherUnordered(in)
+  def wanderUnordered[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => F[B]): F[List[B]]                               =
     Env.wanderUnordered(in)(f)
 
   /** Mirrored traversing operations, trying to create context-unaware Tasks whenever possible */
@@ -185,7 +185,7 @@ trait EnvSpecializedFunctions[E] {
     Env.parZip6(fa1, fa2, fa3, fa4, fa5, fa6)
 
   object conversions {
-    implicit def taskAsEnv[A](task: Task[A]): Env[E, A] = fromTask(task)
+    implicit def taskAsEnv[A](task: Task[A]): Env[E, A]          = fromTask(task)
     implicit def futureAsEnv[A](future: => Future[A]): Env[E, A] =
       deferFuture(future)
   }

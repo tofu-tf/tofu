@@ -11,7 +11,7 @@ final case class ContextMarker(ctx: LoggedValue, referenceList: Seq[Marker] = Li
   import scala.collection.JavaConverters._
 
   override def getName: String                    = "Context"
-  override def add(reference: Marker): Unit       = {}
+  override def add(reference: Marker): Unit = {}
   override def remove(reference: Marker): Boolean = false
   override def hasChildren: Boolean               = referenceList.nonEmpty
   override def hasReferences: Boolean             = referenceList.nonEmpty

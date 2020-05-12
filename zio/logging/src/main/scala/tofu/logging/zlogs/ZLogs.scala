@@ -14,11 +14,11 @@ object ZLogs {
   val uio: ZLogs[Any] = new ZLogs[Any] {
     def forService[Svc: ClassTag]: UIO[Logging[UIO]] =
       UIO.effectTotal(new UIOZLogging(loggerForService[Svc]))
-    def byName(name: String): UIO[Logging[UIO]] = UIO.effectTotal(new UIOZLogging(LoggerFactory.getLogger(name)))
+    def byName(name: String): UIO[Logging[UIO]]      = UIO.effectTotal(new UIOZLogging(LoggerFactory.getLogger(name)))
   }
 
   def withContext[R: Loggable]: ZLogs[R] = new ZLogs[R] {
-    def forService[Svc: ClassTag]: UIO[ZLogging[R]] =
+    def forService[Svc: ClassTag]: UIO[ZLogging[R]]     =
       UIO.effectTotal(new URIOZLoggingImpl(loggerForService[Svc]))
     override def byName(name: String): UIO[ZLogging[R]] =
       UIO.effectTotal(new URIOZLoggingImpl[R](LoggerFactory.getLogger(name)))

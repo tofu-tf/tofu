@@ -17,10 +17,10 @@ object PChoice {
   def apply[P[-_, +_]](implicit P: PChoice[P]): PChoice[P] = P
 
   implicit val functionInstance: PChoice[-* => +*] = new PChoice[-* => +*] {
-    def left[A, B, C](pab: A => B): Either[A, C] => Either[B, C] =
+    def left[A, B, C](pab: A => B): Either[A, C] => Either[B, C]        =
       _.leftMap(pab)
-    def right[A, B, C](pab: A => B): Either[C, A] => Either[C, B] = _.map(pab)
-    def dimap[A, B, C, D](fab: A => B)(f: C => A)(g: B => D): C => D =
+    def right[A, B, C](pab: A => B): Either[C, A] => Either[C, B]       = _.map(pab)
+    def dimap[A, B, C, D](fab: A => B)(f: C => A)(g: B => D): C => D    =
       f andThen fab andThen g
     override def optional[A, B, C](pab: A => B): Option[A] => Option[B] =
       _.map(pab)

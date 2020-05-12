@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.7.4"
+val libVersion = "0.7.5"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -322,7 +322,7 @@ lazy val simulacrumOptions = Seq(
 )
 
 lazy val defaultScalacOptions = scalacOptions ++= Seq(
-  "-deprecation", // Emit warning and location for usages of deprecated APIs.
+  "-deprecation",                  // Emit warning and location for usages of deprecated APIs.
   "-encoding",
   "utf-8",                         // Specify character encoding used by source files.
   "-explaintypes",                 // Explain type errors in more detail.

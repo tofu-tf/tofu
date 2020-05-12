@@ -15,7 +15,7 @@ private[env] class EnvFunctorstance[E]
     with Memoize[Env[E, *]] with ContextShift[Env[E, *]] with Timeout[Env[E, *]] with Start[Env[E, *]] {
   import Env._
 
-  override def functor: Functor[Env[E, *]] = this
+  override def functor: Functor[Env[E, *]]                    = this
   //Functor
   override def map[A, B](fa: Env[E, A])(f: A => B): Env[E, B] = fa.map(f)
 
@@ -31,23 +31,23 @@ private[env] class EnvFunctorstance[E]
   override def tailRecM[A, B](a: A)(f: A => Env[E, Either[A, B]]): Env[E, B] = Env.tailRecM(a)(f)
 
   //MonadError
-  override def raiseError[A](e: Throwable): Env[E, A] = Env.raiseError[E, A](e)
-  def handleErrorWith[A](fa: Env[E, A])(f: Throwable => Env[E, A]): Env[E, A] =
+  override def raiseError[A](e: Throwable): Env[E, A]                                                = Env.raiseError[E, A](e)
+  def handleErrorWith[A](fa: Env[E, A])(f: Throwable => Env[E, A]): Env[E, A]                        =
     fa.onErrorRecoverWith { case e => f(e) }
-  override def ensure[A](fa: Env[E, A])(error: => Throwable)(predicate: A => Boolean): Env[E, A] =
+  override def ensure[A](fa: Env[E, A])(error: => Throwable)(predicate: A => Boolean): Env[E, A]     =
     fa.ensure(error)(predicate)
   override def ensureOr[A](fa: Env[E, A])(error: A => Throwable)(predicate: A => Boolean): Env[E, A] =
     fa.ensureOr(error)(predicate)
-  override def adaptError[A](fa: Env[E, A])(pf: PartialFunction[Throwable, Throwable]): Env[E, A] =
+  override def adaptError[A](fa: Env[E, A])(pf: PartialFunction[Throwable, Throwable]): Env[E, A]    =
     fa.mapTask(_.onErrorRecoverWith { case e if pf.isDefinedAt(e) => Task.raiseError(pf(e)) })
 
-  override def rethrow[A, EE <: Throwable](fa: Env[E, Either[EE, A]]): Env[E, A] =
+  override def rethrow[A, EE <: Throwable](fa: Env[E, Either[EE, A]]): Env[E, A]                     =
     fa.mapTask(_.flatMap(Task.fromEither(_)))
 
   //Bracket
   override def bracketCase[A, B](
       acquire: Env[E, A]
-  )(use: A => Env[E, B])(release: (A, ExitCase[Throwable]) => Env[E, Unit]): Env[E, B] =
+  )(use: A => Env[E, B])(release: (A, ExitCase[Throwable]) => Env[E, Unit]): Env[E, B]                       =
     acquire.bracketСase(use)(release)
   override def bracket[A, B](acquire: Env[E, A])(use: A => Env[E, B])(release: A => Env[E, Unit]): Env[E, B] =
     acquire.bracket(use)(release)
@@ -57,25 +57,25 @@ private[env] class EnvFunctorstance[E]
   override def delay[A](thunk: => A): Env[E, A]           = Env.delay(thunk)
 
   //Async
-  override def shift: Env[E, Unit]                                       = fromTask(Task.shift)
-  override def evalOn[A](ec: ExecutionContext)(fa: Env[E, A]): Env[E, A] = fa.mapTask(_.executeOn(Scheduler(ec)))
-  override def liftIO[A](ioa: IO[A]): Env[E, A]                          = fromTask(Task.from(ioa))
+  override def shift: Env[E, Unit]                                                     = fromTask(Task.shift)
+  override def evalOn[A](ec: ExecutionContext)(fa: Env[E, A]): Env[E, A]               = fa.mapTask(_.executeOn(Scheduler(ec)))
+  override def liftIO[A](ioa: IO[A]): Env[E, A]                                        = fromTask(Task.from(ioa))
   override def asyncF[A](k: (Either[Throwable, A] => Unit) => Env[E, Unit]): Env[E, A] =
     Env(ctx => Task.asyncF(cb => k(cb).run(ctx)))
-  override def async[A](k: (Either[Throwable, A] => Unit) => Unit): Env[E, A] =
+  override def async[A](k: (Either[Throwable, A] => Unit) => Unit): Env[E, A]          =
     fromTask(Task.async(k))
 
   //Concurrent
   override def cancelable[A](k: (Either[Throwable, A] => Unit) => CancelToken[Env[E, *]]): Env[E, A] =
     apply(e => Task.cancelable(cb => k(cb).run(e)))
-  override def uncancelable[A](fa: Env[E, A]): Env[E, A] = fa.uncancelable
+  override def uncancelable[A](fa: Env[E, A]): Env[E, A]                                             = fa.uncancelable
 
   override def start[A](fa: Env[E, A]): Env[E, Fiber[Env[E, *], A]]           = fa.start
   override def race[A, B](fa: Env[E, A], fb: Env[E, B]): Env[E, Either[A, B]] = Env.race(fa, fb)
   override def racePair[A, B](
       fa: Env[E, A],
       fb: Env[E, B]
-  ): Env[E, Either[(A, Fiber[Env[E, *], B]), (Fiber[Env[E, *], A], B)]] =
+  ): Env[E, Either[(A, Fiber[Env[E, *], B]), (Fiber[Env[E, *], A], B)]]       =
     Env.racePair(fa, fb)
 
   //Timer

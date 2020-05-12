@@ -74,12 +74,12 @@ object Agent {
     * that consists of [[cats.effect.concurrent.Ref]] and [[cats.effect.concurrent.Semaphore]]
     */
   final case class SemRef[F[_]: Monad: Fire, A](ref: Ref[F, A], sem: Semaphore[F]) extends Agent[F, A] {
-    def get: F[A]                          = ref.get
-    def updateM(f: A => F[A]): F[A]        = sem.withPermit(ref.get >>= (f(_) flatTap ref.set))
-    def fireUpdateM(f: A => F[A]): F[Unit] = updateM(f).fireAndForget
-    def modifyM[B](f: A => F[(B, A)]): F[B] =
+    def get: F[A]                                                          = ref.get
+    def updateM(f: A => F[A]): F[A]                                        = sem.withPermit(ref.get >>= (f(_) flatTap ref.set))
+    def fireUpdateM(f: A => F[A]): F[Unit]                                 = updateM(f).fireAndForget
+    def modifyM[B](f: A => F[(B, A)]): F[B]                                =
       sem.withPermit(ref.get >>= (f(_).flatMap { case (b, a) => ref.set(a) as b }))
-    def updateSomeM(f: PartialFunction[A, F[A]]): F[A] =
+    def updateSomeM(f: PartialFunction[A, F[A]]): F[A]                     =
       updateM(a => if (f.isDefinedAt(a)) f(a) else a.pure[F])
     def modifySomeM[B](default: B)(f: PartialFunction[A, F[(B, A)]]): F[B] =
       modifyM(a => if (f.isDefinedAt(a)) f(a) else (default, a).pure[F])
@@ -163,8 +163,7 @@ object MakeAgent {
     def of[A](a: A): I[Agent[F, A]] = mkAgent.agentOf(a)
   }
 
-  implicit def byRefAndSemaphore[I[_]: FlatMap, F[_]: Monad: Fire](
-      implicit
+  implicit def byRefAndSemaphore[I[_]: FlatMap, F[_]: Monad: Fire](implicit
       refs: MakeRef[I, F],
       sems: MakeSemaphore[I, F]
   ): MakeAgent[I, F] = new MakeAgent[I, F] {

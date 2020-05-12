@@ -19,8 +19,8 @@ object ref {
       )
 
     /** tries to avoid initializing resource if state contains suitable value */
-    def optimisticModifyRes[B, X, R](prop: PProperty[A, A, R, X])(init: => Resource[F, X])(f: X => R)(
-        implicit F: BracketThrow[F]
+    def optimisticModifyRes[B, X, R](prop: PProperty[A, A, R, X])(init: => Resource[F, X])(f: X => R)(implicit
+        F: BracketThrow[F]
     ): F[R] =
       OptionT(self.get.map(prop.downcast)).getOrElseF(
         init.use(x => self.modify(a => prop.downcast(a).fold((prop.set(a, x), f(x)))((a, _))))

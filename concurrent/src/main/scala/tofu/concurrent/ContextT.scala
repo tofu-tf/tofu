@@ -16,7 +16,7 @@ trait ContextT[F[+_], C[_[_]], +A] {
   def run(c: C[ContextT[F, C, +*]]): F[A]
 }
 
-object ContextT extends ContextTInstances {
+object ContextT         extends ContextTInstances {
   private def makeLiftF[F[+_], C[_[_]]]: F ~> ContextT[F, C, *] = funKFrom[F](fa => _ => fa)
   private val liftFAny                                          = makeLiftF[Any, Any]
 

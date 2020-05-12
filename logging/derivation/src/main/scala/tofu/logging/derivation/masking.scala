@@ -7,12 +7,12 @@ import magnolia.Param
 
 sealed trait MaskMode
 object MaskMode {
-  case object Full  extends MaskMode
-  case object Erase extends MaskMode
+  case object Full                                       extends MaskMode
+  case object Erase                                      extends MaskMode
   case class ForLength(offset: Int, maxLength: Int = -1) extends MaskMode {
     def this(length: Int) = this(0, length)
   }
-  case class Regexp(pattern: Regex) extends MaskMode
+  case class Regexp(pattern: Regex)                      extends MaskMode
 }
 
 object masking {
@@ -32,11 +32,11 @@ object masking {
     }
 
     mode match {
-      case MaskMode.Erase =>
+      case MaskMode.Erase                        =>
         "..."
-      case MaskMode.Full =>
+      case MaskMode.Full                         =>
         loop(shown.toCharArray, 0, shown.length)
-      case MaskMode.Regexp(pattern) =>
+      case MaskMode.Regexp(pattern)              =>
         pattern
           .findFirstMatchIn(shown)
           .collect {
@@ -69,7 +69,7 @@ object masking {
 
         val value: PType = dereference(tpe)
         val shown        = fn(typeclass.asInstanceOf[TypeClass[Any]])(value)
-        val repr = annotations.collectFirst { case masked(mode) => field(value, shown, mode) }
+        val repr         = annotations.collectFirst { case masked(mode) => field(value, shown, mode) }
           .getOrElse(shown)
 
         s"$label=$repr"

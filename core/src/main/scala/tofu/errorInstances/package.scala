@@ -8,8 +8,7 @@ import scala.reflect.ClassTag
 import cats.data.{EitherT, OptionT}
 import cats.{Monad, Id}
 
-private[tofu] class FromAppErr[F[_], E, E1](
-    implicit
+private[tofu] class FromAppErr[F[_], E, E1](implicit
     protected val appErr: ApplicativeError[F, E],
     protected val sub: E1 <:< E
 )
@@ -24,13 +23,12 @@ private[tofu] class HandleApErr[F[_]: ApplicativeError[*[_], E], E, E1: ClassTag
   def recWith[A](fa: F[A])(pf: PartialFunction[E1, F[A]]): F[A] =
     appErr.recoverWith(fa)({ case e1: E1 if pf.isDefinedAt(e1) => pf(e1) })
 
-  def restore[A](fa: F[A]): F[Option[A]] = appErr.handleError[Option[A]](appErr.map(fa)(Some(_)))(_ => None)
+  def restore[A](fa: F[A]): F[Option[A]]                        = appErr.handleError[Option[A]](appErr.map(fa)(Some(_)))(_ => None)
 
   def lift[A](fa: F[A]): F[A] = fa
 }
 
-private[tofu] class FromPrism[F[_], E, E1, +TC[_[_], _], +P[_, _]](
-    implicit
+private[tofu] class FromPrism[F[_], E, E1, +TC[_[_], _], +P[_, _]](implicit
     protected val instance: TC[F, E],
     protected val prism: P[E, E1]
 )

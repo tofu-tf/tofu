@@ -61,8 +61,8 @@ object Dependencies {
   val alleycats       = "org.typelevel"              %% "alleycats-core"      % Version.cats
   val catsEffect      = "org.typelevel"              %% "cats-effect"         % Version.catsEffect
   val monix           = "io.monix"                   %% "monix"               % Version.monix
-  val logback         = "ch.qos.logback"             % "logback-classic"      % Version.logback
-  val slf4j           = "org.slf4j"                  % "slf4j-api"            % Version.slf4j % Provided
+  val logback         = "ch.qos.logback"              % "logback-classic"     % Version.logback
+  val slf4j           = "org.slf4j"                   % "slf4j-api"           % Version.slf4j     % Provided
   val circeCore       = "io.circe"                   %% "circe-core"          % Version.circe
   val circeJava8      = "io.circe"                   %% "circe-java8"         % Version.circe
   val circeDerivation = "io.circe"                   %% "circe-derivation"    % Version.circe
@@ -74,7 +74,7 @@ object Dependencies {
   val tethys          = "com.tethys-json"            %% "tethys-core"         % Version.tethys
   val tethysJackson   = "com.tethys-json"            %% "tethys-jackson"      % Version.tethys
   val catsTagless     = "org.typelevel"              %% "cats-tagless-macros" % Version.catsTagless
-  val typesafeConfig  = "com.typesafe"               % "config"               % Version.typesafeConfig
+  val typesafeConfig  = "com.typesafe"                % "config"              % Version.typesafeConfig
   val zio             = "dev.zio"                    %% "zio"                 % Version.zio
   val zioCats         = "dev.zio"                    %% "zio-interop-cats"    % Version.zioCats
   val scalatest       = "org.scalatest"              %% "scalatest"           % Version.scalatest % Test
@@ -82,10 +82,10 @@ object Dependencies {
   val refined         = "eu.timepit"                 %% "refined"             % Version.refined
 
   // Compile-time only
-  val macroParadise    = "org.scalamacros" % "paradise"            % Version.macroParadise cross CrossVersion.patch
-  val kindProjector    = "org.typelevel"   %% "kind-projector"     % Version.kindProjector cross CrossVersion.patch
-  val simulacrum       = "org.typelevel"   %% "simulacrum"         % Version.simulacrum
-  val betterMonadicFor = "com.olegpy"      %% "better-monadic-for" % Version.betterMonadicFor
-  val silencerPlugin   = "com.github.ghik" % "silencer-plugin"     % Version.silencer cross CrossVersion.full
-  val silencerLib      = "com.github.ghik" % "silencer-lib"        % Version.silencer % Provided cross CrossVersion.full
+  val macroParadise    = "org.scalamacros" % "paradise"           % Version.macroParadise cross CrossVersion.patch
+  val kindProjector    = "org.typelevel"  %% "kind-projector"     % Version.kindProjector cross CrossVersion.patch
+  val simulacrum       = "org.typelevel"  %% "simulacrum"         % Version.simulacrum
+  val betterMonadicFor = "com.olegpy"     %% "better-monadic-for" % Version.betterMonadicFor
+  val silencerPlugin   = "com.github.ghik" % "silencer-plugin"    % Version.silencer cross CrossVersion.full
+  val silencerLib      = "com.github.ghik" % "silencer-lib"       % Version.silencer % Provided cross CrossVersion.full
 }

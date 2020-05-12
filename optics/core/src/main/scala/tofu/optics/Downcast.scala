@@ -27,7 +27,7 @@ object PDowncast extends OpticCompanion[PDowncast] {
     def default: X
   }
 
-  override def toGeneric[S, T, A, B](o: PDowncast[S, T, A, B]): Optic[Context, S, T, A, B] =
+  override def toGeneric[S, T, A, B](o: PDowncast[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
         s => o.downcast(s).fold(Constant.of[T](c.default))(a => p(a).retag)

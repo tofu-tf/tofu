@@ -14,9 +14,9 @@ object logging {
   implicit final class LoggingInterpolator(private val sctx: StringContext) extends AnyVal {
     def error[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
       logging.error(sctx.s(braces(values.size): _*), values: _*)
-    def warn[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
+    def warn[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit]  =
       logging.warn(sctx.s(braces(values.size): _*), values: _*)
-    def info[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
+    def info[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit]  =
       logging.info(sctx.s(braces(values.size): _*), values: _*)
     def debug[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
       logging.debug(sctx.s(braces(values.size): _*), values: _*)
@@ -25,9 +25,9 @@ object logging {
 
     def errorCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
       logging.errorCause(sctx.s(braces(values.size): _*), ex, values: _*)
-    def warnCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
+    def warnCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit]  =
       logging.warnCause(sctx.s(braces(values.size): _*), ex, values: _*)
-    def infoCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
+    def infoCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit]  =
       logging.infoCause(sctx.s(braces(values.size): _*), ex, values: _*)
     def debugCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
       logging.debugCause(sctx.s(braces(values.size): _*), ex, values: _*)
@@ -48,12 +48,12 @@ object logRenderer {
 
     def foldable[F[_]: Foldable, A](fa: F[A])(receive: (V, A) => M)(implicit r: LogRenderer[I, V, R, M]): M =
       r.foldable(fa, v)(receive)
-    def coll[A](fa: TraversableOnce[A])(receive: (V, A) => M)(implicit r: LogRenderer[I, V, R, M]): M =
+    def coll[A](fa: TraversableOnce[A])(receive: (V, A) => M)(implicit r: LogRenderer[I, V, R, M]): M       =
       r.coll(fa, v)(receive)
 
     def putFoldable[F[_]: Foldable, A: Loggable](fa: F[A])(implicit r: LogRenderer[I, V, R, M]): M =
       r.putFoldable(fa, v)
-    def putColl[A: Loggable](fa: TraversableOnce[A])(implicit r: LogRenderer[I, V, R, M]): M =
+    def putColl[A: Loggable](fa: TraversableOnce[A])(implicit r: LogRenderer[I, V, R, M]): M       =
       r.putColl(fa, v)
 
     def dict(receive: I => R)(implicit r: LogRenderer[I, V, R, M]): M = r.dict(v)(receive)
@@ -98,17 +98,17 @@ object logRenderer {
     def subDictList(path: String, size: Int)(receive: (I, Int) => R)(implicit r: LogRenderer[I, V, R, M]): R =
       r.subDictList(path, size, i)(receive)
 
-    def addString(name: String, value: String)(implicit r: LogRenderer[I, V, R, M]): R =
+    def addString(name: String, value: String)(implicit r: LogRenderer[I, V, R, M]): R      =
       r.addString(name, value, i)
-    def addInt(name: String, value: Long)(implicit r: LogRenderer[I, V, R, M]): R =
+    def addInt(name: String, value: Long)(implicit r: LogRenderer[I, V, R, M]): R           =
       r.addInt(name, value, i)
-    def addFloat(name: String, value: Double)(implicit r: LogRenderer[I, V, R, M]): R =
+    def addFloat(name: String, value: Double)(implicit r: LogRenderer[I, V, R, M]): R       =
       r.addFloat(name, value, i)
-    def addBigInt(name: String, value: BigInt)(implicit r: LogRenderer[I, V, R, M]): R =
+    def addBigInt(name: String, value: BigInt)(implicit r: LogRenderer[I, V, R, M]): R      =
       r.addBigInt(name, value, i)
     def addDecimal(name: String, value: BigDecimal)(implicit r: LogRenderer[I, V, R, M]): R =
       r.addDecimal(name, value, i)
-    def addBool(name: String, value: Boolean)(implicit r: LogRenderer[I, V, R, M]): R =
+    def addBool(name: String, value: Boolean)(implicit r: LogRenderer[I, V, R, M]): R       =
       r.addBool(name, value, i)
   }
 }

@@ -70,10 +70,10 @@ object Atom {
   }
 
   final case class QAtom[F[_]: Applicative: Guarantee, A](qvar: QVar[F, A]) extends Atom[F, A] {
-    def get: F[A]                  = qvar.read
-    def set(a: A): F[Unit]         = getAndSet(a).void
-    def getAndSet(a: A): F[A]      = qvar.take.guaranteeAlways(qvar.put(a))
-    def update(f: A => A): F[Unit] = qvar.take.bracketIncomplete(a => qvar.put(f(a)))(qvar.put)
+    def get: F[A]                       = qvar.read
+    def set(a: A): F[Unit]              = getAndSet(a).void
+    def getAndSet(a: A): F[A]           = qvar.take.guaranteeAlways(qvar.put(a))
+    def update(f: A => A): F[Unit]      = qvar.take.bracketIncomplete(a => qvar.put(f(a)))(qvar.put)
     def modify[B](f: A => (A, B)): F[B] = qvar.take.bracketIncomplete { a =>
       val (next, res) = f(a)
       qvar.put(next) as res
@@ -81,10 +81,10 @@ object Atom {
   }
 
   private[Atom] case class FocusedAtom[F[_]: Functor, A, B](v: Atom[F, A], focus: Contains[A, B]) extends Atom[F, B] {
-    def get: F[B]                  = v.get.map(focus.get)
-    def set(b: B): F[Unit]         = v.update(focus.set(_, b))
-    def getAndSet(b: B): F[B]      = v.modify(a => (focus.set(a, b), focus.get(a)))
-    def update(f: B => B): F[Unit] = v.update(focus.update(_, f))
+    def get: F[B]                       = v.get.map(focus.get)
+    def set(b: B): F[Unit]              = v.update(focus.set(_, b))
+    def getAndSet(b: B): F[B]           = v.modify(a => (focus.set(a, b), focus.get(a)))
+    def update(f: B => B): F[Unit]      = v.update(focus.update(_, f))
     def modify[C](f: B => (B, C)): F[C] = v.modify { a =>
       val (b, c) = f(focus.get(a))
       (focus.set(a, b), c)

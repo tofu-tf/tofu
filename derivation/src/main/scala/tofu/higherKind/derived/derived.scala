@@ -7,6 +7,6 @@ object representableK extends DerivationK2[RepresentableK] {
   def instance[T[_[_]]]: RepresentableK[T] = macro Derevo.delegateK2[RepresentableK, T]
 }
 @delegating("tofu.higherKind.derived.genEmbed")
-object embed extends DerivationK2[Embed] {
+object embed          extends DerivationK2[Embed]          {
   def instance[T[_[_]]]: Embed[T] = macro Derevo.delegateK2[Embed, T]
 }

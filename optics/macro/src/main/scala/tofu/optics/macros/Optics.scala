@@ -27,12 +27,12 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
   private lazy val PContainsC = typeOf[PContains[_, _, _, _]].typeConstructor.typeSymbol
   private lazy val promoteC   = typeOf[promote].typeSymbol
 
-  def opticsAnnotationMacro(annottees: c.Expr[Any]*): c.Expr[Any] =
+  def opticsAnnotationMacro(annottees: c.Expr[Any]*): c.Expr[Any]       =
     annotationMacro(annottees, poly = false, classy = false)
   def classyOpticsAnnotationMacro(annottees: c.Expr[Any]*): c.Expr[Any] =
     annotationMacro(annottees, poly = false, classy = true)
 
-  def popticsAnnotationMacro(annottees: c.Expr[Any]*): c.Expr[Any] =
+  def popticsAnnotationMacro(annottees: c.Expr[Any]*): c.Expr[Any]       =
     annotationMacro(annottees, poly = true, classy = false)
   def classyPopticsAnnotationMacro(annottees: c.Expr[Any]*): c.Expr[Any] =
     annotationMacro(annottees, poly = true, classy = true)
@@ -51,7 +51,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
           case Literal(Constant(s: String)) :: Nil => s
           case _                                   => ""
         }
-      case _ => ""
+      case _                                                                                                => ""
     }
 
     def labelType(s: String): Type = internal.constantType(Constant(s))
@@ -109,17 +109,17 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
 
         val groupedTpnames: Map[Int, Set[TypeName]] =
           tparamsUsages.toList.groupBy(_._2).map { case (n, tps) => (n, tps.map(_._1).toSet) }
-        val phantomTpnames     = groupedTpnames.getOrElse(0, Set.empty)
-        val singleFieldTpnames = groupedTpnames.getOrElse(1, Set.empty)
+        val phantomTpnames                          = groupedTpnames.getOrElse(0, Set.empty)
+        val singleFieldTpnames                      = groupedTpnames.getOrElse(1, Set.empty)
 
         params.flatMap { param =>
           val lensName        = TermName(prefix + param.name.decodedName)
           val tpnames         = param.collect { case Ident(tn: TypeName) => tn }.toSet
           val tpnamesToChange = tpnames.intersect(singleFieldTpnames) ++ phantomTpnames
-          val tpnamesMap = tpnamesToChange.foldLeft((tparams.map(_.name).toSet ++ tpnames).map(x => (x, x)).toMap) {
+          val tpnamesMap      = tpnamesToChange.foldLeft((tparams.map(_.name).toSet ++ tpnames).map(x => (x, x)).toMap) {
             (acc, tpname) => acc.updated(tpname, c.freshName(tpname))
           }
-          val defParams = tparams ++ tparams
+          val defParams       = tparams ++ tparams
             .filter(x => tpnamesToChange.contains(x.name))
             .map {
               case TypeDef(mods, name, tps, rhs) => TypeDef(mods, tpnamesMap(name), tps, rhs)
@@ -150,7 +150,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
 
     val result = annottees map (_.tree) match {
       case (classDef @ q"$mods class $tpname[..$tparams] $ctorMods(...$paramss) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
-            :: Nil if mods.hasFlag(Flag.CASE) =>
+          :: Nil if mods.hasFlag(Flag.CASE) =>
         val name = tpname.toTermName
         q"""
          $classDef
@@ -159,8 +159,8 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
          }
          """
       case (classDef @ q"$mods class $tpname[..$tparams] $ctorMods(...$paramss) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
-            :: q"$objMods object $objName extends { ..$objEarlyDefs } with ..$objParents { $objSelf => ..$objDefs }"
-            :: Nil if mods.hasFlag(Flag.CASE) =>
+          :: q"$objMods object $objName extends { ..$objEarlyDefs } with ..$objParents { $objSelf => ..$objDefs }"
+          :: Nil if mods.hasFlag(Flag.CASE) =>
         q"""
          $classDef
          $objMods object $objName extends { ..$objEarlyDefs} with ..$objParents { $objSelf =>
@@ -188,8 +188,12 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
     case _         => false
   }
 
-  @silent("never used") private def debug(ss: Any*) = c.info(c.enclosingPosition, ss map {
-    case null => "null"
-    case s    => s.toString
-  } mkString " ", true)
+  @silent("never used") private def debug(ss: Any*) = c.info(
+    c.enclosingPosition,
+    ss map {
+      case null => "null"
+      case s    => s.toString
+    } mkString " ",
+    true
+  )
 }

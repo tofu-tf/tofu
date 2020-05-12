@@ -17,7 +17,7 @@ private[env] trait EnvProducts {
     (fa1, fa2, fa3) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3)) =>
         EnvTask(Task.parMap3(ta1, ta2, ta3)(f))
-      case _ =>
+      case _                                          =>
         Env(ctx => Task.parMap3(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx))(f))
     }
 
@@ -27,7 +27,7 @@ private[env] trait EnvProducts {
     (fa1, fa2, fa3, fa4) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4)) =>
         EnvTask(Task.parMap4(ta1, ta2, ta3, ta4)(f))
-      case _ =>
+      case _                                                        =>
         Env(ctx => Task.parMap4(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx))(f))
     }
 
@@ -41,7 +41,7 @@ private[env] trait EnvProducts {
     (fa1, fa2, fa3, fa4, fa5) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4), EnvTask(ta5)) =>
         EnvTask(Task.parMap5(ta1, ta2, ta3, ta4, ta5)(f))
-      case _ =>
+      case _                                                                      =>
         Env(ctx => Task.parMap5(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx), fa5.run(ctx))(f))
     }
 
@@ -56,7 +56,7 @@ private[env] trait EnvProducts {
     (fa1, fa2, fa3, fa4, fa5, fa6) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4), EnvTask(ta5), EnvTask(ta6)) =>
         EnvTask(Task.parMap6(ta1, ta2, ta3, ta4, ta5, ta6)(f))
-      case _ =>
+      case _                                                                                    =>
         Env(ctx => Task.parMap6(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx), fa5.run(ctx), fa6.run(ctx))(f))
     }
 
@@ -70,7 +70,7 @@ private[env] trait EnvProducts {
     (fa1, fa2, fa3) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3)) =>
         EnvTask(Task.map3(ta1, ta2, ta3)(f))
-      case _ =>
+      case _                                          =>
         Env(ctx => Task.map3(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx))(f))
     }
 
@@ -80,7 +80,7 @@ private[env] trait EnvProducts {
     (fa1, fa2, fa3, fa4) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4)) =>
         EnvTask(Task.map4(ta1, ta2, ta3, ta4)(f))
-      case _ =>
+      case _                                                        =>
         Env(ctx => Task.map4(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx))(f))
     }
 
@@ -94,7 +94,7 @@ private[env] trait EnvProducts {
     (fa1, fa2, fa3, fa4, fa5) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4), EnvTask(ta5)) =>
         EnvTask(Task.map5(ta1, ta2, ta3, ta4, ta5)(f))
-      case _ =>
+      case _                                                                      =>
         Env(ctx => Task.map5(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx), fa5.run(ctx))(f))
     }
 
@@ -109,7 +109,7 @@ private[env] trait EnvProducts {
     (fa1, fa2, fa3, fa4, fa5, fa6) match {
       case (EnvTask(ta1), EnvTask(ta2), EnvTask(ta3), EnvTask(ta4), EnvTask(ta5), EnvTask(ta6)) =>
         EnvTask(Task.map6(ta1, ta2, ta3, ta4, ta5, ta6)(f))
-      case _ =>
+      case _                                                                                    =>
         Env(ctx => Task.map6(fa1.run(ctx), fa2.run(ctx), fa3.run(ctx), fa4.run(ctx), fa5.run(ctx), fa6.run(ctx))(f))
     }
 
@@ -149,22 +149,22 @@ private[env] trait EnvProducts {
 
 private[env] trait EnvTransformations {
   self: Env.type =>
-  final def taskNat[E]: Task ~> Env[E, *] = new FunctionK[Task, Env[E, *]] {
+  final def taskNat[E]: Task ~> Env[E, *]                   = new FunctionK[Task, Env[E, *]] {
     override def apply[A](fa: Task[A]): Env[E, A] = Env.fromTask(fa)
   }
-  final def funcNat[E]: (E => *) ~> Env[E, *] = new FunctionK[E => *, Env[E, *]] {
+  final def funcNat[E]: (E => *) ~> Env[E, *]               = new FunctionK[E => *, Env[E, *]] {
     override def apply[A](fa: E => A): Env[E, A] = Env.fromFunc(fa)
   }
-  final def idNat[E]: Id ~> Env[E, *] = new FunctionK[Id, Env[E, *]] {
+  final def idNat[E]: Id ~> Env[E, *]                       = new FunctionK[Id, Env[E, *]] {
     override def apply[A](fa: Id[A]): Env[E, A] = Env.pure(fa)
   }
-  final def tryNat[E]: Try ~> Env[E, *] = new FunctionK[Try, Env[E, *]] {
+  final def tryNat[E]: Try ~> Env[E, *]                     = new FunctionK[Try, Env[E, *]] {
     override def apply[A](fa: Try[A]): Env[E, A] = Env.fromTry(fa)
   }
   final def eitherNat[E]: Either[Throwable, *] ~> Env[E, *] = new FunctionK[Either[Throwable, *], Env[E, *]] {
     override def apply[A](fa: Either[Throwable, A]): Env[E, A] = Env.fromEither(fa)
   }
-  final def coevalNat[E]: Coeval ~> Env[E, *] = new FunctionK[Coeval, Env[E, *]] {
+  final def coevalNat[E]: Coeval ~> Env[E, *]               = new FunctionK[Coeval, Env[E, *]] {
     override def apply[A](fa: Coeval[A]): Env[E, A] = Env.fromCoeval(fa)
   }
 }

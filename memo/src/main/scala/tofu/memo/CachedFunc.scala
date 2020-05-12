@@ -49,7 +49,7 @@ object CachedFunc {
     for {
       cacheControl <- control
       now          <- clock.realTime(TimeUnit.MILLISECONDS)
-      validAfter   = (now - ttl).max(cacheControl.invalidated.millis)
+      validAfter    = (now - ttl).max(cacheControl.invalidated.millis)
       result       <- state.getOrElse(f(a), a, now, validAfter)
     } yield result
 }

@@ -40,7 +40,7 @@ object PFolded extends OpticCompanion[PFolded] {
     new PFolded[S, T, U, V] {
       def foldMap[X: Monoid](s: S)(fux: U => X): X = g.foldMap(s)(f.foldMap(_)(fux))
     }
-  final implicit def byFoldable[F[_], A, T, B](implicit F: Foldable[F]): PFolded[F[A], T, A, B] =
+  final implicit def byFoldable[F[_], A, T, B](implicit F: Foldable[F]): PFolded[F[A], T, A, B]      =
     new PFolded[F[A], T, A, B] {
       def foldMap[X: Monoid](fa: F[A])(f: A => X): X = F.foldMap(fa)(f)
     }
@@ -54,7 +54,7 @@ object PFolded extends OpticCompanion[PFolded] {
     }
   }
 
-  override def toGeneric[S, T, A, B](o: PFolded[S, T, A, B]): Optic[Context, S, T, A, B] =
+  override def toGeneric[S, T, A, B](o: PFolded[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
         s => Constant.Impl(o.foldMap(s)(a => p(a).value)(c.algebra))

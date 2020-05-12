@@ -27,7 +27,7 @@ object loggable extends Derivation[Loggable] {
           typeclass match {
             case _ if annotations.contains(unembed()) =>
               receiver.combine(acc, typeclass.fields(value, input))
-            case _ =>
+            case _                                    =>
               receiver.combine(acc, typeclass.putField(value, label, input))
           }
         }

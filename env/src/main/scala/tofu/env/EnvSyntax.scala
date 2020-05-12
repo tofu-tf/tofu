@@ -15,7 +15,7 @@ class EnvOptionOps[E, A](val ea: Env[E, Option[A]]) extends AnyVal {
           case None        => tb
           case s @ Some(_) => Task.pure(s)
         })
-      case _ =>
+      case _                          =>
         ea.flatMap {
           case None        => eb
           case s @ Some(_) => Env.pure(s)
@@ -36,8 +36,8 @@ class EnvOptionOps[E, A](val ea: Env[E, Option[A]]) extends AnyVal {
       case EnvTask(tb) => ea.mapTask(getOrElseTask(tb))
       case _           => Env(ctx => getOrElseTask(eb.run(ctx))(ea.run(ctx)))
     }
-  def getOrElseT[B >: A](tb: Task[B]): Env[E, B] = ea.mapTask(getOrElseTask(tb))
-  def getOrElse[B >: A](a: => B): Env[E, B]      = ea.map(_.getOrElse(a))
+  def getOrElseT[B >: A](tb: Task[B]): Env[E, B]   = ea.mapTask(getOrElseTask(tb))
+  def getOrElse[B >: A](a: => B): Env[E, B]        = ea.map(_.getOrElse(a))
 
   def orRaise(e: Throwable): Env[E, A] =
     ea.mapTask(_.flatMap(_.fold(Task.raiseError[A](e))(Task.pure)))

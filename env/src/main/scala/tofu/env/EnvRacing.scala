@@ -19,7 +19,7 @@ private[env] trait EnvRacing {
     (ta, tb) match {
       case (EnvTask(taskA), EnvTask(taskB)) =>
         fromTask(Task.racePair(taskA, taskB).map(convertRacingFibers))
-      case _ =>
+      case _                                =>
         Env(ctx => Task.racePair(ta.run(ctx), tb.run(ctx)).map(convertRacingFibers))
     }
 
@@ -34,11 +34,11 @@ private[env] trait EnvRacing {
     val funcAccum = Array.newBuilder[E => Task[A]]
     tta.foreach {
       case EnvTask(tt) => taskAccum += tt
-      case env =>
+      case env         =>
         funcAccum += env.run
     }
-    val tasks = taskAccum.result()
-    val funcs = funcAccum.result()
+    val tasks     = taskAccum.result()
+    val funcs     = funcAccum.result()
     if (funcs.isEmpty) EnvTask(Task.raceMany(tasks))
     else Env(ctx => Task.raceMany(funcs.map(_(ctx)) ++ tasks))
   }

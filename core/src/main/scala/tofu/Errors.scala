@@ -102,7 +102,7 @@ trait ErrorsToInstanceChain[TC[f[_], g[_], e] >: ErrorsTo[f, g, e]]
 
   final implicit def eitherIntance[E]: TC[Either[E, *], Id, E] =
     new EitherErrorsTo[E]
-  final implicit val optionTIntance: TC[Option, Id, Unit] = OptionErrorsTo
+  final implicit val optionTIntance: TC[Option, Id, Unit]      = OptionErrorsTo
 }
 
 trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E]

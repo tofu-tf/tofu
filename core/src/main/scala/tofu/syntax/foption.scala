@@ -51,7 +51,7 @@ object foption {
 
     def filterF(f: A => F[Boolean])(implicit F: Monad[F]): F[Option[A]] =
       lhs.flatMap {
-        case None => noneF[F, A]
+        case None            => noneF[F, A]
         case s @ Some(value) =>
           f(value).map {
             case true => s
@@ -90,7 +90,7 @@ object foption {
     def apF[X, Z](f: => F[Option[X]])(implicit F: Monad[F], ev: A <:< (X => Z)): F[Option[Z]] =
       lhs.flatMap(_.flatTraverse(fn => f.map(_.map(fn))))
 
-    def map2F[B, Z](fb: => F[Option[B]])(f: (A, B) => Z)(implicit F: Monad[F]): F[Option[Z]] =
+    def map2F[B, Z](fb: => F[Option[B]])(f: (A, B) => Z)(implicit F: Monad[F]): F[Option[Z]]        =
       productF(fb).map(_.map { case (a, b) => f(a, b) })
 
     def flatMap2F[B, Z](fb: => F[Option[B]])(f: (A, B) => F[Z])(implicit F: Monad[F]): F[Option[Z]] =

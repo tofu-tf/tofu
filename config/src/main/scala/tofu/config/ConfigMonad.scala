@@ -33,15 +33,14 @@ object ConfigMonad {
   )(implicit errors: Errors[F, Fail.type]): F[(Vector[ConfigParseMessage], Option[A])] = {
     for {
       ref      <- newRef[F].of(Vector[ConfigParseMessage]())
-      reader   = Configurable.parse[ConfigT[F, *], A](item.mapK[ConfigT[F, *]](ReaderT.liftK[F, ConfigTContext[F]]))
-      context  = ConfigTContext[F](Vector.empty, ref)
+      reader    = Configurable.parse[ConfigT[F, *], A](item.mapK[ConfigT[F, *]](ReaderT.liftK[F, ConfigTContext[F]]))
+      context   = ConfigTContext[F](Vector.empty, ref)
       res      <- errors.restore(reader.run(context))
       messages <- ref.get
     } yield (messages, res)
   }
 
-  def fromMonadAndErrors[F[_]](
-      implicit
+  def fromMonadAndErrors[F[_]](implicit
       F: Monad[F],
       FE: Raise[F, ConfigError],
       FR: Restore[F],
@@ -55,8 +54,7 @@ object ConfigMonad {
       val path       = FL
     }
 
-  def fromParallelAndErrors[F[_]](
-      implicit
+  def fromParallelAndErrors[F[_]](implicit
       FP: Parallel[F],
       FE: Errors[F, ConfigError],
       F: Monad[F],
@@ -84,8 +82,8 @@ final case class ConfigTContext[F[_]](path: Path, ref: Ref[F, MessageList])
 object ConfigTContext {
   case object Fail extends Exception
 
-  implicit def configTParallelConfigMonad[F[_]: ParallelReader](
-      implicit F: Monad[F],
+  implicit def configTParallelConfigMonad[F[_]: ParallelReader](implicit
+      F: Monad[F],
       FE: Errors[F, Fail.type]
   ): ConfigMonad[ConfigT[F, *]] = new ConfigTConfigMonad[F]
 
@@ -101,15 +99,15 @@ object ConfigTContext {
     val monad: Monad[ConfigT[F, *]]         = Monad[ConfigT[F, *]]
     val paralleled: Parallel[ConfigT[F, *]] = FP.paralleled
     val path: HasLocal[ConfigT[F, *], Path] = Local[ConfigT[F, *]].subcontext(contextPath[F])
-    val config: ConfigRaise[ConfigT[F, *]] = new ConfigRaise[ConfigT[F, *]] {
+    val config: ConfigRaise[ConfigT[F, *]]  = new ConfigRaise[ConfigT[F, *]] {
       def raise[A](err: ConfigError): ConfigT[F, A] =
         ReaderT(ctx => ctx.ref.update(_ :+ ConfigParseMessage(ctx.path, err)) *> FR.raise(Fail))
     }
-    val restore: Restore[ConfigT[F, *]] = new Restore[ConfigT[F, *]] {
+    val restore: Restore[ConfigT[F, *]]     = new Restore[ConfigT[F, *]] {
       def restoreWith[A](fa: ConfigT[F, A])(ra: => ConfigT[F, A]): ConfigT[F, A] =
         ReaderT(ctx => FR.restoreWith(fa.run(ctx))(ra.run(ctx)))
-      def restore[A](fa: ConfigT[F, A]): ConfigT[F, Option[A]] = ReaderT(ctx => FR.restore(fa.run(ctx)))
-      def lift[A](fa: ConfigT[F, A]): ConfigT[F, A]            = fa
+      def restore[A](fa: ConfigT[F, A]): ConfigT[F, Option[A]]                   = ReaderT(ctx => FR.restore(fa.run(ctx)))
+      def lift[A](fa: ConfigT[F, A]): ConfigT[F, A]                              = fa
     }
   }
 }
@@ -132,11 +130,11 @@ trait LowPriorityParallelReader1 extends LowPriorityParallelReader2 {
           case Right(f) => fa.map(f(_))
           case Left(e)  => fa *> F.raiseError(e)
         }
-      def pure[A](x: A): M[A] = F.pure(x)
+      def pure[A](x: A): M[A]                     = F.pure(x)
     }
-    def monad              = F
-    def parallel: F ~> F   = makeFunctionK[F, F](x => x)
-    def sequential: F ~> F = makeFunctionK[F, F](x => x)
+    def monad                       = F
+    def parallel: F ~> F            = makeFunctionK[F, F](x => x)
+    def sequential: F ~> F          = makeFunctionK[F, F](x => x)
   }
 }
 trait LowPriorityParallelReader2 {
