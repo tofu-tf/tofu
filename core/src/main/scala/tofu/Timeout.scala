@@ -13,7 +13,7 @@ trait Timeout[F[_]] {
 }
 
 object Timeout {
-  def concurrent[F[_]](implicit F: Concurrent[F], timer: Timer[F]): Timeout[F] =
+  implicit def concurrent[F[_]](implicit F: Concurrent[F], timer: Timer[F]): Timeout[F] =
     new Timeout[F] {
       override def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A] =
         F.race(fa, timer.sleep(after) *> fallback).map(_.merge)
