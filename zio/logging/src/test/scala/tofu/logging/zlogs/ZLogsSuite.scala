@@ -4,10 +4,12 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import derevo.derive
-import io.circe.{Json, JsonObject}
+import io.circe.JsonObject
+import io.circe.syntax._
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import org.slf4j.LoggerFactory
-import tofu.logging.{LogTree, Loggable}
+import tofu.logging.LogTree
 import tofu.logging.derivation.loggable
 import tofu.logging.impl.ContextMarker
 import tofu.syntax.logging._
@@ -15,8 +17,6 @@ import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.console.Console
 import zio.{Has, Runtime, URIO, URLayer, ZLayer}
-import io.circe.syntax._
-import org.scalatest.matchers.should.Matchers
 
 import scala.collection.JavaConverters._
 
