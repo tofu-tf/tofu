@@ -41,7 +41,7 @@ Of course you can also specify the exact subproject that you wanna add to yours 
 <img align="right" src="logos/tofu-logo.png" height="100px" style="padding-left: 5px"/>
 
 # Copyright
-Copyright the maintainers, 2019
+Copyright the maintainers, 2020
 
 Logos made with love by [@impurepics](https://twitter.com/impurepics)
 
