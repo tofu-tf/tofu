@@ -2,13 +2,17 @@
 id: hascontext
 title: HasContext
 ---
+## Installation
+`"ru.tinkoff" %% "tofu" % Versions.tofu`  
+or as a standalone dependency 
+`"ru.tinkoff" %% "tofu-core" % Versions.tofu`  
 
-### What if you don't need Env
+## What if you don't need Env
 
 Env is a powerful monad, but what if you're sure that you don't need it?
 You can still use convenient Tofu concepts to work with your own Environment (`Context`).  
 
-#### Usage example and a short use case description  
+### Usage example and a short use case description  
 
 The short story long, it is possible to use `ReaderT`:
  

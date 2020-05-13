@@ -3,14 +3,19 @@ id: logging
 title: Logging
 ---
 
-### Logging
+## Installation
+`"ru.tinkoff" %% "tofu" % Versions.tofu`  
+or as a standalone dependency:   
+`"ru.tinkoff" %% "tofu-logging" % Versions.tofu`  
+
+## Preface
 
 Almost every application nowadays does logging, whether it's logging of business events, history of some state of 
 application or even debug record sequences. We log to files, distributed systems, standard outputs of OSes, and we 
 got used to it so much it seems really simple to us. Many existing libraries provide many ways of logging from 
 your application's code, either automatic or manual.
 
-### What's wrong (and how to fix that)?
+## What's wrong (and how to fix that)?
 
 First, logging is, in fact, a side effect. Whether we log anything to standard output or a file - it's an interaction 
 with the outside world ('outside' relative to our program). Thus, logging as a process can be represented as an effect and operations - as an algebra.  
@@ -37,7 +42,7 @@ Basically, that's the main user API you can interact with throughout your code.
 It resembles well-known solutions, keeping in mind that logging is an effect, though introducing the concept of `LoggedValue`.  
 
 
-#### Logs representation (using Loggable)
+### Logs representation (using Loggable)
 To represent a value in logs we use a concept of `Loggable` (it's a typeclass). 
 It describes how a value of some type can be logged, both as a string representation in log message 
 and as a component of structured logging. Given an instance of `Loggable` for a type, a value of the type can be converted into the final internal representation called `LoggedValue` and thus logged in a way that you provided.  
@@ -53,7 +58,7 @@ Of course, you can describe your `Loggable` instance yourself by extending exist
 * `ToStringLoggable` for using `.toString` for logging
 * `HideLoggable` to exclude value from logging
 
-#### Loggable example
+### Loggable example
 ```scala
 import tofu.logging._
 import cats.syntax.semigroup._
@@ -77,7 +82,7 @@ respective names and values
 * `logShow`, that represents `User` as a string in a log message
 
 
-#### Logging creation
+### Logging creation
 Creating an instance of `Logging` in Tofu is an effect itself. You can use helper class `Logs` that can produce values of
 type `I[Logging[F]]` (where `I` and `F` can be two different effects) and define a behaviour of your `Logging` instances. 
 An instance of `Logs` is supposed to be shared by different parts of user code. though it's not a restriction.  
@@ -110,7 +115,7 @@ There are multiple ways to create `Logs` instance, among them:
 `Logging` instance that is created this way will be a combination of two underlying instances, produced by both `Logs`. 
 This means that both `Logging` implementations will be called in sequence    
 
-#### Context logging
+### Context logging
 It is possible to log the context of your computations (MDC, remember?) if you have an instance of `tofu.Context` for your
 effect type and a `Loggable` for your context. 
 That's natural - describe how we can obtain a context from a computation `F` and a way to represent that context in log, 
@@ -122,7 +127,7 @@ Fields are a structure of your `Loggable` that is used for structured logging by
 Tofu comes with a `tofu.logging.ElkLayout` (present in `tofu-logging-layout` library), that will log the structure (fields) of your `Loggable`
 as JSON fields.
 
-#### Syntax extensions
+### Syntax extensions
 It's much more convenient to use pre-defined syntax extensions for logging operations since they do all heavy lifting for you:
 ```scala:reset
 import cats.{Monad, Show, Functor}

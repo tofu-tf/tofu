@@ -2,12 +2,16 @@
 id: console
 title: Console
 ---
+## Installation
+`"ru.tinkoff" %% "tofu" % Versions.tofu`  
+or as a standalone dependency 
+`"ru.tinkoff" %% "tofu-core" % Versions.tofu`  
 
-### What if you need to keep things simple?
+## What if you need to keep things simple?
 
 Let's say you're writing something simple and you need some of that good ol' console IO. Of course you can use plain `println` but we are nice and pure here. It is way better to use `tofu.Console` in such case.
 
-#### Console
+### Console
 
 The `Console[F]` does three things:
 
@@ -39,7 +43,7 @@ object catStraight extends IOApp {
 Where does the instance of `Console[IO]` comes from? 
 The answer is that for any type `F` that has `Sync[F]` instance of console comes for free by using standard scala console IO.
 
-#### Syntax
+### Syntax
 
 It's all cool but writing `Console[F]` isn't cool. There is 'tofu.syntax.console' for a fancy functions to work with it.
 Let's make our cat program a little nicer by adding one import and removing duplicates.
@@ -71,7 +75,7 @@ dog
 >Do not scare the cat! //written in red because of 'putErrLn'
 ```
 
-##### Show
+#### Show
 
 There are integrations with `cats.Show` typeclass.
 Let's say we have some case class and a custom `Show` instance for it:
@@ -92,7 +96,7 @@ putToStringLn[IO](cat).unsafeRunSync() //uses .toString
 putShowLn[IO, Person](cat).unsafeRunSync() //uses Show from scope
 ```
 
-##### Puts
+#### Puts
 
 Also, it is possible to print a interpolated string in a nice way using `puts"..."`:
 ```scala

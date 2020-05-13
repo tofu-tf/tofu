@@ -3,8 +3,10 @@ id: memo
 title: Memo
 ---
 
-## Dependency
-It is available in general package `"ru.tinkoff" %% "tofu" % Versions.tofu` and as standalone dependency `"ru.tinkoff" %% "tofu-memo" % Versions.tofu`
+## Installation
+`"ru.tinkoff" %% "tofu" % Versions.tofu`  
+or as a standalone dependency:   
+`"ru.tinkoff" %% "tofu-memo" % Versions.tofu`
 
 ## Functionality
 * A cache of a single value on access.

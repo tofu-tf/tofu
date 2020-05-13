@@ -6,7 +6,7 @@ title: Forking and Racing
 
 
 ##### Fire
-A simple typeclass which main responsibility is starting process in background and forgetting about result value.
+A simple typeclass, which main responsibility is to start a process in the background and forget about the result value.
 ```scala
 import tofu.env._
 import tofu.syntax.fire._
