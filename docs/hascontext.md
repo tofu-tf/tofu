@@ -3,9 +3,9 @@ id: hascontext
 title: HasContext
 ---
 ## Installation
-`"ru.tinkoff" %% "tofu" % Versions.tofu`  
+`"ru.tinkoff" %% "tofu" % tofu-version`  
 or as a standalone dependency 
-`"ru.tinkoff" %% "tofu-core" % Versions.tofu`  
+`"ru.tinkoff" %% "tofu-core" % tofu-version`  
 
 ## What if you don't need Env
 

@@ -4,9 +4,9 @@ title: Logging
 ---
 
 ## Installation
-`"ru.tinkoff" %% "tofu" % Versions.tofu`  
+`"ru.tinkoff" %% "tofu" % tofu-version`  
 or as a standalone dependency:   
-`"ru.tinkoff" %% "tofu-logging" % Versions.tofu`  
+`"ru.tinkoff" %% "tofu-logging" % tofu-version`  
 
 ## Preface
 

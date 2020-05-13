@@ -4,9 +4,9 @@ title: Memo
 ---
 
 ## Installation
-`"ru.tinkoff" %% "tofu" % Versions.tofu`  
+`"ru.tinkoff" %% "tofu" % tofu-version`  
 or as a standalone dependency:   
-`"ru.tinkoff" %% "tofu-memo" % Versions.tofu`
+`"ru.tinkoff" %% "tofu-memo" % tofu-version`
 
 ## Functionality
 * A cache of a single value on access.

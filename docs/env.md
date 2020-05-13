@@ -4,9 +4,9 @@ title: Env
 ---
 
 ## Installation
-`"ru.tinkoff" %% "tofu" % Versions.tofu`  
+`"ru.tinkoff" %% "tofu" % tofu-version`  
 or as a standalone dependency:   
-`"ru.tinkoff" %% "tofu-env" % Versions.tofu`  
+`"ru.tinkoff" %% "tofu-env" % tofu-version`  
 
 ## What is Env, once again?
 

@@ -3,7 +3,7 @@ id: agent
 title: Agent
 ---
 
- ### Agent: Reference with effectful mutators
+## Agent: Reference with effectful mutators
  
  Agent is like cats-effect Ref but it allows effectful updates of referenced value. 
  It also allows enqueuing of mutations without waiting for their completion 
@@ -38,7 +38,7 @@ title: Agent
 }
  ```
  
- ### Creation
+## Creation
  
  One can create Agent of some value with helper MakeAgent. 
  
@@ -75,8 +75,8 @@ package object concurrent {
 }
 ```
  
- ## Examples
- Using Agents:
+## Examples
+### Using Agents:
  
  ```scala
 import cats.Monad
@@ -94,7 +94,7 @@ import tofu.common.Console
           _ <- Console[F].putStrLn(s"new value is $newValue") // new value is 69
         } yield ()
  ```
- Using MakeAgent:
+### Using MakeAgent:
  
  ```scala
 import cats.Monad
