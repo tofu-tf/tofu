@@ -1,6 +1,6 @@
 ---
 id: env
-title: Learning Env
+title: Env
 ---
 
 ### What is Env, once again?
@@ -13,7 +13,7 @@ Env provides a nice and convenient way to compose such functions, allowing acces
 
 ##### Access to environment
 You can easily access passed environment at any time in a clean monadic way 
-```scala mdoc
+```scala
 import tofu.env._
 import scala.concurrent.duration._
 import monix.execution.Scheduler.Implicits.global
@@ -26,7 +26,7 @@ printCtx.run("I am a context").runSyncUnsafe(1.second) // will print 'I am a con
 
 ##### Local overriding  
 It is possible to override context locally for specific functions that you may want to use with another context.
-```scala mdoc
+```scala
 import tofu.env._
 import scala.concurrent.duration._
 import monix.execution.Scheduler.Implicits.global
@@ -55,7 +55,7 @@ except `Effect` and `ConcurrentEffect` (which allow starting computation at any 
 
 #### Complete example
 Below is a complete example of how Env can be used to pass some environment to computations, use it through the code
-```scala mdoc
+```scala
 import monix.eval.Task
 
 import scala.concurrent.duration._

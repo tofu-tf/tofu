@@ -1,4 +1,7 @@
-# Memo
+---
+id: memo
+title: Memo
+---
 
 ## Dependency
 It is available in general package `"ru.tinkoff" %% "tofu" % Versions.tofu` and as standalone dependency `"ru.tinkoff" %% "tofu-memo" % Versions.tofu`
@@ -16,7 +19,7 @@ There are no
 
 ## Examples
 ### Single value cache
-```scala mdoc
+```scala
 import tofu.memo._
 import cats.effect.Clock
 import tofu.concurrent._
@@ -41,7 +44,7 @@ def f[F[_] : Console : Clock: Monad : Refs] =
 f[Task].runSyncUnsafe()
 ```
 ### Value mapping cache
-```scala mdoc:reset
+```scala:reset
 import tofu.memo._
 import cats.effect.Clock
 import cats._
@@ -72,7 +75,7 @@ f[Task].runSyncUnsafe()
 ```
 
 ### TTL
-```scala mdoc
+```scala
 import tofu.memo._
 import cats.effect.{Clock, Timer}
 import tofu.common.Console
@@ -124,7 +127,7 @@ Number 335
 ```
 ### Forced invalidation
 To invalidate cache update CacheControl and set it to current time:
-```scala mdoc:reset
+```scala:reset
 import tofu.memo._
 import cats.effect.{Clock, Timer}
 import tofu.common.Console

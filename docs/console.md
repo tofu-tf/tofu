@@ -1,6 +1,6 @@
 ---
 id: console
-title: Using Console
+title: Console
 ---
 
 ### What if you need to keep things simple?
@@ -18,7 +18,7 @@ The `Console[F]` does three things:
 Let's demonstrate it with simple example.
 Suppose we are writing a subset of unix `cat` program that can echo its input to output.
 
-```scala mdoc
+```scala
 import cats.effect.{ExitCode, IO, IOApp}
 import tofu.common.Console
 import cats.FlatMap
@@ -44,7 +44,7 @@ The answer is that for any type `F` that has `Sync[F]` instance of console comes
 It's all cool but writing `Console[F]` isn't cool. There is 'tofu.syntax.console' for a fancy functions to work with it.
 Let's make our cat program a little nicer by adding one import and removing duplicates.
 
-```scala mdoc
+```scala
 import tofu.syntax.console._ //this one gets you all the goodies
 object catWithSyntax extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
@@ -76,7 +76,7 @@ dog
 There are integrations with `cats.Show` typeclass.
 Let's say we have some case class and a custom `Show` instance for it:
 
-```scala mdoc
+```scala
 import cats.Show
 
 case class Person(name: String)
@@ -85,7 +85,7 @@ implicit val personShow: Show[Person] = Show.show[Person](p => s"this person has
 
 You can use two methods to put a person to console
 
-```scala mdoc
+```scala
 val cat: Person = Person("Cat")
 
 putToStringLn[IO](cat).unsafeRunSync() //uses .toString 
@@ -95,7 +95,7 @@ putShowLn[IO, Person](cat).unsafeRunSync() //uses Show from scope
 ##### Puts
 
 Also, it is possible to print a interpolated string in a nice way using `puts"..."`:
-```scala mdoc
+```scala
 def putCat[F[_]: Console]: F[Unit] = puts"$cat, not a Person"
 putCat[IO].unsafeRunSync()
 ```

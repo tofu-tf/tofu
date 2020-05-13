@@ -1,6 +1,6 @@
 ---
 id: hascontext
-title: Learning HasContext
+title: HasContext
 ---
 
 ### What if you don't need Env
@@ -12,7 +12,7 @@ You can still use convenient Tofu concepts to work with your own Environment (`C
 
 The short story long, it is possible to use `ReaderT`:
  
-```scala mdoc
+```scala
 import tofu.optics._
 import tofu._
 
@@ -38,7 +38,7 @@ program[ReaderT[Option, MyEnv, *]].run(MyEnv(User(0, "Tofu"))) //> Some(Tofu): O
 
 A bit more complicated example, that shows lenses usage only in the functions that require them:
 
-```scala mdoc:reset
+```scala:reset
 import tofu.optics._
 import tofu._
 
@@ -75,7 +75,7 @@ program[ReaderT[Option, MyEnv, *]]
 
 It is also possible to do define some `Context` explicitly without having a need in `Env` or `ReaderT` monads:
 
-```scala mdoc:reset
+```scala:reset
 import tofu.optics._
 import tofu._
 

@@ -68,7 +68,7 @@ object MakeRef {
 You can use object `MakeRef` that can produce values of type `I[Ref[F]]` (where `I` and `F` can be two different effects) and initialize it with , 
 for example:  
 
-```scala mdoc
+```scala
 import tofu.concurrent.MakeRef
 import cats.effect.IO
 
@@ -85,7 +85,7 @@ program.unsafeRunSync() // (42, 43)
 
 You can simplify this by using Refs[F[]] type alias defined in `tofu.concurrent` package object. 
 
-```scala mdoc
+```scala
 import tofu.concurrent.Refs
 import cats.effect.IO
 
@@ -99,7 +99,7 @@ for {
 
 You can also omit the explicit indication of the value type.
 
-```scala mdoc
+```scala
 import tofu.concurrent.Refs
 import cats.effect.IO
 

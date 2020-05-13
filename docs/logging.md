@@ -21,7 +21,7 @@ screaming from seeing over-engineered solutions.
 Tofu offers an easy and understandable abstraction over logging (it's even named like this!) but keeping in mind that 
 logging is an effect that can be composed.  
 It looks very similar to interfaces we all are used to (from SLF4J and other logging libraries and facades), introducing some new concepts:
-```scala mdoc
+```scala
 import tofu.logging.LoggedValue
 
 trait Logging[F[_]] {
@@ -54,7 +54,7 @@ Of course, you can describe your `Loggable` instance yourself by extending exist
 * `HideLoggable` to exclude value from logging
 
 #### Loggable example
-```scala mdoc
+```scala
 import tofu.logging._
 import cats.syntax.semigroup._
 
@@ -81,7 +81,7 @@ respective names and values
 Creating an instance of `Logging` in Tofu is an effect itself. You can use helper class `Logs` that can produce values of
 type `I[Logging[F]]` (where `I` and `F` can be two different effects) and define a behaviour of your `Logging` instances. 
 An instance of `Logs` is supposed to be shared by different parts of user code. though it's not a restriction.  
-```scala mdoc
+```scala
 import tofu.logging._
 
 // for simplification, you can use whatever F you like
@@ -124,7 +124,7 @@ as JSON fields.
 
 #### Syntax extensions
 It's much more convenient to use pre-defined syntax extensions for logging operations since they do all heavy lifting for you:
-```scala mdoc:reset
+```scala:reset
 import cats.{Monad, Show, Functor}
 import cats.effect._
 import cats.syntax.functor._

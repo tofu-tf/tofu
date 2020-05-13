@@ -1,7 +1,7 @@
 ---
- id: agent
- title: Agent
- ---
+id: agent
+title: Agent
+---
 
  ### Agent: Reference with effectful mutators
  
