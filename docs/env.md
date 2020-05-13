@@ -32,9 +32,9 @@ printCtx.run("I am a context").runSyncUnsafe(1.second) // will print 'I am a con
 ### Local overriding  
 It is possible to override context locally for specific functions that you may want to use with another context.
 ```scala
-import tofu.env._
-import scala.concurrent.duration._
 import monix.execution.Scheduler.Implicits.global
+import scala.concurrent.duration._
+import tofu.env._
 
 val printContext: Env[MyContext, Unit] = Env.context[MyContext].flatMap(ctx => Env.delay(println(ctx)))
 
@@ -62,7 +62,6 @@ except `Effect` and `ConcurrentEffect` (which allow starting computation at any 
 Below is a complete example of how Env can be used to pass some environment to computations, use it through the code
 ```scala
 import monix.eval.Task
-
 import scala.concurrent.duration._
 
 object EnvExamples extends scala.App {

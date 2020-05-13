@@ -130,9 +130,9 @@ as JSON fields.
 ### Syntax extensions
 It's much more convenient to use pre-defined syntax extensions for logging operations since they do all heavy lifting for you:
 ```scala:reset
-import cats.{Monad, Show, Functor}
 import cats.effect._
 import cats.syntax.functor._
+import cats.{Monad, Show, Functor}
 import tofu.logging._
 import tofu.syntax.logging._
 

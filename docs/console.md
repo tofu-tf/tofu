@@ -24,8 +24,8 @@ Suppose we are writing a subset of unix `cat` program that can echo its input to
 
 ```scala
 import cats.effect.{ExitCode, IO, IOApp}
-import tofu.common.Console
 import cats.FlatMap
+import tofu.common.Console
 import tofu.syntax.monadic._ //for flatMap
 
 
@@ -50,6 +50,7 @@ Let's make our cat program a little nicer by adding one import and removing dupl
 
 ```scala
 import tofu.syntax.console._ //this one gets you all the goodies
+
 object catWithSyntax extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     catProgramStep[IO].foreverM

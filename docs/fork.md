@@ -42,8 +42,8 @@ def raceAndPickFirst[F[_]: Race: Functor, A, B](f1: F[A], f2: F[B]): F[String] =
 ## Start
 Allows starting computation, resulting in `Fiber` which can then be joined on or canceled.
 ```scala
-import cats.FlatMap
 import cats.effect.Fiber
+import cats.FlatMap
 import cats.syntax.flatMap._
 import tofu.Start
 import tofu.syntax.start._

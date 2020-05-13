@@ -5,7 +5,7 @@ title: Error management
 
 ## Producing errors
 
-#### Problem
+### Problem
 One of the major issues of the MTL style is an error handling.
 
 The weakest [`Cats`](https://typelevel.org/cats/) typeclass, which enables operations with errors, is an 
@@ -28,7 +28,7 @@ The weakest [`Cats`](https://typelevel.org/cats/) typeclass, which enables opera
 
 So we are forced to choose a single unified error type.
 
-#### Possible solution
+### Solution
 The simplest solution here is to create a typeclass, that is not a subtype of Functor:
 
 
@@ -45,8 +45,8 @@ It would allow us to distinguish between different types of errors:
 ```scala 
 import cats.effect.IO
 import tofu._
-import tofu.syntax.raise._
 import tofu.syntax.monadic._
+import tofu.syntax.raise._
 
 def divide[F[_]: Monad](x: String, y: String)(implicit 
     F1: Raise[F, ArithmeticError],
@@ -67,7 +67,7 @@ divide[IO]("1", "0").attempt.unsafeRunSync()
 
 ## Recovering from errors
 
-#### Problem
+### Problem
 `ApplicativeError` provides the following method for error handling:
 
 ```scala
@@ -77,6 +77,7 @@ divide[IO]("1", "0").attempt.unsafeRunSync()
 Here, if `f` does not fail, `F[A]` should describe a successful computation. The types, however, do not convey this fact, 
 since we have no type for `Unexeptional` partner. Read more [here](https://typelevel.org/blog/2018/04/13/rethinking-monaderror.html)
 
+### Solution
 `Tofu` is shipped with a few typeclasses targeting the problem. The simplest one is
 
 ```scala
@@ -103,9 +104,9 @@ trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
 which can handle concrete error type:
 
 ```scala 
+import cats._
 import cats.data.EitherT
 import cats.instances.vector._
-import cats._
 import cats.syntax.foldable._
 import cats.syntax.traverse._
 import tofu._

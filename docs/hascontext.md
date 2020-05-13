@@ -17,12 +17,11 @@ You can still use convenient Tofu concepts to work with your own Environment (`C
 The short story long, it is possible to use `ReaderT`:
  
 ```scala
-import tofu.optics._
-import tofu._
-
-import cats.instances.option._
 import cats._
 import cats.data.ReaderT
+import cats.instances.option._
+import tofu._
+import tofu.optics._
 
 // defining our own Env that stores some User
 case class User(id: Int, name: String)
@@ -43,13 +42,12 @@ program[ReaderT[Option, MyEnv, *]].run(MyEnv(User(0, "Tofu"))) //> Some(Tofu): O
 A bit more complicated example, that shows lenses usage only in the functions that require them:
 
 ```scala:reset
-import tofu.optics._
-import tofu._
-
-import cats.syntax.apply._
-import cats.instances.option._
 import cats._
 import cats.data.ReaderT
+import cats.instances.option._
+import cats.syntax.apply._
+import tofu._
+import tofu.optics._
 
 // defining our own Env that stores a User and some related Metadata
 case class User(id: Int, name: String)
@@ -80,12 +78,11 @@ program[ReaderT[Option, MyEnv, *]]
 It is also possible to do define some `Context` explicitly without having a need in `Env` or `ReaderT` monads:
 
 ```scala:reset
-import tofu.optics._
-import tofu._
-
-import cats.syntax.apply._
-import cats.instances.option._
 import cats._
+import cats.instances.option._
+import cats.syntax.apply._
+import tofu._
+import tofu.optics._
 
 // defining our own Env that stores a User and some related Metadata
 case class User(id: Int, name: String)
