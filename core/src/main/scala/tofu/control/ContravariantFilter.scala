@@ -12,5 +12,5 @@ trait ContravariantFilter[F[_]] extends Contravariant[F] with Optional[F] {
   override def optional[A](fa: F[A]): F[Option[A]] = contramapFilter(fa)(identity)
 
   def contraFilter[A](fa: F[A])(f: A => Boolean): F[A] =
-    contramapFilter(fa)(a => if (f(a)) Some(a) else None)
+    contramapFilter(fa)(a => Some(a).filter(f))
 }
