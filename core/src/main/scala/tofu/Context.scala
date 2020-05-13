@@ -1,10 +1,10 @@
 package tofu
 
-import cats.{Applicative, Functor, Monad, ~>}
+import cats.{Applicative, FlatMap, Functor, ~>}
 import cats.data.ReaderT
 import tofu.lift.{Lift, Unlift}
 import tofu.optics.{Contains, Equivalent, Extract}
-import tofu.syntax.funk.funK
+import tofu.syntax.funk._
 
 /** lightweight version of ApplicativeAsk */
 trait Context[F[_]] {
@@ -15,7 +15,7 @@ trait Context[F[_]] {
 
   def ask[A](f: Ctx => A): F[A] = functor.map(context)(f)
 
-  def askF[A](f: Ctx => F[A])(implicit F: Monad[F]): F[A] = F.flatMap(context)(f)
+  def askF[A](f: Ctx => F[A])(implicit F: FlatMap[F]): F[A] = F.flatMap(context)(f)
 
   def extract[A](extr: Extract[Ctx, A]): WithContext[F, A] = new ContextExtractInstance[F, Ctx, A](this, extr)
 }
@@ -66,6 +66,7 @@ trait Provide[F[_]] {
   type Lower[A]
 
   def runContext[A](fa: F[A])(ctx: Ctx): Lower[A]
+  def runContextK(ctx: Ctx): F ~> Lower = funK(runContext(_)(ctx))
 
   def lift[A](la: Lower[A]): F[A]
 
