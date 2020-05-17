@@ -17,7 +17,7 @@ object Dependencies {
 
     val monocle = "2.0.4"
 
-    val enumeratum = "1.6.0"
+    val enumeratum = "1.6.1"
 
     val derevo = "0.11.3"
 
