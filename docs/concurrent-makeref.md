@@ -3,7 +3,7 @@ id: concurrent-makeref
 title: MakeRef
 ---
 
-### Cats-Effect: Ref
+## Cats-Effect: Ref
 
 An asynchronous, concurrent mutable reference.
 
@@ -39,9 +39,9 @@ In fact, mutable content modifying is a side effect. Creating of mutable referen
 Ref helps to solve by offering some method to create instance which takes one or two type parameters as effect constructors.
 Althought, this methods needs to given Sync instances for our effects. 
 
-### Tofu: MakeRef
+## Tofu: MakeRef
 
-Tofu offers an easy and understandable initialyzer for Ref.  
+Tofu offers an easy and understandable initializer for Ref.  
 
 ```scala
 import cats.effect.concurrent.Ref
@@ -55,8 +55,8 @@ MakeRef has a companion object that offers easier initialization of Ref instance
 There is defined implicit syncInstance that helps in creating Ref on Sync based effects.
 
 ```scala
-import tofu.concurrent.MakeRef
 import cats.effect.Sync
+import tofu.concurrent.MakeRef
 
 object MakeRef {
   def apply[I[_], F[_]](implicit makeRef: MakeRef[I, F]) = ???
@@ -64,13 +64,13 @@ object MakeRef {
 }
 ```
 
-#### Ref creation
+### Ref creation
 You can use object `MakeRef` that can produce values of type `I[Ref[F]]` (where `I` and `F` can be two different effects) and initialize it with , 
 for example:  
 
-```scala mdoc
-import tofu.concurrent.MakeRef
+```scala
 import cats.effect.IO
+import tofu.concurrent.MakeRef
 
 def program: IO[(Int,Int)] =
     for {
@@ -85,9 +85,9 @@ program.unsafeRunSync() // (42, 43)
 
 You can simplify this by using Refs[F[]] type alias defined in `tofu.concurrent` package object. 
 
-```scala mdoc
-import tofu.concurrent.Refs
+```scala
 import cats.effect.IO
+import tofu.concurrent.Refs
 
 for {
     ref <- Refs[IO].of[Int](42)
@@ -99,9 +99,9 @@ for {
 
 You can also omit the explicit indication of the value type.
 
-```scala mdoc
-import tofu.concurrent.Refs
+```scala
 import cats.effect.IO
+import tofu.concurrent.Refs
 
 for {
     ref <- Refs[IO].of(42)

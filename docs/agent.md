@@ -1,9 +1,9 @@
 ---
- id: agent
- title: Agent
- ---
+id: agent
+title: Agent
+---
 
- ### Agent: Reference with effectful mutators
+## Agent: Reference with effectful mutators
  
  Agent is like cats-effect Ref but it allows effectful updates of referenced value. 
  It also allows enqueuing of mutations without waiting for their completion 
@@ -38,7 +38,7 @@
 }
  ```
  
- ### Creation
+## Creation
  
  One can create Agent of some value with helper MakeAgent. 
  
@@ -75,16 +75,16 @@ package object concurrent {
 }
 ```
  
- ## Examples
- Using Agents:
+## Examples
+### Using Agents:
  
  ```scala
-import cats.Monad
-import cats.implicits._
-import cats.syntax.flatMap._
 import cats.effect.Sync
-import tofu.concurrent.Agents
+import cats.implicits._
+import cats.Monad
+import cats.syntax.flatMap._
 import tofu.common.Console
+import tofu.concurrent.Agents
   
    def example[F[_]: Agents: Sync: Monad: Console]: F[Unit] =
         for {
@@ -94,16 +94,16 @@ import tofu.common.Console
           _ <- Console[F].putStrLn(s"new value is $newValue") // new value is 69
         } yield ()
  ```
- Using MakeAgent:
+### Using MakeAgent:
  
  ```scala
-import cats.Monad
-import cats.implicits._
-import cats.syntax.flatMap._
 import cats.effect.Sync
-import tofu.Fire
-import tofu.concurrent.{Agents, MakeAgent, MakeRef, MakeSemaphore, Refs, Semaphores}
+import cats.implicits._
+import cats.Monad
+import cats.syntax.flatMap._
 import tofu.common.Console
+import tofu.concurrent.{Agents, MakeAgent, MakeRef, MakeSemaphore, Refs, Semaphores}
+import tofu.Fire
  
   def example[F[_]: Agents: Fire: Monad: Console: Sync: Refs: Semaphores](
       implicit
