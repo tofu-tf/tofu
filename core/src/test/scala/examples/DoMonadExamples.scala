@@ -1,9 +1,9 @@
-package tofu
+package examples
 
 import cats.data.Chain
 import tofu.alias.Do
 
-class DoSyntaxCheck {
+class DoMonadExamples {
   def bar[F[_]: Do, A, B, C](f: A => F[B], g: B => F[C], h: C => F[Unit], fa: F[A]) =
     for {
       x <- fa
