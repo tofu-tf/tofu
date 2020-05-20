@@ -1,6 +1,6 @@
 package tofu.logging.zlogs
 
-import izumi.reflect.Tags.Tag
+import izumi.reflect.Tag
 import tofu.logging.Loggable
 import tofu.logging.zlogs.ZioHasBuilder.UnHas
 import zio.Has
