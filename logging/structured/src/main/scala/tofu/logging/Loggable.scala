@@ -102,7 +102,7 @@ object Loggable {
       override def logFields[I, V, @sp(Unit) R, @sp M](i: I)(implicit r: LogRenderer[I, V, R, M]): R =
         fields[I, V, R, M](a, i)
 
-      def putValue[I, V, R, S](v: V)(implicit r: LogRenderer[I, V, R, S]): S = self.putValue(a, v)
+      override def putValue[I, V, R, S](v: V)(implicit r: LogRenderer[I, V, R, S]): S = self.putValue(a, v)
 
       override def putField[I, V, R, S](i: I, name: String)(implicit r: LogRenderer[I, V, R, S]): R =
         self.putField(a, name, i)
