@@ -338,7 +338,7 @@ trait LoggedValue {
   def shortName: String
 
   def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit r: LogRenderer[I, V, R, M]): R
-  def putValue[I, V, R, S](v: V)(implicit r: LogRenderer[I, V, R, S]): S
+  def putValue[I, V, R, S](v: V)(implicit r: LogRenderer[I, V, R, S]): S               = r.dict(v)(logFields(_))
   def putField[I, V, R, S](i: I, name: String)(implicit r: LogRenderer[I, V, R, S]): R = r.sub(name, i)(putValue(_))
 
   def foreachLog(f: (String, Any) => Unit): Unit =
@@ -350,7 +350,7 @@ object LoggedValue {
     def fields[I, V, @sp(Unit) R, M](a: LoggedValue, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
       a.logFields(input)
 
-    def putValue[I, V, R, S](a: LoggedValue, v: V)(implicit r: LogRenderer[I, V, R, S]): S = a.putValue(v)
+    override def putValue[I, V, R, S](a: LoggedValue, v: V)(implicit r: LogRenderer[I, V, R, S]): S = a.putValue(v)
 
     override def putField[I, V, R, S](a: LoggedValue, name: String, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
       a.putField(i, name)
@@ -368,8 +368,6 @@ final class LoggedThrowable(cause: Throwable) extends Throwable(cause.getMessage
 
   def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R =
     f.addString("stacktrace", cause.getStackTrace.mkString("\n"), input)
-
-  def putValue[I, V, R, S](v: V)(implicit r: LogRenderer[I, V, R, S]): S = r.dict(v)(logFields(_))
 
   override def typeName: String = cause.getClass.getTypeName
   def shortName: String         = "exception"
