@@ -32,7 +32,7 @@ lazy val paradise = libraryDependencies ++= {
 }
 
 lazy val defaultSettings = Seq(
-  scalaVersion := "2.13.1",
+  scalaVersion := "2.13.2",
   setMinorVersion,
   setModuleName,
   experimental,
