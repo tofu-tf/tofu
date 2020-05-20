@@ -1,6 +1,6 @@
 package tofu.logging.zlogs
 
-import izumi.reflect.Tags.Tag
+import izumi.reflect.Tag
 import org.slf4j.LoggerFactory
 import tofu.logging.Logging.loggerForService
 import tofu.logging.zlogs.impl.{UIOZLogging, URIOZLoggingImpl}

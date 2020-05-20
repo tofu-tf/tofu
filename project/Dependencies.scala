@@ -35,9 +35,9 @@ object Dependencies {
 
     val typesafeConfig = "1.4.0"
 
-    val zio = "1.0.0-RC18-2"
+    val zio = "1.0.0-RC19-2"
 
-    val zioCats = "2.0.0.0-RC13"
+    val zioCats = "2.0.0.0-RC14"
 
     val shapeless = "2.3.3"
 
