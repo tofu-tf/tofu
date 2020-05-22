@@ -43,6 +43,8 @@ object Dependencies {
 
     val refined = "0.9.13"
 
+    val doobie = "0.9.0"
+
     // Compile time only
     val macroParadise = "2.1.1"
 
@@ -80,6 +82,7 @@ object Dependencies {
   val scalatest       = "org.scalatest"              %% "scalatest"           % Version.scalatest % Test
   val shapeless       = "com.chuusai"                %% "shapeless"           % Version.shapeless
   val refined         = "eu.timepit"                 %% "refined"             % Version.refined
+  val doobieCore      = "org.tpolecat"               %% "doobie-core"         % Version.doobie
 
   // Compile-time only
   val macroParadise    = "org.scalamacros" % "paradise"           % Version.macroParadise cross CrossVersion.patch
