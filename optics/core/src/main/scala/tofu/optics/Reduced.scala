@@ -11,7 +11,7 @@ import tofu.optics.data.Constant
 trait PReduced[-S, +T, +A, -B] extends PFolded[S, T, A, B] {
   def reduceMap[X: Semigroup](s: S)(f: A => X): X
 
-  def foldMap[X: Monoid](s: S)(f: A => X): X = reduceMap(s)(f)
+  override def foldMap[X: Monoid](s: S)(f: A => X): X = reduceMap(s)(f)
   def getAll1(s: S): NonEmptyList[A]         = reduceMap(s)(NonEmptyList.one[A])
 }
 

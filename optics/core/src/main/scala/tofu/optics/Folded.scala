@@ -1,6 +1,7 @@
 package tofu.optics
 
 import cats.instances.list._
+import cats.instances.vector._
 import cats.syntax.monoid._
 import cats.{Applicative, Foldable, Monoid}
 import tofu.optics.data.Constant
@@ -11,6 +12,7 @@ trait PFolded[-S, +T, +A, -B] extends PBase[S, T, A, B] {
   def foldMap[X: Monoid](s: S)(f: A => X): X
 
   def getAll(s: S): List[A] = foldMap(s)(List(_))
+  def toVector(s: S): Vector[A] = foldMap(s)(Vector(_))
 
   def as[B1, T1]: PFolded[S, T1, A, B1] = this.asInstanceOf[PFolded[S, T1, A, B1]]
 }

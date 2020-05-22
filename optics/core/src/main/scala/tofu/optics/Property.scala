@@ -16,13 +16,13 @@ trait PProperty[-S, +T, +A, -B] extends PItems[S, T, A, B] with PDowncast[S, T, 
   def set(s: S, b: B): T
   def narrow(s: S): Either[T, A]
 
-  def traverse[F[+_]](s: S)(f: A => F[B])(implicit F: Applicative[F]): F[T] =
+  override def traverse[F[+_]](s: S)(f: A => F[B])(implicit F: Applicative[F]): F[T] =
     narrow(s).traverse(f).map(_.fold(t => t, set(s, _)))
 
   def traject[F[+_]](s: S)(fab: A => F[B])(implicit FP: Pure[F], F: Functor[F]): F[T] =
     narrow(s).fold[F[T]](FP.pure, a => fab(a).map(set(s, _)))
 
-  def downcast(s: S): Option[A] = narrow(s).toOption
+  override def downcast(s: S): Option[A] = narrow(s).toOption
 
   override def foldMap[X: Monoid](a: S)(f: A => X): X = downcast(a).foldMap(f)
 }

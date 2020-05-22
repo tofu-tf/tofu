@@ -1,8 +1,11 @@
 package tofu.optics
 
-import cats.Apply
+import cats.{Applicative, Apply, Monoid}
 import cats.syntax.apply._
 import cats.syntax.either._
+import cats.syntax.traverse._
+import cats.syntax.functor._
+import cats.syntax.foldable._
 import cats.instances.all._
 import alleycats.std.map._
 import tofu.compat._
@@ -13,10 +16,25 @@ object functions {
       (f(s._1), f(s._2)).tupled
   }
 
-  def listElems[A, B]     = PItems.fromTraverse[List, A, B]
-  def vectorElems[A, B]   = PItems.fromTraverse[Vector, A, B]
-  def streamElems[A, B]   = PItems.fromTraverse[LazySeq, A, B]
-  def lazyListElems[A, B] = PItems.fromTraverse[LazySeq, A, B]
+  def listElemsP[A, B]: PItems[List[A], List[B], A, B] = PItems.fromTraverse[List, A, B]
+  def listElems[A]: Items[List[A], A] = listElemsP
+
+  def vectorElemsP[A, B]: PItems[Vector[A], Vector[B], A, B] = PItems.fromTraverse[Vector, A, B]
+  def vecElemsP[A, B]: PItems[Vector[A], Vector[B], A, B]    = PItems.fromTraverse[Vector, A, B]
+
+  def streamElemsP[A, B]: PItems[LazySeq[A], LazySeq[B], A, B] = PItems.fromTraverse[LazySeq, A, B]
+
+  def mapValuesP[K, V1, V2]: PItems[Map[K, V1], Map[K, V2], V1, V2] = PItems.fromTraverse[Map[K, +*], V1, V2]
+  def mapValues[K, V]: Items[Map[K, V], V]                          = mapValuesP
+
+  def mapItemsP[K, V, A, B]: PFolded[Map[K, V], A, (K, V), B] =
+    new PFolded[Map[K, V], A, (K, V), B] {
+      override def foldMap[X: Monoid](a: Map[K, V])(f: ((K, V)) => X): X = (a: Iterable[(K, V)]).foldMap(f)
+
+      override def getAll(s: Map[K, V]): List[(K, V)] = s.toList
+    }
+
+  def mapItems[K, V]: Folded[Map[K, V], (K, V)] = mapItemsP
 
   def setAt[A](a: A): Contains[Set[A], Boolean] = Contains[Set[A]](_(a))((s, b) => if (b) s + a else s - a)
 
@@ -36,11 +54,7 @@ object functions {
 
   def vecItem[A](i: Int): Property[Vector[A], A] = Property[Vector[A]](_.lift(i))(_.updated(i, _))
 
-  def mapItems[K, V1, V2]: PItems[Map[K, V1], Map[K, V2], V1, V2] = PItems.fromTraverse[Map[K, +*], V1, V2]
-
-  def listItems[A, B]: PItems[List[A], List[B], A, B] = PItems.fromTraverse[List, A, B]
-
-  def vecItems[A, B]: PItems[Vector[A], Vector[B], A, B] = PItems.fromTraverse[Vector, A, B]
+  def vecElems[A, B]: Items[Vector[A], A] = vecElemsP
 
   def everyTuple2[A, B]: PItems[(A, A), (B, B), A, B] =
     PItems[(A, A), A, B](implicit A => (s, f) => (f(s._1), f(s._2)).tupled)
@@ -65,4 +79,20 @@ object functions {
     def extract(s: A): B   = ()
     def set(s: A, b: B): A = s
   }
+
+  def firstP[A, B, A1]: PContains[(A, B), (A1, B), A, A1] = new PContains[(A, B), (A1, B), A, A1] {
+    def set(s: (A, B), b: A1): (A1, B) = (b, s._2)
+
+    def extract(s: (A, B)): A = s._1
+  }
+
+  def first[A, B]: Contains[(A, B), A] = firstP
+
+  def secondP[A, B, B1]: PContains[(A, B), (A, B1), B, B1] = new PContains[(A, B), (A, B1), B, B1] {
+    def set(s: (A, B), b: B1): (A, B1) = (s._1, b)
+
+    def extract(s: (A, B)): B = s._2
+  }
+
+  def second[A, B]: Contains[(A, B), B] = secondP
 }
