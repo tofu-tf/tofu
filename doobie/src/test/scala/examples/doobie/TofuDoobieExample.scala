@@ -143,7 +143,7 @@ object TofuDoobieExample extends TaskApp {
 
     val storage = initWithDB[txr.DB](txr)
 
-    val program = storage.store(Person(1L, "Alex", 22L), Dept(22L, "Marketing"))
+    val program = storage.store(Person(13L, "Alex", 42L), Dept(42L, "Marketing"))
 
     val res = WithProvide[F, I, Ctx].runContext(program)(Ctx())
 
