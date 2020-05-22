@@ -9,7 +9,7 @@ import tofu.optics.data.{Constant, Identity}
   * and can update them using some effect
   */
 trait PItems[-S, +T, +A, -B] extends PUpdate[S, T, A, B] with PFolded[S, T, A, B] {
-  def traverse[F[+_]: Applicative](a: S)(f: A => F[B]): F[T]
+  def traverse[F[+_]: Applicative](s: S)(f: A => F[B]): F[T]
 
   def update(a: S, fb: A => B): T            = traverse[Identity](a)(fb)
   def foldMap[X: Monoid](a: S)(f: A => X): X = traverse[Constant[X, +*]](a)(b => Constant(f(b))).value
@@ -48,6 +48,14 @@ object PItems extends OpticCompanion[PItems] {
   final implicit def fromTraverse[F[+_], A, B](implicit F: Traverse[F]): PItems[F[A], F[B], A, B] =
     new PItems[F[A], F[B], A, B] {
       def traverse[G[_]: Applicative](a: F[A])(f: A => G[B]): G[F[B]] = F.traverse(a)(f)
+
+      override def foldMap[X: Monoid](a: F[A])(f: A => X): X = F.foldMap(a)(f)
+
+      override def getAll(s: F[A]): List[A] = F.toList(s)
+
+      override def update(a: F[A], fb: A => B): F[B] = F.map(a)(fb)
+
+      override def put(s: F[A], b: B): F[B] = F.as(s, b)
     }
 
   trait Context extends PSubset.Context with PRepeated.Context {
