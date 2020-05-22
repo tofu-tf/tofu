@@ -1,6 +1,6 @@
 package tofu
 
-import izumi.reflect.Tags.Tag
+import izumi.reflect.Tag
 import tofu.optics.PContains
 import zio.Has
 
