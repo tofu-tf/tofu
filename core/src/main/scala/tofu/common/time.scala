@@ -84,8 +84,8 @@ object TimeData {
   implicit val instant: TimeData[Instant]               = (inst, _) => inst
   implicit val zonedDateTime: TimeData[ZonedDateTime]   = ZonedDateTime.ofInstant(_, _)
   implicit val localDateTime: TimeData[LocalDateTime]   = LocalDateTime.ofInstant(_, _)
-  implicit val localDate: TimeData[LocalDate]           = LocalDate.ofInstant(_, _)
-  implicit val localTime: TimeData[LocalTime]           = LocalTime.ofInstant(_, _)
+  implicit val localDate: TimeData[LocalDate]           = localDateTime.map(_.toLocalDate)
+  implicit val localTime: TimeData[LocalTime]           = localDateTime.map(_.toLocalTime)
   implicit val offsetDateTime: TimeData[OffsetDateTime] = OffsetDateTime.ofInstant(_, _)
   implicit val offsetTime: TimeData[OffsetTime]         = OffsetTime.ofInstant(_, _)
   implicit val month: TimeData[Month]                   = zonedDateTime.map(_.getMonth)

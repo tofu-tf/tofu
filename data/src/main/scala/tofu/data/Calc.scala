@@ -6,9 +6,13 @@ import tofu.optics.PContains
 import tofu.optics.PContains
 
 sealed trait Calc[-R, -S1, +S2, +E, +A] {
-  final def run(r: R, init: S1): (S2, Either[E, A])    = Calc.run(this, r, init)
-  final def runUnit(init: S1)(implicit ev: Unit <:< R) = run((), init)
-  def narrowRead[R1 <: R]: Calc[R1, S1, S2, E, A]      = this
+  final def run(r: R, init: S1): (S2, Either[E, A]) = Calc.run(this, r, init)
+
+  final def runUnit(init: S1)(implicit ev: Unit <:< R)  = run((), init)
+  final def narrowRead[R1 <: R]: Calc[R1, S1, S2, E, A] = this
+
+  final def exec(r: R, init: S1): S2                        = run(r, init)._1
+  final def execUnit(init: S1)(implicit ev: Unit <:< R): S2 = exec((), init)
 }
 
 object Calc {
@@ -89,7 +93,27 @@ object Calc {
   }
 
   implicit final class CalcFixedStateOps[R, S, E, A](private val calc: Calc[R, S, S, E, A]) extends AnyVal {
-    def when(b: Boolean): Calc[R, S, S, E, Any] = if (b) calc else Calc.unit
+    def when(b: Boolean): Calc[R, S, S, E, Any]                                = if (b) calc else Calc.unit
+    def runEmpty(r: R)(implicit S: Monoid[S]): (S, Either[E, A])               = calc.run(r, S.empty)
+    def runUnitEmpty(implicit S: Monoid[S], ev: Unit <:< R): (S, Either[E, A]) = calc.runUnit(S.empty)
+    def execEmpty(r: R)(implicit S: Monoid[S]): S                              = calc.exec(r, S.empty)
+    def execUnitEmpty(implicit S: Monoid[S], ev: Unit <:< R): S                = calc.exec((), S.empty)
+  }
+
+  implicit final class CalcFixedStateSuccessOps[R, S, A](private val clc: Calc[R, S, S, Nothing, A]) extends AnyVal {
+    def calc(r: R, s: S): (S, A) = clc.run(r, s) match { case (a, b) => a -> b.merge }
+
+    def calcEmpty(r: R)(implicit S: Monoid[S]): (S, A)               = clc.calc(r, S.empty)
+    def calcUnit(s: S)(implicit ev: Unit <:< R): (S, A)              = clc.calc((), s)
+    def calcUnitEmpty(implicit S: Monoid[S], ev: Unit <:< R): (S, A) = clc.calcUnit(S.empty)
+  }
+
+  implicit final class CalcFixedStateUnsuccessOps[R, S, E](private val clc: Calc[R, S, S, E, Nothing]) extends AnyVal {
+    def error(r: R, s: S): (S, E) = clc.run(r, s) match { case (a, b) => a -> b.merge }
+
+    def errorEmpty(r: R)(implicit S: Monoid[S])                       = clc.error(r, S.empty)
+    def errorUnit(s: S)(implicit ev: Unit <:< R): (S, E)              = clc.error((), s)
+    def errorUnitEmpty(implicit S: Monoid[S], ev: Unit <:< R): (S, E) = clc.errorUnit(S.empty)
   }
 
   def run[R, S1, S2, E, A](calc: Calc[R, S1, S2, E, A], r: R, init: S1): (S2, Either[E, A]) =

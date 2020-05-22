@@ -101,9 +101,15 @@ object Loggable {
     def loggedValue(a: A): LoggedValue = new LoggedValue {
       override def logFields[I, V, @sp(Unit) R, @sp M](i: I)(implicit r: LogRenderer[I, V, R, M]): R =
         fields[I, V, R, M](a, i)
-      override def toString: String                                                                  = logShow(a)
-      override def typeName: String                                                                  = self.typeName
-      def shortName: String                                                                          = self.shortName
+
+      override def putValue[I, V, R, S](v: V)(implicit r: LogRenderer[I, V, R, S]): S = self.putValue(a, v)
+
+      override def putField[I, V, R, S](i: I, name: String)(implicit r: LogRenderer[I, V, R, S]): R =
+        self.putField(a, name, i)
+
+      override def toString: String = logShow(a)
+      override def typeName: String = self.typeName
+      def shortName: String         = self.shortName
     }
 
     /** transform input value befor logging */
@@ -332,16 +338,24 @@ trait LoggedValue {
   def shortName: String
 
   def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit r: LogRenderer[I, V, R, M]): R
+  def putValue[I, V, R, S](v: V)(implicit r: LogRenderer[I, V, R, S]): S               = r.dict(v)(logFields(_))
+  def putField[I, V, R, S](i: I, name: String)(implicit r: LogRenderer[I, V, R, S]): R = r.sub(name, i)(putValue(_))
 
   def foreachLog(f: (String, Any) => Unit): Unit =
     logFields("")(LogRenderer.prefixed(f))
 }
 
 object LoggedValue {
-  implicit val loggable: Loggable[LoggedValue] = new DictLoggable[LoggedValue] {
+  implicit val loggable: Loggable[LoggedValue] = new Loggable[LoggedValue] {
     def fields[I, V, @sp(Unit) R, M](a: LoggedValue, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
       a.logFields(input)
-    def logShow(a: LoggedValue): String                                                                       = a.toString
+
+    override def putValue[I, V, R, S](a: LoggedValue, v: V)(implicit r: LogRenderer[I, V, R, S]): S = a.putValue(v)
+
+    override def putField[I, V, R, S](a: LoggedValue, name: String, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
+      a.putField(i, name)
+
+    def logShow(a: LoggedValue): String = a.toString
   }
 
   implicit def loggableToLoggedValue[A](x: A)(implicit loggable: Loggable[A]): LoggedValue = loggable.loggedValue(x)
