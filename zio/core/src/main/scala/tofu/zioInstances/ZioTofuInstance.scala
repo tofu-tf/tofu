@@ -74,12 +74,12 @@ class ZioTofuWithRunInstance[R, E] extends WithRun[ZIO[R, E, *], ZIO[Any, E, *],
 
 class ZioTofuTimeoutInstance[R <: Clock, E] extends Timeout[ZIO[R, E, *]] {
   final def timeoutTo[A](fa: ZIO[R, E, A], after: FiniteDuration, fallback: ZIO[R, E, A]): ZIO[R, E, A] =
-    fa.timeoutTo[R, E, A, ZIO[R, E, A]](fallback)(ZIO.succeed(_))(zio.duration.Duration.fromScala(after)).flatten
+    fa.timeoutTo(fallback)(ZIO.succeed(_))(zio.duration.Duration.fromScala(after)).flatten
 }
 
 class ZioTofuRandomInstance[R <: Random, E] extends GenRandom[ZIO[R, E, *]] {
   override def nextLong: ZIO[R, E, Long]       = random.nextLong
-  override def nextInt(n: Int): ZIO[R, E, Int] = random.nextInt(n)
+  override def nextInt(n: Int): ZIO[R, E, Int] = random.nextIntBounded(n)
 }
 
 class ZioTofuConsoleInstance[R <: Console, E >: IOException] extends tofu.common.Console[ZIO[R, E, *]] {

@@ -1,24 +1,27 @@
 ---
 id: hascontext
-title: Learning HasContext
+title: HasContext
 ---
+## Installation
+`"ru.tinkoff" %% "tofu" % tofu-version`  
+or as a standalone dependency 
+`"ru.tinkoff" %% "tofu-core" % tofu-version`  
 
-### What if you don't need Env
+## What if you don't need Env
 
 Env is a powerful monad, but what if you're sure that you don't need it?
 You can still use convenient Tofu concepts to work with your own Environment (`Context`).  
 
-#### Usage example and a short use case description  
+### Usage example and a short use case description  
 
 The short story long, it is possible to use `ReaderT`:
  
-```scala mdoc
-import tofu.optics._
-import tofu._
-
-import cats.instances.option._
+```scala
 import cats._
 import cats.data.ReaderT
+import cats.instances.option._
+import tofu._
+import tofu.optics._
 
 // defining our own Env that stores some User
 case class User(id: Int, name: String)
@@ -38,14 +41,13 @@ program[ReaderT[Option, MyEnv, *]].run(MyEnv(User(0, "Tofu"))) //> Some(Tofu): O
 
 A bit more complicated example, that shows lenses usage only in the functions that require them:
 
-```scala mdoc:reset
-import tofu.optics._
-import tofu._
-
-import cats.syntax.apply._
-import cats.instances.option._
+```scala:reset
 import cats._
 import cats.data.ReaderT
+import cats.instances.option._
+import cats.syntax.apply._
+import tofu._
+import tofu.optics._
 
 // defining our own Env that stores a User and some related Metadata
 case class User(id: Int, name: String)
@@ -75,13 +77,12 @@ program[ReaderT[Option, MyEnv, *]]
 
 It is also possible to do define some `Context` explicitly without having a need in `Env` or `ReaderT` monads:
 
-```scala mdoc:reset
-import tofu.optics._
-import tofu._
-
-import cats.syntax.apply._
-import cats.instances.option._
+```scala:reset
 import cats._
+import cats.instances.option._
+import cats.syntax.apply._
+import tofu._
+import tofu.optics._
 
 // defining our own Env that stores a User and some related Metadata
 case class User(id: Int, name: String)

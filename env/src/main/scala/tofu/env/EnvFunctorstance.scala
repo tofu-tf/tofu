@@ -2,7 +2,7 @@ package tofu
 package env
 
 import cats.effect._
-import cats.{Functor, Monad}
+import cats.{FlatMap, Functor}
 import monix.eval.Task
 import monix.execution.Scheduler
 import tofu.memo.Memoize
@@ -86,9 +86,9 @@ private[env] class EnvFunctorstance[E]
   override def sleep(duration: FiniteDuration): Env[E, Unit] = Env.sleep(duration)
 
   //Context
-  override val context: Env[E, E]                                                  = Env.fromFunc(identity)
-  override def ask[A](f: E => A): Env[E, A]                                        = Env.fromFunc(f)
-  override def askF[A](f: E => Env[E, A])(implicit F: Monad[Env[E, *]]): Env[E, A] = Env.withContext(f)
+  override val context: Env[E, E]                                                    = Env.fromFunc(identity)
+  override def ask[A](f: E => A): Env[E, A]                                          = Env.fromFunc(f)
+  override def askF[A](f: E => Env[E, A])(implicit F: FlatMap[Env[E, *]]): Env[E, A] = Env.withContext(f)
 
   //Local
   override def local[A](fa: Env[E, A])(project: E => E): Env[E, A] = fa.local(project)

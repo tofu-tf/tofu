@@ -1,7 +1,12 @@
-# Memo
+---
+id: memo
+title: Memo
+---
 
-## Dependency
-It is available in general package `"ru.tinkoff" %% "tofu" % Versions.tofu` and as standalone dependency `"ru.tinkoff" %% "tofu-memo" % Versions.tofu`
+## Installation
+`"ru.tinkoff" %% "tofu" % tofu-version`  
+or as a standalone dependency:   
+`"ru.tinkoff" %% "tofu-memo" % tofu-version`
 
 ## Functionality
 * A cache of a single value on access.
@@ -16,17 +21,17 @@ There are no
 
 ## Examples
 ### Single value cache
-```scala mdoc
-import tofu.memo._
-import cats.effect.Clock
-import tofu.concurrent._
+```scala
 import cats._
-import tofu.syntax.monadic._
+import cats.effect.Clock
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.duration._
 import tofu.common.Console
+import tofu.concurrent._
+import tofu.memo._
 import tofu.syntax.console._
+import tofu.syntax.monadic._
 
 def effect[F[_] : Console: Functor]: F[Int] = putStrLn("called").as(335)
 
@@ -41,17 +46,17 @@ def f[F[_] : Console : Clock: Monad : Refs] =
 f[Task].runSyncUnsafe()
 ```
 ### Value mapping cache
-```scala mdoc:reset
-import tofu.memo._
-import cats.effect.Clock
+```scala:reset
 import cats._
-import tofu.concurrent._
-import tofu.syntax.monadic._
-import tofu.syntax.console._
+import cats.effect.Clock
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.duration._
 import tofu.common.Console
+import tofu.concurrent._
+import tofu.memo._
+import tofu.syntax.console._
+import tofu.syntax.monadic._
 
 
 def effect[F[_] : Console: Functor]: Int => F[String] =
@@ -72,17 +77,17 @@ f[Task].runSyncUnsafe()
 ```
 
 ### TTL
-```scala mdoc
-import tofu.memo._
-import cats.effect.{Clock, Timer}
-import tofu.common.Console
+```scala
 import cats._
-import tofu.concurrent._
-import tofu.syntax.monadic._
-import tofu.syntax.console._
+import cats.effect.{Clock, Timer}
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.duration._
+import tofu.common.Console
+import tofu.concurrent._
+import tofu.memo._
+import tofu.syntax.console._
+import tofu.syntax.monadic._
 import tofu.syntax.timer._
 
 
@@ -124,18 +129,18 @@ Number 335
 ```
 ### Forced invalidation
 To invalidate cache update CacheControl and set it to current time:
-```scala mdoc:reset
-import tofu.memo._
-import cats.effect.{Clock, Timer}
-import tofu.common.Console
+```scala:reset
 import cats._
-import tofu.concurrent._
-import tofu.syntax.monadic._
-import tofu.syntax.console._
+import cats.effect.{Clock, Timer}
+import java.util.concurrent.TimeUnit
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.duration._
-import java.util.concurrent.TimeUnit
+import tofu.common.Console
+import tofu.concurrent._
+import tofu.memo._
+import tofu.syntax.console._
+import tofu.syntax.monadic._
 import tofu.syntax.timer._
 
 

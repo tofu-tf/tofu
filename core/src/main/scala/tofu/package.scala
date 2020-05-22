@@ -14,6 +14,10 @@ package object tofu {
   type MonadThrow[F[_]]       = MonadError[F, Throwable]
   type BracketThrow[F[_]]     = Bracket[F, Throwable]
 
+  type Throws[F[_]]  = Raise[F, Throwable]
+  type Catches[F[_]] = Handle[F, Throwable]
+  type Tries[F[_]]   = Errors[F, Throwable]
+
   type TConst[A, B] = A
 
   private[tofu] type AnyK[_] = Any

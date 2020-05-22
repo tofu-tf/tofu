@@ -1,19 +1,24 @@
 ---
 id: env
-title: Learning Env
+title: Env
 ---
 
-### What is Env, once again?
+## Installation
+`"ru.tinkoff" %% "tofu" % tofu-version`  
+or as a standalone dependency:   
+`"ru.tinkoff" %% "tofu-env" % tofu-version`  
+
+## What is Env, once again?
 
 Env is a monad, allowing composition of functions that are context(environment)-aware.  
 For example, you may have several functions that depend on some common environment/runtime.  
 Env provides a nice and convenient way to compose such functions, allowing access to this environment in a monadic way.
 
-#### Features  
+## Features  
 
-##### Access to environment
+### Access to environment
 You can easily access passed environment at any time in a clean monadic way 
-```scala mdoc
+```scala
 import tofu.env._
 import scala.concurrent.duration._
 import monix.execution.Scheduler.Implicits.global
@@ -24,12 +29,12 @@ val printCtx: Env[MyContext, Unit] = Env.context[MyContext].flatMap(ctx => Env.d
 printCtx.run("I am a context").runSyncUnsafe(1.second) // will print 'I am a context'"
 ```
 
-##### Local overriding  
+### Local overriding  
 It is possible to override context locally for specific functions that you may want to use with another context.
-```scala mdoc
-import tofu.env._
-import scala.concurrent.duration._
+```scala
 import monix.execution.Scheduler.Implicits.global
+import scala.concurrent.duration._
+import tofu.env._
 
 val printContext: Env[MyContext, Unit] = Env.context[MyContext].flatMap(ctx => Env.delay(println(ctx)))
 
@@ -45,7 +50,7 @@ env.run("I am a context").runSyncUnsafe(1.second)
 //I am a context, but new!
 ```  
 
-##### Monix compatibility
+### Monix compatibility
 Under the hood, Env is just a function `E => Task[A]`.   
 Since it's primary based on Monix task, it mirrors most of its methods and functions, including parallel execution, error handling,
 memoization, forking and working with resources.  
@@ -53,11 +58,10 @@ Env plays well with Cats and Cats-Effect, providing instances for most of typecl
 except `Effect` and `ConcurrentEffect` (which allow starting computation at any place, so it contradicts Env, which requires context being passed).
 
 
-#### Complete example
+## Complete example
 Below is a complete example of how Env can be used to pass some environment to computations, use it through the code
-```scala mdoc
+```scala
 import monix.eval.Task
-
 import scala.concurrent.duration._
 
 object EnvExamples extends scala.App {
