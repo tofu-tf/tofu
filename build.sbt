@@ -372,7 +372,7 @@ lazy val publishSettings = Seq(
   publishVersion := libVersion,
   publishMavenStyle := true,
   description := "Opinionated set of tools for functional programming in Scala",
-  crossScalaVersions := Seq("2.12.10", "2.13.1"),
+  crossScalaVersions := Seq("2.12.11", "2.13.2"),
   publishTo := {
     if (isSnapshot.value) {
       Some(Opts.resolver.sonatypeSnapshots)
