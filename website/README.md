@@ -156,7 +156,7 @@ For more information about blog posts, click [here](https://docusaurus.io/docs/e
   headerLinks: [
     ...
     /* you can add docs */
-    { doc: 'my.examples', label: 'Examples' },
+    { doc: 'my-examples', label: 'Examples' },
     /* you can add custom pages */
     { page: 'help', label: 'Help' },
     /* you can add external links */
