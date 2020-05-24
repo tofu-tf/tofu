@@ -29,7 +29,7 @@ sealed class RaiseInstances {
       case GenericSubtypeImpl =>
         raise.asInstanceOf[Raise[F, E1]]
       case _                  =>
-        new FromPrism[F, E, E1, Raise, Upcast] with RaisePrism[F, E, E1]
+        new FromPrism[F, E, E1, Raise, Upcast]()(raise, prism) with RaisePrism[F, E, E1]
     }
 }
 
