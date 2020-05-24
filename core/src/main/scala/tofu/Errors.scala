@@ -28,7 +28,7 @@ sealed class RaiseInstances {
     uc match {
       case GenericSubtypeImpl =>
         r.asInstanceOf[Raise[F, E1]]
-      case _                   =>
+      case _                  =>
         new Raise[F, E1] {
           def raise[A](err: E1): F[A] = r.raise(uc.upcast(err))
         }
