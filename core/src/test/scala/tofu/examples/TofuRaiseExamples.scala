@@ -1,7 +1,6 @@
 package tofu.examples
 
 import cats.FlatMap
-import cats.effect.IO
 import cats.syntax.flatMap._
 import tofu.Raise
 import tofu.syntax.raise._
