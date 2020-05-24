@@ -24,7 +24,7 @@ object Raise extends RaiseInstances with DataEffectComp[Raise] with ErrorsInstan
 
 sealed class RaiseInstances {
 
-  implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1] =
+  final implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1] =
     new FromPrism[F, E, E1, Raise, Upcast] with RaisePrism[F, E, E1]
 }
 
