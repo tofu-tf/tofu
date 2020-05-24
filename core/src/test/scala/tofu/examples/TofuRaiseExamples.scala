@@ -1,6 +1,7 @@
 package tofu.examples
 
 import cats.FlatMap
+import cats.effect.IO
 import cats.syntax.flatMap._
 import tofu.Raise
 import tofu.syntax.raise._
@@ -10,8 +11,8 @@ final case class Card(id: Long, balance: Long)
 
 sealed trait WithdrawalFailed extends Throwable
 
-final case class CardNotFound(id: Long) extends WithdrawalFailed
-final case class UserNotFound(id: Long) extends WithdrawalFailed
+final case class CardNotFound(id: Long)                   extends WithdrawalFailed
+final case class UserNotFound(id: Long)                   extends WithdrawalFailed
 final case class LowBalance(actual: Long, required: Long) extends WithdrawalFailed
 
 trait CardStorage[F[_]] {
@@ -24,7 +25,7 @@ object CardStorage {
   def make[F[_]: Raise[*[_], CardNotFound]]: CardStorage[F] = new Impl[F]
 
   private final class Impl[F[_]: Raise[*[_], CardNotFound]] extends CardStorage[F] {
-    override def get(cardId: Long): F[Card] = ???
+    override def get(cardId: Long): F[Card]                             = ???
     override def updateBalance(cardId: Long, newBalance: Long): F[Unit] = ???
   }
 }
@@ -62,4 +63,8 @@ object WithdrawalService {
         else LowBalance(card.balance, amount).raise[F, Unit]
       }
   }
+}
+
+object App {
+  val withdrawalSrv: WithdrawalService[IO] = WithdrawalService.make
 }
