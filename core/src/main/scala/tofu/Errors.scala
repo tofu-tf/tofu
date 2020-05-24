@@ -24,13 +24,8 @@ object Raise extends RaiseInstances with DataEffectComp[Raise] with ErrorsInstan
 
 sealed class RaiseInstances {
 
-  implicit def raiseUpcast[F[_], E, E1](implicit raise: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1] =
-    prism match {
-      case GenericSubtypeImpl =>
-        raise.asInstanceOf[Raise[F, E1]]
-      case _                  =>
-        new FromPrism[F, E, E1, Raise, Upcast]()(raise, prism) with RaisePrism[F, E, E1]
-    }
+  implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1] =
+    new FromPrism[F, E, E1, Raise, Upcast] with RaisePrism[F, E, E1]
 }
 
 trait RestoreTo[F[_], G[_]] extends Lift[G, F] {
