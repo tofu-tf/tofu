@@ -23,10 +23,19 @@ object PUpcast extends OpticCompanion[PUpcast] {
     def profunctor = PChoice[Tagged]
     def functor    = Functor[Identity]
   }
+
   def toGeneric[S, T, A, B](o: PUpcast[S, T, A, B]): Optic[Context, S, T, A, B] =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: Tagged[A, B]): Tagged[S, T] = Tagged(o.upcast(p.value))
     }
+
   def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PUpcast[S, T, A, B] =
     b => o(new Context)(Tagged(b)).value
+
+  object GenericSubtypeImpl extends Upcast[Any, Any] {
+    override def upcast(b: Any): Any = b
+  }
+
+  implicit def subtype[E, E1](implicit ev: E <:< E1): Upcast[E1, E] =
+    GenericSubtypeImpl.asInstanceOf[Upcast[E1, E]]
 }

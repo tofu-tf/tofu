@@ -6,6 +6,7 @@ import cats.{Applicative, ApplicativeError, Functor, Id, Monad}
 import tofu.errorInstances._
 import tofu.internal.{CachedMatcher, DataEffectComp}
 import tofu.lift.Lift
+import tofu.optics.PUpcast.GenericSubtypeImpl
 import tofu.optics.{Downcast, Subset, Upcast}
 
 import scala.reflect.ClassTag
@@ -19,12 +20,19 @@ object Raise extends RaiseInstances with DataEffectComp[Raise] with ErrorsInstan
   trait ContravariantRaise[F[_], -E] {
     def raise[A](err: E): F[A]
   }
-
 }
 
 sealed class RaiseInstances {
-  final implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1] =
-    new FromPrism[F, E, E1, Raise, Upcast] with RaisePrism[F, E, E1]
+
+  implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], uc: Upcast[E, E1]): Raise[F, E1] =
+    uc match {
+      case GenericSubtypeImpl =>
+        r.asInstanceOf[Raise[F, E1]]
+      case _                   =>
+        new Raise[F, E1] {
+          def raise[A](err: E1): F[A] = r.raise(uc.upcast(err))
+        }
+    }
 }
 
 trait RestoreTo[F[_], G[_]] extends Lift[G, F] {
