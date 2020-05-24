@@ -64,7 +64,3 @@ object WithdrawalService {
       }
   }
 }
-
-object App {
-  val withdrawalSrv: WithdrawalService[IO] = WithdrawalService.make
-}
