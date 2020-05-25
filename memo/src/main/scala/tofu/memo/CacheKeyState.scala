@@ -62,14 +62,14 @@ final case class CacheKeyStateMVar[F[_]: Monad: Guarantee, K, A](
   override def value(key: K): F[CacheVal[A]] = valueByMap(state.read)(key)
   override def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B] = {
     def miss: F[B] =
-      op.getPureOrElse(CacheVal.none)(state.bracketUpdate(freshMap => {
-        freshMap.get(key).map(state.put(freshMap) *> _.runOperation(op)).getOrElse {
+      op.getPureOrElse(CacheVal.none)(state.bracketModify(freshMap => {
+        freshMap.get(key).map(_.runOperation(op).map((freshMap, _))).getOrElse {
           for {
             (newVal, res) <- op.update(CacheVal.none)
-            _             <- newVal.fold(state.put(freshMap))((_, _) =>
-                   factory(newVal) >>= (cell => state.put(freshMap + (key -> cell)))
-                 )
-          } yield res
+            newMap        <- newVal.fold(Monad[F].pure(freshMap))((_, _) =>
+                        factory(newVal) >>= (cell => Monad[F].pure(freshMap + (key -> cell)))
+                      )
+          } yield (newMap, res)
         }
       }))
 
@@ -84,8 +84,7 @@ final case class CacheKeyStateMVar[F[_]: Monad: Guarantee, K, A](
       for {
         results  <- map.toList.traverse { case (k, v) => v.cleanUp(after).tupleLeft(k) }
         cleanKeys = results.collect { case (k, true) => k }
-        _        <- state.put(map -- cleanKeys)
-      } yield cleanKeys.size.toLong
+      } yield (map -- cleanKeys, cleanKeys.size.toLong)
     }
 }
 
@@ -113,7 +112,7 @@ final case class CacheKeyStateRef[F[_]: Monad, K, A](
     for {
       (map, update) <- state.access
       results       <- map.toList.traverse { case (k, v) => v.cleanUp(after).tupleLeft(k) }
-      cleanKeys     = results.collect { case (k, true) => k }
+      cleanKeys      = results.collect { case (k, true) => k }
       _             <- update(map -- cleanKeys)
     } yield cleanKeys.size.toLong
 }
