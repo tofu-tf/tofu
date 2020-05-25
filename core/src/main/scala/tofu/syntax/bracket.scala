@@ -1,6 +1,6 @@
 package tofu.syntax
 
-import cats.Applicative
+import cats.{Applicative, Monad}
 import cats.data.EitherT
 import cats.effect.concurrent.MVar
 import cats.effect.{Bracket, ExitCase}
@@ -19,7 +19,7 @@ object bracket {
 
     def bracketAlways[B, C](
         use: A => F[B]
-    )(release: A => F[C])(FG: Guarantee[F]): F[B]                                                 =
+    )(release: A => F[C])(implicit FG: Guarantee[F]): F[B]                                        =
       FG.bracket(fa)(use) { case (a, _) => release(a) }
 
     def guaranteeIncomplete[B](release: F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[A] =
@@ -42,8 +42,25 @@ object bracket {
       * @param use function to atomically modify value contained in `MVar`
       * @return `F[A]` modified value contained in `MVar`
       */
-    def bracketUpdate[A, E](use: A => F[A])(implicit F: Applicative[F], FG: Guarantee[F]): F[A] =
-      mvar.take.bracketAlways(use)(mvar.put)
+    def bracketUpdate(use: A => F[A])(implicit FG: Guarantee[F], M: Monad[F]): F[A] =
+      M.flatMap(mvar.take)(oldA =>
+        M.pure(oldA).bracketOpt(use) { (newA, success) => mvar.put(if (success) newA else oldA) }
+      )
+
+    /**
+      * Modify value with effectful transformation, calculating result. In case of error value remains unchanged
+      * @param use function to atomically modify value contained in `MVar` and produce result
+      * @return `F[B]`
+      */
+    // NOTE: maybe return F[(A, B)] to inspect updated mvar?
+    def bracketModify[B](use: A => F[(A, B)])(implicit FG: Guarantee[F], M: Monad[F]): F[B] =
+      M.flatMap(mvar.take)(oldA =>
+        M.pure(oldA)
+          .bracketOpt(use) {
+            case (newA, success) => mvar.put(if (success) newA else oldA)
+          }
+          .map(_._2)
+      )
   }
 
   implicit final class TofuBracketEitherTOps[F[_], E, A](private val e: EitherT[F, E, A]) extends AnyVal {
