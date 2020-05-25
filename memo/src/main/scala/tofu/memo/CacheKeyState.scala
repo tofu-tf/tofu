@@ -80,7 +80,7 @@ final case class CacheKeyStateMVar[F[_]: Monad: Guarantee, K, A](
   }
 
   override def cleanUp(after: Long): F[Long] =
-    state.bracketUpdate { map =>
+    state.bracketModify { map =>
       for {
         results  <- map.toList.traverse { case (k, v) => v.cleanUp(after).tupleLeft(k) }
         cleanKeys = results.collect { case (k, true) => k }
@@ -113,7 +113,7 @@ final case class CacheKeyStateRef[F[_]: Monad, K, A](
     for {
       (map, update) <- state.access
       results       <- map.toList.traverse { case (k, v) => v.cleanUp(after).tupleLeft(k) }
-      cleanKeys      = results.collect { case (k, true) => k }
+      cleanKeys     = results.collect { case (k, true) => k }
       _             <- update(map -- cleanKeys)
     } yield cleanKeys.size.toLong
 }
