@@ -2,9 +2,9 @@ package tofu.examples
 
 import cats.FlatMap
 import cats.syntax.flatMap._
-import tofu.{Errors, Handle, Raise}
-import tofu.syntax.raise._
 import tofu.syntax.handle._
+import tofu.syntax.raise._
+import tofu.{Errors, Handle, Raise}
 
 final case class User(id: Long, cardId: Long, name: String)
 final case class Card(id: Long, balance: Long)
@@ -74,11 +74,11 @@ object Payments {
   def make[F[_]: Errors[*[_], WithdrawalFailed]: FlatMap]: Payments[F] =
     new Impl[F](WithdrawalService.make)
 
-  private final class Impl[F[_]](withdrawalService: WithdrawalService[F])(
-    implicit han: Handle[F, WithdrawalFailed]
+  private final class Impl[F[_]: Handle[*[_], WithdrawalFailed]](
+      withdrawalService: WithdrawalService[F]
   ) extends Payments[F] {
     override def processPayment(userId: Long, amount: Long): F[Unit] =
       withdrawalService.withdraw(userId, amount).handleWith[LowBalance](_ => denyPayment)
-    private def denyPayment: F[Unit] = ???
+    private def denyPayment: F[Unit]                                 = ???
   }
 }

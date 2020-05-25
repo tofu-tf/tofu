@@ -7,8 +7,8 @@ import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.foldable._
 import cats.syntax.profunctor._
-import tofu.optics.classes.PChoice
-import tofu.optics.data.{Identity, Tagged}
+import tofu.optics.Subset.ByDowncast
+import tofu.optics.data.Identity
 import tofu.optics.classes.PChoice
 import tofu.optics.data.Tagged
 
@@ -35,11 +35,6 @@ object Subset extends MonoOpticCompanion(PSubset) {
       def cast(a: A): Option[B] = fdown(a)
       def upcast(b: B): A       = fup(b)
     }
-  }
-
-  implicit def subType[A, B <: A: ClassTag]: Subset[A, B] = new ByDowncast[A, B] {
-    def cast(a: A): Option[B] = Some(a).collect { case b: B => b }
-    def upcast(b: B): A       = b
   }
 
   trait ByDowncast[A, B] extends Subset[A, B] {
@@ -98,6 +93,10 @@ object PSubset extends OpticCompanion[PSubset] {
         type F[+x]     = G[x]
         type P[-x, +y] = Q[x, y]
       })(pb)
+  }
 
+  implicit def subType[A, B <: A: ClassTag]: Subset[A, B] = new ByDowncast[A, B] {
+    def cast(a: A): Option[B] = Some(a).collect { case b: B => b }
+    def upcast(b: B): A       = b
   }
 }
