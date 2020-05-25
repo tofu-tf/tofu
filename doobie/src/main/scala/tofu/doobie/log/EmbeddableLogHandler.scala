@@ -15,7 +15,7 @@ import tofu.syntax.monadic._
   * Only useful when `F[_]` is contextual. Allows one to create a context-aware `LogHandler`
   * and embed it into a database algebra that requires it for logging SQL execution events.
   */
-final case class EmbeddableLogHandler[F[_]](self: F[LogHandler]) {
+final class EmbeddableLogHandler[F[_]](val self: F[LogHandler]) extends AnyVal {
   def embedMapK[A[_[_]]: Embed: FunctorK, G[_]](impl: LogHandler => A[G])(fk: G ~> F)(implicit F: FlatMap[F]): A[F] =
     self.map(impl(_).mapK(fk)).embed
 
@@ -53,15 +53,15 @@ object EmbeddableLogHandler {
   /**
     * Use `nop` in tests.
     */
-  def nop[F[_]: Applicative]: EmbeddableLogHandler[F] = EmbeddableLogHandler(LogHandler.nop.pure[F])
+  def nop[F[_]: Applicative]: EmbeddableLogHandler[F] = new EmbeddableLogHandler(LogHandler.nop.pure[F])
 
   private def fromLogHandlerF[F[_]: Functor](
       logHandlerF: LogHandlerF[F]
   )(unsafeRunIO_ : IO[_] => Unit)(implicit U: UnliftIO[F]): EmbeddableLogHandler[F] =
-    EmbeddableLogHandler(U.unlift.map(toIO => LogHandler(event => unsafeRunIO_(toIO(logHandlerF.run(event))))))
+    new EmbeddableLogHandler(U.unlift.map(toIO => LogHandler(event => unsafeRunIO_(toIO(logHandlerF.run(event))))))
 
   implicit val embeddableLogHandlerFunctorK: FunctorK[EmbeddableLogHandler] = new FunctorK[EmbeddableLogHandler] {
     def mapK[F[_], G[_]](af: EmbeddableLogHandler[F])(fk: F ~> G): EmbeddableLogHandler[G] =
-      EmbeddableLogHandler(fk(af.self))
+      new EmbeddableLogHandler(fk(af.self))
   }
 }
