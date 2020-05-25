@@ -2,8 +2,9 @@ package tofu.examples
 
 import cats.FlatMap
 import cats.syntax.flatMap._
-import tofu.Raise
+import tofu.{Errors, Handle, Raise}
 import tofu.syntax.raise._
+import tofu.syntax.handle._
 
 final case class User(id: Long, cardId: Long, name: String)
 final case class Card(id: Long, balance: Long)
@@ -51,7 +52,7 @@ object WithdrawalService {
   def make[F[_]: Raise[*[_], WithdrawalFailed]: FlatMap]: WithdrawalService[F] =
     new Impl[F](UserStorage.make, CardStorage.make)
 
-  final class Impl[F[_]: Raise[*[_], WithdrawalFailed]: FlatMap](
+  private final class Impl[F[_]: Raise[*[_], WithdrawalFailed]: FlatMap](
       userStorage: UserStorage[F],
       cardStorage: CardStorage[F]
   ) extends WithdrawalService[F] {
@@ -61,5 +62,23 @@ object WithdrawalService {
         if (newBalance >= 0) cardStorage.updateBalance(card.id, newBalance)
         else LowBalance(card.balance, amount).raise[F, Unit]
       }
+  }
+}
+
+trait Payments[F[_]] {
+  def processPayment(userId: Long, amount: Long): F[Unit]
+}
+
+object Payments {
+
+  def make[F[_]: Errors[*[_], WithdrawalFailed]: FlatMap]: Payments[F] =
+    new Impl[F](WithdrawalService.make)
+
+  private final class Impl[F[_]](withdrawalService: WithdrawalService[F])(
+    implicit han: Handle[F, WithdrawalFailed]
+  ) extends Payments[F] {
+    override def processPayment(userId: Long, amount: Long): F[Unit] =
+      withdrawalService.withdraw(userId, amount).handleWith[LowBalance](_ => denyPayment)
+    private def denyPayment: F[Unit] = ???
   }
 }
