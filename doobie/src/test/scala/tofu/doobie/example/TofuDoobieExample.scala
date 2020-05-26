@@ -61,6 +61,8 @@ object Tracing      {
 // Model
 final case class Person(id: Long, name: String, deptId: Long)
 final case class Dept(id: Long, name: String)
+// create table department(id numeric primary key, name varchar);
+// create table person(id numeric primary key, name varchar, dept_id numeric references department(id));
 
 // Person SQL algebra
 @derive(representableK)
@@ -165,7 +167,12 @@ object TofuDoobieExample extends TaskApp {
     implicit val loggingF: Logging[F] = Logging.make[F]
     implicit val tracingF: Tracing[F] = Tracing.make[F]
 
-    val transactor = Transactor.fromDriverManager[I]("***", "***")
+    val transactor = Transactor.fromDriverManager[I](
+      driver = "org.postgresql.Driver",
+      url = "jdbc:postgresql://localhost:5432/test",
+      user = "postgres",
+      pass = "secret"
+    )
     val txr        = Txr.contextual[F](transactor)
 
     def initStorage[DB[_]: Monad: Console: LiftConnectionIO: Lift[F, *[_]]: HasLocal[*[_], Ctx]](
