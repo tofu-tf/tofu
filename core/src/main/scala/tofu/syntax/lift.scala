@@ -7,6 +7,10 @@ import cats.tagless.{FunctorK, InvariantK}
 import tofu.lift.{IsoK, Lift, Unlift}
 
 object lift {
+  implicit final class LiftSyntax[F[_], A](private val fa: F[A]) extends AnyVal {
+    def lift[G[_]](implicit lift: Lift[F, G]): G[A] = lift.lift(fa)
+  }
+
   implicit final class MVarLiftSyntax[F[_], A](private val mvar: MVar[F, A]) extends AnyVal {
     def lift[G[_]](implicit lift: Lift[F, G]): MVar[G, A] = mvar.mapK(lift.liftF)
   }
