@@ -1,6 +1,6 @@
 package tofu.syntax
 
-import cats.{Applicative, Monad}
+import cats.Applicative
 import cats.data.EitherT
 import cats.effect.concurrent.MVar
 import cats.effect.{Bracket, ExitCase}
