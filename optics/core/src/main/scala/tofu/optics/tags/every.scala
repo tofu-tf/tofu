@@ -1,6 +1,8 @@
 package tofu.optics
 package tags
 
+import tofu.optics.functions
+
 object every extends TaggerObj[PItems] {
   implicit def everyMap[K, V1, V2]: PTagApply[PItems, Map[K, V1], Map[K, V2], V1, V2, this.type, Unit] =
     _ => functions.mapValuesP

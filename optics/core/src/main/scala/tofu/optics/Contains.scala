@@ -42,7 +42,7 @@ object Contains extends MonoOpticCompanion(PContains) {
   }
 }
 
-object PContains extends OpticCompanion[PContains] {
+object PContains extends OpticCompanion[PContains] with OpticProduct[PContains] {
   def apply[S, B] = new PContainsApplied[S, B](true)
 
   class PContainsApplied[S, B](private val dummy: Boolean) extends AnyVal {
@@ -57,6 +57,15 @@ object PContains extends OpticCompanion[PContains] {
       def set(s: S, b: V): T = g.set(s, f.set(g.extract(s), b))
       def extract(a: S): U   = f.extract(g.extract(a))
     }
+
+  override def product[S1, S2, T1, T2, A1, A2, B1, B2](
+      f: PContains[S1, T1, A1, B1],
+      g: PContains[S2, T2, A2, B2]
+  ): PContains[(S1, S2), (T1, T2), (A1, A2), (B1, B2)] = new PContains[(S1, S2), (T1, T2), (A1, A2), (B1, B2)] {
+    override def set(s: (S1, S2), b: (B1, B2)): (T1, T2) = (f.set(s._1, b._1), g.set(s._2, b._2))
+
+    override def extract(s: (S1, S2)): (A1, A2) = (f.extract(s._1), g.extract(s._2))
+  }
 
   trait ByProject[S, T, A, B] extends PContains[S, T, A, B] {
     def proj[F[+_]: Functor](a: S, fb: A => F[B]): F[T]
@@ -89,5 +98,4 @@ object PContains extends OpticCompanion[PContains] {
     def focusState[F[+_]: Functor, R](state: IndexedStateT[F, A, B, R]): IndexedStateT[F, S, T, R] =
       IndexedStateT.applyF(state.runF.map(afbr => (s: S) => afbr(self.extract(s)).map(_.leftMap(self.set(s, _)))))
   }
-
 }

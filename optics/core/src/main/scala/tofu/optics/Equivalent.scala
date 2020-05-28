@@ -40,7 +40,7 @@ object Equivalent extends MonoOpticCompanion(PEquivalent) {
   }
 }
 
-object PEquivalent extends OpticCompanion[PEquivalent] {
+object PEquivalent extends OpticCompanion[PEquivalent] with OpticProduct[PEquivalent] {
   def apply[S, B] = new PEquivalentApplied[S, B](true)
 
   class PEquivalentApplied[S, B](private val dummy: Boolean) extends AnyVal {
@@ -55,6 +55,14 @@ object PEquivalent extends OpticCompanion[PEquivalent] {
       def extract(s: S): U = f.extract(g.extract(s))
       def upcast(v: V): T  = g.upcast(f.upcast(v))
     }
+
+  override def product[S1, S2, T1, T2, A1, A2, B1, B2](
+      f: PEquivalent[S1, T1, A1, B1],
+      g: PEquivalent[S2, T2, A2, B2]
+  ): PEquivalent[(S1, S2), (T1, T2), (A1, A2), (B1, B2)] = new PEquivalent[(S1, S2), (T1, T2), (A1, A2), (B1, B2)] {
+    override def extract(s: (S1, S2)): (A1, A2) = (f.extract(s._1), g.extract(s._2))
+    override def upcast(b: (B1, B2)): (T1, T2)  = (f.upcast(b._1), g.upcast(b._2))
+  }
 
   trait ByEmploy[S, T, A, B] extends PEquivalent[S, T, A, B] {
     def emp[F[+_]: Functor, P[-_, +_]: Profunctor](pb: P[A, F[B]]): P[S, F[T]]

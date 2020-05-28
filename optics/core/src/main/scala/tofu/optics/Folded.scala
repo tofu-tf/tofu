@@ -8,13 +8,18 @@ import tofu.optics.data.Constant
 
 /** S has some or none occurrences of A
   * and can collect them */
-trait PFolded[-S, +T, +A, -B] extends PBase[S, T, A, B] {
+trait PFolded[-S, +T, +A, -B] extends PBase[S, T, A, B] { self =>
   def foldMap[X: Monoid](s: S)(f: A => X): X
 
-  def getAll(s: S): List[A] = foldMap(s)(List(_))
+  def getAll(s: S): List[A]     = foldMap(s)(List(_))
   def toVector(s: S): Vector[A] = foldMap(s)(Vector(_))
 
   def as[B1, T1]: PFolded[S, T1, A, B1] = this.asInstanceOf[PFolded[S, T1, A, B1]]
+
+  def ++[S1 <: S, A1 >: A](other: PFolded[S1, Any, A1, Nothing]): PFolded[S1, T, A1, B] =
+    new PFolded[S1, T, A1, B] {
+      override def foldMap[X: Monoid](s: S1)(f: A1 => X): X = self.foldMap(s)(f) |+| other.foldMap(s)(f)
+    }
 }
 
 object Folded extends MonoOpticCompanion(PFolded) {

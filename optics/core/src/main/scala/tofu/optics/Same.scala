@@ -17,7 +17,7 @@ object Same extends MonoOpticCompanion(PSame) {
   def id[A]: Same[A, A] = PSame.id[A, A]
 }
 
-object PSame extends OpticCompanion[PSame] {
+object PSame extends OpticCompanion[PSame] with OpticProduct[PSame] {
   type Context             = OpticContext
   override type Mono[A, B] = Same[A, B]
 
@@ -32,6 +32,11 @@ object PSame extends OpticCompanion[PSame] {
 
   def compose[S, T, A, B, U, V](f: PSame[A, B, U, V], g: PSame[S, T, A, B]): PSame[S, T, U, V] =
     g.rsubst[PSame[-*, +*, U, V]](f)
+
+  override def product[S1, S2, T1, T2, A1, A2, B1, B2](
+      f: PSame[S1, T1, A1, B1],
+      g: PSame[S2, T2, A2, B2]
+  ): PSame[(S1, S2), (T1, T2), (A1, A2), (B1, B2)] = anyId.asInstanceOf[PSame[(S1, S2), (T1, T2), (A1, A2), (B1, B2)]]
 
   override def toGeneric[S, T, A, B](o: PSame[S, T, A, B]): Optic[OpticContext, S, T, A, B] =
     new Optic[OpticContext, S, T, A, B] {
