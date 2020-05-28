@@ -249,10 +249,18 @@ lazy val fs2Interop = project
   )
   .dependsOn(concurrent)
 
+lazy val doobie      = project
+  .in(file("doobie"))
+  .settings(
+    libraryDependencies ++= List(doobieCore, derevo, monix % Test),
+    defaultSettings
+  )
+  .dependsOn(core, derivation, env % Test, zioInterop % Test)
+
 lazy val coreModules = Seq(higherKindCore, core, memo, env, concurrent, opticsCore, data)
 
 lazy val commonModules =
-  Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop, fs2Interop)
+  Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop, fs2Interop, doobie)
 
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
