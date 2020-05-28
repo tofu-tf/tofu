@@ -29,4 +29,11 @@ object PUpcast extends OpticCompanion[PUpcast] {
     }
   def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PUpcast[S, T, A, B] =
     b => o(new Context)(Tagged(b)).value
+
+  object GenericSubtypeImpl extends Upcast[Any, Any] {
+    override def upcast(b: Any): Any = b
+  }
+
+  implicit def subType[E, E1](implicit ev: E <:< E1): Upcast[E1, E] =
+    GenericSubtypeImpl.asInstanceOf[Upcast[E1, E]]
 }
