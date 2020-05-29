@@ -8,6 +8,10 @@ import tofu.higherKind.{RepresentableK, derived}
 import tofu.optics.Contains
 import tofu.syntax.monadic._
 import tofu.syntax.bracket._
+import cats.data.StateT
+import cats.Monad
+import cats.data.IndexedStateT
+import cats.Id
 
 /** a middleground between cats.concurrent.Ref and zio.Ref */
 trait Atom[+F[_], A] {
@@ -89,6 +93,18 @@ object Atom {
       val (b, c) = f(focus.get(a))
       (focus.set(a, b), c)
     }
+  }
+
+  def stateTAtom[F[_]: Applicative, A]: Atom[StateT[F, A, *], A] = new Atom[StateT[F, A, *], A] {
+    override def get: StateT[F, A, A] = StateT.get
+
+    override def set(a: A): StateT[F, A, Unit] = StateT.set(a)
+
+    override def getAndSet(a: A): StateT[F, A, A] = StateT(a1 => (a, a1).pure[F])
+
+    override def update(f: A => A): StateT[F, A, Unit] = StateT.modify(f)
+
+    override def modify[B](f: A => (A, B)): StateT[F, A, B] = StateT(a => f(a).pure[F])
   }
 }
 
