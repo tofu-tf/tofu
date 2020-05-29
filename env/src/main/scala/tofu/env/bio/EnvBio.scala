@@ -8,9 +8,9 @@ abstract class EnvBio[-R, +E, +A] {
   protected def runF(ctx: R): Task[A]
 
   final def run(ctx: R): Task[Either[E, A]] = runF(ctx).attempt.flatMap {
-    case Left(UserError(err: E)) => Task.pure(Left(err)) // todo erasure elimination?
-    case Left(fatalErr)          => Task.raiseError(fatalErr)
-    case Right(value)            => Task.pure(Right(value))
+    case Left(UserError(err: E @unchecked)) => Task.pure(Left(err)) // todo erasure elimination?
+    case Left(fatalErr)                     => Task.raiseError(fatalErr)
+    case Right(value)                       => Task.pure(Right(value))
   }
 
   def mapTask[B](f: Task[A] => Task[B]): EnvBio[R, E, B] =
@@ -44,19 +44,19 @@ abstract class EnvBio[-R, +E, +A] {
   def onErrorHandleWith[R1 <: R, E1 >: E, A1 >: A](f: E => EnvBio[R1, E1, A1]): EnvBio[R1, E1, A1] =
     EnvBio.applyFatal(ctx =>
       runF(ctx).onErrorHandleWith {
-        case UserError(e: E) => f(e).runF(ctx)
-        case t               => Task.raiseError(t)
+        case UserError(e: E @unchecked) => f(e).runF(ctx)
+        case t                          => Task.raiseError(t)
       }
     )
 
   def onErrorHandle[A1 >: A](f: E => A1): EnvBio[R, E, A1] =
     onErrorHandleWith(e => EnvBio.pure(f(e)))
 
-  def onErrorRecoverWith[R1 <: R, E1 >: E, A1 >: A](f: PartialFunction[E, EnvBio[R1, E1, A1]]): EnvBio[R1, E1, A1] =
+  def onErrorRecoverWith[R1 <: R, E1 >: E, A2 >: A](f: PartialFunction[E, EnvBio[R1, E1, A2]]): EnvBio[R1, E1, A2] =
     EnvBio.applyFatal(ctx =>
       runF(ctx).onErrorRecoverWith {
-        case UserError(e: E) if f.isDefinedAt(e) => f(e).runF(ctx)
-        case t                                   => Task.raiseError(t)
+        case UserError(e: E @unchecked) if f.isDefinedAt(e) => f(e).runF(ctx)
+        case t                                              => Task.raiseError(t)
       }
     )
 

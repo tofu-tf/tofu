@@ -8,7 +8,6 @@ import cats.data._
 import cats.instances.list._
 import cats.instances.map._
 import cats.instances.sortedSet._
-import cats.instances.stream._
 import cats.instances.string._
 import cats.instances.vector._
 import cats.syntax.foldable._
@@ -20,6 +19,8 @@ import tofu.control.Consume
 import tofu.logging.Loggable.Base
 import tofu.logging.impl._
 import tofu.syntax.logRenderer._
+import tofu.compat._
+import tofu.compat.lazySeqInstances._
 
 import scala.collection.immutable.SortedSet
 import scala.collection.{immutable, mutable}
@@ -238,14 +239,14 @@ object Loggable {
 
   final implicit def listLoggable[A: Loggable]: Loggable[List[A]]           = fldLoggable[List, A]
   final implicit def vectorLoggable[A: Loggable]: Loggable[Vector[A]]       = fldLoggable[Vector, A]
-  final implicit def streamLoggable[A: Loggable]: Loggable[Stream[A]]       = fldLoggable[Stream, A]
+  final implicit def streamLoggable[A: Loggable]: Loggable[LazySeq[A]]      = fldLoggable[LazySeq, A]
   final implicit def chainLoggable[A: Loggable]: Loggable[Chain[A]]         = fldLoggable[Chain, A]
   final implicit def setLoggable[A: Loggable]: Loggable[Set[A]]             = fldLoggable[Set, A]
   final implicit def sortedSetLoggable[A: Loggable]: Loggable[SortedSet[A]] = fldLoggable[SortedSet, A]
 
   final implicit def nonEmptyListLoggable[A: Loggable]: Loggable[NonEmptyList[A]]     = fldLoggable[NonEmptyList, A]
   final implicit def nonEmptyVectorLoggable[A: Loggable]: Loggable[NonEmptyVector[A]] = fldLoggable[NonEmptyVector, A]
-  final implicit def nonEmptyStreamLoggable[A: Loggable]: Loggable[NonEmptyStream[A]] = fldLoggable[NonEmptyStream, A]
+  final implicit def nonEmptyStreamLoggable[A: Loggable]: Loggable[NELazySeq[A]]      = fldLoggable[NELazySeq, A]
   final implicit def nonEmptyChainLoggable[A: Loggable]: Loggable[NonEmptyChain[A]]   = fldLoggable[NonEmptyChain, A]
   final implicit def nonEmptySetLoggable[A: Loggable]: Loggable[NonEmptySet[A]]       = fldLoggable[NonEmptySet, A]
 

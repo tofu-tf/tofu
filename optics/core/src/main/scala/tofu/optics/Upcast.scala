@@ -4,6 +4,7 @@ import alleycats.Pure
 import cats.{Functor, Id}
 import tofu.optics.classes.PChoice
 import tofu.optics.data.{Identity, Tagged}
+import scala.annotation.nowarn
 
 trait PUpcast[-S, +T, +A, -B] extends PBase[S, T, A, B] {
   def upcast(b: B): T
@@ -34,6 +35,6 @@ object PUpcast extends OpticCompanion[PUpcast] {
     override def upcast(b: Any): Any = b
   }
 
-  implicit def subType[E, E1](implicit ev: E <:< E1): Upcast[E1, E] =
+  implicit def subType[E, E1](implicit @nowarn ev: E <:< E1): Upcast[E1, E] =
     GenericSubtypeImpl.asInstanceOf[Upcast[E1, E]]
 }

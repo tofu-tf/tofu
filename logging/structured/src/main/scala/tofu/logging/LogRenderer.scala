@@ -6,6 +6,7 @@ import cats.kernel.{Monoid, Semigroup}
 import cats.syntax.monoid._
 import tofu.data.PArray
 import syntax.logRenderer._
+import scala.collection.compat._
 
 import scala.{specialized => sp}
 
@@ -65,13 +66,13 @@ trait LogRenderer[I, V, @sp(Unit) R, @sp M] extends Semigroup[R] { self =>
   def putFoldable[F[_]: Foldable, A: Loggable](fa: F[A], v: V): M =
     foldable(fa, v)((v, a) => Loggable[A].putValue(a, v))
 
-  def coll[A](fa: TraversableOnce[A], v: V)(receive: (V, A) => M): M = {
+  def coll[A](fa: IterableOnce[A], v: V)(receive: (V, A) => M): M = {
     import PArray.ArrOps // for scala 2.11
     val arr = PArray.fromColl(fa)
     list(arr.length, v)((v, i) => receive(v, arr(i)))
   }
 
-  def putColl[A: Loggable](fa: TraversableOnce[A], v: V): M =
+  def putColl[A: Loggable](fa: IterableOnce[A], v: V): M =
     coll(fa, v)((v, a) => Loggable[A].putValue(a, v))
 
   def addString(name: String, value: String, input: I): R      = addField(name, StrValue(value), input)

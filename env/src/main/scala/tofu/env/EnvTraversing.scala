@@ -18,18 +18,18 @@ private[env] trait EnvTraversing {
   def gather[E, A, M[X] <: Iterable[X]](
       in: M[Env[E, A]]
   )(implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
-    Env(ctx => Task.wander(in)(_.run(ctx)))
+    Env(ctx => Task.parTraverse(in)(_.run(ctx)))
 
   def wander[E, A, B, M[X] <: Iterable[X]](
       in: M[A]
   )(f: A => Env[E, B])(implicit cbf: BuildFrom[M[A], B, M[B]]): Env[E, M[B]] =
-    Env(ctx => Task.wander(in)(x => f(x).run(ctx)))
+    Env(ctx => Task.parTraverse(in)(x => f(x).run(ctx)))
 
   def gatherUnordered[E, A](in: Iterable[Env[E, A]]): Env[E, List[A]] =
-    Env(ctx => Task.wanderUnordered(in)(_.run(ctx)))
+    Env(ctx => Task.parTraverseUnordered(in)(_.run(ctx)))
 
   def wanderUnordered[E, A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B]): Env[E, List[B]] =
-    Env(ctx => Task.wanderUnordered(in)(x => f(x).run(ctx)))
+    Env(ctx => Task.parTraverseUnordered(in)(x => f(x).run(ctx)))
 
   /** Mirrored traversing operations, trying to create context-unaware Tasks whenever possible */
   object opt {
@@ -53,20 +53,40 @@ private[env] trait EnvTraversing {
     )(implicit mapper: CollectionMapper[A, Env[E, B], M], cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
       sequence(mapper.map(in, f))
 
+    def parSequence[E, A, M[X] <: Iterable[X]](
+        in: M[Env[E, A]]
+    )(implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
+      walkTasks(in, Env.gather(in), Task.parTraverse[Env[E, A], A, M])
+
+    def parTraverse[E, A, B, M[X] <: Iterable[X]](in: M[A])(
+        f: A => Env[E, B]
+    )(implicit mapper: CollectionMapper[A, Env[E, B], M], cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
+      parSequence(mapper.map(in, f))
+
+    def parSequenceUnordered[E, A](in: Iterable[Env[E, A]]): Env[E, List[A]] =
+      walkTasks(in.toList, Env.gatherUnordered(in), Task.parTraverseUnordered[Env[E, A], A, List])
+
+    def parTraverseUnordered[E, A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B]): Env[E, List[B]] =
+      parSequenceUnordered(in.map(f))
+
+    @deprecated("use parSequence", since = "0.7.6")
     def gather[E, A, M[X] <: Iterable[X]](
         in: M[Env[E, A]]
     )(implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
-      walkTasks(in, Env.gather(in), Task.wander[Env[E, A], A, M])
+      parSequence(in)
 
+    @deprecated("use parTraverse", since = "0.7.6")
     def wander[E, A, B, M[X] <: Iterable[X]](in: M[A])(
         f: A => Env[E, B]
     )(implicit mapper: CollectionMapper[A, Env[E, B], M], cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
-      gather(mapper.map(in, f))
+      parTraverse(in)(f)
 
-    def gatherUnordered[E, A](in: Iterable[Env[E, A]]): Env[E, List[A]] =
-      walkTasks(in.toList, Env.gatherUnordered(in), Task.wanderUnordered[Env[E, A], A, List])
-
+    @deprecated("use parTraverseUnordered", since = "0.7.6")
     def wanderUnordered[E, A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B]): Env[E, List[B]] =
-      gatherUnordered(in.map(f))
+      parTraverseUnordered(in)(f)
+
+    @deprecated("use parSequenceUnordered", since = "0.7.6")
+    def gatherUnordered[E, A](in: Iterable[Env[E, A]]): Env[E, List[A]] =
+      parSequenceUnordered(in)
   }
 }

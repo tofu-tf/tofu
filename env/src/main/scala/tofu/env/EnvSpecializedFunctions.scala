@@ -82,19 +82,39 @@ trait EnvSpecializedFunctions[E] {
     )(implicit mapper: CollectionMapper[A, Env[E, B], M], cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
       Env.opt.traverse(in)(f)
 
-    def gather[A, M[X] <: Iterable[X]](in: M[Env[E, A]])(implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
-      Env.opt.gather(in)
+    def parSequence[A, M[X] <: Iterable[X]](
+        in: M[Env[E, A]]
+    )(implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
+      Env.opt.parSequence(in)
 
+    def parTraverse[A, B, M[X] <: Iterable[X]](in: M[A])(
+        f: A => Env[E, B]
+    )(implicit mapper: CollectionMapper[A, Env[E, B], M], cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
+      Env.opt.parTraverse(in)(f)
+
+    def parSequenceUnordered[A](in: Iterable[Env[E, A]]): Env[E, List[A]] =
+      Env.opt.parSequenceUnordered(in)
+
+    def parTraverseUnordered[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B]): Env[E, List[B]] =
+      Env.opt.parTraverseUnordered(in)(f)
+
+    @deprecated("use parSequence", since = "0.7.6")
+    def gather[A, M[X] <: Iterable[X]](in: M[Env[E, A]])(implicit cbf: BuildFrom[M[Env[E, A]], A, M[A]]): Env[E, M[A]] =
+      parSequence(in)
+
+    @deprecated("use parTraverse", since = "0.7.6")
     def wander[A, B, M[X] <: Iterable[X]](in: M[A])(
         f: A => Env[E, B]
     )(implicit mapper: CollectionMapper[A, Env[E, B], M], cbf2: BuildFrom[M[Env[E, B]], B, M[B]]): Env[E, M[B]] =
-      Env.opt.wander(in)(f)
+      parTraverse(in)(f)
 
+    @deprecated("use parSequenceUnordered", since = "0.7.6")
     def gatherUnordered[A](in: Iterable[Env[E, A]]): Env[E, List[A]] =
-      Env.opt.gatherUnordered(in)
+      parSequenceUnordered(in)
 
+    @deprecated("use parTraverseUnordered", since = "0.7.6")
     def wanderUnordered[A, B, M[X] <: Iterable[X]](in: M[A])(f: A => Env[E, B]): Env[E, List[B]] =
-      Env.opt.wanderUnordered(in)(f)
+      parTraverseUnordered(in)(f)
   }
 
   def parMap2[A1, A2, R](fa1: Env[E, A1], fa2: Env[E, A2])(f: (A1, A2) => R): Env[E, R] = Env.parMap2(fa1, fa2)(f)
