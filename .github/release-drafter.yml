@@ -8,12 +8,16 @@ categories:
     labels:
       - 'feature'
       - 'enhancement'
-  - title: 'Bug Fixes'
+  - title: 'Fixes'
     labels:
       - 'fix'
       - 'bugfix'
       - 'bug'
       - 'invalid'
+  - title: "Documentation"
+    labels:
+      - 'docs'
+      - 'documentation'
   - title: 'Maintenance'
     labels:
       - 'chore'
