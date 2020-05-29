@@ -3,6 +3,7 @@ package tofu.data
 import cats.{Eval, Foldable, Monad, MonoidK}
 import tofu.internal.Newtype1Covariant
 import cats.syntax.foldable._
+import scala.collection.compat._
 
 object PArray extends Newtype1Covariant {
   private def fromArray[X, A](xs: Array[X]): Type[A] = xs.asInstanceOf[Type[A]]
@@ -14,7 +15,7 @@ object PArray extends Newtype1Covariant {
   def fromFoldable[F[_]: Foldable, A](fa: F[A]): PArray[A] =
     fromArray(fa.foldLeft(Array.newBuilder[Any])((bldr, a) => { bldr += a }).result())
 
-  def fromColl[A](xs: TraversableOnce[A]): PArray[A] = fromArray((xs: TraversableOnce[Any]).toArray)
+  def fromColl[A](xs: IterableOnce[A]): PArray[A] = fromArray((xs: IterableOnce[Any]).iterator.toArray)
 
   implicit final class ArrOps[A](private val xs: Type[A]) extends AnyVal {
     private[PArray] def toArray: Array[A] = xs.asInstanceOf[Array[A]]

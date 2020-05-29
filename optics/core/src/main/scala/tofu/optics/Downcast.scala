@@ -5,6 +5,8 @@ import cats.instances.option._
 import cats.syntax.foldable._
 import tofu.optics.data.Constant
 
+import scala.reflect.ClassTag
+
 /** S could be T or not
   * partial function from S to T
   * and part of prism
@@ -27,15 +29,19 @@ object PDowncast extends OpticCompanion[PDowncast] {
     def default: X
   }
 
-  override def toGeneric[S, T, A, B](o: PDowncast[S, T, A, B]): Optic[Context, S, T, A, B]   =
+  override def toGeneric[S, T, A, B](o: PDowncast[S, T, A, B]): Optic[Context, S, T, A, B] =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
         s => o.downcast(s).fold(Constant.of[T](c.default))(a => p(a).retag)
     }
+
   override def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PDowncast[S, T, A, B] =
     s =>
       o(new Context {
         type X = Option[A]
         def default: Option[A] = None
       })(a => Constant(Some(a)))(s).value
+
+  implicit def subType[A, B <: A: ClassTag]: Downcast[A, B] =
+    (s: A) => Some(s).collect { case b: B => b }
 }

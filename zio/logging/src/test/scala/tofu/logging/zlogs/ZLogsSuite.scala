@@ -18,7 +18,7 @@ import zio.clock.Clock
 import zio.console.Console
 import zio.{Has, Runtime, URIO, URLayer, ZLayer}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class ZLogsSuite extends AnyFlatSpec with Matchers {
   import ZLogsSuite.MyLogging

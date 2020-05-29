@@ -1,16 +1,12 @@
 package tofu.common
 
 import java.time._
-import java.util.Objects
 
 import cats.Monad
-import cats.effect.{Clock, Sync}
-import cats.tagless.autoFlatMap
-import simulacrum.typeclass
-import tofu.optics.data.Constant.Apply
+import cats.effect.Sync
 
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * wrapping around ZoneId methods */

@@ -73,10 +73,10 @@ final case class CacheStateRef[F[_]: Monad, A](state: Ref[F, CacheVal[A]]) exten
     for {
       (cur, update) <- state.access
       res           <- op.getPureOrElse(cur)(
-               for {
-                 (newVal, res) <- op.update(cur)
-                 _             <- update(newVal)
-               } yield res
-             )
+                         for {
+                           (newVal, res) <- op.update(cur)
+                           _             <- update(newVal)
+                         } yield res
+                       )
     } yield res
 }

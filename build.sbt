@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.7.5"
+val libVersion = "0.7.6"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -43,7 +43,8 @@ lazy val defaultSettings = Seq(
     compilerPlugin(betterMonadicFor),
     compilerPlugin(silencerPlugin),
     silencerLib,
-    scalatest
+    scalatest,
+    collectionCompat,
   )
 ) ++ publishSettings ++ scala213Options ++ simulacrumOptions
 
@@ -174,6 +175,7 @@ lazy val opticsCore = project
     libraryDependencies ++= Seq(catsCore, alleycats),
     publishName := "optics-core"
   )
+  .dependsOn(higherKindCore)
 
 lazy val opticsInterop = project
   .in(file("optics/interop"))
@@ -249,10 +251,18 @@ lazy val fs2Interop = project
   )
   .dependsOn(concurrent)
 
+lazy val doobie      = project
+  .in(file("doobie"))
+  .settings(
+    libraryDependencies ++= List(doobieCore, derevo, monix % Test),
+    defaultSettings
+  )
+  .dependsOn(core, derivation, env % Test, zioInterop % Test)
+
 lazy val coreModules = Seq(higherKindCore, core, memo, env, concurrent, opticsCore, data)
 
 lazy val commonModules =
-  Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop, fs2Interop)
+  Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop, fs2Interop, doobie)
 
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])

@@ -2,16 +2,16 @@ dist: xenial
 language: scala
 
 scala:
-  - 2.13.1
-  - 2.12.10
+  - 2.13.2
+  - 2.12.11
 
 jdk:
   - openjdk8
 script:
-  - if [ "$TRAVIS_SCALA_VERSION" = "2.13.1" ]; then sbt checkfmt; fi
+  - if [ "$TRAVIS_SCALA_VERSION" = "2.13.2" ]; then sbt checkfmt; fi
   - sbt compile
   - sbt test
-  - if [ "$TRAVIS_SCALA_VERSION" = "2.13.1" ]; then sbt docs/mdoc; fi
+  - if [ "$TRAVIS_SCALA_VERSION" = "2.13.2" ]; then sbt docs/mdoc; fi
 
 cache:
   directories:

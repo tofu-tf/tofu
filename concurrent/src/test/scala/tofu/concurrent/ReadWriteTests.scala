@@ -5,7 +5,6 @@ import cats.effect.{ContextShift, IO, Timer}
 import cats.instances.list._
 import cats.instances.vector._
 import cats.syntax.applicative._
-import cats.syntax.apply._
 import cats.syntax.parallel._
 import cats.syntax.traverse._
 import org.scalatest.matchers.should.Matchers
