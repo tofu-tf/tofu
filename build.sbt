@@ -43,7 +43,8 @@ lazy val defaultSettings = Seq(
     compilerPlugin(betterMonadicFor),
     compilerPlugin(silencerPlugin),
     silencerLib,
-    scalatest
+    scalatest,
+    collectionCompat,
   )
 ) ++ publishSettings ++ scala213Options ++ simulacrumOptions
 
@@ -174,6 +175,7 @@ lazy val opticsCore = project
     libraryDependencies ++= Seq(catsCore, alleycats),
     publishName := "optics-core"
   )
+  .dependsOn(higherKindCore)
 
 lazy val opticsInterop = project
   .in(file("optics/interop"))

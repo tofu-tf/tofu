@@ -5,11 +5,12 @@ import cats.{Eval, Foldable}
 import cats.syntax.foldable._
 import tofu.logging._
 import tofu.logging.LoggingBase
+import scala.collection.compat._
 
 object loggable extends Loggable.ToLoggableOps with Loggable.Base.ToBaseOps
 
 object logging {
-  val braces = Array.range(0, 30).map(Array.fill(_)("{}"))
+  val braces = Array.range(0, 30).map(Array.fill(_)("{}").toSeq)
 
   implicit final class LoggingInterpolator(private val sctx: StringContext) extends AnyVal {
     import loggable._
@@ -60,12 +61,12 @@ object logRenderer {
 
     def foldable[F[_]: Foldable, A](fa: F[A])(receive: (V, A) => M)(implicit r: LogRenderer[I, V, R, M]): M =
       r.foldable(fa, v)(receive)
-    def coll[A](fa: TraversableOnce[A])(receive: (V, A) => M)(implicit r: LogRenderer[I, V, R, M]): M       =
+    def coll[A](fa: IterableOnce[A])(receive: (V, A) => M)(implicit r: LogRenderer[I, V, R, M]): M          =
       r.coll(fa, v)(receive)
 
     def putFoldable[F[_]: Foldable, A: Loggable](fa: F[A])(implicit r: LogRenderer[I, V, R, M]): M =
       r.putFoldable(fa, v)
-    def putColl[A: Loggable](fa: TraversableOnce[A])(implicit r: LogRenderer[I, V, R, M]): M       =
+    def putColl[A: Loggable](fa: IterableOnce[A])(implicit r: LogRenderer[I, V, R, M]): M          =
       r.putColl(fa, v)
 
     def dict(receive: I => R)(implicit r: LogRenderer[I, V, R, M]): M = r.dict(v)(receive)

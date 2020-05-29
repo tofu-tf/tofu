@@ -34,7 +34,7 @@ class DoMonadExamples {
     resCheck
   }
 
-  def doStaticSyntaxCheck[F[_]: Do, A](a: A, fa: => F[A]): F[A] = {
+  def doStaticSyntaxCheck[F[_]: Do, A](a: A): F[A] = {
     Do[F].unit
     Do[F].pure(a)
   }

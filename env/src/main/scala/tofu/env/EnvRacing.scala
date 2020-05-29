@@ -2,6 +2,7 @@ package tofu.env
 
 import cats.effect._
 import monix.eval.Task
+import scala.collection.compat._
 
 private[env] trait EnvRacing {
   self: Env.type =>
@@ -29,10 +30,10 @@ private[env] trait EnvRacing {
       case _                                => Env(ctx => Task.race(ta.run(ctx), tb.run(ctx)))
     }
 
-  def raceMany[E, A](tta: TraversableOnce[Env[E, A]]): Env[E, A] = {
+  def raceMany[E, A](tta: IterableOnce[Env[E, A]]): Env[E, A] = {
     val taskAccum = Array.newBuilder[Task[A]]
     val funcAccum = Array.newBuilder[E => Task[A]]
-    tta.foreach {
+    tta.iterator.foreach {
       case EnvTask(tt) => taskAccum += tt
       case env         =>
         funcAccum += env.run

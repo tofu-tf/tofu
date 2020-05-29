@@ -3,11 +3,12 @@ package tofu.env.bio
 import cats.effect.concurrent.Ref
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.duration.Duration
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class EnvBioSuite extends FlatSpec with Matchers {
+class EnvBioSuite extends AnyFlatSpec with Matchers {
   "pure" should "lift constant value into EnvBio context" in {
     EnvBio.pure("str").run(()).runSyncUnsafe(Duration.Inf) shouldBe Right("str")
   }
@@ -118,6 +119,8 @@ class EnvBioSuite extends FlatSpec with Matchers {
     case object Err1 extends Error
     case object Err2 extends Error
 
+    Err2 // just for using
+
     EnvBio
       .raiseError[Error](Err1)
       .onErrorRecover { case Err1 => "Result" }
@@ -141,6 +144,8 @@ class EnvBioSuite extends FlatSpec with Matchers {
     sealed trait Error
     case object Err1 extends Error
     case object Err2 extends Error
+
+    identity(Err2) // mention to avoid warning
 
     EnvBio
       .raiseError[Error](Err1)
