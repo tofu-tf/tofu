@@ -14,7 +14,7 @@ object bracket {
   implicit final class TofuBracketOps[F[_], A](private val fa: F[A]) extends AnyVal {
 
     /**
-      * Apply function to [[fa]] with effectful transformation. In case of error [[fa]] is released
+      * Apply function to [[fa]] with effectful transformation. In case of error or cancellation [[fa]] is released
       * @param use function to modify value contained in [[fa]]
       * @param release function to release value contained in [[fa]]
       * @return `F[B]` updated value
@@ -36,7 +36,7 @@ object bracket {
       FG.bracket(fa)(use) { case (a, _) => release(a) }
 
     /**
-      * Guarantee finalization of [[fa]]. `release` is called in case of error
+      * Guarantee finalization of [[fa]]. `release` is called in case of error or cancellation
       * @param release function to release value contained in [[fa]]
       * @return `F[B]` updated value
       */
@@ -61,13 +61,13 @@ object bracket {
       FG.bracket(F.unit)(_ => fa)((_, success) => release(success))
 
     /**
-      * Update value in [[fa]]. In case of error old value of [[fa]] is passed to `commit`, otherwise
+      * Replace value in [[fa]]. In case of error or cancellation old value of [[fa]] is passed to `commit`, otherwise
       * result of `use` is passed.
       * @param use function to modify value contained in [[fa]]
       * @param commit function to commit passed value
       * @return `F[A]` updated value
       */
-    def bracketTransact[B](use: A => F[A])(commit: A => F[B])(implicit FG: Guarantee[F], A: Applicative[F]): F[A] =
+    def bracketReplace[B](use: A => F[A])(commit: A => F[B])(implicit FG: Guarantee[F], A: Applicative[F]): F[A] =
       FG.bracket(FG.bracket(fa)(use) {
         case (oldA, success) => commit(oldA).whenA(!success)
       })(newA => commit(newA).as(newA)) { (_, _) => A.unit }
@@ -83,7 +83,7 @@ object bracket {
 
     /**
       * Update value in [[fa]] while producing additional one.
-      * In case of error old value of [[fa]] is passed to `commit`, otherwise
+      * In case of error or cancellation old value of [[fa]] is passed to `commit`, otherwise
       * result of `use` is passed.
       * @param use function to modify value contained in [[fa]] and produce additional one
       * @param commit function to commit passed value
@@ -109,15 +109,15 @@ object bracket {
   implicit final class TofuBracketMVarOps[F[_], A](private val mvar: MVar[F, A]) extends AnyVal {
 
     /**
-      * Update value with effectful transformation. In case of error value remains unchanged
+      * Update value with effectful transformation. In case of error or cancellation value remains unchanged
       * @param use function to atomically modify value contained in `MVar`
       * @return `F[A]` modified value contained in `MVar`
       */
     def bracketUpdate(use: A => F[A])(implicit FG: Guarantee[F], A: Applicative[F]): F[A] =
-      mvar.take.bracketTransact(use)(mvar.put)
+      mvar.take.bracketReplace(use)(mvar.put)
 
     /**
-      * Modify value with effectful transformation, calculating result. In case of error value remains unchanged
+      * Modify value with effectful transformation, calculating result. In case of error or cancellation value remains unchanged
       * @param use function to atomically modify value contained in `MVar` and produce result
       * @return `F[B]`
       */
