@@ -18,25 +18,35 @@ To use the whole utils pack just add to your `build.sbt`:
 libraryDependencies += "ru.tinkoff" %% "tofu" % "latest version in badge"
 ```
 
-Of course you can also specify the exact subproject that you wanna add to yours dependencies (used in place of `"tofu"`):
+Of course, you can also specify an exact list of `tofu` modules that you want to add to your dependencies (used in place
+of `"tofu"`):
 
-* `tofu-core` for core (Main core)
+* `tofu-core` for core utils
+* `tofu-core-higher-kind` for higher kinded utils
+* `tofu-concurrent` for concurrent utils
+* `tofu-config` for config utils
+* `tofu-data` for data utils
+* `tofu-derivation` for derivation utils and [derevo](https://github.com/manatki/derevo) annotations
+* `tofu-doobie` for [Doobie](https://github.com/tpolecat/doobie) utils
+* `tofu-enums` for [Enumeratum](https://github.com/lloydmeta/enumeratum) utils
+* `tofu-env` for `Env` (a variation of a Reader Monad based on [Monix](https://github.com/monix/monix) Task)
+* `tofu-fs2-interop` for interop with [fs2](https://github.com/functional-streams-for-scala/fs2)
+* `tofu-logging` for the whole set of logging utils (derivation, layout, structured, util, interop)
+  * `tofu-logging-derivation` for logging derivation only
+  * `tofu-logging-layout` for logging layout only
+  * `tofu-logging-structured` for logging structured only
+  * `tofu-logging-util` for logging util only
+  * `tofu-logging-refined` for interop between tofu-logging and [Refined](https://github.com/fthomas/refined) 
+  * `tofu-logging-shapeless` for interop between tofu-logging and [Shapeless](https://github.com/milessabin/shapeless) tag
 * `tofu-memo` for memo (Caching utils)
-* `tofu-env` for env (Some variation of a Reader Monad)
-* `tofu-parallel` for parallel (Parallel utils)
-* `tofu-concurrent` for concurrent (Concurrent utils)
+* `tofu-observable` for `monix.reactive.Observable` utils
 * `tofu-optics-core` for optics core (Optics typeclasses)
 * `tofu-optics-interop` for optics interop with [Monocle](https://github.com/julien-truffaut/Monocle)
 * `tofu-optics-macro` for macro optics generators
-* `tofu-data` for data utils
-* `tofu-logging` for the whole set of logging utils (derivation, layout, structured)
-* `tofu-logging-derivation` for logging derivation only
-* `tofu-logging-structured` for logging structured only
-* `tofu-logging-layout` for logging layout only
-* `tofu-logging-shapeless` for interop between tofu-logging with [Shapeless](https://github.com/milessabin/shapeless) tag
-* `tofu-logging-refined` for interop between tofu-logging with [Refined](https://github.com/fthomas/refined) 
-* `tofu-zio-interop` for interop with [ZIO](https://zio.dev)
-* `tofu-enums` for enums ([Enumeratum](https://github.com/lloydmeta/enumeratum) utils)
+* `tofu-parallel` for parallel (Parallel utils)
+* `tofu-zio-interop` for interop with [ZIO](https://zio.dev) (core, logging)
+  * `tofu-zio-core` for zio instances only
+  * `tofu-zio-logging` for zio logging only
 
 <img align="right" src="logos/tofu-logo.png" height="100px" style="padding-left: 5px"/>
 
@@ -47,10 +57,10 @@ Logos made with love by [@impurepics](https://twitter.com/impurepics)
 
 # Contributing
 
-Please note we use following labels for automated release descriptions:
+Please note we use the following labels for automated release descriptions:
   * `chore` if your PR does not change any types and runtime semantics
   * `fix` if your PR merely fixes incorrect behavior
 
 ## Formatting
-  We have automated check for style conformance. You can run `sbt fmt` before PR.
+  We have an automated check for style conformance. You can run `sbt checkfmt` before PR.
   If you have any trouble during this check, just run `sbt fmt` and commit again.
