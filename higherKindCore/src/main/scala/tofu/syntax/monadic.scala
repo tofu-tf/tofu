@@ -30,7 +30,7 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
       if (condition) F.void(fa) else F.unit
 
     def unless_[F[_], A](fa: => F[A])(implicit F: Applicative[F]): F[Unit] =
-      if (condition) F.unit else F.void(fa)
+      if (condition) F.void(fa) else F.unit
 
     def whenOpt[F[_], A](fa: => F[A])(implicit F: Applicative[F]): F[Option[A]] =
       if (condition) F.map(fa)(Some(_)) else F.pure(None)

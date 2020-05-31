@@ -21,7 +21,7 @@ object bracket {
     def bracketIncomplete[B, C](
         use: A => F[B]
     )(release: A => F[C])(implicit F: Applicative[F], FG: Guarantee[F]): F[B]                     =
-      FG.bracket(fa)(use) { case (a, success) => success unless_ release(a) }
+      FG.bracket(fa)(use) { case (a, success) => !success when_ release(a) }
 
     /**
       * Apply function to [[fa]] with effectful transformation. [[fa]] is always released
@@ -40,7 +40,7 @@ object bracket {
       * @return `F[B]` updated value
       */
     def guaranteeIncomplete[B](release: F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[A] =
-      FG.bracket(F.unit)(_ => fa)((_, success) => success unless_ release)
+      FG.bracket(F.unit)(_ => fa)((_, success) => !success when_ release)
 
     /**
       * Guarantee finalization of [[fa]]. `release` is alwyas called
@@ -68,7 +68,7 @@ object bracket {
       */
     def bracketReplace[B](use: A => F[A])(commit: A => F[B])(implicit FG: Guarantee[F], A: Applicative[F]): F[A] =
       FG.bracket(FG.bracket(fa)(use) {
-        case (oldA, success) => success unless_ commit(oldA)
+        case (oldA, success) => !success when_ commit(oldA)
       })(newA => commit(newA) as newA) { (_, _) => A.unit }
 
     /**
@@ -92,7 +92,7 @@ object bracket {
         use: A => F[(A, B)]
     )(commit: A => F[C])(implicit FG: Guarantee[F], A: Applicative[F]): F[B]                                     =
       FG.bracket(FG.bracket(fa)(use) {
-        case (oldA, success) => success unless_ commit(oldA)
+        case (oldA, success) => !success when_ commit(oldA)
       }) { case (newA, b) => commit(newA) as b } { (_, _) => A.unit }
 
     /**
