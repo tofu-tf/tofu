@@ -34,7 +34,7 @@ object context {
       HP.runContextK(ctx)
   }
 
-  implicit final class LocalOps[F[_], A, C](private val fa: F[A])(implicit loc: F HasLocal C) {
-    def local(project: C => C): F[A] = loc.local(fa)(project)
+  implicit final class LocalOps[F[_], A](private val fa: F[A]) {
+    def local[C](project: C => C)(implicit loc: F HasLocal C): F[A] = loc.local(fa)(project)
   }
 }
