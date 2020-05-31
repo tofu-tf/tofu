@@ -38,15 +38,14 @@ of `"tofu"`):
   * `tofu-logging-util` for logging util only
   * `tofu-logging-refined` for interop between tofu-logging and [Refined](https://github.com/fthomas/refined) 
   * `tofu-logging-shapeless` for interop between tofu-logging and [Shapeless](https://github.com/milessabin/shapeless) tag
-* `tofu-memo` for memo (Caching utils)
+* `tofu-memo` for caching utils
 * `tofu-observable` for `monix.reactive.Observable` utils
 * `tofu-optics-core` for optics core (Optics typeclasses)
 * `tofu-optics-interop` for optics interop with [Monocle](https://github.com/julien-truffaut/Monocle)
 * `tofu-optics-macro` for macro optics generators
-* `tofu-parallel` for parallel (Parallel utils)
 * `tofu-zio-interop` for interop with [ZIO](https://zio.dev) (core, logging)
-  * `tofu-zio-core` for zio instances only
-  * `tofu-zio-logging` for zio logging only
+  * `tofu-zio-core` for ZIO instances only
+  * `tofu-zio-logging` for ZIO logging only
 
 <img align="right" src="logos/tofu-logo.png" height="100px" style="padding-left: 5px"/>
 
