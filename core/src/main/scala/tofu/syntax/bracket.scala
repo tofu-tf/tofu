@@ -5,10 +5,9 @@ import cats.data.EitherT
 import cats.effect.concurrent.MVar
 import cats.effect.{Bracket, ExitCase}
 import cats.effect.syntax.bracket._
-import cats.syntax.functor._
-import cats.syntax.applicative._
 import cats.syntax.either._
 import tofu.{Finally, Guarantee}
+import tofu.syntax.monadic._
 
 object bracket {
   implicit final class TofuBracketOps[F[_], A](private val fa: F[A]) extends AnyVal {
@@ -22,7 +21,7 @@ object bracket {
     def bracketIncomplete[B, C](
         use: A => F[B]
     )(release: A => F[C])(implicit F: Applicative[F], FG: Guarantee[F]): F[B]                     =
-      FG.bracket(fa)(use) { case (a, success) => release(a).whenA(!success) }
+      FG.bracket(fa)(use) { case (a, success) => !success when_ release(a) }
 
     /**
       * Apply function to [[fa]] with effectful transformation. [[fa]] is always released
@@ -41,7 +40,7 @@ object bracket {
       * @return `F[B]` updated value
       */
     def guaranteeIncomplete[B](release: F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[A] =
-      FG.bracket(F.unit)(_ => fa)((_, success) => release.whenA(!success))
+      FG.bracket(F.unit)(_ => fa)((_, success) => !success when_ release)
 
     /**
       * Guarantee finalization of [[fa]]. `release` is alwyas called
@@ -69,8 +68,8 @@ object bracket {
       */
     def bracketReplace[B](use: A => F[A])(commit: A => F[B])(implicit FG: Guarantee[F], A: Applicative[F]): F[A] =
       FG.bracket(FG.bracket(fa)(use) {
-        case (oldA, success) => commit(oldA).whenA(!success)
-      })(newA => commit(newA).as(newA)) { (_, _) => A.unit }
+        case (oldA, success) => !success when_ commit(oldA)
+      })(newA => commit(newA) as newA) { (_, _) => A.unit }
 
     /**
       * Use value contained in [[fa]]. `release` is guaranteed to be called
@@ -93,8 +92,8 @@ object bracket {
         use: A => F[(A, B)]
     )(commit: A => F[C])(implicit FG: Guarantee[F], A: Applicative[F]): F[B]                                     =
       FG.bracket(FG.bracket(fa)(use) {
-        case (oldA, success) => commit(oldA).whenA(!success)
-      }) { case (newA, b) => commit(newA).as(b) } { (_, _) => A.unit }
+        case (oldA, success) => !success when_ commit(oldA)
+      }) { case (newA, b) => commit(newA) as b } { (_, _) => A.unit }
 
     /**
       * Update value in [[fa]] and then release with respect to exit cause.
