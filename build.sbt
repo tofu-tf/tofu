@@ -141,8 +141,8 @@ lazy val loggingRefined = project
   .dependsOn(loggingStr)
 
 lazy val logging = project
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil)
-  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil)
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
+  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
   .settings(defaultSettings)
 
 lazy val env = project
