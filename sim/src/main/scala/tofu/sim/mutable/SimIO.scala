@@ -10,7 +10,7 @@ import tofu.Void
 import tofu.sim.SIM.RUN
 import tofu.sim._
 import tofu.sim.mutable.MutSim.MutVar
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
 
 import scala.concurrent.duration.FiniteDuration
@@ -28,7 +28,8 @@ object SimIO {
       journal.write.foreach { w =>
         w.assign()
         w.waiters.foreach(runtime.notify)
-      } else journal.read.foreach(_.waiters += fiberId)
+      }
+    else journal.read.foreach(_.waiters += fiberId)
 
     (journal.read.iterator ++ journal.write.iterator).foreach(_.assigned = None)
     result.fold[Exit[A]](Lock)(Success(_))
@@ -43,12 +44,11 @@ object SimIO {
   def toProc[E, A](simIO: SimIO[E, A])(runtime: Runtime, fiberId: FiberId): SimProc =
     simIO.value.void.mapK[Exit](funK(_(runtime, fiberId)))
 
-  def exec[E](process: SimIO[Void, Unit]): SimIO[E, FiberId] = lift(
-    (runtime, _) => Success(runtime.exec(id => toProc(process)(runtime, id)))
-  )
-  def cancel[E](fiberId: Long): SimIO[E, Unit]  = lift((runtime, _) => Success(runtime.cancel(fiberId)))
-  def getFiberId[E]: SimIO[E, Long]             = lift((_, fiberId) => Success(fiberId))
-  def panic[E, A](message: String): SimIO[E, A] = lift((_, _) => Panic(message))
+  def exec[E](process: SimIO[Void, Unit]): SimIO[E, FiberId] =
+    lift((runtime, _) => Success(runtime.exec(id => toProc(process)(runtime, id))))
+  def cancel[E](fiberId: Long): SimIO[E, Unit]               = lift((runtime, _) => Success(runtime.cancel(fiberId)))
+  def getFiberId[E]: SimIO[E, Long]                          = lift((_, fiberId) => Success(fiberId))
+  def panic[E, A](message: String): SimIO[E, A]              = lift((_, _) => Panic(message))
 
   def respondTo[E, A](proc: SimIO[E, A], tvar: MutTVar[FiberRes[E, A]]): SimIO[Void, Unit] =
     EitherT(proc.value.flatMap(res => SimIO.atomically(SimT.writeTVar(tvar)(FiberRes.fromEither(res))).value))
@@ -76,21 +76,21 @@ object SimIO {
       init: SimIO[E, A]
   )(action: A => SimIO[E, B])(release: (A, ExitCase[E]) => SimIO[E, C]): SimIO[E, B] =
     for {
-      _ <- setUncancelable[E](true)
-      a <- init
-      _ <- setUncancelable[E](false)
-      _ <- lift { (runtime, fiberId) =>
-            Traced {
-              runtime.regBracket(fiberId, true, toProc(release(a, ExitCase.Completed))(runtime, fiberId))
-              runtime.regBracket(fiberId, false, toProc(release(a, ExitCase.Canceled))(runtime, fiberId))
-            }
-          }
+      _   <- setUncancelable[E](true)
+      a   <- init
+      _   <- setUncancelable[E](false)
+      _   <- lift { (runtime, fiberId) =>
+               Traced {
+                 runtime.regBracket(fiberId, true, toProc(release(a, ExitCase.Completed))(runtime, fiberId))
+                 runtime.regBracket(fiberId, false, toProc(release(a, ExitCase.Canceled))(runtime, fiberId))
+               }
+             }
       res <- action(a).onError {
-              case err =>
-                lift { (runtime, fiberId) =>
-                  Success(runtime.regBracket(fiberId, true, toProc(release(a, ExitCase.Error(err)))(runtime, fiberId)))
-                }
-            }
+               case err =>
+                 lift { (runtime, fiberId) =>
+                   Success(runtime.regBracket(fiberId, true, toProc(release(a, ExitCase.Error(err)))(runtime, fiberId)))
+                 }
+             }
     } yield res
 
 }

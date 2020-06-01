@@ -23,7 +23,7 @@ trait PContains[-S, +T, +A, -B] extends PExtract[S, T, A, B] with PRepeated[S, T
   def project[F[+_]](s: S)(fab: A => F[B])(implicit F: Functor[F]): F[T] =
     F.map(fab(extract(s)))(set(s, _))
 
-  override def reduceMap[X: Semigroup](s: S)(f: A => X): X = f(extract(s))
+  override def reduceMap[X: Semigroup](s: S)(f: A => X): X             = f(extract(s))
   def traverse1[F[+_]](a: S)(f: A => F[B])(implicit F: Apply[F]): F[T] =
     F.map(f(extract(a)))(b => set(a, b))
 
@@ -85,7 +85,7 @@ object PContains extends OpticCompanion[PContains] {
         })(fb)(a)
     }
 
-  implicit class PContainsOps[S, T, A, B](private val self: PContains[S, T, A, B]) extends AnyVal {
+  implicit final class PContainsOps[S, T, A, B](private val self: PContains[S, T, A, B]) extends AnyVal {
     def focusState[F[+_]: Functor, R](state: IndexedStateT[F, A, B, R]): IndexedStateT[F, S, T, R] =
       IndexedStateT.applyF(state.runF.map(afbr => (s: S) => afbr(self.extract(s)).map(_.leftMap(self.set(s, _)))))
   }

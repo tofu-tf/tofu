@@ -13,13 +13,13 @@ import cats.syntax.either._
 
 object Flux extends FluxInstances {
   trait FluxTag extends Any
-  type Base = Any {type FluxOpaque}
+  type Base = Any { type FluxOpaque }
 
   type FluxRepr[+F[_], +G[_], +A] <: Base with FluxTag
 
   def apply[F[_], G[_], A](tfa: F[G[(A, Flux[F, G, A])]]): FluxRepr[F, G, A] = tfa.asInstanceOf[FluxRepr[F, G, A]]
 
-  implicit class FluxValueExtract[F[_], G[_], A](private val repr: FluxRepr[F, G, A]) extends AnyVal {
+  implicit final class FluxValueExtract[F[_], G[_], A](private val repr: FluxRepr[F, G, A]) extends AnyVal {
     def value: F[G[(A, Flux[F, G, A])]] = repr.asInstanceOf[F[G[(A, Flux[F, G, A])]]]
   }
 
@@ -27,7 +27,7 @@ object Flux extends FluxInstances {
   type Stream[+F[_], +A]    = Flux[F, Option, A]
   type Accum[+F[_], +R, +A] = Flux[F, Either[R, +*], A]
 
-  final implicit def toFluxOps[F[_], G[_], A](flux: Flux[F, G, A]): FluxOps[F, G, A] = new FluxOps(flux.value)
+  final implicit def toFluxOps[F[_], G[_], A](flux: Flux[F, G, A]): FluxOps[F, G, A]     = new FluxOps(flux.value)
   final implicit def toStreamOps[F[_], A](flux: Flux[F, Option, A]): FluxStreamOps[F, A] =
     new FluxStreamOps(flux.value)
 
@@ -70,7 +70,7 @@ class FluxStreamOps[F[_], A](private val value: F[Option[(A, Flux.Stream[F, A])]
 }
 
 class FluxOps[F[_], G[_], A](private val value: F[G[(A, Flux[F, G, A])]]) extends AnyVal {
-  def mapK[H[_]: Functor](f: F ~> H)(implicit G: Functor[G]): Flux[H, G, A] =
+  def mapK[H[_]: Functor](f: F ~> H)(implicit G: Functor[G]): Flux[H, G, A]          =
     Flux(f(value).map(_.map { case (a, flx) => (a, flx.mapK(f)) }))
 
   def flatMapF[B](f: A => F[B])(implicit F: Monad[F], G: Traverse[G]): Flux[F, G, B] =
@@ -81,7 +81,7 @@ class FluxOps[F[_], G[_], A](private val value: F[G[(A, Flux[F, G, A])]]) extend
   def zipWithIndex(starting: Int)(implicit F: Functor[F], G: Functor[G]): Flux[F, G, (A, Int)] =
     Flux(value.map(_.map { case (a, next) => ((a, starting), next.zipWithIndex(starting + 1)) }))
 
-  def zipWithIndex(implicit F: Functor[F], G: Functor[G]): Flux[F, G, (A, Int)] = zipWithIndex(0)
+  def zipWithIndex(implicit F: Functor[F], G: Functor[G]): Flux[F, G, (A, Int)]                = zipWithIndex(0)
 }
 
 trait FluxInstances extends FluxInstances1 { self: Flux.type =>
@@ -112,9 +112,9 @@ trait FluxInstances extends FluxInstances1 { self: Flux.type =>
           case Right((head, tail)) => Right((head, add(r, tail)))
         })
 
-      def empty[A]: Accum[F, R, A]      = Flux(Monoid.empty[R].asLeft[(A, Accum[F, R, A])].pure[F])
-      def pure[A](x: A): Accum[F, R, A] = Flux((x, empty[A]).asRight[R].pure[F])
-      def combineK[A](x: Accum[F, R, A], y: Accum[F, R, A]): Accum[F, R, A] =
+      def empty[A]: Accum[F, R, A]                                                  = Flux(Monoid.empty[R].asLeft[(A, Accum[F, R, A])].pure[F])
+      def pure[A](x: A): Accum[F, R, A]                                             = Flux((x, empty[A]).asRight[R].pure[F])
+      def combineK[A](x: Accum[F, R, A], y: Accum[F, R, A]): Accum[F, R, A]         =
         Flux(x.value.flatMap {
           case Left(r)             => add(r, y).value
           case Right((head, tail)) => (head, combineK(tail, y)).asRight[R].pure[F]

@@ -1,18 +1,52 @@
 {
   "docs": {
     "Getting Started": [
-      "start"
+      "start",
+      "installation"
     ],
-    "Module Documentation": [
+    "Documentation": [
       {
         "type": "subcategory",
         "label": "Core",
         "ids": [
-          "typeclasses",
-          "fork"
+          "errors",
+          "fork",
+          "typeclasses"
         ]
       },
-      "env"
+      {
+        "type": "subcategory",
+        "label": "Contextual",
+        "ids": [
+          "env",
+          "hascontext"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Concurrent",
+        "ids": [
+          "agent",
+          "concurrent-makeref"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Optics",
+        "ids": [
+          "optics"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Utilities",
+        "ids": [
+          "config",
+          "console",
+          "logging",
+          "memo"
+        ]
+      }
     ]
   }
 }

@@ -18,7 +18,7 @@ object RaceState {
 case class SimRace[F[_, _]: Transact: STMMonad, E: IOMonad[F, *], A, B](
     tvar: F[TVAR, RaceState[E, A, B]]
 ) {
-  def putFirst(e: Either[E, A]): F[STM, Unit] =
+  def putFirst(e: Either[E, A]): F[STM, Unit]  =
     tvar.read.flatMap {
       case Working => tvar.write(e.fold(Error(_), First(_)))
       case _       => stmMonad.unit

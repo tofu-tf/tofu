@@ -2,8 +2,10 @@ package tofu.optics
 
 import cats.Apply
 import cats.syntax.apply._
+import cats.syntax.either._
 import cats.instances.all._
 import alleycats.std.map._
+import tofu.compat._
 
 object functions {
   def both2[A, B] = new PRepeated[(A, A), (B, B), A, B] {
@@ -11,9 +13,10 @@ object functions {
       (f(s._1), f(s._2)).tupled
   }
 
-  def listElems[A, B]   = PItems.fromTraverse[List, A, B]
-  def vectorElems[A, B] = PItems.fromTraverse[Vector, A, B]
-  def streamElems[A, B] = PItems.fromTraverse[Stream, A, B]
+  def listElems[A, B]     = PItems.fromTraverse[List, A, B]
+  def vectorElems[A, B]   = PItems.fromTraverse[Vector, A, B]
+  def streamElems[A, B]   = PItems.fromTraverse[LazySeq, A, B]
+  def lazyListElems[A, B] = PItems.fromTraverse[LazySeq, A, B]
 
   def setAt[A](a: A): Contains[Set[A], Boolean] = Contains[Set[A]](_(a))((s, b) => if (b) s + a else s - a)
 
@@ -47,4 +50,19 @@ object functions {
 
   def everyTuple4[A, B]: PItems[(A, A, A, A), (B, B, B, B), A, B] =
     PItems[(A, A, A, A), A, B](implicit A => (s, f) => (f(s._1), f(s._2), f(s._3), f(s._4)).tupled)
+
+  def right[A, B]: Subset[Either[A, B], B] = Subset[Either[A, B]](_.toOption)(_.asRight)
+
+  def left[A, B]: Subset[Either[A, B], A] = Subset[Either[A, B]](_.fold(Some(_), _ => None))(_.asLeft)
+
+  def some[A]: Subset[Option[A], A] = Subset[Option[A]](identity)(Some(_))
+
+  def none[A]: Subset[Option[A], Unit] = Subset[Option[A]](_ => Some(()))(_ => None)
+
+  def extractSubtype[A <: B, B]: Extract[A, B] = (s: B) => s
+
+  def containsUnit[A, B >: Unit]: Contains[A, B] = new Contains[A, B] {
+    def extract(s: A): B   = ()
+    def set(s: A, b: B): A = s
+  }
 }

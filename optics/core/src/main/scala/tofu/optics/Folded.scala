@@ -7,7 +7,7 @@ import tofu.optics.data.Constant
 
 /** S has some or none occurrences of A
   * and can collect them */
-trait PFolded[-S, +T, +A, -B] {
+trait PFolded[-S, +T, +A, -B] extends PBase[S, T, A, B] {
   def foldMap[X: Monoid](s: S)(f: A => X): X
 
   def getAll(s: S): List[A] = foldMap(s)(List(_))
@@ -29,7 +29,7 @@ object Folded extends MonoOpticCompanion(PFolded) {
 }
 
 object PFolded extends OpticCompanion[PFolded] {
-  implicit class TofuFoldedOps[S, T, A, B](private val self: PFolded[S, T, A, B]) extends AnyVal {
+  implicit final class TofuFoldedOps[S, T, A, B](private val self: PFolded[S, T, A, B]) extends AnyVal {
     def ++[S1 <: S, T1, A1 >: A, V1](that: PFolded[S1, T1, A1, V1]): PFolded[S1, T1, A1, V1] =
       new PFolded[S1, T1, A1, V1] {
         def foldMap[X: Monoid](s: S1)(f: A1 => X): X = self.foldMap(s)(f) |+| that.foldMap(s)(f)
@@ -40,7 +40,7 @@ object PFolded extends OpticCompanion[PFolded] {
     new PFolded[S, T, U, V] {
       def foldMap[X: Monoid](s: S)(fux: U => X): X = g.foldMap(s)(f.foldMap(_)(fux))
     }
-  final implicit def byFoldable[F[_], A, T, B](implicit F: Foldable[F]): PFolded[F[A], T, A, B] =
+  final implicit def byFoldable[F[_], A, T, B](implicit F: Foldable[F]): PFolded[F[A], T, A, B]      =
     new PFolded[F[A], T, A, B] {
       def foldMap[X: Monoid](fa: F[A])(f: A => X): X = F.foldMap(fa)(f)
     }
@@ -54,7 +54,7 @@ object PFolded extends OpticCompanion[PFolded] {
     }
   }
 
-  override def toGeneric[S, T, A, B](o: PFolded[S, T, A, B]): Optic[Context, S, T, A, B] =
+  override def toGeneric[S, T, A, B](o: PFolded[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
         s => Constant.Impl(o.foldMap(s)(a => p(a).value)(c.algebra))

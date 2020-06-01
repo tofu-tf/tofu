@@ -1,12 +1,12 @@
 package tofu.data
 package derived
 
-import java.time.{Instant, LocalDateTime, ZonedDateTime}
+import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 
 import cats.kernel.Semigroup
 import magnolia.{CaseClass, Magnolia, SealedTrait}
 import simulacrum.typeclass
-import org.manatki.derevo.Derivation
+import derevo.Derivation
 
 @typeclass trait Merge[A] {
   def merge(a: A, b: A): A
@@ -19,10 +19,7 @@ trait MergeInstances1 {
     (a, b) => caseClass.construct(p => p.typeclass.merge(p.dereference(a), p.dereference(b)))
 
   def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
-    (a, b) =>
-      sealedTrait.dispatch(a) { h =>
-        if (h.cast.isDefinedAt(b)) h.typeclass.merge(h.cast(a), h.cast(b)) else a
-      }
+    (a, b) => sealedTrait.dispatch(a) { h => if (h.cast.isDefinedAt(b)) h.typeclass.merge(h.cast(a), h.cast(b)) else a }
 
   implicit def instance[A]: Merge[A] = macro Magnolia.gen[A]
 }
@@ -46,19 +43,20 @@ object Merge extends Derivation[Merge] with MergeInstances1 {
   final implicit object primitiveBigInt        extends Primitive[BigInt]
   final implicit object primitiveLocalDateTime extends Primitive[LocalDateTime]
   final implicit object primitiveZonedDateTime extends Primitive[ZonedDateTime]
+  final implicit object primitiveLocalDate     extends Primitive[LocalDate]
   final implicit object primitiveInstant       extends Primitive[Instant]
   final implicit object primitiveString        extends Primitive[String]
 }
 
 object Merged {
   trait OpaqueTag extends Any
-  type Base = Any {type MergedOpaque}
+  type Base = Any { type MergedOpaque }
 
   type Mer[A] <: Base with OpaqueTag
 
   def apply[A](value: A): Mer[A] = value.asInstanceOf[Mer[A]]
 
-  implicit class MergedOps[A](private val mer: Mer[A]) extends AnyVal {
+  implicit final class MergedOps[A](private val mer: Mer[A]) extends AnyVal {
     def value: A = mer.asInstanceOf[A]
   }
 

@@ -7,14 +7,14 @@ import scala.collection.mutable
 import scala.util.Random
 
 final class FiberInfo private[tofu] {
-  val successBrackets: mutable.Stack[SimProc] = mutable.Stack.empty
-  val cancelBrackets: mutable.Stack[SimProc]  = mutable.Stack.empty
+  val successBrackets: mutable.Stack[SimProc]            = mutable.Stack.empty
+  val cancelBrackets: mutable.Stack[SimProc]             = mutable.Stack.empty
   def brackets(success: Boolean): mutable.Stack[SimProc] =
     if (success) successBrackets else cancelBrackets
-  var uncancelable: Boolean = false
-  var inBracket: Boolean    = false
-  var bracketType: Boolean  = false
-  var wakeUp: Long          = -1
+  var uncancelable: Boolean                              = false
+  var inBracket: Boolean                                 = false
+  var bracketType: Boolean                               = false
+  var wakeUp: Long                                       = -1
 
   def canCancel = !uncancelable && !inBracket
 }
@@ -31,7 +31,7 @@ class Runtime private[tofu] (chooser: Int => Int) {
   def trace(fiberId: Long, message: String): Unit =
     tracing.getOrElseUpdate(fiberId, mutable.Buffer.empty) += message
 
-  def notify(fiberId: Long): Unit =
+  def notify(fiberId: Long): Unit                                         =
     waiting.remove(fiberId).foreach(active += fiberId -> _)
 
   def regBracket(fiberId: FiberId, success: Boolean, proc: SimProc): Unit =
@@ -92,14 +92,14 @@ class Runtime private[tofu] (chooser: Int => Int) {
 
   private def handleStep(fiberId: FiberId, proc: SimProc): StepStatus =
     proc.resume match {
-      case Right(()) =>
+      case Right(())              =>
         active -= fiberId
         startBracketJob(fiberId, success = true)
         if (fiberId == 0) Finished else Ready
-      case Left(Traced(next)) =>
+      case Left(Traced(next))     =>
         active += (fiberId -> next)
         handleStep(fiberId, next)
-      case Left(Success(next)) =>
+      case Left(Success(next))    =>
         active += (fiberId -> next)
         Ready
       case Left(Sleep(next, dur)) =>
@@ -108,11 +108,11 @@ class Runtime private[tofu] (chooser: Int => Int) {
         sleeping += wakeUp -> fiberId -> next
         infos(fiberId).wakeUp = wakeUp
         Ready
-      case Left(Lock) =>
+      case Left(Lock)             =>
         active -= fiberId
         waiting += (fiberId -> proc)
         Ready
-      case Left(p @ Panic(_)) => p
+      case Left(p @ Panic(_))     => p
     }
 
   private def activeStep(): StepStatus =
@@ -120,7 +120,7 @@ class Runtime private[tofu] (chooser: Int => Int) {
       case (fiberId, proc) => handleStep(fiberId, proc)
     }
 }
-object Runtime {
+object Runtime                                    {
   def apply(chooser: Int => Int): Runtime = new Runtime(chooser)
   def apply(random: Random): Runtime      = apply(random.nextInt(_: Int))
   def apply(seed: Long): Runtime          = apply(new Random(seed))

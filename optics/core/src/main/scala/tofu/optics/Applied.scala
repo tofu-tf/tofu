@@ -48,8 +48,8 @@ final case class AppliedWithTag[O[_, _, _, _], S, T, A, B, Tag](s: S, o: O[S, T,
   )(implicit tag: PTagApply[O, A, B, U, V, Tag, Unit], cat: Category2[O]): AppliedWithTag[O1, S, T, U, V, tagger.Tag] =
     end > tagger
 
-  def >>[O1[s, t, a, b] >: O[s, t, a, b]: Category2, U, V, X, Y](o1: O1[U, V, X, Y])(
-      implicit tag: PTagApply[O, A, B, U, V, Tag, Unit],
+  def >>[O1[s, t, a, b] >: O[s, t, a, b]: Category2, U, V, X, Y](o1: O1[U, V, X, Y])(implicit
+      tag: PTagApply[O, A, B, U, V, Tag, Unit],
       cat: Category2[O]
   ): Applied[O1, S, T, X, Y] =
     end >> o1

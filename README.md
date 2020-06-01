@@ -1,17 +1,21 @@
+<img align="right" src="logos/tofu-mascot.png" height="170px" style="padding-left: 20px"/>
+
 # ToFu
+
+**Functional programming toolkit aimed at taming the complexity of Tagless Final approach.** 
 
 | CI | Release | Chat |
 | --- | --- | --- |
-| [![Build Status](https://travis-ci.com/TinkoffCreditSystems/tofu.svg?branch=master)](https://travis-ci.com/TinkoffCreditSystems/tofu) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu-core_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu-core) | [![Gitter chat](https://badges.gitter.im/tinkoff-tofu/community.png)](https://gitter.im/tinkoff-tofu/community)
+| ![Scala CI](https://github.com/TinkoffCreditSystems/tofu/workflows/Scala%20CI/badge.svg) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu-core_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu-core) | [![Discord Chat](https://img.shields.io/discord/657318688025739283.svg)](https://discord.gg/qPD5GGH)
 
-**Functional programming toolkit by Tinkoff scala team aimed at taming the complexity of Tagless Final approach.** 
+# Quick Start
 
-### Quick Start
+## see [the docs on the microsite](https://tinkoffcreditsystems.github.io/tofu)
 
 To use the whole utils pack just add to your `build.sbt`: 
 
 ```scala
-libraryDependencies += "ru.tinkoff" %% "tofu" % "0.4.0"
+libraryDependencies += "ru.tinkoff" %% "tofu" % "latest version in badge"
 ```
 
 Of course you can also specify the exact subproject that you wanna add to yours dependencies (used in place of `"tofu"`):
@@ -29,9 +33,24 @@ Of course you can also specify the exact subproject that you wanna add to yours 
 * `tofu-logging-derivation` for logging derivation only
 * `tofu-logging-structured` for logging structured only
 * `tofu-logging-layout` for logging layout only
-* `tofu-observable` for observable
+* `tofu-logging-shapeless` for interop between tofu-logging with [Shapeless](https://github.com/milessabin/shapeless) tag
+* `tofu-logging-refined` for interop between tofu-logging with [Refined](https://github.com/fthomas/refined) 
+* `tofu-zio-interop` for interop with [ZIO](https://zio.dev)
 * `tofu-enums` for enums ([Enumeratum](https://github.com/lloydmeta/enumeratum) utils)
 
+<img align="right" src="logos/tofu-logo.png" height="100px" style="padding-left: 5px"/>
 
-_Here will be glorious readme soon with link to the gorgeous microsite_
+# Copyright
+Copyright the maintainers, 2020
 
+Logos made with love by [@impurepics](https://twitter.com/impurepics)
+
+# Contributing
+
+Please note we use following labels for automated release descriptions:
+  * `chore` if your PR does not change any types and runtime semantics
+  * `fix` if your PR merely fixes incorrect behavior
+
+## Formatting
+  We have automated check for style conformance. You can run `sbt fmt` before PR.
+  If you have any trouble during this check, just run `sbt fmt` and commit again.

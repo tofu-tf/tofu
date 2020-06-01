@@ -6,9 +6,9 @@ import cats.free.Free
 import scala.collection.mutable
 
 final class MutTVar[A](
-  private[tofu] var value: A,
-  private[tofu] var assigned: Option[A] = None,
-  private[tofu] val waiters: mutable.Buffer[Long] = mutable.Buffer.empty
+    private[tofu] var value: A,
+    private[tofu] var assigned: Option[A] = None,
+    private[tofu] val waiters: mutable.Buffer[Long] = mutable.Buffer.empty
 ) {
   def assign() = assigned.foreach(value = _)
 }

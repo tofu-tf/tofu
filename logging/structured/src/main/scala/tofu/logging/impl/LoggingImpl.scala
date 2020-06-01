@@ -3,9 +3,9 @@ package impl
 
 import org.slf4j.{Logger, Marker}
 import tofu.logging.Logging.{Debug, Error, Info, Level, Trace, Warn}
-import tofu.logging.{LoggedValue, Logging}
 
-abstract class LoggingImpl[F[_]](logger: Logger) extends Logging[F] {
+/* */
+private[tofu] abstract class LoggingImpl[F[_]](logger: Logger) extends Logging[F] {
 
   def traceEnabled: Boolean = logger.isTraceEnabled
   def debugEnabled: Boolean = logger.isDebugEnabled
@@ -31,12 +31,12 @@ abstract class LoggingImpl[F[_]](logger: Logger) extends Logging[F] {
       case Error => errorWithMarker(message, marker)
     }
 
-  override def writeCause(level: Level, message: String, cause: Throwable): F[Unit] =
+  override def writeCause(level: Level, message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     level match {
-      case Trace => traceCause(message, cause)
-      case Debug => debugCause(message, cause)
-      case Info  => infoCause(message, cause)
-      case Warn  => warnCause(message, cause)
-      case Error => errorCause(message, cause)
+      case Trace => traceCause(message, cause, values: _*)
+      case Debug => debugCause(message, cause, values: _*)
+      case Info  => infoCause(message, cause, values: _*)
+      case Warn  => warnCause(message, cause, values: _*)
+      case Error => errorCause(message, cause, values: _*)
     }
 }

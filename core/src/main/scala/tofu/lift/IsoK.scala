@@ -1,14 +1,14 @@
 package tofu.lift
 
 import cats.~>
-import tofu.syntax.functionK._
+import tofu.syntax.funk._
 
 /** bidirectional transformation */
 trait IsoK[F[_], G[_]] { self =>
   def to[A](fa: F[A]): G[A]
   def from[A](ga: G[A]): F[A]
 
-  def tof: F ~> G = makeFunctionK(to(_))
+  def tof: F ~> G   = makeFunctionK(to(_))
   def fromF: G ~> F = makeFunctionK(from(_))
 
   def inverse: IsoK[G, F] = new IsoK[G, F] {

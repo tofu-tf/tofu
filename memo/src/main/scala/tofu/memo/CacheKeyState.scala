@@ -18,7 +18,7 @@ trait CacheKeyState[F[_], -K, A] {
   def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B]
   def getOrElse(process: F[A], key: K, now: Long, after: Long): F[A] =
     runOperation(key, GetOrElse(process, now, after))
-  def cleanUpSingle(key: K, after: Long): F[Boolean] =
+  def cleanUpSingle(key: K, after: Long): F[Boolean]                 =
     runOperation(key, CleanUp(after))
   def cleanUp(after: Long): F[Long]
   def value(key: K): F[CacheVal[A]]
@@ -37,19 +37,21 @@ object CacheKeyState {
     apply[I, F, K, A](keyMethod)(CacheState(valueMethod, _))
 
   def apply[I[_]: Functor, F[_]: Monad: Guarantee, K, A](keyMethod: CacheMethod)(
-      factory: CacheVal[A] => F[CacheState[F, A]])(implicit refs: MakeRef[I, F],
-                                                   mvars: MakeMVar[I, F]): I[CacheKeyState[F, K, A]] =
+      factory: CacheVal[A] => F[CacheState[F, A]]
+  )(implicit refs: MakeRef[I, F], mvars: MakeMVar[I, F]): I[CacheKeyState[F, K, A]] =
     keyMethod match {
       case CacheMethod.MVar => mvar[I, F, K, A](factory)
       case CacheMethod.Ref  => ref[I, F, K, A](factory)
     }
 
-  def mvar[I[_]: Functor, F[_]: Monad: Guarantee, K, A](factory: CacheVal[A] => F[CacheState[F, A]])(
-      implicit mvars: MakeMVar[I, F]): I[CacheKeyState[F, K, A]] =
+  def mvar[I[_]: Functor, F[_]: Monad: Guarantee, K, A](
+      factory: CacheVal[A] => F[CacheState[F, A]]
+  )(implicit mvars: MakeMVar[I, F]): I[CacheKeyState[F, K, A]] =
     mvars.mvarOf[CacheMap[F, K, A]](Map.empty).map(CacheKeyStateMVar(_, factory))
 
-  def ref[I[_]: Functor, F[_]: Monad, K, A](factory: CacheVal[A] => F[CacheState[F, A]])(
-      implicit refs: MakeRef[I, F]): I[CacheKeyState[F, K, A]] =
+  def ref[I[_]: Functor, F[_]: Monad, K, A](
+      factory: CacheVal[A] => F[CacheState[F, A]]
+  )(implicit refs: MakeRef[I, F]): I[CacheKeyState[F, K, A]] =
     refs.refOf[CacheMap[F, K, A]](Map.empty).map(CacheKeyStateRef(_, factory))
 }
 
@@ -58,28 +60,31 @@ final case class CacheKeyStateMVar[F[_]: Monad: Guarantee, K, A](
     factory: CacheVal[A] => F[CacheState[F, A]]
 ) extends CacheKeyState[F, K, A] {
   override def value(key: K): F[CacheVal[A]] = valueByMap(state.read)(key)
-  override def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B] =
+  override def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B] = {
+    def miss: F[B] =
+      op.getPureOrElse(CacheVal.none)(state.bracketUpdate(freshMap => {
+        freshMap.get(key).map(state.put(freshMap) *> _.runOperation(op)).getOrElse {
+          for {
+            (newVal, res) <- op.update(CacheVal.none)
+            _             <- newVal.fold(state.put(freshMap))((_, _) =>
+                               factory(newVal) >>= (cell => state.put(freshMap + (key -> cell)))
+                             )
+          } yield res
+        }
+      }))
+
     for {
       map <- state.read
-      res <- map.get(key).map(_.runOperation(op)).getOrElse {
-              op.getPureOrElse(CacheVal.none)(state.bracketUpdate(freshMap => {
-                freshMap.get(key).map(state.put(freshMap) *> _.runOperation(op)).getOrElse {
-                  for {
-                    (newVal, res) <- op.update(CacheVal.none)
-                    _ <- newVal.fold(state.put(freshMap))((_, _) =>
-                          factory(newVal) >>= (cell => state.put(freshMap + (key -> cell))))
-                  } yield res
-                }
-              }))
-            }
+      res <- map.get(key).fold(miss)(_.runOperation(op))
     } yield res
+  }
 
   override def cleanUp(after: Long): F[Long] =
     state.bracketUpdate { map =>
       for {
-        results   <- map.toList.traverse { case (k, v) => v.cleanUp(after).tupleLeft(k) }
+        results  <- map.toList.traverse { case (k, v) => v.cleanUp(after).tupleLeft(k) }
         cleanKeys = results.collect { case (k, true) => k }
-        _         <- state.put(map -- cleanKeys)
+        _        <- state.put(map -- cleanKeys)
       } yield cleanKeys.size.toLong
     }
 }
@@ -89,26 +94,25 @@ final case class CacheKeyStateRef[F[_]: Monad, K, A](
     factory: CacheVal[A] => F[CacheState[F, A]]
 ) extends CacheKeyState[F, K, A] {
 
-  override def value(key: K): F[CacheVal[A]] = valueByMap(state.get)(key)
+  override def value(key: K): F[CacheVal[A]]                              = valueByMap(state.get)(key)
   override def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B] =
     for {
       (map, update) <- state.access
-      res <- map.get(key).map(_.runOperation(op)).getOrElse {
-              op.getPureOrElse(CacheVal.none)(
-                for {
-                  (newVal, res) <- op.update(CacheVal.none)
-                  _ <- newVal.getOption
-                        .traverse_(_ => factory(newVal) >>= (cell => update(map + (key -> cell))))
-                } yield res
-              )
-            }
+      res           <- map.get(key).map(_.runOperation(op)).getOrElse {
+                         op.getPureOrElse(CacheVal.none)(
+                           for {
+                             (newVal, res) <- op.update(CacheVal.none)
+                             _             <- newVal.getOption.traverse_(_ => factory(newVal) >>= (cell => update(map + (key -> cell))))
+                           } yield res
+                         )
+                       }
     } yield res
 
   override def cleanUp(after: Long): F[Long] =
     for {
       (map, update) <- state.access
       results       <- map.toList.traverse { case (k, v) => v.cleanUp(after).tupleLeft(k) }
-      cleanKeys     = results.collect { case (k, true) => k }
+      cleanKeys      = results.collect { case (k, true) => k }
       _             <- update(map -- cleanKeys)
     } yield cleanKeys.size.toLong
 }

@@ -5,6 +5,7 @@ import tofu.optics.Subset
 import scala.reflect.macros.blackbox
 
 object GenSubset {
+
   /** generate a [[Subset]] between `S` and a subtype `A` of `S` */
   def apply[S, A <: S]: Subset[S, A] = macro GenSubsetImpl.genSubset_impl[S, A]
 }

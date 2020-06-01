@@ -12,11 +12,10 @@ final case class FocusedRef[F[_]: Functor, A, B](ref: Ref[F, A], focus: Contains
     focus.set(a, next) -> res
   }
 
-  def get: F[B]             = ref.get.map(focus.extract)
-  def set(b: B): F[Unit]    = ref.update(a => focus.set(a, b))
-  def getAndSet(b: B): F[B] = ref.modify(a => focus.set(a, b) -> focus.extract(a))
+  def set(b: B): F[Unit] = ref.update(a => focus.set(a, b))
+  override def get: F[B] = ref.get.map(focus.extract)
 
-  def update(f: B => B): F[Unit]               = ref.update(focus.update(_, f))
+  override def update(f: B => B): F[Unit]      = ref.update(focus.update(_, f))
   def modify[X](f: B => (B, X)): F[X]          = ref.modify(focusedMod(f))
   def modifyState[X](state: State[B, X]): F[X] = ref.modifyState(focus.focusState(state))
 

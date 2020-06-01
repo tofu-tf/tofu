@@ -5,9 +5,9 @@ title: Forking and Racing
 
 
 
-##### Fire
-A simple typeclass which main responsibility is starting process in background and forgetting about result value.
-```scala mdoc
+## Fire
+A simple typeclass, which main responsibility is to start a process in the background and forget about the result value.
+```scala
 import tofu.env._
 import tofu.syntax.fire._
 
@@ -18,9 +18,9 @@ val longComputation: Env[Unit, Unit] = Env.delay(())
 val started: Env[Unit, Unit] = longComputation.fireAndForget
 ``` 
 
-##### Race
+## Race
 Allows to run two computations concurrently, returning the result of either completed first (or failed first).
-```scala mdoc
+```scala
 import cats.Functor
 import cats.syntax.functor._
 import tofu.Race
@@ -39,11 +39,11 @@ def raceAndPickFirst[F[_]: Race: Functor, A, B](f1: F[A], f2: F[B]): F[String] =
 }
 ``` 
 
-##### Start
+## Start
 Allows starting computation, resulting in `Fiber` which can then be joined on or canceled.
-```scala mdoc
-import cats.FlatMap
+```scala
 import cats.effect.Fiber
+import cats.FlatMap
 import cats.syntax.flatMap._
 import tofu.Start
 import tofu.syntax.start._

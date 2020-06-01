@@ -27,6 +27,7 @@ object Exit {
       case Panic(message) => Panic(message)
       case Sleep(a, dur)  => Sleep(f(a), dur)
       case Success(a)     => Success(f(a))
+      case Traced(a)      => Traced(f(a))
     }
   }
 }

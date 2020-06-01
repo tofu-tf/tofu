@@ -14,8 +14,9 @@ object CachedFunc {
   def apply[I[_]] = new CachedApply[I]
 
   class CachedApply[I[_]] {
-    def apply[F[_]: Monad: Clock, A, B](f: A => F[B])(ttl: FiniteDuration, control: F[CacheControl])(
-        implicit I: Functor[I]) =
+    def apply[F[_]: Monad: Clock, A, B](
+        f: A => F[B]
+    )(ttl: FiniteDuration, control: F[CacheControl])(implicit I: Functor[I]) =
       new CacheApply2[I, F, A, B](f)(ttl.toMillis, control)
   }
 
@@ -30,7 +31,8 @@ object CachedFunc {
   }
 
   class CacheApply3[I[_]: Functor, F[_]: Clock: Monad, A, B](f: A => F[B])(ttl: Long, control: F[CacheControl])(
-      factory: CacheVal[B] => F[CacheState[F, B]]) {
+      factory: CacheVal[B] => F[CacheState[F, B]]
+  ) {
     def apply(method: CacheMethod)(implicit mr: MakeRef[I, F], mv: MakeMVar[I, F], FG: Guarantee[F]): I[A => F[B]] =
       CacheKeyState[I, F, A, B](method)(factory).map(usingState[F, A, B](f)(ttl, control))
 
@@ -41,12 +43,13 @@ object CachedFunc {
       CacheKeyState.mvar[I, F, A, B](factory).map(usingState[F, A, B](f)(ttl, control))
   }
 
-  private def usingState[F[_]: Monad, A, B](f: A => F[B])(ttl: Long, control: F[CacheControl])(
-      state: CacheKeyState[F, A, B])(a: A)(implicit clock: Clock[F]) =
+  private def usingState[F[_]: Monad, A, B](
+      f: A => F[B]
+  )(ttl: Long, control: F[CacheControl])(state: CacheKeyState[F, A, B])(a: A)(implicit clock: Clock[F]) =
     for {
       cacheControl <- control
       now          <- clock.realTime(TimeUnit.MILLISECONDS)
-      validAfter   = (now - ttl).max(cacheControl.invalidated.millis)
+      validAfter    = (now - ttl).max(cacheControl.invalidated.millis)
       result       <- state.getOrElse(f(a), a, now, validAfter)
     } yield result
 }

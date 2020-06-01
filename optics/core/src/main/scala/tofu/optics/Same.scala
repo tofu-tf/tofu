@@ -6,15 +6,14 @@ import com.github.ghik.silencer.silent
 trait PSame[-S, +T, +A, -B] extends PEquivalent[S, T, A, B] {
   self =>
 
-  def rsubst[R[- _, + _]](r: R[A, B]): R[S, T]
+  def rsubst[R[-_, +_]](r: R[A, B]): R[S, T]
 
   def upcast(b: B): T                     = rsubst[λ[(`-x`, `+y`) => y]](b)
   def extract(a: S): A                    = inverse.rsubst[λ[(`-x`, `+y`) => y]](a)
   override def inverse: PSame[B, A, T, S] = PSame.invert(this)
 }
 
-
-object Same extends MonoOpticCompanion(PSame){
+object Same extends MonoOpticCompanion(PSame) {
   def id[A]: Same[A, A] = PSame.id[A, A]
 }
 
@@ -22,7 +21,7 @@ object PSame extends OpticCompanion[PSame] {
   type Context             = OpticContext
   override type Mono[A, B] = Same[A, B]
 
-  @silent private type Inv[-s, +t, +a, -b] = PSame[b, a, t, s]
+  @silent("never used") private type Inv[-s, +t, +a, -b] = PSame[b, a, t, s]
 
   private def refl[A, B]: PSame[A, B, A, B] = new PSame[A, B, A, B] {
     def rsubst[K[_, _]](k: K[A, B]): K[A, B] = k
@@ -42,7 +41,7 @@ object PSame extends OpticCompanion[PSame] {
 
   override def fromGeneric[S, T, A, B](o: Optic[OpticContext, S, T, A, B]): PSame[S, T, A, B] =
     new PSame[S, T, A, B] {
-      def rsubst[R[- _, + _]](r: R[A, B]): R[S, T] =
+      def rsubst[R[-_, +_]](r: R[A, B]): R[S, T] =
         o(new OpticContext {
           type F[+x]     = x
           type P[-x, +y] = R[x, y]
@@ -52,7 +51,7 @@ object PSame extends OpticCompanion[PSame] {
   private def invert[S, T, A, B](self: PSame[S, T, A, B]): PSame[B, A, T, S] =
     self.rsubst[Inv[-*, +*, A, B]](PSame.id)
 
-  implicit class SameOps[A, B](private val s: PSame[A, A, B, B]) extends AnyVal {
-    def subst[F[+ _]](fa: F[A]): F[B] = s.inverse.rsubst[λ[(`-s`, `+t`) => F[t]]](fa)
+  implicit final class SameOps[A, B](private val s: PSame[A, A, B, B]) extends AnyVal {
+    def subst[F[+_]](fa: F[A]): F[B] = s.inverse.rsubst[λ[(`-s`, `+t`) => F[t]]](fa)
   }
 }

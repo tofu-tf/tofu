@@ -18,24 +18,28 @@ abstract class CacheState[F[_], A] {
 }
 
 object CacheState {
-  def apply[F[_]: Monad: Guarantee: Refs: MVars, A](method: CacheMethod,
-                                                    initial: CacheVal[A] = CacheVal.None): F[CacheState[F, A]] =
+  def apply[F[_]: Monad: Guarantee: Refs: MVars, A](
+      method: CacheMethod,
+      initial: CacheVal[A] = CacheVal.None
+  ): F[CacheState[F, A]] =
     in[F, F, A](method, initial)
 
-  def in[I[_]: Functor, F[_]: Monad: Guarantee, A](method: CacheMethod, initial: CacheVal[A] = CacheVal.None)(
-      implicit
+  def in[I[_]: Functor, F[_]: Monad: Guarantee, A](method: CacheMethod, initial: CacheVal[A] = CacheVal.None)(implicit
       mvar: MakeMVar[I, F],
-      refs: MakeRef[I, F]): I[CacheState[F, A]] =
+      refs: MakeRef[I, F]
+  ): I[CacheState[F, A]] =
     method match {
       case CacheMethod.MVar => mvarIn[I, F, A](initial)
       case CacheMethod.Ref  => refIn[I, F, A](initial)
     }
 
-  def mvarIn[I[_]: Functor, F[_]: Monad: Guarantee, A](initial: CacheVal[A] = CacheVal.none)(
-      implicit mvars: MakeMVar[I, F]): I[CacheState[F, A]] = mvars.mvarOf(initial).map(CacheStateMVar(_))
+  def mvarIn[I[_]: Functor, F[_]: Monad: Guarantee, A](initial: CacheVal[A] = CacheVal.none)(implicit
+      mvars: MakeMVar[I, F]
+  ): I[CacheState[F, A]] = mvars.mvarOf(initial).map(CacheStateMVar(_))
 
-  def refIn[I[_]: Functor, F[_]: Monad, A](initial: CacheVal[A] = CacheVal.none)(
-      implicit refs: MakeRef[I, F]): I[CacheState[F, A]] =
+  def refIn[I[_]: Functor, F[_]: Monad, A](
+      initial: CacheVal[A] = CacheVal.none
+  )(implicit refs: MakeRef[I, F]): I[CacheState[F, A]] =
     refs.refOf(initial).map(CacheStateRef(_))
 
   def mvar[F[_]: Monad: Guarantee: MVars, A](initial: CacheVal[A] = CacheVal.none): F[CacheState[F, A]] =
@@ -43,40 +47,41 @@ object CacheState {
 
   def ref[F[_]: Monad: Refs, A](initial: CacheVal[A] = CacheVal.none): F[CacheState[F, A]] = refIn[F, F, A](initial)
 
-  implicit def invariantK[A]: InvariantK[CacheState[*[_], A]] =  new InvariantK[CacheState[*[_], A]] {
+  implicit def invariantK[A]: InvariantK[CacheState[*[_], A]] = new InvariantK[CacheState[*[_], A]] {
     def imapK[F[_], G[_]](af: CacheState[F, A])(fk: F ~> G)(gk: G ~> F): CacheState[G, A] =
       new CacheState[G, A] {
         def runOperation[B](op: CacheOperation[G, A, B]): G[B] = fk(af.runOperation(op.mapK(gk)))
-        def value: G[CacheVal[A]] = fk(af.value)
+        def value: G[CacheVal[A]]                              = fk(af.value)
       }
   }
 }
 
 final case class CacheStateMVar[F[_]: Monad: Guarantee, A](state: MVar[F, CacheVal[A]]) extends CacheState[F, A] {
-  override def value: F[CacheVal[A]] = state.read
+  override def value: F[CacheVal[A]]                              = state.read
   override def runOperation[B](op: CacheOperation[F, A, B]): F[B] =
     for {
       cur <- state.read
       res <- op.getPureOrElse(cur)(
-              state.bracketUpdate(fresh =>
-                for {
-                  (next, res) <- op.update(fresh)
-                  _           <- state.put(next)
-                } yield res)
-            )
+               state.bracketUpdate(fresh =>
+                 for {
+                   (next, res) <- op.update(fresh)
+                   _           <- state.put(next)
+                 } yield res
+               )
+             )
     } yield res
 }
 
 final case class CacheStateRef[F[_]: Monad, A](state: Ref[F, CacheVal[A]]) extends CacheState[F, A] {
-  override def value: F[CacheVal[A]] = state.get
+  override def value: F[CacheVal[A]]                              = state.get
   override def runOperation[B](op: CacheOperation[F, A, B]): F[B] =
     for {
       (cur, update) <- state.access
-      res <- op.getPureOrElse(cur)(
-              for {
-                (newVal, res) <- op.update(cur)
-                _             <- update(newVal)
-              } yield res
-            )
+      res           <- op.getPureOrElse(cur)(
+                         for {
+                           (newVal, res) <- op.update(cur)
+                           _             <- update(newVal)
+                         } yield res
+                       )
     } yield res
 }

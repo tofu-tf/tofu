@@ -13,19 +13,21 @@ import scala.concurrent.duration.FiniteDuration
 object Cached {
   def apply[I[_]] = new CachedApply[I]
 
-  private def usingState[F[_]: Monad, A](value: F[A], ttl: Long, control: F[CacheControl])(state: CacheState[F, A])(
-      implicit clock: Clock[F]): F[A] = {
+  private def usingState[F[_]: Monad, A](value: F[A], ttl: Long, control: F[CacheControl])(
+      state: CacheState[F, A]
+  )(implicit clock: Clock[F]): F[A] = {
     for {
       cacheControl <- control
       now          <- clock.realTime(TimeUnit.MILLISECONDS)
-      validAfter   = (now - ttl).max(cacheControl.invalidated.millis)
+      validAfter    = (now - ttl).max(cacheControl.invalidated.millis)
       result       <- state.getOrElse(value, now, validAfter)
     } yield result
   }
 
   class CachedApply[I[_]] {
-    def apply[F[_]: Monad: Clock, A](value: F[A])(ttl: FiniteDuration, control: F[CacheControl])(
-        implicit I: Functor[I]) =
+    def apply[F[_]: Monad: Clock, A](
+        value: F[A]
+    )(ttl: FiniteDuration, control: F[CacheControl])(implicit I: Functor[I]) =
       new CachedApply2[I, F, A](value)(ttl.toMillis, control)
   }
 

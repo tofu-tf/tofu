@@ -47,7 +47,7 @@ object PReduced extends OpticCompanion[PReduced] {
     }
   }
 
-  override def toGeneric[S, T, A, B](o: PReduced[S, T, A, B]): Optic[Context, S, T, A, B] =
+  override def toGeneric[S, T, A, B](o: PReduced[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
         s => Constant.Impl(o.reduceMap(s)(a => p(a).value)(c.algebra))

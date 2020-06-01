@@ -6,7 +6,7 @@ object order {
   type Typeclass[A] = Order[A]
 
   def combine[T](ctx: CaseClass[Order, T]): Order[T] = (x: T, y: T) => {
-    val it = ctx.parameters.iterator
+    val it        = ctx.parameters.iterator
     def go(): Int =
       if (it.hasNext) {
         val p   = it.next()
@@ -19,7 +19,7 @@ object order {
 
   def dispatch[T](ctx: SealedTrait[Order, T]): Order[T] =
     (x: T, y: T) => {
-      val it = ctx.subtypes.iterator
+      val it        = ctx.subtypes.iterator
       def go(): Int =
         if (it.hasNext) {
           val s = it.next()

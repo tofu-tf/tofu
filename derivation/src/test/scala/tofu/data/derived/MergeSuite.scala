@@ -1,11 +1,13 @@
 package tofu.data.derived
 
-import org.scalatest.FlatSpec
-import cats.syntax.option._
-import org.manatki.derevo.derive
-import MergeSuite.{Bar, Foo}
+import java.time.LocalDate
 
-class MergeSuite extends FlatSpec {
+import cats.syntax.option._
+import derevo.derive
+import MergeSuite.{Bar, Foo}
+import org.scalatest.flatspec.AnyFlatSpec
+
+class MergeSuite extends AnyFlatSpec {
   "simple merge" should "prefer left value" in {
     assert(Merge[Int].merge(1, 2) === 1)
   }
@@ -161,6 +163,15 @@ class MergeSuite extends FlatSpec {
         Bar(Foo(11, "11".some, None), Foo(12, None, 1.2.some).some),
         Bar(Foo(21, "21".some, 2.1.some), None),
       ) === Bar(Foo(11, "11".some, 2.1.some), Foo(12, None, 1.2.some).some)
+    )
+  }
+
+  "local date" should "have merge instance" in {
+    assert(
+      Merge[LocalDate].merge(
+        LocalDate.ofYearDay(1999, 256),
+        LocalDate.ofYearDay(2000, 128)
+      ) === LocalDate.ofYearDay(1999, 256),
     )
   }
 

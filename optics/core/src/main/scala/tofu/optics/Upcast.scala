@@ -4,8 +4,9 @@ import alleycats.Pure
 import cats.{Functor, Id}
 import tofu.optics.classes.PChoice
 import tofu.optics.data.{Identity, Tagged}
+import scala.annotation.nowarn
 
-trait PUpcast[-S, +T, +A, -B]  {
+trait PUpcast[-S, +T, +A, -B] extends PBase[S, T, A, B] {
   def upcast(b: B): T
 }
 
@@ -18,7 +19,7 @@ object PUpcast extends OpticCompanion[PUpcast] {
 
   class Context extends PSubset.Context {
     override type P[-x, +y] = Tagged[x, y]
-    type F[+x]             = x
+    type F[+x]              = x
     def pure       = Pure[Id]
     def profunctor = PChoice[Tagged]
     def functor    = Functor[Identity]
@@ -29,4 +30,11 @@ object PUpcast extends OpticCompanion[PUpcast] {
     }
   def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PUpcast[S, T, A, B] =
     b => o(new Context)(Tagged(b)).value
+
+  object GenericSubtypeImpl extends Upcast[Any, Any] {
+    override def upcast(b: Any): Any = b
+  }
+
+  implicit def subType[E, E1](implicit @nowarn ev: E <:< E1): Upcast[E1, E] =
+    GenericSubtypeImpl.asInstanceOf[Upcast[E1, E]]
 }

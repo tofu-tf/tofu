@@ -4,9 +4,10 @@ import java.util.UUID
 
 import cats.Functor
 import cats.effect.Sync
-import simulacrum.typeclass
 import cats.syntax.functor._
-import cats.tagless.ApplyK
+import simulacrum.typeclass
+import tofu.higherKind
+import tofu.higherKind.RepresentableK
 
 @typeclass
 trait GenUUID[F[_]] {
@@ -21,5 +22,5 @@ object GenUUID {
     val randomUUID: F[UUID] = F.delay(UUID.randomUUID())
   }
 
-  implicit val applyK: ApplyK[GenUUID] = cats.tagless.Derive.applyK
+  implicit val genUUIDRepresentableK: RepresentableK[GenUUID] = higherKind.derived.genRepresentableK[GenUUID]
 }

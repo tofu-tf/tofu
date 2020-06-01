@@ -17,16 +17,16 @@ object Tagged {
     new Compose[Tagged] with PChoice[Tagged] {
       def dimap[A, B, C, D](fab: Tagged[A, B])(f: C => A)(
           g: B => D
-      ): Tagged[C, D] = fab.map(g).retag
-      def compose[A, B, C](f: Tagged[B, C], g: Tagged[A, B]): Tagged[A, C] =
+      ): Tagged[C, D]                                                          = fab.map(g).retag
+      def compose[A, B, C](f: Tagged[B, C], g: Tagged[A, B]): Tagged[A, C]     =
         f.retag
       def left[A, B, C](pab: Tagged[A, B]): Tagged[Either[A, C], Either[B, C]] =
         pab.map(_.asLeft[C]).retag
       def right[A, B, C](
           pab: Tagged[A, B]
-      ): Tagged[Either[C, A], Either[C, B]] = pab.map(_.asRight[C]).retag
+      ): Tagged[Either[C, A], Either[C, B]]                                    = pab.map(_.asRight[C]).retag
       override def optional[A, B, C](
           pab: Tagged[A, B]
-      ): Tagged[Option[A], Option[B]] = pab.map(_.some).retag
+      ): Tagged[Option[A], Option[B]]                                          = pab.map(_.some).retag
     }
 }

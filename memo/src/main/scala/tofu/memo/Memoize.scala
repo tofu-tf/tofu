@@ -4,7 +4,6 @@ import cats.effect.{Concurrent, ExitCase}
 import cats.effect.concurrent.{Deferred, Ref}
 import simulacrum.typeclass
 import tofu.syntax.monadic._
-import cats.syntax.semigroupal._
 import cats.syntax.option._
 import cats.effect.syntax.concurrent._
 import cats.effect.syntax.bracket._
@@ -37,8 +36,8 @@ object Memoize {
               case (v, stop) =>
                 def endState(ec: ExitCase[Throwable]) =
                   state.modify {
-                    case None                        => throw new AssertionError("unreachable")
-                    case s @ Some(Fetch(Done, _, _)) => s -> F.unit
+                    case None                          => throw new AssertionError("unreachable")
+                    case s @ Some(Fetch(Done, _, _))   => s -> F.unit
                     case Some(Fetch(Subs(n), v, stop)) =>
                       if (ec == ExitCase.Canceled && n == 1) None -> stop.get.flatten
                       else if (ec == ExitCase.Canceled) Fetch(Subs(n - 1), v, stop).some -> F.unit
@@ -51,11 +50,11 @@ object Memoize {
                     .flatMap(fiber => stop.complete(fiber.cancel))
 
                 state.modify {
-                  case s @ Some(Fetch(Done, v, _)) =>
+                  case s @ Some(Fetch(Done, v, _))   =>
                     s -> v.get
                   case Some(Fetch(Subs(n), v, stop)) =>
                     Fetch(Subs(n + 1), v, stop).some -> v.get.guaranteeCase(endState)
-                  case None =>
+                  case None                          =>
                     Fetch(Subs(1), v, stop).some -> fetch.bracketCase(_ => v.get) { case (_, ec) => endState(ec) }
                 }.flatten
             }

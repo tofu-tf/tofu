@@ -1,10 +1,11 @@
 package tofu.logging
 package derivation
 
-import org.manatki.derevo.derive
-import org.scalatest.{FlatSpec, Matchers}
+import derevo.derive
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class DerivedLoggableSuite extends FlatSpec with Matchers {
+class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
 
   import DerivedLoggableSuite._
 
@@ -40,7 +41,9 @@ class DerivedLoggableSuite extends FlatSpec with Matchers {
   }
 
   it should "respect complex primitive collections" in {
-    json(Baz(zs = Some(List(List("one", "two"), List("three"))))) shouldBe """{"foos":[],"ys":[],"zs":[["one","two"],["three"]]}"""
+    json(
+      Baz(zs = Some(List(List("one", "two"), List("three"))))
+    ) shouldBe """{"foos":[],"ys":[],"zs":[["one","two"],["three"]]}"""
   }
 
 }

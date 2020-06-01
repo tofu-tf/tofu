@@ -10,6 +10,7 @@ import tofu.optics.Contains
 import tofu.syntax.bracket._
 
 /** simplified form of synchonized mutable variable, that could be satisfied both by MVar and Ref */
+@deprecated("use Atom / qvar.toAtom", since = "0.5.6")
 trait Mut[F[_], A] {
   def get: F[A]
   def update(f: A => A): F[Unit]

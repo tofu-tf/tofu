@@ -7,10 +7,14 @@ trait MakeSemaphore[I[_], F[_]] {
   def semaphore(count: Long): I[Semaphore[F]]
 }
 
+object Semaphores {
+  def apply[F[_]](implicit agents: Semaphores[F]): MakeSemaphore.Applier[F, F] = new MakeSemaphore.Applier[F, F](agents)
+}
+
 object MakeSemaphore {
   def apply[I[_], F[_]](implicit mksem: MakeSemaphore[I, F]) = new Applier[I, F](mksem)
 
-  class Applier[I[_], F[_]](val mksem: MakeSemaphore[I, F]) extends AnyVal {
+  final class Applier[I[_], F[_]](private val mksem: MakeSemaphore[I, F]) extends AnyVal {
     def of(count: Long): I[Semaphore[F]] = mksem.semaphore(count)
   }
 

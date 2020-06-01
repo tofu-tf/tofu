@@ -1,7 +1,7 @@
 package tofu.config
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers
-import org.manatki.derevo.derive
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import derevo.derive
 import com.typesafe.config.ConfigFactory
 import cats.syntax.option._
 import ConfigSuite.{Foe, Skill}
@@ -9,7 +9,7 @@ import Key.{Index, Prop}
 import tofu.config.ConfigItem.ValueType
 import tofu.config.ConfigError.{BadType, NotFound, BadNumber}
 
-class ConfigSuite extends FlatSpec with Matchers {
+class ConfigSuite extends AnyFlatSpec with Matchers {
   import ConfigSuite.{tryParse, fallenParse}
 
   "sync parsing" should "parse lists" in {
@@ -66,9 +66,9 @@ object ConfigSuite {
 
   val cfg = ConfigFactory.parseResources("suite.conf")
 
-  def tryParse[A: Configurable](path: String) =
-    typesafe.syncParseValue[A](cfg.getValue(path)).right.get
+  def tryParse[A: Configurable](path: String): A =
+    typesafe.syncParseValue[A](cfg.getValue(path)).getOrElse(throw new RuntimeException("no parse"))
 
-  def fallenParse[A: Configurable](path: String) =
+  def fallenParse[A: Configurable](path: String): Either[A, MessageList] =
     typesafe.syncParseValue[A](cfg.getValue(path)).swap
 }
