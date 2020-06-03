@@ -28,7 +28,7 @@ case class SimFiber[F[+_, _]: IOMonad[*[_, _], E] : VoidMonad: STMVMonad: Transa
     tvar.read.flatMap {
       case Working => tvar.write(Canceled) as true
       case _       => false.pureSTM[F, Nothing]
-    }.atomically >>= Transact.cancel[F, Nothing](fiberId).whenA
+    }.atomically >>= Transact.cancel[F](fiberId).whenA
 
   def join: F[RUN[E], A] =
     (tvar.read
@@ -40,7 +40,7 @@ case class SimFiber[F[+_, _]: IOMonad[*[_, _], E] : VoidMonad: STMVMonad: Transa
       .flatMap {
         case Succeed(a) => a.pure[F[RUN[E], *]]
         case Failed(e)  => error(e)
-        case Canceled   => panic[F, E, A]("joining canceled fiber")
+        case Canceled   => panic[F, A]("joining canceled fiber")
       }
 
 }

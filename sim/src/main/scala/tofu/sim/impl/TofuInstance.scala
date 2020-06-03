@@ -12,7 +12,7 @@ import cats.instances.list._
 class TofuInstance[F[+_, _]: Transact: VoidMonad: STMVMonad, E: IOMonad[F, *]] extends Start[F[RUN[E], *]] {
   def start[A](fa: F[RUN[E], A]): F[RUN[E], Fiber[F[RUN[E], *], A]] = for {
     resVar <- newTVar[F, E].of[FiberRes[E, A]](FiberRes.Working)
-    id     <- exec[F, E](respondTo[A](fa)(e => resVar.write(FiberRes.fromEither(e))))
+    id     <- exec[F](respondTo[A](fa)(e => resVar.write(FiberRes.fromEither(e))))
   } yield SimFiber[F, E, A](resVar, id)
 
   def racePair[A, B](
@@ -23,18 +23,18 @@ class TofuInstance[F[+_, _]: Transact: VoidMonad: STMVMonad, E: IOMonad[F, *]] e
     bVar <- newTVar[F, E].of[FiberRes[E, B]](FiberRes.Working)
     rVar <- newTVar[F, E].of[RaceState[E, A, B]](RaceState.Working)
     rst   = SimRace(rVar)
-    aId  <- exec[F, E](
+    aId  <- exec[F](
               respondTo[A](fa)(
                 e => aVar.write(FiberRes.fromEither(e)),
                 rst.putFirst,
               )
-            )
-    bId  <- exec[F, E](
+            ) : F[RUN[E], FiberId]
+    bId  <- exec[F](
               respondTo[B](fb)(
                 e => bVar.write(FiberRes.fromEither(e)),
                 rst.putSecond
               )
-            )
+            ) : F[RUN[E], FiberId]
     res  <- rst.get(SimFiber(aVar, aId), SimFiber(bVar, bId))
   } yield res
 
@@ -43,7 +43,7 @@ class TofuInstance[F[+_, _]: Transact: VoidMonad: STMVMonad, E: IOMonad[F, *]] e
     case Right((af, b)) => af.cancel as Right(b)
   }
   def never[A]: F[RUN[E], A]                                                  = fail[F, A].atomically
-  def fireAndForget[A](fa: F[RUN[E], A]): F[RUN[E], Unit]                     = exec[F, E](fa.attempt.void).void
+  def fireAndForget[A](fa: F[RUN[E], A]): F[RUN[E], Unit]                     = exec[F](fa.attempt.void).void
 
   private def respondTo[A](proc: F[RUN[E], A])(writers: (Either[E, A] => F[STM[Nothing], Unit])*): F[RUN[Nothing], Unit] =
     proc.attempt >>= (res => writers.toList.traverse_(_(res)).atomically)

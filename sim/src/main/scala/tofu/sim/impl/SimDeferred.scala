@@ -15,5 +15,5 @@ case class SimDeferred[F[+_, _]: VoidMonad: STMVMonad: Transact, E, A](tvar: F[T
     case None => tvar.write(Some(a)) as false
     case _    => true.pureSTM
   }.atomically >>=
-    panic[F, Nothing, Unit]("Attempting to complete a Deferred that has already been completed").whenA
+    panic[F, Unit]("Attempting to complete a Deferred that has already been completed").whenA
 }

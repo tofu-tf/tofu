@@ -2,7 +2,6 @@ package tofu
 package sim
 package mutable
 
-import cats.data.OptionT
 import cats.free.Free
 
 import scala.collection.mutable

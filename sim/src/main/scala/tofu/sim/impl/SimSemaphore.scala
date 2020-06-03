@@ -19,7 +19,7 @@ case class SimSemaphore[F[+_, _]: IOMonad[*[_, _], E]: VoidMonad: STMVMonad: Tra
       else tvar.write(n + count) as false
     })
     .atomically
-    .flatMap(panic[F, Nothing, Unit](s"too large acquire in Semaphore $n, allowed: $max").whenA)
+    .flatMap(panic[F, Unit](s"too large acquire in Semaphore $n, allowed: $max").whenA)
   def tryAcquireN(n: Long): F[RUN[E], Boolean]     =
     tvar.read.flatMap { count =>
       if (n > max) false.pureSTM

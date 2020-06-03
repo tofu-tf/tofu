@@ -14,8 +14,8 @@ sealed trait MutSim[+T, A]
 
 object MutSim {
   final case class MutIO[+E, A](fa: SimIO[E @uncheckedVariance, A]) extends MutSim[RUN[E], A]
-  final case class MutSTM[+E, A](fa: SimT[E, A]) extends MutSim[STM[E], A]
-  final case class MutVar[A](va: MutTVar[A])    extends MutSim[TVAR, A]
+  final case class MutSTM[+E, A](fa: SimT[E, A])                    extends MutSim[STM[E], A]
+  final case class MutVar[A](va: MutTVar[A])                        extends MutSim[TVAR, A]
 
   implicit class IOOPs[E, A](private val sim: MutSim[RUN[E], A])  extends AnyVal {
     def value: SimIO[E, A] = sim match { case MutIO(fa) => fa }
@@ -33,24 +33,20 @@ object MutSim {
 }
 
 private class MutSimTransact extends Transact[MutSim[*, *]] {
-  def writeTVar[A](tvar: MutSim[TVAR, A], value: A): MutSim[STM[Nothing], Unit] = MutSTM[Nothing, Unit](
-    SimT.writeTVar(tvar.value)(value)
-  )
-  def readTVar[A](tvar: MutSim[TVAR, A]): MutSim[STM[Nothing], A]               =
-    MutSTM[Nothing, A](SimT.readTVar(tvar.value))
-  def fail[A]: MutSim[STM[Nothing], A]                                          =
-    MutSTM[Nothing, A](SimT.fail)
-  def atomically[E, A](v: MutSim[STM[E], A]): MutSim[RUN[E], A]                 = MutIO(SimIO.atomically(v.value))
-  def newTVar[E, A](a: A): MutSim[RUN[E], MutSim[TVAR, A]]                      = 
-    MutIO[E, MutSim[TVAR, A]](SimIO.newTVar(a).map(MutVar(_)))
-  def panic[E, A](s: String): MutSim[RUN[E], A]                                 = MutIO(SimIO.panic(s))
-  def cancel[E](threadId: FiberId): MutSim[RUN[E], Unit]                        = MutIO(SimIO.cancel(threadId))
-  def fiberId[E]: MutSim[RUN[E], FiberId]                                       = MutIO(SimIO.getFiberId)
-  def time[E]: MutSim[RUN[E], Long]                                             = MutIO(SimIO.time)
-  def sleep[E](nanos: Long): MutSim[RUN[E], Unit]                               = MutIO(SimIO.sleep(nanos))
-  def error[E, A](err: E): MutSim[RUN[E], A]                                    = MutIO(SimIO.raise(err))
-  def attempt[E, E1, A](proc: MutSim[RUN[E], A]): MutSim[RUN[E1], Either[E, A]] = MutIO(SimIO.attempt(proc.value))
-  def exec[E](p: MutSim[RUN[Nothing], Unit]): MutSim[RUN[E], FiberId]           = MutIO(SimIO.exec(p.value))
+  def writeTVar[A](tvar: MutSim[TVAR, A], value: A): MutSim[STM[Nothing], Unit]  =
+    MutSTM(SimT.writeTVar(tvar.value)(value))
+  def readTVar[A](tvar: MutSim[TVAR, A]): MutSim[STM[Nothing], A]                = MutSTM(SimT.readTVar(tvar.value))
+  def fail[A]: MutSim[STM[Nothing], A]                                           = MutSTM(SimT.fail)
+  def atomically[E, A](v: MutSim[STM[E], A]): MutSim[RUN[E], A]                  = MutIO(SimIO.atomically(v.value))
+  def newTVar[A](a: A): MutSim[RUN[Nothing], MutSim[TVAR, A]]                    = MutIO(SimIO.newTVar(a).map(MutVar(_)))
+  def panic[A](s: String): MutSim[RUN[Nothing], A]                               = MutIO(SimIO.panic(s))
+  def cancel(threadId: FiberId): MutSim[RUN[Nothing], Unit]                      = MutIO(SimIO.cancel(threadId))
+  def fiberId: MutSim[RUN[Nothing], FiberId]                                     = MutIO(SimIO.getFiberId)
+  def time: MutSim[RUN[Nothing], Long]                                           = MutIO(SimIO.time)
+  def sleep(nanos: Long): MutSim[RUN[Nothing], Unit]                             = MutIO(SimIO.sleep(nanos))
+  def error[E, A](err: E): MutSim[RUN[E], A]                                     = MutIO(SimIO.raise(err))
+  def attempt[E, A](proc: MutSim[RUN[E], A]): MutSim[RUN[Nothing], Either[E, A]] = MutIO(SimIO.attempt(proc.value))
+  def exec(p: MutSim[RUN[Nothing], Unit]): MutSim[RUN[Nothing], FiberId]         = MutIO(SimIO.exec(p.value))
 }
 
 class MutSimIOMonad[E]
@@ -80,7 +76,7 @@ class MutSimIOMonad[E]
       case Right(x) => SimIO.pure(x)
       case Left(e)  => f(e).value
     })
-  def restore[A](fa: MutSim[RUN[E], A]): MutSim[RUN[Nothing], Option[A]]                          =
+  def restore[A](fa: MutSim[RUN[E], A]): MutSim[RUN[Nothing], Option[A]]                             =
     MutIO[Nothing, Option[A]](SimIO.attempt[Nothing, E, A](fa.value).flatMap[Nothing, Option[A]] {
       case Right(x) => SimIO.pure(Some(x))
       case Left(_)  => SimIO.pure(None)
