@@ -1,8 +1,10 @@
 package tofu.sim
-import SIM.{IOMonad, RUN, STM, STMMonad, TVAR}
+package impl
+
+import SIM._
 import Transact.{cancel => _, _}
 import cats.effect.Fiber
-import tofu.sim.FiberRes._
+import tofu.sim.impl.FiberRes._
 import tofu.syntax.monadic._
 
 sealed trait FiberRes[+E, +A]

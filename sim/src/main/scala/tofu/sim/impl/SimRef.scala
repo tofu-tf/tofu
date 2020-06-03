@@ -1,4 +1,5 @@
 package tofu.sim
+package impl
 import cats.data.State
 import cats.effect.concurrent.Ref
 import cats.instances.tuple._

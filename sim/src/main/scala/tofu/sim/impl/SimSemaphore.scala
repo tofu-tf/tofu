@@ -1,7 +1,8 @@
 package tofu.sim
+package impl
 import Transact._
 import cats.effect.concurrent.Semaphore
-import tofu.sim.SIM.{RUN, IOGuarantee, IOMonad, STMMonad, TVAR}
+import tofu.sim.SIM._
 import tofu.syntax.bracket._
 import tofu.syntax.monadic._
 

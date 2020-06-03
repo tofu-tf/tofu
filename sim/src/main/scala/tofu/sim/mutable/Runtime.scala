@@ -7,9 +7,9 @@ import scala.collection.mutable
 import scala.util.Random
 
 final class FiberInfo private[tofu] {
-  val successBrackets: mutable.Stack[SimProc]            = mutable.Stack.empty
-  val cancelBrackets: mutable.Stack[SimProc]             = mutable.Stack.empty
-  def brackets(success: Boolean): mutable.Stack[SimProc] =
+  val successBrackets: mutable.Buffer[SimProc]            = mutable.Buffer.empty[SimProc]
+  val cancelBrackets: mutable.Buffer[SimProc]             = mutable.Buffer.empty[SimProc]
+  def brackets(success: Boolean): mutable.Buffer[SimProc] =
     if (success) successBrackets else cancelBrackets
   var uncancelable: Boolean                              = false
   var inBracket: Boolean                                 = false
@@ -29,13 +29,16 @@ class Runtime private[tofu] (chooser: Int => Int) {
   val tracing: mutable.LongMap[mutable.Buffer[String]] = mutable.LongMap.empty
 
   def trace(fiberId: Long, message: String): Unit =
-    tracing.getOrElseUpdate(fiberId, mutable.Buffer.empty) += message
+    {
+      tracing.getOrElseUpdate(fiberId, mutable.Buffer.empty) += message
+      ()
+    }
 
   def notify(fiberId: Long): Unit                                         =
     waiting.remove(fiberId).foreach(active += fiberId -> _)
 
   def regBracket(fiberId: FiberId, success: Boolean, proc: SimProc): Unit =
-    infos(fiberId).brackets(success).push(proc)
+    infos(fiberId).brackets(success).append(proc)
 
   private def startBracketJob(fiberId: FiberId, success: Boolean) = {
     val info = infos(fiberId)
@@ -43,7 +46,9 @@ class Runtime private[tofu] (chooser: Int => Int) {
     val s = if (info.inBracket) info.bracketType else success
     info.brackets(!s).clear()
     if (info.brackets(s).nonEmpty) {
-      val handler = info.brackets(s).pop()
+      val bracket = info.brackets(s)
+      val handler = bracket.last
+      bracket.dropRight(1)
       info.inBracket = true
       info.inBracket = s
       info.uncancelable = true
@@ -61,6 +66,7 @@ class Runtime private[tofu] (chooser: Int => Int) {
       waiting -= fiberId
       sleeping -= (info.wakeUp -> fiberId)
       startBracketJob(fiberId, success = false)
+      ()
     }
   }
 

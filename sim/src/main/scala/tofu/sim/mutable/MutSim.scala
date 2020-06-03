@@ -1,9 +1,10 @@
 package tofu.sim
 package mutable
+
 import cats.data.{EitherT, OptionT}
 import cats.effect.{Bracket, ExitCase}
 import cats.{Monad, StackSafeMonad}
-import tofu.sim.SIM.{RUN, STM, TVAR}
+import tofu.sim.SIM._
 import tofu.sim.mutable.MutSim.{MutIO, MutSTM, MutVar}
 import tofu.{HandleTo, Void}
 

@@ -1,8 +1,9 @@
 package tofu
 package sim
+package impl
 import cats.effect.Fiber
 import tofu.Start
-import tofu.sim.SIM.{IOMonad, RUN, STM, STMMonad, TVAR}
+import tofu.sim.SIM._
 import tofu.syntax.monadic._
 import Transact._
 import cats.syntax.foldable._

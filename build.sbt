@@ -3,6 +3,8 @@ import com.typesafe.sbt.SbtGit.git
 
 val libVersion = "0.7.6"
 
+val scalaV = "2.13.2"
+
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, v)) => v.toInt
@@ -32,7 +34,7 @@ lazy val paradise = libraryDependencies ++= {
 }
 
 lazy val defaultSettings = Seq(
-  scalaVersion := "2.13.2",
+  scalaVersion := scalaV,
   setMinorVersion,
   setModuleName,
   experimental,

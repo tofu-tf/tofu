@@ -1,16 +1,16 @@
 package tofu.sim.mutable
 
+import tofu.sim.impl.{FiberRes, SimFiber}
 import cats.Id
 import cats.data.EitherT
 import cats.effect.{ExitCase, Fiber}
 import cats.free.Free
 import cats.syntax.applicativeError.catsSyntaxApplicativeError
-import cats.syntax.either._
 import tofu.Void
 import tofu.sim.SIM.RUN
 import tofu.sim._
-import tofu.sim.mutable.MutSim.MutVar
-import tofu.syntax.funk.funK
+import MutSim.MutVar
+import tofu.syntax.funk._
 import tofu.syntax.monadic._
 
 import scala.concurrent.duration.FiniteDuration
@@ -42,7 +42,7 @@ object SimIO {
   def time[E]: SimIO[E, Long] = lift((runtime, _) => Success(runtime.time))
 
   def toProc[E, A](simIO: SimIO[E, A])(runtime: Runtime, fiberId: FiberId): SimProc =
-    simIO.value.void.mapK[Exit](funK(_(runtime, fiberId)))
+    simIO.value.void.mapK[Exit](funKFrom[SimF](_(runtime, fiberId)))
 
   def exec[E](process: SimIO[Void, Unit]): SimIO[E, FiberId] =
     lift((runtime, _) => Success(runtime.exec(id => toProc(process)(runtime, id))))

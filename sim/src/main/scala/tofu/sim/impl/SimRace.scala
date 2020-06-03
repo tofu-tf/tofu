@@ -1,6 +1,7 @@
 package tofu.sim
-import tofu.sim.RaceState.{Completed, Error, First, Second, Working}
-import tofu.sim.SIM.{IOMonad, RUN, STM, STMMonad, TVAR}
+package impl
+import RaceState.{Completed, Error, First, Second, Working}
+import tofu.sim.SIM._
 import tofu.syntax.monadic._
 import Transact._
 import cats.effect.Fiber

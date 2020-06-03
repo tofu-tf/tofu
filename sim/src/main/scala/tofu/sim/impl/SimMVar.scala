@@ -1,7 +1,8 @@
 package tofu.sim
+package impl
 import Transact._
 import cats.effect.concurrent.MVar
-import tofu.sim.SIM.{RUN, IOMonad, STM, STMMonad, TVAR}
+import tofu.sim.SIM._
 import tofu.syntax.monadic._
 import cats.syntax.foldable._
 import cats.instances.option._

@@ -1,6 +1,6 @@
 package tofu.sim
 import cats.effect.concurrent.Deferred
-import tofu.sim.SIM.{RUN, IOMonad, STM, STMMonad, TVAR}
+import tofu.sim.SIM._
 import tofu.syntax.monadic._
 import Transact._
 

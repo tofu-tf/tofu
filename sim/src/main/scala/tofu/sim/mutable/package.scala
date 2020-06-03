@@ -2,6 +2,7 @@ package tofu.sim
 
 import cats.data.{EitherT, OptionT}
 import cats.free.Free
+import cats.Monad
 
 package object mutable {
   type SimTF[A] = Journal => A
@@ -11,4 +12,7 @@ package object mutable {
   type SimIO[E, A] = EitherT[Free[SimF, *], E, A]
 
   type SimProc = Free[Exit, Unit]
+
+  implicit val freeMonad: Monad[Free[SimF, *]] =  Free.catsFreeMonadForFree[SimF]
+
 }
