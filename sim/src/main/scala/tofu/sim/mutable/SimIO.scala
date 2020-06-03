@@ -17,14 +17,15 @@ import scala.concurrent.duration.FiniteDuration
 
 object SimIO {
 
-  def pure[E, A](x: A): SimIO[E, A]        = EitherT.pure(x)
-  def raise[E, A](e: E): SimIO[E, A]       = EitherT.leftT(e)
-  def lift[E, A](fa: SimF[A]): SimIO[E, A] = EitherT.liftF(Free.liftF(fa))
+  def pure[E, A](x: A): SimIO[E, A]                      = EitherT.pure(x)
+  def raise[E, A](e: E): SimIO[E, A]                     = EitherT.leftT(e)
+  def lift[E, A](fa: SimF[A]): SimIO[E, A]               = EitherT.liftF(Free.liftF(fa))
+  def either[E, A](fea: SimF[Either[E, A]]): SimIO[E, A] = EitherT(Free.liftF(fea))
 
-  def atomically[E, A](trans: SimT[A]): SimIO[E, A] = lift { (runtime, fiberId) =>
+  def atomically[E, A](trans: SimT[E, A]): SimIO[E, A] = either { (runtime, fiberId) =>
     val journal = new Journal
     val result  = trans.value.foldMap[Id](funK(_(journal)))
-    if (result.isDefined)
+    if (result.isRight)
       journal.write.foreach { w =>
         w.assign()
         w.waiters.foreach(runtime.notify)
@@ -32,7 +33,7 @@ object SimIO {
     else journal.read.foreach(_.waiters += fiberId)
 
     (journal.read.iterator ++ journal.write.iterator).foreach(_.assigned = None)
-    result.fold[Exit[A]](Lock)(Success(_))
+    result.fold(_.fold[Exit[Either[E, A]]](Lock)(e => Success(Left(e))), a => Success(Right(a)))
   }
 
   def newTVar[E, A](value: A): SimIO[E, MutTVar[A]]      = lift((_, _) => Success(new MutTVar[A](value)))
@@ -60,7 +61,7 @@ object SimIO {
       tvar <- newTVar[E, FiberRes[E, A]](FiberRes.Working)
       id   <- getFiberId[E]
       _    <- exec(respondTo(proc.value, tvar))
-    } yield SimFiber[MutSim[*, *], E, A](MutVar[FiberRes[E, A]](tvar), id)
+    } yield SimFiber[MutSim[+*, *], E, A](MutVar[FiberRes[E, A]](tvar), id)
   }
 
   def trace[E](message: String): SimIO[E, Unit] =

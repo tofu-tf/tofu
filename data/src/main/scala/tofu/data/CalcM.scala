@@ -100,7 +100,7 @@ object CalcM {
       )
   }
 
-  implicit class invariantOps[F[+_], R, S1, S2, E, A](private val calc: CalcM[F, R, S1, S2, E, A]) extends AnyVal {
+  implicit class InvariantOps[F[+_], R, S1, S2, E, A](private val calc: CalcM[F, R, S1, S2, E, A]) extends AnyVal {
     final def step(r: R, init: S1)(implicit F: Functor[F]): StepResult[F, S2, E, A] =
       CalcM.step(calc, r, init)
 
@@ -112,23 +112,24 @@ object CalcM {
         }
       }
 
-    final def runUnit(init: S1)(implicit ev: Unit <:< R, F: Functor[F]): StepResult[F, S2, E, A] = step((), init)
+    final def stepUnit(init: S1)(implicit ev: Unit <:< R, F: Functor[F]): StepResult[F, S2, E, A] = step((), init)
 
     def bind[R1 <: R, E2, S3, B](continue: Continue[A, E, CalcM[F, R1, S2, S3, E2, B]]): CalcM[F, R1, S1, S3, E2, B] =
       Bind(calc, continue)
     def flatMap[R1 <: R, E1 >: E, B](f: A => CalcM[F, R1, S2, S2, E1, B]): CalcM[F, R1, S1, S2, E1, B]               =
       bind(Continue.flatMapConst[A, E, S2, CalcM[F, R1, S2, S2, E1, B]](f))
-    def >>=[R1 <: R, E1 >: E, B](f: A => CalcM[F, R1, S2, S2, E1, B])                                                = flatMap(f)
-    def >>[R1 <: R, E1 >: E, B](c: => CalcM[F, R1, S2, S2, E1, B])                                                   = flatMap(_ => c)
-    def handleWith[E1](f: E => CalcM[F, R, S2, S2, E1, A]): CalcM[F, R, S1, S2, E1, A]                               =
+
+    def >>=[R1 <: R, E1 >: E, B](f: A => CalcM[F, R1, S2, S2, E1, B])                  = flatMap(f)
+    def >>[R1 <: R, E1 >: E, B](c: => CalcM[F, R1, S2, S2, E1, B])                     = flatMap(_ => c)
+    def handleWith[E1](f: E => CalcM[F, R, S2, S2, E1, A]): CalcM[F, R, S1, S2, E1, A] =
       bind(Continue.handleWithConst[A, E, S2, CalcM[F, R, S2, S2, E1, A]](f))
-    def handle(f: E => A): CalcM[F, R, S1, S2, E, A]                                                                 = handleWith(e => pure(f(e)))
-    def map[B](f: A => B): CalcM[F, R, S1, S2, E, B]                                                                 = flatMap(a => pure(f(a)))
-    def as[B](b: => B): CalcM[F, R, S1, S2, E, B]                                                                    = map(_ => b)
-    def mapError[E1](f: E => E1): CalcM[F, R, S1, S2, E1, A]                                                         = handleWith(e => CalcM.raise(f(e)))
-    def provideSet(r: R, s: S1): CalcM[F, Any, Any, S2, E, A]                                                        = set(s) *>> calc.provide(r)
-    def provide(r: R): CalcM[F, Any, S1, S2, E, A]                                                                   = Provide(r, calc)
-    def provideSome[R1](f: R1 => R): CalcM[F, R1, S1, S2, E, A]                                                      = read[S1, R1] flatMapS (r => calc.provide(f(r)))
+    def handle(f: E => A): CalcM[F, R, S1, S2, E, A]                                   = handleWith(e => pure(f(e)))
+    def map[B](f: A => B): CalcM[F, R, S1, S2, E, B]                                   = flatMap(a => pure(f(a)))
+    def as[B](b: => B): CalcM[F, R, S1, S2, E, B]                                      = map(_ => b)
+    def mapError[E1](f: E => E1): CalcM[F, R, S1, S2, E1, A]                           = handleWith(e => CalcM.raise(f(e)))
+    def provideSet(r: R, s: S1): CalcM[F, Any, Any, S2, E, A]                          = set(s) *>> calc.provide(r)
+    def provide(r: R): CalcM[F, Any, S1, S2, E, A]                                     = Provide(r, calc)
+    def provideSome[R1](f: R1 => R): CalcM[F, R1, S1, S2, E, A]                        = read[S1, R1] flatMapS (r => calc.provide(f(r)))
 
     def focus[S3, S4](lens: PContains[S3, S4, S1, S2]): CalcM[F, R, S3, S4, E, A] =
       get[S3].flatMapS { s3 =>

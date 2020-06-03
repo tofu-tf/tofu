@@ -6,7 +6,7 @@ import cats.instances.tuple._
 import tofu.sim.SIM._
 import tofu.syntax.monadic._
 
-case class SimRef[F[_, _]: IOMonad[*[_, _], E]: STMMonad: Transact, E, A](tvar: F[TVAR, (Long, A)])
+case class SimRef[F[+_, _]: IOMonad[*[_, _], E]: VoidMonad: STMVMonad: Transact, E, A](tvar: F[TVAR, (Long, A)])
     extends Ref[F[RUN[E], *], A] {
   def get: F[RUN[E], A]                                           = tvar.read.map(_._2).atomically
   def set(a: A): F[RUN[E], Unit]                                  =
@@ -14,12 +14,12 @@ case class SimRef[F[_, _]: IOMonad[*[_, _], E]: STMMonad: Transact, E, A](tvar: 
   override def getAndSet(a: A): F[RUN[E], A]                      =
     tvar.read.flatTap { case (i, _) => tvar.write((i + 1, a)) }.map(_._2).atomically
   def access: F[RUN[E], (A, A => F[RUN[E], Boolean])]             =
-    tvar.read.atomically[E].map {
+    tvar.read.atomically.map {
       _.swap.map { i => a1 =>
         tvar.read.flatMap {
           case (`i`, _) => tvar.write((i + 1, a1)) as true
-          case _        => false.pure[F[STM, *]]
-        }.atomically[E]
+          case _        => false.pure[F[STM[Nothing], *]]
+        }.atomically
       }
     }
   def tryUpdate(f: A => A): F[RUN[E], Boolean]                    = update(f) as true

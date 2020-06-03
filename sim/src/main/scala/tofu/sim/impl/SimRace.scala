@@ -16,28 +16,28 @@ object RaceState {
   case class Second[B](b: B)         extends Completed[Nothing, Nothing, B]
 }
 
-case class SimRace[F[_, _]: Transact: STMMonad, E: IOMonad[F, *], A, B](
+case class SimRace[F[+_, _]: Transact: STMVMonad, E: IOMonad[F, *], A, B](
     tvar: F[TVAR, RaceState[E, A, B]]
 ) {
-  def putFirst(e: Either[E, A]): F[STM, Unit]  =
+  def putFirst(e: Either[E, A]): F[STM[Nothing], Unit]  =
     tvar.read.flatMap {
       case Working => tvar.write(e.fold(Error(_), First(_)))
-      case _       => stmMonad.unit
+      case _       => stmvMonad.unit
     }
-  def putSecond(e: Either[E, B]): F[STM, Unit] =
+  def putSecond(e: Either[E, B]): F[STM[Nothing], Unit] =
     tvar.read.flatMap {
       case Working => tvar.write(e.fold(Error(_), Second(_)))
-      case _       => stmMonad.unit
+      case _       => stmvMonad.unit
     }
 
   def get(
       fibA: Fiber[F[RUN[E], *], A],
       fibB: Fiber[F[RUN[E], *], B]
   ): F[RUN[E], Either[(A, Fiber[F[RUN[E], *], B]), (Fiber[F[RUN[E], *], A], B)]] =
-    tvar.read.flatMap {
+    (tvar.read.flatMap {
       case Working                       => fail[F, Completed[E, A, B]]
-      case completed: Completed[E, A, B] => completed.pureSTM[F]
-    }.atomically.flatMap {
+      case completed: Completed[E, A, B] => completed.pureSTM[F, Nothing]
+    }.atomically : F[RUN[E], Completed[E, A, B]]).flatMap {
       case Error(e)  => error(e)
       case First(a)  => ioMonad[F, E].pure(Left(a -> fibB))
       case Second(b) => ioMonad[F, E].pure(Right(fibA -> b))

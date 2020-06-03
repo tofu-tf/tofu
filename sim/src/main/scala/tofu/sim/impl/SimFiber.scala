@@ -20,23 +20,23 @@ object FiberRes {
   def fromEither[E, A](e: Either[E, A]): FiberExit[E, A] = e.fold(Failed(_), Succeed(_))
 }
 
-case class SimFiber[F[_, _]: IOMonad[*[_, _], E]: STMMonad: Transact, E, A](
+case class SimFiber[F[+_, _]: IOMonad[*[_, _], E] : VoidMonad: STMVMonad: Transact, E, A](
     tvar: F[TVAR, FiberRes[E, A]],
     fiberId: FiberId
 ) extends Fiber[F[RUN[E], *], A] {
   def cancel: F[RUN[E], Unit] =
     tvar.read.flatMap {
       case Working => tvar.write(Canceled) as true
-      case _       => false.pureSTM[F]
-    }.atomically[E] >>= Transact.cancel[F, E](fiberId).whenA
+      case _       => false.pureSTM[F, Nothing]
+    }.atomically >>= Transact.cancel[F, Nothing](fiberId).whenA
 
   def join: F[RUN[E], A] =
-    tvar.read
+    (tvar.read
       .flatMap[FiberExit[E, A]] {
         case Working               => fail
-        case exit: FiberExit[E, A] => exit.pure[F[STM, *]]
+        case exit: FiberExit[E, A] => exit.pure[F[STM[Nothing], *]]
       }
-      .atomically[E]
+      .atomically : F[RUN[E], FiberExit[E, A]])
       .flatMap {
         case Succeed(a) => a.pure[F[RUN[E], *]]
         case Failed(e)  => error(e)

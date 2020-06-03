@@ -9,7 +9,7 @@ import Transact._
 import cats.syntax.foldable._
 import cats.instances.list._
 
-class TofuInstance[F[_, _]: Transact: IOMonad[*[_, _], Void]: STMMonad, E: IOMonad[F, *]] extends Start[F[RUN[E], *]] {
+class TofuInstance[F[+_, _]: Transact: VoidMonad: STMVMonad, E: IOMonad[F, *]] extends Start[F[RUN[E], *]] {
   def start[A](fa: F[RUN[E], A]): F[RUN[E], Fiber[F[RUN[E], *], A]] = for {
     resVar <- newTVar[F, E].of[FiberRes[E, A]](FiberRes.Working)
     id     <- exec[F, E](respondTo[A](fa)(e => resVar.write(FiberRes.fromEither(e))))
@@ -42,9 +42,9 @@ class TofuInstance[F[_, _]: Transact: IOMonad[*[_, _], Void]: STMMonad, E: IOMon
     case Left((a, bf))  => bf.cancel as Left(a)
     case Right((af, b)) => af.cancel as Right(b)
   }
-  def never[A]: F[RUN[E], A]                                                  = fail[F, A].atomically[E]
-  def fireAndForget[A](fa: F[RUN[E], A]): F[RUN[E], Unit]                     = exec[F, E](fa.attempt[Void].void).void
+  def never[A]: F[RUN[E], A]                                                  = fail[F, A].atomically
+  def fireAndForget[A](fa: F[RUN[E], A]): F[RUN[E], Unit]                     = exec[F, E](fa.attempt.void).void
 
-  private def respondTo[A](proc: F[RUN[E], A])(writers: (Either[E, A] => F[STM, Unit])*): F[RUN[Void], Unit] =
-    proc.attempt[Void] >>= (res => writers.toList.traverse_(_(res)).atomically[Void])
+  private def respondTo[A](proc: F[RUN[E], A])(writers: (Either[E, A] => F[STM[Nothing], Unit])*): F[RUN[Nothing], Unit] =
+    proc.attempt >>= (res => writers.toList.traverse_(_(res)).atomically)
 }

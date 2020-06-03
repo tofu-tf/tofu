@@ -6,7 +6,7 @@ import tofu.sim.SIM._
 import tofu.syntax.bracket._
 import tofu.syntax.monadic._
 
-case class SimSemaphore[F[_, _]: IOMonad[*[_, _], E]: STMMonad: Transact: IOGuarantee[*[_, _], E], E](
+case class SimSemaphore[F[+_, _]: IOMonad[*[_, _], E]: VoidMonad: STMVMonad: Transact: IOGuarantee[*[_, _], E], E](
     tvar: F[TVAR, Long],
     max: Long
 ) extends Semaphore[F[RUN[E], *]] {
@@ -18,8 +18,8 @@ case class SimSemaphore[F[_, _]: IOMonad[*[_, _], E]: STMMonad: Transact: IOGuar
       else if (n + count > max) fail[F, Boolean]
       else tvar.write(n + count) as false
     })
-    .atomically[E]
-    .flatMap(panic[F, E, Unit](s"too large acquire in Semaphore $n, allowed: $max").whenA)
+    .atomically
+    .flatMap(panic[F, Nothing, Unit](s"too large acquire in Semaphore $n, allowed: $max").whenA)
   def tryAcquireN(n: Long): F[RUN[E], Boolean]     =
     tvar.read.flatMap { count =>
       if (n > max) false.pureSTM
