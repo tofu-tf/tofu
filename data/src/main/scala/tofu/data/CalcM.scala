@@ -10,48 +10,243 @@ import cats.~>
 
 import scala.annotation.tailrec
 import cats.evidence.As
+import tofu.control.StackSafeBind
+import tofu.WithRun
+import tofu.syntax.funk._
+import tofu.data.Calc.Read
 
-sealed trait CalcM[+F[+_], -R, -S1, +S2, +E, +A] {
-  def narrowRead[R1 <: R]: CalcM[F, R1, S1, S2, E, A] = this
-  def mapK[G[+_]](fk: F FunK G): CalcM[G, R, S1, S2, E, A]
+sealed trait CalcM[+F[+_], -R, -SI, +SO, +E, +A] {
+  import CalcM.{Pure, Raise, Provide, Set, Get, Bind}
+
+  def narrowRead[R1 <: R]: CalcM[F, R1, SI, SO, E, A] = this
+
+  def mapK[G[+_]](fk: F FunK G): CalcM[G, R, SI, SO, E, A]
+
+  def local[R1](f: R1 => R): CalcM[F, R1, SI, SO, E, A]
+
+  def widenF[F1[+x] >: F[x]]: CalcM[F1, R, SI, SO, E, A] = this
+
+  def hyperFlatMap[G[+_], R1, SI1, SO1, E1](
+      fk: F FunK CalcM[G, R1, SI1, SO1, E1, *],
+      fr: R1 => R,
+      fsi: SI1 => SI,
+      fso: SO => SO1,
+      fe: E => E1
+  ): CalcM[G, R1, SI1, SO1, E1, A] = ???
+
+  def contramapState[SI1](f: SI1 => SI): CalcM[F, R, SI1, SO, E, A] = CalcM.update(f) *>> this
+  def mapState[SO1](f: SO => SO1): CalcM[F, R, SI, SO1, E, A]       =
+    bind(Continue.update(f))
+
+  def dimapState[SI1, SO1](f: SI1 => SI, g: SO => SO1): CalcM[F, R, SI1, SO1, E, A] =
+    contramapState(f).mapState(g)
+
+  def flatMapLocalK[G[+_], R1, SI1 <: SI, SO1 >: SO, E1 >: E](
+      fk: F FunK CalcM[G, R1, SI1, SO1, E1, *],
+      f: R1 => R,
+  ): CalcM[G, R1, SI1, SO1, E1, A] = hyperFlatMap[G, R1, SI1, SO1, E1](fk, f, identity, identity, identity)
+
+  def flatMapK[G[+_], R1 <: R, SI1 <: SI, SO1 >: SO, E1 >: E](
+      fk: F FunK CalcM[G, R1, SI1, SO1, E1, *]
+  ): CalcM[G, R1, SI1, SO1, E1, A] = hyperFlatMap[G, R1, SI1, SO1, E1](fk, identity, identity, identity, identity)
+
+  def bind[F1[+x] >: F[x], R1 <: R, X, S, B](
+      continue: Continue[A, E, CalcM[F1, R1, SO, S, X, B]]
+  ): CalcM[F1, R1, SI, S, X, B] =
+    CalcM.Bind(this, continue)
+
+  def foldWith[F1[+x] >: F[x], R1 <: R, X, S, B](
+      f: A => CalcM[F1, R1, SO, S, X, B],
+      h: E => CalcM[F1, R1, SO, S, X, B]
+  ): CalcM[F1, R1, SI, S, X, B] = bind(Continue(f, h))
+
+  def flatMap[F1[+x] >: F[x], R1 <: R, SO1 >: SO, E1 >: E, B](
+      f: A => CalcM[F1, R1, SO, SO1, E1, B]
+  ): CalcM[F1, R1, SI, SO1, E1, B] =
+    bind(Continue.flatMapConst[A, E, SO, CalcM[F1, R1, SO, SO1, E1, B]](f))
+
+  def flatTap[F1[+x] >: F[x], R1 <: R, SO1 >: SO, E1 >: E, B](
+      f: A => CalcM[F1, R1, SO, SO1, E1, B]
+  ): CalcM[F1, R1, SI, SO1, E1, A] =
+    flatMap(a => f(a) as a)
+
+  def >>=[F1[+x] >: F[x], R1 <: R, E1 >: E, SO1 >: SO, B](f: A => CalcM[F1, R1, SO, SO1, E1, B]) = flatMap(f)
+  def >>[F1[+x] >: F[x], R1 <: R, E1 >: E, SO1 >: SO, B](c: => CalcM[F1, R1, SO, SO1, E1, B])    = flatMap(_ => c)
+  def <<[F1[+x] >: F[x], R1 <: R, E1 >: E, SO1 >: SO, B](
+      c: => CalcM[F1, R1, SO, SO1, E1, B]
+  ): CalcM[F1, R1, SI, SO1, E1, A]                                                               = flatTap(_ => c)
+  def map[B](f: A => B): CalcM[F, R, SI, SO, E, B]                                               = flatMap(a => CalcM.Pure(f(a)))
+
+  def handleWith[F1[+x] >: F[x], E1, R1 <: R, SO1 >: SO, A1 >: A](
+      f: E => CalcM[F1, R1, SO, SO1, E1, A1]
+  ): CalcM[F1, R1, SI, SO1, E1, A1] =
+    bind(Continue.handleWithConst[A, E, SO, CalcM[F1, R1, SO, SO1, E1, A1]](f))
+
+  def handle[A1 >: A](f: E => A1): CalcM[F, R, SI, SO, E, A1] = handleWith(e => CalcM.Pure(f(e)))
+
+  def as[B](b: => B): CalcM[F, R, SI, SO, E, B]            = map(_ => b)
+  def as_[B](b: B): CalcM[F, R, SI, SO, E, B]              = map(_ => b)
+  def mapError[E1](f: E => E1): CalcM[F, R, SI, SO, E1, A] = handleWith(e => CalcM.raise(f(e)))
+
+  def errorAs[X](e: => X): CalcM[F, R, SI, SO, X, A]        = mapError(_ => e)
+  def errorAs_[X](b: X): CalcM[F, R, SI, SO, X, A]          = mapError(_ => b)
+  def provideSet(r: R, s: SI): CalcM[F, Any, Any, SO, E, A] = CalcM.Set(s) *>> provide(r)
+  def provide(r: R): CalcM[F, Any, SI, SO, E, A]            = CalcM.Provide(r, this)
+
+  def focus[S3, S4](lens: PContains[S3, S4, SI, SO]): CalcM[F, R, S3, S4, E, A] =
+    Get[S3].flatMapS { s3 =>
+      Set(lens.extract(s3)) *>> this.bind(
+        new Continue[A, E, CalcM[F, R, SO, S4, E, A]] {
+          def success(result: A): CalcM[F, R, SO, S4, E, A] =
+            Get[SO].flatMapS(s2 => Set(lens.set(s3, s2)) *>> Pure(result))
+          def error(err: E): CalcM[F, R, SO, S4, E, A]      = Get[SO].flatMapS(s2 => Set(lens.set(s3, s2)) *>> Raise(err))
+        }
+      )
+    }
+
+  def provideSome[R1](f: R1 => R): CalcM[F, R1, SI, SO, E, A] = local(f)
+
+  final def flatMapS[F1[+x] >: F[x], R1 <: R, S, E1, B](
+      f: A => CalcM[F1, R1, SO, S, E1, B]
+  )(implicit ev: E <:< Nothing): CalcM[F1, R1, SI, S, E1, B] =
+    foldWith(f, ev)
+
+  final def flatTapS[F1[+x] >: F[x], R1 <: R, S, E1, B](
+      f: A => CalcM[F1, R1, SO, S, E1, B]
+  )(implicit ev: E <:< Nothing): CalcM[F1, R1, SI, S, E1, A] =
+    foldWith(a => f(a) as_ a, ev)
+
+  final def productRS[F1[+x] >: F[x], R1 <: R, S, B, E1](
+      r: => CalcM[F1, R1, SO, S, E1, B]
+  )(implicit ev: E <:< Nothing): CalcM[F1, R1, SI, S, E1, B] =
+    flatMapS(_ => r)
+
+  final def productLS[F1[+x] >: F[x], R1 <: R, S, B, E1](
+      r: => CalcM[F1, R1, SO, S, E1, B]
+  )(implicit ev: E <:< Nothing): CalcM[F1, R1, SI, S, E1, A] =
+    flatTapS(_ => r)
+
+  def *>>[F1[+x] >: F[x], R1 <: R, S, B, E1](r: => CalcM[F1, R1, SO, S, E1, B])(implicit
+      ev: E <:< Nothing
+  ): CalcM[F1, R1, SI, S, E1, B] = productRS(r)
+
+  def <<*[F1[+x] >: F[x], R1 <: R, S, B, E1](r: => CalcM[F1, R1, SO, S, E1, B])(implicit
+      ev: E <:< Nothing
+  ): CalcM[F1, R1, SI, S, E1, A] = productLS(r)
+
+  def handleWithU[F1[+x] >: F[x], R1 <: R, E1, S3, B](
+      f: E => CalcM[F1, R1, SO, S3, E1, B]
+  )(implicit ev: A <:< Nothing): CalcM[F1, R1, SI, S3, E1, B] =
+    foldWith(ev, f)
+
+  def onErrorU[F1[+x] >: F[x], R1 <: R, E1, S3, B](
+      f: E => CalcM[F1, R1, SO, S3, E1, B]
+  )(implicit ev: A <:< Nothing): CalcM[F1, R1, SI, S3, E, B] =
+    foldWith(ev, x => f(x) errorAs_ x)
+
+  def !>>[F1[+x] >: F[x], R1 <: R, E1, S3, B](
+      r: => CalcM[F1, R1, SO, S3, E1, B]
+  )(implicit ev: A <:< Nothing): CalcM[F1, R1, SI, S3, E1, B] =
+    handleWithU(_ => r)
+
+  def <<![F1[+x] >: F[x], R1 <: R, E1, S3, B](
+      r: => CalcM[F1, R1, SO, S3, E1, B]
+  )(implicit ev: A <:< Nothing): CalcM[F1, R1, SI, S3, E, B] =
+    onErrorU(_ => r)
+
+  def swap: CalcM[F, R, SI, SO, A, E] = bind(Continue.swap[A, E, SO, CalcM[Nothing, Any, SO, SO, A, E]])
+
+  def when[S >: SO <: SI](b: Boolean): CalcM[F, R, S, S, E, Any] =
+    if (b) this else CalcM.unit[S]
+
+  def step[F1[+x] >: F[x]](r: R, init: SI)(implicit F: Functor[F1]): StepResult[F1, SO, E, A] =
+    CalcM.step[F1, R, SI, SO, E, A](this, r, init)
+
+  def runTailRec[F1[+x] >: F[x]](r: R, init: SI)(implicit F: Monad[F1]): F1[(SO, Either[E, A])] =
+    F.tailRecM(this.provideSet(r, init).widenF[F1]) { c =>
+      c.step[F1]((), ()) match {
+        case now: StepResult.Now[SO, E, A]                => F.pure(Right((now.state, now.result)))
+        case wrap: StepResult.Wrap[F1, r, s, SO, E, m, A] => F.map(wrap.provided)(Left(_))
+      }
+    }
+
+  def stepUnit[F1[+x] >: F[x]](init: SI)(implicit ev: Unit <:< R, F: Functor[F1]): StepResult[F1, SO, E, A] =
+    step[F1]((), init)
+
+  def run(r: R, init: SI)(implicit runner: CalcRunner[F]): (SO, Either[E, A]) = runner(this)(r, init)
 }
 
 object CalcM {
-  def unit[S]: CalcM[Nothing, Any, S, S, Nothing, Unit]                       = Pure(())
-  def pure[S, A](a: A): CalcM[Nothing, Any, S, S, Nothing, A]                 = Pure(a)
-  def read[S, R]: CalcM[Nothing, R, S, S, Nothing, R]                         = Read()
-  def get[S]: CalcM[Nothing, Any, S, S, Nothing, S]                           = Get()
-  def set[S](s: S): CalcM[Nothing, Any, Any, S, Nothing, Unit]                = Set(s)
-  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, Unit] =
+  def unit[S]: CalcM[Nothing, Any, S, S, Nothing, Unit]                           = Pure(())
+  def pure[S, A](a: A): CalcM[Nothing, Any, S, S, Nothing, A]                     = Pure(a)
+  def read[S, R]: CalcM[Nothing, R, S, S, Nothing, R]                             = Read()
+  def get[S]: CalcM[Nothing, Any, S, S, Nothing, S]                               = Get()
+  def set[S](s: S): CalcM[Nothing, Any, Any, S, Nothing, S]                       = Set(s)
+  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, S2]       =
     get[S1].flatMapS(s => set(f(s)))
-  def raise[S, E](e: E): CalcM[Nothing, Any, S, S, E, Nothing]                = Raise(e)
-  def defer[F[+_], R, S1, S2, E, A](x: => CalcM[F, R, S1, S2, E, A])          = Defer(() => x)
-  def delay[S, A](x: => A): CalcM[Nothing, Any, S, S, Nothing, A]             = defer(pure[S, A](x))
+  def state[S1, S2, A](f: S1 => (S2, A)): CalcM[Nothing, Any, S1, S2, Nothing, A] =
+    get[S1].flatMapS { s1 =>
+      val (s2, a) = f(s1)
+      set(s2) as a
+    }
 
-  def write[S](s: S)(implicit S: Monoid[S]): CalcM[Nothing, Any, S, S, Nothing, Unit] = update(S.combine(_, s))
+  def raise[S, E](e: E): CalcM[Nothing, Any, S, S, E, Nothing]       = Raise(e)
+  def defer[F[+_], R, S1, S2, E, A](x: => CalcM[F, R, S1, S2, E, A]) = Defer(() => x)
+  def delay[S, A](x: => A): CalcM[Nothing, Any, S, S, Nothing, A]    = defer(pure[S, A](x))
 
-  sealed trait CalcMRes[-R, -S1, +S2, +E, +A] extends CalcM[Nothing, R, S1, S2, E, A]      {
+  def write[S](s: S)(implicit S: Monoid[S]): CalcM[Nothing, Any, S, S, Nothing, S] = update(S.combine(_, s))
+
+  sealed trait CalcMRes[-R, -S1, +S2, +E, +A] extends CalcM[Nothing, R, S1, S2, E, A]   {
     def submit[X](submit: Submit[R, S1, S2, E, A, X]): X
     def mapK[G[+_]](fk: Nothing ~> G): CalcM[G, R, S1, S2, E, A] = this
+    override def flatMapK[G[+_], R1 <: R, SI1 <: S1, SO1 >: S2, E1 >: E](
+        fk: FunK[Nothing, CalcM[G, R1, SI1, SO1, E1, +*]]
+    ): CalcM[G, R, S1, S2, E, A]                                 = this
   }
-  final case class Pure[S, +A](a: A)          extends CalcMRes[Any, S, S, Nothing, A]      {
-    def submit[X](submit: Submit[Any, S, S, Nothing, A, X]): X = submit.success(submit.state, a)
+  final case class Pure[S, +A](a: A)          extends CalcMRes[Any, S, S, Nothing, A]   {
+    def submit[X](submit: Submit[Any, S, S, Nothing, A, X]): X                                             = submit.success(submit.state, a)
+    def local[R1](f: R1 => Any): CalcM[Nothing, R1, S, S, Nothing, A]                                      = this
+    override def dimapState[SI1, SO1](f: SI1 => S, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, Nothing, A] =
+      update(g compose f) as_ a
+
+    // def hyperFlatMap[G[+_], R1, SI1, SO1, E1](
+    //     fk: Nothing FunK CalcM[G, R1, SI1, SO1, E1, *],
+    //     fr: R1 => Any,
+    //     fsi: SI1 => S,
+    //     fso: S => SO1,
+    //     fe: Nothing => E1
+    // ): CalcM[G, R1, SI1, SO1, E1, A]                                  = Pure(a)
   }
-  final case class Read[S, R]()               extends CalcMRes[R, S, S, Nothing, R]        {
-    def submit[X](submit: Submit[R, S, S, Nothing, R, X]): X = submit.success(submit.state, submit.read)
+  final case class Read[S, R]()               extends CalcMRes[R, S, S, Nothing, R]     {
+    def submit[X](submit: Submit[R, S, S, Nothing, R, X]): X        = submit.success(submit.state, submit.read)
+    def local[R1](f: R1 => R): CalcM[Nothing, R1, S, S, Nothing, R] = Read[S, R1].map(f)
   }
-  final case class Get[S]()                   extends CalcMRes[Any, S, S, Nothing, S]      {
-    def submit[X](submit: Submit[Any, S, S, Nothing, S, X]): X = submit.success(submit.state, submit.state)
+  final case class Get[S]()                   extends CalcMRes[Any, S, S, Nothing, S]   {
+    def submit[X](submit: Submit[Any, S, S, Nothing, S, X]): X                                             = submit.success(submit.state, submit.state)
+    def local[R1](f: R1 => Any): CalcM[Nothing, R1, S, S, Nothing, S]                                      = this
+    override def dimapState[SI1, SO1](f: SI1 => S, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, Nothing, S] =
+      get[SI1] *>> state { s1 =>
+        val s = f(s1)
+        (g(s), s)
+      }
   }
-  final case class Set[S](s: S)               extends CalcMRes[Any, Any, S, Nothing, Unit] {
-    def submit[X](submit: Submit[Any, Any, S, Nothing, Unit, X]): X = submit.success(s, ())
+  final case class Set[S](s: S)               extends CalcMRes[Any, Any, S, Nothing, S] {
+    def submit[X](submit: Submit[Any, Any, S, Nothing, S, X]): X                                             = submit.success(s, s)
+    def local[R1](f: R1 => Any): CalcM[Nothing, R1, Any, S, Nothing, S]                                      = this
+    override def dimapState[SI1, SO1](f: SI1 => Any, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, Nothing, S] =
+      set(g(s)) as_ s
   }
-  final case class Raise[S, E](e: E)          extends CalcMRes[Any, S, S, E, Nothing]      {
-    def submit[X](submit: Submit[Any, S, S, E, Nothing, X]): X = submit.error(submit.state, e)
+  final case class Raise[S, E](e: E)          extends CalcMRes[Any, S, S, E, Nothing]   {
+    def submit[X](submit: Submit[Any, S, S, E, Nothing, X]): X                                             = submit.error(submit.state, e)
+    def local[R1](f: R1 => Any): CalcM[Nothing, R1, S, S, E, Nothing]                                      = this
+    override def dimapState[SI1, SO1](f: SI1 => S, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, E, Nothing] =
+      update(g compose f).swap errorAs_ e
   }
   final case class Defer[+F[+_], -R, -S1, +S2, +E, +A](runStep: () => CalcM[F, R, S1, S2, E, A])
       extends CalcM[F, R, S1, S2, E, A] {
     def mapK[G[+_]](fk: F FunK G): CalcM[G, R, S1, S2, E, A] = Defer(() => runStep().mapK(fk))
+
+    def local[R1](f: R1 => R): CalcM[F, R1, S1, S2, E, A] = Defer(() => runStep().local(f))
   }
 
   sealed trait ProvideM[+F[+_], R, -S1, +S2, +E, +A] extends CalcM[F, R, S1, S2, E, A] {
@@ -66,19 +261,23 @@ object CalcM {
     type R1 = R
     def any                                                    = Is.refl
     def mapK[G[+_]](fk: F FunK G): CalcM[G, Any, S1, S2, E, A] = Provide(r, inner.mapK(fk))
+
+    def local[R2](f: R2 => Any): CalcM[F, R2, S1, S2, E, A] = this
   }
 
   abstract class Sub[+F[+_], -S1, +S2, A](val fa: F[A]) extends CalcM[F, Any, S1, S2, Nothing, A] {
     def iss: S1 As S2
     def subcalc[F1[+_], R, SX, E, A1](calc: CalcM[F1, R, S2, SX, E, A1]): CalcM[F1, R, S1, SX, E, A1] =
       iss.substitute[CalcM[F1, R, -*, SX, E, A1]](calc)
-    final def mapK[G[+_]](fk: F FunK G): CalcM[G, Any, S1, S2, Nothing, A]                            =
-      iss.substitute[CalcM[G, Any, -*, S2, Nothing, A] @uv](Sub(fk(fa)))
+    def local[R1](f: R1 => Any): CalcM[F, R1, S1, S2, Nothing, A]                                     = this
   }
 
   object Sub {
+
     def apply[F[+_], S, A](fa: F[A]): CalcM[F, Any, S, S, Nothing, A] = new Sub[F, S, S, A](fa) {
       def iss = As.refl
+
+      def mapK[G[+_]](fk: F FunK G): CalcM[G, Any, S, S, Nothing, A] = Sub(fk(fa))
     }
   }
 
@@ -93,72 +292,13 @@ object CalcM {
     def mapK[G[+_]](fk: F FunK G): CalcM[G, R, S1, S3, E2, B] =
       Bind(
         src.mapK(fk),
-        new Continue[A, E1, CalcM[G, R, S2, S3, E2, B]] {
-          def success(a: A): CalcM[G, R, S2, S3, E2, B] = continue.success(a).mapK(fk)
-          def error(e: E1): CalcM[G, R, S2, S3, E2, B]  = continue.error(e).mapK(fk)
-        }
+        continue.map(_.mapK(fk))
       )
-  }
 
-  implicit class InvariantOps[F[+_], R, S1, S2, E, A](private val calc: CalcM[F, R, S1, S2, E, A]) extends AnyVal {
-    final def step(r: R, init: S1)(implicit F: Functor[F]): StepResult[F, S2, E, A] =
-      CalcM.step(calc, r, init)
-
-    final def runTailRec(r: R, init: S1)(implicit F: Monad[F]): F[(S2, Either[E, A])] =
-      F.tailRecM(calc.provideSet(r, init)) { c =>
-        c.step((), ()) match {
-          case now: StepResult.Now[S2, E, A]               => F.pure(Right((now.state, now.result)))
-          case wrap: StepResult.Wrap[F, r, s, S2, E, m, A] => F.map(wrap.provided(F))(Left(_))
-        }
-      }
-
-    final def stepUnit(init: S1)(implicit ev: Unit <:< R, F: Functor[F]): StepResult[F, S2, E, A] = step((), init)
-
-    def bind[R1 <: R, E2, S3, B](continue: Continue[A, E, CalcM[F, R1, S2, S3, E2, B]]): CalcM[F, R1, S1, S3, E2, B] =
-      Bind(calc, continue)
-    def flatMap[R1 <: R, E1 >: E, B](f: A => CalcM[F, R1, S2, S2, E1, B]): CalcM[F, R1, S1, S2, E1, B]               =
-      bind(Continue.flatMapConst[A, E, S2, CalcM[F, R1, S2, S2, E1, B]](f))
-
-    def >>=[R1 <: R, E1 >: E, B](f: A => CalcM[F, R1, S2, S2, E1, B])                  = flatMap(f)
-    def >>[R1 <: R, E1 >: E, B](c: => CalcM[F, R1, S2, S2, E1, B])                     = flatMap(_ => c)
-    def handleWith[E1](f: E => CalcM[F, R, S2, S2, E1, A]): CalcM[F, R, S1, S2, E1, A] =
-      bind(Continue.handleWithConst[A, E, S2, CalcM[F, R, S2, S2, E1, A]](f))
-    def handle(f: E => A): CalcM[F, R, S1, S2, E, A]                                   = handleWith(e => pure(f(e)))
-    def map[B](f: A => B): CalcM[F, R, S1, S2, E, B]                                   = flatMap(a => pure(f(a)))
-    def as[B](b: => B): CalcM[F, R, S1, S2, E, B]                                      = map(_ => b)
-    def mapError[E1](f: E => E1): CalcM[F, R, S1, S2, E1, A]                           = handleWith(e => CalcM.raise(f(e)))
-    def provideSet(r: R, s: S1): CalcM[F, Any, Any, S2, E, A]                          = set(s) *>> calc.provide(r)
-    def provide(r: R): CalcM[F, Any, S1, S2, E, A]                                     = Provide(r, calc)
-    def provideSome[R1](f: R1 => R): CalcM[F, R1, S1, S2, E, A]                        = read[S1, R1] flatMapS (r => calc.provide(f(r)))
-
-    def focus[S3, S4](lens: PContains[S3, S4, S1, S2]): CalcM[F, R, S3, S4, E, A] =
-      get[S3].flatMapS { s3 =>
-        set(lens.extract(s3)) *>> calc.bind(
-          new Continue[A, E, CalcM[F, R, S2, S4, E, A]] {
-            def success(result: A): CalcM[F, R, S2, S4, E, A] =
-              get[S2].flatMapS(s2 => set(lens.set(s3, s2)) *>> pure(result))
-            def error(err: E): CalcM[F, R, S2, S4, E, A]      = get[S2].flatMapS(s2 => set(lens.set(s3, s2)) *>> raise(err))
-          }
-        )
-      }
-  }
-
-  implicit class CalcSuccessfullOps[F[+_], R, S1, S2, A](private val calc: CalcM[F, R, S1, S2, Nothing, A])
-      extends AnyVal {
-    final def flatMapS[R1 <: R, S3, B, E](f: A => CalcM[F, R1, S2, S3, E, B]): CalcM[F, R1, S1, S3, E, B] =
-      calc.bind(Continue.flatMapSuccess[A, B, S2, S3, CalcM[F, R1, S2, S3, E, B]](f))
-    final def productRS[R1 <: R, S3, B, E](r: => CalcM[F, R1, S2, S3, E, B]): CalcM[F, R1, S1, S3, E, B]  =
-      flatMapS(_ => r)
-    final def *>>[R1 <: R, S3, B, E](r: => CalcM[F, R1, S2, S3, E, B]): CalcM[F, R1, S1, S3, E, B]        = productRS(r)
-  }
-
-  implicit class CalcPureOps[R, S1, S2, E, A](private val calc: CalcM[Nothing, R, S1, S2, E, A]) extends AnyVal {
-    final def run(r: R, init: S1): (S2, Either[E, A]) =
-      step[Nothing, R, S1, S2, E, A](calc, r, init) match {
-        case wrap: StepResult.Wrap[Nothing, _, _, S2, E, m, A] => wrap.inner: Nothing
-        case StepResult.Error(s, err)                          => (s, Left(err))
-        case StepResult.Ok(s, a)                               => (s, Right(a))
-      }
+    def local[R1](f: R1 => R): CalcM[F, R1, S1, S3, E2, B] = Bind(
+      src.local(f),
+      continue.map(_.local(f))
+    )
   }
 
   implicit class CalcPureSuccessfullOps[R, S1, S2, A](private val calc: CalcM[Nothing, R, S1, S2, Nothing, A])
@@ -169,16 +309,6 @@ object CalcM {
         case StepResult.Error(_, err)                                => err
         case StepResult.Ok(s, a)                                     => (s, a)
       }
-  }
-
-  implicit class CalcUnsuccessfullOps[F[+_], R, S1, S2, E](private val calc: CalcM[F, R, S1, S2, E, Nothing])
-      extends AnyVal {
-    def handleWithS[R1 <: R, E1, S3, B, A](f: E => CalcM[F, R, S2, S3, E1, A]): CalcM[F, R1, S1, S3, E1, A] =
-      calc.bind(Continue.handleWithFail[E, E1, S2, S3, CalcM[F, R, S2, S3, E1, A]](f))
-  }
-
-  implicit class CalcFixedStateOps[F[+_], R, S, E, A](private val calc: CalcM[F, R, S, S, E, A]) extends AnyVal {
-    def when(b: Boolean): CalcM[F, R, S, S, E, Any] = if (b) calc else CalcM.unit
   }
 
   implicit class CalcSimpleStateOps[F[+_], S1, S2, A](private val calc: CalcM[Nothing, Any, S1, S2, Nothing, A])
@@ -223,15 +353,16 @@ object CalcM {
           case p: ProvideM[F, R, S1, _, _, _]            =>
             val kcont = p.any.substitute[λ[r => Continue[a1, e1, CalcM[F, r, s1, S2, E, A]]]](c1.continue)
 
-            step(p.inner.bind[p.R1, E, S2, A](kcont), p.r, init)
+            step(p.inner.bind[F, p.R1, E, S2, A](kcont), p.r, init)
           case c2: Bind[F, R, S1, s2, _, e2, _, a2, _]   =>
             step(c2.src.bind(Continue.compose(c2.continue, c1.continue)), r, init)
         }
     }
 
-  implicit def calcInstance[F[+_], R, S, E]: CalcFunctorInstance[F, R, S, E] = new CalcFunctorInstance[F, R, S, E]
+  implicit def calcFunctorInstance[F[+_], R, S, E]: CalcMonadInstance[F, R, S, E] =
+    new CalcMonadInstance[F, R, S, E]
 
-  class CalcFunctorInstance[F[+_], R, S, E]
+  class CalcMonadInstance[F[+_], R, S, E]
       extends MonadError[CalcM[F, R, S, S, E, *], E] with cats.Defer[CalcM[F, R, S, S, E, *]]
       with StackSafeMonad[CalcM[F, R, S, S, E, *]] {
     def defer[A](fa: => CalcM[F, R, S, S, E, A]): CalcM[F, R, S, S, E, A]                                         = CalcM.defer(fa)
@@ -242,15 +373,47 @@ object CalcM {
       fa.flatMap(f)
     def pure[A](x: A): CalcM[F, R, S, S, E, A]                                                                    = CalcM.pure(x)
   }
+
+  class CalcBindInstance[F[+_], R, S] extends StackSafeBind[CalcM[F, R, S, S, *, *]] {
+    override def pure[E, A](a: A): CalcM[F, R, S, S, E, A] = CalcM.pure(a)
+
+    override def raise[E, A](e: E): CalcM[F, R, S, S, E, A] = CalcM.raise(e)
+
+    override def foldWith[E, A, X, B](
+        fa: CalcM[F, R, S, S, E, A],
+        h: E => CalcM[F, R, S, S, X, B],
+        f: A => CalcM[F, R, S, S, X, B]
+    ): CalcM[F, R, S, S, X, B] = fa.foldWith(f, h)
+  }
+
+  class CalcContextInstance[F[+_], R, S, E] extends WithRun[CalcM[F, R, S, S, E, *], CalcM[F, Any, S, S, E, *], R] {
+    override val context: CalcM[F, R, S, S, E, R]                    = CalcM.read
+    override val functor: Functor[tofu.data.CalcM[F, R, S, S, E, *]] = new CalcMonadInstance
+
+    override def runContext[A](fa: CalcM[F, R, S, S, E, A])(ctx: R): CalcM[F, Any, S, S, E, A]   = fa.provide(ctx)
+    override def local[A](fa: CalcM[F, R, S, S, E, A])(project: R => R): CalcM[F, R, S, S, E, A] =
+      fa.provideSome(project)
+    override def lift[A](fa: CalcM[F, Any, S, S, E, A]): CalcM[F, R, S, S, E, A]                 = fa
+  }
 }
 
 object CalcMSpecials {
-  trait Continue[-A, -E, +C] {
+  trait Continue[-A, -E, +C] { self =>
     def success(a: A): C
     def error(e: E): C
+
+    def map[D](f: C => D): Continue[A, E, D] = new Continue[A, E, D] {
+      override def success(a: A): D = f(self.success(a))
+      override def error(e: E): D   = f(self.error(e))
+    }
   }
 
   object Continue {
+    def apply[A, E, X](f: A => X, h: E => X): Continue[A, E, X] = new Continue[A, E, X] {
+      override def success(a: A): X = f(a)
+      override def error(e: E): X   = h(e)
+    }
+
     def compose[A, B, C, E, V, W, R, S1, S2, S3, F[+_]](
         c1: Continue[A, E, CalcM[F, R, S1, S2, V, B]],
         c2: Continue[B, V, CalcM[F, R, S2, S3, W, C]]
@@ -272,16 +435,16 @@ object CalcMSpecials {
         def error(e: E): X   = f(e)
       }
 
-    def flatMapSuccess[A, B, S1, S2, X >: CalcM[Nothing, Any, S1, S2, Nothing, B]](f: A => X): Continue[A, Nothing, X] =
-      new Continue[A, Nothing, X] {
-        def success(a: A): X     = f(a)
-        def error(e: Nothing): X = e
+    def swap[A, E, S, X >: CalcM[Nothing, Any, S, S, A, E]]: Continue[A, E, X] =
+      new Continue[A, E, X] {
+        override def success(a: A): X = CalcM.Raise(a)
+        override def error(e: E): X   = CalcM.Pure(e)
       }
 
-    def handleWithFail[E, V, S1, S2, X >: CalcM[Nothing, Any, S1, S2, V, Nothing]](f: E => X): Continue[Nothing, E, X] =
-      new Continue[Nothing, E, X] {
-        def success(a: Nothing): X = a
-        def error(e: E): X         = f(e)
+    def update[A, E, SI, SO, X >: CalcM[Nothing, Any, SI, SO, E, A]](f: SI => SO): Continue[A, E, X] =
+      new Continue[A, E, X] {
+        override def success(a: A): X = CalcM.update(f) as_ a
+        override def error(e: E): X   = CalcM.update(f).swap errorAs_ e
       }
   }
 
@@ -313,4 +476,20 @@ object CalcMSpecials {
     def success(s: S2, a: A): X
     def error(s: S2, err: E): X
   }
+}
+
+trait CalcRunner[-F[+_]] {
+  def apply[R, SI, SO, E, A](calc: CalcM[F, R, SI, SO, E, A])(r: R, init: SI): (SO, Either[E, A])
+}
+
+object CalcRunner {
+  implicit val nothingRunner: CalcRunner[Nothing] =
+    new CalcRunner[Nothing] {
+      def apply[R, SI, SO, E, A](calc: CalcM[Nothing, R, SI, SO, E, A])(r: R, init: SI): (SO, Either[E, A]) =
+        calc.step(r, init)(nothingFunctor) match {
+          case wrap: StepResult.Wrap[Nothing, _, _, SO, E, m, A] => wrap.inner: Nothing
+          case StepResult.Error(s, err)                          => (s, Left(err))
+          case StepResult.Ok(s, a)                               => (s, Right(a))
+        }
+    }
 }
