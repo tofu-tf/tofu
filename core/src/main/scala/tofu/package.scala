@@ -1,5 +1,6 @@
 import cats.effect.Bracket
 import cats.{ApplicativeError, MonadError}
+import cats.data.Ior
 
 package object tofu {
   type HasContext[F[_], C] = Context[F] { type Ctx = C }
@@ -21,4 +22,6 @@ package object tofu {
   type TConst[A, B] = A
 
   private[tofu] type AnyK[_] = Any
+
+  type IorC[C[_], E, A] = Ior[C[E], C[A]]
 }
