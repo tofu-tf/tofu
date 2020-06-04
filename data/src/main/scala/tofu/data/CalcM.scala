@@ -13,7 +13,6 @@ import cats.evidence.As
 import tofu.control.StackSafeBind
 import tofu.WithRun
 import tofu.syntax.funk._
-import tofu.data.Calc.Read
 
 sealed trait CalcM[+F[+_], -R, -SI, +SO, +E, +A] {
   import CalcM.{Pure, Raise, Provide, Set, Get, Bind}
@@ -159,19 +158,17 @@ sealed trait CalcM[+F[+_], -R, -SI, +SO, +E, +A] {
   def when[S >: SO <: SI](b: Boolean): CalcM[F, R, S, S, E, Any] =
     if (b) this else CalcM.unit[S]
 
-  def step[F1[+x] >: F[x]](r: R, init: SI)(implicit F: Functor[F1]): StepResult[F1, SO, E, A] =
-    CalcM.step[F1, R, SI, SO, E, A](this, r, init)
+  def step(r: R, init: SI): StepResult[F, SO, E, A] = CalcM.step[F, R, SI, SO, E, A](this, r, init)
 
   def runTailRec[F1[+x] >: F[x]](r: R, init: SI)(implicit F: Monad[F1]): F1[(SO, Either[E, A])] =
     F.tailRecM(this.provideSet(r, init).widenF[F1]) { c =>
-      c.step[F1]((), ()) match {
+      c.step((), ()) match {
         case now: StepResult.Now[SO, E, A]                => F.pure(Right((now.state, now.result)))
         case wrap: StepResult.Wrap[F1, r, s, SO, E, m, A] => F.map(wrap.provided)(Left(_))
       }
     }
 
-  def stepUnit[F1[+x] >: F[x]](init: SI)(implicit ev: Unit <:< R, F: Functor[F1]): StepResult[F1, SO, E, A] =
-    step[F1]((), init)
+  def stepUnit(init: SI)(implicit ev: Unit <:< R): StepResult[F, SO, E, A] = step((), init)
 
   def run(r: R, init: SI)(implicit runner: CalcRunner[F]): (SO, Either[E, A]) = runner(this)(r, init)
 }
@@ -319,9 +316,7 @@ object CalcM {
   }
 
   @tailrec
-  def step[F[+_], R, S1, S2, E, A](calc: CalcM[F, R, S1, S2, E, A], r: R, init: S1)(implicit
-      F: Functor[F]
-  ): StepResult[F, S2, E, A] =
+  def step[F[+_], R, S1, S2, E, A](calc: CalcM[F, R, S1, S2, E, A], r: R, init: S1): StepResult[F, S2, E, A] =
     calc match {
       case res: CalcMRes[R, S1, S2, E, A]           =>
         res.submit(new Submit[R, S1, S2, E, A, StepResult[F, S2, E, A]](r, init) {
@@ -486,7 +481,7 @@ object CalcRunner {
   implicit val nothingRunner: CalcRunner[Nothing] =
     new CalcRunner[Nothing] {
       def apply[R, SI, SO, E, A](calc: CalcM[Nothing, R, SI, SO, E, A])(r: R, init: SI): (SO, Either[E, A]) =
-        calc.step(r, init)(nothingFunctor) match {
+        calc.step(r, init) match {
           case wrap: StepResult.Wrap[Nothing, _, _, SO, E, m, A] => wrap.inner: Nothing
           case StepResult.Error(s, err)                          => (s, Left(err))
           case StepResult.Ok(s, a)                               => (s, Right(a))
