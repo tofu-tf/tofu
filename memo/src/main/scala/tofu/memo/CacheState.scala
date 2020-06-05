@@ -62,12 +62,7 @@ final case class CacheStateMVar[F[_]: Monad: Guarantee, A](state: MVar[F, CacheV
     for {
       cur <- state.read
       res <- op.getPureOrElse(cur)(
-               state.bracketUpdate(fresh =>
-                 for {
-                   (next, res) <- op.update(fresh)
-                   _           <- state.put(next)
-                 } yield res
-               )
+               state.bracketModify(fresh => op.update(fresh))
              )
     } yield res
 }

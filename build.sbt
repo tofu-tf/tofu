@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.7.6"
+val libVersion = "0.7.7"
 
 val scalaV = "2.13.2"
 
@@ -143,8 +143,8 @@ lazy val loggingRefined = project
   .dependsOn(loggingStr)
 
 lazy val logging = project
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil)
-  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil)
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
+  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
   .settings(defaultSettings)
 
 lazy val env = project

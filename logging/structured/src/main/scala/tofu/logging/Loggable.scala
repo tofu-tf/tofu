@@ -1,6 +1,8 @@
 package tofu.logging
 
+import java.io.{PrintWriter, StringWriter}
 import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
+import java.util.UUID
 
 import alleycats.std.iterable._
 import alleycats.std.set._
@@ -24,6 +26,7 @@ import tofu.compat.lazySeqInstances._
 
 import scala.collection.immutable.SortedSet
 import scala.collection.{immutable, mutable}
+import scala.concurrent.duration.FiniteDuration
 import scala.{PartialFunction => PF, specialized => sp}
 
 /**
@@ -250,11 +253,13 @@ object Loggable {
   final implicit def nonEmptyChainLoggable[A: Loggable]: Loggable[NonEmptyChain[A]]   = fldLoggable[NonEmptyChain, A]
   final implicit def nonEmptySetLoggable[A: Loggable]: Loggable[NonEmptySet[A]]       = fldLoggable[NonEmptySet, A]
 
-  final implicit val instantLoggable: Loggable[Instant]             = stringValue.contramap(_.toString)
-  final implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime] = stringValue.contramap(_.toString)
-  final implicit val localDateTimeLoggable: Loggable[LocalDateTime] = stringValue.contramap(_.toString)
-  final implicit val localDateLoggable: Loggable[LocalDate]         = stringValue.contramap(_.toString)
-  final implicit val durationLoggable: Loggable[java.time.Duration] = stringValue.contramap(_.toString)
+  final implicit val instantLoggable: Loggable[Instant]               = stringValue.contramap(_.toString)
+  final implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime]   = stringValue.contramap(_.toString)
+  final implicit val localDateTimeLoggable: Loggable[LocalDateTime]   = stringValue.contramap(_.toString)
+  final implicit val localDateLoggable: Loggable[LocalDate]           = stringValue.contramap(_.toString)
+  final implicit val durationLoggable: Loggable[java.time.Duration]   = stringValue.contramap(_.toString)
+  final implicit val uuidLoggable: Loggable[UUID]                     = stringValue.contramap(_.toString)
+  final implicit val finiteDurationLoggable: Loggable[FiniteDuration] = stringValue.contramap(_.toString)
 
   final implicit def mapLoggable[A](implicit A: Loggable[A]): Loggable[Map[String, A]] =
     new DictLoggable[Map[String, A]] {
@@ -367,8 +372,11 @@ object LoggedValue {
 final class LoggedThrowable(cause: Throwable) extends Throwable(cause.getMessage, cause) with LoggedValue {
   override def toString: String = cause.toString
 
-  def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R =
-    f.addString("stacktrace", cause.getStackTrace.mkString("\n"), input)
+  def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R = {
+    val strWriter = new StringWriter()
+    cause.printStackTrace(new PrintWriter(strWriter))
+    f.addString("stacktrace", strWriter.toString, input)
+  }
 
   override def typeName: String = cause.getClass.getTypeName
   def shortName: String         = "exception"

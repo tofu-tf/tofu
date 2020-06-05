@@ -10,7 +10,6 @@ import tofu.syntax.monadic._
 import tofu.syntax.bracket._
 import cats.data.StateT
 
-
 /** a middleground between cats.concurrent.Ref and zio.Ref */
 trait Atom[+F[_], A] {
 
