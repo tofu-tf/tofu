@@ -1,4 +1,4 @@
-package tofu.higherKind
+package tofu.higherKind.bi
 
 trait BiFunK[-F[_, _], +G[_, _]] {
   def apply[A, B](fab: F[A, B]): G[A, B]

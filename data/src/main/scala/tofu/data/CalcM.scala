@@ -1,8 +1,7 @@
 package tofu.data
 
 import tofu.control.Bind
-
-import tofu.higherKind.BiFunK
+import tofu.higherKind.bi.BiFunK
 
 import CalcMSpecials._
 import cats.data.IndexedState
