@@ -1,5 +1,6 @@
 package tofu.logging
 
+import java.io.{PrintWriter, StringWriter}
 import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 import java.util.UUID
 
@@ -371,8 +372,11 @@ object LoggedValue {
 final class LoggedThrowable(cause: Throwable) extends Throwable(cause.getMessage, cause) with LoggedValue {
   override def toString: String = cause.toString
 
-  def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R =
-    f.addString("stacktrace", cause.getStackTrace.mkString("\n"), input)
+  def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R = {
+    val strWriter = new StringWriter()
+    cause.printStackTrace(new PrintWriter(strWriter))
+    f.addString("stacktrace", strWriter.toString, input)
+  }
 
   override def typeName: String = cause.getClass.getTypeName
   def shortName: String         = "exception"
