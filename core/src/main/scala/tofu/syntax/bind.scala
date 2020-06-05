@@ -1,17 +1,18 @@
 package tofu.syntax
 
 import tofu.control.TwinMonad
+import scala.annotation.unchecked.{uncheckedVariance => uv}
 
 object bind {
   implicit class BindSyntax[F[+_, +_], E, A](private val self: F[E, A]) extends AnyVal {
-    def flatMap[F1[+e, +a] >: F[e, a], E1 >: E, B](f: A => F1[E1, B])(implicit F: TwinMonad[F1]): F1[E1, B] =
+    def flatMap[F1[e, a] >: F[e, a], E1 >: E, B](f: A => F1[E1, B])(implicit F: TwinMonad[F1]): F1[E1, B] =
       F.flatMap(self, f)
 
     def map[B](f: A => B)(implicit F: TwinMonad[F]): F[E, B] = F.map(self)(f)
 
     def mapErr[X](f: E => X)(implicit F: TwinMonad[F]): F[X, A] = F.mapErr(self)(f)
 
-    def handleWith[F1[+e, +a] >: F[e, a], X, A1 >: A](f: E => F1[X, A1])(implicit F: TwinMonad[F1]): F1[X, A1] =
+    def handleWith[F1[e, a] >: F[e, a], X, A1 >: A](f: E => F1[X, A1])(implicit F: TwinMonad[F1]): F1[X, A1] =
       F.handleWith(self, f)
 
     def handle[A1 >: A](f: E => A1)(implicit F: TwinMonad[F]): F[Nothing, A1] = F.handle(self, f)
@@ -24,7 +25,7 @@ object bind {
 
     def void(implicit F: TwinMonad[F]): F[E, Unit] = F.void(self)
 
-    def flatMapErr[F1[+e, +a] >: F[e, a], X](f: E => F1[X, A])(implicit F: TwinMonad[F1]): F1[X, A] =
+    def flatMapErr[F1[e, a] >: F[e, a], X](f: E => F1[X, A])(implicit F: TwinMonad[F1]): F1[X, A] =
       F.flatMapErr(self, f)
 
     def fail[B](f: A => E)(implicit F: TwinMonad[F]): F[E, B] = F.fail(self)(f)

@@ -1,28 +1,23 @@
 package tofu.data
 
-import cats.Bifunctor
-
 import tofu.control.Bind
 
 import tofu.higherKind.BiFunK
 
-import scala.annotation.unchecked.{uncheckedVariance => uv}
 import CalcMSpecials._
 import cats.data.IndexedState
 import cats.evidence.Is
-import cats.{Functor, Monad, MonadError, Monoid, StackSafeMonad}
+import cats.{Functor, MonadError, Monoid, StackSafeMonad}
 import tofu.optics.PContains
-import cats.~>
 
 import scala.annotation.tailrec
 import cats.evidence.As
 import tofu.control.StackSafeBind
 import tofu.WithRun
-import tofu.syntax.funk._
-import tofu.syntax.bind._
+import tofu.compat.uv212
 
 sealed trait CalcM[+F[+_, +_], -R, -SI, +SO, +E, +A] {
-  import CalcM.{Pure, Raise, Provide, Set, Get, Bound}
+  import CalcM.{Pure, Raise, Set, Get}
 
   def narrowRead[R1 <: R]: CalcM[F, R1, SI, SO, E, A] = this
 
@@ -30,7 +25,7 @@ sealed trait CalcM[+F[+_, +_], -R, -SI, +SO, +E, +A] {
 
   def local[R1](f: R1 => R): CalcM[F, R1, SI, SO, E, A]
 
-  def widenF[F1[+x, +y] >: F[x, y]]: CalcM[F1, R, SI, SO, E, A] = this
+  def widenF[F1[+x, +y] >: F[x, y] @uv212]: CalcM[F1, R, SI, SO, E, A] = this
 
   def contramapState[SI1](f: SI1 => SI): CalcM[F, R, SI1, SO, E, A] = CalcM.update(f) *>> this
 
@@ -40,34 +35,34 @@ sealed trait CalcM[+F[+_, +_], -R, -SI, +SO, +E, +A] {
   def dimapState[SI1, SO1](f: SI1 => SI, g: SO => SO1): CalcM[F, R, SI1, SO1, E, A] =
     contramapState(f).mapState(g)
 
-  def bind[F1[+x, +y] >: F[x, y], R1 <: R, X, S, B](
+  def bind[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, X, S, B](
       continue: Continue[A, E, CalcM[F1, R1, SO, S, X, B]]
   ): CalcM[F1, R1, SI, S, X, B] =
     CalcM.Bound(this, continue)
 
-  def foldWith[F1[+x, +y] >: F[x, y], R1 <: R, X, S, B](
+  def foldWith[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, X, S, B](
       f: A => CalcM[F1, R1, SO, S, X, B],
       h: E => CalcM[F1, R1, SO, S, X, B]
   ): CalcM[F1, R1, SI, S, X, B] = bind(Continue(f, h))
 
-  def flatMap[F1[+x, +y] >: F[x, y], R1 <: R, SO1 >: SO, E1 >: E, B](
+  def flatMap[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, SO1 >: SO, E1 >: E, B](
       f: A => CalcM[F1, R1, SO, SO1, E1, B]
   ): CalcM[F1, R1, SI, SO1, E1, B] =
     bind(Continue.flatMapConst[A, E, SO, CalcM[F1, R1, SO, SO1, E1, B]](f))
 
-  def flatTap[F1[+x, +y] >: F[x, y], R1 <: R, SO1 >: SO, E1 >: E, B](
+  def flatTap[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, SO1 >: SO, E1 >: E, B](
       f: A => CalcM[F1, R1, SO, SO1, E1, B]
   ): CalcM[F1, R1, SI, SO1, E1, A] =
     flatMap(a => f(a) as a)
 
-  def >>=[F1[+x, +y] >: F[x, y], R1 <: R, E1 >: E, SO1 >: SO, B](f: A => CalcM[F1, R1, SO, SO1, E1, B]) = flatMap(f)
-  def >>[F1[+x, +y] >: F[x, y], R1 <: R, E1 >: E, SO1 >: SO, B](c: => CalcM[F1, R1, SO, SO1, E1, B])    = flatMap(_ => c)
-  def <<[F1[+x, +y] >: F[x, y], R1 <: R, E1 >: E, SO1 >: SO, B](
+  def >>=[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1 >: E, SO1 >: SO, B](f: A => CalcM[F1, R1, SO, SO1, E1, B]) = flatMap(f)
+  def >>[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1 >: E, SO1 >: SO, B](c: => CalcM[F1, R1, SO, SO1, E1, B])    = flatMap(_ => c)
+  def <<[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1 >: E, SO1 >: SO, B](
       c: => CalcM[F1, R1, SO, SO1, E1, B]
   ): CalcM[F1, R1, SI, SO1, E1, A]                                                                      = flatTap(_ => c)
   def map[B](f: A => B): CalcM[F, R, SI, SO, E, B]                                                      = flatMap(a => CalcM.Pure(f(a)))
 
-  def handleWith[F1[+x, +y] >: F[x, y], E1, R1 <: R, SO1 >: SO, A1 >: A](
+  def handleWith[F1[+x, +y] >: F[x, y] @uv212, E1, R1 <: R, SO1 >: SO, A1 >: A](
       f: E => CalcM[F1, R1, SO, SO1, E1, A1]
   ): CalcM[F1, R1, SI, SO1, E1, A1] =
     bind(Continue.handleWithConst[A, E, SO, CalcM[F1, R1, SO, SO1, E1, A1]](f))
@@ -96,50 +91,50 @@ sealed trait CalcM[+F[+_, +_], -R, -SI, +SO, +E, +A] {
 
   def provideSome[R1](f: R1 => R): CalcM[F, R1, SI, SO, E, A] = local(f)
 
-  final def flatMapS[F1[+x, +y] >: F[x, y], R1 <: R, S, E1, B](
+  final def flatMapS[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, S, E1, B](
       f: A => CalcM[F1, R1, SO, S, E1, B]
   )(implicit ev: E <:< Nothing): CalcM[F1, R1, SI, S, E1, B] =
     foldWith(f, ev)
 
-  final def flatTapS[F1[+x, +y] >: F[x, y], R1 <: R, S, E1, B](
+  final def flatTapS[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, S, E1, B](
       f: A => CalcM[F1, R1, SO, S, E1, B]
   )(implicit ev: E <:< Nothing): CalcM[F1, R1, SI, S, E1, A] =
     foldWith(a => f(a) as_ a, ev)
 
-  final def productRS[F1[+x, +y] >: F[x, y], R1 <: R, S, B, E1](
+  final def productRS[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, S, B, E1](
       r: => CalcM[F1, R1, SO, S, E1, B]
   )(implicit ev: E <:< Nothing): CalcM[F1, R1, SI, S, E1, B] =
     flatMapS(_ => r)
 
-  final def productLS[F1[+x, +y] >: F[x, y], R1 <: R, S, B, E1](
+  final def productLS[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, S, B, E1](
       r: => CalcM[F1, R1, SO, S, E1, B]
   )(implicit ev: E <:< Nothing): CalcM[F1, R1, SI, S, E1, A] =
     flatTapS(_ => r)
 
-  def *>>[F1[+x, +y] >: F[x, y], R1 <: R, S, B, E1](r: => CalcM[F1, R1, SO, S, E1, B])(implicit
+  def *>>[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, S, B, E1](r: => CalcM[F1, R1, SO, S, E1, B])(implicit
       ev: E <:< Nothing
   ): CalcM[F1, R1, SI, S, E1, B] = productRS(r)
 
-  def <<*[F1[+x, +y] >: F[x, y], R1 <: R, S, B, E1](r: => CalcM[F1, R1, SO, S, E1, B])(implicit
+  def <<*[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, S, B, E1](r: => CalcM[F1, R1, SO, S, E1, B])(implicit
       ev: E <:< Nothing
   ): CalcM[F1, R1, SI, S, E1, A] = productLS(r)
 
-  def handleWithU[F1[+x, +y] >: F[x, y], R1 <: R, E1, S3, B](
+  def handleWithU[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1, S3, B](
       f: E => CalcM[F1, R1, SO, S3, E1, B]
   )(implicit ev: A <:< Nothing): CalcM[F1, R1, SI, S3, E1, B] =
     foldWith(ev, f)
 
-  def onErrorU[F1[+x, +y] >: F[x, y], R1 <: R, E1, S3, B](
+  def onErrorU[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1, S3, B](
       f: E => CalcM[F1, R1, SO, S3, E1, B]
   )(implicit ev: A <:< Nothing): CalcM[F1, R1, SI, S3, E, B] =
     foldWith(ev, x => f(x) errorAs_ x)
 
-  def !>>[F1[+x, +y] >: F[x, y], R1 <: R, E1, S3, B](
+  def !>>[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1, S3, B](
       r: => CalcM[F1, R1, SO, S3, E1, B]
   )(implicit ev: A <:< Nothing): CalcM[F1, R1, SI, S3, E1, B] =
     handleWithU(_ => r)
 
-  def <<![F1[+x, +y] >: F[x, y], R1 <: R, E1, S3, B](
+  def <<![F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1, S3, B](
       r: => CalcM[F1, R1, SO, S3, E1, B]
   )(implicit ev: A <:< Nothing): CalcM[F1, R1, SI, S3, E, B] =
     onErrorU(_ => r)
@@ -151,7 +146,7 @@ sealed trait CalcM[+F[+_, +_], -R, -SI, +SO, +E, +A] {
 
   def step(r: R, init: SI): StepResult[F, SO, E, A] = CalcM.step[F, R, SI, SO, E, A](this, r, init)
 
-  def runTailRec[F1[+x, +y] >: F[x, y]](r: R, init: SI)(implicit F: Bind[F1]): F1[(SO, E), (SO, A)] = {
+  def runTailRec[F1[+x, +y] >: F[x, y] @uv212](r: R, init: SI)(implicit F: Bind[F1]): F1[(SO, E), (SO, A)] = {
     type It = CalcM[F1, Any, Any, SO, E, A]
     F.foldRec[It, It, (SO, E), (SO, A)](Right(this.provideSet(r, init).widenF[F1])) { c =>
       c.merge.step((), ()) match {
@@ -455,7 +450,7 @@ object CalcMSpecials {
         fail: X => CalcM[F, R, S1, S2, E, A],
         succ: M => CalcM[F, R, S1, S2, E, A],
     ) extends StepResult[F, S2, E, A] {
-      def provided[F1[+x, +y] >: F[x, y]](implicit
+      def provided[F1[+x, +y] >: F[x, y] @uv212](implicit
           F: Bind[F1]
       ): F1[CalcM[F1, Any, Any, S2, E, A], CalcM[F1, Any, Any, S2, E, A]] =
         F.bimap(inner)(x => fail(x).provideSet(input, state), m => succ(m).provideSet(input, state))

@@ -219,7 +219,7 @@ lazy val derivation =
     )
     .dependsOn(data)
 
-lazy val sim = project.settings(defaultSettings, libraryDependencies += catsFree).dependsOn(core)
+// lazy val sim = project.settings(defaultSettings, libraryDependencies += catsFree).dependsOn(core)
 
 lazy val zioCore =
   project
@@ -266,7 +266,7 @@ lazy val doobie      = project
 lazy val coreModules = Seq(higherKindCore, core, memo, env, concurrent, opticsCore, data)
 
 lazy val commonModules =
-  Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop, fs2Interop, doobie, sim)
+  Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop, fs2Interop, doobie)
 
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
