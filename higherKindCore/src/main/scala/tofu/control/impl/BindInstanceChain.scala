@@ -1,6 +1,5 @@
 package tofu.control.impl
 import tofu.control.Bind
-import tofu.IorC
 
 import cats.Monad
 
