@@ -9,9 +9,6 @@ import tofu.optics.Contains
 import tofu.syntax.monadic._
 import tofu.syntax.bracket._
 import cats.data.StateT
-import cats.Monad
-import cats.data.IndexedStateT
-import cats.Id
 
 /** a middleground between cats.concurrent.Ref and zio.Ref */
 trait Atom[+F[_], A] {
