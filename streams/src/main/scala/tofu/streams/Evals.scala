@@ -20,8 +20,8 @@ trait Evals[F[_], G[_]] extends Emits[F] {
 
   def eval[A](ga: G[A]): F[A]
 
-  def evals[S[_]: Foldable, A](gas: G[S[A]]): F[A] =
-    monad.flatMap(eval(gas))(as => emits(as.toList))
+  def evals[S[_]: Foldable, A](gsa: G[S[A]]): F[A] =
+    monad.flatMap(eval(gsa))(as => emits(as.toList))
 
   final def evalMap[A, B](fa: F[A])(f: A => G[B]): F[B] =
     monad.flatMap(fa)(a => eval(f(a)))
