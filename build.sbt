@@ -251,13 +251,21 @@ lazy val fs2Interop = project
   )
   .dependsOn(concurrent)
 
-lazy val doobie      = project
+lazy val doobie  = project
   .in(file("doobie"))
   .settings(
     libraryDependencies ++= List(doobieCore, derevo, monix % Test),
     defaultSettings
   )
   .dependsOn(core, derivation, env % Test, zioInterop % Test)
+
+lazy val streams = project
+  .in(file("streams"))
+  .settings(
+    libraryDependencies ++= List(fs2 % Test),
+    defaultSettings
+  )
+  .dependsOn(core)
 
 lazy val coreModules = Seq(higherKindCore, core, memo, env, concurrent, opticsCore, data)
 
