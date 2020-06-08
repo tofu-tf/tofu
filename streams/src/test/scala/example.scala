@@ -7,7 +7,7 @@ import tofu.streams.syntax.compile._
 import tofu.streams.syntax.evals._
 import tofu.syntax.monadic._
 
-object playground {
+object example {
 
   trait Srv[S[_]] {
     def requestAll: S[String]
