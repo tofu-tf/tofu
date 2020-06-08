@@ -9,7 +9,7 @@ trait Emits[F[_]] {
 
   final def emit[A](a: A): F[A] = applicative.pure(a)
 
-  def emits[A](as: Seq[A]): F[A]
+  def emits[A](as: List[A]): F[A]
 }
 
 trait Evals[F[_], G[_]] extends Emits[F] {
