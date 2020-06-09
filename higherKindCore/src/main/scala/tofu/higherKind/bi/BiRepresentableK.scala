@@ -6,7 +6,7 @@ import tofu.higherKind.RepK
 import tofu.syntax.bind._
 
 trait RepresentableB[U[f[_, _]]] extends MonoidalB[U] with EmbedB[U] {
-  def tabulate[F[_, _]](repr: BiRepK[U, *, *] BiFunK F): U[F]
+  def bitabulate[F[_, _]](repr: BiRepK[U, *, *] BiFunK F): U[F]
 
   final def tab[F[_, _]]: Tab[U, F] = new Tab(this)
 
@@ -25,6 +25,6 @@ object RepresentableB {
   class Tab[U[f[_, _]], F[_, _]](private val repr: RepresentableB[U]) extends AnyVal {
     type E1
     type A1
-    def apply(maker: BiFunK.Maker[BiRepK[U, *, *], F, E1, A1]): U[F] = repr.tabulate(maker)
+    def apply(maker: BiFunK.Maker[BiRepK[U, *, *], F, E1, A1]): U[F] = repr.bitabulate(maker)
   }
 }
