@@ -47,7 +47,7 @@ object unlift {
 
   }
 
-  trait EffectInstance[F[_], G[_]] extends Effect[G] {
+  private[unlift] trait EffectInstance[F[_], G[_]] extends Effect[G] {
     def toG: F ~> G
     def toF: G ~> F
     implicit def F: Effect[F]
@@ -74,7 +74,7 @@ object unlift {
     def runAsync[A](ga: G[A])(cb: Either[Throwable, A] => IO[Unit]): SyncIO[Unit] = F.runAsync(toF(ga))(cb)
   }
 
-  trait ConcurrentEffectInstance[F[_], G[_]] extends EffectInstance[F, G] with ConcurrentEffect[G] {
+  private[unlift] trait ConcurrentEffectInstance[F[_], G[_]] extends EffectInstance[F, G] with ConcurrentEffect[G] {
     implicit def F: ConcurrentEffect[F]
 
     def start[A](ga: G[A]): G[Fiber[G, A]] = toG(F.map(F.start(toF(ga)))(_.mapK(toG)))
