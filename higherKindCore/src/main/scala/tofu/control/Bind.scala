@@ -26,7 +26,7 @@ trait BiMonad[L[_, _], R[_, _]] {
   }
 }
 
-trait TwinMonad[F[_, _]] extends BiMonad[F, F] { self =>
+trait TwinMonad[F[_, _]] extends BiMonad[F, F] with Bifunctor[F] { self =>
   def pure[E, A](a: A): F[E, A]
 
   def raise[E, A](e: E): F[E, A]
