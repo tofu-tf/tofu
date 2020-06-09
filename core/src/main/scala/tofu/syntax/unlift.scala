@@ -6,7 +6,7 @@ import tofu.lift.Unlift
 
 object unlift {
 
-  implicit class UnliftEffectOps[F[_], G[_]](private val U: Unlift[F, G]) extends AnyVal {
+  implicit final class UnliftEffectOps[F[_], G[_]](private val U: Unlift[F, G]) extends AnyVal {
     def effect(implicit G: Functor[G], E: Effect[F]): G[Effect[G]] =
       G.map(U.unlift) { unliftF =>
         new EffectInstance[F, G] {
