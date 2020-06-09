@@ -43,7 +43,7 @@ val sizeUpToRank: LazyList[BigInt] = LazyList.from(0).map{x =>
 }
 
 val rankSize: LazyList[BigInt] = LazyList.from(0).map{x =>
-    if(x <= 1) 1  
+    if(x == 0) 1  
     else 2 * sizeUpToRank(x - 1) * rankSize(x - 1) + rankSize(x - 1) * rankSize(x - 1)
 }
 ```
