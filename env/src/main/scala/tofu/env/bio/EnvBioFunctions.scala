@@ -12,7 +12,7 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
     }
 
   // todo naming
-  def applyFatal[R, E, A](f: R => Task[A]): EnvBio[R, E, A] = f(_)
+  def applyFatal[R, E, A](eb: EnvBio[R, E, A]): EnvBio[R, E, A] = eb
 
   def pure[A](x: A): EnvBio[Any, Nothing, A] = _ => Task.pure(x)
 
@@ -60,6 +60,12 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
     *   // res = Right(1)
     * }}} */
   def fromTaskTotal[A](task: Task[A]): EnvBio[Any, Nothing, A] = _ => task
+
+  def fromTaskEither[E, A](task: Task[Either[E, A]]): EnvBio[Any, Nothing, A] = _ =>
+    task.flatMap {
+      case Left(e)  => Task.raiseError(UserError(e))
+      case Right(a) => Task.pure(a)
+    }
 
   /** Creates `EnvBio` from `Task`.
     * Any `Throwable` raised by Task will result in failed `EnvBio`, fixed to Left side. */

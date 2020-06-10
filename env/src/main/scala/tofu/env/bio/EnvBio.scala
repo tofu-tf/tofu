@@ -41,7 +41,7 @@ abstract class EnvBio[-R, +E, +A] {
   ): EnvBio[R1, E1, D] =
     EnvBio.applyFatal(ctx => Task.parMap3(runF(ctx), eb.runF(ctx), ec.runF(ctx))(f))
 
-  def onErrorHandleWith[R1 <: R, E1 >: E, A1 >: A](f: E => EnvBio[R1, E1, A1]): EnvBio[R1, E1, A1] =
+  def onErrorHandleWith[R1 <: R, E1, A1 >: A](f: E => EnvBio[R1, E1, A1]): EnvBio[R1, E1, A1] =
     EnvBio.applyFatal(ctx =>
       runF(ctx).onErrorHandleWith {
         case UserError(e: E @unchecked) => f(e).runF(ctx)
@@ -49,7 +49,7 @@ abstract class EnvBio[-R, +E, +A] {
       }
     )
 
-  def onErrorHandle[A1 >: A](f: E => A1): EnvBio[R, E, A1] =
+  def onErrorHandle[A1 >: A](f: E => A1): EnvBio[R, Nothing, A1] =
     onErrorHandleWith(e => EnvBio.pure(f(e)))
 
   def onErrorRecoverWith[R1 <: R, E1 >: E, A2 >: A](f: PartialFunction[E, EnvBio[R1, E1, A2]]): EnvBio[R1, E1, A2] =
@@ -63,11 +63,11 @@ abstract class EnvBio[-R, +E, +A] {
   def onErrorRecover[A1 >: A](f: PartialFunction[E, A1]): EnvBio[R, E, A1] =
     onErrorRecoverWith(f.andThen(a1 => EnvBio.pure(a1)))
 
-  def mapError[E1 >: E](f: E => E1): EnvBio[R, E1, A] =
+  def mapError[E1](f: E => E1): EnvBio[R, E1, A] =
     onErrorHandleWith(e => EnvBio.raiseError(f(e)))
 
-  def tapError[R1 <: R, E1 >: E](f: E => EnvBio[R1, E1, Any]): EnvBio[R1, E1, A] =
-    onErrorHandleWith(e => f(e).flatMap(_ => EnvBio.raiseError(e)))
+  def tapError[R1 <: R, E1, A1 >: A](f: E => EnvBio[R1, E1, A1]): EnvBio[R1, E, A1] =
+    onErrorHandleWith(e => f(e).mapError(_ => e))
 
   /** Creates new EnvBio with polymorphic environment switching */
   def localP[R1](f: R1 => R): EnvBio[R1, Nothing, A]              =
@@ -85,8 +85,19 @@ abstract class EnvBio[-R, +E, +A] {
 
   /** Times the `EnvBio` execution, returning elapsed time along with computed value */
   def timed: EnvBio[R, E, (FiniteDuration, A)] = mapTask(_.timed)
+
+  def foldWith[X, B, R1 <: R](
+      h: E => EnvBio[R1, X, B],
+      f: A => EnvBio[R1, X, B]
+  ): EnvBio[R1, X, B] =
+    ctx =>
+      this.runF(ctx).attempt.flatMap {
+        case Left(UserError(e: E @unchecked)) => h(e).runF(ctx)
+        case Left(err)                        => Task.raiseError(err)
+        case Right(x)                         => f(x).runF(ctx)
+      }
 }
 
-object EnvBio extends EnvBioFunctions {}
+object EnvBio extends EnvBioFunctions with EnvBioInstances {}
 
 private[bio] final case class UserError(err: Any) extends Throwable
