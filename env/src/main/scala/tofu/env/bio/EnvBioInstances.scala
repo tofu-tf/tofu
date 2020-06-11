@@ -4,11 +4,15 @@ import tofu.control.Bind
 import tofu.control.StackSafeBind
 import tofu.bi.BiRun
 import cats.Bifunctor
+import tofu.higherKind.bi.BiFunK
 
 trait EnvBioInstances {}
 
 class EnvBioBifunctorInstance[R]
     extends StackSafeBind[EnvBio[R, *, *]] with BiRun[EnvBio[R, *, *], BiTask, Nothing, R] {
+
+  override def disclose[E, A](k: BiFunK[EnvBio[R, *, *], BiTask] => BiTask[E, A]): EnvBio[R, E, A] =
+    EnvBio.context.flatMap((ctx: R) => EnvBio.fromTaskEither(k(BiFunK.apply(bio => bio.run(ctx)))))
 
   override def gfunctor: Bifunctor[EnvBio[R, *, *]] = this
 
@@ -20,7 +24,8 @@ class EnvBioBifunctorInstance[R]
 
   override def context: EnvBio[R, Nothing, R] = EnvBio.context[R]
 
-  override def bilocal[E, A](fea: EnvBio[R, E, A])(lproj: Nothing => Nothing, rproj: R => R): EnvBio[R, E, A] = fea.local(rproj)
+  override def bilocal[E, A](fea: EnvBio[R, E, A])(lproj: Nothing => Nothing, rproj: R => R): EnvBio[R, E, A] =
+    fea.local(rproj)
 
   override def pure[E, A](a: A): EnvBio[R, E, A] = EnvBio.pure(a)
 

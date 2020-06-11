@@ -4,7 +4,7 @@ import cats.Bifunctor
 import tofu.optics.Extract
 import tofu.optics.Same
 import tofu.optics.Contains
-import tofu.bi.lift.BiLift
+import tofu.bi.lift.{BiLift, BiDisclose}
 import tofu.higherKind.bi.BiFunK
 
 trait BiContext[F[_, _], X, C] {
@@ -76,7 +76,7 @@ class BiLocalSubInstance[F[_, _], X, C, E, A](ctx: BiLocal[F, X, C], lcts: Conta
     ctx.sub(lcts >> err, rcts >> res)
 }
 
-trait BiRun[F[_, _], G[_, _], X, C] extends BiProvide[F, G, X, C] with BiLocal[F, X, C]
+trait BiRun[F[_, _], G[_, _], X, C] extends BiProvide[F, G, X, C] with BiLocal[F, X, C] with BiDisclose[G, F]
 
 object BiRun {
   def apply[F[_, _], G[_, _], X, C](implicit inst: BiRun[F, G, X, C]): BiRun[F, G, X, C] = inst
