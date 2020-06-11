@@ -134,7 +134,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
     instantiate[Embed[Alg]](tag)(embedf)
 
   def representableB[Alg[_[_, _]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
-    instantiate[RepresentableB[Alg]](tag)(bitabulate, biembed) 
+    instantiate[RepresentableB[Alg]](tag)(bitabulate, biembed)
 
   def embedB[Alg[_[_, _]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
     instantiate[EmbedB[Alg]](tag)(biembed)

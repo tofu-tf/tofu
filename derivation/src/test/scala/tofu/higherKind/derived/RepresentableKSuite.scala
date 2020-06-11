@@ -30,8 +30,6 @@ class RepresentableKSuite extends AnyFlatSpec with Matchers {
       OptionT(a.headOption.traverse(_.asLeft[Unit]))
   }
 
-
-
   val defaultFoo: Foo[Id] = new Foo[Id] {
     override def foo(x: Int, s: String): Double = x.toDouble
     override def bar(a: List[Int]): Unit        = ()
@@ -90,7 +88,6 @@ class RepresentableKSuite extends AnyFlatSpec with Matchers {
     leftFoo.bar(List(4, 5, 6)) should ===(Left("failed"))
     leftFoo.bar(List()) should ===(Left("failed"))
   }
-
 
 }
 

@@ -11,7 +11,7 @@ object UnitalB {
 trait PureB[U[_[_, _]]] extends UnitalB[U] {
   def pureB[F[_, _]](point: BiPoint[F]): U[F]
 
-  def unitB: U[UnitB] = pureB(BiPoint.unit)  
+  def unitB: U[UnitB] = pureB(BiPoint.unit)
 }
 
 object PureB {

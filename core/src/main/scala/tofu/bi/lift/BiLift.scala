@@ -18,6 +18,6 @@ object BiLift {
   def trans[F[_, _], G[_, _]](implicit lift: BiLift[F, G]): F BiFunK G   = lift.liftF
 }
 
-trait BiDisclose[F[_, _], G[_, _]] extends BiLift[F, G]{
+trait BiDisclose[F[_, _], G[_, _]] extends BiLift[F, G] {
   def disclose[E, A](k: (G BiFunK F) => F[E, A]): G[E, A]
 }

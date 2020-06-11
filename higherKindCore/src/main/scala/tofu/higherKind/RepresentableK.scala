@@ -46,7 +46,7 @@ object RepK {
 }
 
 object RepresentableK extends RepresentableKInstanceChain[RepresentableK] {
-  class Tab[U[f[_]], F[_]](private val rep: RepresentableK[U]) extends AnyVal{
+  class Tab[U[f[_]], F[_]](private val rep: RepresentableK[U]) extends AnyVal {
     type A1
     def apply(maker: funk.Maker[RepK[U, *], F, A1]): U[F] = rep.tabulate(maker)
   }

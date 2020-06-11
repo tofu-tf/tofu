@@ -9,6 +9,6 @@ trait EmbedB[U[f[_, _]]] {
 object EmbedB {
   def apply[U[f[_, _]]](implicit u: EmbedB[U]): EmbedB[U] = u
 
-  def of[F[_, _]: Bind, U[f[_, _]]](uf: F[U[F], U[F]])(implicit embed: EmbedB[U]): U[F] = 
+  def of[F[_, _]: Bind, U[f[_, _]]](uf: F[U[F], U[F]])(implicit embed: EmbedB[U]): U[F] =
     embed.biembed(uf)
 }

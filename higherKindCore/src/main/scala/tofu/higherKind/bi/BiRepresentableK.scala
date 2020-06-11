@@ -10,10 +10,10 @@ trait RepresentableB[U[f[_, _]]] extends MonoidalB[U] with EmbedB[U] {
 
   final def tab[F[_, _]]: Tab[U, F] = new Tab(this)
 
-  def biembed[F[_, _]](fu: F[U[F], U[F]])(implicit F: Bind[F]): U[F] = 
-    tab(repr => F.foldWithC(fu)(repr(_))(repr(_)))     
+  def biembed[F[_, _]](fu: F[U[F], U[F]])(implicit F: Bind[F]): U[F] =
+    tab(repr => F.foldWithC(fu)(repr(_))(repr(_)))
 
-  def map2b[F[_, _], G[_, _], H[_, _]](uf: U[F], ug: U[G])(fk: BiFun2K[F, G, H]): U[H] = 
+  def map2b[F[_, _], G[_, _], H[_, _]](uf: U[F], ug: U[G])(fk: BiFun2K[F, G, H]): U[H] =
     tab(repr => fk(repr(uf), repr(ug)))
 
   def pureB[F[_, _]](point: BiPoint[F]): U[F] = tab[F](_ => point.apply)

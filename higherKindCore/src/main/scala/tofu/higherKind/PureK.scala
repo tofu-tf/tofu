@@ -1,18 +1,18 @@
 package tofu.higherKind
 import simulacrum.typeclass
 
-
 /**
   * Higher-order form of lax unital functor
   * Transform identity in monoidal (with Tuple2K) category of endofunctors
-  * into its image 
+  * into its image
   *
   * @tparam U - higher order functor
   */
-@typeclass 
-trait UnitalK[U[_[_]]]{
+@typeclass
+trait UnitalK[U[_[_]]] {
   def unitK: U[UnitK]
 }
+
 /**
   * Higher-order form of pointed functor
   * Having point in functor cat 1 -> F, provide point in mapped Scal () -> U[F]
