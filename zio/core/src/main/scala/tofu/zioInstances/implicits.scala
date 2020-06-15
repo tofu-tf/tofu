@@ -5,6 +5,7 @@ import tofu.optics.{Contains, Extract}
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
+import zio.{Has, Tag}
 
 object implicits extends ZioTofuImplicits1
 
@@ -33,8 +34,14 @@ private[zioInstances] class ZioTofuImplicits1 extends ZioTofuImplicits2 {
     zioTofuContainsUnliftInstance[R1, R2, E]
 
   @inline final implicit def rioTofuUnliftIOImplicit[R]: RioTofuUnliftIOInstance[R] = rioTofuUnliftIOInstance
+
 }
-private[zioInstances] trait ZioTofuImplicits2 {
+private[zioInstances] trait ZioTofuImplicits2 extends ZioTofuImplicits3 {
   @inline final implicit def zioTofuImplicit[R, E]: ZioTofuInstance[R, E]               = zioTofuInstance
   @inline final implicit def zioTofuWithRunImplicit[R, E]: ZioTofuWithRunInstance[R, E] = zioTofuWithRunInstance
+}
+
+private[zioInstances] trait ZioTofuImplicits3 {
+  @inline final implicit def zioTofuUnliftHasImplicit[R <: Has[_], E, C: Tag]: ZioTofuUnliftHasInstance[R, E, C] =
+    zioTofuUnliftHasInstance
 }
