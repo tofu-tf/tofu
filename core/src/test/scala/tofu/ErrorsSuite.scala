@@ -5,6 +5,7 @@ import cats.syntax.either._
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import tofu.syntax.error._
 
 class ErrorsSuite extends AnyFlatSpec with Matchers with EitherValues {
 
@@ -17,7 +18,8 @@ class ErrorsSuite extends AnyFlatSpec with Matchers with EitherValues {
     val err: String                         = "oops"
     val pf: PartialFunction[String, String] = { case s if s == err => err + "_" + err }
     val fa: ErrorOr[Unit]                   = Raise[ErrorOr, String].raise(err)
-    Errors[ErrorOr, String].adaptError(fa)(pf) shouldBe toErr(pf(err))
+    implicit val errors                     = Errors[ErrorOr, String]
+    fa.adaptError(pf) shouldBe toErr(pf(err))
   }
 
   type ErrorOr[A] = Either[String, A]
