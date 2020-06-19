@@ -253,14 +253,18 @@ object Loggable {
   final implicit def nonEmptyChainLoggable[A: Loggable]: Loggable[NonEmptyChain[A]]   = fldLoggable[NonEmptyChain, A]
   final implicit def nonEmptySetLoggable[A: Loggable]: Loggable[NonEmptySet[A]]       = fldLoggable[NonEmptySet, A]
 
-  final implicit val instantLoggable: Loggable[Instant]               = stringValue.contramap(_.toString)
-  final implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime]   = stringValue.contramap(_.toString)
+
+  final implicit val instantLoggable: Loggable[Instant]                 = stringValue.contramap(_.toString)
+  final implicit val zonedDateTimeLoggable: Loggable[ZonedDateTime]     = stringValue.contramap(_.toString)
   final implicit val offsetDateTimeLoggable: Loggable[OffsetDateTime] = stringValue.contramap(_.toString)
-  final implicit val localDateTimeLoggable: Loggable[LocalDateTime]   = stringValue.contramap(_.toString)
-  final implicit val localDateLoggable: Loggable[LocalDate]           = stringValue.contramap(_.toString)
-  final implicit val durationLoggable: Loggable[java.time.Duration]   = stringValue.contramap(_.toString)
-  final implicit val uuidLoggable: Loggable[UUID]                     = stringValue.contramap(_.toString)
-  final implicit val finiteDurationLoggable: Loggable[FiniteDuration] = stringValue.contramap(_.toString)
+  final implicit val localDateTimeLoggable: Loggable[LocalDateTime]     = stringValue.contramap(_.toString)
+  final implicit val localDateLoggable: Loggable[LocalDate]             = stringValue.contramap(_.toString)
+  final implicit val durationLoggable: Loggable[java.time.Duration]     = stringValue.contramap(_.toString)
+  final implicit val uuidLoggable: Loggable[UUID]                       = stringValue.contramap(_.toString)
+  final implicit val finiteDurationLoggable: Loggable[FiniteDuration]   = stringValue.contramap(_.toString)
+  final implicit val sqlDateLoggable: Loggable[java.sql.Date]           = stringValue.contramap(_.toString)
+  final implicit val sqlTimeLoggable: Loggable[java.sql.Time]           = stringValue.contramap(_.toString)
+  final implicit val sqlTimestampLoggable: Loggable[java.sql.Timestamp] = stringValue.contramap(_.toString)
 
   final implicit def mapLoggable[A](implicit A: Loggable[A]): Loggable[Map[String, A]] =
     new DictLoggable[Map[String, A]] {
