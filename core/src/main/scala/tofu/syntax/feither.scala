@@ -2,7 +2,7 @@ package tofu.syntax
 
 import cats.instances.either._
 import cats.syntax.either._
-import cats.{Applicative, Functor, Monad, Traverse}
+import cats.{Applicative, FlatMap, Functor, Monad, Traverse}
 import cats.syntax.traverse._
 import tofu.Raise
 import tofu.syntax.either._
@@ -150,6 +150,8 @@ object feither {
     def mergeF[A >: R](implicit ev: L <:< A, F: Functor[F]): F[A] = {
       e.map(_.fold(ev, identity(_: A)))
     }
+
+    def reRaise(implicit R: Raise[F, L], M: Monad[F]): F[R] = R.reRaise(e)
   }
 
   implicit final class EitherIdFOps[A](private val id: A) extends AnyVal {
