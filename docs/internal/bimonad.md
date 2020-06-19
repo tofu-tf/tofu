@@ -1,6 +1,6 @@
 # Bimonad tutorial
 
-Bifunctors have been a hot topic in the Scala community since ZIO introduced the second type parameter.
+Bifunctors have become a hot topic in the Scala community since ZIO introduced the second type parameter.
 It's a great way to manage business errors in your code, but it lacks suitable abstractions.
 The most comprehensive set I've seen lies [here](https://github.com/7mind/izumi/tree/develop/fundamentals/fundamentals-bio/src/main/scala/izumi/functional/bio).
 But it's built upon practical usage.
@@ -8,22 +8,22 @@ So let's start building a more principled approach.
 
 ## Monads
 
-Let's talk about basic definitions. We will use basic category theory terminology, most of this you can find in [wikipedia](https://en.wikipedia.org/wiki/Monad_(functional_programming)) and [nlab](https://ncatlab.org/nlab/show/monad) 
-We will use the following definitions
+Let's talk about the basic definitions. We will use the basic category theory terminology, most of which can be found on [Wikipedia](https://en.wikipedia.org/wiki/Monad_(functional_programming)) and [nLab](https://ncatlab.org/nlab/show/monad).
+We will use the following definitions.
 
 ### Category 
-Starting from this section we would think of Category as some entity with some additional structure.
-The class mentioned below is something like a Set or Type. Its elements are objects of the category. Since we want the object class to be arbitrary big (bigger than classical Set could be) and we do not need equality\identity relation on it, we will say _Class_
+Starting from this section, we will think of a Category as some entity with some additional structure.
+The class mentioned below is something like a Set or a Type. Its elements are objects of the category. Since we want the object class to be arbitrary big (bigger than the classic Set could be) and we do not need equality/identity relation on it, we will denote it _Class_.
 
 
-[Category](https://en.wikipedia.org/wiki/Category_(mathematics)) `C` is a Class called _objects_ together with indexed set family `Hom: (C, C) -> Set` and functions
+A [category](https://en.wikipedia.org/wiki/Category_(mathematics)) `C` is a Class called _objects_ together with an indexed set family `Hom: (C, C) -> Set` and functions
 
 ```
 id : ∀(a: C), Hom(a, a)
 
 ∘ : ∀{a, b, c : C}, (Hom(b, c), Hom(a, b)) -> Hom(a, c) 
 ```
-and following properties
+and the following properties
 ```
 left-id : ∀{a, b: C}, ∀(f: Hom(a, b)), id b ∘ f = f
 
@@ -32,33 +32,30 @@ right-id : ∀{a, b: C}, ∀(f: Hom(a, b)), f ∘ id a = f
 associativity : ∀{a, b, c, d: C}, ∀(f: Hom(c, d)), ∀(g: Hom(b, c)), ∀(h: Hom(c, d)), ∀(h: Hom(a, b)), f ∘ (g ∘ h) = (f ∘ g) ∘ h
 ```
 
-The most acknowledged category in a functional programming language is a `Set-like category of inhabitable types and pure total functions between them, so
-objects are types, and for types `A` and `B` `Hom(A, B)` is a set of pure functions `A => B`
-For scala, we will call it `Scala`
+The most acknowledged category in a functional programming language is a `Set`-like category of inhabitable types and pure total functions between them, so the objects are types, and for types `A` and `B` `Hom(A, B)` is a set of pure functions `A => B`. For Scala, we will call it `Scala`.
 
-Another form of a category of scala types is subtyping relations,
-I.e. we have a single element `Hom(A, B)` when `A <: B` and empty Hom otherwise.
+Another sort of category that Scala types form is subtyping relations, i.e. we have a single element `Hom(A, B)` when `A <: B` and an empty Hom otherwise.
 
 ### Functor
 
-Functor `F` between categories `C` and `D` is a function `C -> D` together with a family of functions
+A functor `F` between categories `C` and `D` is a function `C -> D` together with a family of functions
 
 ```
 map: ∀(a, b: C), Hom(a, b) -> Hom(F(a), F(b))
 ```
-and following properties
+and the following properties
 ```
 functor-id: ∀(a: C), map(F)(id a) = id b
 functor-compose: ∀(a, b, c: C), ∀(f: Hom(b, c), g: Hom(a, b)),  map{F}(f ∘ g) = map{F}(f) ∘ map{F}(g)
 ```
 
-Most beloved form of functors are endo-functors `Scala` -> `Scala` which interface looks like that 
+The most beloved form of functors are endo-functors `Scala` -> `Scala`, whose interface looks like
 ```scala
 trait Functor[F[_]]{
   def map[A, B](f: A => B): F[A] => F[B]
 }
 ```
-or more common in the uncurried form 
+or more commonly in the uncurried form 
 ```scala
 trait Functor[F[_]]{
   def map[A, B](fa: F[A])(f: A => B): F[B]
@@ -252,7 +249,7 @@ So we definitely may split any mappings to left and right components
 
 ### Bifunctor monad
 
-So what is a monad which is also bifunctor, it should be endofunctor from a product of some categories, that means that it's a functor which results also in a product of the same categories,
+So what is a monad which is also bifunctor? It should be an endofunctor from a product of some categories, implying that it's a functor which results also in a product of these categories,
 
 ```
 pure: ∀a: C, x: D, Hom((a, x), F(a, x))
@@ -261,7 +258,7 @@ flatMap: ∀(a, b: C), (x, y: D), Hom((a, x), F(b, y)) -> Hom(F(a, x), F(b, y))
 
 But here we must remember that F is a function to a pair of objects.  
 How can we represent such thing on scala types?  
-We can immediately think of any function, which results in a pair as a pair of functions, producing corresponding elements of pair.  
+We can immediately think of any function resulting in a pair as a pair of functions, producing corresponding elements of pair.
 Meaning that `F: A -> B × C` can be represented `F_1: A -> B` and `F_2: A -> C` and `F(a) = (F_1(a), F_2(a))`.  
 So a binary function from types to a pair of types we can represent as a pair of type constructors.
 Same trick will work for components of `pure` and `flatMap` : instead of tuple of functions as a result we define two different methods for each component
@@ -279,8 +276,8 @@ We can easily uncurry that and define bifunctors for both `L` and `R` using such
 
 ### Twin monad
 
-Such definitions are still unsettling. It is hard to imagine how it could be useful to have two different type-constructors. So first thing we can narrow our definition requiring that 
-`R = L`, next our definitions of `flatMapLeft` and `flatMapRight` become having identical types without any useful help on which use when, so we further require them to be identical.
+Such definitions are still unsettling. It is hard to imagine how it could be useful having two different type-constructors. So the most obvious way of narrowing our definition is requiring that 
+`R = L`, then our definitions of `flatMapLeft` and `flatMapRight` become identical and can be further merged into one method.
 
 So now we with just three methods for which we can imagine fancy names.
 
