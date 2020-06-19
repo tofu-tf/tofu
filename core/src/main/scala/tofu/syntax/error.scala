@@ -59,3 +59,9 @@ object handle {
       FE.handleWith(fa)(e => F.productR(f(e))(FE.raise(e)))
   }
 }
+
+object error {
+  implicit final class ErrorOps[F[_], A](private val fa: F[A]) extends AnyVal {
+    def adaptError[E](pf: PartialFunction[E, E])(implicit FE: Errors[F, E]): F[A] = FE.adaptError(fa)(pf)
+  }
+}

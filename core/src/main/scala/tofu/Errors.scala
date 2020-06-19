@@ -2,7 +2,7 @@ package tofu
 
 import cats.data.{EitherT, OptionT, ReaderT}
 import cats.syntax.either._
-import cats.{Applicative, ApplicativeError, Functor, Id, Monad}
+import cats.{Applicative, ApplicativeError, FlatMap, Functor, Id, Monad}
 import tofu.errorInstances._
 import tofu.internal.{CachedMatcher, DataEffectComp}
 import tofu.lift.Lift
@@ -19,6 +19,9 @@ object Raise extends RaiseInstances with DataEffectComp[Raise] with ErrorsInstan
 
   trait ContravariantRaise[F[_], -E] {
     def raise[A](err: E): F[A]
+
+    def reRaise[A, E1 <: E](fa: F[Either[E1, A]])(implicit F: FlatMap[F], A: Applicative[F]): F[A] =
+      F.flatMap(fa)(_.fold(raise[A], A.pure))
   }
 
 }
@@ -113,7 +116,10 @@ trait ErrorsToInstanceChain[TC[f[_], g[_], e] >: ErrorsTo[f, g, e]]
   final implicit val optionTIntance: TC[Option, Id, Unit]      = OptionErrorsTo
 }
 
-trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E]
+trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E] {
+  def adaptError[A](fa: F[A])(pf: PartialFunction[E, E]): F[A] =
+    recoverWith(fa)(pf.andThen(raise[A] _))
+}
 
 object Errors extends ErrorInstances with DataEffectComp[Errors] with ErrorsInstanceChain[Errors]
 
