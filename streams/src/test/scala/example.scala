@@ -22,12 +22,11 @@ object example {
     }
   }
 
-  final class App[F[_]: Console: FlatMap, S[_]: Evals[*[_], F]: Compile[*[_], F]] {
+  final class App[F[_]: Console: FlatMap, S[_]: Evals[*[_], F]: Compile[*[_], F, Vector]] {
 
     def run: F[ExitCode] = {
       val srv = Srv[F, S]
       srv.requestAll.compile >>= (xs => Console[F].putStr(xs.mkString(", ")) as ExitCode.Success)
     }
-
   }
 }

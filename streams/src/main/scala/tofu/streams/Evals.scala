@@ -1,6 +1,5 @@
 package tofu.streams
 
-import cats.syntax.foldable._
 import cats.{Applicative, Foldable, Monad}
 
 trait Emits[F[_]] {
@@ -9,7 +8,7 @@ trait Emits[F[_]] {
 
   final def emit[A](a: A): F[A] = applicative.pure(a)
 
-  def emits[A](as: List[A]): F[A]
+  def emits[C[_]: Foldable, A](as: C[A]): F[A]
 }
 
 trait Evals[F[_], G[_]] extends Emits[F] {
@@ -20,8 +19,8 @@ trait Evals[F[_], G[_]] extends Emits[F] {
 
   def eval[A](ga: G[A]): F[A]
 
-  def evals[S[_]: Foldable, A](gsa: G[S[A]]): F[A] =
-    monad.flatMap(eval(gsa))(as => emits(as.toList))
+  def evals[C[_]: Foldable, A](gsa: G[C[A]]): F[A] =
+    monad.flatMap(eval(gsa))(emits(_))
 
   final def evalMap[A, B](fa: F[A])(f: A => G[B]): F[B] =
     monad.flatMap(fa)(a => eval(f(a)))
