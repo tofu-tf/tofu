@@ -14,10 +14,12 @@ package object data {
   type Nothing1 <: Nothing
   type NothingT[+A]                 = Nothing
 
+  type CalcM[+F[+_, +_], -R, -SI, +SO, +E, +A] = tofu.data.calc.CalcM[F, R, SI, SO, E, A]
+  val CalcM : tofu.data.calc.CalcM.type = tofu.data.calc.CalcM
+
   implicit val nothingFunctor: Functor[Nothing] = new Functor[Nothing] {
     def map[A, B](fa: Nothing)(f: A => B): Nothing = fa
   }
 
   type FunK[-F[_], +G[_]] = FunctionK[F @uv, G @uv]
-
 }

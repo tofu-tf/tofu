@@ -11,10 +11,10 @@ trait EnvBioInstances {}
 class EnvBioBifunctorInstance[R]
     extends StackSafeBind[EnvBio[R, *, *]] with BiRun[EnvBio[R, *, *], BiTask, Nothing, R] {
 
-  override def disclose[E, A](k: FunBK[EnvBio[R, *, *], BiTask] => BiTask[E, A]): EnvBio[R, E, A] =
-    EnvBio.context.flatMap((ctx: R) => EnvBio.fromTaskEither(k(FunBK.apply(bio => bio.run(ctx)))))
+  override def disclose[E, A](k: FunBK[EnvBio[R, *, *], BiTask] => EnvBio[R, E, A]): EnvBio[R, E, A] =
+    EnvBio.context.flatMap((ctx: R) => k(FunBK.apply(bio => bio.run(ctx))))
 
-  override def gfunctor: Bifunctor[EnvBio[R, *, *]] = this
+  override def bifunctor: Bind[EnvBio[R, *, *]] = this
 
   override def lift[E, A](fa: BiTask[E, A]): EnvBio[R, E, A] = EnvBio.fromTaskEither(fa)
 
