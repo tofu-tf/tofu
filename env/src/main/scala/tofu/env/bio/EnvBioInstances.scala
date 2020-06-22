@@ -3,7 +3,6 @@ package tofu.env.bio
 import tofu.control.Bind
 import tofu.control.StackSafeBind
 import tofu.bi.BiRun
-import cats.Bifunctor
 import tofu.higherKind.bi.FunBK
 
 trait EnvBioInstances {}

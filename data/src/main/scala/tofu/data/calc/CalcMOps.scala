@@ -4,18 +4,26 @@ import tofu.control.Bind
 import tofu.higherKind.bi.FunBK
 
 import cats.data.IndexedState
-import cats.evidence.Is
-import cats.{Functor, MonadError, Monoid, StackSafeMonad}
 import tofu.optics.PContains
 
-import scala.annotation.tailrec
-import cats.evidence.As
-import tofu.control.StackSafeBind
-import tofu.WithRun
 import tofu.compat.uv212
+import tofu.optics.functions._
 
-trait CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, A] =>
+class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, A] =>
   def widenF[F1[+x, +y] >: F[x, y] @uv212]: CalcM[F1, R, SI, SO, E, A] = this
+
+  def mapK[G[+_, +_]](fk: F FunBK G): CalcM[G, R, SI, SO, E, A] = translate(ITranslator.mapK(fk))
+
+  def trans: TranslatePack[F, R, SI, SO, E, A] = new TranslatePack(this)
+
+  def translateForget[G[+_, +_], ST, R1](
+      translator: Translator[F, G, ST, R, R1]
+  )(implicit evs: Unit <:< SI): CalcM[G, R1, ST, ST, E, A] =
+    CalcM.update((st: ST) => (st, (): SI)) *>> translateState(translator).mapState(_._1)
+
+  def local[R1](f: R1 => R): CalcM[F, R1, SI, SO, E, A] = CalcM.read[SI, R1].flatMapS(r1 => provide(f(r1)))
+
+  def supply(si: => SI): CalcM[F, R, Any, SO, E, A] = CalcM.set(si) *>> this
 
   def contramapState[SI1](f: SI1 => SI): CalcM[F, R, SI1, SO, E, A] = CalcM.update(f) *>> this
 
@@ -81,6 +89,9 @@ trait CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
         }
       )
     }
+
+  def focusFirst[S]: CalcM[F, R, (SI, S), (SO, S), E, A]  = focus(firstP)
+  def focusSecond[S]: CalcM[F, R, (S, SI), (S, SO), E, A] = focus(secondP)
 
   def provideSome[R1](f: R1 => R): CalcM[F, R1, SI, SO, E, A] = local(f)
 
@@ -159,6 +170,18 @@ trait CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
       case (s, Right(x))     => (s, x)
       case (_, Left(absurd)) => absurd
     }
+
+  def runUnit(init: SI)(implicit runner: CalcRunner[F], evr: Unit <:< R): (SO, Either[E, A]) = run((), init)
+
+  def results(implicit runner: CalcRunner[F], evr: Unit <:< R, evs: Unit <:< SI): (SO, Either[E, A]) = run((), ())
+
+  def result(implicit runner: CalcRunner[F], evr: Unit <:< R, evs: Unit <:< SI): Either[E, A] = run((), ())._2
+
+  def values(implicit runner: CalcRunner[F], evr: Unit <:< R, evs: Unit <:< SI, ev: E <:< Nothing): (SO, A) =
+    runSuccess((), ())
+
+  def value(implicit runner: CalcRunner[F], evr: Unit <:< R, evs: Unit <:< SI, ev: E <:< Nothing): A =
+    runSuccess((), ())._2
 
   def runSuccessUnit(init: SI)(implicit runner: CalcRunner[F], ev: E <:< Nothing, evr: Unit <:< R): (SO, A) =
     runSuccess((), init)

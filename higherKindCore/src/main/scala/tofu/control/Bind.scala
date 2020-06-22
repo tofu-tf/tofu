@@ -3,9 +3,6 @@ package tofu.control
 import cats.Bifunctor
 import cats.Monad
 import cats.StackSafeMonad
-import scala.annotation.tailrec
-import cats.data.EitherT
-import tofu.syntax.monadic._
 import tofu.control.impl.BindInstanceChain
 
 trait BiMonad[L[_, _], R[_, _]] {

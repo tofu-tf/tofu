@@ -1,7 +1,6 @@
 package tofu.syntax
 
 import tofu.control.TwinMonad
-import scala.annotation.unchecked.{uncheckedVariance => uv}
 
 object bind {
   implicit class BindSyntax[F[+_, +_], E, A](private val self: F[E, A]) extends AnyVal {

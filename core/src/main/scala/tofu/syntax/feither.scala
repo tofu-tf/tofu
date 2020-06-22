@@ -2,7 +2,7 @@ package tofu.syntax
 
 import cats.instances.either._
 import cats.syntax.either._
-import cats.{Applicative, FlatMap, Functor, Monad, Traverse}
+import cats.{Applicative, Functor, Monad, Traverse}
 import cats.syntax.traverse._
 import tofu.Raise
 import tofu.syntax.either._

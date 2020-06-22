@@ -1,10 +1,9 @@
 package tofu.data.calc
 
-import cats.{Functor, MonadError, Monoid, StackSafeMonad}
+import cats.{Functor, MonadError, StackSafeMonad}
 import tofu.control.{Bind, StackSafeBind}
 import tofu.WithRun
 import tofu.bi.BiRun
-import cats.Bifunctor
 import tofu.higherKind.bi.FunBK
 
 trait CalcMInstances {

@@ -2,8 +2,6 @@ package tofu.bi.lift
 
 import tofu.higherKind.bi.FunBK
 import cats.Bifunctor
-import tofu.bi.BiConst
-import tofu.higherKind.bi.Fun2BK
 import tofu.control.Bind
 
 trait BiLift[F[_, _], G[_, _]] {

@@ -4,7 +4,7 @@ import cats.Bifunctor
 import tofu.optics.Extract
 import tofu.optics.Same
 import tofu.optics.Contains
-import tofu.bi.lift.{BiLift, BiUnlift}
+import tofu.bi.lift.BiUnlift
 import tofu.higherKind.bi.FunBK
 import tofu.control.Bind
 import tofu.optics.Equivalent
