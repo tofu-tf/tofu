@@ -12,10 +12,15 @@ trait PUpcast[-S, +T, +A, -B] extends PBase[S, T, A, B] {
 
 object Upcast extends MonoOpticCompanion(PUpcast)
 
-object PUpcast extends OpticCompanion[PUpcast] {
+object PUpcast extends OpticCompanion[PUpcast] with OpticProduct[PUpcast] {
 
   def compose[S, T, A, B, U, V](f: PUpcast[A, B, U, V], g: PUpcast[S, T, A, B]): PUpcast[S, T, U, V] =
     v => g.upcast(f.upcast(v))
+
+  override def product[S1, S2, T1, T2, A1, A2, B1, B2](
+      f: PUpcast[S1, T1, A1, B1],
+      g: PUpcast[S2, T2, A2, B2]
+  ) = { case (b1, b2) => (f.upcast(b1), g.upcast(b2)) }
 
   class Context extends PSubset.Context {
     override type P[-x, +y] = Tagged[x, y]

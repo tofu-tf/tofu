@@ -3,16 +3,23 @@ package tofu.optics
 import cats._
 import cats.data.NonEmptyList
 import tofu.optics.data.Constant
+import cats.syntax.semigroup._
 
 /** aka NonEmptyFold
   * S has some occurences of A
   * and can collect then
   */
-trait PReduced[-S, +T, +A, -B] extends PFolded[S, T, A, B] {
+trait PReduced[-S, +T, +A, -B] extends PFolded[S, T, A, B] { self =>
   def reduceMap[X: Semigroup](s: S)(f: A => X): X
 
-  def foldMap[X: Monoid](s: S)(f: A => X): X = reduceMap(s)(f)
-  def getAll1(s: S): NonEmptyList[A]         = reduceMap(s)(NonEmptyList.one[A])
+  override def foldMap[X: Monoid](s: S)(f: A => X): X = reduceMap(s)(f)
+  def getAll1(s: S): NonEmptyList[A]                  = reduceMap(s)(NonEmptyList.one[A])
+
+  def +++[S1 <: S, A1 >: A](other: PReduced[S1, Any, A1, Nothing]): PReduced[S1, T, A1, B] =
+    new PReduced[S1, T, A1, B] {
+      override def reduceMap[X: Semigroup](s: S1)(f: A1 => X): X =
+        self.reduceMap(s)(f) |+| other.reduceMap(s)(f)
+    }
 }
 
 object Reduced extends MonoOpticCompanion(PReduced) {
