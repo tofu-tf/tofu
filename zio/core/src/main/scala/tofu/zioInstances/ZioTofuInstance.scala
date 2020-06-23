@@ -1,5 +1,7 @@
 package tofu
 package zioInstances
+
+import zio.ZIO
 import java.io.IOException
 
 import cats.effect.{CancelToken, Fiber, IO => CIO}
@@ -130,4 +132,18 @@ class RioTofuUnliftIOInstance[R] extends UnliftIO[RIO[R, *]] {
 class RioTofuUnsafeExecFutureInstance[R] extends UnsafeExecFuture[RIO[R, *]] {
   def lift[A](fa: Future[A]): RIO[R, A]   = RIO.fromFuture(_ => fa)
   def unlift: RIO[R, RIO[R, *] ~> Future] = RIO.runtime[R].map(r => funK(r.unsafeRunToFuture(_)))
+}
+
+class ZioTofuUnliftHasInstance[R <: Has[_], E, C: Tag] extends WithRun[ZIO[R with Has[C], E, *], ZIO[R, E, *], C] {
+  override def functor: Functor[ZIO[R with Has[C], E, *]] = zio.interop.catz.monadErrorInstance
+
+  override def runContext[A](fa: ZIO[R with Has[C], E, A])(ctx: C): ZIO[R, E, A] =
+    fa.provideSome((_: R) add ctx)
+
+  override def context: ZIO[R with Has[C], E, C] = ZIO.access(_.get[C])
+
+  override def local[A](fa: ZIO[R with Has[C], E, A])(project: C => C): ZIO[R with Has[C], E, A] =
+    fa.provideSome(r => r add project(r.get[C]))
+
+  override def lift[A](fa: ZIO[R, E, A]): ZIO[R with Has[C], E, A] = fa
 }

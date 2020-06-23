@@ -2,12 +2,12 @@ package tofu
 package zioInstances
 
 import java.io.IOException
-
 import tofu.optics.functions.extractSubtype
 import tofu.optics.{Contains, Extract}
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
+import zio.{Has, Tag}
 
 private[zioInstances] class ZioInstances {
   private[this] val rioTofuInstanceAny: RioTofuInstance[Any] = new RioTofuInstance
@@ -58,4 +58,7 @@ private[zioInstances] class ZioInstances {
   private[this] val zioTofuWithRunInstanceAny                          = new ZioTofuWithRunInstance[Any, Any]
   final def zioTofuWithRunInstance[R, E]: ZioTofuWithRunInstance[R, E] =
     zioTofuWithRunInstanceAny.asInstanceOf[ZioTofuWithRunInstance[R, E]]
+
+  final def zioTofuUnliftHasInstance[R <: Has[_], E, C: Tag]: ZioTofuUnliftHasInstance[R, E, C] =
+    new ZioTofuUnliftHasInstance
 }

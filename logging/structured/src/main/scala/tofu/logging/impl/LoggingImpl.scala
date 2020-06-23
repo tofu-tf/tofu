@@ -15,20 +15,20 @@ private[tofu] abstract class LoggingImpl[F[_]](logger: Logger) extends Logging[F
 
   override def write(level: Level, message: String, values: LoggedValue*): F[Unit] =
     level match {
-      case Trace => trace(message)
-      case Debug => debug(message)
-      case Info  => info(message)
-      case Warn  => warn(message)
-      case Error => error(message)
+      case Trace => trace(message, values: _*)
+      case Debug => debug(message, values: _*)
+      case Info  => info(message, values: _*)
+      case Warn  => warn(message, values: _*)
+      case Error => error(message, values: _*)
     }
 
   override def writeMarker(level: Level, message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     level match {
-      case Trace => traceWithMarker(message, marker)
-      case Debug => debugWithMarker(message, marker)
-      case Info  => infoWithMarker(message, marker)
-      case Warn  => warnWithMarker(message, marker)
-      case Error => errorWithMarker(message, marker)
+      case Trace => traceWithMarker(message, marker, values: _*)
+      case Debug => debugWithMarker(message, marker, values: _*)
+      case Info  => infoWithMarker(message, marker, values: _*)
+      case Warn  => warnWithMarker(message, marker, values: _*)
+      case Error => errorWithMarker(message, marker, values: _*)
     }
 
   override def writeCause(level: Level, message: String, cause: Throwable, values: LoggedValue*): F[Unit] =

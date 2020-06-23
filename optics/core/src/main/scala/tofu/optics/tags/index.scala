@@ -1,6 +1,8 @@
 package tofu.optics
 package tags
 
+import tofu.optics.functions
+
 object index extends TaggerObj[PProperty] {
   implicit def indexMap[K, V]: TagApply[PProperty, Map[K, V], V, this.type, K] =
     k => functions.mapItem[K, V](k)

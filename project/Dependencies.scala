@@ -15,7 +15,7 @@ object Dependencies {
 
     val catsTagless = "0.11"
 
-    val monocle = "2.0.4"
+    val monocle = "2.0.5"
 
     val enumeratum = "1.6.1"
 
@@ -23,19 +23,19 @@ object Dependencies {
 
     val slf4j = "1.7.30"
 
-    val fs2 = "2.3.0"
+    val fs2 = "2.4.2"
 
     val logback = "1.2.3"
 
     val monix = "3.2.2"
 
-    val scalatest = "3.1.2"
+    val scalatest = "3.2.0"
 
     val magnolia = "0.16.0"
 
     val typesafeConfig = "1.4.0"
 
-    val zio = "1.0.0-RC20"
+    val zio = "1.0.0-RC21"
 
     val zioCats = "2.0.0.0-RC14"
 

@@ -29,6 +29,13 @@ trait OpticCompanion[O[s, t, a, b] >: PSame[s, t, a, b]] {
 
 }
 
+trait OpticProduct[O[s, t, a, b]] {
+  def product[S1, S2, T1, T2, A1, A2, B1, B2](
+      f: O[S1, T1, A1, B1],
+      g: O[S2, T2, A2, B2]
+  ): O[(S1, S2), (T1, T2), (A1, A2), (B1, B2)]
+}
+
 trait OpticContext {
   type F[+_]
   type P[-_, +_]
