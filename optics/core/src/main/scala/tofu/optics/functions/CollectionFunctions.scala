@@ -14,13 +14,13 @@ import tofu.compat.lazySeqInstances._
 
 trait CollectionFunctions {
   def listElemsP[A, B]: PItems[List[A], List[B], A, B] = PItems.fromTraverse[List, A, B]
+  def listElems[A]: Items[List[A], A]                  = listElemsP
 
-  def listElems[A]: Items[List[A], A] = listElemsP
-
-  def vectorElemsP[A, B]: PItems[Vector[A], Vector[B], A, B] = PItems.fromTraverse[Vector, A, B]
-  def vecElemsP[A, B]: PItems[Vector[A], Vector[B], A, B]    = PItems.fromTraverse[Vector, A, B]
+  def vecElemsP[A, B]: PItems[Vector[A], Vector[B], A, B] = PItems.fromTraverse[Vector, A, B]
+  def vecElems[A, B]: Items[Vector[A], A]                 = vecElemsP
 
   def streamElemsP[A, B]: PItems[LazySeq[A], LazySeq[B], A, B] = PItems.fromTraverse[LazySeq, A, B]
+  def streamElems[A]: Items[LazySeq[A], A]                     = streamElemsP
 
   def mapValuesP[K, V1, V2]: PItems[Map[K, V1], Map[K, V2], V1, V2] = PItems.fromTraverse[Map[K, +*], V1, V2]
   def mapValues[K, V]: Items[Map[K, V], V]                          = mapValuesP
@@ -51,6 +51,4 @@ trait CollectionFunctions {
   def mapItem[K, V](k: K): Property[Map[K, V], V] = Property[Map[K, V]](_.get(k))(_.updated(k, _))
 
   def vecItem[A](i: Int): Property[Vector[A], A] = Property[Vector[A]](_.lift(i))(_.updated(i, _))
-
-  def vecElems[A, B]: Items[Vector[A], A] = vecElemsP
 }

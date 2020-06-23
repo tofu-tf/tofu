@@ -11,7 +11,7 @@ object every extends TaggerObj[PItems] {
     _ => functions.listElemsP
 
   implicit def everyVector[A, B]: PTagApply[PItems, Vector[A], Vector[B], A, B, this.type, Unit] =
-    _ => functions.vectorElemsP
+    _ => functions.vecElemsP
 
   implicit def everyTuple2[A, B]: PTagApply[PItems, (A, A), (B, B), A, B, this.type, Unit] = _ => functions.everyTuple2
 
