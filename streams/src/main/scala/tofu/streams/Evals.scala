@@ -1,12 +1,8 @@
 package tofu.streams
 
-import cats.{Applicative, Foldable, Monad}
+import cats.{Foldable, Monad}
 
 trait Emits[F[_]] {
-
-  val applicative: Applicative[F]
-
-  final def emit[A](a: A): F[A] = applicative.pure(a)
 
   def emits[C[_]: Foldable, A](as: C[A]): F[A]
 }
@@ -14,8 +10,6 @@ trait Emits[F[_]] {
 trait Evals[F[_], G[_]] extends Emits[F] {
 
   val monad: Monad[F]
-
-  override val applicative: Applicative[F] = monad
 
   def eval[A](ga: G[A]): F[A]
 
