@@ -27,11 +27,8 @@ object example {
     F[_]: Console: FlatMap,
     S[_]: Evals[*[_], F]: Compile.Aux[*[_], F, Vector]: Chunks[*[_], C],
     C[_]: Functor
-  ] {
-
-    def run: F[ExitCode] = {
-      val srv = Srv[F, S, C]
+  ](srv: Srv[S]) {
+    def run: F[ExitCode] =
       srv.requestAll.compile >>= (xs => Console[F].putStr(xs.mkString(", ")) as ExitCode.Success)
-    }
   }
 }
