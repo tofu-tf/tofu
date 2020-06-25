@@ -3,7 +3,7 @@ package tofu.optics
 import com.github.ghik.silencer.silent
 
 /** polymorphic equality: any relation for S and T equal to relation of A and B */
-trait PSame[-S, +T, +A, -B] extends PEquivalent[S, T, A, B] {
+trait PSame[-S, +T, +A, -B] extends PEquivalent[S, T, A, B] with PBase[PSame, S, T, A, B] {
   self =>
 
   def rsubst[R[-_, +_]](r: R[A, B]): R[S, T]
@@ -59,4 +59,7 @@ object PSame extends OpticCompanion[PSame] with OpticProduct[PSame] {
   implicit final class SameOps[A, B](private val s: PSame[A, A, B, B]) extends AnyVal {
     def subst[F[+_]](fa: F[A]): F[B] = s.inverse.rsubst[λ[(`-s`, `+t`) => F[t]]](fa)
   }
+
+  override def delayed[S, T, A, B](o: () => PSame[S, T, A, B]): PSame[S, T, A, B] =
+    PSame.anyId.asInstanceOf[PSame[S, T, A, B]]
 }

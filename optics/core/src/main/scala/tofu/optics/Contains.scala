@@ -11,7 +11,7 @@ import tofu.optics.data.{Constant, Identity}
 /** aka Lens
   * S has exactly one A and can update it
   */
-trait PContains[-S, +T, +A, -B] extends PExtract[S, T, A, B] with PRepeated[S, T, A, B] with PProperty[S, T, A, B] {
+trait PContains[-S, +T, +A, -B] extends PExtract[S, T, A, B] with PRepeated[S, T, A, B] with PProperty[S, T, A, B] with PBase[PContains, S, T, A, B] {
   def set(s: S, b: B): T
   def extract(s: S): A
 
@@ -45,6 +45,13 @@ object Contains extends MonoOpticCompanion(PContains) {
 object PContains extends OpticCompanion[PContains] with OpticProduct[PContains] {
   def apply[S, B] = new PContainsApplied[S, B](true)
 
+  override def delayed[S, T, A, B](o: () => PContains[S,T,A,B]): PContains[S,T,A,B] = new PContains[S, T, A, B] {
+    lazy val opt = o()
+
+    override def set(s: S, b: B): T = opt.set(s, b)
+
+    override def extract(s: S): A = opt.extract(s)    
+  }
   class PContainsApplied[S, B](private val dummy: Boolean) extends AnyVal {
     def apply[A, T](fget: S => A)(fset: (S, B) => T): PContains[S, T, A, B] = new PContains[S, T, A, B] {
       def set(s: S, b: B): T = fset(s, b)

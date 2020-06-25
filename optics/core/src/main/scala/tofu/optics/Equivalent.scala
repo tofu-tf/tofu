@@ -8,7 +8,7 @@ import tofu.optics.data.{Constant, Tagged}
 /** aka Iso
   * S and B share same information
   */
-trait PEquivalent[-S, +T, +A, -B] extends PSubset[S, T, A, B] with PContains[S, T, A, B] {
+trait PEquivalent[-S, +T, +A, -B] extends PSubset[S, T, A, B] with PContains[S, T, A, B] with PBase[PEquivalent, S, T, A, B] {
   self =>
   def extract(s: S): A
   def upcast(b: B): T
@@ -92,5 +92,13 @@ object PEquivalent extends OpticCompanion[PEquivalent] with OpticProduct[PEquiva
           type F[+x]     = G[x]
           type P[-x, +y] = Q[x, y]
         })(pb)
+    }
+
+    override def delayed[S, T, A, B](o: () => PEquivalent[S,T,A,B]): PEquivalent[S,T,A,B] = new PEquivalent[S, T, A, B] {
+      lazy val opt = o()
+      def extract(s: S): A = opt.extract(s)
+      
+      def upcast(b: B): T = opt.upcast(b)
+      
     }
 }

@@ -8,7 +8,7 @@ import tofu.optics.data.{Constant, Identity}
   * S has some or none occurences of A
   * and can update them using some effect
   */
-trait PItems[-S, +T, +A, -B] extends PUpdate[S, T, A, B] with PFolded[S, T, A, B] {
+trait PItems[-S, +T, +A, -B] extends PUpdate[S, T, A, B] with PFolded[S, T, A, B] with PBase[PItems, S, T, A, B] {
   def traverse[F[+_]: Applicative](s: S)(f: A => F[B]): F[T]
 
   def update(a: S, fb: A => B): T            = traverse[Identity](a)(fb)
@@ -77,5 +77,10 @@ object PItems extends OpticCompanion[PItems] {
         def functor = Applicative[G]
         type F[+x] = G[x]
       })(f)(a)
+  }
+
+  override def delayed[S, T, A, B](o: () => PItems[S, T, A, B]): PItems[S, T, A, B] = new PItems[S, T, A, B] {
+    val opt                                                    = o()
+    def traverse[F[+_]: Applicative](s: S)(f: A => F[B]): F[T] = opt.traverse(s)(f)
   }
 }

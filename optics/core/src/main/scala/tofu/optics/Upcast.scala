@@ -6,7 +6,7 @@ import tofu.optics.classes.PChoice
 import tofu.optics.data.{Identity, Tagged}
 import scala.annotation.nowarn
 
-trait PUpcast[-S, +T, +A, -B] extends PBase[S, T, A, B] {
+trait PUpcast[-S, +T, +A, -B] extends PBase[PUpcast, S, T, A, B] {
   def upcast(b: B): T
 }
 
@@ -42,4 +42,9 @@ object PUpcast extends OpticCompanion[PUpcast] with OpticProduct[PUpcast] {
 
   implicit def subType[E, E1](implicit @nowarn ev: E <:< E1): Upcast[E1, E] =
     GenericSubtypeImpl.asInstanceOf[Upcast[E1, E]]
+
+    override def delayed[S, T, A, B](o: () => PUpcast[S,T,A,B]): PUpcast[S,T,A,B] = new PUpcast[S, T, A, B] {
+      lazy val opt = o()
+      def upcast(b: B): T = opt.upcast(b)
+    }
 }

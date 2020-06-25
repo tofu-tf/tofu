@@ -8,7 +8,8 @@ import tofu.optics.data.Constant
   * mere function from A to B
   * and part of Lens
   */
-trait PExtract[-S, +T, +A, -B] extends PDowncast[S, T, A, B] with PReduced[S, T, A, B] {
+trait PExtract[-S, +T, +A, -B]
+    extends PDowncast[S, T, A, B] with PReduced[S, T, A, B] with PBase[PExtract, S, T, A, B] {
   def extract(s: S): A
 
   def downcast(s: S): Option[A]                       = Some(extract(s))
@@ -33,4 +34,9 @@ object PExtract extends OpticCompanion[PExtract] {
     }
   override def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PExtract[S, T, A, B] =
     s => o(new Context { type X = A })(a => Constant.Impl(a))(s).value
+
+  override def delayed[S, T, A, B](o: () => PExtract[S, T, A, B]): PExtract[S, T, A, B] = new PExtract[S, T, A, B] {
+    lazy val opt         = o()
+    def extract(s: S): A = opt.extract(s)
+  }
 }
