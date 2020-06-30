@@ -12,6 +12,9 @@ final case class Applied[O[_, _, _, _], S, T, A, B](s: S, o: O[S, T, A, B]) {
   def >[O1[s, t, a, b] >: O[s, t, a, b]](tagger: Tagger[O1]): AppliedWithTag[O1, S, T, A, B, tagger.Tag] =
     AppliedWithTag(s, o)
 
+  def to[O1[s, t, a, b] >: O[s, t, a, b]](tagger: Tagger[O1]): AppliedWithTag[O1, S, T, A, B, tagger.Tag] =
+    AppliedWithTag(s, o)
+
   def put(b: B)(implicit ev: O[S, T, A, B] <:< PUpdate[S, T, A, B]): T = ev(o).put(s, b)
 
   def update(f: A => B)(implicit ev: O[S, T, A, B] <:< PUpdate[S, T, A, B]): T = ev(o).update(s, f)

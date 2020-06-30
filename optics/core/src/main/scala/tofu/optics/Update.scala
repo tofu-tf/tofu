@@ -2,6 +2,7 @@ package tofu.optics
 
 import cats.{Applicative, Functor}
 import tofu.optics.data.Identity
+import tofu.optics.classes.PChoice
 
 /** aka Setter
   * can update all occurrences of A in S */
@@ -11,6 +12,8 @@ trait PUpdate[-S, +T, +A, -B] extends PBase[PUpdate, S, T, A, B] {
   def updateF(fb: A => B): S => T = update(_, fb)
 
   def put(s: S, b: B) = update(s, _ => b)
+
+  def putF(b: B): S => T = put(_, b)
 
   def follow[A1 >: A, B1 <: B, U](upd: PUpdate[T, U, A1, B1]): PUpdate[S, U, A1, B1] =
     (s, f) => upd.update(this.update(s, f), f)
@@ -32,9 +35,9 @@ object PUpdate extends OpticCompanion[PUpdate] {
     lazy val opt = o()
   }
 
-  class Context extends PItems.Context {
-    val functor = Applicative[Identity]
-    type F[+x] = x
+  class Context extends PZipping.Context with PItems.Context {
+    def gfunctor = Applicative[Identity]
+    override type G[+x] = x
   }
 
   override def toGeneric[S, T, A, B](o: PUpdate[S, T, A, B]): Optic[Context, S, T, A, B] =

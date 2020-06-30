@@ -9,7 +9,7 @@ import cats.syntax.profunctor._
 import tofu.optics.Subset.ByDowncast
 import tofu.optics.data.Identity
 import tofu.optics.classes.PChoice
-import tofu.optics.data.Tagged
+import tofu.optics.data._
 
 import scala.reflect.ClassTag
 
@@ -68,7 +68,7 @@ object PSubset extends OpticCompanion[PSubset] {
     def inj[F[+_]: Pure: Functor, P[-_, +_]: PChoice](pb: P[A, F[B]]): P[S, F[T]]
     override def inject[F[+_]: Pure: Functor, P[-_, +_]: PChoice](pb: P[A, F[B]]): P[S, F[T]] = inj(pb)
 
-    def upcast(b: B): T            = inj[Identity, Tagged](Tagged(b)).value
+    def upcast(b: B): T            = inj[Identity, Tagged](_ => b).apply(())
     def narrow(s: S): Either[T, A] = inj[Either[A, +*], Function](Left(_)).apply(s).swap
   }
 

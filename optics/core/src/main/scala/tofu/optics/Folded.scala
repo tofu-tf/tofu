@@ -4,7 +4,7 @@ import cats.instances.list._
 import cats.instances.vector._
 import cats.syntax.monoid._
 import cats.{Applicative, Foldable, Monoid}
-import tofu.optics.data.Constant
+import tofu.optics.data._
 
 /** S has some or none occurrences of A
   * and can collect them */
@@ -64,7 +64,7 @@ object PFolded extends OpticCompanion[PFolded] {
   override def toGeneric[S, T, A, B](o: PFolded[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
-        s => Constant.Impl(o.foldMap(s)(a => p(a).value)(c.algebra))
+        s => o.foldMap(s)(a => p(a))(c.algebra)
     }
   override def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PFolded[S, T, A, B] =
     new PFolded[S, T, A, B] {
@@ -72,7 +72,7 @@ object PFolded extends OpticCompanion[PFolded] {
         o(new Context {
           type X = Y
           override def algebra = Monoid[Y]
-        })(a => Constant(f(a)))(s).value
+        })(f)(s)
     }
 
   override def delayed[S, T, A, B](o: () => PFolded[S, T, A, B]): PFolded[S, T, A, B] = new PFolded[S, T, A, B] {

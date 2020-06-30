@@ -10,10 +10,11 @@ object interop {
   }
 
   implicit final class MonocleIsoInteropOps[S, T, A, B](private val eqv: PIso[S, T, A, B]) extends AnyVal {
-    def toEquivalent: PEquivalent[S, T, A, B] = new PEquivalent[S, T, A, B] {
-      def extract(s: S): A = eqv.get(s)
-      def upcast(b: B): T  = eqv.reverseGet(b)
-    }
+    def toEquivalent: PEquivalent[S, T, A, B] =
+      new PEquivalent[S, T, A, B] {
+        def extract(s: S): A = eqv.get(s)
+        def back(b: B): T    = eqv.reverseGet(b)
+      }
   }
 
   implicit final class ContainsInteropOps[S, T, A, B](private val conts: PContains[S, T, A, B]) extends AnyVal {

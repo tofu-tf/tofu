@@ -2,7 +2,7 @@ package tofu.optics
 
 import cats._
 import cats.data.NonEmptyList
-import tofu.optics.data.Constant
+import tofu.optics.data._
 import cats.syntax.semigroup._
 import cats.instances.option._
 
@@ -82,16 +82,15 @@ object PReduced extends OpticCompanion[PReduced] {
   override def toGeneric[S, T, A, B](o: PReduced[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
-        s => Constant.Impl(o.reduceMap(s)(a => p(a).value)(c.algebra))
+        s => o.reduceMap(s)(p)(c.algebra)
     }
   override def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PReduced[S, T, A, B] =
     new PReduced[S, T, A, B] {
       def reduceMap[Y: Semigroup](s: S)(f: A => Y): Y =
         o.apply(new Context {
-            type X = Y
-            def algebra = Semigroup[Y]
-          })(a => Constant.Impl(f(a)))(s)
-          .value
+          type X = Y
+          def algebra = Semigroup[Y]
+        })(f)(s)
 
     }
 

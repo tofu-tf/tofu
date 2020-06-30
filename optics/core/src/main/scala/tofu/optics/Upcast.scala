@@ -3,7 +3,7 @@ package tofu.optics
 import alleycats.Pure
 import cats.{Functor, Id}
 import tofu.optics.classes.PChoice
-import tofu.optics.data.{Identity, Tagged}
+import tofu.optics.data._
 import scala.annotation.nowarn
 
 trait PUpcast[-S, +T, +A, -B] extends PBase[PUpcast, S, T, A, B] {
@@ -22,19 +22,19 @@ object PUpcast extends OpticCompanion[PUpcast] with OpticProduct[PUpcast] {
       g: PUpcast[S2, T2, A2, B2]
   ) = { case (b1, b2) => (f.upcast(b1), g.upcast(b2)) }
 
-  class Context extends PSubset.Context {
+  class Context extends PZipping.Context with PSubset.Context {
     override type P[-x, +y] = Tagged[x, y]
-    type F[+x]              = x
-    def pure       = Pure[Id]
-    def profunctor = PChoice[Tagged]
-    def functor    = Functor[Identity]
+    type G[+x]              = Unit
+    def pure                 = Pure[Id]
+    override def profunctor  = PChoice[Tagged]
+    def gfunctor: Functor[G] = ProxyFunctor
   }
   def toGeneric[S, T, A, B](o: PUpcast[S, T, A, B]): Optic[Context, S, T, A, B] =
     new Optic[Context, S, T, A, B] {
-      def apply(c: Context)(p: Tagged[A, B]): Tagged[S, T] = Tagged(o.upcast(p.value))
+      def apply(c: Context)(p: Tagged[A, B]): Tagged[S, T] = _ => o.upcast(p(()))
     }
   def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PUpcast[S, T, A, B] =
-    b => o(new Context)(Tagged(b)).value
+    b => o(new Context)(_ => b)(())
 
   object GenericSubtypeImpl extends Upcast[Any, Any] {
     override def upcast(b: Any): Any = b
@@ -43,8 +43,8 @@ object PUpcast extends OpticCompanion[PUpcast] with OpticProduct[PUpcast] {
   implicit def subType[E, E1](implicit @nowarn ev: E <:< E1): Upcast[E1, E] =
     GenericSubtypeImpl.asInstanceOf[Upcast[E1, E]]
 
-    override def delayed[S, T, A, B](o: () => PUpcast[S,T,A,B]): PUpcast[S,T,A,B] = new PUpcast[S, T, A, B] {
-      lazy val opt = o()
-      def upcast(b: B): T = opt.upcast(b)
-    }
+  override def delayed[S, T, A, B](o: () => PUpcast[S, T, A, B]): PUpcast[S, T, A, B] = new PUpcast[S, T, A, B] {
+    lazy val opt        = o()
+    def upcast(b: B): T = opt.upcast(b)
+  }
 }

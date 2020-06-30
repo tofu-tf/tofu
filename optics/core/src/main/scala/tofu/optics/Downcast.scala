@@ -33,7 +33,7 @@ object PDowncast extends OpticCompanion[PDowncast] {
   override def toGeneric[S, T, A, B](o: PDowncast[S, T, A, B]): Optic[Context, S, T, A, B] =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
-        s => o.downcast(s).fold(Constant.of[T](c.default))(a => p(a).retag)
+        s => o.downcast(s).fold(c.default)(a => p(a))
     }
 
   override def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PDowncast[S, T, A, B] =
@@ -41,13 +41,13 @@ object PDowncast extends OpticCompanion[PDowncast] {
       o(new Context {
         type X = Option[A]
         def default: Option[A] = None
-      })(a => Constant(Some(a)))(s).value
+      })(a => Some(a))(s)
 
   implicit def subType[A, B <: A: ClassTag]: Downcast[A, B]                               =
     (s: A) => Some(s).collect { case b: B => b }
 
   override def delayed[S, T, A, B](o: () => PDowncast[S, T, A, B]): PDowncast[S, T, A, B] = new PDowncast[S, T, A, B] {
-    lazy val opt = o()
+    lazy val opt                  = o()
     def downcast(s: S): Option[A] = opt.downcast(s)
   }
 }

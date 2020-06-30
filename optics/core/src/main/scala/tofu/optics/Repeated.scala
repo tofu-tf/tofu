@@ -1,7 +1,7 @@
 package tofu.optics
 
 import cats._
-import tofu.optics.data.Constant
+import tofu.optics.data._
 
 /** aka NonEmptyTraversal
   * S has some occurrences of A
@@ -12,7 +12,7 @@ trait PRepeated[-S, +T, +A, -B] extends PItems[S, T, A, B] with PReduced[S, T, A
 
   def traverse[F[+_]: Applicative](s: S)(f: A => F[B]): F[T] = traverse1[F](s)(f)
   override def foldMap[X: Monoid](s: S)(f: A => X): X        = reduceMap[X](s)(f)
-  def reduceMap[X: Semigroup](s: S)(f: A => X): X            = traverse1[Constant[X, +*]](s)(b => Constant(f(b))).value
+  def reduceMap[X: Semigroup](s: S)(f: A => X): X            = traverse1[Constant[X, +*]](s)(f)
 }
 
 object Repeated extends MonoOpticCompanion(PRepeated) {

@@ -4,8 +4,9 @@ import cats.arrow._
 import tofu.optics.classes.Category2
 import tofu.optics.tags.Tagger
 import tofu.optics.classes.Delayed
+import tofu.compat.uv212
 
-trait OpticCompanion[O[-s, +t, +a, -b] >: PSame[s, t, a, b]] {
+trait OpticCompanion[O[-s, +t, +a, -b] >: PSame[s, t, a, b] @uv212] {
   self =>
   type Context <: OpticContext
   type Mono[a, b] = O[a, a, b, b]
@@ -35,7 +36,7 @@ trait OpticCompanion[O[-s, +t, +a, -b] >: PSame[s, t, a, b]] {
 
   final implicit def toMonoOpticOps[S, A](o: O[S, S, A, A]) = new MonoOpticOps[O, S, A](o)
 
-  final implicit def toDelayOps[S, T, A, B](o: => O[S, T, A, B]) = new DelayedOps[O, S, T, A, B](() => o) 
+  final implicit def toDelayOps[S, T, A, B](o: => O[S, T, A, B]) = new DelayedOps[O, S, T, A, B](() => o)
 
 }
 
@@ -51,7 +52,7 @@ trait OpticContext {
   type P[-_, +_]
 }
 
-abstract class MonoOpticCompanion[PO[-s, +t, +a, -b] >: PSame[s, t, a, b]](
+abstract class MonoOpticCompanion[PO[-s, +t, +a, -b] >: PSame[s, t, a, b] @uv212](
     poly: OpticCompanion[PO]
 ) {
   self =>
@@ -76,9 +77,11 @@ class OpticComposeOps[O[s, t, a, b], S, T, A, B](private val o: O[S, T, A, B]) e
 
 class MonoOpticOps[O[s, t, a, b], S, A](private val o: O[S, S, A, A]) extends AnyVal {
   def ->:(s: S): Applied[O, S, S, A, A] = Applied(s, o)
+
+  def applied_:(s: S): Applied[O, S, S, A, A] = Applied(s, o)
 }
 
-class DelayedOps[O[s, t, a, b], S, T, A, B](private val of: () => O[S, T, A, B]) extends AnyVal{
+class DelayedOps[O[s, t, a, b], S, T, A, B](private val of: () => O[S, T, A, B]) extends AnyVal {
   def delayed(implicit d: Delayed[O]): O[S, T, A, B] = d.delayed(of)
 }
 

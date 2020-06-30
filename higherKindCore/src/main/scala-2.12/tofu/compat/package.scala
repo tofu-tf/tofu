@@ -8,7 +8,5 @@ package object compat {
 
   val lazySeqInstances = cats.instances.stream
 
-    type uv212 = scala.annotation.unchecked.uncheckedVariance
+  type uv212 = scala.annotation.unchecked.uncheckedVariance
 }
-
-

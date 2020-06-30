@@ -8,7 +8,7 @@ trait PSame[-S, +T, +A, -B] extends PEquivalent[S, T, A, B] with PBase[PSame, S,
 
   def rsubst[R[-_, +_]](r: R[A, B]): R[S, T]
 
-  def upcast(b: B): T                     = rsubst[λ[(`-x`, `+y`) => y]](b)
+  def back(b: B): T                       = rsubst[λ[(`-x`, `+y`) => y]](b)
   def extract(a: S): A                    = inverse.rsubst[λ[(`-x`, `+y`) => y]](a)
   override def inverse: PSame[B, A, T, S] = PSame.invert(this)
 }

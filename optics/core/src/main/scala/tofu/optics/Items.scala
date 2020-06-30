@@ -2,7 +2,7 @@ package tofu.optics
 
 import alleycats.Pure
 import cats._
-import tofu.optics.data.{Constant, Identity}
+import tofu.optics.data._
 
 /** aka Traversal
   * S has some or none occurences of A
@@ -12,7 +12,7 @@ trait PItems[-S, +T, +A, -B] extends PUpdate[S, T, A, B] with PFolded[S, T, A, B
   def traverse[F[+_]: Applicative](s: S)(f: A => F[B]): F[T]
 
   def update(a: S, fb: A => B): T            = traverse[Identity](a)(fb)
-  def foldMap[X: Monoid](a: S)(f: A => X): X = traverse[Constant[X, +*]](a)(b => Constant(f(b))).value
+  def foldMap[X: Monoid](a: S)(f: A => X): X = traverse[Constant[X, +*]](a)(f)
 }
 
 object Items extends MonoOpticCompanion(PItems) {
