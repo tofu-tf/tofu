@@ -2,7 +2,6 @@ package tofu.optics.functions
 
 import cats.Monoid
 import tofu.optics.{Contains, Folded, Items, PFolded, PItems, Property}
-import tofu.syntax.monadic._
 import cats.syntax.foldable._
 import cats.instances.list._
 import cats.instances.vector._

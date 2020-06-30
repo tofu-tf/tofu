@@ -94,6 +94,18 @@ class EnvBioSuite extends AnyFlatSpec with Matchers {
       .runSyncUnsafe(Duration.Inf) shouldBe Left("Err2")
   }
 
+  "tapHandle" should "effectfully peek at error without changing original error" in {
+    EnvBio.raiseError("Err1").tapHandle(_ => EnvBio.pure(1)).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(1)
+  }
+
+  it should "return new error if effectful computation fails" in {
+    EnvBio
+      .raiseError("Err1")
+      .tapHandle(_ => EnvBio.raiseError("Err2"))
+      .run(())
+      .runSyncUnsafe(Duration.Inf) shouldBe Left("Err1")
+  }
+
   "onErrorHandleWith" should "recover failed computation with given function" in {
     EnvBio
       .raiseError("err")
