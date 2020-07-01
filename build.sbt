@@ -249,7 +249,7 @@ lazy val fs2Interop = project
     libraryDependencies += fs2,
     defaultSettings
   )
-  .dependsOn(concurrent)
+  .dependsOn(concurrent, streams)
 
 lazy val doobie  = project
   .in(file("doobie"))
@@ -265,12 +265,24 @@ lazy val streams = project
     libraryDependencies ++= List(fs2 % Test),
     defaultSettings
   )
-  .dependsOn(core, fs2Interop % Test)
+  .dependsOn(core)
 
 lazy val coreModules = Seq(higherKindCore, core, memo, env, concurrent, opticsCore, data)
 
 lazy val commonModules =
-  Seq(observable, opticsInterop, opticsMacro, logging, enums, config, derivation, zioInterop, fs2Interop, doobie, streams)
+  Seq(
+    observable,
+    opticsInterop,
+    opticsMacro,
+    logging,
+    enums,
+    config,
+    derivation,
+    zioInterop,
+    fs2Interop,
+    doobie,
+    streams
+  )
 
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])

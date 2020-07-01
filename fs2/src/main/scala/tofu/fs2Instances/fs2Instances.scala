@@ -1,10 +1,12 @@
 package tofu
 package fs2Instances
-import cats.{FlatMap, Functor, ~>}
+import cats.effect.Concurrent
 import cats.tagless.FunctorK
-import tofu.higherKind.Embed
-import tofu.syntax.funk._
+import cats.{Alternative, FlatMap, Functor, Monad, ~>}
 import fs2._
+import tofu.higherKind.Embed
+import tofu.streams.{Chunks, CombineK, Evals, Merge}
+import tofu.syntax.funk._
 
 private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   private[this] val fs2HKInstanceAny = new FS2StreamHKInstance[Any]
@@ -14,8 +16,32 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
 
   final implicit def fs2StreamRunContext[F[_], G[_], R](implicit
       fctx: HasContextRun[F, G, R]
-  ): WithRun[Stream[F, *], Stream[G, *], R] =
+  ): WithRun[Stream[F, *], Stream[G, *], R]                   =
     new FS2RunContext[F, G, R] { override val F: HasContextRun[F, G, R] = fctx }
+
+  implicit def fs2EvalsInstance[F[_]]: Evals[Stream[F, *], F] =
+    new Evals[Stream[F, *], F] {
+      override val monad: Monad[Stream[F, *]]             = Stream.monadInstance
+      override val alternative: Alternative[Stream[F, *]] = fs2AlternativeInstance
+      override def eval[A](ga: F[A]): Stream[F, A]        = Stream.eval(ga)
+    }
+
+  implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk] =
+    new Chunks[Stream[F, *], Chunk] {
+      override def chunkN[A](fa: Stream[F, A])(n: Int): Stream[F, Chunk[A]]                 = fa.chunkN(n)
+      override def chunks[A](fa: Stream[F, A]): Stream[F, Chunk[A]]                         = fa.chunks
+      override def mapChunks[A, B](fa: Stream[F, A])(f: Chunk[A] => Chunk[B]): Stream[F, B] = fa.mapChunks(f)
+    }
+
+  implicit def fs2MergeInstance[F[_]: Concurrent]: Merge[Stream[F, *]] =
+    new Merge[Stream[F, *]] {
+      override def merge[A](fa: Stream[F, A])(that: Stream[F, A]): Stream[F, A] = fa merge that
+    }
+
+  implicit def fs2CombineKInstance[F[_]]: CombineK[Stream[F, *]] =
+    new CombineK[Stream[F, *]] {
+      override def combineK_[A](a: Stream[F, A])(b: => Stream[F, A]): Stream[F, A] = a ++ b
+    }
 }
 
 private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
@@ -28,9 +54,19 @@ private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
     new FS2Provide[F, G, R] { override val F: HasProvide[F, G, R] = fctx }
 }
 
-private[fs2Instances] trait Fs2Instances3 {
+private[fs2Instances] trait Fs2Instances3 extends Fs2Instances4 {
   final implicit def fs2StreamContext[F[_], R](implicit fctx: F HasContext R): WithContext[Stream[F, *], R] =
     new FS2Context[F, R] { override val F: F HasContext R = fctx }
+}
+
+private[fs2Instances] trait Fs2Instances4 {
+  implicit def fs2AlternativeInstance[F[_]]: Alternative[Stream[F, *]] =
+    new Alternative[Stream[F, *]] {
+      override def ap[A, B](ff: Stream[F, A => B])(fa: Stream[F, A]): Stream[F, B] = ff.flatMap(fa.map)
+      override def empty[A]: Stream[F, A]                                          = Stream.empty
+      override def combineK[A](x: Stream[F, A], y: Stream[F, A]): Stream[F, A]     = x ++ y
+      override def pure[A](x: A): Stream[F, A]                                     = Stream.emit(x)
+    }
 }
 
 class FS2StreamHKInstance[A] extends Embed[Stream[*[_], A]] with FunctorK[Stream[*[_], A]] {
