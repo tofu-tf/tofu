@@ -12,7 +12,7 @@ trait Evals[F[_], G[_]] {
 
   def eval[A](ga: G[A]): F[A]
 
-  def evals[C[_]: Foldable, A](gsa: G[C[A]]): F[A] =
+  final def evals[C[_]: Foldable, A](gsa: G[C[A]]): F[A] =
     eval(gsa) >>= (ca => alternative.unite(ca.pure))
 
   final def evalMap[A, B](fa: F[A])(f: A => G[B]): F[B] =
