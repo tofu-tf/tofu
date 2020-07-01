@@ -1,21 +1,20 @@
 package tofu.streams
 
-import cats.{Foldable, Monad}
+import cats.{Alternative, Foldable, Monad}
+import cats.syntax.applicative._
+import cats.syntax.flatMap._
 
-trait Emits[F[_]] {
+trait Evals[F[_], G[_]] {
 
-  def emits[C[_]: Foldable, A](as: C[A]): F[A]
-}
+  implicit val monad: Monad[F]
 
-trait Evals[F[_], G[_]] extends Emits[F] {
-
-  val monad: Monad[F]
+  val alternative: Alternative[F]
 
   def eval[A](ga: G[A]): F[A]
 
   def evals[C[_]: Foldable, A](gsa: G[C[A]]): F[A] =
-    monad.flatMap(eval(gsa))(emits(_))
+    eval(gsa) >>= (ca => alternative.unite(ca.pure))
 
   final def evalMap[A, B](fa: F[A])(f: A => G[B]): F[B] =
-    monad.flatMap(fa)(a => eval(f(a)))
+    fa >>= (a => eval(f(a)))
 }
