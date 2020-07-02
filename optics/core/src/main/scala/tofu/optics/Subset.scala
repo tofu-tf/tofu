@@ -9,7 +9,7 @@ import cats.syntax.profunctor._
 import tofu.optics.Subset.ByDowncast
 import tofu.optics.data.Identity
 import tofu.optics.classes.PChoice
-import tofu.optics.data.Tagged
+import tofu.optics.data._
 
 import scala.reflect.ClassTag
 
@@ -17,7 +17,8 @@ import scala.reflect.ClassTag
   * any of S could be equivalent to A
   */
 trait PSubset[-S, +T, +A, -B]
-    extends PUpcast[S, T, A, B] with PDowncast[S, T, A, B] with PItems[S, T, A, B] with PProperty[S, T, A, B] { self =>
+    extends PUpcast[S, T, A, B] with PDowncast[S, T, A, B] with PItems[S, T, A, B] with PProperty[S, T, A, B]
+    with PBase[PSubset, S, T, A, B] { self =>
   def narrow(s: S): Either[T, A]
 
   def set(s: S, b: B): T                                                                                       = upcast(b)
@@ -67,7 +68,7 @@ object PSubset extends OpticCompanion[PSubset] {
     def inj[F[+_]: Pure: Functor, P[-_, +_]: PChoice](pb: P[A, F[B]]): P[S, F[T]]
     override def inject[F[+_]: Pure: Functor, P[-_, +_]: PChoice](pb: P[A, F[B]]): P[S, F[T]] = inj(pb)
 
-    def upcast(b: B): T            = inj[Identity, Tagged](Tagged(b)).value
+    def upcast(b: B): T            = inj[Identity, Tagged](_ => b).apply(())
     def narrow(s: S): Either[T, A] = inj[Either[A, +*], Function](Left(_)).apply(s).swap
   }
 
@@ -96,5 +97,13 @@ object PSubset extends OpticCompanion[PSubset] {
   implicit def subType[A, B <: A: ClassTag]: Subset[A, B] = new ByDowncast[A, B] {
     def cast(a: A): Option[B] = Some(a).collect { case b: B => b }
     def upcast(b: B): A       = b
+  }
+
+  override def delayed[S, T, A, B](o: () => PSubset[S, T, A, B]): PSubset[S, T, A, B] = new PSubset[S, T, A, B] {
+    lazy val opt        = o()
+    def upcast(b: B): T = opt.upcast(b)
+
+    def narrow(s: S): Either[T, A] = opt.narrow(s)
+
   }
 }

@@ -12,7 +12,8 @@ import tofu.optics.data.Identity
 /** aka Optional
   * S may or may not contain single element of A
   * which may be set to B and change whole type to T*/
-trait PProperty[-S, +T, +A, -B] extends PItems[S, T, A, B] with PDowncast[S, T, A, B] {
+trait PProperty[-S, +T, +A, -B]
+    extends PItems[S, T, A, B] with PDowncast[S, T, A, B] with PBase[PProperty, S, T, A, B] {
   def set(s: S, b: B): T
   def narrow(s: S): Either[T, A]
 
@@ -83,4 +84,12 @@ object PProperty extends OpticCompanion[PProperty] {
           type F[+x] = G[x]
         })(fab)(s)
     }
+
+  override def delayed[S, T, A, B](o: () => PProperty[S, T, A, B]): PProperty[S, T, A, B] = new PProperty[S, T, A, B] {
+    val opt                = o()
+    def set(s: S, b: B): T = opt.set(s, b)
+
+    def narrow(s: S): Either[T, A] = opt.narrow(s)
+
+  }
 }
