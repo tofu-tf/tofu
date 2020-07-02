@@ -1,7 +1,7 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
-val libVersion = "0.7.7"
+val libVersion = "0.7.8"
 
 val scalaV = "2.13.2"
 
