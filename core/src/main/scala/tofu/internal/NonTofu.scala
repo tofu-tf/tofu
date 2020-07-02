@@ -17,6 +17,6 @@ object NonTofu extends NonTofu[Nothing] {
   /** This always declares an instance of `Refute`
     *
     * This instance will only be found when there is no evidence of `T`
-    * */
+    */
   implicit def refute[F[_]](implicit dummy: DummyImplicit): NonTofu[F] = this
 }

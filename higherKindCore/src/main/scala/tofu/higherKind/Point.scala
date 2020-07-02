@@ -6,7 +6,7 @@ import cats.{ContravariantMonoidal, MonoidK, ~>}
   * get F[A] for any given type A
   * useful for empty values or typeconstructors with phantom parameters
   * may look like a type class but is not
-  * */
+  */
 trait Point[F[_]] {
   def point[A]: F[A]
 }

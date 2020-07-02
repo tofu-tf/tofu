@@ -9,11 +9,13 @@ object show extends Derivation[Show] {
 
   /** the type constructor for new [[Show]] instances
     *
-    *  The first parameter is fixed as `String`, and the second parameter varies generically. */
+    *  The first parameter is fixed as `String`, and the second parameter varies generically.
+    */
   type Typeclass[T] = Show[T]
 
   /** creates a new [[Show]] instance by labelling and joining (with `mkString`) the result of
-    *  showing each parameter, and prefixing it with the class name */
+    *  showing each parameter, and prefixing it with the class name
+    */
   def combine[T](ctx: CaseClass[Typeclass, T]): Show[T] = value =>
     if (ctx.isValueClass) {
       val param = ctx.parameters.head

@@ -106,13 +106,13 @@ trait LogBuilder[U] {
   /** `I` of contained renderer */
   type Top
 
-  /**  `V` of contained renderer */
+  /** `V` of contained renderer */
   type Value
 
-  /**  `M` of contained renderer */
+  /** `M` of contained renderer */
   type ValRes
 
-  /**  `R` of contained renderer */
+  /** `R` of contained renderer */
   @specialized(Unit) type Output
 
   implicit def receiver: LogRenderer[Top, Value, Output, ValRes]
@@ -154,7 +154,8 @@ object LogRenderer {
     def dict(input: String)(receive: String => Unit): Unit                   = receive(input)
   }
 
-  /**  */
+  /**
+    */
   final case class IdxPrefix(init: String, group: String, name: String) {
     def sub(s: String) = IdxPrefix(init, join(group, name), s)
     def idx(i: Int)    = IdxPrefix(join(init, join(group, name)), "", i.toString)

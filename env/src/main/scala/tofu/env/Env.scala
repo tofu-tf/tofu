@@ -180,7 +180,8 @@ sealed trait Env[E, +A] {
     *     (duration, value) = r
     *     _ <- Env.delay(println("executed in " + duration.toMillis + " ms"))
     *   } yield value
-    * }}}*/
+    * }}}
+    */
   def timed: Env[E, (FiniteDuration, A)] =
     mapTask(_.timed)
 

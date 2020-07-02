@@ -52,7 +52,8 @@ object RepresentableK extends RepresentableKInstanceChain[RepresentableK] {
   }
 
   /** simply for reference
-    * continuation form of RepK makes higher order index trivial */
+    * continuation form of RepK makes higher order index trivial
+    */
   def index[U[_[_]], F[_], A](tf: U[F])(repr: RepK[U, A]): F[A] = repr(tf)
 }
 
