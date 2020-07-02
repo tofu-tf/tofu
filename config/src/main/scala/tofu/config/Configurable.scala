@@ -135,9 +135,8 @@ trait BaseGetters { self: Configurable.type =>
         cfg match {
           case ValueType.Array((get, is)) =>
             is.foldLeft(F.pure(Monoid.empty[C])) { (fc, i) =>
-                (fc, get(i).flatMap(parse[F, A](_)).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
-              }
-              .flatten
+              (fc, get(i).flatMap(parse[F, A](_)).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
+            }.flatten
           case ValueType.Stream(items)    =>
             items.zipWithIndex
               .foldLeft(F.pure(Monoid.empty[C])) {

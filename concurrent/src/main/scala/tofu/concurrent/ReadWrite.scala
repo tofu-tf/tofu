@@ -291,7 +291,6 @@ object ReadWrite {
     *     ten <- rw.get
     *   } yield ten
     * }}}
-    *
     */
   def of[F[_]: Concurrent, A](initial: A, maxReaders: Int = Int.MaxValue): F[ReadWrite[F, A]] =
     assertNonNegative[F](maxReaders) *>

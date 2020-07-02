@@ -8,7 +8,6 @@ import tofu.syntax.monadic._
 /**
   * A mutable atomic reference augmented with effectful operations.
   * Can be thought as TF version of zio.RefM
-  *
   */
 trait Agent[F[_], A] {
 
@@ -16,7 +15,7 @@ trait Agent[F[_], A] {
     * Reads the value from the `Agent`.
     *
     * @return `F[A]` value from `Agent`
-    * */
+    */
   def get: F[A]
 
   /**
@@ -24,7 +23,7 @@ trait Agent[F[_], A] {
     *
     * @param f function to atomically modify the `Agent`
     * @return `F[A]` modified value of `Agent`
-    * */
+    */
   def updateM(f: A => F[A]): F[A]
 
   /**
@@ -32,7 +31,7 @@ trait Agent[F[_], A] {
     *
     * @param f function to atomically modify the `Agent`
     * @return `F[Unit]`
-    * */
+    */
   def fireUpdateM(f: A => F[A]): F[Unit]
 
   /**
@@ -40,7 +39,7 @@ trait Agent[F[_], A] {
     *
     * @param f function which computes a return value for the modification
     * @return `F[B]` modified value of `Agent`
-    * */
+    */
   def modifyM[B](f: A => F[(B, A)]): F[B]
 
   /**
@@ -49,7 +48,7 @@ trait Agent[F[_], A] {
     *
     * @param f partial function to modify the `Agent`
     * @return `F[A]` modified value of `Agent`
-    * */
+    */
   def updateSomeM(f: PartialFunction[A, F[A]]): F[A]
 
   // NOTE: B => F[B] looks like tagless encoding of F[Option[B]]

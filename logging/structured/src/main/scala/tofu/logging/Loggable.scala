@@ -38,7 +38,7 @@ trait Loggable[A] extends Loggable.Base[A] {
   /** same as this loggable, but do not show any info in the message string */
   def hide: Loggable[A] = new HiddenLoggable(this)
 
-  /** combine two loggables: put fields of both, choose value of first that suits  */
+  /** combine two loggables: put fields of both, choose value of first that suits */
   def +(that: Loggable.Base[A]): Loggable[A] = that match {
     case EmptyLoggable => this
     case _             => new PlusLoggable[A](this, that)
@@ -125,7 +125,7 @@ object Loggable {
     /** same as `Loggable.+` but contravariace-friendly version */
     def plus[B <: A](that: Base[B]): Base[B]
 
-    /** same as `Loggable.fitler` but contravariance-friendly version*/
+    /** same as `Loggable.fitler` but contravariance-friendly version */
     def filterC[B <: A](p: B => Boolean): Base[B]
 
     /** contravariant version of `collect` - log values of type `B` when they could be converted to `A` */
@@ -139,7 +139,7 @@ object Loggable {
     def narrow[B <: A]: Loggable[B]
   }
 
-  /** do nothing log*/
+  /** do nothing log */
   def empty[A]: SingleValueLoggable[A] = EmptyLoggable.narrow[A]
 
   /** put no field, not value, but render as Show string */

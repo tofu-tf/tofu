@@ -88,7 +88,8 @@ abstract class EnvBio[-R, +E, +A] {
 
   /** Convenient alias for [[localP]] for better type inference.
     * Creates a new `EnvBio` that uses transformed context `R1`
-    * which is a result of applying given function to current context. */
+    * which is a result of applying given function to current context.
+    */
   def local[R1 <: R](f: R1 => R1): EnvBio[R1, Nothing, A] =
     localP[R1](f)
 

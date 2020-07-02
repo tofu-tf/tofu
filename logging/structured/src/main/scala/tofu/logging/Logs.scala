@@ -44,7 +44,8 @@ import scala.reflect.ClassTag
 trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
 
   /** Creates an instance of [[tofu.logging.Logging]] with a given arbitrary type tag,
-    * using it as a class to create underlying [[org.slf4j.Logger]] with. */
+    * using it as a class to create underlying [[org.slf4j.Logger]] with.
+    */
   def forService[Svc: ClassTag]: I[Logging[F]]
 
   /** Creates an instance of [[tofu.logging.Logging]] for a given arbitrary string name,

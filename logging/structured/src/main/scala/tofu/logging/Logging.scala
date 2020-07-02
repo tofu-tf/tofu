@@ -15,7 +15,8 @@ import scala.reflect.ClassTag
 
 /** typeclass equivalent of Logger
   * may contain specified some Logger instance
-  * or try to read it from the context */
+  * or try to read it from the context
+  */
 trait LoggingBase[F[_]] {
 
   /** push new message to log, level will be automatically checked
@@ -65,7 +66,8 @@ trait LoggingBase[F[_]] {
 }
 
 /** Logging tagged with some arbitrary tag type
-  *  note there are not any guarantees that `Service` correspond to the type parameter of `Logs.forService` method*/
+  *  note there are not any guarantees that `Service` correspond to the type parameter of `Logs.forService` method
+  */
 trait ServiceLogging[F[_], Service] extends LoggingBase[F] {
   final def to[Svc2]: ServiceLogging[F, Svc2] = this.asInstanceOf[ServiceLogging[F, Svc2]]
 }
@@ -87,7 +89,8 @@ object ServiceLogging {
 }
 
 /** typeclass for logging using specified logger or set of loggers
-  * see `Logs` for creating instances of that*/
+  * see `Logs` for creating instances of that
+  */
 trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
   final def widen[G[a] >: F[a]]: Logging[G] = this.asInstanceOf[Logging[G]]
 }

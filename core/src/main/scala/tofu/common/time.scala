@@ -9,7 +9,8 @@ import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 
 /**
-  * wrapping around ZoneId methods */
+  * wrapping around ZoneId methods
+  */
 trait TimeZone[F[_]] {
 
   /** current System time zone */
@@ -20,7 +21,8 @@ trait TimeZone[F[_]] {
 
   /** get ZoneId by full string ID,
     * checking for availability, probably generating an error
-    * see documentation to `java.time.ZoneId.of` */
+    * see documentation to `java.time.ZoneId.of`
+    */
   def of(zoneId: String): F[ZoneId]
 
   /**
@@ -46,7 +48,8 @@ object TimeZone {
 }
 
 /** typeclass for the types describing some time moment information
-  * possibly respecting timezone */
+  * possibly respecting timezone
+  */
 trait TimeData[A] {
 
   /** construct an instance from moment in time and time zone */

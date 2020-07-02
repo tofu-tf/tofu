@@ -26,7 +26,8 @@ package object optics {
   type Zipping[A, B]    = PZipping[A, A, B, B]
 
   /** label provider for instance discrimination
-    * like Contains[A, B] with Label["first"] */
+    * like Contains[A, B] with Label["first"]
+    */
   type Label[label] = Any {
     type Label = label
   }

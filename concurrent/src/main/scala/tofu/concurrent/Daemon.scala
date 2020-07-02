@@ -53,7 +53,7 @@ object Daemonic extends DaemonicInstances {
 }
 trait DaemonicInstances { self: Daemonic.type =>
 
-  /** instance making Daemons keeping default underlying behaviour*/
+  /** instance making Daemons keeping default underlying behaviour */
   implicit def nativeInstance[F[_]: Start: TryableDeferreds: Refs: Bracket[*[_], E], E]: Daemonic[F, E] =
     mkInstance[F, E](
       Function2K[Fiber[F, *], Promise[F, E, *], Daemon[F, E, *]]((fib, promise) => new Daemon.Impl(fib, promise))

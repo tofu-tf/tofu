@@ -53,7 +53,7 @@ object Calc {
       src: Calc[R, S1, S2, E1, A],
       ksuc: A => Calc[R, S2, S3, E2, B],
       kerr: E1 => Calc[R, S2, S3, E2, B]
-  ) extends Calc[R, S1, S3, E2, B] {
+  )                                                                       extends Calc[R, S1, S3, E2, B]              {
     type MidState = S2
     type MidErr   = E1
   }

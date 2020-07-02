@@ -6,7 +6,8 @@ object functionK {
 
   /** simple constructor of FunctionK
     * you can use it as makeFunctionK[List, Option](_.headOption)
-    * credits : https://github.com/alexknvl*/
+    * credits : https://github.com/alexknvl
+    */
   def makeFunctionK[F[_], G[_]](maker: MakeFunctionK[F, G]): F ~> G = maker
 
   def funK[F[_], G[_]](maker: MakeFunctionK[F, G]): F ~> G = maker
@@ -25,7 +26,8 @@ object funk {
 
   /** simple constructor of FunctionK
     * you can use it as makeFunctionK[List, Option](_.headOption)
-    * credits : https://github.com/alexknvl*/
+    * credits : https://github.com/alexknvl
+    */
   def makeFunctionK[F[_], G[_]] = new Applied2[F, G](true)
 
   def funK[F[_], G[_]] = new Applied2[F, G](true)
