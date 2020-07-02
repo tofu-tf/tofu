@@ -2,10 +2,10 @@ package tofu
 package fs2Instances
 import cats.effect.Concurrent
 import cats.tagless.FunctorK
-import cats.{Alternative, FlatMap, Functor, Monad, ~>}
+import cats.{Alternative, FlatMap, Functor, Monad, MonoidK, ~>}
 import fs2._
 import tofu.higherKind.Embed
-import tofu.streams.{Chunks, CombineK, Evals, Merge}
+import tofu.streams.{Chunks, Evals, Merge}
 import tofu.syntax.funk._
 
 private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
@@ -21,9 +21,9 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
 
   implicit def fs2EvalsInstance[F[_]]: Evals[Stream[F, *], F] =
     new Evals[Stream[F, *], F] {
-      override val monad: Monad[Stream[F, *]]             = Stream.monadInstance
-      override val alternative: Alternative[Stream[F, *]] = fs2AlternativeInstance
-      override def eval[A](ga: F[A]): Stream[F, A]        = Stream.eval(ga)
+      override val monad: Monad[Stream[F, *]]      = Stream.monadInstance
+      override val monoidK: MonoidK[Stream[F, *]]  = Stream.monoidKInstance
+      override def eval[A](ga: F[A]): Stream[F, A] = Stream.eval(ga)
     }
 
   implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk] =
@@ -36,11 +36,6 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   implicit def fs2MergeInstance[F[_]: Concurrent]: Merge[Stream[F, *]] =
     new Merge[Stream[F, *]] {
       override def merge[A](fa: Stream[F, A])(that: Stream[F, A]): Stream[F, A] = fa merge that
-    }
-
-  implicit def fs2CombineKInstance[F[_]]: CombineK[Stream[F, *]] =
-    new CombineK[Stream[F, *]] {
-      override def combineK_[A](a: Stream[F, A])(b: => Stream[F, A]): Stream[F, A] = a ++ b
     }
 }
 

@@ -1,10 +1,11 @@
 package tofu.streams.syntax
 
-import tofu.streams.CombineK
+import cats.{Defer, SemigroupK}
+import cats.syntax.semigroupk._
 
 object combineK {
 
-  implicit class LazyCombineKOps[F[_], A](private val fa: F[A]) extends AnyVal {
-    def repeat(implicit F: CombineK[F]): F[A] = F.combineK_(fa)(repeat)
+  implicit class CombineKOps[F[_], A](private val fa: F[A]) extends AnyVal {
+    def repeat(implicit F: SemigroupK[F], D: Defer[F]): F[A] = fa <+> D.defer(repeat)
   }
 }
