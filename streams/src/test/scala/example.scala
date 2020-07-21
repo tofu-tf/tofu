@@ -15,7 +15,7 @@ object example {
 
   object Srv {
 
-    def apply[F[_], S[_]: Evals[*[_], F]: Chunks[*[_], C], C[_]: Functor]: Srv[S] = new Impl[F, S, C]
+    def make[F[_], S[_]: Evals[*[_], F]: Chunks[*[_], C], C[_]: Functor]: Srv[S] = new Impl[F, S, C]
 
     final class Impl[F[_], S[_]: Chunks[*[_], C], C[_]: Functor](implicit S: Evals[S, F]) extends Srv[S] {
       override def requestAll: S[String]          = S.evals(getIds).mapChunks(_.map(_ % 2)).evalMap(requestById)
@@ -26,11 +26,11 @@ object example {
 
   final class App[
       F[_]: Console: FlatMap,
-      S[_]: Evals[*[_], F]: Compile.Aux[*[_], F, Vector]: Chunks[*[_], C],
+      S[_]: Evals[*[_], F]: Compile[*[_], F]: Chunks[*[_], C],
       C[_]: Functor
   ](srv: Srv[S]) {
 
     def run: F[Unit] =
-      srv.requestAll.compile >>= (xs => Console[F].putStr(xs.mkString(", ")))
+      srv.requestAll.to[Vector] >>= (xs => Console[F].putStr(xs.mkString(", ")))
   }
 }

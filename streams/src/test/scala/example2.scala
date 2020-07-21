@@ -32,11 +32,6 @@ object example2 {
 
 trait Fs2Instances {
 
-  implicit def fs2DeferInstance[F[_]]: Defer[Stream[F, *]] =
-    new Defer[Stream[F, *]] {
-      override def defer[A](fa: => Stream[F, A]): Stream[F, A] = Stream.empty ++ fa
-    }
-
   implicit def fs2Evals[F[_]]: Evals[fs2.Stream[F, *], F] =
     new Evals[fs2.Stream[F, *], F] {
       override val monad: Monad[fs2.Stream[F, *]]      = fs2.Stream.monadInstance

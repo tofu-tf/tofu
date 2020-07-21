@@ -44,7 +44,7 @@ lazy val defaultSettings = Seq(
     compilerPlugin(silencerPlugin),
     silencerLib,
     scalatest,
-    collectionCompat,
+    collectionCompat
   )
 ) ++ publishSettings ++ scala213Options ++ simulacrumOptions
 

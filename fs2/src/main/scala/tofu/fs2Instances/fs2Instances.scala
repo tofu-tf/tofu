@@ -1,12 +1,14 @@
 package tofu
 package fs2Instances
-import cats.effect.Concurrent
+import cats.effect.{Concurrent, Sync}
 import cats.tagless.FunctorK
 import cats.{Alternative, FlatMap, Functor, Monad, MonoidK, ~>}
 import fs2._
 import tofu.higherKind.Embed
-import tofu.streams.{Chunks, Evals, Merge}
+import tofu.streams.{Chunks, Compile, Evals, Merge}
 import tofu.syntax.funk._
+
+import scala.collection.Factory
 
 private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   private[this] val fs2HKInstanceAny = new FS2StreamHKInstance[Any]
@@ -36,6 +38,16 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   implicit def fs2MergeInstance[F[_]: Concurrent]: Merge[Stream[F, *]] =
     new Merge[Stream[F, *]] {
       override def merge[A](fa: Stream[F, A])(that: Stream[F, A]): Stream[F, A] = fa merge that
+    }
+
+  implicit def fs2CompileInstance[F[_]: Sync]: Compile[Stream[F, *], F] =
+    new Compile[Stream[F, *], F] {
+
+      override def drain[A](fa: Stream[F, A]): F[Unit] = fa.compile.drain
+
+      override def to[C[_], A](fa: Stream[F, A])(implicit ev: Factory[A, C[A]]): F[C[A]] = fa.compile.to(ev)
+
+      override def fold[A, B](fa: Stream[F, A])(init: B)(f: (B, A) => B): F[B] = fa.compile.fold(init)(f)
     }
 }
 

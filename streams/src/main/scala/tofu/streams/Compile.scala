@@ -2,12 +2,9 @@ package tofu.streams
 
 trait Compile[F[_], G[_]] {
 
-  type C[_]
+  def drain[A](fa: F[A]): G[Unit]
 
-  def compile[A](fa: F[A]): G[C[A]]
-}
+  def to[C[_], A](fa: F[A])(implicit ev: scala.collection.Factory[A, C[A]]): G[C[A]]
 
-object Compile {
-
-  type Aux[F[_], G[_], CH[_]] = Compile[F, G] { type C[x] = CH[x] }
+  def fold[A, B](fa: F[A])(init: B)(f: (B, A) => B): G[B]
 }
