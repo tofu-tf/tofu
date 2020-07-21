@@ -61,19 +61,9 @@ private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
     new FS2Provide[F, G, R] { override val F: HasProvide[F, G, R] = fctx }
 }
 
-private[fs2Instances] trait Fs2Instances3 extends Fs2Instances4 {
+private[fs2Instances] trait Fs2Instances3 {
   final implicit def fs2StreamContext[F[_], R](implicit fctx: F HasContext R): WithContext[Stream[F, *], R] =
     new FS2Context[F, R] { override val F: F HasContext R = fctx }
-}
-
-private[fs2Instances] trait Fs2Instances4 {
-  implicit def fs2AlternativeInstance[F[_]]: Alternative[Stream[F, *]] =
-    new Alternative[Stream[F, *]] {
-      override def ap[A, B](ff: Stream[F, A => B])(fa: Stream[F, A]): Stream[F, B] = ff.flatMap(fa.map)
-      override def empty[A]: Stream[F, A]                                          = Stream.empty
-      override def combineK[A](x: Stream[F, A], y: Stream[F, A]): Stream[F, A]     = x ++ y
-      override def pure[A](x: A): Stream[F, A]                                     = Stream.emit(x)
-    }
 }
 
 class FS2StreamHKInstance[A] extends Embed[Stream[*[_], A]] with FunctorK[Stream[*[_], A]] {
