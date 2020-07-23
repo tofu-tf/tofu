@@ -1,0 +1,201 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>internal/kind-enumeration · Tofu</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Kind numbers"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="internal/kind-enumeration · Tofu"/><meta property="og:type" content="website"/><meta property="og:url" content="https://docs.tofu.tf/"/><meta property="og:description" content="# Kind numbers"/><meta property="og:image" content="https://docs.tofu.tf/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://docs.tofu.tf/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/favicon.ico" alt="Tofu"/><h2 class="headerTitleWithLogo">Tofu</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/start" target="_self">Docs</a></li><li class=""><a href="/api/index.html" target="_self">API</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">internal/kind-enumeration</h1></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="kind-numbers"></a><a href="#kind-numbers" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kind numbers</h1>
+<p>Naming kinds is hard. Suppose you have <code>Function1[A, B] = A =&gt; B</code> and <code>FunctionK[F[_], G[_]] = [A] =&gt; F[A] =&gt; G[A]</code></p>
+<p>Suppose you have <code>T[_[_, _], _, _]</code> how to correctly name transformation between such types? <code>FunctionK_KK_KK</code> ?<br>
+Alphabetical codes could be hard to read and disambiguate. So I propose enumerate them all with a simple scheme.</p>
+<p>Here we suppose that <code>* = Type</code> is a Kind of  inhabitable types and <code>k1 -&gt; k2</code> where <code>k1</code> and <code>k2</code> are kind is itself kind that has single type argument of kind <code>k1</code> and result of kind <code>k2</code>. Those arrows in absence of parenthesis are associated right.
+All scala kinds we suppose to be naturally curried.</p>
+<p>So <code>T[_[_, _], _, _]</code> becomes <code>(* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *</code> or  <code>(* -&gt; (* -&gt; *)) -&gt; (* -&gt; (* -&gt; *))</code>
+and <code>T[_[_[_]], _[_[_]]]</code> becomes <code>((* -&gt; *) -&gt; *) -&gt; ((* -&gt; *) -&gt; *) -&gt; *</code> or <code>((* -&gt; *) -&gt; *) -&gt; (((* -&gt; *) -&gt; *) -&gt; *)</code>.</p>
+<p>We can consider those elements as binary trees, elements of</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Bin</span></span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Leaf</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Bin</span></span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Branch</span>(<span class="hljs-params">l: <span class="hljs-type">Bin</span>, r: <span class="hljs-type">Bin</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bin</span></span>
+</code></pre>
+<p><code>*</code> corresponds to <code>Leaf</code> and <code>k1 -&gt; k2</code> corresponds to <code>Branch(k1, k2)</code>  <br>
+For those trees we defined rank as following:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> rank: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">Int</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-number">0</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Branch</span>(b1, b2) =&gt; (rank(b1) max rank(b2)) + <span class="hljs-number">1</span>
+}
+</code></pre>
+<p>We can calculate count of different binary trees for each rank as follows:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> sizeUpToRank: <span class="hljs-type">LazyList</span>[<span class="hljs-type">BigInt</span>] = <span class="hljs-type">LazyList</span>.from(<span class="hljs-number">0</span>).map{x =&gt;  
+    <span class="hljs-keyword">if</span>(x == <span class="hljs-number">0</span>) <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> rankSize(x - <span class="hljs-number">1</span>) + sizeUpToRank(x - <span class="hljs-number">1</span>)
+}
+<span class="hljs-comment">// sizeUpToRank: LazyList[BigInt] = LazyList(</span>
+<span class="hljs-comment">//   0,</span>
+<span class="hljs-comment">//   1,</span>
+<span class="hljs-comment">//   2,</span>
+<span class="hljs-comment">//   5,</span>
+<span class="hljs-comment">//   26,</span>
+<span class="hljs-comment">//   677,</span>
+<span class="hljs-comment">//   458330,</span>
+<span class="hljs-comment">//   210066388901,</span>
+<span class="hljs-comment">//   44127887745906175987802,</span>
+<span class="hljs-comment">//   1947270476915296449559703445493848930452791205,</span>
+<span class="hljs-comment">//   3791862310265926082868235028027893277370233152247388584761734150717768254410341175325352026,</span>
+<span class="hljs-comment">//   14378219780015246281818710879551167697596193767663736497089725524386087657390556152293078723153293423353330879856663164406809615688082297859526620035327291442156498380795040822304677,</span>
+<span class="hljs-comment">//   206733204042421677181634718734036889377274379383357716793405865823317095368775657289542893376781635914484312173817557988370878548961245582641826131216636641404794790451610519266609830021136113094251414331751648388702965701984820995989371335396043070504172130112866209291049622803261659179113537278037525778584436702376761342360786599429657542977416989141816074330,</span>
+<span class="hljs-comment">//   42738617653645554487425669417955367763548489178153791212890331885138890998900808508146311757939093198954220995963493880469893655060010272737530068485887533886750263319088128875100617961740172918691094829068947024559255417843694122849355986039999784721779678479610340520316257460780653331211115191175921001686550288449540320526606015935656176339986358350085020871937781528861776129372953594883435388246572243486971684762525383211187114336334622961088849148988499044550772500949253994140989436531257826950153336030112478731838434316764895787741660597458158488889333869972691535297977686181013053333952226427170791307608470557004650494024440810638395846001231063108520585007047155467529084874545828487195466969383678372084948901,</span>
+<span class="hljs-comment">//   1826589438944503441233944903619374450505261905526216392190051569548555311191158288867132938991947712288591383352357588138810394060302387326270400600396570764614934427901378777366474525326749920624362632713940031612926606920439054397967548375833719159919910473895631392945311389708800463637987473929840325809307030010774766185391004135689734801234068539673581567775247599312241880503731683150081948935872832347373134284011181695810360683632037786770652414081815536574735547003101607812553534569242800170074276069350462692933568357952987062502907512783970461830300863082344583363776284175469786477682472528820908926526978015048109278721956581080776106925683386344085908595453026188666824003645568312836844393452776707185739880242765885532671069322802588959974057953754440241274547755740805666209468229826073218310424533265403717016863713464933481439043224331825817565164707656783863059616635780195412599299890019236436263930950584822203151741820151538481327313250894614525005135671096533093671101268517348570123352986058151565118846051377378244992162124290532840857906027057164086589991526364319002339012160251861903081354327843235434099982103607251422708178709813535095709323459574676499772530632263072416255064323426190667204706459937331048039207608155531772816982817842713722875518708173547418014456222314932091002591308523682124993038543498600578558907708385547242803907175849701173431239528379850308459943588194282093011602458634084954...</span>
+
+<span class="hljs-keyword">val</span> rankSize: <span class="hljs-type">LazyList</span>[<span class="hljs-type">BigInt</span>] = <span class="hljs-type">LazyList</span>.from(<span class="hljs-number">0</span>).map{x =&gt;
+    <span class="hljs-keyword">if</span>(x &lt;= <span class="hljs-number">1</span>) <span class="hljs-number">1</span>  
+    <span class="hljs-keyword">else</span> <span class="hljs-number">2</span> * sizeUpToRank(x - <span class="hljs-number">1</span>) * rankSize(x - <span class="hljs-number">1</span>) + rankSize(x - <span class="hljs-number">1</span>) * rankSize(x - <span class="hljs-number">1</span>)
+}
+<span class="hljs-comment">// rankSize: LazyList[BigInt] = LazyList(</span>
+<span class="hljs-comment">//   1,</span>
+<span class="hljs-comment">//   1,</span>
+<span class="hljs-comment">//   3,</span>
+<span class="hljs-comment">//   21,</span>
+<span class="hljs-comment">//   651,</span>
+<span class="hljs-comment">//   457653,</span>
+<span class="hljs-comment">//   210065930571,</span>
+<span class="hljs-comment">//   44127887745696109598901,</span>
+<span class="hljs-comment">//   1947270476915296449559659317606103024276803403,</span>
+<span class="hljs-comment">//   3791862310265926082868235028027893277370233150300118107846437701158064808916492244872560821,</span>
+<span class="hljs-comment">//   14378219780015246281818710879551167697596193767663736497089725524386087657390556152293078719361431113087404796988428136378916338317849145612138035273593140724388243970453865496952651,</span>
+<span class="hljs-comment">//   206733204042421677181634718734036889377274379383357716793405865823317095368775657289542893376781635914484312173817557988370878548961245582641826131216636641404794790451610519266609815642916333079005132513040768837535268105791053332252874245670518684416514739556713916212326469509838305848233680614873118968968748620078901815740751272138215386479036194100993769653,</span>
+<span class="hljs-comment">//   42738617653645554487425669417955367763548489178153791212890331885138890998900808508146311757939093198954220995963493880469893655060010272737530068485887533886750263319088128875100617961740172918691094829068947024559255417843694122849355986039999784721779678479610340520316257460780653331211115191175921001686550288449540320526606015935656176339986358350085020871731048324819354452191318876149398498869297864103613967969119517387870018967558965671545955772206863130066460327131696005770110887570012244308327204813475837327043643865154376521131830576322045394637919538221043146595011984196192057344580891031127720803436340444138441202974818007376736666887693785070994806422610453090767742513759229057537923991966689230268874571,</span>
+<span class="hljs-comment">//   1826589438944503441233944903619374450505261905526216392190051569548555311191158288867132938991947712288591383352357588138810394060302387326270400600396570764614934427901378777366474525326749920624362632713940031612926606920439054397967548375833719159919910473895631392945311389708800463637987473929840325809307030010774766185391004135689734801234068539673581567775247599312241880503731683150081948935872832347373134284011181695810360683632037786770652414081815536574735547003101607812553534569242800170074276069350462692933568357952987062502907512783970461830300863082344583363776284175469786477682472528820908926526978015048109278721956581080776106925683386344085908595453026188666824003645568312836844393452776707185739880200027267879025514835376919542018690190205951063120756542850473781070577230925264710164112775326310518062642717501439600969149569271815544827634639170896329172866372461107283724199272057496263345239855755753256127182564733694787204463894908574525220413891418053483330580952259887789470021774942960389197844364827089795451841597684516905201729687070805736504970654426537473477236030878908308197918939596663190613010418844726039496991595477200472748234610425688000727979859762123162260923333989659409377756306601300935560475769721215007921195076182116264717029818839677445322920924337245909989537974571455697822247235890130021554257214361106432165511329848470110322718943372803152992414503319736264524406991664701276287696158901,</span>
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>Now we can assign unique natural index to Binary trees inside the rank and globally</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> rankIndex: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">BigInt</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-number">0</span>
+    <span class="hljs-keyword">case</span> tree<span class="hljs-meta">@Branch</span>(tl, tr) =&gt;
+        <span class="hljs-keyword">val</span> r   = rank(tree) - <span class="hljs-number">1</span>
+        <span class="hljs-keyword">val</span> q   = rankSize(r)
+        <span class="hljs-keyword">val</span> u   = sizeUpToRank(r) * q
+        <span class="hljs-keyword">if</span>(rank(tl) &lt; r)
+            index(tl) * q + rankIndex(tr)
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(rank(tr) &lt; r)
+            index(tr) * q + rankIndex(tl) + u  
+        <span class="hljs-keyword">else</span>  
+            rankIndex(tl) * q + rankIndex(tr) + <span class="hljs-number">2</span> * u
+}
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">index</span></span>(tree: <span class="hljs-type">Bin</span>): <span class="hljs-type">BigInt</span> = sizeUpToRank(rank(tree)) + rankIndex(tree)
+
+index(<span class="hljs-type">Branch</span>(<span class="hljs-type">Branch</span>(<span class="hljs-type">Leaf</span>, <span class="hljs-type">Leaf</span>), <span class="hljs-type">Leaf</span>))
+<span class="hljs-comment">// res0: BigInt = 3</span>
+</code></pre>
+<p>We can provide string representations for our trees.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> args: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">LazyList</span>[<span class="hljs-type">Bin</span>] = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-type">LazyList</span>.empty
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Branch</span>(t1, t2) =&gt; t1 #:: args(t2)
+}
+
+<span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> toStarString: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">String</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-string">"*"</span>
+    <span class="hljs-keyword">case</span> tree =&gt; args(tree).iterator.map {
+        <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-string">"*"</span>
+        <span class="hljs-keyword">case</span> branch =&gt; <span class="hljs-string">s"(<span class="hljs-subst">${toStarString(branch)}</span>)"</span>
+    }.mkString(<span class="hljs-string">""</span>, <span class="hljs-string">" -&gt; "</span>, <span class="hljs-string">" -&gt; *"</span>)
+}
+
+<span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> toScalaString: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">String</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-string">"T"</span>
+    <span class="hljs-keyword">case</span> tree =&gt; args(tree).iterator.map {
+        <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-string">"_"</span>
+        <span class="hljs-keyword">case</span> branch =&gt; <span class="hljs-string">s"_<span class="hljs-subst">${toScalaString(branch)}</span>"</span>
+    }.mkString(<span class="hljs-string">"["</span>, <span class="hljs-string">", "</span>, <span class="hljs-string">"]"</span>)
+}
+</code></pre>
+<p>Now we can generate some trees</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> trees = <span class="hljs-type">LazyList</span>.iterate((<span class="hljs-type">LazyList</span>[<span class="hljs-type">Bin</span>](), <span class="hljs-type">LazyList</span>[<span class="hljs-type">Bin</span>](<span class="hljs-type">Leaf</span>))){ <span class="hljs-keyword">case</span> (prev, cur) =&gt;  
+    <span class="hljs-keyword">val</span> xs = <span class="hljs-keyword">for</span>(tl &lt;- prev; tr &lt;- cur) <span class="hljs-keyword">yield</span> <span class="hljs-type">Branch</span>(tl, tr)
+    <span class="hljs-keyword">val</span> ys = <span class="hljs-keyword">for</span>(tr &lt;- prev; tl &lt;- cur) <span class="hljs-keyword">yield</span> <span class="hljs-type">Branch</span>(tl, tr)
+    <span class="hljs-keyword">val</span> zs = <span class="hljs-keyword">for</span>(tl &lt;- cur; tr &lt;- cur)  <span class="hljs-keyword">yield</span> <span class="hljs-type">Branch</span>(tl, tr)
+    <span class="hljs-keyword">val</span> next = xs #::: ys #::: zs
+    (prev #::: cur, next)
+}.flatMap(_._2).map(t =&gt; (toScalaString(t), index(t)))
+<span class="hljs-comment">// trees: LazyList[(String, BigInt)] = LazyList(</span>
+<span class="hljs-comment">//   ("T", 0),</span>
+<span class="hljs-comment">//   ("[_]", 1),</span>
+<span class="hljs-comment">//   ("[_, _]", 2),</span>
+<span class="hljs-comment">//   ("[_[_]]", 3),</span>
+<span class="hljs-comment">//   ("[_[_], _]", 4),</span>
+<span class="hljs-comment">//   ("[_, _, _]", 5),</span>
+<span class="hljs-comment">//   ("[_, _[_]]", 6),</span>
+<span class="hljs-comment">//   ("[_, _[_], _]", 7),</span>
+<span class="hljs-comment">//   ("[_[_], _, _]", 8),</span>
+<span class="hljs-comment">//   ("[_[_], _[_]]", 9),</span>
+<span class="hljs-comment">//   ("[_[_], _[_], _]", 10),</span>
+<span class="hljs-comment">//   ("[_[_, _]]", 11),</span>
+<span class="hljs-comment">//   ("[_[_[_]]]", 12),</span>
+<span class="hljs-comment">//   ("[_[_[_], _]]", 13),</span>
+<span class="hljs-comment">//   ("[_[_, _], _]", 14),</span>
+<span class="hljs-comment">//   ("[_[_[_]], _]", 15),</span>
+<span class="hljs-comment">//   ("[_[_[_], _], _]", 16),</span>
+<span class="hljs-comment">//   ("[_[_, _], _, _]", 17),</span>
+<span class="hljs-comment">//   ("[_[_, _], _[_]]", 18),</span>
+<span class="hljs-comment">//   ("[_[_, _], _[_], _]", 19),</span>
+<span class="hljs-comment">//   ("[_[_[_]], _, _]", 20),</span>
+<span class="hljs-comment">//   ("[_[_[_]], _[_]]", 21),</span>
+<span class="hljs-comment">//   ("[_[_[_]], _[_], _]", 22),</span>
+<span class="hljs-comment">//   ("[_[_[_], _], _, _]", 23),</span>
+<span class="hljs-comment">//   ("[_[_[_], _], _[_]]", 24),</span>
+<span class="hljs-comment">//   ("[_[_[_], _], _[_], _]", 25),</span>
+<span class="hljs-comment">//   ("[_, _, _, _]", 26),</span>
+<span class="hljs-comment">//   ("[_, _, _[_]]", 27),</span>
+<span class="hljs-comment">//   ("[_, _, _[_], _]", 28),</span>
+<span class="hljs-comment">//   ("[_, _[_], _, _]", 29),</span>
+<span class="hljs-comment">//   ("[_, _[_], _[_]]", 30),</span>
+<span class="hljs-comment">//   ("[_, _[_], _[_], _]", 31),</span>
+<span class="hljs-comment">//   ("[_, _[_, _]]", 32),</span>
+<span class="hljs-comment">//   ("[_, _[_[_]]]", 33),</span>
+<span class="hljs-comment">//   ("[_, _[_[_], _]]", 34),</span>
+<span class="hljs-comment">//   ("[_, _[_, _], _]", 35),</span>
+<span class="hljs-comment">//   ("[_, _[_[_]], _]", 36),</span>
+<span class="hljs-comment">//   ("[_, _[_[_], _], _]", 37),</span>
+<span class="hljs-comment">//   ("[_, _[_, _], _, _]", 38),</span>
+<span class="hljs-comment">//   ("[_, _[_, _], _[_]]", 39),</span>
+<span class="hljs-comment">//   ("[_, _[_, _], _[_], _]", 40),</span>
+<span class="hljs-comment">//   ("[_, _[_[_]], _, _]", 41),</span>
+<span class="hljs-comment">//   ("[_, _[_[_]], _[_]]", 42),</span>
+<span class="hljs-comment">//   ("[_, _[_[_]], _[_], _]", 43),</span>
+<span class="hljs-comment">//   ("[_, _[_[_], _], _, _]", 44),</span>
+<span class="hljs-comment">//   ("[_, _[_[_], _], _[_]]", 45),</span>
+<span class="hljs-comment">//   ("[_, _[_[_], _], _[_], _]", 46),</span>
+<span class="hljs-comment">//   ("[_[_], _, _, _]", 47),</span>
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>Here we can find that our desired shape for <code>[_[_, _], _, _]</code> has number 17</p>
+<pre><code class="hljs css language-scala">trees.find(_._1 == <span class="hljs-string">"[_[_, _], _, _]"</span>).get._2
+<span class="hljs-comment">// res1: BigInt = 17</span>
+</code></pre>
+<p>Therefore we can name our kind-specific transformation as <code>FunctionKn17</code> meaning this is transformation between typeconstructors of type with index 17 having following form</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">FunctionKn17</span>[<span class="hljs-type">A</span>[_[_, _], <span class="hljs-title">_</span>, <span class="hljs-title">_</span>], <span class="hljs-title">B</span>[_[_, _], <span class="hljs-title">_</span>, <span class="hljs-title">_</span>]] </span>= [<span class="hljs-type">F</span>[_, _], <span class="hljs-type">E</span>, <span class="hljs-type">A</span>] =&gt; <span class="hljs-type">A</span>[<span class="hljs-type">F</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>] =&gt; <span class="hljs-type">B</span>[<span class="hljs-type">F</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>]
+</code></pre>
+<p>We can also reverse kind getting by index</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">byIndex</span></span>(x: <span class="hljs-type">BigInt</span>): <span class="hljs-type">Bin</span> = <span class="hljs-keyword">if</span>(x == <span class="hljs-number">0</span>) <span class="hljs-type">Leaf</span> <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">val</span> r = sizeUpToRank.indexWhere(_ &gt; x) - <span class="hljs-number">1</span>
+    byIndexInRank(x - sizeUpToRank(r), r)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">byIndexInRank</span></span>(x: <span class="hljs-type">BigInt</span>, r: <span class="hljs-type">Int</span>): <span class="hljs-type">Bin</span> = <span class="hljs-keyword">if</span>(r == <span class="hljs-number">0</span>) <span class="hljs-type">Leaf</span> <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">val</span> q = rankSize(r - <span class="hljs-number">1</span>)
+    <span class="hljs-keyword">val</span> u = sizeUpToRank(r - <span class="hljs-number">1</span>) * q
+    <span class="hljs-keyword">if</span>(x &lt; u)
+        <span class="hljs-type">Branch</span>(byIndex(x / q), byIndexInRank(x % q, r - <span class="hljs-number">1</span>))
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(x &lt; <span class="hljs-number">2</span> * u){
+        <span class="hljs-keyword">val</span> x1 = x - u
+        <span class="hljs-type">Branch</span>(byIndexInRank(x1 % q, r - <span class="hljs-number">1</span>), byIndex(x1 / q))
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">val</span> x1 = x - <span class="hljs-number">2</span> * u
+        <span class="hljs-type">Branch</span>(byIndexInRank(x1 / q, r - <span class="hljs-number">1</span>), byIndexInRank(x1 % q, r - <span class="hljs-number">1</span>))
+    }
+}
+</code></pre>
+<p>we may check that these functions are indeed isomorphim in natural numbers</p>
+<pre><code class="hljs css language-scala"><span class="hljs-type">Iterator</span>.range(<span class="hljs-number">0</span>, <span class="hljs-number">100</span>).forall(i =&gt; index(byIndex(i)) == i)
+<span class="hljs-comment">// res2: Boolean = true</span>
+</code></pre>
+<p>So now if one need to get signature for Kind number 17, they may write</p>
+<pre><code class="hljs css language-scala">toScalaString(byIndex(<span class="hljs-number">17</span>))
+<span class="hljs-comment">// res3: String = "[_[_, _], _, _]"</span>
+toStarString(byIndex(<span class="hljs-number">17</span>))
+<span class="hljs-comment">// res4: String = "(* -&gt; * -&gt; *) -&gt; * -&gt; * -&gt; *"</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/favicon.ico" alt="Tofu" width="66" height="58"/></a><div><h5>Docs</h5><a href="/docs/start.html">Getting Started</a></div><div><h5>Community</h5><a href="/en/users.html">User Showcase</a><a href="https://stackoverflow.com/questions/tagged/tofu" target="tofu" rel="noreferrer noopener">Stack Overflow</a><a href="https://t.me/tofu_scala">Telegram Group (EN|RU)</a><a href="https://gitter.im/tinkoff-tofu/community">Gitter Group (EN)</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/TinkoffCreditSystems/tofu">GitHub</a><a class="github-button" href="https://github.com/TinkoffCreditSystems/tofu" data-icon="octicon-star" data-count-href="/TinkoffCreditSystems/tofu/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Tinkoff.ru</section></footer></div></body></html>

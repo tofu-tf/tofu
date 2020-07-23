@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>internal/variance-enumeration · Tofu</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# Kind numbers with variance support"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="internal/variance-enumeration · Tofu"/><meta property="og:type" content="website"/><meta property="og:url" content="https://docs.tofu.tf/"/><meta property="og:description" content="# Kind numbers with variance support"/><meta property="og:image" content="https://docs.tofu.tf/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://docs.tofu.tf/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/favicon.ico" alt="Tofu"/><h2 class="headerTitleWithLogo">Tofu</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/start" target="_self">Docs</a></li><li class=""><a href="/api/index.html" target="_self">API</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">internal/variance-enumeration</h1></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="kind-numbers-with-variance-support"></a><a href="#kind-numbers-with-variance-support" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Kind numbers with variance support</h1>
+<p>Naming kinds is hard. Especially with variance
+Consider <code>Function1[-A, +B] = A =&gt; B</code> and <code>FunctionK[-F[_], +G[_]] = [A] =&gt; F[A] =&gt; G[A]</code></p>
+<p>Suppose you have now <code>T[_[-_, +_], -_, +_]</code> how to correctly name transformation between such types? <code>FunctionK_PM_PM</code> ?<br>
+Alphabetical codes could be hard to read and disambiguate. So I propose enumerate them all with a simple scheme.</p>
+<p>Here we suppose that <code>* = Type</code> is a Kind of inhabitable types and <code>[v]k1 -&gt; k2</code> where <code>k1</code> and <code>k2</code> are kinds is itself a kind that has single type argument of kind <code>k1</code> and result of kind <code>k2</code>. And <code>[v]</code> is a variance annotation that could be <code>+</code>, <code>-</code> or empty, meaning invariant argument
+Those arrows in absence of parenthesis are associated right.</p>
+<p>All scala kinds we suppose to be naturally curried.</p>
+<p>So <code>T[_[-_, +_], -_, +_]</code>  <br>
+becomes  <code>(-* -&gt; +* -&gt; *) -&gt; -* -&gt; -* -&gt; *</code>  <br>
+or  <code>(-* -&gt; (+* -&gt; *)) -&gt; (-* -&gt; (+* -&gt; *))</code>  <br>
+and <code>T[-_[_[_]], +_[_[_]]]</code>  <br>
+becomes <code>-((* -&gt; *) -&gt; *) -&gt; +((* -&gt; *) -&gt; *) -&gt; *</code>  <br>
+or <code>-((* -&gt; *) -&gt; *) -&gt; +(((* -&gt; *) -&gt; *) -&gt; *)</code>.</p>
+<p>We can consider those elements as binary trees, elements of</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Variance</span></span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">VP</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Variance</span> <span class="hljs-title">//</span> <span class="hljs-title">plus</span>  </span>: covariant <span class="hljs-comment">// plus  : covariant</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">VM</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Variance</span> <span class="hljs-title">//</span> <span class="hljs-title">minux</span> </span>: contravariant <span class="hljs-comment">// minux : contravariant</span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">VZ</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Variance</span> <span class="hljs-title">//</span> <span class="hljs-title">zero</span>  </span>: invariant <span class="hljs-comment">// zero  : invariant</span>
+
+<span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Bin</span></span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">object</span> <span class="hljs-title">Leaf</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Bin</span></span>
+<span class="hljs-keyword">case</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Branch</span>(<span class="hljs-params">v: <span class="hljs-type">Variance</span>, l: <span class="hljs-type">Bin</span>, r: <span class="hljs-type">Bin</span></span>) <span class="hljs-keyword">extends</span> <span class="hljs-title">Bin</span></span>
+</code></pre>
+<p><code>*</code> corresponds to <code>Leaf</code> and <code>[v]k1 -&gt; k2</code> corresponds to <code>Branch(v, k1, k2)</code>  <br>
+For such trees we define rank as following:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> rank: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">Int</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-number">0</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Branch</span>(_, b1, b2) =&gt; (rank(b1) max rank(b2)) + <span class="hljs-number">1</span>
+}
+</code></pre>
+<p>We can calculate count of different binary trees for each rank as follows:</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> sizeUpToRank: <span class="hljs-type">LazyList</span>[<span class="hljs-type">BigInt</span>] = <span class="hljs-type">LazyList</span>.from(<span class="hljs-number">0</span>).map{x =&gt;  
+    <span class="hljs-keyword">if</span>(x == <span class="hljs-number">0</span>) <span class="hljs-number">0</span> <span class="hljs-keyword">else</span> rankSize(x - <span class="hljs-number">1</span>) + sizeUpToRank(x - <span class="hljs-number">1</span>)
+}
+<span class="hljs-comment">// sizeUpToRank: LazyList[BigInt] = LazyList(</span>
+<span class="hljs-comment">//   0,</span>
+<span class="hljs-comment">//   1,</span>
+<span class="hljs-comment">//   4,</span>
+<span class="hljs-comment">//   49,</span>
+<span class="hljs-comment">//   7204,</span>
+<span class="hljs-comment">//   155692849,</span>
+<span class="hljs-comment">//   72720789689210404,</span>
+<span class="hljs-comment">//   15864939759067110620365478945529649,</span>
+<span class="hljs-comment">//   755088940676485169938738163710161860712676916415510672422283414189604,</span>
+<span class="hljs-comment">//   1710477924995809620741466545281845877392776244459137496512119763532487257949748828346877281192891932326680051648814006422213934676185030449,</span>
+<span class="hljs-comment">//   8777204195693911567685456624818652701352810989020881472462735774808494129194366672354313548546992725985867783409528459518360807197552168726303108340073231468228005400316009637445980374042337351867194500630013083675337492392623557213384815556591715323532442371044405945171424804,</span>
+<span class="hljs-comment">//   231117940478720415213531437758395981779612055401727489007061251549584337033722648017278268997043331944793422425417147835136378653769228785180826873170803292070200962881100251725971234983367922271392500247243802459492492117984536255015645165165964208867355845380616890646607109058985424080623647679283990271608491010174719633013513533814269224342669738892396601966820323744148160302566876466384569583272577739989650397413110828035478239623075534083552447473721205052481025356390145628657289507988670848231995322172252217021762360439524461596518070279315249,</span>
+<span class="hljs-comment">//   160246507233376057888095983946400008211351822986391919961667375491092120841195207706879637172649311212790319414854429458009034673347011434249077392770346783241578121135671156808427657387010368952095309901399258462191780631290757367662627562869543102758910577839074571844310832469946090964425485099041581224416204564838673679448027889956518931413492836045036864642103979998509935616868856220481791677573090517846649634334731092202168229074043650007647088568047380591203577649379437839450221552111437388320838854722861455634758241800521514340484532271192888080701246406039376020926608775795638100046305558670761054040792898680681011197516458799768326372369854365131487221856486163460785673202880959816636862080325912430729209881793588453374503814544947340489876868798682677147110685870859893177232841574242385645336577275376721303843475693586425653434013198444957617111891930743060369420100934441515202814481374267729939253591134243797349748174991973932841020034779271484062241759971035917323450866363965015833713674328348946282266062242982187351643898666059256597096269612015978524190104108993764347604971796004,</span>
+<span class="hljs-comment">//   7703682924148933572737622303499584243566291396188029208027163112470143192054773098602261862914620829053803320509752885260765890714357378271657227072008971636003502342026979926955549155966896962188774205386859531322719946512500604909414526020801121695464446843680960907453578446513955446693643181715825027518962556706286671815525645080220684215451278634153154465644408198657772941883250234644988507906950528293241906199494524595926781722308789169773225516118200326036535141755591839304713900714117166638821348972893482692188186574368300812183762808263713578073397969923091874616994129069569036253864851963461539052858669286003211551106684708828059760409543825330039719624422193523781202732346109421353226733018183643288051526491570842066776792596947731921767392952558544522425388609631093113578062200647689274294720113843876550205067771853654044466859682455104648427337953934562095927850996311997655951443176619710553655154961936286457600077025478331559164362...</span>
+
+<span class="hljs-keyword">val</span> rankSize: <span class="hljs-type">LazyList</span>[<span class="hljs-type">BigInt</span>] = <span class="hljs-type">LazyList</span>.from(<span class="hljs-number">0</span>).map{x =&gt;
+    <span class="hljs-keyword">if</span>(x == <span class="hljs-number">0</span>) <span class="hljs-number">1</span>  
+    <span class="hljs-keyword">else</span> <span class="hljs-number">3</span> * (<span class="hljs-number">2</span> * sizeUpToRank(x - <span class="hljs-number">1</span>) * rankSize(x - <span class="hljs-number">1</span>) + rankSize(x - <span class="hljs-number">1</span>) * rankSize(x - <span class="hljs-number">1</span>))
+}
+<span class="hljs-comment">// rankSize: LazyList[BigInt] = LazyList(</span>
+<span class="hljs-comment">//   1,</span>
+<span class="hljs-comment">//   3,</span>
+<span class="hljs-comment">//   45,</span>
+<span class="hljs-comment">//   7155,</span>
+<span class="hljs-comment">//   155685645,</span>
+<span class="hljs-comment">//   72720789533517555,</span>
+<span class="hljs-comment">//   15864939759067110547644689256319245,</span>
+<span class="hljs-comment">//   755088940676485169938738163710161844847737157348400052056804468659955,</span>
+<span class="hljs-comment">//   1710477924995809620741466545281845877392776244459137496512119763532486502860808151861707342454728222164819338971897590911541512392770840845,</span>
+<span class="hljs-comment">//   8777204195693911567685456624818652701352810989020881472462735774808494129194366672354313548546992725985867783409528459518360807197552168724592630415077421847486538855034163760053204129583199855355074737097525825725588664045746276020492883229911663674718435948830471268986394355,</span>
+<span class="hljs-comment">//   231117940478720415213531437758395981779612055401727489007061251549584337033722648017278268997043331944793422425417147835136378653769228785180826873170803292070200962881100251725971234983367922271392500247243802459492492117984536255015645165165964208867355845380616890646607109050208219884929736111598533646789838308821908643992632061351533449534175609698029929612506775197155434316699093056856110064911770542437481671110002487962246771395070133767542810027740831010143673489195644998644205832651178455608438108787436660430047036907082090552112125107890445,</span>
+<span class="hljs-comment">//   160246507233376057888095983946400008211351822986391919961667375491092120841195207706879637172649311212790319414854429458009034673347011434249077392770346783241578121135671156808427657387010368952095309901399258462191780631290757367662627562869543102758910577839074571844310832469946090964425485099041581224416204564838673679448027889956518931413492836045036864642103979998509935616868856220481791677573090517846649634334731092202168229074043650007647088568047380591203577649379437839450221552111437388320838854722861455634758241800521514340484532271192887849583305927318960807395171017399656320434250156943272046979541349096343977474868441521499329329037909571709061804708651027082131903974095778989763691277033842229766328781541862482139520446622675947989629624996223184654992701334604877532067675610033518289491196658486074696734416708162345029786333914454686008620881756023427355906567120172290860144742481871127972433267390095637047181298525589363257747457039281833664828649143000439083827790829881463386239953123296465256909672097353530062135909995211024601774097359798956761829664584532167829534692480755,</span>
+<span class="hljs-comment">//   770368292414893357273762230349958424356629139618802920802716311247014319205477309860226186291462082905380332050975288526076589071435737827165722707200897163600350234202697992695554915596689696218877420538685953132271994651250060490941452602080112169546444684368096090745357844651395544669364318171582502751896255670628667181552564508022068421545127863415315446564440819865777294188325023464498850790695052829324190619949452459592678172230878916977322551611820032603653514175559183930471390071411716663882134897289348269218818657436830081218376280826371357807339796992309187461699412906956903625386485196346153905285866928600321155110668470882805976040954382533003971962442219352378120273234610942135322673301818364328805152649157084206677679259694773192176739295255854452242538860963109311357806220064768927429472011384387655020506777185365404446685968245510464842733795393456209592785099631199765595144317661971055365515496193628645760007702547833155916436229463079280459924457646186515746810255782617251844242782546385959092833748525000...</span>
+</code></pre>
+<p>Now we can assign unique natural index to Binary trees inside the rank and globally</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> varianceIndex: <span class="hljs-type">Variance</span> =&gt; <span class="hljs-type">Int</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">VP</span> =&gt; <span class="hljs-number">0</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-type">VM</span> =&gt; <span class="hljs-number">1</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-type">VZ</span> =&gt; <span class="hljs-number">2</span>
+}
+
+<span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> rankIndex: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">BigInt</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-number">0</span>
+    <span class="hljs-keyword">case</span> tree<span class="hljs-meta">@Branch</span>(v, tl, tr) =&gt;
+        <span class="hljs-keyword">val</span> r   = rank(tree) - <span class="hljs-number">1</span>
+        <span class="hljs-keyword">val</span> q   = rankSize(r)
+        <span class="hljs-keyword">val</span> u   = sizeUpToRank(r) * q
+        <span class="hljs-keyword">val</span> idx =  
+        <span class="hljs-keyword">if</span>(rank(tl) &lt; r)
+            index(tl) * q + rankIndex(tr)
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(rank(tr) &lt; r)
+            index(tr) * q + rankIndex(tl) + u  
+        <span class="hljs-keyword">else</span>  
+            rankIndex(tl) * q + rankIndex(tr) + <span class="hljs-number">2</span> * u
+        idx * <span class="hljs-number">3</span> + varianceIndex(v)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">index</span></span>(tree: <span class="hljs-type">Bin</span>): <span class="hljs-type">BigInt</span> = sizeUpToRank(rank(tree)) + rankIndex(tree)
+
+index(<span class="hljs-type">Branch</span>(<span class="hljs-type">VM</span> , <span class="hljs-type">Branch</span>(<span class="hljs-type">VP</span>, <span class="hljs-type">Leaf</span>, <span class="hljs-type">Leaf</span>), <span class="hljs-type">Leaf</span>))
+<span class="hljs-comment">// res0: BigInt = 14</span>
+</code></pre>
+<p>We can provide string representations for our trees.</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> varianceSign: <span class="hljs-type">Variance</span> =&gt; <span class="hljs-type">String</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">VP</span> =&gt; <span class="hljs-string">"+"</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-type">VM</span> =&gt; <span class="hljs-string">"-"</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-type">VZ</span> =&gt; <span class="hljs-string">""</span>
+}
+
+<span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> args: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">LazyList</span>[(<span class="hljs-type">String</span>, <span class="hljs-type">Bin</span>)] = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-type">LazyList</span>.empty
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Branch</span>(v, t1, t2) =&gt; (varianceSign(v), t1) #:: args(t2)
+}
+
+<span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> toStarString: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">String</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-string">"*"</span>
+    <span class="hljs-keyword">case</span> tree =&gt; args(tree).iterator.map {
+        <span class="hljs-keyword">case</span> (sign, <span class="hljs-type">Leaf</span>) =&gt; <span class="hljs-string">s"<span class="hljs-subst">$sign</span>*"</span>
+        <span class="hljs-keyword">case</span> (sign, branch) =&gt; <span class="hljs-string">s"<span class="hljs-subst">$sign</span>(<span class="hljs-subst">${toStarString(branch)}</span>)"</span>
+    }.mkString(<span class="hljs-string">""</span>, <span class="hljs-string">" -&gt; "</span>, <span class="hljs-string">" -&gt; *"</span>)
+}
+
+<span class="hljs-keyword">lazy</span> <span class="hljs-keyword">val</span> toScalaString: <span class="hljs-type">Bin</span> =&gt; <span class="hljs-type">String</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-type">Leaf</span> =&gt; <span class="hljs-string">"T"</span>
+    <span class="hljs-keyword">case</span> tree =&gt; args(tree).iterator.map {
+        <span class="hljs-keyword">case</span> (sign, <span class="hljs-type">Leaf</span>) =&gt; <span class="hljs-string">s"<span class="hljs-subst">${sign}</span>_"</span>
+        <span class="hljs-keyword">case</span> (sign, branch) =&gt; <span class="hljs-string">s"<span class="hljs-subst">${sign}</span>_<span class="hljs-subst">${toScalaString(branch)}</span>"</span>
+    }.mkString(<span class="hljs-string">"["</span>, <span class="hljs-string">", "</span>, <span class="hljs-string">"]"</span>)
+}
+</code></pre>
+<p>Now we can generate some trees</p>
+<pre><code class="hljs css language-scala"><span class="hljs-keyword">val</span> variances = <span class="hljs-type">LazyList</span>(<span class="hljs-type">VP</span>, <span class="hljs-type">VM</span>, <span class="hljs-type">VZ</span>)
+<span class="hljs-comment">// variances: LazyList[Product with Variance with Serializable] = LazyList(</span>
+<span class="hljs-comment">//   VP,</span>
+<span class="hljs-comment">//   VM,</span>
+<span class="hljs-comment">//   VZ</span>
+<span class="hljs-comment">// )</span>
+<span class="hljs-keyword">val</span> trees = <span class="hljs-type">LazyList</span>.iterate((<span class="hljs-type">LazyList</span>[<span class="hljs-type">Bin</span>](), <span class="hljs-type">LazyList</span>[<span class="hljs-type">Bin</span>](<span class="hljs-type">Leaf</span>))){ <span class="hljs-keyword">case</span> (prev, cur) =&gt;  
+    <span class="hljs-keyword">val</span> xs = <span class="hljs-keyword">for</span>(tl &lt;- prev; tr &lt;- cur; v &lt;- variances) <span class="hljs-keyword">yield</span> <span class="hljs-type">Branch</span>(v, tl, tr)
+    <span class="hljs-keyword">val</span> ys = <span class="hljs-keyword">for</span>(tr &lt;- prev; tl &lt;- cur; v &lt;- variances) <span class="hljs-keyword">yield</span> <span class="hljs-type">Branch</span>(v, tl, tr)
+    <span class="hljs-keyword">val</span> zs = <span class="hljs-keyword">for</span>(tl &lt;- cur; tr &lt;- cur; v &lt;- variances)  <span class="hljs-keyword">yield</span> <span class="hljs-type">Branch</span>(v, tl, tr)
+    <span class="hljs-keyword">val</span> next = xs #::: ys #::: zs
+    (prev #::: cur, next)
+}.flatMap(_._2).map(t =&gt; (index(t), toScalaString(t), toStarString(t)))
+<span class="hljs-comment">// trees: LazyList[(BigInt, String, String)] = LazyList(</span>
+<span class="hljs-comment">//   (0, "T", "*"),</span>
+<span class="hljs-comment">//   (1, "[+_]", "+* -&gt; *"),</span>
+<span class="hljs-comment">//   (2, "[-_]", "-* -&gt; *"),</span>
+<span class="hljs-comment">//   (3, "[_]", "* -&gt; *"),</span>
+<span class="hljs-comment">//   (4, "[+_, +_]", "+* -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (5, "[-_, +_]", "-* -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (6, "[_, +_]", "* -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (7, "[+_, -_]", "+* -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (8, "[-_, -_]", "-* -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (9, "[_, -_]", "* -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (10, "[+_, _]", "+* -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (11, "[-_, _]", "-* -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (12, "[_, _]", "* -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (13, "[+_[+_]]", "+(+* -&gt; *) -&gt; *"),</span>
+<span class="hljs-comment">//   (14, "[-_[+_]]", "-(+* -&gt; *) -&gt; *"),</span>
+<span class="hljs-comment">//   (15, "[_[+_]]", "(+* -&gt; *) -&gt; *"),</span>
+<span class="hljs-comment">//   (16, "[+_[-_]]", "+(-* -&gt; *) -&gt; *"),</span>
+<span class="hljs-comment">//   (17, "[-_[-_]]", "-(-* -&gt; *) -&gt; *"),</span>
+<span class="hljs-comment">//   (18, "[_[-_]]", "(-* -&gt; *) -&gt; *"),</span>
+<span class="hljs-comment">//   (19, "[+_[_]]", "+(* -&gt; *) -&gt; *"),</span>
+<span class="hljs-comment">//   (20, "[-_[_]]", "-(* -&gt; *) -&gt; *"),</span>
+<span class="hljs-comment">//   (21, "[_[_]]", "(* -&gt; *) -&gt; *"),</span>
+<span class="hljs-comment">//   (22, "[+_[+_], +_]", "+(+* -&gt; *) -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (23, "[-_[+_], +_]", "-(+* -&gt; *) -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (24, "[_[+_], +_]", "(+* -&gt; *) -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (25, "[+_[+_], -_]", "+(+* -&gt; *) -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (26, "[-_[+_], -_]", "-(+* -&gt; *) -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (27, "[_[+_], -_]", "(+* -&gt; *) -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (28, "[+_[+_], _]", "+(+* -&gt; *) -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (29, "[-_[+_], _]", "-(+* -&gt; *) -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (30, "[_[+_], _]", "(+* -&gt; *) -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (31, "[+_[-_], +_]", "+(-* -&gt; *) -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (32, "[-_[-_], +_]", "-(-* -&gt; *) -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (33, "[_[-_], +_]", "(-* -&gt; *) -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (34, "[+_[-_], -_]", "+(-* -&gt; *) -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (35, "[-_[-_], -_]", "-(-* -&gt; *) -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (36, "[_[-_], -_]", "(-* -&gt; *) -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (37, "[+_[-_], _]", "+(-* -&gt; *) -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (38, "[-_[-_], _]", "-(-* -&gt; *) -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (39, "[_[-_], _]", "(-* -&gt; *) -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (40, "[+_[_], +_]", "+(* -&gt; *) -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (41, "[-_[_], +_]", "-(* -&gt; *) -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (42, "[_[_], +_]", "(* -&gt; *) -&gt; +* -&gt; *"),</span>
+<span class="hljs-comment">//   (43, "[+_[_], -_]", "+(* -&gt; *) -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (44, "[-_[_], -_]", "-(* -&gt; *) -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (45, "[_[_], -_]", "(* -&gt; *) -&gt; -* -&gt; *"),</span>
+<span class="hljs-comment">//   (46, "[+_[_], _]", "+(* -&gt; *) -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">//   (47, "[-_[_], _]", "-(* -&gt; *) -&gt; * -&gt; *"),</span>
+<span class="hljs-comment">// ...</span>
+</code></pre>
+<p>Here we can find that our desired shape for <code>[_[-_, +_], -_, +_]</code> has number 1269</p>
+<pre><code class="hljs css language-scala">trees.find(_._2 == <span class="hljs-string">"[_[-_, +_], -_, +_]"</span>).get._1
+<span class="hljs-comment">// res1: BigInt = 1269</span>
+</code></pre>
+<p>Therefore we can name our kind-specific transformation as <code>FunctionVn1269</code> meaning this is transformation between typeconstructors of type with index 1269 having following form</p>
+<pre><code class="hljs css language-scala"><span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">FunctionVn1269</span>[<span class="hljs-type">A</span>[_[-_, +_], <span class="hljs-title">-_</span>, <span class="hljs-title">+_</span>], <span class="hljs-title">B</span>[_[-_, +_], <span class="hljs-title">-_</span>, <span class="hljs-title">+_</span>]] </span>= [<span class="hljs-type">F</span>[-_, +_], <span class="hljs-type">E</span>, <span class="hljs-type">A</span>] =&gt; <span class="hljs-type">A</span>[<span class="hljs-type">F</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>] =&gt; <span class="hljs-type">B</span>[<span class="hljs-type">F</span>, <span class="hljs-type">E</span>, <span class="hljs-type">A</span>]
+</code></pre>
+<p>We can also reverse kind getting by index</p>
+<pre><code class="hljs css language-scala"><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">byIndex</span></span>(x: <span class="hljs-type">BigInt</span>): <span class="hljs-type">Bin</span> = <span class="hljs-keyword">if</span>(x == <span class="hljs-number">0</span>) <span class="hljs-type">Leaf</span> <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">val</span> r = sizeUpToRank.indexWhere(_ &gt; x) - <span class="hljs-number">1</span>
+    byIndexInRank(x - sizeUpToRank(r), r)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">varByIndex</span></span>: <span class="hljs-type">Int</span> =&gt; <span class="hljs-type">Variance</span> = {
+    <span class="hljs-keyword">case</span> <span class="hljs-number">0</span> =&gt; <span class="hljs-type">VP</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-number">1</span> =&gt; <span class="hljs-type">VM</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-number">2</span> =&gt; <span class="hljs-type">VZ</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">byIndexInRank</span></span>(x: <span class="hljs-type">BigInt</span>, r: <span class="hljs-type">Int</span>): <span class="hljs-type">Bin</span> = <span class="hljs-keyword">if</span>(r == <span class="hljs-number">0</span>) <span class="hljs-type">Leaf</span> <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">val</span> q = rankSize(r - <span class="hljs-number">1</span>)
+    <span class="hljs-keyword">val</span> u = sizeUpToRank(r - <span class="hljs-number">1</span>) * q
+    <span class="hljs-keyword">val</span> v = varByIndex((x % <span class="hljs-number">3</span>).toInt)
+    <span class="hljs-keyword">val</span> x0 = x / <span class="hljs-number">3</span>
+    <span class="hljs-keyword">if</span>(x0 &lt; u)
+        <span class="hljs-type">Branch</span>(v, byIndex(x0 / q), byIndexInRank(x0 % q, r - <span class="hljs-number">1</span>))
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(x0 &lt; <span class="hljs-number">2</span> * u){
+        <span class="hljs-keyword">val</span> x1 = x0 - u
+        <span class="hljs-type">Branch</span>(v, byIndexInRank(x1 % q, r - <span class="hljs-number">1</span>), byIndex(x1 / q))
+    } <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">val</span> x1 = x0 - <span class="hljs-number">2</span> * u
+        <span class="hljs-type">Branch</span>(v, byIndexInRank(x1 / q, r - <span class="hljs-number">1</span>), byIndexInRank(x1 % q, r - <span class="hljs-number">1</span>))
+    }
+}
+</code></pre>
+<p>we may check that these functions are indeed isomorphim in natural numbers</p>
+<pre><code class="hljs css language-scala"><span class="hljs-type">Iterator</span>.range(<span class="hljs-number">0</span>, <span class="hljs-number">1000</span>).forall(i =&gt; index(byIndex(i)) == i)
+<span class="hljs-comment">// res2: Boolean = true</span>
+</code></pre>
+<p>So now if one need to get signature for Kind number 17, they may write</p>
+<pre><code class="hljs css language-scala">toScalaString(byIndex(<span class="hljs-number">1269</span>))
+<span class="hljs-comment">// res3: String = "[_[-_, +_], -_, +_]"</span>
+toStarString(byIndex(<span class="hljs-number">1269</span>))
+<span class="hljs-comment">// res4: String = "(-* -&gt; +* -&gt; *) -&gt; -* -&gt; +* -&gt; *"</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/favicon.ico" alt="Tofu" width="66" height="58"/></a><div><h5>Docs</h5><a href="/docs/start.html">Getting Started</a></div><div><h5>Community</h5><a href="/en/users.html">User Showcase</a><a href="https://stackoverflow.com/questions/tagged/tofu" target="tofu" rel="noreferrer noopener">Stack Overflow</a><a href="https://t.me/tofu_scala">Telegram Group (EN|RU)</a><a href="https://gitter.im/tinkoff-tofu/community">Gitter Group (EN)</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/TinkoffCreditSystems/tofu">GitHub</a><a class="github-button" href="https://github.com/TinkoffCreditSystems/tofu" data-icon="octicon-star" data-count-href="/TinkoffCreditSystems/tofu/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Tinkoff.ru</section></footer></div></body></html>
