@@ -10,14 +10,14 @@
 
 // List of projects/orgs using your project for the users page.
 
-const baseUrl = '/tofu/'; // Base URL for your project *
+const baseUrl = '/'; // Base URL for your project *
 
 const users = [
   {
     caption: 'Tinkoff bank',
     // You will need to prepend the image path with your baseUrl
     // if it is not '/', like: '/test-site/img/image.jpg'.
-    image: '/tofu/img/tinkoff-bank-general-logo-1.png',
+    image: '/img/tinkoff-bank-general-logo-1.png',
     infoLink: 'tinkoff.ru',
     pinned: true,
   },
@@ -27,7 +27,7 @@ const siteConfig = {
   title: 'Tofu', // Title for your website.
   tagline: 'Functional programming toolbox',
   // For github.io type URLs, you would set the url and baseUrl like:
-  url: 'https://TinkoffCreditSystems.github.io',
+  url: 'https://docs.tofu.tf',
   baseUrl: baseUrl,
 
   // Used for publishing and more

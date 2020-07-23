@@ -18,7 +18,7 @@ Tofu contains its own optics library with some notable features:
 Hierarchy
 ---------
 
-<img src="/tofu/docs_img/optics-hierarchy.png" height="700">
+<img src="/docs_img/optics-hierarchy.png" height="700">
 
 Intuition
 ---------
