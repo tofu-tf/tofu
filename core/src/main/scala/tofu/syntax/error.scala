@@ -45,6 +45,8 @@ object handle {
     def restoreTo[G[_]](implicit FE: RestoreTo[F, G]): G[Option[A]]                                     = FE.restore(fa)
     def restoreWith(ra: => F[A])(implicit FE: Restore[F]): F[A]                                         = FE.restoreWith(fa)(ra)
     def retry(count: Int)(implicit FE: Restore[F]): F[A]                                                = if (count <= 1) fa else restoreWith(retry(count - 1))
+    def retryOnly[E](count: Int)(implicit FE: Handle[F, E]): F[A]                                       =
+      if (count <= 1) fa else handleWith[E](_ => retryOnly[E](count - 1))
     def handleWith[E](f: E => F[A])(implicit FE: Handle[F, E]): F[A]                                    = FE.handleWith(fa)(f)
     def handleToWith[G[_], E](f: E => G[A])(implicit FE: HandleTo[F, G, E]): G[A]                       = FE.handleWith(fa)(f)
     def tryHandleWith[E](f: E => Option[F[A]])(implicit FE: Handle[F, E]): F[A]                         = FE.tryHandleWith(fa)(f)
