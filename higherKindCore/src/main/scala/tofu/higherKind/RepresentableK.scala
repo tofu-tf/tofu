@@ -3,7 +3,7 @@ import cats.data._
 import cats.tagless.IdK
 import cats.{FlatMap, ~>}
 import simulacrum.typeclass
-import tofu.syntax.funk.funK
+import tofu.syntax.funk
 import tofu.syntax.monadic._
 
 trait RepK[U[_[_]], A] {
@@ -27,25 +27,33 @@ object RepK {
 }
 
 @typeclass trait RepresentableK[U[_[_]]] extends MonoidalK[U] with Embed[U] {
+  import RepresentableK.Tab
   def tabulate[F[_]](hom: RepK[U, *] ~> F): U[F]
 
-  override def mapK[F[_], G[_]](af: U[F])(fk: F ~> G): U[G] = tabulate(funK(repr => fk(repr(af))))
+  final def tab[F[_]]: Tab[U, F] = new Tab(this)
+
+  override def mapK[F[_], G[_]](af: U[F])(fk: F ~> G): U[G] = tab(repr => fk(repr(af)))
 
   override def productK[F[_], G[_]](af: U[F], ag: U[G]): U[Tuple2K[F, G, *]] =
-    tabulate(funK(repr => Tuple2K(repr(af), repr(ag))))
+    tab(repr => Tuple2K(repr(af), repr(ag)))
 
-  override def embed[F[_]: FlatMap](ft: F[U[F]]): U[F] = tabulate(funK(repr => ft.flatMap(repr(_))))
+  override def embed[F[_]: FlatMap](ft: F[U[F]]): U[F] = tab(repr => ft.flatMap(repr(_)))
 
   override def zipWith2K[F[_], G[_], H[_]](af: U[F], ag: U[G])(f2: Function2K[F, G, H]): U[H] =
-    tabulate(funK(repr => f2(repr(af), repr(ag))))
+    tab(repr => f2(repr(af), repr(ag)))
 
-  override def pureK[F[_]](p: Point[F]): U[F] = tabulate(funK(_ => p.point))
+  override def pureK[F[_]](p: Point[F]): U[F] = tab(_ => p.point)
 }
 
 object RepresentableK extends RepresentableKInstanceChain[RepresentableK] {
+  class Tab[U[f[_]], F[_]](private val rep: RepresentableK[U]) extends AnyVal {
+    type A1
+    def apply(maker: funk.Maker[RepK[U, *], F, A1]): U[F] = rep.tabulate(maker)
+  }
 
   /** simply for reference
-    * continuation form of RepK makes higher order index trivial */
+    * continuation form of RepK makes higher order index trivial
+    */
   def index[U[_[_]], F[_], A](tf: U[F])(repr: RepK[U, A]): F[A] = repr(tf)
 }
 

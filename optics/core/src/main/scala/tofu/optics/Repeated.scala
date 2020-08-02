@@ -1,18 +1,18 @@
 package tofu.optics
 
 import cats._
-import tofu.optics.data.Constant
+import tofu.optics.data._
 
 /** aka NonEmptyTraversal
   * S has some occurrences of A
   * and can update them using some effect
   */
-trait PRepeated[-S, +T, +A, -B] extends PItems[S, T, A, B] with PReduced[S, T, A, B] {
+trait PRepeated[-S, +T, +A, -B] extends PItems[S, T, A, B] with PReduced[S, T, A, B] with PBase[PRepeated, S, T, A, B] {
   def traverse1[F[+_]: Apply](s: S)(f: A => F[B]): F[T]
 
   def traverse[F[+_]: Applicative](s: S)(f: A => F[B]): F[T] = traverse1[F](s)(f)
   override def foldMap[X: Monoid](s: S)(f: A => X): X        = reduceMap[X](s)(f)
-  def reduceMap[X: Semigroup](s: S)(f: A => X): X            = traverse1[Constant[X, +*]](s)(b => Constant(f(b))).value
+  def reduceMap[X: Semigroup](s: S)(f: A => X): X            = traverse1[Constant[X, +*]](s)(f)
 }
 
 object Repeated extends MonoOpticCompanion(PRepeated) {
@@ -58,5 +58,10 @@ object PRepeated extends OpticCompanion[PRepeated] {
 
   def toMono[A, B](o: PRepeated[A, A, B, B]): Repeated[A, B] = new Repeated[A, B] {
     def traverse1[F[+_]: Apply](a: A)(f: B => F[B]): F[A] = o.traverse1(a)(f)
+  }
+
+  override def delayed[S, T, A, B](o: () => PRepeated[S, T, A, B]): PRepeated[S, T, A, B] = new PRepeated[S, T, A, B] {
+    lazy val opt                                          = o()
+    def traverse1[F[+_]: Apply](s: S)(f: A => F[B]): F[T] = opt.traverse1(s)(f)
   }
 }

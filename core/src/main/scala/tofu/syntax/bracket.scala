@@ -10,7 +10,9 @@ import tofu.{Finally, Guarantee}
 import tofu.syntax.monadic._
 
 object bracket {
-  implicit final class TofuBracketOps[F[_], A](private val fa: F[A]) extends AnyVal {
+  implicit class TofuBracketOps[F[_], A](val fa: F[A]) extends AnyVal {
+    def guaranteeIf[B](fb: Boolean => F[B])(implicit FG: Guarantee[F], F: Applicative[F]) =
+      FG.bracket(F.unit)(_ => fa)((_, b) => fb(b))
 
     /**
       * Apply function to [[fa]] with effectful transformation. In case of error or cancellation [[fa]] is released

@@ -38,7 +38,8 @@ object Lift {
 
 /** embedded transformation
   * can be used instead of direct F ~> G
-  * especially useful Unlift[_[_], IO] as replacement for `Effect` typeclass */
+  * especially useful Unlift[_[_], IO] as replacement for `Effect` typeclass
+  */
 trait Unlift[F[_], G[_]] extends Lift[F, G] {
   self =>
   def lift[A](fa: F[A]): G[A]

@@ -4,11 +4,12 @@ import cats.instances.list._
 import cats.instances.vector._
 import cats.syntax.monoid._
 import cats.{Applicative, Foldable, Monoid}
-import tofu.optics.data.Constant
+import tofu.optics.data._
 
 /** S has some or none occurrences of A
-  * and can collect them */
-trait PFolded[-S, +T, +A, -B] extends PBase[S, T, A, B] { self =>
+  * and can collect them
+  */
+trait PFolded[-S, +T, +A, -B] extends PBase[PFolded, S, T, A, B] { self =>
   def foldMap[X: Monoid](s: S)(f: A => X): X
 
   def getAll(s: S): List[A]     = foldMap(s)(List(_))
@@ -16,8 +17,8 @@ trait PFolded[-S, +T, +A, -B] extends PBase[S, T, A, B] { self =>
 
   def as[B1, T1]: PFolded[S, T1, A, B1] = this.asInstanceOf[PFolded[S, T1, A, B1]]
 
-  def ++[S1 <: S, A1 >: A](other: PFolded[S1, Any, A1, Nothing]): PFolded[S1, T, A1, B] =
-    new PFolded[S1, T, A1, B] {
+  def ++[S1 <: S, A1 >: A](other: PFolded[S1, Any, A1, Nothing]): PFolded[S1, Nothing, A1, Any] =
+    new PFolded[S1, Nothing, A1, Any] {
       override def foldMap[X: Monoid](s: S1)(f: A1 => X): X = self.foldMap(s)(f) |+| other.foldMap(s)(f)
     }
 }
@@ -64,7 +65,7 @@ object PFolded extends OpticCompanion[PFolded] {
   override def toGeneric[S, T, A, B](o: PFolded[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
-        s => Constant.Impl(o.foldMap(s)(a => p(a).value)(c.algebra))
+        s => o.foldMap(s)(a => p(a))(c.algebra)
     }
   override def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PFolded[S, T, A, B] =
     new PFolded[S, T, A, B] {
@@ -72,6 +73,11 @@ object PFolded extends OpticCompanion[PFolded] {
         o(new Context {
           type X = Y
           override def algebra = Monoid[Y]
-        })(a => Constant(f(a)))(s).value
+        })(f)(s)
     }
+
+  override def delayed[S, T, A, B](o: () => PFolded[S, T, A, B]): PFolded[S, T, A, B] = new PFolded[S, T, A, B] {
+    val opt                                    = o()
+    def foldMap[X: Monoid](s: S)(f: A => X): X = opt.foldMap(s)(f)
+  }
 }

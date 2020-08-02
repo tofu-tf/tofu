@@ -11,7 +11,7 @@ object Dependencies {
 
     val cats = "2.1.1"
 
-    val catsEffect = "2.1.3"
+    val catsEffect = "2.1.4"
 
     val catsTagless = "0.11"
 
@@ -35,13 +35,13 @@ object Dependencies {
 
     val typesafeConfig = "1.4.0"
 
-    val zio = "1.0.0-RC21"
+    val zio = "1.0.0-RC21-2"
 
     val zioCats = "2.0.0.0-RC14"
 
     val shapeless = "2.3.3"
 
-    val refined = "0.9.14"
+    val refined = "0.9.15"
 
     val doobie = "0.9.0"
 
@@ -50,7 +50,7 @@ object Dependencies {
 
     val simulacrum = "1.0.0"
 
-    val silencer = "1.7.0"
+    val silencer = "1.7.1"
 
     val kindProjector = "0.11.0"
 

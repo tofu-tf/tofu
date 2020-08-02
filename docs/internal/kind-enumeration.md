@@ -1,21 +1,15 @@
 # Kind numbers
 
-Naming kinds is hard.  
-Consider `Function1[A, B] = A => B` and `FunctionK[F[_], G[_]] = [A] => F[A] => G[A]`
+Naming kinds is hard. Suppose you have `Function1[A, B] = A => B` and `FunctionK[F[_], G[_]] = [A] => F[A] => G[A]`
 
-Suppose you have now `T[_[_, _], _, _]` how to correctly name transformation between such types? `FunctionK_KK_KK` ?  
+Suppose you have `T[_[_, _], _, _]` how to correctly name transformation between such types? `FunctionK_KK_KK` ?  
 Alphabetical codes could be hard to read and disambiguate. So I propose enumerate them all with a simple scheme.
 
-Here we suppose that `* = Type` is a Kind of inhabitable types and `k1 -> k2` where `k1` and `k2` are kinds is itself a kind that has single type argument of kind `k1` and result of kind `k2`. Those arrows in absence of parenthesis are associated right.
-
+Here we suppose that `* = Type` is a Kind of  inhabitable types and `k1 -> k2` where `k1` and `k2` are kind is itself kind that has single type argument of kind `k1` and result of kind `k2`. Those arrows in absence of parenthesis are associated right.
 All scala kinds we suppose to be naturally curried.  
 
-So `T[_[_, _], _, _]`  
-becomes  `(* -> * -> *) -> * -> * -> *`  
-or  `(* -> (* -> *)) -> (* -> (* -> *))`  
-and `T[_[_[_]], _[_[_]]]`  
-becomes `((* -> *) -> *) -> ((* -> *) -> *) -> *`  
-or `((* -> *) -> *) -> (((* -> *) -> *) -> *)`.
+So `T[_[_, _], _, _]` becomes `(* -> * -> *) -> * -> * -> *` or  `(* -> (* -> *)) -> (* -> (* -> *))`
+and `T[_[_[_]], _[_[_]]]` becomes `((* -> *) -> *) -> ((* -> *) -> *) -> *` or `((* -> *) -> *) -> (((* -> *) -> *) -> *)`.
 
 We can consider those elements as binary trees, elements of  
 
@@ -26,7 +20,7 @@ case class Branch(l: Bin, r: Bin) extends Bin
 ```
 
 `*` corresponds to `Leaf` and `k1 -> k2` corresponds to `Branch(k1, k2)`  
-For such trees we define rank as following:
+For those trees we defined rank as following:
 
 ```scala mdoc
 lazy val rank: Bin => Int = {
@@ -43,7 +37,7 @@ val sizeUpToRank: LazyList[BigInt] = LazyList.from(0).map{x =>
 }
 
 val rankSize: LazyList[BigInt] = LazyList.from(0).map{x =>
-    if(x == 0) 1  
+    if(x <= 1) 1  
     else 2 * sizeUpToRank(x - 1) * rankSize(x - 1) + rankSize(x - 1) * rankSize(x - 1)
 }
 ```
@@ -104,13 +98,14 @@ val trees = LazyList.iterate((LazyList[Bin](), LazyList[Bin](Leaf))){ case (prev
     val zs = for(tl <- cur; tr <- cur)  yield Branch(tl, tr)
     val next = xs #::: ys #::: zs
     (prev #::: cur, next)
-}.flatMap(_._2).map(t => (index(t), toScalaString(t), toStarString(t)))
+}.flatMap(_._2).map(t => (toScalaString(t), index(t)))
+
 ```
 
 Here we can find that our desired shape for `[_[_, _], _, _]` has number 17
 
 ```scala mdoc
-trees.find(_._2 == "[_[_, _], _, _]").get._1
+trees.find(_._1 == "[_[_, _], _, _]").get._2
 ```
 
 Therefore we can name our kind-specific transformation as `FunctionKn17` meaning this is transformation between typeconstructors of type with index 17 having following form

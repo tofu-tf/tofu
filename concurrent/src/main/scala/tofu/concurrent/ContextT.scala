@@ -8,8 +8,7 @@ import tofu.syntax.monadic._
 
 /** a ReaderT analog, allowing to have context referring resulting type
   *  for instance you can define ```MyCtx[F[_]](state: Ref[F, Int], k ```
-  *
-  * */
+  */
 trait ContextT[F[+_], C[_[_]], +A] {
 
   /** run computation, providing context */

@@ -6,12 +6,14 @@ import cats.instances.tuple._
 import cats.syntax.bifunctor._
 import cats.syntax.functor._
 import tofu.optics.classes.PChoice
-import tofu.optics.data.{Constant, Identity}
+import tofu.optics.data._
 
 /** aka Lens
   * S has exactly one A and can update it
   */
-trait PContains[-S, +T, +A, -B] extends PExtract[S, T, A, B] with PRepeated[S, T, A, B] with PProperty[S, T, A, B] {
+trait PContains[-S, +T, +A, -B]
+    extends PExtract[S, T, A, B] with PRepeated[S, T, A, B] with PProperty[S, T, A, B]
+    with PBase[PContains, S, T, A, B] {
   def set(s: S, b: B): T
   def extract(s: S): A
 
@@ -45,6 +47,13 @@ object Contains extends MonoOpticCompanion(PContains) {
 object PContains extends OpticCompanion[PContains] with OpticProduct[PContains] {
   def apply[S, B] = new PContainsApplied[S, B](true)
 
+  override def delayed[S, T, A, B](o: () => PContains[S, T, A, B]): PContains[S, T, A, B] = new PContains[S, T, A, B] {
+    lazy val opt = o()
+
+    override def set(s: S, b: B): T = opt.set(s, b)
+
+    override def extract(s: S): A = opt.extract(s)
+  }
   class PContainsApplied[S, B](private val dummy: Boolean) extends AnyVal {
     def apply[A, T](fget: S => A)(fset: (S, B) => T): PContains[S, T, A, B] = new PContains[S, T, A, B] {
       def set(s: S, b: B): T = fset(s, b)
@@ -72,12 +81,12 @@ object PContains extends OpticCompanion[PContains] with OpticProduct[PContains] 
     override def project[F[+_]: Functor](a: S)(fb: A => F[B]) = proj[F](a, fb)
 
     def set(a: S, b: B): T = proj[Identity](a, _ => b)
-    def extract(a: S): A   = proj(a, Constant[A]).value
+    def extract(a: S): A   = proj[Constant[A, +*]](a, identity)(constantFunctor)
   }
 
   trait Context extends PEquivalent.Context {
-    type P[-x, +y] = x => y
-    val profunctor: PChoice[P] = PChoice[P]
+    override type P[-x, +y] = x => y
+    override def profunctor: PChoice[P] = PChoice[P]
   }
 
   override def toGeneric[S, T, A, B](o: PContains[S, T, A, B]): Optic[Context, S, T, A, B] =

@@ -11,6 +11,7 @@
         "ids": [
           "errors",
           "fork",
+          "timeout",
           "typeclasses"
         ]
       },

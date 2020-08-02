@@ -19,7 +19,8 @@ object time {
 
     /** get ZoneId by full string ID,
       * checking for availability, probably generating an error
-      * see documentation to `java.time.ZoneId.of` */
+      * see documentation to `java.time.ZoneId.of`
+      */
     def of[F[_]](zoneId: String)(implicit tz: TimeZone[F]): F[ZoneId] = tz.of(zoneId)
 
     /**

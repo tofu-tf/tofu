@@ -11,8 +11,7 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
       case Right(value) => Task.pure(value)
     }
 
-  // todo naming
-  def applyFatal[R, E, A](f: R => Task[A]): EnvBio[R, E, A] = f(_)
+  def applyFatal[R, E, A](eb: EnvBio[R, E, A]): EnvBio[R, E, A] = eb
 
   def pure[A](x: A): EnvBio[Any, Nothing, A] = _ => Task.pure(x)
 
@@ -42,7 +41,8 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
     *
     *   env.run("ctx").runSyncUnsafe(Duration.Inf)
     *   // will result in Right("ctx")
-    * }}}*/
+    * }}}
+    */
   def context[R]: EnvBio[R, Nothing, R] = Task.now
 
   /** Creates `EnvBio` from total, non-failing `Task`.
@@ -58,21 +58,31 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
     *   val res = env.run(()).runSyncUnsafe(Duration.Inf)
     *
     *   // res = Right(1)
-    * }}} */
+    * }}}
+    */
   def fromTaskTotal[A](task: Task[A]): EnvBio[Any, Nothing, A] = _ => task
 
+  def fromTaskEither[E, A](task: Task[Either[E, A]]): EnvBio[Any, E, A] = _ =>
+    task.flatMap {
+      case Left(e)  => Task.raiseError(UserError(e))
+      case Right(a) => Task.pure(a)
+    }
+
   /** Creates `EnvBio` from `Task`.
-    * Any `Throwable` raised by Task will result in failed `EnvBio`, fixed to Left side. */
+    * Any `Throwable` raised by Task will result in failed `EnvBio`, fixed to Left side.
+    */
   def fromTask[A](task: Task[A]): EnvBio[Any, Throwable, A] =
     _ => task.onErrorHandleWith(e => Task.raiseError(UserError(e)))
 
   /** Creates `EnvBio` from total, non-throwing effect, resulting in a value of type `A`.
-    * Any `Throwable` raised by `x` will result in fatal error being thrown. */
+    * Any `Throwable` raised by `x` will result in fatal error being thrown.
+    */
   def delayTotal[A](x: => A): EnvBio[Any, Nothing, A] =
     fromTaskTotal(Task.delay(x))
 
   /** Creates `EnvBio` from total effect.
-    * Any `Throwable` raised by `x` will result in failed `EnvBio` fixed to Left side. */
+    * Any `Throwable` raised by `x` will result in failed `EnvBio` fixed to Left side.
+    */
   def delay[A](x: => A): EnvBio[Any, Throwable, A] =
     fromTask(Task.delay(x))
 

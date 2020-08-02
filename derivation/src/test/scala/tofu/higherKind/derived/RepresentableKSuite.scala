@@ -1,6 +1,6 @@
 package tofu.higherKind.derived
 
-import RepresentableKSuite.Foo
+import RepresentableKSuite.{Foo}
 import cats.data.{OptionT, Tuple2K}
 import cats.instances.either._
 import cats.instances.option._
@@ -56,7 +56,7 @@ class RepresentableKSuite extends AnyFlatSpec with Matchers {
     mappedFoo.baz(Nil) should ===(OptionT[MapR, Unit](Embedded(("", List(None)))))
   }
 
-  "representableK" should "generate nice productK" in {
+  it should "generate nice productK" in {
     val zippedFoo: Foo[Tuple2K[Either[String, *], Id, *]] = checkingFoo.productK(defaultFoo)
 
     def tuple[A](e: Either[String, A], a: A) = Tuple2K[Either[String, *], Id, A](e, a)
@@ -72,7 +72,7 @@ class RepresentableKSuite extends AnyFlatSpec with Matchers {
 
   }
 
-  "representableK" should "generate nice embed" in {
+  it should "generate nice embed" in {
     val rightFoo = checkingFoo.asRight[String].embed
     val leftFoo  = "failed".asLeft[Foo[Either[String, *]]].embed
 

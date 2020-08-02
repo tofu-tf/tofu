@@ -7,4 +7,6 @@ package object compat {
   type NELazySeq[A] = NonEmptyStream[A]
 
   val lazySeqInstances = cats.instances.stream
+
+  type uv212 = scala.annotation.unchecked.uncheckedVariance
 }

@@ -34,7 +34,7 @@ trait PushInstances1 {
   }
 }
 
-/** simply F[A] in a typeclass form*/
+/** simply F[A] in a typeclass form */
 trait Pull[F[_], A] {
   def pull: F[A]
 }

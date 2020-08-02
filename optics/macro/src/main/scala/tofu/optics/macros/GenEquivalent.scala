@@ -79,7 +79,7 @@ class GenEquivalentImpl(override val c: blackbox.Context) extends GenEquivalentI
         override def extract(s: $sTpe): $aTpe =
           s.$fieldMethod
 
-        override def upcast(a: $aTpe): $sTpe =
+        override def back(a: $aTpe): $sTpe =
          $sTpeSym(a)
       }
     """)
@@ -128,7 +128,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
           new _root_.tofu.optics.Equivalent[$sTpe, $pType] {
             override def extract(s: $sTpe): $pType = s.$pName
 
-            override def upcast(a: $pType): $sTpe = ${sTpeSym.companion}(_)
+            override def back(a: $pType): $sTpe = ${sTpeSym.companion}(_)
           }
         """
 
@@ -146,7 +146,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
           new _root_.tofu.optics.Equivalent[$sTpe, (..$types)] {
             override def extract(s: $sTpe): (..$types) = (..$readField)
 
-            override def upcast(a: (..$types)): $sTpe = ${sTpeSym.companion}(..$readTuple)
+            override def back(a: (..$types)): $sTpe = ${sTpeSym.companion}(..$readTuple)
           }
         """
 

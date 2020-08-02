@@ -1,5 +1,6 @@
 package tofu.data
 
+import cats.data.IndexedState
 import cats.effect.ExitCase
 import cats.{MonadError, Monoid, StackSafeMonad}
 import tofu.optics.PContains
@@ -52,7 +53,7 @@ object Calc {
       src: Calc[R, S1, S2, E1, A],
       ksuc: A => Calc[R, S2, S3, E2, B],
       kerr: E1 => Calc[R, S2, S3, E2, B]
-  ) extends Calc[R, S1, S3, E2, B] {
+  )                                                                       extends Calc[R, S1, S3, E2, B]              {
     type MidState = S2
     type MidErr   = E1
   }
@@ -84,6 +85,10 @@ object Calc {
     def flatMapS[R1 <: R, S3, B, E](f: A => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B] = calc.cont(f, identity)
     def productRS[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]  = flatMapS(_ => r)
     def *>>[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]        = productRS(r)
+    def runSuccess(r: R, init: S1): (S2, A) = {
+      val (s2, res) = calc.run(r, init)
+      s2 -> res.merge
+    }
   }
 
   implicit final class CalcUnsuccessfullOps[R, S1, S2, E](private val calc: Calc[R, S1, S2, E, Nothing])
@@ -114,6 +119,12 @@ object Calc {
     def errorEmpty(r: R)(implicit S: Monoid[S])                       = clc.error(r, S.empty)
     def errorUnit(s: S)(implicit ev: Unit <:< R): (S, E)              = clc.error((), s)
     def errorUnitEmpty(implicit S: Monoid[S], ev: Unit <:< R): (S, E) = clc.errorUnit(S.empty)
+  }
+
+  implicit class CalcSimpleStateOps[S1, S2, A](private val calc: Calc[Any, S1, S2, Nothing, A]) extends AnyVal {
+    final def runSuccessUnit(init: S1): (S2, A) = calc.runSuccess((), init)
+
+    def toState: IndexedState[S1, S2, A] = IndexedState(runSuccessUnit)
   }
 
   def run[R, S1, S2, E, A](calc: Calc[R, S1, S2, E, A], r: R, init: S1): (S2, Either[E, A]) =

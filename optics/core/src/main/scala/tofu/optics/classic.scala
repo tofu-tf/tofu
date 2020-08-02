@@ -15,6 +15,7 @@ object classic {
   val Getter: Extract.type             = Extract
   val Fold: Folded.type                = Folded
   val Setter: Update.type              = Update
+  val Grate: Zipping.type              = Zipping
 
   type Equality[A, B]          = PSame[A, A, B, B]
   type Iso[A, B]               = PEquivalent[A, A, B, B]
@@ -29,6 +30,7 @@ object classic {
   type Getter[A, B]            = PExtract[A, A, B, B]
   type Fold[A, B]              = PFolded[A, A, B, B]
   type Setter[A, B]            = PUpdate[A, A, B, B]
+  type Grate[A, B]             = PZipping[A, A, B, B]
 
   val PEquality: PSame.type              = PSame
   val PIso: PEquivalent.type             = PEquivalent
@@ -43,6 +45,7 @@ object classic {
   val PGetter: PExtract.type             = PExtract
   val PFold: PFolded.type                = PFolded
   val PSetter: PUpdate.type              = PUpdate
+  val PGrate: PZipping.type              = PZipping
 
   type PEquality[S, T, A, B]          = PSame[S, T, A, B]
   type PIso[S, T, A, B]               = PEquivalent[S, T, A, B]
@@ -57,4 +60,5 @@ object classic {
   type PGetter[S, T, A, B]            = PExtract[S, T, A, B]
   type PFold[S, T, A, B]              = PFolded[S, T, A, B]
   type PSetter[S, T, A, B]            = PUpdate[S, T, A, B]
+  type PGrate[S, T, A, B]             = PZipping[S, T, A, B]
 }
