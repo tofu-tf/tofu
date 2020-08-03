@@ -10,6 +10,6 @@ object compile {
   }
 
   implicit final class ConsumeOps[F[_], G[_], A](private val fa: F[A]) extends AnyVal {
-    def to[C[_]](implicit ev: Consume[F, G, C]): G[C[A]] = ev.to(fa)
+    def to[C[_]](implicit ev: Consume[F, G, C]): G[C[A]] = ev.consume(fa)
   }
 }

@@ -11,5 +11,5 @@ trait Compile[F[_], G[_]] {
 
 trait Consume[F[_], G[_], C[_]] extends Compile[F, G] {
 
-  def to[A](fa: F[A]): G[C[A]]
+  def consume[A](fa: F[A]): G[C[A]]
 }
