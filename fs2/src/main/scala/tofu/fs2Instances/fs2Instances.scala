@@ -2,13 +2,11 @@ package tofu
 package fs2Instances
 import cats.effect.{Concurrent, Sync}
 import cats.tagless.FunctorK
-import cats.{Alternative, FlatMap, Functor, Monad, MonoidK, ~>}
+import cats.{FlatMap, Functor, Monad, MonoidK, ~>}
 import fs2._
 import tofu.higherKind.Embed
 import tofu.streams.{Chunks, Compile, Evals, Merge}
 import tofu.syntax.funk._
-
-import scala.collection.Factory
 
 private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   private[this] val fs2HKInstanceAny = new FS2StreamHKInstance[Any]
