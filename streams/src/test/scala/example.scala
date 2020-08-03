@@ -1,5 +1,6 @@
+import cats.Functor
+import cats.effect.Sync
 import cats.instances.list._
-import cats.{FlatMap, Functor}
 import tofu.common.Console
 import tofu.streams._
 import tofu.streams.syntax.chunks._
@@ -25,8 +26,8 @@ object example {
   }
 
   final class App[
-      F[_]: Console: FlatMap,
-      S[_]: Evals[*[_], F]: Compile[*[_], F]: Chunks[*[_], C],
+      F[_]: Console: Sync,
+      S[_]: Evals[*[_], F]: Chunks[*[_], C]: Consume[*[_], F, Vector],
       C[_]: Functor
   ](srv: Srv[S]) {
 

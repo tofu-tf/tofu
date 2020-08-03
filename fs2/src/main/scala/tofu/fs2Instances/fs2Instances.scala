@@ -18,20 +18,25 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
 
   final implicit def fs2StreamRunContext[F[_], G[_], R](implicit
       fctx: HasContextRun[F, G, R]
-  ): WithRun[Stream[F, *], Stream[G, *], R]                   =
-    new FS2RunContext[F, G, R] { override val F: HasContextRun[F, G, R] = fctx }
+  ): WithRun[Stream[F, *], Stream[G, *], R] =
+    new FS2RunContext[F, G, R] {
+      override val F: HasContextRun[F, G, R] = fctx
+    }
 
   implicit def fs2EvalsInstance[F[_]]: Evals[Stream[F, *], F] =
     new Evals[Stream[F, *], F] {
-      override val monad: Monad[Stream[F, *]]      = Stream.monadInstance
-      override val monoidK: MonoidK[Stream[F, *]]  = Stream.monoidKInstance
+      override val monad: Monad[Stream[F, *]]     = Stream.monadInstance
+      override val monoidK: MonoidK[Stream[F, *]] = Stream.monoidKInstance
+
       override def eval[A](ga: F[A]): Stream[F, A] = Stream.eval(ga)
     }
 
   implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk] =
     new Chunks[Stream[F, *], Chunk] {
-      override def chunkN[A](fa: Stream[F, A])(n: Int): Stream[F, Chunk[A]]                 = fa.chunkN(n)
-      override def chunks[A](fa: Stream[F, A]): Stream[F, Chunk[A]]                         = fa.chunks
+      override def chunkN[A](fa: Stream[F, A])(n: Int): Stream[F, Chunk[A]] = fa.chunkN(n)
+
+      override def chunks[A](fa: Stream[F, A]): Stream[F, Chunk[A]] = fa.chunks
+
       override def mapChunks[A, B](fa: Stream[F, A])(f: Chunk[A] => Chunk[B]): Stream[F, B] = fa.mapChunks(f)
     }
 
@@ -44,8 +49,6 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
     new Compile[Stream[F, *], F] {
 
       override def drain[A](fa: Stream[F, A]): F[Unit] = fa.compile.drain
-
-      override def to[C[_], A](fa: Stream[F, A])(implicit ev: Factory[A, C[A]]): F[C[A]] = fa.compile.to(ev)
 
       override def fold[A, B](fa: Stream[F, A])(init: B)(f: (B, A) => B): F[B] = fa.compile.fold(init)(f)
     }
