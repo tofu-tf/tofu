@@ -32,11 +32,10 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
   // copied from cats.tagless.DeriveMacros.delegateMethods
   // for correct handling of vararg parameters
   private def methodArgs(method: Method, algebra: Type) =
-    for (ps <- method.signature.paramLists) yield
-      for (p <- ps) yield p.typeSignatureIn(algebra) match {
-        case RepeatedParam(_) => q"${p.name.toTermName}: _*"
-        case _ => Ident(p.name)
-      }
+    for (ps <- method.signature.paramLists) yield for (p <- ps) yield p.typeSignatureIn(algebra) match {
+      case RepeatedParam(_) => q"${p.name.toTermName}: _*"
+      case _                => Ident(p.name)
+    }
 
   private def tabulateTemplate(algebra: Type)(impl: TabulateParams): Type => Tree = {
     case PolyType(List(f), MethodType(List(hom), af)) =>
