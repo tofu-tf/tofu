@@ -4,7 +4,7 @@ import cats.Applicative
 import cats.effect.IO
 import cats.effect.concurrent.Ref
 import org.scalatest.flatspec.AnyFlatSpec
-import tofu.{Handle, Raise}
+import tofu.{ApplicativeThrow, Errors, Handle, Raise}
 import tofu.syntax.handle._
 import tofu.syntax.raise._
 import cats.syntax.all._
@@ -42,5 +42,14 @@ class RetrySuite extends AnyFlatSpec {
       _       <- runRetry[Err2.type, IO](counter, times)
       state   <- counter.get
     } yield assert(state == 1)).unsafeRunSync()
+  }
+}
+
+class RetryChecks{
+
+  def lol[F[_]: ApplicativeThrow](v: F[Unit]): F[Unit] = {
+    v.retry(3)(implicitly[Errors[F, Throwable]])
+    v.retry(3)
+
   }
 }

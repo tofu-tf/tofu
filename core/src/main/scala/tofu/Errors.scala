@@ -48,6 +48,8 @@ trait Restore[F[_]] extends RestoreTo[F, F] {
   def restoreWith[A](fa: F[A])(ra: => F[A]): F[A]
 }
 
+object Restore extends ErrorsInstanceChain[λ[(f[_], e) => Restore[f]]]
+
 trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
   def handleWith[A](fa: F[A])(f: E => G[A]): G[A]
 
