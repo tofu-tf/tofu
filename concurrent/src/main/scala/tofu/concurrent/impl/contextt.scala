@@ -5,8 +5,11 @@ import cats.effect._
 import cats.instances.either._
 import cats.instances.tuple._
 import cats.syntax.bifunctor._
+import cats.tagless.InvariantK
+import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
 import tofu.{RunContext, WithContext, WithRun}
+import scala.annotation.unchecked.{uncheckedVariance => uv}
 
 trait ContextTInvariant[F[+_], C[_[_]]] extends Invariant[ContextT[F, C, *]] {
   implicit def F: Invariant[F]
@@ -327,3 +330,58 @@ final class ContextTRunContextUnsafe[F[+_]: Applicative, C[_[_]]]
     c => fa.run(project(c))
   def lift[A](fa: F[A]): ContextT[F, C, A]                                                                      = ContextT.lift(fa)
 }
+
+trait ContextTNonEmptyParallel[G[+_], C[_[_]]] extends NonEmptyParallel[ContextT[G, C, *]] {
+  val G: NonEmptyParallel[G]
+  implicit def invC: InvariantK[C]
+  type F[+A] = ContextT[GF, C, A]
+  type GF[+A] = G.F[A @uv]
+
+  override def apply: Apply[F] = {
+    implicit val GFapp: Apply[G.F] = G.apply
+    new ContextTApplyI[GF, C]
+  }
+
+  override def flatMap: FlatMap[ContextT[G, C, *]] = {
+    implicit val GM: FlatMap[G] = G.flatMap
+    new ContextTFlatMapI[G, C]
+  }
+
+  override def sequential: F ~> ContextT[G, C, *] = funKFrom[F](_.imapK(G.sequential)(G.parallel))
+  override def parallel: ContextT[G, C, +*] ~> F   = funKFrom[ContextT[G, C, +*]](_.imapK[GF](G.parallel)(G.sequential))
+}
+
+trait ContextTParallel[G[+_], C[_[_]]] extends ContextTNonEmptyParallel[G, C] with Parallel[ContextT[G, C, *]] {
+  override val G: Parallel[G]
+
+  def applicative: Applicative[F] = {
+    implicit val GFapp: Applicative[G.F] = G.applicative
+    new ContextTApplicativeI[GF, C]()
+  }
+
+  def monad: Monad[ContextT[G, C, *]] = {
+    implicit val GM: Monad[G] = G.monad
+    new ContextTMonadI[G, C]
+  }
+}
+
+final class ContextTNonEmptyParallelI[G[+_], C[_[_]]](implicit val G: NonEmptyParallel[G], val invC: InvariantK[C])
+    extends ContextTNonEmptyParallel[G, C] {
+  override val apply: Apply[F]                     = super.apply
+  override val flatMap: FlatMap[ContextT[G, C, *]] = super.flatMap
+  override val sequential: F ~> ContextT[G, C, *]  = super.sequential
+  override val parallel: ContextT[G, C, *] ~> F    = super.parallel
+}
+
+final class ContextTParallelI[G[+_], C[_[_]]](implicit val G: Parallel[G], val invC: InvariantK[C])
+    extends ContextTParallel[G, C] {
+  override val applicative: Applicative[F] = super.applicative
+
+  override val monad: Monad[ContextT[G, C, *]] = super.monad
+
+  override val sequential: F ~> ContextT[G, C, *] = super.sequential
+
+  override val parallel: ContextT[G, C, *] ~> F = super.parallel
+}
+
+

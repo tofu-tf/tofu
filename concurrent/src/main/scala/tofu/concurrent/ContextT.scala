@@ -1,9 +1,10 @@
 package tofu.concurrent
 import cats._
 import cats.effect._
+import cats.tagless.{FunctorK, InvariantK}
 import tofu.HasContextRun
 import tofu.concurrent.impl._
-import tofu.syntax.funk.funKFrom
+import tofu.syntax.funk.{funK, funKFrom}
 import tofu.syntax.monadic._
 
 /** a ReaderT analog, allowing to have context referring resulting type
@@ -18,10 +19,22 @@ import tofu.syntax.monadic._
   * {{{type MyProcess[+A] => Ref[MyProcess, Int] => IO[A]}}}
   * which would be problematic to define using normal `ReaderT`, `Env` or `ZIO` type constructors
   */
-trait ContextT[F[+_], C[_[_]], +A] {
+trait ContextT[F[+_], C[_[_]], +A] { self =>
 
   /** run computation, providing context */
   def run(c: C[ContextT[F, C, +*]]): F[A]
+
+  final def imapK[G[+_]](f: F ~> G)(g: G ~> F)(implicit cf: InvariantK[C]): ContextT[G, C, A] = {
+    lazy val fc: ContextT[F, C, *] ~> ContextT[G, C, *] = funK(_.imapKInt(f, fc, gc))
+    lazy val gc: ContextT[G, C, *] ~> ContextT[F, C, *] = funK(_.imapKInt(g, gc, fc))
+    imapKInt(f, fc, gc)
+  }
+  final private def imapKInt[G[+_]](
+      f: F ~> G,
+      fc: => ContextT[F, C, *] ~> ContextT[G, C, *],
+      gc: => ContextT[G, C, *] ~> ContextT[F, C, *]
+  )(implicit ci: InvariantK[C]): ContextT[G, C, A] =
+    cg => f(run(ci.imapK(cg)(gc)(fc)))
 }
 
 object ContextT         extends ContextTInstances {
@@ -112,6 +125,9 @@ trait ContextTInstancesR extends ContextTInstancesS {
 
   final implicit def contextTContext[F[+_]: Applicative, C[_[_]]]: ContextTContext[F, C] =
     new ContextTContext
+
+  final implicit def contextTNonEmptyParallel[F[+_]: NonEmptyParallel, C[_[_]]: InvariantK] =
+    new ContextTNonEmptyParallelI[F, C]
 }
 
 trait ContextTInstancesQ extends ContextTInstancesR {
@@ -121,6 +137,13 @@ trait ContextTInstancesQ extends ContextTInstancesR {
   final implicit def contextTRunContext[F[+_]: Applicative: Defer, C[_[_]]]: ContextTRunContext[F, C] =
     new ContextTRunContext
 
-  final def runContextUnsafe[F[+_]: Applicative, C[_[_]]]: HasContextRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] =
+  final implicit def runContextUnsafe[F[+_]: Applicative, C[_[_]]]
+      : HasContextRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] =
     new ContextTRunContextUnsafe[F, C]
+
+  final implicit def contextTParallel[F[+_]: Parallel, C[_[_]]: InvariantK]: Parallel[ContextT[F, C, *]] =
+    new ContextTParallelI[F, C]
+
+  final implicit def contextTTimer[F[+_], C[_[_]]](implicit t: Timer[F]): Timer[ContextT[F, C, *]] =
+    t.mapK(ContextT.liftF)
 }
