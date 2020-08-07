@@ -1,6 +1,8 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
 
+moduleName := "tofu"
+
 val libVersion = "0.7.9"
 
 val scalaV = "2.13.3"
@@ -13,13 +15,6 @@ lazy val setMinorVersion = minorVersion := {
 }
 
 lazy val setModuleName = moduleName := { s"tofu-${(publishName or name).value}" }
-
-val reflect = libraryDependencies += scalaOrganization.value % "scala-reflect" % scalaVersion.value
-
-lazy val macros = Seq(
-  scalacOptions ++= { if (minorVersion.value == 13) Seq("-Ymacro-annotations") else Seq() },
-  libraryDependencies ++= { if (minorVersion.value == 12) Seq(compilerPlugin(macroParadise)) else Seq() }
-)
 
 lazy val defaultSettings = Seq(
   scalaVersion := scalaV,
@@ -34,23 +29,20 @@ lazy val defaultSettings = Seq(
     silencerLib,
     scalatest,
     collectionCompat,
+    scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided
   )
 ) ++ macros ++ simulacrumOptions ++ publishSettings
-
-moduleName := "tofu"
 
 lazy val higherKindCore = project settings (
   defaultSettings,
   publishName := "core-higher-kind",
   libraryDependencies ++= Seq(catsCore, catsFree, catsTagless),
-  reflect,
 )
 
 lazy val core = project dependsOn (opticsCore, higherKindCore) settings (
   defaultSettings,
   publishName := "core",
   libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
-  reflect,
 )
 
 lazy val memo = project
@@ -58,7 +50,6 @@ lazy val memo = project
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(catsCore, catsEffect),
-    reflect
   )
 
 lazy val loggingStr = project
@@ -78,7 +69,6 @@ lazy val loggingStr = project
       derevo,
       catsTagless
     ),
-    reflect
   )
   .dependsOn(core, concurrent, data)
 
@@ -88,7 +78,6 @@ lazy val loggingDer = project
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(derevo, magnolia),
-    reflect,
     publishName := "logging-derivation"
   )
 
@@ -97,7 +86,6 @@ lazy val loggingLayout = project
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(catsCore, catsEffect, logback, slf4j),
-    reflect,
     publishName := "logging-layout"
   )
   .dependsOn(loggingStr)
@@ -148,13 +136,11 @@ lazy val concurrent =
   project dependsOn core settings (
     defaultSettings,
     libraryDependencies ++= Seq(catsEffect, catsTagless),
-    reflect,
 )
 
 lazy val config = project dependsOn (core, data, opticsCore, concurrent) settings (
   defaultSettings,
   libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo),
-  reflect,
 )
 
 lazy val opticsCore = project
@@ -183,7 +169,6 @@ lazy val opticsMacro = project
       )
       opts.filterNot(opt => suppressed.exists(opt.contains))
     },
-    reflect,
     publishName := "optics-macro"
   )
 
@@ -204,7 +189,6 @@ lazy val derivation =
     .settings(
       defaultSettings,
       libraryDependencies ++= Seq(magnolia, derevo, catsTagless),
-      reflect,
       publishName := "derivation",
     )
     .dependsOn(data)
@@ -278,19 +262,26 @@ lazy val tofu = project
   .aggregate((coreModules ++ commonModules).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
-libraryDependencies += scalatest
+lazy val defaultScalacOptions = scalacOptions := {
+  val tpolecatOptions = scalacOptions.value
 
-lazy val defaultScalacOptions = scalacOptions ~= { opts => //sbt-tpolecat plugin options
-  val removed = Set(
-    "dead-code",
-    "fatal-warnings"
+  val dropLints = Set(
+    "-Ywarn-dead-code",
+    "-Wdead-code" // ignore dead code paths where `Nothing` is involved
   )
-  opts.filterNot(opt => removed.exists(opt.contains))
+
+  val opts = tpolecatOptions.filterNot(dropLints)
+
+  // drop `-Xfatal-warnings` on dev and 2.12 CI
+  if (!sys.env.get("CI").contains("true") || (minorVersion.value == 12))
+    opts.filterNot(Set("-Xfatal-warnings"))
+  else
+    opts
 }
 
 lazy val scala213WarningConfig = {
   // ignore unused imports that cannot be removed due to cross-compilation
-  val suppressUnusedImports = List(
+  val suppressUnusedImports = Seq(
     "scala/tofu/config/typesafe.scala",
     "scala-2.13/tofu.syntax/FoldableSuite.scala"
   ).map { src =>
@@ -310,11 +301,13 @@ lazy val versionSpecificScalacOptions = scalacOptions ++= {
   }
 }
 
+lazy val macros = Seq(
+  scalacOptions ++= { if (minorVersion.value == 13) Seq("-Ymacro-annotations") else Seq() },
+  libraryDependencies ++= { if (minorVersion.value == 12) Seq(compilerPlugin(macroParadise)) else Seq() }
+)
+
 lazy val simulacrumOptions = Seq(
-  libraryDependencies ++= Seq(
-    scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided,
-    simulacrum              % Provided
-  ),
+  libraryDependencies += simulacrum % Provided,
   pomPostProcess := { node =>
     import scala.xml.transform.{RewriteRule, RuleTransformer}
 
