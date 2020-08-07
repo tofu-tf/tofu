@@ -50,7 +50,10 @@ object DoMonad extends DoMonadInstances {
     def <*>[F1[x] >: F[x], B, C](fb: F1[B])(implicit F: Do[F1], @unused212 ev: A <:< (B => C)): F1[C] =
       F.!.ap(fa.asInstanceOf[F1[B => C]])(fb)
 
-    def ap2[F1[x] >: F[x], B, C, D](fa: F1[B], fb: F1[C])(implicit F: Do[F1], @unused212 ev: A <:< ((B, C) => D)): F1[D] =
+    def ap2[F1[x] >: F[x], B, C, D](fa: F1[B], fb: F1[C])(implicit
+        F: Do[F1],
+        @unused212 ev: A <:< ((B, C) => D)
+    ): F1[D] =
       F.!.ap2(fa.asInstanceOf[F1[(B, C) => D]])(fa, fb)
 
     def whenM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], @unused212 ev: A <:< Boolean): F1[Unit] =
@@ -59,7 +62,10 @@ object DoMonad extends DoMonadInstances {
     def unlessM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], @unused212 ev: A <:< Boolean): F1[Unit] =
       F.!.flatMap(fa)(a => if (ev(a)) F.!.unit else F.!.void(fb))
 
-    def ifM[F1[x] >: F[x], B](fthen: => F1[B], felse: => F1[B])(implicit F: Do[F1], @unused212 ev: A <:< Boolean): F1[B] =
+    def ifM[F1[x] >: F[x], B](fthen: => F1[B], felse: => F1[B])(implicit
+        F: Do[F1],
+        @unused212 ev: A <:< Boolean
+    ): F1[B] =
       F.!.ifM(fa.asInstanceOf[F[Boolean]])(fthen, felse)
 
     def iterateWhile(f: A => Boolean)(implicit F: Do[F]): F[A] = F.!.iterateWhile(fa)(f)
