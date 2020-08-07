@@ -1,10 +1,8 @@
 package tofu.higherKind.derived
 
 import cats.data.Tuple2K
-import cats.effect.IO
 import cats.{Id, ~>}
 import derevo.derive
-import tofu.syntax.funk._
 import tofu.syntax.embed._
 import cats.tagless.syntax.functorK._
 import cats.tagless.syntax.semigroupalK._

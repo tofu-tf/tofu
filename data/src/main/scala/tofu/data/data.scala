@@ -3,7 +3,6 @@ package tofu
 import cats.Functor
 import cats.arrow.FunctionK
 import scala.annotation.unchecked.{uncheckedVariance => uv}
-import tofu.compat.uv212
 
 package object data {
   type PArray[+A]                   = PArray.Type[A]

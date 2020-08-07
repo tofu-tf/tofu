@@ -1,6 +1,6 @@
 package tofu.optics
 
-import com.github.ghik.silencer.silent
+import tofu.compat.unused
 
 /** polymorphic equality: any relation for S and T equal to relation of A and B */
 trait PSame[-S, +T, +A, -B] extends PEquivalent[S, T, A, B] with PBase[PSame, S, T, A, B] {
@@ -21,7 +21,7 @@ object PSame extends OpticCompanion[PSame] with OpticProduct[PSame] {
   type Context             = OpticContext
   override type Mono[A, B] = Same[A, B]
 
-  @silent("never used") private type Inv[-s, +t, +a, -b] = PSame[b, a, t, s]
+  @unused private type Inv[-s, +t, +a, -b] = PSame[b, a, t, s]
 
   private def refl[A, B]: PSame[A, B, A, B] = new PSame[A, B, A, B] {
     def rsubst[K[_, _]](k: K[A, B]): K[A, B] = k

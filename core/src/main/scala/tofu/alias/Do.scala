@@ -2,11 +2,11 @@ package tofu.alias
 
 import cats.kernel.Monoid
 import cats.{Alternative, Monad}
+import tofu.compat.unused212
 
 import scala.collection.immutable.Queue
 
 class DoMonad[F[_]](val ! : Monad[F]) extends AnyVal
-import scala.annotation.nowarn
 
 object DoMonad extends DoMonadInstances {
   final implicit def doMonad[F[_]](implicit F: Monad[F]): Do[F] = new DoMonad[F](F)
@@ -41,25 +41,31 @@ object DoMonad extends DoMonadInstances {
     def mproduct[F1[x] >: F[x], B](f: A => F1[B])(implicit F: Do[F1]): F1[(A, B)]       = F.!.mproduct(fa)(f)
     def flatTap[F1[x] >: F[x], B](f: A => F1[B])(implicit F: Do[F1]): F1[A]             = F.!.flatTap(fa)(f)
 
-    def flatten[F1[x] >: F[x], B](implicit @nowarn ev: A <:< F1[B], F: Do[F1]): F1[B] =
+    def flatten[F1[x] >: F[x], B](implicit @unused212 ev: A <:< F1[B], F: Do[F1]): F1[B] =
       F.!.flatten(fa.asInstanceOf[F1[F1[B]]])
 
-    def ap[F1[x] >: F[x], B, C](fb: F1[B])(implicit F: Do[F1], @nowarn ev: A <:< (B => C)): F1[C] =
+    def ap[F1[x] >: F[x], B, C](fb: F1[B])(implicit F: Do[F1], @unused212 ev: A <:< (B => C)): F1[C] =
       F.!.ap(fa.asInstanceOf[F[B => C]])(fb)
 
-    def <*>[F1[x] >: F[x], B, C](fb: F1[B])(implicit F: Do[F1], @nowarn ev: A <:< (B => C)): F1[C] =
+    def <*>[F1[x] >: F[x], B, C](fb: F1[B])(implicit F: Do[F1], @unused212 ev: A <:< (B => C)): F1[C] =
       F.!.ap(fa.asInstanceOf[F1[B => C]])(fb)
 
-    def ap2[F1[x] >: F[x], B, C, D](fa: F1[B], fb: F1[C])(implicit F: Do[F1], @nowarn ev: A <:< ((B, C) => D)): F1[D] =
+    def ap2[F1[x] >: F[x], B, C, D](fa: F1[B], fb: F1[C])(implicit
+        F: Do[F1],
+        @unused212 ev: A <:< ((B, C) => D)
+    ): F1[D] =
       F.!.ap2(fa.asInstanceOf[F1[(B, C) => D]])(fa, fb)
 
-    def whenM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], ev: A <:< Boolean): F1[Unit] =
+    def whenM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], @unused212 ev: A <:< Boolean): F1[Unit] =
       F.!.flatMap(fa)(a => if (ev(a)) F.!.void(fb) else F.!.unit)
 
-    def unlessM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], ev: A <:< Boolean): F1[Unit] =
+    def unlessM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], @unused212 ev: A <:< Boolean): F1[Unit] =
       F.!.flatMap(fa)(a => if (ev(a)) F.!.unit else F.!.void(fb))
 
-    def ifM[F1[x] >: F[x], B](fthen: => F1[B], felse: => F1[B])(implicit F: Do[F1], @nowarn ev: A <:< Boolean): F1[B] =
+    def ifM[F1[x] >: F[x], B](fthen: => F1[B], felse: => F1[B])(implicit
+        F: Do[F1],
+        @unused212 ev: A <:< Boolean
+    ): F1[B] =
       F.!.ifM(fa.asInstanceOf[F[Boolean]])(fthen, felse)
 
     def iterateWhile(f: A => Boolean)(implicit F: Do[F]): F[A] = F.!.iterateWhile(fa)(f)

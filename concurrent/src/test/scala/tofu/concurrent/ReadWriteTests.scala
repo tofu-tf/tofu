@@ -39,7 +39,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
         _              <- releases.parSequence
         releaseState   <- rw.getState
       } yield (initialState, blockedState, releaseState, xs)
-      io.unsafeToFuture.map {
+      io.unsafeToFuture().map {
         case (initial, blocked, release, xs) =>
           initial shouldBe State(
             Queue(),
@@ -89,7 +89,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _              <- (release3, release4).parTupled
           releaseState   <- rw.getState
         } yield (initialState, blockedState1, blockedState2, blockedState3, releaseState, List(i1, i2, i3, i4))
-        io.unsafeToFuture.map {
+        io.unsafeToFuture().map {
           case (initial, blocked1, blocked2, blocked3, release, xs) =>
             initial shouldBe State(
               Queue(),
@@ -142,7 +142,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _             <- release
           releaseState2 <- rw.getState
         } yield (initialState, blockedState, releaseState1, releaseState2, List(i1, i2))
-        io.unsafeToFuture.map {
+        io.unsafeToFuture().map {
           case (initial, blocked, release1, release2, xs) =>
             initial shouldBe State(
               Queue(),
@@ -195,7 +195,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _              <- release
           resultState    <- rw.getState
         } yield (initialState, blockedState, writerState, readerState, resultState, xs ::: List(wi, ri))
-        io.unsafeToFuture.map {
+        io.unsafeToFuture().map {
           case (initial, blocked, writer, reader, result, xs) =>
             initial shouldBe State(
               Queue(),
@@ -246,7 +246,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
         _            <- update(i + 1)
         releaseState <- rw.getState
       } yield (initialState, blockedState, releaseState)
-      io.unsafeToFuture.map {
+      io.unsafeToFuture().map {
         case (initial, blocked, release) =>
           initial shouldBe State(
             Queue(),
@@ -290,7 +290,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _             <- update2(i2 + 1)
           releaseState2 <- rw.getState
         } yield (initialState, blockedState, releaseState1, releaseState2, List(i1, i2))
-        io.unsafeToFuture.map {
+        io.unsafeToFuture().map {
           case (initial, blocked, release1, release2, xs) =>
             initial shouldBe State(
               Queue(),
@@ -338,7 +338,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _             <- update2(i2 + 1)
           releaseState2 <- rw.getState
         } yield (initialState, blockedState, releaseState1, releaseState2, List(i1, i2))
-        io.unsafeToFuture.map {
+        io.unsafeToFuture().map {
           case (initial, blocked, release1, release2, xs) =>
             initial shouldBe State(
               Queue(),
@@ -393,7 +393,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _             <- release2
           releaseState2 <- rw.getState
         } yield (initialState, blockedState, cancelState, releaseState1, releaseState2)
-        io.unsafeToFuture.map {
+        io.unsafeToFuture().map {
           case (initialState, blockedState, cancelState, releaseState1, releaseState2) =>
             initialState shouldBe State(
               Queue(),
@@ -439,7 +439,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _            <- fs.sequence.join
           cancelState  <- rw.getState
         } yield (initialState, blockedState, cancelState)
-        io.unsafeToFuture.map {
+        io.unsafeToFuture().map {
           case (initialState, blockedState, cancelState) =>
             initialState shouldBe State(
               Queue(),
@@ -474,7 +474,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _            <- f.cancel
           cancelState  <- rw.getState
         } yield (initialState, blockedState, cancelState)
-        io.unsafeToFuture.map {
+        io.unsafeToFuture().map {
           case (initial, blocked, cancel) =>
             initial shouldBe State(
               Queue(),
@@ -508,7 +508,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _            <- fs.sequence.join
           cancelState  <- rw.getState
         } yield (initialState, blockedState, cancelState)
-        io.unsafeToFuture.map {
+        io.unsafeToFuture().map {
           case (initialState, blockedState, cancelState) =>
             initialState shouldBe State(
               Queue(),
@@ -820,7 +820,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
         corrupted <- fal.get
       } yield corrupted
 
-      io.unsafeToFuture.map(_ shouldBe false)
+      io.unsafeToFuture().map(_ shouldBe false)
     }
 
   }

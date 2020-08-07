@@ -1,12 +1,16 @@
-package tofu
+package tofu.compat
 
 import cats.data.NonEmptyStream
 
-package object compat {
+object `package` {
   type LazySeq[+A]  = Stream[A]
   type NELazySeq[A] = NonEmptyStream[A]
 
   val lazySeqInstances = cats.instances.stream
 
   type uv212 = scala.annotation.unchecked.uncheckedVariance
+
+  type unused = scala.annotation.nowarn
+
+  type unused212 = scala.annotation.nowarn
 }

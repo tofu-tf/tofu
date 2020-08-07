@@ -1,6 +1,5 @@
 package tofu.higherKind.derived
 
-import com.github.ghik.silencer.silent
 import tofu.higherKind.{Embed, RepresentableK}
 import tofu.higherKind.bi.{EmbedBK, RepresentableB}
 
