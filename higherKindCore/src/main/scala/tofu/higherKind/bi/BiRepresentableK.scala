@@ -2,7 +2,6 @@ package tofu.higherKind.bi
 
 import tofu.control.Bind
 import tofu.higherKind.bi.RepresentableB.Tab
-import tofu.higherKind.RepK
 
 trait RepresentableB[U[f[_, _]]] extends MonoidalBK[U] with EmbedBK[U] {
   def bitabulate[F[_, _]](repr: RepBK[U, *, *] FunBK F): U[F]

@@ -1,22 +1,18 @@
 package tofu.logging
 
-import Logging.loggerForService
 import cats.data.Tuple2K
 import cats.effect.Sync
 import cats.kernel.Monoid
-import cats.{Applicative, Apply, FlatMap, Functor, Id, Monad}
-import impl.{CachedLogs, ContextSyncLoggingImpl, SyncLogging, UniversalEmbedLogs}
-import cats.tagless.{ApplyK, FunctorK}
 import cats.tagless.syntax.functorK._
-import cats.{Applicative, Apply, FlatMap, Functor, ~>}
-import impl.{ContextSyncLoggingImpl, SyncLogging}
+import cats.tagless.{ApplyK, FunctorK}
+import cats.{Applicative, Apply, FlatMap, Functor, Id, Monad, ~>}
 import org.slf4j.LoggerFactory
 import tofu.concurrent.QVars
 import tofu.{Guarantee, higherKind}
-import tofu.higherKind.RepresentableK
-import tofu.lift.Lift
-import tofu.higherKind
 import tofu.higherKind.{Function2K, MonoidalK, Point, RepresentableK}
+import tofu.lift.Lift
+import tofu.logging.Logging.loggerForService
+import tofu.logging.impl.{CachedLogs, ContextSyncLoggingImpl, SyncLogging, UniversalEmbedLogs}
 import tofu.syntax.monadic._
 import tofu.syntax.monoidalK._
 

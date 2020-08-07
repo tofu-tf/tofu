@@ -4,8 +4,8 @@ import Logging._
 import cats.kernel.Monoid
 import cats.syntax.apply._
 import cats.{Applicative, Apply, FlatMap}
-import com.github.ghik.silencer.silent
 import org.slf4j.{Logger, LoggerFactory, Marker}
+import tofu.compat.unused
 import tofu.{Init, higherKind}
 import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.logging.impl.EmbedLogging
@@ -29,7 +29,7 @@ trait LoggingBase[F[_]] {
   def write(level: Level, message: String, values: LoggedValue*): F[Unit]
 
   /** could be overridden in the implementation, same as `write` but add additional info via marker */
-  def writeMarker(level: Level, message: String, @silent("never used") marker: Marker, values: LoggedValue*): F[Unit] =
+  def writeMarker(level: Level, message: String, @unused marker: Marker, values: LoggedValue*): F[Unit] =
     write(level, message, values: _*)
 
   /** could be overridden in the implementations, write message about some exception */

@@ -4,7 +4,6 @@ import cats.data.IndexedState
 import cats.effect.ExitCase
 import cats.{MonadError, Monoid, StackSafeMonad}
 import tofu.optics.PContains
-import tofu.optics.PContains
 
 sealed trait Calc[-R, -S1, +S2, +E, +A] {
   final def run(r: R, init: S1): (S2, Either[E, A]) = Calc.run(this, r, init)

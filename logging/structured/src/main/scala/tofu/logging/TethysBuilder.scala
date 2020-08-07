@@ -5,9 +5,9 @@ import java.io.StringWriter
 
 import cats.instances.unit._
 import cats.kernel.Monoid
-import com.github.ghik.silencer.silent
 import tofu.logging.LogRenderer.LogRendererUnit
 import tethys.writers.tokens.TokenWriter
+import tofu.compat.unused
 
 class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilder[String] {
   type Top    = TokenWriter
@@ -16,7 +16,7 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
   type Output = Unit
 
   /** override to add predefined fields */
-  def predefined(@silent("never used") tokenWriter: TokenWriter): Unit = {}
+  def predefined(@unused tokenWriter: TokenWriter): Unit = {}
 
   def writeValue(value: LogParamValue, writer: TokenWriter): Unit = value match {
     case StrValue(v)     => writer.writeString(v)

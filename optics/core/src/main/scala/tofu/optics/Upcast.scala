@@ -2,9 +2,9 @@ package tofu.optics
 
 import alleycats.Pure
 import cats.{Functor, Id}
+import tofu.compat.unused212
 import tofu.optics.classes.PChoice
 import tofu.optics.data._
-import scala.annotation.nowarn
 
 trait PUpcast[-S, +T, +A, -B] extends PBase[PUpcast, S, T, A, B] {
   def upcast(b: B): T
@@ -40,7 +40,7 @@ object PUpcast extends OpticCompanion[PUpcast] with OpticProduct[PUpcast] {
     override def upcast(b: Any): Any = b
   }
 
-  implicit def subType[E, E1](implicit @nowarn ev: E <:< E1): Upcast[E1, E] =
+  implicit def subType[E, E1](implicit @unused212 ev: E <:< E1): Upcast[E1, E] =
     GenericSubtypeImpl.asInstanceOf[Upcast[E1, E]]
 
   override def delayed[S, T, A, B](o: () => PUpcast[S, T, A, B]): PUpcast[S, T, A, B] = new PUpcast[S, T, A, B] {
