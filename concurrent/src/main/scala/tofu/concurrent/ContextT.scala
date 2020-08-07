@@ -7,7 +7,16 @@ import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
 
 /** a ReaderT analog, allowing to have context referring resulting type
-  *  for instance you can define ```MyCtx[F[_]](state: Ref[F, Int], k ```
+  *  for instance you can define
+  * {{{
+  *  case class MyCtx[F[_]](state: Ref[F, Int])
+  *
+  *  type MyProcess[+A] = ContextT[IO, MyCtx, A]
+  * }}}
+  *
+  * here MyProcess is equivalent to a function alias
+  * {{{type MyProcess[+A] => Ref[MyProcess, Int] => IO[A]}}}
+  * which would be problematic to define using normal `ReaderT`, `Env` or `ZIO` type constructors
   */
 trait ContextT[F[+_], C[_[_]], +A] {
 
