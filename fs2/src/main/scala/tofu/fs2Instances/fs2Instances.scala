@@ -52,7 +52,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
 
       override def fold[A, B](fa: Stream[F, A])(init: B)(f: (B, A) => B): F[B] = fa.compile.fold(init)(f)
 
-      override def compile[A](fa: Stream[F, A]): F[Iterator[A]] = fa.compile.to(Iterator)
+      override def toIterator[A](fa: Stream[F, A]): F[Iterator[A]] = fa.compile.to(Iterator)
     }
 }
 
