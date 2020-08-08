@@ -27,11 +27,10 @@ object example {
 
   final class App[
       F[_]: Console: Sync,
-      S[_]: Evals[*[_], F]: Chunks[*[_], C]: Consume[*[_], F, Vector],
+      S[_]: Compile[*[_], F],
       C[_]: Functor
   ](srv: Srv[S]) {
-
     def run: F[Unit] =
-      srv.requestAll.to[Vector] >>= (xs => Console[F].putStr(xs.mkString(", ")))
+      srv.requestAll.compile.map(_.toVector) >>= (xs => Console[F].putStr(xs.mkString(", ")))
   }
 }

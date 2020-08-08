@@ -36,6 +36,8 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override def chunks[A](fa: Stream[F, A]): Stream[F, Chunk[A]] = fa.chunks
 
       override def mapChunks[A, B](fa: Stream[F, A])(f: Chunk[A] => Chunk[B]): Stream[F, B] = fa.mapChunks(f)
+
+      override def cons[A](fa: Stream[F, A])(c: Chunk[A]): Stream[F, A] = fa.cons(c)
     }
 
   implicit def fs2MergeInstance[F[_]: Concurrent]: Merge[Stream[F, *]] =
@@ -49,6 +51,8 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override def drain[A](fa: Stream[F, A]): F[Unit] = fa.compile.drain
 
       override def fold[A, B](fa: Stream[F, A])(init: B)(f: (B, A) => B): F[B] = fa.compile.fold(init)(f)
+
+      override def compile[A](fa: Stream[F, A]): F[Iterator[A]] = fa.compile.to(Iterator)
     }
 }
 
