@@ -63,7 +63,7 @@ object CalcM extends CalcMInstances {
   }
   final case class Read[S, R]()      extends CalcMRes[R, S, S, Nothing, R]      {
     def submit[X](submit: Submit[R, S, S, Nothing, R, X]): X                                                          = submit.success(submit.state, submit.read)
-    override def local[R1](f: R1 => R): CalcM[Nothing, R1, S, S, Nothing, R]                                          = Read[S, R1].map(f)
+    override def local[R1](f: R1 => R): CalcM[Nothing, R1, S, S, Nothing, R]                                          = Read[S, R1]().map(f)
     override def translate[G[+_, +_], R1](translator: ITranslator[Nothing, G, R, R1]): CalcM[G, R1, S, S, Nothing, R] =
       CalcM.read[S, R1].map(translator.mapRead)
     def translateState[G[+_, +_], ST, R1](

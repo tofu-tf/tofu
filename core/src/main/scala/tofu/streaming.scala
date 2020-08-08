@@ -1,9 +1,7 @@
 package tofu
 
 import cats.{Applicative, Functor, Monoid}
-import tofu.internal.DataEffectComp
 import tofu.optics.Folded
-import tofu.optics.classes.Transform
 import tofu.internal.DataEffectComp
 import tofu.optics.classes.Transform
 

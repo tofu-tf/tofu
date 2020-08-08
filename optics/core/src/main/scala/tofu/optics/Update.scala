@@ -2,7 +2,6 @@ package tofu.optics
 
 import cats.{Applicative, Functor}
 import tofu.optics.data.Identity
-import tofu.optics.classes.PChoice
 
 /** aka Setter
   * can update all occurrences of A in S

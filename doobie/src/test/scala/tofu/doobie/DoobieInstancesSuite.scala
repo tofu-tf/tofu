@@ -3,10 +3,10 @@ package tofu.doobie
 import cats.Applicative
 import cats.data.ReaderT
 import cats.effect.{IO, SyncIO}
-import com.github.ghik.silencer.silent
 import doobie.ConnectionIO
 import monix.eval.{Coeval, Task}
 import monix.execution.Scheduler
+import tofu.compat.unused
 import tofu.doobie.instances.implicits._
 import tofu.env.Env
 import tofu.lift.Lift
@@ -48,7 +48,7 @@ object DoobieInstancesSuite {
     ()
   }
 
-  def summonMonixImplicitsUnambiguously[R](implicit @silent sc: Scheduler, L: Lift[Task, IO]): Unit = {
+  def summonMonixImplicitsUnambiguously[R](implicit @unused sc: Scheduler, L: Lift[Task, IO]): Unit = {
     Lift[Task, ConnectionIO]
     Lift[Task, ConnectionRIO[R, *]]
     Lift[ReaderT[Task, R, *], ConnectionRIO[R, *]]

@@ -2,7 +2,6 @@ package tofu.syntax
 
 import cats.{Functor, ~>}
 import cats.effect.concurrent.{Deferred, MVar, Ref, Semaphore}
-import tofu.lift.{IsoK, Lift, Unlift}
 import cats.tagless.{FunctorK, InvariantK}
 import tofu.lift.{IsoK, Lift, Unlift}
 

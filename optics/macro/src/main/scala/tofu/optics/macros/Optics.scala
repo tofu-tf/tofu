@@ -1,6 +1,6 @@
 package tofu.optics.macros
 
-import com.github.ghik.silencer.silent
+import tofu.compat.unused
 import tofu.optics.PContains
 
 import scala.reflect.macros.blackbox
@@ -188,7 +188,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
     case _         => false
   }
 
-  @silent("never used") private def debug(ss: Any*) = c.info(
+  @unused private def debug(ss: Any*) = c.info(
     c.enclosingPosition,
     ss map {
       case null => "null"

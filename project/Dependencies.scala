@@ -29,15 +29,15 @@ object Dependencies {
 
     val monix = "3.2.2"
 
-    val scalatest = "3.2.0"
+    val scalatest = "3.2.1"
 
     val magnolia = "0.16.0"
 
     val typesafeConfig = "1.4.0"
 
-    val zio = "1.0.0-RC21-2"
+    val zio = "1.0.0"
 
-    val zioCats = "2.0.0.0-RC14"
+    val zioCats = "2.1.4.0"
 
     val shapeless = "2.3.3"
 

@@ -1,6 +1,4 @@
 package tofu.higherKind.derived
-import cats.data.{IorT, NonEmptyChain}
-import cats.free.Free
 import derevo.derive
 import tofu.higherKind.Embed
 import org.scalatest.flatspec.AnyFlatSpec

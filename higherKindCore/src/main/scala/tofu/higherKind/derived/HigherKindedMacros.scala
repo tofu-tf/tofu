@@ -1,6 +1,5 @@
 package tofu.higherKind.derived
 
-import com.github.ghik.silencer.silent
 import tofu.higherKind.{Embed, RepresentableK}
 import tofu.higherKind.bi.{EmbedBK, RepresentableB}
 
@@ -29,6 +28,14 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       })
   }
 
+  // copied from cats.tagless.DeriveMacros.delegateMethods
+  // for correct handling of vararg parameters
+  private def methodArgs(method: Method, algebra: Type) =
+    for (ps <- method.signature.paramLists) yield for (p <- ps) yield p.typeSignatureIn(algebra) match {
+      case RepeatedParam(_) => q"${p.name.toTermName}: _*"
+      case _                => Ident(p.name)
+    }
+
   private def tabulateTemplate(algebra: Type)(impl: TabulateParams): Type => Tree = {
     case PolyType(List(f), MethodType(List(hom), af)) =>
       val members = overridableMembersOf(af)
@@ -45,12 +52,12 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
           abort(s"Type parameter $f appears in contravariant position in method ${method.name}")
 
         case method if method.returnType.typeConstructor.typeSymbol == f =>
-          val params = method.paramLists.map(_.map(_.name))
+          val params = methodArgs(method, algebra)
           val body   = q"$hom($repk[$algebra](($algv => $alg.${method.name}(...$params))))"
           method.copy(body = body)
 
         case method if method.occursInReturn(f)                          =>
-          val params = method.paramLists.map(_.map(_.name))
+          val params = methodArgs(method, algebra)
           val tt     = polyType(f :: Nil, method.returnType)
           val tab    = impl.tabMethod(tt)
           val body   =
@@ -65,10 +72,10 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       res
   }
 
-  private def embedTemplate(@silent("never used") algebra: Type)(impl: EmbedParams): Type => Tree = {
+  private def embedTemplate(algebra: Type)(impl: EmbedParams): Type => Tree = {
     case PolyType(List(f), MethodType(List(faf), MethodType(List(fmonad), _))) =>
-      def makeMethod(method: Method)(body: List[List[TermName]] => Tree): Method = {
-        val params = method.paramLists.map(_.map(_.name))
+      def makeMethod(method: Method)(body: List[List[Tree]] => Tree): Method = {
+        val params = methodArgs(method, algebra)
         method.copy(body = body(params))
       }
 

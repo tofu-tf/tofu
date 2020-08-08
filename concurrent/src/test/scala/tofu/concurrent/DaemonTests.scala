@@ -19,7 +19,7 @@ class DaemonTests extends AnyWordSpec with Matchers {
 
       val io = IO.pure(()).daemonize.flatMap(_.cancel)
       noException shouldBe thrownBy {
-        for { _ <- 1 to 100 } io.unsafeRunSync
+        for { _ <- 1 to 100 } io.unsafeRunSync()
       }
     }
 
