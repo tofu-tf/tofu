@@ -1,12 +1,14 @@
 package tofu
 package fs2Instances
-import cats.effect.{Concurrent, Sync}
+import cats.effect.{Concurrent, Sync, Timer}
 import cats.tagless.FunctorK
 import cats.{FlatMap, Functor, Monad, MonoidK, ~>}
 import fs2._
 import tofu.higherKind.Embed
-import tofu.streams.{Chunks, Compile, Evals, Merge}
+import tofu.streams.{Chunks, Compile, Evals, Merge, ParFlatten, Temporal}
 import tofu.syntax.funk._
+
+import scala.concurrent.duration.FiniteDuration
 
 private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   private[this] val fs2HKInstanceAny = new FS2StreamHKInstance[Any]
@@ -53,6 +55,20 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override def fold[A, B](fa: Stream[F, A])(init: B)(f: (B, A) => B): F[B] = fa.compile.fold(init)(f)
 
       override def toIterator[A](fa: Stream[F, A]): F[Iterator[A]] = fa.compile.to(Iterator)
+    }
+
+  implicit def fs2ParFlattenInstance[F[_]: Concurrent: Timer]: ParFlatten[Stream[F, *]] =
+    new ParFlatten[Stream[F, *]] {
+      override def parFlatten[A](ffa: Stream[F, Stream[F, A]])(maxConcurrent: Int): Stream[F, A] =
+        ffa.parJoin(maxConcurrent)
+    }
+
+  implicit def fs2TemporalInstance[F[_]: Timer]: Temporal[Stream[F, *]] =
+    new Temporal[Stream[F, *]] {
+
+      override def metered[A](fa: Stream[F, A])(rate: FiniteDuration): Stream[F, A] = fa.metered(rate)
+
+      override def delay[A](fa: Stream[F, A])(d: FiniteDuration): Stream[F, A] = fa.delayBy(d)
     }
 }
 
