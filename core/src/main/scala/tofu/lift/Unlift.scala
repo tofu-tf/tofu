@@ -3,6 +3,8 @@ package lift
 
 import cats.arrow.FunctionK
 import cats.data.ReaderT
+import cats.effect.{Effect, IO}
+import cats.effect.syntax.effect._
 import cats.{Applicative, Functor, Monad, ~>}
 import syntax.funk._
 import tofu.syntax.monadic._
@@ -13,7 +15,7 @@ trait Lift[F[_], G[_]] {
   def liftF: FunctionK[F, G] = funK(lift(_))
 }
 
-object Lift {
+object Lift extends LiftInstances1 {
   def apply[F[_], G[_]](implicit lift: Lift[F, G]): Lift[F, G] = lift
   def trans[F[_], G[_]](implicit lift: Lift[F, G]): F ~> G     = lift.liftF
 
@@ -29,19 +31,27 @@ object Lift {
     }
   }
   implicit def liftReaderT[F[_], R]: Lift[F, ReaderT[F, R, *]] = liftReaderTAny.asInstanceOf[Lift[F, ReaderT[F, R, *]]]
+}
 
-  def byIso[F[_], G[_]](iso: IsoK[F, G]): Lift[F, G] =
+private[lift] trait LiftInstances1 extends LiftInstances2 {
+  implicit def byIso[F[_], G[_]](implicit iso: IsoK[F, G]): Lift[F, G] =
     new Lift[F, G] {
       def lift[A](fa: F[A]): G[A] = iso.to(fa)
     }
 }
 
-/** embedded transformation
-  * can be used instead of direct F ~> G
-  * especially useful Unlift[_[_], IO] as replacement for `Effect` typeclass
+private[lift] trait LiftInstances2 {
+  implicit def byIsoInverse[F[_], G[_]](implicit iso: IsoK[F, G]): Lift[G, F] =
+    new Lift[G, F] {
+      def lift[A](ga: G[A]): F[A] = iso.from(ga)
+    }
+}
+
+/**
+  * Embedded transformation. Can be used instead of a direct F ~> G.
+  * Especially useful one is `UnliftIO`, a replacement for the `Effect` typeclass.
   */
-trait Unlift[F[_], G[_]] extends Lift[F, G] {
-  self =>
+trait Unlift[F[_], G[_]] extends Lift[F, G] { self =>
   def lift[A](fa: F[A]): G[A]
   def unlift: G[G ~> F]
 
@@ -77,6 +87,14 @@ object Unlift {
     new Unlift[F, RT] {
       def lift[A](fa: F[A]): RT[A] = ReaderT.liftF(fa)
       def unlift: RT[RT ~> F]      = ReaderT(r => funK[RT, F](_.run(r)).pure[F])
+    }
+  }
+
+  implicit def unliftIOReaderT[F[_]: Effect, R]: UnliftIO[ReaderT[F, R, *]] = {
+    type RT[a] = ReaderT[F, R, a]
+    new UnliftIO[RT] {
+      def lift[A](fa: IO[A]): RT[A] = ReaderT.liftF(Effect[F].liftIO(fa))
+      def unlift: RT[RT ~> IO]      = ReaderT(r => funK[RT, IO](_.run(r).toIO).pure[F])
     }
   }
 
