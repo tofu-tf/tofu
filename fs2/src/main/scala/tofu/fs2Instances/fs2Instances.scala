@@ -54,7 +54,8 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
 
       override def fold[A, B](fa: Stream[F, A])(init: B)(f: (B, A) => B): F[B] = fa.compile.fold(init)(f)
 
-      override def toIterator[A](fa: Stream[F, A]): F[Iterator[A]] = fa.compile.to(Iterator)
+      override def to[C[_], A](fa: Stream[F, A])(implicit ev: tofu.streams.internal.Factory[A, C[A]]): F[C[A]] =
+        fa.compile.to(ev)
     }
 
   implicit def fs2ParFlattenInstance[F[_]: Concurrent: Timer]: ParFlatten[Stream[F, *]] =

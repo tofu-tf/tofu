@@ -8,10 +8,5 @@ trait Compile[F[_], G[_]] {
 
   def fold[A, B](fa: F[A])(init: B)(f: (B, A) => B): G[B]
 
-  def toIterator[A](fa: F[A]): G[Iterator[A]]
-}
-
-trait Materialize[F[_], G[_], C[_]] extends Compile[F, G] {
-
-  def materialize[A](fa: F[A]): G[C[A]]
+  def to[C[_], A](fa: F[A])(implicit ev: internal.Factory[A, C[A]]): G[C[A]]
 }

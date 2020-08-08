@@ -31,6 +31,6 @@ object example {
       C[_]: Functor
   ](srv: Srv[S]) {
     def run: F[Unit] =
-      srv.requestAll.toIterator.map(_.toVector) >>= (xs => Console[F].putStr(xs.mkString(", ")))
+      srv.requestAll.to[Vector] >>= (xs => Console[F].putStr(xs.mkString(", ")))
   }
 }
