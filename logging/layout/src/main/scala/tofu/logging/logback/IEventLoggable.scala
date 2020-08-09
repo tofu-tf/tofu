@@ -5,8 +5,7 @@ package logback
 import java.time.Instant
 
 import cats.syntax.monoid._
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.CoreConstants.{LINE_SEPARATOR => EOL}
+import ch.qos.logback.classic.spi.{ILoggingEvent, ThrowableProxyUtil}
 import impl.ContextMarker
 import syntax.logRenderer._
 import tofu.data.PArray
@@ -85,10 +84,8 @@ class EventExceptionLoggable extends EventLoggable {
     evt.getThrowableProxy match {
       case null           => i.noop
       case throwableProxy =>
-        i.addString(ExceptionField, s"${throwableProxy.getClassName}: ${throwableProxy.getMessage}") |+| {
-          val stackTrace = throwableProxy.getStackTraceElementProxyArray
-          if (stackTrace.isEmpty) i.noop else i.addString(StackTraceField, stackTrace.mkString(EOL))
-        }
+        i.addString(ExceptionField, s"${throwableProxy.getClassName}: ${throwableProxy.getMessage}") |+|
+          i.addString(StackTraceField, ThrowableProxyUtil.asString(throwableProxy))
     }
 }
 
