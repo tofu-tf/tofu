@@ -32,4 +32,11 @@ object IsoK {
     def to[A](fa: F[A]): F[A]   = fa
     def from[A](ga: F[A]): F[A] = ga
   }
+
+  def byFunK[F[_], G[_]](fg: F ~> G, gf: G ~> F): IsoK[F, G] =
+    new IsoK[F, G] {
+      override def to[A](fa: F[A]): G[A] = fg(fa)
+
+      override def from[A](ga: G[A]): F[A] = gf(ga)
+    }
 }
