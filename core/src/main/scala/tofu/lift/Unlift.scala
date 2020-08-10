@@ -38,6 +38,11 @@ private[lift] trait LiftInstances1 extends LiftInstances2 {
     new Lift[F, G] {
       def lift[A](fa: F[A]): G[A] = iso.to(fa)
     }
+
+  def byFunK[F[_], G[_]](fk: F ~> G): Lift[F, G] =
+    new Lift[F, G] {
+      def lift[A](fa: F[A]): G[A] = fk(fa)
+    }
 }
 
 private[lift] trait LiftInstances2 {
