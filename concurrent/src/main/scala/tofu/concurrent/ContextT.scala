@@ -68,42 +68,13 @@ object ContextT extends ContextTInstances {
   def transfer[In[_[_]], Out[_[_]], F[+_]: Monad](c1: In[ContextT[F, In, *]])(implicit
       l: Out[ContextT[F, Out, *]] Contains In[ContextT[F, Out, *]],
       rc1: Rebase[In],
-  ): In[ContextT[F, Out, *]] = {
-    class uloi(implicit c2c: Out[ContextT[F, Out, *]]) extends Unlift[ContextT[F, Out, *], ContextT[F, In, *]] {
-      implicit def self                                         = this
-      def lift[A](c2a: ContextT[F, Out, A]): ContextT[F, In, A] =
-        c1c => c2a.run(l.set(c2c, rc1.rebase(c1c)))
-
-      def in2out[A](c1a: ContextT[F, In, A]): ContextT[F, Out, A] =
-        c2c => c1a.run(rc1.rebase(l.get(c2c)))
-
-      def unlift: ContextT[F, In, ContextT[F, In, *] ~> ContextT[F, Out, *]] =
-        _ => funKFrom[ContextT[F, In, *]](in2out).pure[F]
-    }
-
-    implicit def uloi(implicit c2c: Out[ContextT[F, Out, *]]): Unlift[ContextT[F, Out, *], ContextT[F, In, *]] =
-      new uloi
-    implicit def ulio: Unlift[ContextT[F, In, *], ContextT[F, Out, *]]                                         = ul
-
-    object ul extends Unlift[ContextT[F, In, *], ContextT[F, Out, *]] {
-      def lift[A](c1a: ContextT[F, In, A]): ContextT[F, Out, A] =
-        implicit c2c => c1a.run(rc1.rebase(l.get(c2c)))
-
-      def t21[A](c2c: Out[ContextT[F, Out, *]])(c2a: ContextT[F, Out, A]): ContextT[F, In, A] =
-        c1c => c2a.run(l.set(c2c, rc1.rebase(c1c)))
-
-      def unlift: ContextT[F, Out, ContextT[F, Out, *] ~> ContextT[F, In, *]] =
-        c2c => funKFrom[ContextT[F, Out, *]](t21(c2c) _).pure[F]
-    }
-
-    rc1.rebase(c1)
-  }
+  ): In[ContextT[F, Out, *]] = rc1.rebase(c1)
 
 }
 
 trait ContextTInstances extends ContextTInstancesQ
 
-trait ContextTInstancesZ  { self: ContextTInstances =>
+trait ContextTInstancesZ { self: ContextTInstances =>
   final implicit def contextTInvariant[F[+_]: Invariant, C[_[_]]]: Invariant[ContextT[F, C, *]] = new ContextTInvariantI
 }
 
@@ -190,4 +161,37 @@ trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
 
   final implicit def contextTTimer[F[+_], C[_[_]]](implicit t: Timer[F]): Timer[ContextT[F, C, *]] =
     t.mapK(ContextT.liftF)
+
+  final implicit def contextTUnlifting[F[+_]: Monad, In[_[_]], Out[_[_]]](implicit
+      l: Out[ContextT[F, Out, *]] Contains In[ContextT[F, Out, *]],
+      rc1: Rebase[In],
+  ): Unlift[ContextT[F, In, *], ContextT[F, Out, *]] = {
+    class uloi(implicit c2c: Out[ContextT[F, Out, *]]) extends Unlift[ContextT[F, Out, *], ContextT[F, In, *]] {
+      implicit def self                                         = this
+      def lift[A](c2a: ContextT[F, Out, A]): ContextT[F, In, A] =
+        c1c => c2a.run(l.set(c2c, rc1.rebase(c1c)))
+
+      def in2out[A](c1a: ContextT[F, In, A]): ContextT[F, Out, A] =
+        c2c => c1a.run(rc1.rebase(l.get(c2c)))
+
+      def unlift: ContextT[F, In, ContextT[F, In, *] ~> ContextT[F, Out, *]] =
+        _ => funKFrom[ContextT[F, In, *]](in2out).pure[F]
+    }
+
+    implicit def uloi(implicit c2c: Out[ContextT[F, Out, *]]): Unlift[ContextT[F, Out, *], ContextT[F, In, *]] =
+      new uloi
+
+    implicit object ulio extends Unlift[ContextT[F, In, *], ContextT[F, Out, *]] {
+      def lift[A](c1a: ContextT[F, In, A]): ContextT[F, Out, A] =
+        implicit c2c => c1a.run(rc1.rebase(l.get(c2c)))
+
+      def t21[A](c2c: Out[ContextT[F, Out, *]])(c2a: ContextT[F, Out, A]): ContextT[F, In, A] =
+        c1c => c2a.run(l.set(c2c, rc1.rebase(c1c)))
+
+      def unlift: ContextT[F, Out, ContextT[F, Out, *] ~> ContextT[F, In, *]] =
+        c2c => funKFrom[ContextT[F, Out, *]](t21(c2c) _).pure[F]
+    }
+
+    ulio
+  }
 }
