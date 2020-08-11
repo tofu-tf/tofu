@@ -78,10 +78,7 @@ trait ContextTApply[F[+_], C[+_[_]]]
       ff: ContextT[F, C, (A, B) => Z]
   )(fa: ContextT[F, C, A], fb: ContextT[F, C, B]): ContextT[F, C, Z]          =
     c => ff.run(c).ap2(fa.run(c), fb.run(c))
-  final override def map2Eval[A, B, Z](fa: ContextT[F, C, A], fb: Eval[ContextT[F, C, B]])(
-      f: (A, B) => Z
-  ): Eval[ContextT[F, C, Z]]                                                  =
-    Eval.always(c => fa.run(c).map2Eval(fb.map(_.run(c)))(f).value)
+
   final override def ifA[A](
       fcond: ContextT[F, C, Boolean]
   )(ifTrue: ContextT[F, C, A], ifFalse: ContextT[F, C, A]): ContextT[F, C, A] =

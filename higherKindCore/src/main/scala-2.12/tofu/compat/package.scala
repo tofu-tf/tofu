@@ -13,4 +13,5 @@ object `package` {
   type unused = scala.annotation.nowarn
 
   type unused212 = scala.annotation.nowarn
+  val LazySeq: Stream.type = Stream
 }

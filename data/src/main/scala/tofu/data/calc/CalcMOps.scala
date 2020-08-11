@@ -70,6 +70,7 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
   def handle[A1 >: A](f: E => A1): CalcM[F, R, SI, SO, E, A1] = handleWith(e => CalcM.Pure(f(e)))
 
   def as[B](b: => B): CalcM[F, R, SI, SO, E, B]            = map(_ => b)
+  def void: CalcM[F, R, SI, SO, E, Unit]                   = as_(())
   def as_[B](b: B): CalcM[F, R, SI, SO, E, B]              = map(_ => b)
   def mapError[E1](f: E => E1): CalcM[F, R, SI, SO, E1, A] = handleWith(e => CalcM.raise(f(e)))
 
