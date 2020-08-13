@@ -48,4 +48,21 @@ object Continue {
       override def success(a: A): X = CalcM.update(f) as_ a
       override def error(e: E): X   = CalcM.update(f).swap errorAs_ e
     }
+
+  def unwrapState[SA, SE, A, E, S, X >: CalcM[Nothing, Any, Any, S, E, A]](implicit
+      evA: SA <:< (S, A),
+      evE: SE <:< (S, E)
+  ): Continue[SA, SE, X] =
+    new Continue[SA, SE, X] {
+      def success(sa: SA): X = CalcM.set(sa._1) >> CalcM.pure(sa._2)
+      def error(se: SE): X   = CalcM.set(se._1) >> CalcM.raise(se._2)
+    }
+
+  def biflatten[F[+_, +_], R, SI, SO, E1, A1, E, A](implicit
+      evA: A1 <:< CalcM[F, R, SI, SO, E, A],
+      evE: E1 <:< CalcM[F, R, SI, SO, E, A],
+  ): Continue[A1, E1, CalcM[F, R, SI, SO, E, A]] = new Continue[A1, E1, CalcM[F, R, SI, SO, E, A]] {
+    def success(a: A1) = a
+    def error(e: E1)   = e
+  }
 }

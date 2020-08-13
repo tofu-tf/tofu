@@ -42,6 +42,10 @@ object CalcM extends CalcMInstances {
 
   def lift[F[+_, +_], S, E, A](fea: F[E, A]): CalcM[F, Any, S, S, E, A] = Sub(fea)
 
+  def roll[F[+_, +_], R, SI, SO, E, A](
+      f: F[CalcM[F, R, SI, SO, E, A], CalcM[F, R, SI, SO, E, A]]
+  ): CalcM[F, R, SI, SO, E, A] = lift(f).biflatten
+
   sealed trait CalcMRes[-R, -S1, +S2, +E, +A] extends CalcM[Nothing, R, S1, S2, E, A] {
     def submit[X](submit: Submit[R, S1, S2, E, A, X]): X
     override def mapK[G[+_, +_]](fk: Nothing FunBK G): CalcM[G, R, S1, S2, E, A] = this

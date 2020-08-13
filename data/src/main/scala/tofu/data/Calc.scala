@@ -5,6 +5,8 @@ import cats.effect.ExitCase
 import cats.{MonadError, Monoid, StackSafeMonad}
 import tofu.optics.PContains
 
+import scala.annotation.tailrec
+
 sealed trait Calc[-R, -S1, +S2, +E, +A] {
   final def run(r: R, init: S1): (S2, Either[E, A]) = Calc.run(this, r, init)
 
@@ -126,7 +128,7 @@ object Calc {
     def toState: IndexedState[S1, S2, A] = IndexedState(runSuccessUnit)
   }
 
-  def run[R, S1, S2, E, A](calc: Calc[R, S1, S2, E, A], r: R, init: S1): (S2, Either[E, A]) =
+  @tailrec def run[R, S1, S2, E, A](calc: Calc[R, S1, S2, E, A], r: R, init: S1): (S2, Either[E, A]) =
     calc match {
       case res: CalcRes[R, S1, S2, E, A] =>
         res.submit(r, init, (s2, e) => (s2, Left(e)), (s2, a) => (s2, Right(a)))

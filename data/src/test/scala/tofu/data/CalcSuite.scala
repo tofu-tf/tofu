@@ -1,8 +1,10 @@
 package tofu.data
 
-import org.scalatest.flatspec.AnyFlatSpec
 import cats.instances.all._
+import cats.syntax.bifoldable._
+import org.scalatest.flatspec.AnyFlatSpec
 import tofu.data.calc.Translator
+
 
 class CalcSuite extends AnyFlatSpec {
 
@@ -11,7 +13,7 @@ class CalcSuite extends AnyFlatSpec {
 
   def write(i: Int): IntStream[Unit] = CalcT.lift((i, ()))
 
-  val simpleStream = for {
+  val simpleStream                    = for {
     _ <- write(1)
     _ <- write(2)
     _ <- write(3)
@@ -50,5 +52,29 @@ class CalcSuite extends AnyFlatSpec {
         .supply(Vector())
 
     assert(list.values === ((Vector(1, 2, 3, 4, 5, 6), "ok")))
+  }
+
+  "bifoldLeft" should "be stack safe" in {
+    val size = 10000
+    val longCalc = {
+      (1 to size).foldLeft(CalcM.pure(1): ICalcM[Either, Any, Any, Nothing, Int])((cm, _) =>
+        CalcM.lift(Right(cm)).flatMap(x => x)
+      )
+    }
+
+    val items = longCalc.bifoldMap((x: Nothing) => x, List(_))
+
+    assert(items === List(1))
+  }
+
+  it should "calculate correctly" in {
+    val size     = 1000
+    val longCalc = (1 to size).foldLeft(CalcM.pure(0): ICalcM[Tuple2, Any, Any, Int, Int])((cm, i) =>
+      CalcM.lift((i, cm)).flatMap(x => x)
+    )
+
+    val items = longCalc.bifoldMap(Vector(_), Vector(_))
+
+    assert(items === (size to 0 by -1).toVector)
   }
 }

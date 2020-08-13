@@ -53,6 +53,11 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
   ): CalcM[F1, R1, SI, SO1, E1, A] =
     flatMap(a => f(a) as a)
 
+  def biflatten[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, S, X, B](implicit
+      evA: A <:< CalcM[F1, R1, SO, S, X, B],
+      evE: E <:< CalcM[F1, R1, SO, S, X, B]
+  ): CalcM[F1, R1, SI, S, X, B] =    bind(Continue.biflatten)
+
   def >>=[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1 >: E, SO1 >: SO, B](f: A => CalcM[F1, R1, SO, SO1, E1, B]) =
     flatMap(f)
   def >>[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1 >: E, SO1 >: SO, B](c: => CalcM[F1, R1, SO, SO1, E1, B])    =
@@ -148,6 +153,9 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
 
   def when[S >: SO <: SI](b: Boolean): CalcM[F, R, S, S, E, Any] =
     if (b) this else CalcM.unit[S]
+
+  def unwrapState[E1, A1, S1](implicit evA: A <:< (S1, A1), evE: E <:< (S1, E1)): CalcM[F, R, SI, S1, E1, A1] =
+    bind(Continue.unwrapState[A, E, A1, E1, S1, CalcM[Nothing, Any, Any, S1, E1, A1]])
 
   def step(r: R, init: SI): StepResult[F, SO, E, A] = CalcM.step[F, R, SI, SO, E, A](this, r, init)
 
