@@ -30,7 +30,9 @@ class ZioTofuInstance[R, E]
     fa.catchSome(CachedMatcher(f))
   final override def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E, A]): ZIO[R, E, A]   = fa.catchAll(f)
 
-  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, *], A]]        = fa.forkDaemon.map(convertFiber)
+  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, *], A]] =
+    fa.interruptible.forkDaemon.map(convertFiber)
+
   final def racePair[A, B](
       fa: ZIO[R, E, A],
       fb: ZIO[R, E, B]

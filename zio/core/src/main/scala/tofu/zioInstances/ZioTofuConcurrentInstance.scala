@@ -25,7 +25,7 @@ class ZioTofuConcurrentInstanceUIO[R, E] extends ZioTofuConcurrentInstance[Any, 
   def agentOf[A](a: A): ZIO[Any, Nothing, Agent[ZIO[R, E, *], A]] = RefM.make(a).map(ZioAgent(_))
 
   def daemonize[A](process: ZIO[R, E, A]): ZIO[R, E, Daemon[ZIO[R, E, *], Cause[E], A]] =
-    process.forkDaemon.map(ZIODaemon(_))
+    process.interruptible.forkDaemon.map(ZIODaemon(_))
 }
 
 final case class ZioDeferred[R, E, A](p: zio.Promise[E, A]) extends Deferred[ZIO[R, E, *], A] {
