@@ -45,7 +45,7 @@ class RetrySuite extends AnyFlatSpec {
   }
 }
 
-class RetryChecks{
+class RetryChecks {
 
   def lol[F[_]: ApplicativeThrow](v: F[Unit]): F[Unit] = {
     v.retry(3)(implicitly[Errors[F, Throwable]])

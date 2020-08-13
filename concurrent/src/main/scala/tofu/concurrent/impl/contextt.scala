@@ -76,7 +76,7 @@ trait ContextTApply[F[+_], C[+_[_]]]
 
   final override def ap2[A, B, Z](
       ff: ContextT[F, C, (A, B) => Z]
-  )(fa: ContextT[F, C, A], fb: ContextT[F, C, B]): ContextT[F, C, Z]          =
+  )(fa: ContextT[F, C, A], fb: ContextT[F, C, B]): ContextT[F, C, Z] =
     c => ff.run(c).ap2(fa.run(c), fb.run(c))
 
   final override def ifA[A](
@@ -331,7 +331,7 @@ final class ContextTRunContextUnsafe[F[+_]: Applicative, C[_[_]]]
 trait ContextTNonEmptyParallel[G[+_], C[_[_]]] extends NonEmptyParallel[ContextT[G, C, *]] {
   val G: NonEmptyParallel[G]
   implicit def invC: InvariantK[C]
-  type F[+A] = ContextT[GF, C, A]
+  type F[+A]  = ContextT[GF, C, A]
   type GF[+A] = G.F[A @uv]
 
   override def apply: Apply[F] = {
@@ -345,7 +345,7 @@ trait ContextTNonEmptyParallel[G[+_], C[_[_]]] extends NonEmptyParallel[ContextT
   }
 
   override def sequential: F ~> ContextT[G, C, *] = funKFrom[F](_.imapK(G.sequential)(G.parallel))
-  override def parallel: ContextT[G, C, +*] ~> F   = funKFrom[ContextT[G, C, +*]](_.imapK[GF](G.parallel)(G.sequential))
+  override def parallel: ContextT[G, C, +*] ~> F  = funKFrom[ContextT[G, C, +*]](_.imapK[GF](G.parallel)(G.sequential))
 }
 
 trait ContextTParallel[G[+_], C[_[_]]] extends ContextTNonEmptyParallel[G, C] with Parallel[ContextT[G, C, *]] {
@@ -380,5 +380,3 @@ final class ContextTParallelI[G[+_], C[_[_]]](implicit val G: Parallel[G], val i
 
   override val parallel: ContextT[G, C, *] ~> F = super.parallel
 }
-
-

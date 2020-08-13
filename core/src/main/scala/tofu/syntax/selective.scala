@@ -1,6 +1,5 @@
 package tofu.syntax
 
-import cats.syntax.option.none
 import tofu.control.Selective
 
 object selective extends Selective.ToSelectiveOps {

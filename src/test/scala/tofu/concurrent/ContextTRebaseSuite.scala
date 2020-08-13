@@ -1,16 +1,16 @@
 package tofu.concurrent
 
-import cats.{FlatMap, Monad}
 import cats.instances.list._
+import cats.{FlatMap, Monad}
 import derevo.derive
 import derevo.tagless.invariantK
 import org.scalatest.funsuite.AnyFunSuite
 import simulacrum.typeclass
 import tofu.Raise
 import tofu.concurrent.ContextTRebaseSuite.{History, Name, Out, State, outer}
-import tofu.data.ICalcM
 import tofu.data.calc.CalcM
 import tofu.data.derived.ContextEmbed
+import tofu.data.{ICalcM, Nothing2T}
 import tofu.higherKind.derived.{embed, representableK}
 import tofu.lift.{Rebase, Unlift}
 import tofu.optics.macros.{ClassyOptics, GenContains, promote}
@@ -129,7 +129,7 @@ object ContextTRebaseSuite {
       history: List[String] = Nil,
   )
 
-  type Eff[+A] = ICalcM[Nothing, Any, State, String, A]
+  type Eff[+A] = ICalcM[Nothing2T, Any, State, String, A]
 
   type In[+A]  = ContextT[Eff, Inner, A]
   type Out[+A] = ContextT[Eff, Outer, A]

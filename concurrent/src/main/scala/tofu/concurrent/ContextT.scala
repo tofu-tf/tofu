@@ -1,14 +1,13 @@
 package tofu.concurrent
 import cats._
 import cats.effect._
-import cats.tagless.{FunctorK, InvariantK}
-import tofu.{HasContextRun, WithLocal}
+import cats.tagless.InvariantK
 import tofu.concurrent.impl._
-import tofu.higherKind.Embed
 import tofu.lift.{Rebase, Unlift}
-import tofu.optics.{Contains, Extract}
+import tofu.optics.Contains
 import tofu.syntax.funk.{funK, funKFrom}
 import tofu.syntax.monadic._
+import tofu.{HasContextRun, WithLocal}
 
 /** a ReaderT analog, allowing to have context referring resulting type
   *  for instance you can define
@@ -160,7 +159,7 @@ trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
     new ContextTParallelI[F, C]
 
   final implicit def contextTTimer[F[+_], C[_[_]]](implicit t: Timer[F]): Timer[ContextT[F, C, *]] =
-    t.mapK(ContextT.liftF)
+    Timer.TimerOps[F](t).mapK(ContextT.liftF)
 
   final implicit def contextTUnlifting[F[+_]: Monad, In[_[_]], Out[_[_]]](implicit
       l: Out[ContextT[F, Out, *]] Contains In[ContextT[F, Out, *]],
@@ -175,7 +174,7 @@ trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
         c2c => c1a.run(rc1.rebase(l.get(c2c)))
 
       def unlift: ContextT[F, In, ContextT[F, In, *] ~> ContextT[F, Out, *]] =
-        _ => funKFrom[ContextT[F, In, *]](in2out).pure[F]
+        _ => funKFrom[ContextT[F, In, *]](in2out(_)).pure[F]
     }
 
     implicit def uloi(implicit c2c: Out[ContextT[F, Out, *]]): Unlift[ContextT[F, Out, *], ContextT[F, In, *]] =
@@ -186,7 +185,7 @@ trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
         implicit c2c => c1a.run(rc1.rebase(l.get(c2c)))
 
       def t21[A](c2c: Out[ContextT[F, Out, *]])(c2a: ContextT[F, Out, A]): ContextT[F, In, A] =
-        c1c => c2a.run(l.set(c2c, rc1.rebase(c1c)))
+        c1c => c2a.run(l.set(c2c, rc1.rebase(c1c)(implicitly, this)))
 
       def unlift: ContextT[F, Out, ContextT[F, Out, *] ~> ContextT[F, In, *]] =
         c2c => funKFrom[ContextT[F, Out, *]](t21(c2c) _).pure[F]
