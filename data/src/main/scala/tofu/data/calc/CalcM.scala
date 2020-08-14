@@ -47,7 +47,7 @@ object CalcM extends CalcMInstances {
   ): CalcM[F, R, SI, SO, E, A] = lift(f).biflatten
 
   sealed trait CalcMRes[-R, -S1, +S2, +E, +A] extends CalcM[Nothing, R, S1, S2, E, A] {
-    def submit[X](submit: Submit[R, S1, S2, E, A, X]): X
+    def submit[X](r: R, s1: S1, cont: Continue[A, E, S2, X]): X
     override def mapK[G[+_, +_]](fk: Nothing FunBK G): CalcM[G, R, S1, S2, E, A] = this
   }
 
@@ -60,13 +60,13 @@ object CalcM extends CalcMInstances {
   }
 
   final case class Pure[S, +A](a: A) extends CalcMResStatic[S, S, Nothing, A]   {
-    def submit[X](submit: Submit[Any, S, S, Nothing, A, X]): X                                             = submit.success(submit.state, a)
+    def submit[X](r: Any, s1: S, submit: Continue[A, Nothing, S, X]): X                                    = submit.success(s1, a)
     override def local[R1](f: R1 => Any): CalcM[Nothing, R1, S, S, Nothing, A]                             = this
     override def dimapState[SI1, SO1](f: SI1 => S, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, Nothing, A] =
       update(g compose f) as_ a
   }
   final case class Read[S, R]()      extends CalcMRes[R, S, S, Nothing, R]      {
-    def submit[X](submit: Submit[R, S, S, Nothing, R, X]): X                                                          = submit.success(submit.state, submit.read)
+    def submit[X](r: R, s: S, cont: Continue[R, Nothing, S, X]): X                                                    = cont.success(s, r)
     override def local[R1](f: R1 => R): CalcM[Nothing, R1, S, S, Nothing, R]                                          = Read[S, R1]().map(f)
     override def translate[G[+_, +_], R1](translator: ITranslator[Nothing, G, R, R1]): CalcM[G, R1, S, S, Nothing, R] =
       CalcM.read[S, R1].map(translator.mapRead)
@@ -76,7 +76,7 @@ object CalcM extends CalcMInstances {
       CalcM.read[S, R1].map(translator.mapRead).focusSecond
   }
   final case class Get[S]()          extends CalcMResStatic[S, S, Nothing, S]   {
-    def submit[X](submit: Submit[Any, S, S, Nothing, S, X]): X                                             = submit.success(submit.state, submit.state)
+    def submit[X](r: Any, s: S, cont: Continue[S, Nothing, S, X]): X                                       = cont.success(s, s)
     override def local[R1](f: R1 => Any): CalcM[Nothing, R1, S, S, Nothing, S]                             = this
     override def dimapState[SI1, SO1](f: SI1 => S, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, Nothing, S] =
       get[SI1] *>> state { s1 =>
@@ -85,13 +85,13 @@ object CalcM extends CalcMInstances {
       }
   }
   final case class Set[S](s: S)      extends CalcMResStatic[Any, S, Nothing, S] {
-    def submit[X](submit: Submit[Any, Any, S, Nothing, S, X]): X                                             = submit.success(s, s)
+    def submit[X](r: Any, s1: Any, cont: Continue[S, Nothing, S, X]): X                                      = cont.success(s, s)
     override def local[R1](f: R1 => Any): CalcM[Nothing, R1, Any, S, Nothing, S]                             = this
     override def dimapState[SI1, SO1](f: SI1 => Any, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, Nothing, S] =
       set(g(s)) as_ s
   }
   final case class Raise[S, E](e: E) extends CalcMResStatic[S, S, E, Nothing]   {
-    def submit[X](submit: Submit[Any, S, S, E, Nothing, X]): X                                             = submit.error(submit.state, e)
+    def submit[X](r: Any, s: S, cont: Continue[Nothing, E, S, X]): X                                       = cont.error(s, e)
     override def local[R1](f: R1 => Any): CalcM[Nothing, R1, S, S, E, Nothing]                             = this
     override def dimapState[SI1, SO1](f: SI1 => S, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, E, Nothing] =
       update(g compose f).swap errorAs_ e
@@ -133,9 +133,8 @@ object CalcM extends CalcMInstances {
 
   abstract class Sub[+F[+_, +_], -S1, +S2, E, A](val fa: F[E, A]) extends CalcM[F, Any, S1, S2, E, A] {
     def iss: S1 As S2
-    def subcalc[F1[+_, +_], R, SX, E1, A1](calc: CalcM[F1, R, S2, SX, E1, A1]): CalcM[F1, R, S1, SX, E1, A1] =
-      iss.substitute[CalcM[F1, R, -*, SX, E1, A1]](calc)
-    override def local[R1](f: R1 => Any): CalcM[F, R1, S1, S2, E, A]                                         = this
+
+    override def local[R1](f: R1 => Any): CalcM[F, R1, S1, S2, E, A] = this
   }
 
   object Sub {
@@ -157,7 +156,7 @@ object CalcM extends CalcMInstances {
 
   final case class Bound[+F[+_, +_], R, S1, S2, S3, E1, E2, A, B](
       src: CalcM[F, R, S1, S2, E1, A],
-      continue: Continue[A, E1, CalcM[F, R, S2, S3, E2, B]],
+      continue: Continue[A, E1, S2, CalcM[F, R, S2, S3, E2, B]],
   ) extends CalcM[F, R, S1, S3, E2, B] {
     type MidState = S2
     type MidErr   = E1
@@ -172,54 +171,32 @@ object CalcM extends CalcMInstances {
     override def translateState[G[+_, +_], ST, R1](
         translator: Translator[F, G, ST, R, R1]
     ): CalcM[G, R1, (ST, S1), (ST, S3), E2, B] =
-      src.translateState(translator).bind(continue.map(_.translateState(translator)))
-  }
-
-  abstract class Submit[+R, +S1, -S2, -E, -A, +X](val read: R, val state: S1) {
-    def success(s: S2, a: A): X
-    def error(s: S2, err: E): X
+      src.translateState(translator).bind(continue.dimap(_.translateState(translator), _._2))
   }
 
   @tailrec
   def step[F[+_, +_], R, S1, S2, E, A](calc: CalcM[F, R, S1, S2, E, A], r: R, init: S1): StepResult[F, S2, E, A] =
     calc match {
-      case res: CalcMRes[R, S1, S2, E, A]            =>
-        res.submit(new Submit[R, S1, S2, E, A, StepResult[F, S2, E, A]](r, init) {
-          def success(s: S2, a: A) = StepResult.Ok(s, a)
-          def error(s: S2, err: E) = StepResult.Error(s, err)
-        })
+      case res: CalcMRes[R, S1, S2, E, A]            => res.submit(r, init, Continue.stepResult)
       case d: Defer[F, R, S1, S2, E, A]              => step(d.runStep(), r, init)
       case sub: Sub[F, S1, S2, E, A]                 =>
-        StepResult.Wrap[F, R, S1, S2, E, E, A, A](
-          r,
-          init,
-          sub.fa,
-          (e: E) => sub.iss.substitute[CalcM[F, R, -*, S2, E, A]](CalcM.raise[S2, E](e)),
-          (a: A) => sub.iss.substitute[CalcM[F, R, -*, S2, E, A]](CalcM.pure[S2, A](a))
-        )
+        type Cont[-S] = Continue[A, E, Any, CalcM[Nothing, Any, S, S2, E, A]]
+        val cont = sub.iss.substitute[Cont](Continue.result[A, E, S2])
+        StepResult.Wrap[F, R, S1, S2, E, E, A, A](r, init, sub.fa, cont)
       case p: Provide[F, r, S1, S2, E, A]            => step[F, r, S1, S2, E, A](p.inner, p.r, init)
       case c1: Bound[F, R, S1, s1, S2, e1, E, a1, A] =>
         c1.src match {
           case res: CalcMRes[R, S1, c1.MidState, e1, a1] =>
-            val (sm, next) =
-              res.submit(new Submit[R, S1, s1, e1, a1, (s1, CalcM[F, R, s1, S2, E, A])](r, init) {
-                def success(s: s1, a: a1) = (s, c1.continue.success(a))
-                def error(s: s1, err: e1) = (s, c1.continue.error(err))
-              })
+            val (sm, next) = res.submit(r, init, c1.continue.withState[s1])
             step[F, R, s1, S2, E, A](next, r, sm)
           case d: Defer[F, R, S1, _, _, _]               => step(d.runStep().bind(c1.continue), r, init)
           case sub: Sub[F, S1, s1, c1.MidErr, c1.MidVal] =>
-            StepResult
-              .Wrap[F, R, S1, S2, e1, E, a1, A](
-                r,
-                init,
-                sub.fa,
-                e => sub.subcalc[F, R, S2, E, A](c1.continue.error(e)),
-                a => sub.subcalc[F, R, S2, E, A](c1.continue.success(a)),
-              )
+            type Cont[-S] = Continue[a1, e1, S, CalcM[F, R, S, S2, E, A]]
+            val cont1 = sub.iss.substitute[Cont](c1.continue)
+            StepResult.Wrap[F, R, S1, S2, e1, E, a1, A](r, init, sub.fa, cont1)
           case p: ProvideM[F, R, S1, _, _, _]            =>
-            val kcont = p.any.substitute[λ[r => Continue[a1, e1, CalcM[F, r, s1, S2, E, A]]]](c1.continue)
-
+            type Cont[r] = Continue[a1, e1, s1, CalcM[F, r, s1, S2, E, A]]
+            val kcont = p.any.substitute[Cont](c1.continue)
             step(p.inner.bind[F, p.R1, E, S2, A](kcont), p.r, init)
           case c2: Bound[F, R, S1, s2, _, e2, _, a2, _]  =>
             step(c2.src.bind(Continue.compose(c2.continue, c1.continue)), r, init)

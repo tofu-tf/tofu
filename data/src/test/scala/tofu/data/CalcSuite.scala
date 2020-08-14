@@ -5,7 +5,6 @@ import cats.syntax.bifoldable._
 import org.scalatest.flatspec.AnyFlatSpec
 import tofu.data.calc.Translator
 
-
 class CalcSuite extends AnyFlatSpec {
 
   type IntStreamT[+E, +A] = (Int, A)
@@ -13,7 +12,7 @@ class CalcSuite extends AnyFlatSpec {
 
   def write(i: Int): IntStream[Unit] = CalcT.lift((i, ()))
 
-  val simpleStream                    = for {
+  val simpleStream = for {
     _ <- write(1)
     _ <- write(2)
     _ <- write(3)

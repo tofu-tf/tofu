@@ -19,15 +19,17 @@ object StepResult {
       input: R,
       state: S1,
       inner: F[X, M],
-      fail: X => CalcM[F, R, S1, S2, E, A],
-      succ: M => CalcM[F, R, S1, S2, E, A],
+      cont: Continue[M, X, S1, CalcM[F, R, S1, S2, E, A]]
   )                                                  extends StepResult[F, S2, E, A] {
-    def stepFailure(x: X): StepResult[F, S2, E, A] = fail(x).step(input, state)
-    def stepSuccess(m: M): StepResult[F, S2, E, A] = succ(m).step(input, state)
+    def stepFailure(x: X): StepResult[F, S2, E, A] = cont.error(state, x).step(input, state)
+    def stepSuccess(m: M): StepResult[F, S2, E, A] = cont.success(state, m).step(input, state)
 
     def provided[F1[+x, +y] >: F[x, y] @uv212](implicit
         F: Bind[F1]
     ): F1[CalcM[F1, Any, Any, S2, E, A], CalcM[F1, Any, Any, S2, E, A]] =
-      F.bimap(inner)(x => fail(x).provideSet(input, state), m => succ(m).provideSet(input, state))
+      F.bimap(inner)(
+        x => cont.error(state, x).provideSet(input, state),
+        m => cont.success(state, m).provideSet(input, state)
+      )
   }
 }
