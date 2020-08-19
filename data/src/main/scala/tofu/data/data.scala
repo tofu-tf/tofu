@@ -13,6 +13,7 @@ package object data {
   type Identity[+A]                 = A
   type Nothing1 <: Nothing
   type NothingT[+A]                 = Nothing
+  type Nothing2T[+A, +B]            = Nothing
 
   val CalcM: tofu.data.calc.CalcM.type = tofu.data.calc.CalcM
   val CalcT: tofu.data.calc.CalcT.type = tofu.data.calc.CalcT
