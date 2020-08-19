@@ -1,29 +1,26 @@
 package tofu
 package errorInstances
 
-import cats.ApplicativeError
-import tofu.optics.{Downcast, Upcast}
-
-import scala.reflect.ClassTag
 import cats.data.{EitherT, OptionT}
-import cats.{Monad, Id}
+import cats.{ApplicativeError, Id, Monad}
+import tofu.optics.{Downcast, Upcast}
 
 private[tofu] class FromAppErr[F[_], E, E1](implicit
     protected val appErr: ApplicativeError[F, E],
     protected val sub: E1 <:< E
 )
 
-private[tofu] trait RaiseAppApErr[F[_], E, E1] extends Raise[F, E1] {
-  self: FromAppErr[F, E, E1] =>
-  def raise[A](err: E1): F[A] = appErr.raiseError(err)
+private[tofu] trait RaiseAppApErr[F[_], E] extends Raise[F, E] {
+  self: FromAppErr[F, E, E] =>
+  def raise[A](err: E): F[A] = appErr.raiseError(err)
 }
 
-private[tofu] class HandleApErr[F[_]: ApplicativeError[*[_], E], E, E1: ClassTag: * <:< E]
-    extends FromAppErr[F, E, E1] with Handle.ByRecover[F, E1] {
-  def recWith[A](fa: F[A])(pf: PartialFunction[E1, F[A]]): F[A] =
-    appErr.recoverWith(fa)({ case e1: E1 if pf.isDefinedAt(e1) => pf(e1) })
+private[tofu] class HandleApErr[F[_]: ApplicativeError[*[_], E], E]
+    extends FromAppErr[F, E, E] with Handle.ByRecover[F, E] {
+  def recWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A] =
+    appErr.recoverWith(fa) { case e if pf.isDefinedAt(e) => pf(e) }
 
-  def restore[A](fa: F[A]): F[Option[A]]                        = appErr.handleError[Option[A]](appErr.map(fa)(Some(_)))(_ => None)
+  def restore[A](fa: F[A]): F[Option[A]]                       = appErr.handleError[Option[A]](appErr.map(fa)(Some(_)))(_ => None)
 
   def lift[A](fa: F[A]): F[A] = fa
 }
