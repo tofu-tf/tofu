@@ -1,10 +1,10 @@
 package tofu.zioInstances
 
-import tofu.{ErrorsTo, HasContextRun, RunContext, WithRun}
 import tofu.lift.{Lift, Unlift, UnliftIO}
 import tofu.optics.{Contains, Extract}
 import tofu.zioInstances.implicits._
-import zio.{IO, RIO, Task, UIO, URIO, ZIO}
+import tofu._
+import zio._
 
 object ZioInstancesSuite {
 
@@ -38,6 +38,23 @@ object ZioInstancesSuite {
     implicitly[HasContextRun[ZIO[R1, E1, *], IO[E1, *], R1]]
     implicitly[WithRun[ZIO[R1, E1, *], IO[E1, *], R1]]
     ()
+  }
+
+  def taskAmbiguity: Any = {
+    import cats.effect.Sync
+    import tofu.Raise
+    import tofu.zioInstances.implicits.rioTofuImplicit
+    import zio.Task
+    import zio.interop.catz.taskConcurrentInstance
+
+    class SyncDependency[F[_]: Sync]
+
+    class RaiseDependency[F[_]: Raise[*[_], RuntimeException]]
+    class ErrorsDependency[F[_]: Errors[*[_], RuntimeException]]
+
+    new SyncDependency[Task]
+    new RaiseDependency[Task]
+    new ErrorsDependency[Task]
   }
 
 }
