@@ -4,8 +4,7 @@ title: Logging
 ---
 
 ## Installation
-`"ru.tinkoff" %% "tofu" % tofu-version`  
-or as a standalone dependency:   
+Logging are available as a separate project
 `"ru.tinkoff" %% "tofu-logging" % tofu-version`  
 
 ## Preface
