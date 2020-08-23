@@ -25,7 +25,7 @@ trait Evals[F[_], G[_]] extends Emits[F] {
 
   implicit val monad: Monad[F]
 
-  val applicative: Applicative[F] = monad
+  lazy val applicative: Applicative[F] = monad
 
   def eval[A](ga: G[A]): F[A]
 
