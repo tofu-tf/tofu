@@ -34,7 +34,7 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
     contramapState(f).mapState(g)
 
   def bind[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, X, S, B](
-      continue: Continue[A, E, CalcM[F1, R1, SO, S, X, B]]
+      continue: Continue[A, E, SO, CalcM[F1, R1, SO, S, X, B]]
   ): CalcM[F1, R1, SI, S, X, B] =
     CalcM.Bound(this, continue)
 
@@ -52,6 +52,11 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
       f: A => CalcM[F1, R1, SO, SO1, E1, B]
   ): CalcM[F1, R1, SI, SO1, E1, A] =
     flatMap(a => f(a) as a)
+
+  def biflatten[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, S, X, B](implicit
+      evA: A <:< CalcM[F1, R1, SO, S, X, B],
+      evE: E <:< CalcM[F1, R1, SO, S, X, B]
+  ): CalcM[F1, R1, SI, S, X, B] = bind(Continue.biflatten)
 
   def >>=[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1 >: E, SO1 >: SO, B](f: A => CalcM[F1, R1, SO, SO1, E1, B]) =
     flatMap(f)
@@ -81,14 +86,7 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
 
   def focus[S3, S4](lens: PContains[S3, S4, SI, SO]): CalcM[F, R, S3, S4, E, A] =
     CalcM.get[S3].flatMapS { s3 =>
-      CalcM.set(lens.extract(s3)) *>> this.bind(
-        new Continue[A, E, CalcM[F, R, SO, S4, E, A]] {
-          def success(result: A): CalcM[F, R, SO, S4, E, A] =
-            CalcM.get[SO].flatMapS(s2 => CalcM.set(lens.set(s3, s2)) *>> CalcM.pure(result))
-          def error(err: E): CalcM[F, R, SO, S4, E, A]      =
-            CalcM.get[SO].flatMapS(s2 => CalcM.set(lens.set(s3, s2)) *>> CalcM.raise(err))
-        }
-      )
+      CalcM.set(lens.extract(s3)) *>> this.bind(Continue.focus(s3, lens))
     }
 
   def focusFirst[S]: CalcM[F, R, (SI, S), (SO, S), E, A]  = focus(firstP)
@@ -144,7 +142,7 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
   )(implicit ev: A <:< Nothing): CalcM[F1, R1, SI, S3, E, B] =
     onErrorU(_ => r)
 
-  def swap: CalcM[F, R, SI, SO, A, E] = bind(Continue.swap[A, E, SO, CalcM[Nothing, Any, SO, SO, A, E]])
+  def swap: CalcM[F, R, SI, SO, A, E] = bind(Continue.swap)
 
   def when[S >: SO <: SI](b: Boolean): CalcM[F, R, S, S, E, Any] =
     if (b) this else CalcM.unit[S]
@@ -164,7 +162,7 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
 
   def stepUnit(init: SI)(implicit ev: Unit <:< R): StepResult[F, SO, E, A] = step((), init)
 
-  def run(r: R, init: SI)(implicit runner: CalcRunner[F]): (SO, Either[E, A]) = runner(this)(r, init)
+  def run(r: R, init: SI)(implicit runner: CalcRunner[F]): (SO, Either[E, A]) = runner.runPair(this)(r, init)
 
   def runSuccess(r: R, init: SI)(implicit runner: CalcRunner[F], ev: E <:< Nothing): (SO, A) =
     run(r, init) match {

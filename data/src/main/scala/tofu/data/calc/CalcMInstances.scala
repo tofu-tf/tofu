@@ -1,12 +1,14 @@
 package tofu.data.calc
 
-import cats.{Functor, MonadError, StackSafeMonad}
-import tofu.control.{Bind, StackSafeBind}
+import cats.{Applicative, Bifoldable, Bitraverse, Eval, Functor, MonadError, StackSafeMonad}
 import tofu.WithRun
 import tofu.bi.BiRun
+import tofu.control.{Bind, StackSafeBind}
+import tofu.data.calc.StepResult._
 import tofu.higherKind.bi.FunBK
+import tofu.syntax.monadic._
 
-trait CalcMInstances {
+trait CalcMInstances extends CalcMInstances1 {
   final implicit def calcFunctorInstance[F[+_, +_], R, S, E]: CalcMonadInstance[F, R, S, E] =
     new CalcMonadInstance[F, R, S, E]
 
@@ -18,6 +20,17 @@ trait CalcMInstances {
 
   final implicit def calcBiContextInstance[F[+_, +_], R, S]: CalcBiContextInstance[F, R, S] =
     new CalcBiContextInstance[F, R, S]
+
+}
+
+trait CalcMInstances1 {
+  final implicit def calcMBitraverse[F[+_, +_]: Bitraverse, S]: Bitraverse[CalcM[F, Any, Any, S, *, *]] =
+    new CalcMBitraverse
+}
+
+trait CalcMInstances2 {
+  final implicit def calcMBifoldable[F[+_, +_]: Bifoldable, S]: Bifoldable[CalcM[F, Any, Any, S, *, *]] =
+    new CalcMBifoldable
 }
 
 class CalcMonadInstance[F[+_, +_], R, S, E]
@@ -73,4 +86,83 @@ class CalcBiContextInstance[F[+_, +_], R, S]
   override def disclose[E, A](
       k: FunBK[CalcM[F, R, S, S, *, *], CalcM[F, Any, S, S, *, *]] => CalcM[F, R, S, S, E, A]
   ): CalcM[F, R, S, S, E, A] = CalcM.read[S, R].flatMap(r => k(FunBK.apply(_.provide(r))))
+}
+
+class CalcMBifoldable[F[+_, +_], S](implicit F: Bifoldable[F]) extends Bifoldable[CalcM[F, Any, Any, S, *, *]] {
+  private[this] val MaxDepth = 256
+
+  def bifoldLeft1Slow[E, A, B](
+      c: StepResult[F, S, E, A],
+      b: Eval[B]
+  )(f: (Eval[B], E) => Eval[B], g: (Eval[B], A) => Eval[B]): Eval[B] =
+    Eval.defer(c match {
+      case Error(_, e)                     => f(b, e)
+      case Ok(_, a)                        => g(b, a)
+      case w: Wrap[F, r, s, S, x, E, m, A] =>
+        F.bifoldLeft(w.inner, b)(
+          (b1, x) => bifoldLeft1Slow(w.stepFailure(x), b1)(f, g),
+          (b1, m) => bifoldLeft1Slow(w.stepSuccess(m), b1)(f, g)
+        )
+    })
+
+  def bifoldLeft1[E, A, B](c: StepResult[F, S, E, A], b: B, depth: Int)(f: (B, E) => B, g: (B, A) => B): B = {
+    if (depth == MaxDepth)
+      bifoldLeft1Slow(c, Eval.now(b))(
+        (eb, e) => eb.map(f(_, e)),
+        (eb, a) => eb.map(g(_, a))
+      ).value
+    else
+      c match {
+        case Error(_, e)                     => f(b, e)
+        case Ok(_, a)                        => g(b, a)
+        case w: Wrap[F, r, s, S, x, E, m, A] =>
+          F.bifoldLeft(w.inner, b)(
+            (b1, x) => bifoldLeft1(w.stepFailure(x), b1, depth + 1)(f, g),
+            (b1, m) => bifoldLeft1(w.stepSuccess(m), b1, depth + 1)(f, g)
+          )
+      }
+  }
+
+  def bifoldLeft[A, B, C](fab: CalcM[F, Any, Any, S, A, B], c: C)(f: (C, A) => C, g: (C, B) => C): C =
+    bifoldLeft1(fab.step((), ()), c, 0)(f, g)
+
+  def bifoldRight1[E, A, B](c: StepResult[F, S, E, A], b: Eval[B])(
+      f: (E, Eval[B]) => Eval[B],
+      g: (A, Eval[B]) => Eval[B]
+  ): Eval[B] = c match {
+    case Error(_, e)                     => f(e, b)
+    case Ok(_, a)                        => g(a, b)
+    case w: Wrap[F, r, s, S, x, E, m, A] =>
+      F.bifoldRight(w.inner, b)(
+        (x, b1) => Eval.defer(bifoldRight1(w.stepFailure(x), b1)(f, g)),
+        (m, b1) => Eval.defer(bifoldRight1(w.stepSuccess(m), b1)(f, g))
+      )
+  }
+
+  def bifoldRight[A, B, C](fab: CalcM[F, Any, Any, S, A, B], c: Eval[C])(
+      f: (A, Eval[C]) => Eval[C],
+      g: (B, Eval[C]) => Eval[C]
+  ): Eval[C] = bifoldRight1(fab.step((), ()), c)(f, g)
+}
+
+class CalcMBitraverse[F[+_, +_], S](implicit F: Bitraverse[F])
+    extends CalcMBifoldable[F, S] with Bitraverse[CalcM[F, Any, Any, S, *, *]] {
+
+  def bitraverse1[G[_]: Applicative, A, B, C, D](
+      fab: StepResult[F, S, A, B]
+  )(f: A => G[C], g: B => G[D]): G[CalcM[F, Any, Any, S, C, D]] = fab match {
+    case Error(s, a)                     =>
+      f(a).map(c => CalcM.set(s) >> CalcM.raise(c))
+    case Ok(s, b)                        =>
+      g(b).map(d => CalcM.set(s) >> CalcM.pure(d))
+    case w: Wrap[F, r, s, S, x, A, m, B] =>
+      F.bitraverse(w.inner)(
+        x => bitraverse1(w.stepFailure(x))(f, g),
+        m => bitraverse1(w.stepSuccess(m))(f, g)
+      ).map(CalcM.roll)
+  }
+
+  def bitraverse[G[_]: Applicative, A, B, C, D](
+      fab: CalcM[F, Any, Any, S, A, B]
+  )(f: A => G[C], g: B => G[D]): G[CalcM[F, Any, Any, S, C, D]] = ???
 }
