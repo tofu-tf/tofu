@@ -9,9 +9,9 @@ trait Region[F[_], G[_], E] {
     */
   def regionCase[R](open: G[R])(close: (R, ExitCase[E]) => G[Unit]): F[R]
 
-  /** Like [[regionCase]] but dose not provide an access to the [[ExitCase]] on `close` section.
+  /** Like [[regionCase]] but does not provide an access to the [[ExitCase]] in `close` section.
     */
-  def region[R](open: G[R])(close: R => G[Unit]): F[R] =
+  final def region[R](open: G[R])(close: R => G[Unit]): F[R] =
     regionCase(open) { case (r, _) => close(r) }
 }
 

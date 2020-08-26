@@ -5,7 +5,7 @@ import cats.tagless.FunctorK
 import cats.{FlatMap, Functor, Monad, MonoidK, ~>}
 import fs2._
 import tofu.higherKind.Embed
-import tofu.streams.{Chunks, Compile, Evals, Merge, ParFlatten, Region, RegionThrow, Temporal}
+import tofu.streams.{Chunks, Compile, Evals, Merge, ParFlatten, RegionThrow, Temporal}
 import tofu.syntax.funk._
 
 import scala.concurrent.duration.FiniteDuration

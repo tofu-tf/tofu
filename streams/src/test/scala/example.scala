@@ -18,8 +18,8 @@ object example {
 
     def make[F[_], S[_]: Evals[*[_], F]: Chunks[*[_], C], C[_]: Functor]: Srv[S] = new Impl[F, S, C]
 
-    final class Impl[F[_], S[_]: Chunks[*[_], C], C[_]: Functor](implicit S: Evals[S, F]) extends Srv[S] {
-      override def requestAll: S[String]          = S.evals(getIds).mapChunks(_.map(_ % 2)).evalMap(requestById)
+    final class Impl[F[_], S[_]: Chunks[*[_], C]: Evals[*[_], F], C[_]: Functor] extends Srv[S] {
+      override def requestAll: S[String]          = evals(getIds).mapChunks(_.map(_ % 2)).evalMap(requestById)
       private def getIds: F[List[Int]]            = ???
       private def requestById(id: Int): F[String] = ???
     }
