@@ -24,10 +24,9 @@ object example2 {
   }
 
   final class ContinualPrinter[
-      S[_]: SemigroupK: Defer: Applicative: Evals[*[_], F]: Monad,
+      S[_]: Monad: SemigroupK: Defer: Applicative: Evals[*[_], F]: RegionThrow[*[_], F],
       F[_]: Console
-  ](implicit R: RegionThrow[S, F])
-      extends Printer[S] {
+  ] extends Printer[S] {
     def print(word: String): S[Unit] =
       region(putStrLn[F]("Start"))(_ => putStrLn[F]("End")) >> word.pure.repeat.evalMap(putStrLn[F])
   }
