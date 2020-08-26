@@ -20,3 +20,6 @@ object NonTofu extends NonTofu[Nothing] {
     */
   implicit def refute[F[_]](implicit dummy: DummyImplicit): NonTofu[F] = this
 }
+
+/** tag trait to make types more specific to prioritize instances */
+trait Prior extends Any

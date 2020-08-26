@@ -9,6 +9,7 @@ import tofu.optics.Contains
 import tofu.syntax.monadic._
 import tofu.syntax.bracket._
 import cats.data.StateT
+import tofu.data.calc.CalcM
 
 /** a middleground between cats.concurrent.Ref and zio.Ref */
 trait Atom[+F[_], A] {
@@ -92,17 +93,27 @@ object Atom {
     }
   }
 
-  def stateTAtom[F[_]: Applicative, A]: Atom[StateT[F, A, *], A] = new Atom[StateT[F, A, *], A] {
-    override def get: StateT[F, A, A] = StateT.get
+  def stateTAtom[F[_]: Applicative, A]: Atom[StateT[F, A, *], A] = StateTAtom()
 
-    override def set(a: A): StateT[F, A, Unit] = StateT.set(a)
-
-    override def getAndSet(a: A): StateT[F, A, A] = StateT(a1 => (a, a1).pure[F])
-
-    override def update(f: A => A): StateT[F, A, Unit] = StateT.modify(f)
-
+  private case class StateTAtom[F[_]: Applicative, A]() extends Atom[StateT[F, A, *], A] {
+    override def get: StateT[F, A, A]                       = StateT.get
+    override def set(a: A): StateT[F, A, Unit]              = StateT.set(a)
+    override def getAndSet(a: A): StateT[F, A, A]           = StateT(a1 => (a, a1).pure[F])
+    override def update(f: A => A): StateT[F, A, Unit]      = StateT.modify(f)
     override def modify[B](f: A => (A, B)): StateT[F, A, B] = StateT(a => f(a).pure[F])
   }
+
+  def calcMAtom[F[+_, +_], R, S, E]: Atom[CalcM[F, R, S, S, E, *], S] =
+    calcMAtomAny.asInstanceOf[Atom[CalcM[F, R, S, S, E, *], S]]
+
+  private class CalcMAtom[F[+_, +_], R, S, E]() extends Atom[CalcM[F, R, S, S, E, *], S] {
+    def get: CalcM[F, R, S, S, E, S]                       = CalcM.get
+    def set(a: S): CalcM[F, R, S, S, E, Unit]              = CalcM.set(a).void
+    def getAndSet(a: S): CalcM[F, R, S, S, E, S]           = CalcM.get[S] << CalcM.set(a)
+    def update(f: S => S): CalcM[F, R, S, S, E, Unit]      = CalcM.update(f).void
+    def modify[B](f: S => (S, B)): CalcM[F, R, S, S, E, B] = CalcM.state(f)
+  }
+  private[this] object calcMAtomAny             extends CalcMAtom[Any, Any, Any, Any]
 }
 
 trait MakeAtom[I[_], F[_]] {

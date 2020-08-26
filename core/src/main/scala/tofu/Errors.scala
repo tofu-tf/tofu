@@ -9,13 +9,11 @@ import tofu.lift.Lift
 import tofu.optics.PUpcast.GenericSubtypeImpl
 import tofu.optics.{Downcast, Subset, Upcast}
 
-import scala.reflect.ClassTag
-
 trait Raise[F[_], E] extends Raise.ContravariantRaise[F, E] {
   def raise[A](err: E): F[A]
 }
 
-object Raise extends RaiseInstances with DataEffectComp[Raise] with ErrorsInstanceChain[Raise] {
+object Raise extends RaiseInstances with DataEffectComp[Raise] {
 
   trait ContravariantRaise[F[_], -E] {
     def raise[A](err: E): F[A]
@@ -26,7 +24,7 @@ object Raise extends RaiseInstances with DataEffectComp[Raise] with ErrorsInstan
 
 }
 
-sealed class RaiseInstances {
+sealed class RaiseInstances extends ErrorsInstanceChain[Raise] {
   final implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1] =
     prism match {
       case GenericSubtypeImpl =>
@@ -47,6 +45,8 @@ object RestoreTo extends ErrorsToInstanceChain[λ[(f[_], g[_], e) => RestoreTo[f
 trait Restore[F[_]] extends RestoreTo[F, F] {
   def restoreWith[A](fa: F[A])(ra: => F[A]): F[A]
 }
+
+object Restore extends ErrorsInstanceChain[λ[(f[_], e) => Restore[f]]]
 
 trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
   def handleWith[A](fa: F[A])(f: E => G[A]): G[A]
@@ -79,7 +79,7 @@ trait Handle[F[_], E] extends HandleTo[F, F, E] with Restore[F] {
     tryHandleWith(fa)(e => Some(f(e)))
 }
 
-object Handle extends HandleInstances with DataEffectComp[Handle] with ErrorsInstanceChain[Handle] {
+object Handle extends HandleInstances with DataEffectComp[Handle] {
 
   trait ByRecover[F[_], E] extends Handle[F, E] {
     def recWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A]
@@ -95,7 +95,7 @@ object Handle extends HandleInstances with DataEffectComp[Handle] with ErrorsIns
   }
 }
 
-sealed class HandleInstances {
+sealed class HandleInstances extends ErrorsInstanceChain[Handle] {
   final implicit def handleDowncast[F[_], E, E1](implicit h: Handle[F, E], prism: Downcast[E, E1]): Handle[F, E1] =
     new FromPrism[F, E, E1, Handle, Downcast] with HandlePrism[F, E, E1]
 }
@@ -123,14 +123,17 @@ trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, 
 
 object Errors extends ErrorInstances with DataEffectComp[Errors] with ErrorsInstanceChain[Errors]
 
-trait ErrorsInstanceChain[TC[f[_], e] >: Errors[f, e]] {
-  final implicit def errorByCatsError[F[_]: ApplicativeError[*[_], E], E, E1: ClassTag: * <:< E]: TC[F, E1] =
-    new HandleApErr[F, E, E1] with RaiseAppApErr[F, E, E1] with Errors[F, E1]
+trait ErrorsInstanceChain[TC[f[_], e] >: Errors[f, e]] extends LowPrioErrorsInstanceChain[TC] {
+  final implicit def errorByCatsError[F[_]: ApplicativeError[*[_], E], E]: TC[F, E] =
+    new HandleApErr[F, E] with RaiseAppApErr[F, E] with Errors[F, E]
+}
+
+trait LowPrioErrorsInstanceChain[TC[f[_], e] >: Errors[f, e]] {
+  final implicit def errorPrismatic[F[_], E, E1](implicit e: Errors[F, E], prism: Subset[E, E1]): TC[F, E1] =
+    new FromPrism[F, E, E1, Errors, Subset] with RaisePrism[F, E, E1] with HandlePrism[F, E, E1] with Errors[F, E1]
 }
 
 trait ErrorInstances {
-  final implicit def errorPrismatic[F[_], E, E1](implicit e: Errors[F, E], prism: Subset[E, E1]): Errors[F, E1] =
-    new FromPrism[F, E, E1, Errors, Subset] with RaisePrism[F, E, E1] with HandlePrism[F, E, E1] with Errors[F, E1]
 
   final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
     new Errors[ReaderT[F, R, *], E] {

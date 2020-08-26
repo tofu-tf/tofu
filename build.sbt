@@ -133,7 +133,7 @@ lazy val observable = project.settings(
 )
 
 lazy val concurrent =
-  project dependsOn core settings (
+  project dependsOn (core, data) settings (
     defaultSettings,
     libraryDependencies ++= Seq(catsEffect, catsTagless),
 )
@@ -243,22 +243,10 @@ lazy val streams = project
   )
   .dependsOn(core)
 
-lazy val coreModules = Seq(higherKindCore, core, memo, env, concurrent, opticsCore, data)
+lazy val coreModules = Seq(higherKindCore, core, opticsMacro, memo, derivation, env, concurrent, opticsCore, data, streams)
 
 lazy val commonModules =
-  Seq(
-    observable,
-    opticsInterop,
-    opticsMacro,
-    logging,
-    enums,
-    config,
-    derivation,
-    zioInterop,
-    fs2Interop,
-    doobie,
-    streams
-  )
+  Seq(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)
 
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
@@ -279,6 +267,7 @@ lazy val docs = project // new documentation project
 lazy val tofu = project
   .in(file("."))
   .settings(defaultSettings)
+  .settings(libraryDependencies += "org.manatki" %% "derevo-cats-tagless" % Version.derevo)
   .aggregate((coreModules ++ commonModules).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
