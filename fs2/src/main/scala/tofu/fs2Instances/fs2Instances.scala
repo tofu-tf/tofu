@@ -1,11 +1,11 @@
 package tofu
 package fs2Instances
-import cats.effect.{Concurrent, Sync, Timer}
+import cats.effect.{Concurrent, ExitCase, Sync, Timer}
 import cats.tagless.FunctorK
 import cats.{FlatMap, Functor, Monad, MonoidK, ~>}
 import fs2._
 import tofu.higherKind.Embed
-import tofu.streams.{Chunks, Compile, Evals, Merge, ParFlatten, Temporal}
+import tofu.streams.{Chunks, Compile, Evals, Merge, ParFlatten, Region, RegionThrow, Temporal}
 import tofu.syntax.funk._
 
 import scala.concurrent.duration.FiniteDuration
@@ -70,6 +70,12 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override def metered[A](fa: Stream[F, A])(rate: FiniteDuration): Stream[F, A] = fa.metered(rate)
 
       override def delay[A](fa: Stream[F, A])(d: FiniteDuration): Stream[F, A] = fa.delayBy(d)
+    }
+
+  implicit def fs2RegionThrowInstance[F[_]]: RegionThrow[Stream[F, *], F] =
+    new RegionThrow[Stream[F, *], F] {
+      override def regionCase[R](open: F[R])(close: (R, ExitCase[Throwable]) => F[Unit]): Stream[F, R] =
+        Stream.bracketCase(open)(close)
     }
 }
 
