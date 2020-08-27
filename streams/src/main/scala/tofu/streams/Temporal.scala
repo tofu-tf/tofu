@@ -8,7 +8,7 @@ trait Temporal[F[_]] {
     */
   def metered[A](fa: F[A])(rate: FiniteDuration): F[A]
 
-  /** Delay pull from stream for `d` duration.
+  /** Delay pull from `F` for `d` duration.
     */
   def delay[A](fa: F[A])(d: FiniteDuration): F[A]
 }
