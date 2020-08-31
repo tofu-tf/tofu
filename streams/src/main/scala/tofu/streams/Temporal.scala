@@ -2,13 +2,10 @@ package tofu.streams
 
 import scala.concurrent.duration.FiniteDuration
 
-trait Temporal[F[_]] {
+trait Temporal[F[_], C[_]] {
 
-  /** Throttles the stream to the specified `rate`.
+  /** Divide `F` into groups of elements received within a time window,
+    * or limited by the number of the elements, whichever happens first.
     */
-  def metered[A](fa: F[A])(rate: FiniteDuration): F[A]
-
-  /** Delay pull from `F` for `d` duration.
-    */
-  def delay[A](fa: F[A])(d: FiniteDuration): F[A]
+  def groupWithin[A](fa: F[A])(n: Int, d: FiniteDuration): F[C[A]]
 }
