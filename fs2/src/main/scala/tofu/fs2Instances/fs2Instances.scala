@@ -4,8 +4,9 @@ import cats.effect.{Concurrent, ExitCase, Sync, Timer}
 import cats.tagless.FunctorK
 import cats.{FlatMap, Functor, Monad, MonoidK, ~>}
 import fs2._
+import fs2.concurrent.Broadcast
 import tofu.higherKind.Embed
-import tofu.streams.{Chunks, Compile, Evals, Merge, Pace, ParFlatten, RegionThrow, Temporal}
+import tofu.streams.{Broadcast, Chunks, Compile, Evals, Merge, Pace, ParFlatten, RegionThrow, Temporal}
 import tofu.syntax.funk._
 
 import scala.concurrent.duration.FiniteDuration
@@ -82,6 +83,16 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
     new RegionThrow[Stream[F, *], F] {
       override def regionCase[R](open: F[R])(close: (R, ExitCase[Throwable]) => F[Unit]): Stream[F, R] =
         Stream.bracketCase(open)(close)
+    }
+
+  implicit def fs2BroadcastInstances[F[_]: Concurrent]: Broadcast[Stream[F, *]] =
+    new Broadcast[Stream[F, *]] {
+
+      override def broadcast[A](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, Unit]*): Stream[F, Unit] =
+        fa.broadcastTo(processors: _*)
+
+      override def broadcastThrough[A, B](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, B]*): Stream[F, B] =
+        fa.broadcastThrough(processors: _*)
     }
 }
 
