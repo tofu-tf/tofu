@@ -31,6 +31,7 @@ of `"tofu"`):
 * `tofu-enums` for [Enumeratum](https://github.com/lloydmeta/enumeratum) utils
 * `tofu-env` for `Env` (a variation of a Reader Monad based on [Monix](https://github.com/monix/monix) Task)
 * `tofu-fs2-interop` for interop with [fs2](https://github.com/functional-streams-for-scala/fs2)
+* `tofu-streams` for streaming utils
 * `tofu-logging` for the whole set of logging utils (derivation, layout, structured, util, interop)
   * `tofu-logging-derivation` for logging derivation only
   * `tofu-logging-layout` for logging layout only
