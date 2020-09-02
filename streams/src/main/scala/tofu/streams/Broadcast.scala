@@ -7,6 +7,6 @@ trait Broadcast[F[_]] {
   def broadcast[A](fa: F[A])(processors: F[A] => F[Unit]*): F[Unit]
 
   /** Broadcast each element of `F` through `processors` concurrently.
-   */
+    */
   def broadcastThrough[A, B](fa: F[A])(processors: F[A] => F[B]*): F[B]
 }

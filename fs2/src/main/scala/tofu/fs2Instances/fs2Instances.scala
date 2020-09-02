@@ -3,10 +3,9 @@ package fs2Instances
 import cats.effect.{Concurrent, ExitCase, Sync, Timer}
 import cats.tagless.FunctorK
 import cats.{FlatMap, Functor, Monad, MonoidK, ~>}
-import fs2._
-import fs2.concurrent.Broadcast
+import _root_.fs2._
 import tofu.higherKind.Embed
-import tofu.streams.{Broadcast, Chunks, Compile, Evals, Merge, Pace, ParFlatten, RegionThrow, Temporal}
+import tofu.streams._
 import tofu.syntax.funk._
 
 import scala.concurrent.duration.FiniteDuration
@@ -112,7 +111,7 @@ private[fs2Instances] trait Fs2Instances3 {
 }
 
 class FS2StreamHKInstance[A] extends Embed[Stream[*[_], A]] with FunctorK[Stream[*[_], A]] {
-  def embed[F[_]: FlatMap](ft: F[Stream[F, A]]): Stream[F, A]      = fs2.Stream.force(ft)
+  def embed[F[_]: FlatMap](ft: F[Stream[F, A]]): Stream[F, A]      = Stream.force(ft)
   def mapK[F[_], G[_]](af: Stream[F, A])(fk: F ~> G): Stream[G, A] = af.translate(fk)
 }
 
