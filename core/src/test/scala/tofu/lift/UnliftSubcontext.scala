@@ -11,8 +11,8 @@ import org.scalatest.matchers.should.Matchers
 import tofu.HasContext
 
 class UnliftSubcontext extends AnyFlatSpec with Matchers {
-  def context[F[_]: HasContext[*[_], Big]]: F[Big] = HasContext[F, Big].context
-  def smallCtx[F[_]: HasContext[*[_], Small]]: F[Small]   = HasContext[F, Small].context
+  def context[F[_]: HasContext[*[_], Big]]: F[Big]      = HasContext[F, Big].context
+  def smallCtx[F[_]: HasContext[*[_], Small]]: F[Small] = HasContext[F, Small].context
 
   val init: Big  = Big(0, Small(1))
   val sub: Small = Small(2)
