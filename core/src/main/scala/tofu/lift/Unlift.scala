@@ -5,8 +5,9 @@ import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.effect.{Effect, IO}
 import cats.effect.syntax.effect._
-import cats.{Applicative, Functor, Monad, ~>}
+import cats.{Applicative, FlatMap, Functor, Monad, ~>}
 import syntax.funk._
+import tofu.optics.Contains
 import tofu.syntax.monadic._
 
 trait Lift[F[_], G[_]] {
@@ -108,4 +109,18 @@ object Unlift {
       def lift[A](fa: F[A]): G[A] = iso.to(fa)
       def unlift: G[G ~> F]       = iso.fromF.pure[G]
     }
+
+  implicit def subContextUnlift[F[_], G[_], I[_], A, B](implicit
+      wrF: WithRun[F, I, A],
+      wrG: WithRun[G, I, B],
+      lens: A Contains B,
+      F: FlatMap[F],
+      G: FlatMap[G]
+  ): Unlift[G, F] = new Unlift[G, F] {
+    override def lift[X](fa: G[X]): F[X] =
+      wrF.askF(a => wrF.lift(wrG.runContext(fa)(lens.get(a))))
+
+    override def unlift: F[F ~> G] =
+      wrF.ask(a => funK(fa => wrG.askF(b => wrG.lift(wrF.runContext(fa)(lens.set(a, b))))))
+  }
 }
