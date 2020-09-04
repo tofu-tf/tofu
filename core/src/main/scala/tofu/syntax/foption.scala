@@ -2,7 +2,6 @@ package tofu.syntax
 
 import cats.{Applicative, Functor, Monad, Traverse}
 import cats.syntax.traverse.toTraverseOps
-import cats.instances.option.catsStdInstancesForOption
 import cats.syntax.option._
 import tofu.Raise
 import tofu.syntax.monadic._

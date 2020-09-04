@@ -5,7 +5,6 @@ import tofu.syntax.monadic._
 import tofu.optics.data.Identity
 import tofu.optics.data.{CoKleisli, CoKleisliProfunctor}
 import cats.arrow.Profunctor
-import cats.instances.function._
 import cats.Applicative
 import tofu.compat.uv212
 

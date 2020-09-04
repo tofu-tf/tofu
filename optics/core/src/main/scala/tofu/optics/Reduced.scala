@@ -4,7 +4,6 @@ import cats._
 import cats.data.NonEmptyList
 import tofu.optics.data._
 import cats.syntax.semigroup._
-import cats.instances.option._
 
 /** aka NonEmptyFold
   * S has some occurences of A

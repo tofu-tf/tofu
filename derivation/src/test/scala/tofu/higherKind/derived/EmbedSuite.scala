@@ -7,8 +7,6 @@ import cats.data.OptionT
 import EmbedSuite.Foo
 import tofu.syntax.monadic._
 import tofu.syntax.embed._
-import cats.instances.either._
-import cats.instances.option._
 import cats.syntax.traverse._
 import cats.syntax.either._
 import scala.util.Try

@@ -1,6 +1,4 @@
 package tofu.concurrent
-
-import cats.instances.list._
 import cats.{FlatMap, Monad}
 import derevo.derive
 import derevo.tagless.invariantK

@@ -1,7 +1,4 @@
 package tofu.syntax
-
-import cats.instances.list._
-import cats.instances.option._
 import cats.syntax.option.catsSyntaxOptionId
 import cats.syntax.option.none
 import cats.syntax.either._

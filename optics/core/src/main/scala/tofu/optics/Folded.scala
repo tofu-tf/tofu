@@ -1,7 +1,4 @@
 package tofu.optics
-
-import cats.instances.list._
-import cats.instances.vector._
 import cats.syntax.monoid._
 import cats.{Applicative, Foldable, Monoid}
 import tofu.optics.data._

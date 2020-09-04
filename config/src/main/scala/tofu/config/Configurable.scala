@@ -5,10 +5,6 @@ import java.net.{URI, URL}
 
 import ConfigMonad.promote._
 import cats.data.{Chain, NonEmptyList}
-import cats.instances.list._
-import cats.instances.map._
-import cats.instances.option._
-import cats.instances.vector._
 import cats.kernel.Monoid
 import cats.syntax.alternative._
 import cats.syntax.option._

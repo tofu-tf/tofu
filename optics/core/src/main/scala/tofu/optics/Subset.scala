@@ -2,8 +2,6 @@ package tofu.optics
 
 import alleycats.Pure
 import cats._
-import cats.instances.either._
-import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.profunctor._
 import tofu.optics.Subset.ByDowncast

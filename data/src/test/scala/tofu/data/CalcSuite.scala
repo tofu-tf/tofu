@@ -1,6 +1,4 @@
 package tofu.data
-
-import cats.instances.all._
 import cats.syntax.bifoldable._
 import org.scalatest.flatspec.AnyFlatSpec
 import tofu.data.calc.Translator

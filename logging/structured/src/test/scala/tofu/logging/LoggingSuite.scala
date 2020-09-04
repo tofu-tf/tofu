@@ -1,6 +1,4 @@
 package tofu.logging
-
-import cats.instances.all._
 import io.circe.Json
 import org.scalatest.flatspec.AnyFlatSpec
 import tofu.data.{Calc, ICalc}

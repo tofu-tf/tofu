@@ -151,7 +151,6 @@ trait DoSyntaxExtension1 {
 }
 
 trait DoMonadInstances extends ScalaSpecificDoMonadInstances {
-  import cats.instances.all._
   implicit val optionDoMonad: Do[Option]           = new DoMonad(catsStdInstancesForOption)
   implicit def eitherDoMonad[E]: Do[Either[E, *]]  = new DoMonad(catsStdInstancesForEither[E])
   implicit def tupleDoMonad[W: Monoid]: Do[(W, *)] = new DoMonad(catsStdMonadForTuple2[W])

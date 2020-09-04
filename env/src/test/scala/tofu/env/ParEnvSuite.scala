@@ -1,7 +1,6 @@
 package tofu.env
 
 import cats.Parallel
-import cats.instances.list._
 import monix.execution.Scheduler.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

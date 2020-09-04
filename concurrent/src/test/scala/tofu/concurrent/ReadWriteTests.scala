@@ -2,8 +2,6 @@ package tofu.concurrent
 
 import cats.effect.concurrent.{Deferred, Ref}
 import cats.effect.{ContextShift, IO, Timer}
-import cats.instances.list._
-import cats.instances.vector._
 import cats.syntax.applicative._
 import cats.syntax.parallel._
 import cats.syntax.traverse._

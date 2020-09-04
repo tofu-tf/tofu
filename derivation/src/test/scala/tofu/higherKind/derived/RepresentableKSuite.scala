@@ -2,8 +2,6 @@ package tofu.higherKind.derived
 
 import RepresentableKSuite.{Foo}
 import cats.data.{OptionT, Tuple2K}
-import cats.instances.either._
-import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.functor._
 import cats.syntax.traverse._

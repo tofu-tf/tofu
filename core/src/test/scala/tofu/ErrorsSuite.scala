@@ -1,6 +1,4 @@
 package tofu
-
-import cats.instances.either.catsStdInstancesForEither
 import cats.syntax.either._
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec

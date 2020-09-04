@@ -2,8 +2,6 @@ package tofu.concurrent
 package impl
 import cats._
 import cats.effect._
-import cats.instances.either._
-import cats.instances.tuple._
 import cats.syntax.bifunctor._
 import cats.tagless.InvariantK
 import tofu.syntax.funk.funKFrom

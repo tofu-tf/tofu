@@ -2,8 +2,6 @@ package tofu
 package config
 
 import cats.effect.Sync
-import cats.instances.list._
-import cats.instances.option._
 import cats.syntax.option._
 import cats.{Applicative, Functor, Id, Monad, ~>}
 import tofu.concurrent.Refs

@@ -2,7 +2,6 @@ package tofu.doobie.example
 
 import cats.data.NonEmptyList
 import cats.effect.{ContextShift, Effect, ExitCode}
-import cats.instances.string._
 import cats.tagless.syntax.functorK._
 import cats.{Apply, FlatMap, Monad}
 import derevo.derive

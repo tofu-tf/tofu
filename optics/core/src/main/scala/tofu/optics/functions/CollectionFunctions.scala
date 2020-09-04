@@ -3,8 +3,6 @@ package tofu.optics.functions
 import cats.Monoid
 import tofu.optics.{Contains, Folded, Items, PFolded, PItems, Property}
 import cats.syntax.foldable._
-import cats.instances.list._
-import cats.instances.vector._
 import alleycats.std.iterable._
 import alleycats.std.map._
 

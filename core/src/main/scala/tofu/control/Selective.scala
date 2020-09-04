@@ -1,7 +1,6 @@
 package tofu.control
 
 import cats.data.{EitherT, OptionT, ReaderT, WriterT}
-import cats.instances.option._
 import cats.syntax.coflatMap._
 import cats.syntax.option._
 import cats.{Applicative, Monad, Monoid}

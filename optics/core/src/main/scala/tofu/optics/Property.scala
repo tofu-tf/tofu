@@ -1,8 +1,6 @@
 package tofu.optics
 
 import alleycats.Pure
-import cats.instances.either._
-import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.foldable._
 import cats.syntax.functor._

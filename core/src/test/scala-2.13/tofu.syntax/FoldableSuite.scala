@@ -4,7 +4,6 @@ import cats.data.Writer
 import tofu.syntax.monadic._
 import cats.data.Chain
 import tofu.syntax.foldable._
-import cats.instances.lazyList._
 import org.scalatest.flatspec.AnyFlatSpec
 import scala.collection.compat._
 

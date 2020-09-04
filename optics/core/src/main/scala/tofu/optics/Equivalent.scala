@@ -2,7 +2,6 @@ package tofu.optics
 
 import cats._
 import cats.arrow._
-import cats.instances.function._
 import tofu.optics.data._
 
 /** aka Iso

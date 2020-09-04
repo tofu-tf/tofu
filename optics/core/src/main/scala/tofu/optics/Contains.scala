@@ -2,7 +2,6 @@ package tofu.optics
 
 import cats._
 import cats.data._
-import cats.instances.tuple._
 import cats.syntax.bifunctor._
 import cats.syntax.functor._
 import tofu.optics.classes.PChoice

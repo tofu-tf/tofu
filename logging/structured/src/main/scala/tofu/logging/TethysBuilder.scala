@@ -2,8 +2,6 @@ package tofu
 package logging
 
 import java.io.StringWriter
-
-import cats.instances.unit._
 import cats.kernel.Monoid
 import tofu.logging.LogRenderer.LogRendererUnit
 import tethys.writers.tokens.TokenWriter

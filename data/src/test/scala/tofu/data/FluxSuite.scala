@@ -1,7 +1,5 @@
 package tofu.data
 import cats.Id
-import cats.instances.int._
-import cats.instances.list._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

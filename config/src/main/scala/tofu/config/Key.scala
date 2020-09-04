@@ -1,8 +1,5 @@
 package tofu
 package config
-
-import cats.instances.string._
-import cats.instances.int._
 import cats.{Order, Show}
 
 sealed trait Key

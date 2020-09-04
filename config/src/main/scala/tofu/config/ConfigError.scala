@@ -6,8 +6,6 @@ import tofu.config.ConfigItem.ValueTag
 import cats.Show
 import cats.syntax.show._
 import cats.syntax.foldable._
-import cats.instances.string._
-import cats.instances.vector._
 
 sealed trait ConfigError extends Product with Serializable
 object ConfigError {

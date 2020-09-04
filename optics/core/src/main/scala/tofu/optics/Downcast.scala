@@ -1,7 +1,6 @@
 package tofu.optics
 
 import cats.Monoid
-import cats.instances.option._
 import cats.syntax.foldable._
 import tofu.optics.data.Constant
 

@@ -7,11 +7,6 @@ import java.util.UUID
 import alleycats.std.iterable._
 import alleycats.std.set._
 import cats.data._
-import cats.instances.list._
-import cats.instances.map._
-import cats.instances.sortedSet._
-import cats.instances.string._
-import cats.instances.vector._
 import cats.syntax.foldable._
 import cats.syntax.monoid._
 import cats.syntax.show._

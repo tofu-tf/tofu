@@ -2,8 +2,6 @@ package tofu.logging
 
 import cats.effect.SyncIO
 import cats.effect.concurrent.Ref
-import cats.instances.list._
-import cats.instances.unit._
 import tofu.syntax.monadic._
 import cats.syntax.foldable._
 import cats.syntax.traverse._

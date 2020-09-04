@@ -6,8 +6,6 @@ import tofu.syntax.monadic._
 import cats.syntax.foldable._
 import cats.syntax.traverse._
 import cats.syntax.monoid._
-import cats.instances.option._
-import cats.instances.either._
 import cats.syntax.option._
 import cats.syntax.either._
 

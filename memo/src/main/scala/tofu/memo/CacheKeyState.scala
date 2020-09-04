@@ -2,8 +2,6 @@ package tofu.memo
 
 import cats.data.OptionT
 import cats.effect.concurrent.{MVar, Ref}
-import cats.instances.list._
-import cats.instances.option._
 import cats.syntax.foldable._
 import cats.syntax.traverse._
 import cats.{Functor, Monad}
