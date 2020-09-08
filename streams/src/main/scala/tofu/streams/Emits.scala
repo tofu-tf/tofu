@@ -1,6 +1,8 @@
 package tofu.streams
 
-import cats.{Applicative, Foldable, MonoidK}
+import cats.{Applicative, Foldable, Monad, MonoidK}
+import cats.syntax.flatMap._
+import tofu.lift.Lift
 
 trait Emits[F[_]] {
 
@@ -17,5 +19,31 @@ object Emits {
     new Emits[F] {
       override val monoidK: MonoidK[F]         = implicitly
       override val applicative: Applicative[F] = implicitly
+    }
+}
+
+trait Evals[F[_], G[_]] extends Emits[F] with Lift[G, F] {
+
+  implicit val monad: Monad[F]
+
+  lazy val applicative: Applicative[F] = monad
+
+  def eval[A](ga: G[A]): F[A] = lift(ga)
+
+  def evals[C[_]: Foldable, A](gsa: G[C[A]]): F[A] =
+    eval(gsa) >>= (emits(_))
+
+  def evalMap[A, B](fa: F[A])(f: A => G[B]): F[B] =
+    fa >>= (a => eval(f(a)))
+}
+
+object Evals {
+
+  implicit def instance[F[_]: Monad: MonoidK, G[_]](implicit lft: Lift[G, F]): Evals[F, G] =
+    new Evals[F, G] {
+      override val monad: Monad[F]     = implicitly
+      override val monoidK: MonoidK[F] = implicitly
+
+      override def lift[A](fa: G[A]): F[A] = lft.lift(fa)
     }
 }
