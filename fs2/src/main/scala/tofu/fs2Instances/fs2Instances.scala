@@ -1,10 +1,11 @@
 package tofu
 package fs2Instances
+import _root_.fs2._
 import cats.effect.{Concurrent, ExitCase, Sync, Timer}
 import cats.tagless.FunctorK
-import cats.{FlatMap, Functor, Monad, MonoidK, ~>}
-import _root_.fs2._
+import cats.{FlatMap, Functor, ~>}
 import tofu.higherKind.Embed
+import tofu.lift.Lift
 import tofu.streams._
 import tofu.syntax.funk._
 
@@ -23,13 +24,8 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override val F: HasContextRun[F, G, R] = fctx
     }
 
-  implicit def fs2EvalsInstance[F[_]]: Evals[Stream[F, *], F] =
-    new Evals[Stream[F, *], F] {
-      override val monad: Monad[Stream[F, *]]     = Stream.monadInstance
-      override val monoidK: MonoidK[Stream[F, *]] = Stream.monoidKInstance
-
-      override def eval[A](ga: F[A]): Stream[F, A] = Stream.eval(ga)
-    }
+  implicit def fs2LiftInstance[F[_]]: Lift[F, Stream[F, *]] =
+    Lift.byFunK(funK(Stream.eval(_)))
 
   implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk] =
     new Chunks[Stream[F, *], Chunk] {
@@ -67,7 +63,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   implicit def fs2PaceInstance[F[_]: Timer]: Pace[Stream[F, *]] =
     new Pace[Stream[F, *]] {
 
-      override def metered[A](fa: Stream[F, A])(rate: FiniteDuration): Stream[F, A] = fa.metered(rate)
+      override def throttled[A](fa: Stream[F, A])(rate: FiniteDuration): Stream[F, A] = fa.metered(rate)
 
       override def delay[A](fa: Stream[F, A])(d: FiniteDuration): Stream[F, A] = fa.delayBy(d)
     }
@@ -78,8 +74,8 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
         fa.groupWithin(n, d)
     }
 
-  implicit def fs2RegionThrowInstance[F[_]]: RegionThrow[Stream[F, *], F] =
-    new RegionThrow[Stream[F, *], F] {
+  implicit def fs2RegionThrowInstance[F[_]]: Region[Stream[F, *], F, ExitCase[Throwable]] =
+    new Region[Stream[F, *], F, ExitCase[Throwable]] {
       override def regionCase[R](open: F[R])(close: (R, ExitCase[Throwable]) => F[Unit]): Stream[F, R] =
         Stream.bracketCase(open)(close)
     }

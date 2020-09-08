@@ -6,7 +6,7 @@ trait Pace[F[_]] {
 
   /** Throttles `F` to the specified `rate`.
     */
-  def metered[A](fa: F[A])(rate: FiniteDuration): F[A]
+  def throttled[A](fa: F[A])(rate: FiniteDuration): F[A]
 
   /** Delay pull from `F` for `d` duration.
     */
