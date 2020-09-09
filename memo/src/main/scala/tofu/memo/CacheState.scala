@@ -9,6 +9,8 @@ import tofu.memo.CacheOperation.{CleanUp, GetOrElse}
 import tofu.syntax.bracket._
 import tofu.syntax.monadic._
 
+import scala.annotation.nowarn
+
 abstract class CacheState[F[_], A] {
   def runOperation[B](op: CacheOperation[F, A, B]): F[B]
   def value: F[CacheVal[A]]
@@ -56,6 +58,7 @@ object CacheState {
   }
 }
 
+@nowarn("cat=deprecation")
 final case class CacheStateMVar[F[_]: Monad: Guarantee, A](state: MVar[F, CacheVal[A]]) extends CacheState[F, A] {
   override def value: F[CacheVal[A]]                              = state.read
   override def runOperation[B](op: CacheOperation[F, A, B]): F[B] =

@@ -9,9 +9,9 @@ object Dependencies {
 
     val tethys = "0.11.0"
 
-    val cats = "2.1.1"
+    val cats = "2.2.0"
 
-    val catsEffect = "2.1.4"
+    val catsEffect = "2.2.0"
 
     val catsTagless = "0.11"
 
@@ -23,19 +23,19 @@ object Dependencies {
 
     val slf4j = "1.7.30"
 
-    val fs2 = "2.4.3"
+    val fs2 = "2.4.4"
 
     val logback = "1.2.3"
 
     val monix = "3.2.2"
 
-    val scalatest = "3.2.1"
+    val scalatest = "3.2.2"
 
     val magnolia = "0.17.0"
 
     val typesafeConfig = "1.4.0"
 
-    val zio = "1.0.0"
+    val zio = "1.0.1"
 
     val zioCats = "2.1.4.0"
 
@@ -43,7 +43,7 @@ object Dependencies {
 
     val refined = "0.9.15"
 
-    val doobie = "0.9.0"
+    val doobie = "0.9.2"
 
     // Compile time only
     val macroParadise = "2.1.1"

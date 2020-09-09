@@ -1,14 +1,11 @@
 package tofu.alias
 
-import cats.kernel.Monoid
 import cats.{Alternative, Monad}
 import tofu.compat.unused212
 
-import scala.collection.immutable.Queue
-
 class DoMonad[F[_]](val ! : Monad[F]) extends AnyVal
 
-object DoMonad extends DoMonadInstances {
+object DoMonad {
   final implicit def doMonad[F[_]](implicit F: Monad[F]): Do[F] = new DoMonad[F](F)
 
   final class TofuDoOps[F[_], A](private val fa: F[A]) extends AnyVal {
@@ -148,16 +145,4 @@ trait DoSyntaxExtension1 {
   def Do[F[_]] = new DoMonad.DoMethods[F](true)
 
   @inline final implicit def Do[F[_], A](fa: F[A]): DoMonad.TofuDoOps[F, A] = new DoMonad.TofuDoOps[F, A](fa)
-}
-
-trait DoMonadInstances extends ScalaSpecificDoMonadInstances {
-  import cats.instances.all._
-  implicit val optionDoMonad: Do[Option]           = new DoMonad(catsStdInstancesForOption)
-  implicit def eitherDoMonad[E]: Do[Either[E, *]]  = new DoMonad(catsStdInstancesForEither[E])
-  implicit def tupleDoMonad[W: Monoid]: Do[(W, *)] = new DoMonad(catsStdMonadForTuple2[W])
-  implicit val listDoMonad: Do[List]               = new DoMonad(catsStdInstancesForList)
-  implicit val vectorDoMonad: Do[Vector]           = new DoMonad(catsStdInstancesForVector)
-  implicit val queueDoMonad: Do[Queue]             = new DoMonad(catsStdInstancesForQueue)
-  implicit def function1DoMonad[A]: Do[A => *]     = new DoMonad(catsStdMonadForFunction1[A])
-  implicit val function0DoMonad: Do[() => *]       = new DoMonad(catsStdBimonadForFunction0)
 }

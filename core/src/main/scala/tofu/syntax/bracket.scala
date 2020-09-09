@@ -9,6 +9,8 @@ import cats.syntax.either._
 import tofu.{Finally, Guarantee}
 import tofu.syntax.monadic._
 
+import scala.annotation.nowarn
+
 object bracket {
   implicit class TofuBracketOps[F[_], A](val fa: F[A]) extends AnyVal {
     def guaranteeIf[B](fb: Boolean => F[B])(implicit FG: Guarantee[F], F: Applicative[F]) =
@@ -107,6 +109,7 @@ object bracket {
       FG.finallyCase(fa)(use)(release)
   }
 
+  @nowarn("cat=deprecation")
   implicit final class TofuBracketMVarOps[F[_], A](private val mvar: MVar[F, A]) extends AnyVal {
 
     /**
