@@ -13,6 +13,8 @@ import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.syntax.monadic._
 import tofu.syntax.start._
 
+import scala.annotation.nowarn
+
 trait Daemonic[F[_], E] {
   def daemonize[A](process: F[A]): F[Daemon[F, E, A]]
 }
@@ -126,6 +128,7 @@ object Daemon            extends DaemonInstances {
 
 }
 
+@nowarn("cat=deprecation")
 final class Actor[F[_], E, A] private (queue: MVar[F, A], val daemon: Daemon[F, E, Void]) {
 
   /** fire message waiting for receive */

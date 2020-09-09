@@ -7,6 +7,8 @@ import tofu.concurrent.QVar.QVarByMVar
 import tofu.higherKind.{RepresentableK, derived}
 import tofu.syntax.monadic._
 
+import scala.annotation.nowarn
+
 /** a middleground between cats.concurrent.MVar and zio.Queue.bounded(1) */
 trait QVar[+F[_], A] {
 
@@ -63,6 +65,7 @@ object QVar {
     def toAtom(implicit F: Applicative[F], FG: Guarantee[F]): Atom[F, A] = Atom.QAtom(self)
   }
 
+  @nowarn("cat=deprecation")
   final case class QVarByMVar[F[_], A](mvar: MVar[F, A]) extends QVar[F, A] {
     override def isEmpty: F[Boolean] = mvar.isEmpty
     override def put(a: A): F[Unit]  = mvar.put(a)

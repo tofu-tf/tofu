@@ -14,6 +14,8 @@ import tofu.memo.CacheOperation.{CleanUp, GetOrElse}
 import tofu.syntax.bracket._
 import tofu.syntax.monadic._
 
+import scala.annotation.nowarn
+
 trait CacheKeyState[F[_], -K, A] {
   def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B]
   def getOrElse(process: F[A], key: K, now: Long, after: Long): F[A] =
@@ -55,6 +57,7 @@ object CacheKeyState {
     refs.refOf[CacheMap[F, K, A]](Map.empty).map(CacheKeyStateRef(_, factory))
 }
 
+@nowarn("cat=deprecation")
 final case class CacheKeyStateMVar[F[_]: Monad: Guarantee, K, A](
     state: MVar[F, Map[K, CacheState[F, A]]],
     factory: CacheVal[A] => F[CacheState[F, A]]

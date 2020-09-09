@@ -119,7 +119,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
       .paramLists
 
     paramLists match {
-      case Nil | Nil :: Nil      =>
+      case Nil | Nil :: Nil =>
         genEquiv_unit_tree[S]
 
       case (param :: Nil) :: Nil =>
@@ -132,7 +132,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
           }
         """
 
-      case params :: Nil         =>
+      case params :: Nil =>
         var readField = List.empty[Tree]
         var readTuple = List.empty[Tree]
         var types     = List.empty[Type]
@@ -150,7 +150,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
           }
         """
 
-      case _ :: _ :: _           =>
+      case _ :: _ :: _ =>
         fail(s"Found several parameter-lists for $sTpe, $sTpe needs to be a case class with a single parameter-list.")
     }
   }

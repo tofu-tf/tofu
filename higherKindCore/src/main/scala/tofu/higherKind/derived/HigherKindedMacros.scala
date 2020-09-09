@@ -22,9 +22,8 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
   implicit final class MethodOps(private val m: Method) {
     def occursInParams(symbol: Symbol): Boolean =
-      m.paramLists.exists(_.exists {
-        case ValDef(_, _, tpe, _) =>
-          tpe.exists(_.tpe.typeSymbol == symbol)
+      m.paramLists.exists(_.exists { case ValDef(_, _, tpe, _) =>
+        tpe.exists(_.tpe.typeSymbol == symbol)
       })
   }
 
@@ -48,7 +47,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       val repv    = q"val $rep: $et"
 
       val methods = delegateMethods(af, members, NoSymbol) {
-        case method if method.occursInParams(f)                          =>
+        case method if method.occursInParams(f) =>
           abort(s"Type parameter $f appears in contravariant position in method ${method.name}")
 
         case method if method.returnType.typeConstructor.typeSymbol == f =>
@@ -56,7 +55,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
           val body   = q"$hom($repk[$algebra](($algv => $alg.${method.name}(...$params))))"
           method.copy(body = body)
 
-        case method if method.occursInReturn(f)                          =>
+        case method if method.occursInReturn(f) =>
           val params = methodArgs(method, algebra)
           val tt     = polyType(f :: Nil, method.returnType)
           val tab    = impl.tabMethod(tt)
@@ -64,7 +63,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
             q"$tab($repv => $hom($repk[$algebra]($algv => $rep($alg.${method.name}(...$params)))))"
           method.copy(body = body)
 
-        case method                                                      =>
+        case method =>
           abort(s"Type parameter $f does not appear in return in method ${method.name}")
       }
 

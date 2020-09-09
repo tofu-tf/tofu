@@ -260,10 +260,9 @@ object ReadWrite {
     override def tryUpdate(f: A => A): F[Boolean] = tryModify(a => (f(a), ())).map(_.isDefined)
 
     override def modify[B](f: A => (A, B)): F[B] =
-      write.flatMap {
-        case (a, putAndRelease) =>
-          val (u, b) = f(a)
-          putAndRelease(u).as(b)
+      write.flatMap { case (a, putAndRelease) =>
+        val (u, b) = f(a)
+        putAndRelease(u).as(b)
       }
 
     override def tryModify[B](f: A => (A, B)): F[Option[B]] =

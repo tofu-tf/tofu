@@ -9,6 +9,8 @@ import cats.syntax.either._
 import tofu.{Finally, Guarantee}
 import tofu.syntax.monadic._
 
+import scala.annotation.nowarn
+
 object bracket {
   implicit class TofuBracketOps[F[_], A](val fa: F[A]) extends AnyVal {
     def guaranteeIf[B](fb: Boolean => F[B])(implicit FG: Guarantee[F], F: Applicative[F]) =
@@ -69,8 +71,8 @@ object bracket {
       * @return `F[A]` updated value
       */
     def bracketReplace[B](use: A => F[A])(commit: A => F[B])(implicit FG: Guarantee[F], A: Applicative[F]): F[A] =
-      FG.bracket(FG.bracket(fa)(use) {
-        case (oldA, success) => success unless_ commit(oldA)
+      FG.bracket(FG.bracket(fa)(use) { case (oldA, success) =>
+        success unless_ commit(oldA)
       })(newA => commit(newA) as newA) { (_, _) => A.unit }
 
     /**
@@ -93,8 +95,8 @@ object bracket {
     def bracketState[B, C](
         use: A => F[(A, B)]
     )(commit: A => F[C])(implicit FG: Guarantee[F], A: Applicative[F]): F[B]                                     =
-      FG.bracket(FG.bracket(fa)(use) {
-        case (oldA, success) => success unless_ commit(oldA)
+      FG.bracket(FG.bracket(fa)(use) { case (oldA, success) =>
+        success unless_ commit(oldA)
       }) { case (newA, b) => commit(newA) as b } { (_, _) => A.unit }
 
     /**
@@ -107,6 +109,7 @@ object bracket {
       FG.finallyCase(fa)(use)(release)
   }
 
+  @nowarn("cat=deprecation")
   implicit final class TofuBracketMVarOps[F[_], A](private val mvar: MVar[F, A]) extends AnyVal {
 
     /**

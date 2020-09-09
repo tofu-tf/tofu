@@ -9,9 +9,9 @@ object Dependencies {
 
     val tethys = "0.11.0"
 
-    val cats = "2.1.1"
+    val cats = "2.2.0"
 
-    val catsEffect = "2.1.4"
+    val catsEffect = "2.2.0"
 
     val catsTagless = "0.11"
 
@@ -43,7 +43,7 @@ object Dependencies {
 
     val refined = "0.9.15"
 
-    val doobie = "0.9.0"
+    val doobie = "0.9.2"
 
     // Compile time only
     val macroParadise = "2.1.1"

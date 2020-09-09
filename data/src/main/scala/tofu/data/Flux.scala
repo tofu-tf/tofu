@@ -74,8 +74,8 @@ class FluxOps[F[_], G[_], A](private val value: F[G[(A, Flux[F, G, A])]]) extend
     Flux(f(value).map(_.map { case (a, flx) => (a, flx.mapK(f)) }))
 
   def flatMapF[B](f: A => F[B])(implicit F: Monad[F], G: Traverse[G]): Flux[F, G, B] =
-    Flux[F, G, B](value.flatMap(_.traverse[F, (B, Flux[F, G, B])] {
-      case (a, flux) => f(a).tupleRight(flux.flatMapF(f))
+    Flux[F, G, B](value.flatMap(_.traverse[F, (B, Flux[F, G, B])] { case (a, flux) =>
+      f(a).tupleRight(flux.flatMapF(f))
     }))
 
   def zipWithIndex(starting: Int)(implicit F: Functor[F], G: Functor[G]): Flux[F, G, (A, Int)] =
