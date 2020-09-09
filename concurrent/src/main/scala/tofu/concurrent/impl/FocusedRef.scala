@@ -23,7 +23,7 @@ final case class FocusedRef[F[_]: Functor, A, B](ref: Ref[F, A], focus: Contains
   def tryModify[X](f: B => (B, X)): F[Option[X]]          = ref.tryModify(focusedMod(f))
   def tryModifyState[X](state: State[B, X]): F[Option[X]] = ref.tryModifyState(focus.focusState(state))
 
-  def access: F[(B, B => F[Boolean])] = ref.access.map {
-    case (a, update) => (focus.extract(a), b => update(focus.set(a, b)))
+  def access: F[(B, B => F[Boolean])] = ref.access.map { case (a, update) =>
+    (focus.extract(a), b => update(focus.set(a, b)))
   }
 }

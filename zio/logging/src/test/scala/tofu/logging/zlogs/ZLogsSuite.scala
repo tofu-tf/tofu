@@ -32,8 +32,8 @@ class ZLogsSuite extends AnyFlatSpec with Matchers {
 
     val expected = JsonObject("foo" -> "kojima".asJson, "bar" -> 2.asJson).asJson
 
-    items.map(_.getMarker).collect {
-      case ContextMarker(ctx, _) => LogTree(ctx)
+    items.map(_.getMarker).collect { case ContextMarker(ctx, _) =>
+      LogTree(ctx)
     } should ===(List.fill(2)(expected))
   }
 }

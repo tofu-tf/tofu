@@ -39,33 +39,32 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
         _              <- releases.parSequence
         releaseState   <- rw.getState
       } yield (initialState, blockedState, releaseState, xs)
-      io.unsafeToFuture().map {
-        case (initial, blocked, release, xs) =>
-          initial shouldBe State(
-            Queue(),
-            0,
-            writeLocked = false,
-            Set.empty[Deferred[IO, (Int, IO[Unit])]],
-            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-            1
-          )
-          blocked shouldBe State(
-            Queue(),
-            4,
-            writeLocked = false,
-            Set.empty[Deferred[IO, (Int, IO[Unit])]],
-            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-            1
-          )
-          release shouldBe State(
-            Queue(),
-            0,
-            writeLocked = false,
-            Set.empty[Deferred[IO, (Int, IO[Unit])]],
-            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-            1
-          )
-          xs shouldBe List(1, 1, 1, 1)
+      io.unsafeToFuture().map { case (initial, blocked, release, xs) =>
+        initial shouldBe State(
+          Queue(),
+          0,
+          writeLocked = false,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          1
+        )
+        blocked shouldBe State(
+          Queue(),
+          4,
+          writeLocked = false,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          1
+        )
+        release shouldBe State(
+          Queue(),
+          0,
+          writeLocked = false,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          1
+        )
+        xs shouldBe List(1, 1, 1, 1)
       }
     }
 
@@ -89,43 +88,40 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _              <- (release3, release4).parTupled
           releaseState   <- rw.getState
         } yield (initialState, blockedState1, blockedState2, blockedState3, releaseState, List(i1, i2, i3, i4))
-        io.unsafeToFuture().map {
-          case (initial, blocked1, blocked2, blocked3, release, xs) =>
-            initial shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            inside(blocked1) {
-              case State(q, 2, false, _, _, 1) =>
-                q.size shouldBe 2
-                q.forall(_.isReader) shouldBe true
-            }
-            inside(blocked2) {
-              case State(q, 2, false, _, _, 1) =>
-                q.size shouldBe 1
-                q.head.isReader shouldBe true
-            }
-            blocked3 shouldBe State(
-              Queue(),
-              2,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            release shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            xs shouldBe List(1, 1, 1, 1)
+        io.unsafeToFuture().map { case (initial, blocked1, blocked2, blocked3, release, xs) =>
+          initial shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          inside(blocked1) { case State(q, 2, false, _, _, 1) =>
+            q.size shouldBe 2
+            q.forall(_.isReader) shouldBe true
+          }
+          inside(blocked2) { case State(q, 2, false, _, _, 1) =>
+            q.size shouldBe 1
+            q.head.isReader shouldBe true
+          }
+          blocked3 shouldBe State(
+            Queue(),
+            2,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          release shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          xs shouldBe List(1, 1, 1, 1)
         }
       }
 
@@ -142,38 +138,36 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _             <- release
           releaseState2 <- rw.getState
         } yield (initialState, blockedState, releaseState1, releaseState2, List(i1, i2))
-        io.unsafeToFuture().map {
-          case (initial, blocked, release1, release2, xs) =>
-            initial shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            inside(blocked) {
-              case State(q, 0, true, _, _, 1) =>
-                q.size shouldBe 1
-                q.forall(_.isReader) shouldBe true
-            }
-            release1 shouldBe State(
-              Queue(),
-              1,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              2
-            )
-            release2 shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              2
-            )
-            xs shouldBe List(1, 2)
+        io.unsafeToFuture().map { case (initial, blocked, release1, release2, xs) =>
+          initial shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          inside(blocked) { case State(q, 0, true, _, _, 1) =>
+            q.size shouldBe 1
+            q.forall(_.isReader) shouldBe true
+          }
+          release1 shouldBe State(
+            Queue(),
+            1,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            2
+          )
+          release2 shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            2
+          )
+          xs shouldBe List(1, 2)
         }
       }
 
@@ -195,43 +189,40 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           _              <- release
           resultState    <- rw.getState
         } yield (initialState, blockedState, writerState, readerState, resultState, xs ::: List(wi, ri))
-        io.unsafeToFuture().map {
-          case (initial, blocked, writer, reader, result, xs) =>
-            initial shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            inside(blocked) {
-              case State(q, 3, false, _, _, 1) =>
-                q.size shouldBe 2
-                q.map(_.isWriter) shouldBe List(true, false)
-            }
-            inside(writer) {
-              case State(q, 0, true, _, _, 1) =>
-                q.size shouldBe 1
-                q.head.isReader shouldBe true
-            }
-            reader shouldBe State(
-              Queue(),
-              1,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              2
-            )
-            result shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              2
-            )
-            xs shouldBe List(1, 1, 1, 1, 2)
+        io.unsafeToFuture().map { case (initial, blocked, writer, reader, result, xs) =>
+          initial shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          inside(blocked) { case State(q, 3, false, _, _, 1) =>
+            q.size shouldBe 2
+            q.map(_.isWriter) shouldBe List(true, false)
+          }
+          inside(writer) { case State(q, 0, true, _, _, 1) =>
+            q.size shouldBe 1
+            q.head.isReader shouldBe true
+          }
+          reader shouldBe State(
+            Queue(),
+            1,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            2
+          )
+          result shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            2
+          )
+          xs shouldBe List(1, 1, 1, 1, 2)
         }
       }
 
@@ -246,8 +237,359 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
         _            <- update(i + 1)
         releaseState <- rw.getState
       } yield (initialState, blockedState, releaseState)
-      io.unsafeToFuture().map {
-        case (initial, blocked, release) =>
+      io.unsafeToFuture().map { case (initial, blocked, release) =>
+        initial shouldBe State(
+          Queue(),
+          0,
+          writeLocked = false,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          1
+        )
+        blocked shouldBe State(
+          Queue(),
+          0,
+          writeLocked = true,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          1
+        )
+        release shouldBe State(
+          Queue(),
+          0,
+          writeLocked = false,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          2
+        )
+      }
+    }
+
+    "block on write lock" when {
+
+      "someone already writing. Wait and then release" in {
+        val io = for {
+          rw            <- rwOf(1)
+          initialState  <- rw.getState
+          (i1, update1) <- rw.write
+          f             <- rw.write.start // blocked
+          blockedState  <- smallDelay *> rw.getState
+          _             <- update1(i1 + 1)
+          releaseState1 <- rw.getState
+          (i2, update2) <- f.join
+          _             <- update2(i2 + 1)
+          releaseState2 <- rw.getState
+        } yield (initialState, blockedState, releaseState1, releaseState2, List(i1, i2))
+        io.unsafeToFuture().map { case (initial, blocked, release1, release2, xs) =>
+          initial shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          inside(blocked) { case State(q, 0, true, _, _, 1) =>
+            q.size shouldBe 1
+            q.head.isWriter shouldBe true
+          }
+          release1 shouldBe State(
+            Queue(),
+            0,
+            writeLocked = true,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            2
+          )
+          release2 shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            3
+          )
+          xs shouldBe List(1, 2)
+        }
+      }
+
+      "someone still reading. Wait and then release" in {
+        val io = for {
+          rw            <- rwOf(1)
+          initialState  <- rw.getState
+          (i1, release) <- rw.read
+          f             <- rw.write.start // blocked
+          blockedState  <- smallDelay *> rw.getState
+          _             <- release
+          releaseState1 <- rw.getState
+          (i2, update2) <- f.join
+          _             <- update2(i2 + 1)
+          releaseState2 <- rw.getState
+        } yield (initialState, blockedState, releaseState1, releaseState2, List(i1, i2))
+        io.unsafeToFuture().map { case (initial, blocked, release1, release2, xs) =>
+          initial shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          inside(blocked) { case State(q, 1, false, _, _, 1) =>
+            q.size shouldBe 1
+            q.head.isWriter shouldBe true
+          }
+          release1 shouldBe State(
+            Queue(),
+            0,
+            writeLocked = true,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          release2 shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            2
+          )
+          xs shouldBe List(1, 1)
+        }
+      }
+
+    }
+
+    "remove tasks from q" when {
+
+      "cancel on read happened" in {
+        val io = for {
+          rw            <- rwOf(1, maxReaders = 1)
+          initialState  <- rw.getState
+          (_, release1) <- rw.read
+          f1            <- rw.read.start
+          f2            <- rw.read.start
+          blockedState  <- smallDelay *> rw.getState
+          _             <- f1.cancel
+          cancelState   <- rw.getState
+          _             <- release1
+          (_, release2) <- f2.join
+          releaseState1 <- rw.getState
+          _             <- release2
+          releaseState2 <- rw.getState
+        } yield (initialState, blockedState, cancelState, releaseState1, releaseState2)
+        io.unsafeToFuture().map { case (initialState, blockedState, cancelState, releaseState1, releaseState2) =>
+          initialState shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          inside(blockedState) { case State(q, 1, false, tr, _, 1) =>
+            q.size shouldBe 2
+            q.forall(_.isReader) shouldBe true
+            tr.size shouldBe 0
+          }
+          inside(cancelState) { case State(q, 1, false, tr, _, 1) =>
+            q.size shouldBe 2
+            q.head.isReader shouldBe true
+            tr.size shouldBe 1
+          }
+          inside(releaseState1) { case State(Queue(), 1, false, tr, _, 1) =>
+            tr.isEmpty shouldBe true
+          }
+          releaseState2 shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+        }
+      }
+
+      "timeout on read happened" in {
+        val io = for {
+          rw           <- rwOf(1)
+          initialState <- rw.getState
+          fs           <- rw.read.timeout(50.milli).attempt.start.replicateA(10)
+          blockedState <- smallDelay *> rw.getState
+          _            <- fs.sequence.join
+          cancelState  <- rw.getState
+        } yield (initialState, blockedState, cancelState)
+        io.unsafeToFuture().map { case (initialState, blockedState, cancelState) =>
+          initialState shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          inside(blockedState) { case State(q, 5, false, tr, _, 1) =>
+            q.size shouldBe 5
+            q.forall(_.isReader) shouldBe true
+            tr.size shouldBe 0
+          }
+          inside(cancelState) { case State(q, 5, false, tr, _, 1) =>
+            q.size shouldBe 5
+            tr.size shouldBe 5
+          }
+        }
+      }
+
+      "cancel on write happened" in {
+        val io = for {
+          rw           <- rwOf(1)
+          initialState <- rw.getState
+          _            <- rw.read
+          f            <- rw.write.start
+          _            <- rw.write.start
+          blockedState <- smallDelay *> rw.getState
+          _            <- f.cancel
+          cancelState  <- rw.getState
+        } yield (initialState, blockedState, cancelState)
+        io.unsafeToFuture().map { case (initial, blocked, cancel) =>
+          initial shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          inside(blocked) { case State(q, 1, false, _, tw, 1) =>
+            q.size shouldBe 2
+            q.forall(_.isWriter) shouldBe true
+            tw.size shouldBe 0
+          }
+          inside(cancel) { case State(q, 1, false, _, tw, 1) =>
+            q.size shouldBe 2
+            q.head.isWriter shouldBe true
+            tw.size shouldBe 1
+          }
+        }
+      }
+
+      "timeout on write happened" in {
+        val io = for {
+          rw           <- rwOf(1)
+          initialState <- rw.getState
+          fs           <- rw.write.timeout(50.milli).attempt.start.replicateA(10)
+          blockedState <- smallDelay *> rw.getState
+          _            <- fs.sequence.join
+          cancelState  <- rw.getState
+        } yield (initialState, blockedState, cancelState)
+        io.unsafeToFuture().map { case (initialState, blockedState, cancelState) =>
+          initialState shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          inside(blockedState) { case State(q, 0, true, _, tw, 1) =>
+            q.size shouldBe 9
+            q.forall(_.isWriter) shouldBe true
+            tw.size shouldBe 0
+          }
+          inside(cancelState) { case State(q, 0, true, _, tw, 1) =>
+            q.size shouldBe 9
+            tw.size shouldBe 9
+          }
+        }
+      }
+
+    }
+
+    "tryRead" when {
+
+      "read is available" in {
+        val io = for {
+          rw           <- rwOf(1, 1)
+          initialState <- rw.getState
+          (a, release) <- rw.tryRead.map(_.getOrElse(sys.error("should be some")))
+          blockedState <- rw.getState
+          _            <- release
+          releaseState <- rw.getState
+        } yield (initialState, blockedState, releaseState, a)
+        io.unsafeToFuture().map { case (initial, blocked, release, i) =>
+          initial shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          blocked shouldBe State(
+            Queue(),
+            1,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          release shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          i shouldBe 1
+        }
+      }
+
+      "read is unavailable" in {
+        val io = for {
+          rw           <- rwOf(1, 0)
+          initialState <- rw.getState
+          non          <- rw.tryRead
+          afterState   <- rw.getState
+        } yield (initialState, afterState, non)
+        io.unsafeToFuture().map { case (initialState, afterState, non) =>
+          initialState shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          afterState shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          non shouldBe None
+        }
+      }
+
+    }
+
+    "tryWrite" when {
+
+      "write is available" in {
+        val io = for {
+          rw                 <- rwOf(1)
+          initialState       <- rw.getState
+          (a, putAndRelease) <- rw.tryWrite.map(_.getOrElse(sys.error("should be some")))
+          blockedState       <- rw.getState
+          _                  <- putAndRelease(a + 1)
+          releaseState       <- rw.getState
+        } yield (initialState, blockedState, releaseState, a)
+
+        io.unsafeToFuture().map { case (initial, blocked, release, i) =>
           initial shouldBe State(
             Queue(),
             0,
@@ -272,379 +614,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
             Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
             2
           )
-      }
-    }
-
-    "block on write lock" when {
-
-      "someone already writing. Wait and then release" in {
-        val io = for {
-          rw            <- rwOf(1)
-          initialState  <- rw.getState
-          (i1, update1) <- rw.write
-          f             <- rw.write.start // blocked
-          blockedState  <- smallDelay *> rw.getState
-          _             <- update1(i1 + 1)
-          releaseState1 <- rw.getState
-          (i2, update2) <- f.join
-          _             <- update2(i2 + 1)
-          releaseState2 <- rw.getState
-        } yield (initialState, blockedState, releaseState1, releaseState2, List(i1, i2))
-        io.unsafeToFuture().map {
-          case (initial, blocked, release1, release2, xs) =>
-            initial shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            inside(blocked) {
-              case State(q, 0, true, _, _, 1) =>
-                q.size shouldBe 1
-                q.head.isWriter shouldBe true
-            }
-            release1 shouldBe State(
-              Queue(),
-              0,
-              writeLocked = true,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              2
-            )
-            release2 shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              3
-            )
-            xs shouldBe List(1, 2)
-        }
-      }
-
-      "someone still reading. Wait and then release" in {
-        val io = for {
-          rw            <- rwOf(1)
-          initialState  <- rw.getState
-          (i1, release) <- rw.read
-          f             <- rw.write.start // blocked
-          blockedState  <- smallDelay *> rw.getState
-          _             <- release
-          releaseState1 <- rw.getState
-          (i2, update2) <- f.join
-          _             <- update2(i2 + 1)
-          releaseState2 <- rw.getState
-        } yield (initialState, blockedState, releaseState1, releaseState2, List(i1, i2))
-        io.unsafeToFuture().map {
-          case (initial, blocked, release1, release2, xs) =>
-            initial shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            inside(blocked) {
-              case State(q, 1, false, _, _, 1) =>
-                q.size shouldBe 1
-                q.head.isWriter shouldBe true
-            }
-            release1 shouldBe State(
-              Queue(),
-              0,
-              writeLocked = true,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            release2 shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              2
-            )
-            xs shouldBe List(1, 1)
-        }
-      }
-
-    }
-
-    "remove tasks from q" when {
-
-      "cancel on read happened" in {
-        val io = for {
-          rw            <- rwOf(1, maxReaders = 1)
-          initialState  <- rw.getState
-          (_, release1) <- rw.read
-          f1            <- rw.read.start
-          f2            <- rw.read.start
-          blockedState  <- smallDelay *> rw.getState
-          _             <- f1.cancel
-          cancelState   <- rw.getState
-          _             <- release1
-          (_, release2) <- f2.join
-          releaseState1 <- rw.getState
-          _             <- release2
-          releaseState2 <- rw.getState
-        } yield (initialState, blockedState, cancelState, releaseState1, releaseState2)
-        io.unsafeToFuture().map {
-          case (initialState, blockedState, cancelState, releaseState1, releaseState2) =>
-            initialState shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            inside(blockedState) {
-              case State(q, 1, false, tr, _, 1) =>
-                q.size shouldBe 2
-                q.forall(_.isReader) shouldBe true
-                tr.size shouldBe 0
-            }
-            inside(cancelState) {
-              case State(q, 1, false, tr, _, 1) =>
-                q.size shouldBe 2
-                q.head.isReader shouldBe true
-                tr.size shouldBe 1
-            }
-            inside(releaseState1) {
-              case State(Queue(), 1, false, tr, _, 1) =>
-                tr.isEmpty shouldBe true
-            }
-            releaseState2 shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-        }
-      }
-
-      "timeout on read happened" in {
-        val io = for {
-          rw           <- rwOf(1)
-          initialState <- rw.getState
-          fs           <- rw.read.timeout(50.milli).attempt.start.replicateA(10)
-          blockedState <- smallDelay *> rw.getState
-          _            <- fs.sequence.join
-          cancelState  <- rw.getState
-        } yield (initialState, blockedState, cancelState)
-        io.unsafeToFuture().map {
-          case (initialState, blockedState, cancelState) =>
-            initialState shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            inside(blockedState) {
-              case State(q, 5, false, tr, _, 1) =>
-                q.size shouldBe 5
-                q.forall(_.isReader) shouldBe true
-                tr.size shouldBe 0
-            }
-            inside(cancelState) {
-              case State(q, 5, false, tr, _, 1) =>
-                q.size shouldBe 5
-                tr.size shouldBe 5
-            }
-        }
-      }
-
-      "cancel on write happened" in {
-        val io = for {
-          rw           <- rwOf(1)
-          initialState <- rw.getState
-          _            <- rw.read
-          f            <- rw.write.start
-          _            <- rw.write.start
-          blockedState <- smallDelay *> rw.getState
-          _            <- f.cancel
-          cancelState  <- rw.getState
-        } yield (initialState, blockedState, cancelState)
-        io.unsafeToFuture().map {
-          case (initial, blocked, cancel) =>
-            initial shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            inside(blocked) {
-              case State(q, 1, false, _, tw, 1) =>
-                q.size shouldBe 2
-                q.forall(_.isWriter) shouldBe true
-                tw.size shouldBe 0
-            }
-            inside(cancel) {
-              case State(q, 1, false, _, tw, 1) =>
-                q.size shouldBe 2
-                q.head.isWriter shouldBe true
-                tw.size shouldBe 1
-            }
-        }
-      }
-
-      "timeout on write happened" in {
-        val io = for {
-          rw           <- rwOf(1)
-          initialState <- rw.getState
-          fs           <- rw.write.timeout(50.milli).attempt.start.replicateA(10)
-          blockedState <- smallDelay *> rw.getState
-          _            <- fs.sequence.join
-          cancelState  <- rw.getState
-        } yield (initialState, blockedState, cancelState)
-        io.unsafeToFuture().map {
-          case (initialState, blockedState, cancelState) =>
-            initialState shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            inside(blockedState) {
-              case State(q, 0, true, _, tw, 1) =>
-                q.size shouldBe 9
-                q.forall(_.isWriter) shouldBe true
-                tw.size shouldBe 0
-            }
-            inside(cancelState) {
-              case State(q, 0, true, _, tw, 1) =>
-                q.size shouldBe 9
-                tw.size shouldBe 9
-            }
-        }
-      }
-
-    }
-
-    "tryRead" when {
-
-      "read is available" in {
-        val io = for {
-          rw           <- rwOf(1, 1)
-          initialState <- rw.getState
-          (a, release) <- rw.tryRead.map(_.getOrElse(sys.error("should be some")))
-          blockedState <- rw.getState
-          _            <- release
-          releaseState <- rw.getState
-        } yield (initialState, blockedState, releaseState, a)
-        io.unsafeToFuture().map {
-          case (initial, blocked, release, i) =>
-            initial shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            blocked shouldBe State(
-              Queue(),
-              1,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            release shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            i shouldBe 1
-        }
-      }
-
-      "read is unavailable" in {
-        val io = for {
-          rw           <- rwOf(1, 0)
-          initialState <- rw.getState
-          non          <- rw.tryRead
-          afterState   <- rw.getState
-        } yield (initialState, afterState, non)
-        io.unsafeToFuture().map {
-          case (initialState, afterState, non) =>
-            initialState shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            afterState shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            non shouldBe None
-        }
-      }
-
-    }
-
-    "tryWrite" when {
-
-      "write is available" in {
-        val io = for {
-          rw                 <- rwOf(1)
-          initialState       <- rw.getState
-          (a, putAndRelease) <- rw.tryWrite.map(_.getOrElse(sys.error("should be some")))
-          blockedState       <- rw.getState
-          _                  <- putAndRelease(a + 1)
-          releaseState       <- rw.getState
-        } yield (initialState, blockedState, releaseState, a)
-
-        io.unsafeToFuture().map {
-          case (initial, blocked, release, i) =>
-            initial shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            blocked shouldBe State(
-              Queue(),
-              0,
-              writeLocked = true,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            release shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              2
-            )
-            i shouldBe 1
+          i shouldBe 1
         }
       }
 
@@ -656,25 +626,24 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           non          <- rw.tryWrite
           afterState   <- rw.getState
         } yield (initialState, afterState, non)
-        io.unsafeToFuture().map {
-          case (initialState, afterState, non) =>
-            initialState shouldBe State(
-              Queue(),
-              0,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            afterState shouldBe State(
-              Queue(),
-              1,
-              writeLocked = false,
-              Set.empty[Deferred[IO, (Int, IO[Unit])]],
-              Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-              1
-            )
-            non shouldBe None
+        io.unsafeToFuture().map { case (initialState, afterState, non) =>
+          initialState shouldBe State(
+            Queue(),
+            0,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          afterState shouldBe State(
+            Queue(),
+            1,
+            writeLocked = false,
+            Set.empty[Deferred[IO, (Int, IO[Unit])]],
+            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+            1
+          )
+          non shouldBe None
         }
       }
 
@@ -703,29 +672,27 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
         _            <- p4(i8 + 1)
         cleanState   <- rw.getState
       } yield (initialState, blockedState, cleanState, List(i1, i2, i3, i4, i5, i6, i7, i8))
-      io.unsafeToFuture().map {
-        case (initial, blocked, clean, is) =>
-          initial shouldBe State(
-            Queue(),
-            0,
-            writeLocked = false,
-            Set.empty[Deferred[IO, (Int, IO[Unit])]],
-            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-            1
-          )
-          inside(blocked) {
-            case State(q, 2, false, _, _, 1) =>
-              q.map(_.isReader) shouldBe List(false, false, true, true, false, false)
-          }
-          clean shouldBe State(
-            Queue(),
-            0,
-            writeLocked = false,
-            Set.empty[Deferred[IO, (Int, IO[Unit])]],
-            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-            5
-          )
-          is shouldBe List(1, 1, 1, 2, 3, 3, 3, 4)
+      io.unsafeToFuture().map { case (initial, blocked, clean, is) =>
+        initial shouldBe State(
+          Queue(),
+          0,
+          writeLocked = false,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          1
+        )
+        inside(blocked) { case State(q, 2, false, _, _, 1) =>
+          q.map(_.isReader) shouldBe List(false, false, true, true, false, false)
+        }
+        clean shouldBe State(
+          Queue(),
+          0,
+          writeLocked = false,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          5
+        )
+        is shouldBe List(1, 1, 1, 2, 3, 3, 3, 4)
       }
     }
 
@@ -753,29 +720,27 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
         cleanState   <- rw.getState
       } yield (initialState, blockedState, cleanState, List(i1, i2, i3, i4, i5, i6, i7, i8))
 
-      io.unsafeToFuture().map {
-        case (initial, blocked, clean, is) =>
-          initial shouldBe State(
-            Queue(),
-            0,
-            writeLocked = false,
-            Set.empty[Deferred[IO, (Int, IO[Unit])]],
-            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-            10
-          )
-          inside(blocked) {
-            case State(q, 0, true, _, _, 10) =>
-              q.map(_.isReader) shouldBe List(false, true, true, false, false, true, true)
-          }
-          clean shouldBe State(
-            Queue(),
-            0,
-            writeLocked = false,
-            Set.empty[Deferred[IO, (Int, IO[Unit])]],
-            Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
-            14
-          )
-          is shouldBe List(10, 11, 12, 12, 12, 13, 14, 14)
+      io.unsafeToFuture().map { case (initial, blocked, clean, is) =>
+        initial shouldBe State(
+          Queue(),
+          0,
+          writeLocked = false,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          10
+        )
+        inside(blocked) { case State(q, 0, true, _, _, 10) =>
+          q.map(_.isReader) shouldBe List(false, true, true, false, false, true, true)
+        }
+        clean shouldBe State(
+          Queue(),
+          0,
+          writeLocked = false,
+          Set.empty[Deferred[IO, (Int, IO[Unit])]],
+          Set.empty[Deferred[IO, (Int, Int => IO[Unit])]],
+          14
+        )
+        is shouldBe List(10, 11, 12, 12, 12, 13, 14, 14)
       }
     }
 

@@ -39,8 +39,8 @@ trait FinallyInstanceChain[T[f[_], exit[_]] >: Finally[f, exit]] {
   final implicit def fromBracket[F[_], E](implicit F: Bracket[F, E]): T[F, TConst[ExitCase[E], *]] =
     new Finally[F, TConst[ExitCase[E], *]] {
       def finallyCase[A, B, C](init: F[A])(action: A => F[B])(release: (A, ExitCase[E]) => F[C]): F[B] =
-        F.bracketCase(init)(action) {
-          case (a, exit) => F.void(release(a, exit))
+        F.bracketCase(init)(action) { case (a, exit) =>
+          F.void(release(a, exit))
         }
       def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]         =
         F.bracketCase(init)(action) {

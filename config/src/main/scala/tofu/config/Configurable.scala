@@ -112,8 +112,8 @@ trait BaseGetters { self: Configurable.type =>
   implicit val booleanConfigurable: Configurable[Boolean]   = requireSimple(ValueType.Bool)
   implicit val stringConfigurable: Configurable[String]     = requireSimple(ValueType.Str)
   implicit val durationConfigurable: Configurable[Duration] =
-    requireSimple(ValueType.Str).catching[Duration](Duration(_))(ConfigFunc.apply(F => {
-      case (s, _) => F.error(BadString(s, "bad duration"))
+    requireSimple(ValueType.Str).catching[Duration](Duration(_))(ConfigFunc.apply(F => { case (s, _) =>
+      F.error(BadString(s, "bad duration"))
     }))
 
   implicit val finiteDirationConfigurable: Configurable[FiniteDuration] =
@@ -139,9 +139,8 @@ trait BaseGetters { self: Configurable.type =>
             }.flatten
           case ValueType.Stream(items)    =>
             items.zipWithIndex
-              .foldLeft(F.pure(Monoid.empty[C])) {
-                case (fc, (x, i)) =>
-                  (fc, parse[F, A](x).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
+              .foldLeft(F.pure(Monoid.empty[C])) { case (fc, (x, i)) =>
+                (fc, parse[F, A](x).local(_ :+ Index(i)).map(f)).parMapN(_ |+| _)
               }
               .flatten
           case Null                       => Monoid.empty[C].pure[F]

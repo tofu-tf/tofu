@@ -20,8 +20,8 @@ class CalcSuite extends AnyFlatSpec {
   "streamy calc" should "calculate sum" in {
     val sum = simpleStream.trans
       .state[Int]
-      .pure {
-        case (i, a) => CalcM[Int].mapState(_ + i).as(a)
+      .pure { case (i, a) =>
+        CalcM[Int].mapState(_ + i).as(a)
       }
       .supply(0)
 
@@ -31,8 +31,8 @@ class CalcSuite extends AnyFlatSpec {
   it should "aggregate items" in {
     val list = simpleStream.trans
       .state[Vector[Int]]
-      .pure {
-        case (i, a) => CalcM.write(Vector(i)).as(a)
+      .pure { case (i, a) =>
+        CalcM.write(Vector(i)).as(a)
       }
       .supply(Vector())
 
@@ -40,8 +40,8 @@ class CalcSuite extends AnyFlatSpec {
   }
 
   it should "aggregate concatenated streams" in {
-    val items = Translator[IntStreamT, Any, Vector[Int]].pure {
-      case (i, a) => CalcM.write(Vector(i)).as(a)
+    val items = Translator[IntStreamT, Any, Vector[Int]].pure { case (i, a) =>
+      CalcM.write(Vector(i)).as(a)
     }
 
     val list =

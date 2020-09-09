@@ -136,7 +136,7 @@ lazy val concurrent =
   project dependsOn (core, data) settings (
     defaultSettings,
     libraryDependencies ++= Seq(catsEffect, catsTagless),
-)
+  )
 
 lazy val config = project dependsOn (core, data, opticsCore, concurrent) settings (
   defaultSettings,

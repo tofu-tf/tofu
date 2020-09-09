@@ -10,14 +10,13 @@ import either._
 object monadError {
   implicit final class MonadErrorFOps[F[_], A](private val fa: F[A]) extends AnyVal {
     def retryAttempt[E](count: Int)(implicit F: MonadError[F, E]): F[Either[List[E], A]] =
-      F.tailRecM((count, List.empty[E])) {
-        case (cnt, acc) =>
-          if (cnt <= 0) F.pure(acc.reverse.asLeft.asRight)
-          else
-            fa.attempt.map {
-              case Left(err) => (cnt - 1, err :: acc).asLeft
-              case Right(v)  => v.asRight.asRight
-            }
+      F.tailRecM((count, List.empty[E])) { case (cnt, acc) =>
+        if (cnt <= 0) F.pure(acc.reverse.asLeft.asRight)
+        else
+          fa.attempt.map {
+            case Left(err) => (cnt - 1, err :: acc).asLeft
+            case Right(v)  => v.asRight.asRight
+          }
       }
 
     def retry[E](count: Int)(implicit F: MonadError[F, E]): F[A] =
