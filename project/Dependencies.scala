@@ -43,7 +43,7 @@ object Dependencies {
 
     val refined = "0.9.15"
 
-    val doobie = "0.9.0"
+    val doobie = "0.9.2"
 
     // Compile time only
     val macroParadise = "2.1.1"
