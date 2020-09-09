@@ -23,7 +23,7 @@ final class EmbeddableLogHandler[F[_]](val self: F[LogHandler]) extends AnyVal {
       impl: LogHandler => A[G]
   )(implicit F: FlatMap[F], L: Lift[G, F]): A[F] = embedMapK(impl)(L.liftF)
 
-  def embed[A[_[_]]: Embed: FunctorK](impl: LogHandler => A[F])(implicit F: FlatMap[F]): A[F] =
+  def embed[A[_[_]]: Embed](impl: LogHandler => A[F])(implicit F: FlatMap[F]): A[F] =
     self.map(impl).embed
 }
 
