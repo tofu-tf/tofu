@@ -79,20 +79,12 @@ trait Unlift[F[_], G[_]] extends Lift[F, G] { self =>
     }
 }
 
-object Unlift {
+object Unlift extends UnliftInstances1 {
   def apply[F[_], G[_]](implicit unlift: Unlift[F, G]): Unlift[F, G] = unlift
 
   implicit def unliftIdentity[F[_]: Applicative]: Unlift[F, F] = new Unlift[F, F] {
     def lift[A](fa: F[A]): F[A] = fa
     def unlift: F[F ~> F]       = FunctionK.id[F].pure[F]
-  }
-
-  implicit def unliftReaderT[F[_]: Applicative, R]: Unlift[F, ReaderT[F, R, *]] = {
-    type RT[a] = ReaderT[F, R, a]
-    new Unlift[F, RT] {
-      def lift[A](fa: F[A]): RT[A] = ReaderT.liftF(fa)
-      def unlift: RT[RT ~> F]      = ReaderT(r => funK[RT, F](_.run(r)).pure[F])
-    }
   }
 
   implicit def unliftIOReaderT[F[_]: Effect, R]: UnliftIO[ReaderT[F, R, *]] = {
@@ -108,4 +100,14 @@ object Unlift {
       def lift[A](fa: F[A]): G[A] = iso.to(fa)
       def unlift: G[G ~> F]       = iso.fromF.pure[G]
     }
+}
+
+private[lift] trait UnliftInstances1 {
+  implicit def unliftReaderT[F[_]: Applicative, R]: Unlift[F, ReaderT[F, R, *]] = {
+    type RT[a] = ReaderT[F, R, a]
+    new Unlift[F, RT] {
+      def lift[A](fa: F[A]): RT[A] = ReaderT.liftF(fa)
+      def unlift: RT[RT ~> F]      = ReaderT(r => funK[RT, F](_.run(r)).pure[F])
+    }
+  }
 }

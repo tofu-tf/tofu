@@ -2,7 +2,7 @@ package tofu.lift
 
 import cats.Applicative
 import cats.data.ReaderT
-import cats.effect.Effect
+import cats.effect.{Effect, IO}
 import cats.syntax.option._
 import org.scalatest.flatspec.AnyFlatSpec
 import tofu.compat.unused
@@ -49,8 +49,14 @@ object UnliftSuite {
     ()
   }
 
-  def summonUnliftIOInstances[F[_]: Effect, R](): Unit = {
+  def summonUnliftIOInstances1[F[_]: Effect, R](): Unit = {
     implicitly[UnliftIO[ReaderT[F, R, *]]]
+    implicitly[Unlift[F, ReaderT[F, R, *]]]
+    ()
+  }
+
+  def summonUnliftIOInstances2[R](): Unit = {
+    implicitly[UnliftIO[ReaderT[IO, R, *]]]
     ()
   }
 
