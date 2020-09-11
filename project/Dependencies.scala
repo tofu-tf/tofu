@@ -56,7 +56,7 @@ object Dependencies {
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.1.6"
+    val collectionCompat = "2.2.0"
   }
 
   val catsCore         = "org.typelevel"              %% "cats-core"               % Version.cats
