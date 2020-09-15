@@ -1,4 +1,4 @@
-package tofu.streams.syntax
+package tofu.syntax.streams
 
 import tofu.streams.Region
 

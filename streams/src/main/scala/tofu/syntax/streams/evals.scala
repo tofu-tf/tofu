@@ -1,7 +1,7 @@
-package tofu.streams.syntax
+package tofu.syntax.streams
 
-import cats.{Foldable, Functor}
 import cats.syntax.functor._
+import cats.{Foldable, Functor}
 import tofu.lift.Lift
 import tofu.streams.Evals
 

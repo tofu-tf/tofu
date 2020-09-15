@@ -1,7 +1,7 @@
-package tofu.streams.syntax
+package tofu.syntax.streams
 
-import cats.{Defer, SemigroupK}
 import cats.syntax.semigroupk._
+import cats.{Defer, SemigroupK}
 
 object combineK {
 
