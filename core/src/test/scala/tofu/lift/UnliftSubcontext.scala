@@ -7,6 +7,7 @@ import tofu.lift.UnliftSubcontext.FatApp
 import tofu.optics.Contains
 import UnliftSubcontext._
 import cats.Monad
+import com.github.ghik.silencer.silent
 import org.scalatest.matchers.should.Matchers
 import tofu.HasContext
 
@@ -46,6 +47,7 @@ object UnliftSubcontext {
   type FatApp[A] = ReaderT[IO, Big, A]
 
   def summonUnliftSubContext[F[_]: Monad](): Unit = {
+    @silent("never used")
     val ul: Unlift[ReaderT[F, Small, *], ReaderT[F, Big, *]] = Unlift.subContextUnlift
     ()
   }
