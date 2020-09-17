@@ -110,7 +110,7 @@ object Unlift {
       def unlift: G[G ~> F]       = iso.fromF.pure[G]
     }
 
-  implicit def subContextUnlift[F[_], G[_], I[_], A, B](implicit
+  def subContextUnlift[F[_], G[_], I[_], A, B](implicit
       wrF: WithRun[F, I, A],
       wrG: WithRun[G, I, B],
       lens: A Contains B,
