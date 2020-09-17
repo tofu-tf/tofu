@@ -14,8 +14,9 @@ class UnliftSubcontext extends AnyFlatSpec with Matchers {
   def context[F[_]: HasContext[*[_], Big]]: F[Big]      = HasContext[F, Big].context
   def smallCtx[F[_]: HasContext[*[_], Small]]: F[Small] = HasContext[F, Small].context
 
-  val init: Big  = Big(0, Small(1))
-  val sub: Small = Small(2)
+  implicit val ul: Unlift[App, FatApp] = Unlift.subContextUnlift
+  val init: Big                        = Big(0, Small(1))
+  val sub: Small                       = Small(2)
 
   val fatAppProgram: IO[Big] =
     context[FatApp].run(init)
@@ -45,7 +46,7 @@ object UnliftSubcontext {
   type FatApp[A] = ReaderT[IO, Big, A]
 
   def summonUnliftSubContext[F[_]: Monad](): Unit = {
-    implicitly[Unlift[ReaderT[F, Small, *], ReaderT[F, Big, *]]]
+    val ul: Unlift[ReaderT[F, Small, *], ReaderT[F, Big, *]] = Unlift.subContextUnlift
     ()
   }
 }
