@@ -161,6 +161,11 @@ trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
   final implicit def contextTTimer[F[+_], C[_[_]]](implicit t: Timer[F]): Timer[ContextT[F, C, *]] =
     Timer.TimerOps[F](t).mapK(ContextT.liftF)
 
+  final implicit def contextTContextShift[F[+_], C[_[_]]](implicit
+      cs: ContextShift[F]
+  ): ContextShift[ContextT[F, C, *]] =
+    new ContextTContextShift[F, C]
+
   final implicit def contextTUnlifting[F[+_]: Monad, In[_[_]], Out[_[_]]](implicit
       l: Out[ContextT[F, Out, *]] Contains In[ContextT[F, Out, *]],
       rc1: Rebase[In],

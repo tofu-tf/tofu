@@ -10,6 +10,7 @@ import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
 import tofu.{RunContext, WithContext, WithRun}
 import scala.annotation.unchecked.{uncheckedVariance => uv}
+import scala.concurrent.ExecutionContext
 
 trait ContextTInvariant[F[+_], C[_[_]]] extends Invariant[ContextT[F, C, *]] {
   implicit def F: Invariant[F]
@@ -379,4 +380,11 @@ final class ContextTParallelI[G[+_], C[_[_]]](implicit val G: Parallel[G], val i
   override val sequential: F ~> ContextT[G, C, *] = super.sequential
 
   override val parallel: ContextT[G, C, *] ~> F = super.parallel
+}
+
+final class ContextTContextShift[F[+_], C[_[_]]](implicit cs: ContextShift[F]) extends ContextShift[ContextT[F, C, *]] {
+  def shift: ContextT[F, C, Unit] = _ => cs.shift
+
+  def evalOn[A](ec: ExecutionContext)(fa: ContextT[F, C, A]): ContextT[F, C, A] =
+    c => cs.evalOn(ec)(fa.run(c))
 }
