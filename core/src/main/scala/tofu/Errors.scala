@@ -11,7 +11,7 @@ import tofu.optics.{Downcast, Subset, Upcast}
 import scala.annotation.implicitNotFound
 
 /**
-  * Having this means a possibity of raising `E` inside type `F`
+  * Allows to raise `E` inside type `F`.
   */
 @implicitNotFound("""can't understand how to raise ${E} inside ${F} 
 provide an instance of Raise[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Upcast[..., ${E}]""")
@@ -31,8 +31,8 @@ object Raise extends DataEffectComp[Raise] {
 }
 
 /**
-  * Having this means you can recover after some error in the ${F} having ${G} as result
-  * `G` can be same as `F` or some "subconstructor" having less errors semantically
+  * Allows to recover after some error in a ${F} transiting to a ${G} as a result.
+  * A `G` can either be the same as a `F` or some "subconstructor" having less errors semantically.
   */
 @implicitNotFound("""can't understand how to restore from the type ${F} to the subtype ${G} 
 provide an instance of RestoreTo[${F}, ${G}], cats.ApplicativeError[${F}, ...]""")
@@ -41,7 +41,7 @@ trait RestoreTo[F[_], G[_]] extends Lift[G, F] with ErrorBase {
 }
 
 /**
-  * Having this means you can recover after some error in the ${F}
+  * Allows to recover after some error in a ${F}.
   */
 @implicitNotFound("""can't understand how to restore in the type ${F} to the subtype ${G} 
 provide an instance of Restore[${F}], cats.ApplicativeError[${F}, ...]""")
@@ -50,8 +50,8 @@ trait Restore[F[_]] extends RestoreTo[F, F] {
 }
 
 /**
-  * Having this means you can recover after error of type ${E} in the ${F} having ${G} as result
-  * `G` can be same as `F` or some "subconstructor" having less errors semantically
+  * Allows to recover after an error of type ${E} in a ${F} transiting to a ${G} as a result.
+  * A `G` can either be the same as a `F` or some "subconstructor" having less errors semantically.
   */
 @implicitNotFound("""can't understand how to recover from ${E} in the type ${F} to the subtype ${G} 
 provide an instance of HandleTo[${F}, ${G}, ${E}], cats.ApplicativeError[${F}, ${E}]""")
@@ -66,7 +66,7 @@ trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
 }
 
 /**
-  * Having this means you can recover after error of type ${E} in the ${F}
+  * Allows to recover after an error of type ${E} in a ${F}.
   */
 @implicitNotFound("""can't understand how to recover from ${E} in the type ${F}
 provide an instance of Handle[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Downcast[..., ${E}]""")
@@ -106,15 +106,15 @@ object Handle extends DataEffectComp[Handle] {
 }
 
 /**
-  * Having this means you can throw and handle errors of type ${E} in the ${F} having ${G} as recover result
-  * `G` can be same as `F` or some "subconstructor" having less errors semantically
+  * Allows to throw and handle errors of type ${E} in a ${F} transiting to a ${G} when recovering.
+  * A `G` can either be the same as `F` or some "subconstructor" having less errors semantically.
   */
 @implicitNotFound("""can't understand how to deal with errors ${E} in the type ${F} with the subtype ${G}
 provide an instance of ErrorsTo[${F}, ${G}, ${E}], cats.ApplicativeError[${F}, ${E}] or Contains[..., ${E}]""")
 trait ErrorsTo[F[_], G[_], E] extends Raise[F, E] with HandleTo[F, G, E]
 
 /**
-  * Having this means you can throw and handle errors of type ${E} in the ${F}
+  * Allows to throw and handle errors of type ${E} in a ${F}.
   */
 @implicitNotFound("""can't understand how to deal with errors ${E} in the type ${F}
 provide an instance of Errors[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Contains[..., ${E}]""")
