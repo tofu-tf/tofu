@@ -1,10 +1,15 @@
 package tofu
 package fs2Instances
-import cats.{FlatMap, Functor, ~>}
+import _root_.fs2._
+import cats.effect.{Concurrent, ExitCase, Sync, Timer}
 import cats.tagless.FunctorK
+import cats.{FlatMap, Functor, ~>}
 import tofu.higherKind.Embed
+import tofu.lift.Lift
+import tofu.streams._
 import tofu.syntax.funk._
-import fs2._
+
+import scala.concurrent.duration.FiniteDuration
 
 private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   private[this] val fs2HKInstanceAny = new FS2StreamHKInstance[Any]
@@ -15,7 +20,75 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   final implicit def fs2StreamRunContext[F[_], G[_], R](implicit
       fctx: HasContextRun[F, G, R]
   ): WithRun[Stream[F, *], Stream[G, *], R] =
-    new FS2RunContext[F, G, R] { override val F: HasContextRun[F, G, R] = fctx }
+    new FS2RunContext[F, G, R] {
+      override val F: HasContextRun[F, G, R] = fctx
+    }
+
+  implicit def fs2LiftInstance[F[_]]: Lift[F, Stream[F, *]] =
+    Lift.byFunK(funK(Stream.eval(_)))
+
+  implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk] =
+    new Chunks[Stream[F, *], Chunk] {
+      override def chunkN[A](fa: Stream[F, A])(n: Int): Stream[F, Chunk[A]] = fa.chunkN(n)
+
+      override def chunks[A](fa: Stream[F, A]): Stream[F, Chunk[A]] = fa.chunks
+
+      override def mapChunks[A, B](fa: Stream[F, A])(f: Chunk[A] => Chunk[B]): Stream[F, B] = fa.mapChunks(f)
+
+      override def cons[A](fa: Stream[F, A])(c: Chunk[A]): Stream[F, A] = fa.cons(c)
+    }
+
+  implicit def fs2MergeInstance[F[_]: Concurrent]: Merge[Stream[F, *]] =
+    new Merge[Stream[F, *]] {
+      override def merge[A](fa: Stream[F, A])(that: Stream[F, A]): Stream[F, A] = fa merge that
+    }
+
+  implicit def fs2CompileInstance[F[_]: Sync]: Compile[Stream[F, *], F] =
+    new Compile[Stream[F, *], F] {
+
+      override def drain[A](fa: Stream[F, A]): F[Unit] = fa.compile.drain
+
+      override def fold[A, B](fa: Stream[F, A])(init: B)(f: (B, A) => B): F[B] = fa.compile.fold(init)(f)
+
+      override def to[C[_], A](fa: Stream[F, A])(implicit ev: tofu.streams.internal.Factory[A, C[A]]): F[C[A]] =
+        fa.compile.to(ev)
+    }
+
+  implicit def fs2ParFlattenInstance[F[_]: Concurrent: Timer]: ParFlatten[Stream[F, *]] =
+    new ParFlatten[Stream[F, *]] {
+      override def parFlatten[A](ffa: Stream[F, Stream[F, A]])(maxConcurrent: Int): Stream[F, A] =
+        ffa.parJoin(maxConcurrent)
+    }
+
+  implicit def fs2PaceInstance[F[_]: Timer]: Pace[Stream[F, *]] =
+    new Pace[Stream[F, *]] {
+
+      override def throttled[A](fa: Stream[F, A])(rate: FiniteDuration): Stream[F, A] = fa.metered(rate)
+
+      override def delay[A](fa: Stream[F, A])(d: FiniteDuration): Stream[F, A] = fa.delayBy(d)
+    }
+
+  implicit def fs2TemporalInstance[F[_]: Timer: Concurrent]: Temporal[Stream[F, *], Chunk] =
+    new Temporal[Stream[F, *], Chunk] {
+      override def groupWithin[A](fa: Stream[F, A])(n: Int, d: FiniteDuration): Stream[F, Chunk[A]] =
+        fa.groupWithin(n, d)
+    }
+
+  implicit def fs2RegionThrowInstance[F[_]]: Region[Stream[F, *], F, ExitCase[Throwable]] =
+    new Region[Stream[F, *], F, ExitCase[Throwable]] {
+      override def regionCase[R](open: F[R])(close: (R, ExitCase[Throwable]) => F[Unit]): Stream[F, R] =
+        Stream.bracketCase(open)(close)
+    }
+
+  implicit def fs2BroadcastInstances[F[_]: Concurrent]: Broadcast[Stream[F, *]] =
+    new Broadcast[Stream[F, *]] {
+
+      override def broadcast[A](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, Unit]*): Stream[F, Unit] =
+        fa.broadcastTo(processors: _*)
+
+      override def broadcastThrough[A, B](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, B]*): Stream[F, B] =
+        fa.broadcastThrough(processors: _*)
+    }
 }
 
 private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
@@ -34,7 +107,7 @@ private[fs2Instances] trait Fs2Instances3 {
 }
 
 class FS2StreamHKInstance[A] extends Embed[Stream[*[_], A]] with FunctorK[Stream[*[_], A]] {
-  def embed[F[_]: FlatMap](ft: F[Stream[F, A]]): Stream[F, A]      = fs2.Stream.force(ft)
+  def embed[F[_]: FlatMap](ft: F[Stream[F, A]]): Stream[F, A]      = Stream.force(ft)
   def mapK[F[_], G[_]](af: Stream[F, A])(fk: F ~> G): Stream[G, A] = af.translate(fk)
 }
 
