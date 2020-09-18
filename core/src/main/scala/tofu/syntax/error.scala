@@ -51,7 +51,7 @@ object handle {
     def handleToWith[G[_], E](f: E => G[A])(implicit FE: HandleTo[F, G, E]): G[A]                       = FE.handleWith(fa)(f)
     def tryHandleWith[E](f: E => Option[F[A]])(implicit FE: Handle[F, E]): F[A]                         = FE.tryHandleWith(fa)(f)
     def tryHandle[E](f: E => Option[A])(implicit F: Applicative[F], FE: Handle[F, E]): F[A]             = FE.tryHandle(fa)(f)
-    def handle[E](f: E => A)(implicit FE: HandleTo[F, F, E], F: Applicative[F]): F[A]                   = FE.handle(fa)(f)
+    def handle[E](f: E => A)(implicit FE: Handle[F, E], F: Applicative[F]): F[A]                        = FE.handle(fa)(f)
     def handleTo[G[_]: Applicative, E](f: E => A)(implicit FE: HandleTo[F, G, E]): G[A]                 = FE.handle(fa)(f)
     def recoverWith[E](pf: PartialFunction[E, F[A]])(implicit FE: Handle[F, E]): F[A]                   = FE.recoverWith(fa)(pf)
     def recover[E](pf: PartialFunction[E, A])(implicit F: Applicative[F], FE: Handle[F, E]): F[A]       = FE.recover(fa)(pf)
