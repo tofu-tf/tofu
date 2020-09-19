@@ -4,7 +4,6 @@ package lift
 import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.effect.{Effect, IO}
-import cats.effect.syntax.effect._
 import cats.{Applicative, FlatMap, Functor, Monad, ~>}
 import syntax.funk._
 import tofu.optics.Contains
