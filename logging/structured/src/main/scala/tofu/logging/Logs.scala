@@ -17,6 +17,9 @@ import tofu.syntax.monadic._
 import tofu.syntax.monoidalK._
 
 import scala.reflect.ClassTag
+import tofu.higherKind.Pre
+import tofu.higherKind.Post
+import tofu.higherKind.Mid
 
 /**
   * A helper for creating instances of [[tofu.logging.Logging]], defining a way these instances will behave while doing logging.
@@ -52,7 +55,6 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
   final def biwiden[I1[a] >: I[a], F1[a] >: F[a]]: Logs[I1, F1] = this.asInstanceOf[Logs[I1, F1]]
 
   final def service[Svc: ClassTag]: I[ServiceLogging[F, Svc]] = forService[Svc].asInstanceOf[I[ServiceLogging[F, Svc]]]
-
 }
 
 object Logs extends LogsInstances0 {
@@ -145,7 +147,38 @@ object Logs extends LogsInstances0 {
         il: Lift[I, F],
         F: FlatMap[F]
     ): I[Universal[F]] = cached.map(_.universal)
+
+    /**
+      * Collection of useful methods for creating middleware
+      * ${logs.logged[Service].mid(implicit l => new Service[Mid[F, *]]{... })}
+      */
+    final def logged[U[_[_]]](implicit c: ClassTag[U[Any]]): LogWares[U, I, F] =
+      new LogWares(logs.forService[U[Any]])
+
+    /**
+      * Collection of useful methods for creating middleware
+      * ${logs.nameLogged[Service]("service").mid(implicit l => new Service[Mid[F, *]]{... })}
+      */
+    final def nameLogged[U[_[_]]](name: String): LogWares[U, I, F] =
+      new LogWares(logs.byName(name))
   }
+}
+
+class LogWares[U[_[_]], I[_], F[_]](private val made: I[Logging[F]]) extends AnyVal {
+  final def pre(
+      make: Logging[F] => U[Pre.Unwrap[F, *]]
+  )(implicit I: Functor[I]): I[U[Pre[F, *]]] =
+    made.map(logging => Pre.wrap(make(logging)))
+
+  final def post(
+      make: Logging[F] => U[Post[F, *]]
+  )(implicit I: Functor[I]): I[U[Post[F, *]]] =
+    made.map(logging => make(logging))
+
+  final def mid(
+      make: Logging[F] => U[Mid[F, *]]
+  )(implicit I: Functor[I]): I[U[Mid[F, *]]] =
+    made.map(logging => make(logging))
 }
 
 private[logging] trait LogsInstances0 extends LogsInstances1 {
