@@ -13,6 +13,11 @@ import tofu.syntax.monadic._
 object Pre extends PreInstances {
   type T[F[_], A] <: Base with PreTag
 
+  type Unwrap[F[_], A] = F[Unit]
+
+  def wrap[U[_[_]], F[_]](ufu: U[Unwrap[F, *]]): U[T[F, *]]    = ufu.asInstanceOf[U[T[F, *]]]
+  def unwrap[U[_[_]], F[_]](upre: U[T[F, *]]): U[Unwrap[F, *]] = upre.asInstanceOf[U[Unwrap[F, *]]]
+
   type Base = Any { type PreOpaque }
   trait PreTag extends Any
 
