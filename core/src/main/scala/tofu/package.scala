@@ -24,4 +24,12 @@ package object tofu {
   private[tofu] type AnyK[_] = Any
 
   type IorC[C[_], E, A] = Ior[C[E], C[A]]
+
+  type Execute[F[_]] = ScopedExecute[Scoped.Main, F]
+
+  type Blocks[F[_]]    = Scoped[Scoped.Blocking, F]
+  type BlockExec[F[_]] = ScopedExecute[Scoped.Blocking, F]
+
+  type Calculates[F[_]] = Scoped[Scoped.Calculation, F]
+  type CalcExec[F[_]]   = Scoped[Scoped.Calculation, F]
 }
