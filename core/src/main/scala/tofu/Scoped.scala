@@ -1,6 +1,6 @@
 package tofu
 
-import tofu.higherKind.Mid
+import tofu.higherKind.{Mid, Point, PureK}
 import cats._
 import tofu.syntax.funk._
 import tofu.syntax.monadic._
@@ -20,6 +20,10 @@ trait Scoped[Tag, F[_]] {
   final def funK: F ~> F = funKFrom[F](fa => fa)
 
   final def tagged[NewTag]: Scoped[NewTag, F] = this.asInstanceOf[Scoped[NewTag, F]]
+
+  final def midPoint: Point[Mid[F, *]] = new Point[Mid[F, *]] {
+    def point[A]: Mid[F, A] = runScoped
+  }
 }
 
 object Scoped extends ScopedInstances {
@@ -42,12 +46,11 @@ object Scoped extends ScopedInstances {
     */
   def make[Tag, F[_]] = new Make[Tag, F]
 
-  class Make[Tag, F[_]](private val __ : Boolean = true) extends AnyVal {
+  class Make[Tag, F[_]](private val __ : Boolean = true) extends AnyVal         {
     type Arbitrary
     def apply(maker: Maker[Tag, F, Arbitrary]): Scoped[Tag, F] = maker
   }
-
-  abstract class Maker[Tag, F[_], Arbitrary] extends Scoped[Tag, F] {
+  abstract class Maker[Tag, F[_], Arbitrary]             extends Scoped[Tag, F] {
     def arbApply(fa: F[Arbitrary]): F[Arbitrary]
     final def runScoped[A](fa: F[A]): F[A] = arbApply(fa.asInstanceOf[F[Arbitrary]]).asInstanceOf[F[A]]
   }
@@ -66,6 +69,9 @@ object Scoped extends ScopedInstances {
     def apply[Tag, F[_]](transform: C => C)(implicit FL: F WithLocal C): Scoped[Tag, F] =
       make[Tag, F](FL.local(_)(transform))
   }
+
+  /** helpful method to create middleware that executes all proceses in the given scope */
+  def mid[Tag, U[_[_]], F[_]](implicit U: PureK[U], F: Scoped[Tag, F]): U[Mid[F, *]] = U.pureK(F.midPoint)
 }
 
 trait ScopedExecute[Tag, F[_]] extends Scoped[Tag, F] {
