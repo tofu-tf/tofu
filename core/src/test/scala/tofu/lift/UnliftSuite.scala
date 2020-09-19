@@ -1,6 +1,6 @@
 package tofu.lift
 
-import cats.Applicative
+import cats.{Applicative, FlatMap}
 import cats.data.ReaderT
 import cats.effect.{Effect, IO}
 import cats.syntax.option._
@@ -57,6 +57,11 @@ object UnliftSuite {
 
   def summonUnliftIOInstances2[R](): Unit = {
     implicitly[UnliftIO[ReaderT[IO, R, *]]]
+    ()
+  }
+
+  def summonUnliftIOInstances2[F[_]: UnliftIO: Applicative: FlatMap, R](): Unit = {
+    implicitly[UnliftIO[ReaderT[F, R, *]]]
     ()
   }
 

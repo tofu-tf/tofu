@@ -80,20 +80,12 @@ trait Unlift[F[_], G[_]] extends Lift[F, G] { self =>
     }
 }
 
-object Unlift extends UnliftInstances1 {
+object Unlift extends UnliftInstances1 with UnliftInstances2 with UnliftInstances3 {
   def apply[F[_], G[_]](implicit unlift: Unlift[F, G]): Unlift[F, G] = unlift
 
   implicit def unliftIdentity[F[_]: Applicative]: Unlift[F, F] = new Unlift[F, F] {
     def lift[A](fa: F[A]): F[A] = fa
     def unlift: F[F ~> F]       = FunctionK.id[F].pure[F]
-  }
-
-  implicit def unliftIOReaderT[F[_]: Effect, R]: UnliftIO[ReaderT[F, R, *]] = {
-    type RT[a] = ReaderT[F, R, a]
-    new UnliftIO[RT] {
-      def lift[A](fa: IO[A]): RT[A] = ReaderT.liftF(Effect[F].liftIO(fa))
-      def unlift: RT[RT ~> IO]      = ReaderT(r => funK[RT, IO](_.run(r).toIO).pure[F])
-    }
   }
 
   def byIso[F[_], G[_]: Applicative](iso: IsoK[F, G]): Unlift[F, G] =
@@ -118,11 +110,32 @@ object Unlift extends UnliftInstances1 {
 }
 
 private[lift] trait UnliftInstances1 {
-  implicit def unliftReaderT[F[_]: Applicative, R]: Unlift[F, ReaderT[F, R, *]] = {
-    type RT[a] = ReaderT[F, R, a]
-    new Unlift[F, RT] {
-      def lift[A](fa: F[A]): RT[A] = ReaderT.liftF(fa)
-      def unlift: RT[RT ~> F]      = ReaderT(r => funK[RT, F](_.run(r)).pure[F])
+  implicit def unliftWithRun[F[_], G[_], A](implicit wr: WithRun[F, G, A]): Unlift[G, F] = wr
+}
+
+private[lift] trait UnliftInstances2 {
+  implicit def unliftIOWithRun[F[_], G[_], A](implicit
+      wr: WithRun[F, G, A],
+      ulG: UnliftIO[G],
+      F: FlatMap[F]
+  ): UnliftIO[F] = {
+    new Unlift[IO, F] {
+      def lift[X](fa: IO[X]): F[X] = wr.lift(ulG.lift(fa))
+
+      def unlift: F[F ~> IO] =
+        for {
+          toG  <- wr.unlift
+          toIO <- wr.lift(ulG.unlift)
+        } yield toG andThen toIO
     }
   }
+}
+
+private[lift] trait UnliftInstances3 {
+  implicit def unliftIOEffect[F[_]: Effect]: UnliftIO[F] =
+    new Unlift[IO, F] {
+      def lift[A](fa: IO[A]): F[A] = Effect[F].liftIO(fa)
+
+      def unlift: F[F ~> IO] = funK[F, IO](Effect[F].toIO).pure[F]
+    }
 }
