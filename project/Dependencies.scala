@@ -41,7 +41,7 @@ object Dependencies {
 
     val shapeless = "2.3.3"
 
-    val refined = "0.9.15"
+    val refined = "0.9.16"
 
     val doobie = "0.9.2"
 
