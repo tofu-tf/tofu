@@ -3,7 +3,7 @@ import com.typesafe.sbt.SbtGit.git
 
 moduleName := "tofu"
 
-val libVersion = "0.7.10"
+val libVersion = "0.8.0"
 
 val scalaV = "2.13.3"
 
