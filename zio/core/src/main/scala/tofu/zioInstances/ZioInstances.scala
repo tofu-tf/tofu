@@ -8,6 +8,7 @@ import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
 import zio.{Has, Tag}
+import zio.blocking.Blocking
 
 private[zioInstances] class ZioInstances {
   private[this] val rioTofuInstanceAny: RioTofuInstance[Any] = new RioTofuInstance
@@ -61,4 +62,14 @@ private[zioInstances] class ZioInstances {
 
   final def zioTofuUnliftHasInstance[R <: Has[_], E, C: Tag]: ZioTofuUnliftHasInstance[R, E, C] =
     new ZioTofuUnliftHasInstance
+
+  private[this] val zioTofuBlockingInstanceAny                                       =
+    new ZioTofuBlockingInstance[Blocking, Any]
+  final def zioTofuBlockingInstance[R <: Blocking, E]: ZioTofuBlockingInstance[R, E] =
+    zioTofuBlockingInstanceAny.asInstanceOf[ZioTofuBlockingInstance[R, E]]
+
+  private[this] val rioTofuBlockingInstanceAny                                 =
+    new RioTofuBlockingInstance[Blocking]
+  final def rioTofuBlockingInstance[R <: Blocking]: RioTofuBlockingInstance[R] =
+    rioTofuBlockingInstanceAny.asInstanceOf[RioTofuBlockingInstance[R]]
 }

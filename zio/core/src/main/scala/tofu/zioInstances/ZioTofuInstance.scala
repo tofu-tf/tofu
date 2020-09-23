@@ -15,10 +15,11 @@ import tofu.zioInstances.ZioTofuInstance.convertFiber
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
-import zio.{Fiber => ZFiber, _}
+import zio.{Fiber => ZFiber, blocking => _, _}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
+import zio.blocking._
 
 class ZioTofuInstance[R, E]
     extends Errors[ZIO[R, E, *], E] with Start[ZIO[R, E, *]] with Finally[ZIO[R, E, *], Exit[E, *]]
@@ -55,6 +56,9 @@ class ZioTofuInstance[R, E]
       init: ZIO[R, E, A]
   )(action: A => ZIO[R, E, B])(release: (A, Exit[E, B]) => ZIO[R, E, C]): ZIO[R, E, B] =
     init.bracketExit[R, E, B]((a, e) => release(a, e).ignore, action)
+
+  //Execute
+  def runScoped[A](fa: ZIO[R, E, A]): ZIO[R, E, A] = fa
 
   def executionContext: ZIO[R, E, ExecutionContext] = ZIO.runtime[R].map(_.platform.executor.asEC)
 
@@ -148,4 +152,18 @@ class ZioTofuUnliftHasInstance[R <: Has[_], E, C: Tag] extends WithRun[ZIO[R wit
     fa.provideSome(r => r add project(r.get[C]))
 
   override def lift[A](fa: ZIO[R, E, A]): ZIO[R with Has[C], E, A] = fa
+}
+
+class ZioTofuBlockingInstance[R <: Blocking, E] extends BlockExec[ZIO[R, E, *]] {
+  def runScoped[A](fa: ZIO[R, E, A]): ZIO[R, E, A] = blocking(fa)
+
+  def executionContext: ZIO[R, E, ExecutionContext] = blocking(ZIO.runtime.map(_.platform.executor.asEC))
+
+  def deferFutureAction[A](f: ExecutionContext => Future[A]): ZIO[R, E, A] =
+    blocking(ZIO.fromFuture(f).orDie)
+}
+
+class RioTofuBlockingInstance[R <: Blocking] extends ZioTofuBlockingInstance[R, Throwable] {
+  override def deferFutureAction[A](f: ExecutionContext => Future[A]): RIO[R, A] =
+    blocking(ZIO.fromFuture(f))
 }

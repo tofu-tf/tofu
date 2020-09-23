@@ -102,6 +102,7 @@ private[env] class EnvFunctorstance[E]
   override def memoizeOnSuccess[A](fa: Env[E, A]): Env[E, Env[E, A]] = fa.memoSuccess
 
   //Execute
+  override def runScoped[A](fa: Env[E, A]): Env[E, A]                            = Env.shift[E] *> fa
   override def executionContext: Env[E, ExecutionContext]                        = Env.deferTask(Task.deferAction(Task.pure))
   override def deferFutureAction[A](f: ExecutionContext => Future[A]): Env[E, A] = Env.deferFutureAction(f)
   override def deferFuture[A](f: => Future[A]): Env[E, A]                        = Env.deferFuture(f)
