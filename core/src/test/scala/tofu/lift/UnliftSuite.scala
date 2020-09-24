@@ -62,7 +62,7 @@ object UnliftSuite {
     ()
   }
 
-  def summonUnliftIOInstances3[F[_]: UnliftIO : Functor, R](): Unit = {
+  def summonUnliftIOInstances3[F[_]: UnliftIO: Functor, R](): Unit = {
     implicitly[UnliftIO[ReaderT[F, R, *]]]
     ()
   }

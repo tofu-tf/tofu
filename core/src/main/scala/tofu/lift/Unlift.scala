@@ -117,8 +117,8 @@ object Unlift extends UnliftInstances1 {
 }
 
 private[lift] trait UnliftInstances1 {
-  final implicit def unliftIOEffect[F[_] : Effect]: UnliftIO[F] = new UnliftIO[F] {
+  final implicit def unliftIOEffect[F[_]: Effect]: UnliftIO[F] = new UnliftIO[F] {
     def lift[A](fa: IO[A]): F[A] = Effect[F].liftIO(fa)
-    def unlift: F[F ~> IO] = Effect.toIOK[F].pure[F]
+    def unlift: F[F ~> IO]       = Effect.toIOK[F].pure[F]
   }
 }
