@@ -43,7 +43,7 @@ trait RestoreTo[F[_], G[_]] extends Lift[G, F] with ErrorBase {
 /**
   * Allows to recover after some error in a ${F}.
   */
-@implicitNotFound("""can't understand how to restore in the type ${F} to the subtype ${G} 
+@implicitNotFound("""can't understand how to restore in the type ${F}
 provide an instance of Restore[${F}], cats.ApplicativeError[${F}, ...]""")
 trait Restore[F[_]] extends RestoreTo[F, F] {
   def restoreWith[A](fa: F[A])(ra: => F[A]): F[A]
