@@ -50,14 +50,20 @@ object PSubset extends OpticCompanion[PSubset] {
   def apply[S, B] = new SubsetApplied[S, B](true)
 
   class SubsetApplied[S, B](private val dummy: Boolean) extends AnyVal {
-    def apply[T, A](fdown: S => Either[T, A])(fup: B => T): PSubset[S, T, A, B] = new PSubset[S, T, A, B] {
+    def apply[T, A](fdown: S => Either[T, A])(fup: B => T): PSubset[S, T, A, B]               = new PSubset[S, T, A, B] {
       def narrow(s: S): Either[T, A] = fdown(s)
       def upcast(b: B): T            = fup(b)
     }
+    def apply[T, A](name: String)(fdown: S => Either[T, A])(fup: B => T): PSubset[S, T, A, B] =
+      new PSubset[S, T, A, B] {
+        def narrow(s: S): Either[T, A]  = fdown(s)
+        def upcast(b: B): T             = fup(b)
+        override def toString(): String = name
+      }
   }
 
   def compose[S, T, A, B, U, V](f: PSubset[A, B, U, V], g: PSubset[S, T, A, B]): PSubset[S, T, U, V] =
-    new PSubset[S, T, U, V] {
+    new PComposed[PSubset, S, T, A, B, U, V](g, f) with PSubset[S, T, U, V] {
       def narrow(s: S): Either[T, U] = g.narrow(s).flatMap(f.narrow(_).leftMap(g.upcast))
       def upcast(v: V): T            = g.upcast(f.upcast(v))
     }

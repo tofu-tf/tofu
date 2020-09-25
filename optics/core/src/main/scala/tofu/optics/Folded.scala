@@ -20,6 +20,8 @@ trait PFolded[-S, +T, +A, -B] extends PBase[PFolded, S, T, A, B] { self =>
   def ++[S1 <: S, A1 >: A](other: PFolded[S1, Any, A1, Nothing]): PFolded[S1, Nothing, A1, Any] =
     new PFolded[S1, Nothing, A1, Any] {
       override def foldMap[X: Monoid](s: S1)(f: A1 => X): X = self.foldMap(s)(f) |+| other.foldMap(s)(f)
+
+      override def toString(): String = s"($self) ++ ($other)"
     }
 }
 
@@ -41,11 +43,13 @@ object PFolded extends OpticCompanion[PFolded] {
     def ++[S1 <: S, T1, A1 >: A, V1](that: PFolded[S1, T1, A1, V1]): PFolded[S1, T1, A1, V1] =
       new PFolded[S1, T1, A1, V1] {
         def foldMap[X: Monoid](s: S1)(f: A1 => X): X = self.foldMap(s)(f) |+| that.foldMap(s)(f)
+
+        override def toString(): String = s"($self) ++ ($that)"
       }
   }
 
   def compose[S, T, A, B, U, V](f: PFolded[A, B, U, V], g: PFolded[S, T, A, B]): PFolded[S, T, U, V] =
-    new PFolded[S, T, U, V] {
+    new PComposed[PFolded, S, T, A, B, U, V](g, f) with PFolded[S, T, U, V] {
       def foldMap[X: Monoid](s: S)(fux: U => X): X = g.foldMap(s)(f.foldMap(_)(fux))
     }
   final implicit def byFoldable[F[_], A, T, B](implicit F: Foldable[F]): PFolded[F[A], T, A, B]      =

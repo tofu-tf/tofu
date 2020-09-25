@@ -13,6 +13,8 @@ case class Bar(i: Int)
 
 case class Foo(b: Bar)
 
+case class Baz()
+
 class FooField1
 class FooField2
 

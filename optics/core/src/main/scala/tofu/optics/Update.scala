@@ -26,7 +26,9 @@ object Update extends MonoOpticCompanion(PUpdate)
 
 object PUpdate extends OpticCompanion[PUpdate] {
   def compose[S, T, A, B, U, V](f: PUpdate[A, B, U, V], g: PUpdate[S, T, A, B]): PUpdate[S, T, U, V] =
-    (s, fuv) => g.update(s, f.update(_, fuv))
+    new PComposed[PUpdate, S, T, A, B, U, V](g, f) with PUpdate[S, T, U, V] {
+      def update(s: S, uv: U => V): T = g.update(s, f.update(_, uv))
+    }
 
   override def delayed[S, T, A, B](o: () => PUpdate[S, T, A, B]): PUpdate[S, T, A, B] = new PUpdate[S, T, A, B] {
 

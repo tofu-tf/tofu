@@ -14,7 +14,7 @@ import tofu.optics.data.Identity
   * which may be set to B and change whole type to T
   */
 trait PProperty[-S, +T, +A, -B]
-    extends PItems[S, T, A, B] with PDowncast[S, T, A, B] with PBase[PProperty, S, T, A, B] {
+    extends PItems[S, T, A, B] with PDowncast[S, T, A, B] with PBase[PProperty, S, T, A, B] { self =>
   def set(s: S, b: B): T
   def narrow(s: S): Either[T, A]
 
@@ -27,6 +27,29 @@ trait PProperty[-S, +T, +A, -B]
   override def downcast(s: S): Option[A] = narrow(s).toOption
 
   override def foldMap[X: Monoid](a: S)(f: A => X): X = downcast(a).foldMap(f)
+
+  /** Fallback to another property of compatible type */
+  def orElse[S1 >: T <: S, T1, A1 >: A, B1 <: B](other: PProperty[S1, T1, A1, B1]): PProperty[S1, T1, A1, B1] =
+    new PProperty[S1, T1, A1, B1] {
+      def set(s: S1, b: B1): T1 = other.set(self.set(s, b), b)
+
+      def narrow(s: S1): Either[T1, A1] = self.narrow(s) match {
+        case Left(t)  => other.narrow(t)
+        case Right(a) => Right(a)
+      }
+
+      override def toString: String = s"$self orElse $other"
+    }
+
+  /** unsafe transform this property to contains */
+  def unsafeTotal: PContains[S, T, A, B] = new PContains[S, T, A, B] {
+    def set(s: S, b: B): T = self.set(s, b)
+
+    def extract(s: S): A =
+      self.narrow(s).getOrElse(throw new NoSuchElementException(s"$self was empty for $s"))
+
+    override def toString(): String = s"($self).unsafeTotal"
+  }
 }
 
 object Property extends MonoOpticCompanion(PProperty) {
@@ -59,7 +82,7 @@ object PProperty extends OpticCompanion[PProperty] {
   trait Context extends PSubset.Context with PContains.Context
 
   def compose[S, T, A, B, U, V](f: PProperty[A, B, U, V], g: PProperty[S, T, A, B]): PProperty[S, T, U, V] =
-    new PProperty[S, T, U, V] {
+    new PComposed[PProperty, S, T, A, B, U, V](g, f) with PProperty[S, T, U, V] {
       def set(s: S, b: V): T         = g.narrow(s).fold(identity[T], a => g.set(s, f.set(a, b)))
       def narrow(s: S): Either[T, U] = g.narrow(s).flatMap(a => f.narrow(a).leftMap(g.set(s, _)))
     }

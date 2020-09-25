@@ -11,6 +11,8 @@ class GenContainsSpec extends AnyFunSuite with Matchers {
     val foo = Foo(Bar(42))
 
     sut.update(foo, _ + 1).b.i shouldBe 43
+
+    sut.toString shouldBe "(_.b) >> (_.i)"
   }
 
   test("Annotation-generated optics") {
