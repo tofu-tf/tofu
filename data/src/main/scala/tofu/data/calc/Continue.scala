@@ -1,5 +1,6 @@
 package tofu.data.calc
 
+import tofu.compat.unused212
 import tofu.optics.PContains
 
 trait Continue[-A, -E, -S, +C] { self =>
@@ -96,8 +97,8 @@ object Continue {
   private[this] val biflattenAny                           = biflatten1[Nothing, Any, Any, Any, Any, Any]
 
   def biflatten[F[+_, +_], R, SI, SO, E1, A1, E, A](implicit
-      evA: A1 <:< CalcM[F, R, SI, SO, E, A],
-      evE: E1 <:< CalcM[F, R, SI, SO, E, A],
+      @unused212 evA: A1 <:< CalcM[F, R, SI, SO, E, A],
+      @unused212 evE: E1 <:< CalcM[F, R, SI, SO, E, A],
   ): Continue[A1, E1, SI, CalcM[F, R, SI, SO, E, A]] =
     biflattenAny.asInstanceOf[Continue[A1, E1, SI, CalcM[F, R, SI, SO, E, A]]]
 

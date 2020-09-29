@@ -4,7 +4,6 @@ package lift
 import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.effect.{Effect, IO}
-import cats.effect.syntax.effect._
 import cats.{Applicative, FlatMap, Functor, Monad, ~>}
 import syntax.funk._
 import tofu.optics.Contains
@@ -19,6 +18,11 @@ trait Lift[F[_], G[_]] {
 object Lift extends LiftInstances1 {
   def apply[F[_], G[_]](implicit lift: Lift[F, G]): Lift[F, G] = lift
   def trans[F[_], G[_]](implicit lift: Lift[F, G]): F ~> G     = lift.liftF
+
+  def byFunK[F[_], G[_]](fk: F ~> G): Lift[F, G] =
+    new Lift[F, G] {
+      def lift[A](fa: F[A]): G[A] = fk(fa)
+    }
 
   private val liftIdentityAny: Lift[AnyK, AnyK] = new Lift[AnyK, AnyK] {
     def lift[A](fa: Any): Any = fa
@@ -39,11 +43,6 @@ private[lift] trait LiftInstances1 extends LiftInstances2 {
     new Lift[F, G] {
       def lift[A](fa: F[A]): G[A] = iso.to(fa)
     }
-
-  def byFunK[F[_], G[_]](fk: F ~> G): Lift[F, G] =
-    new Lift[F, G] {
-      def lift[A](fa: F[A]): G[A] = fk(fa)
-    }
 }
 
 private[lift] trait LiftInstances2 {
@@ -57,7 +56,7 @@ private[lift] trait LiftInstances2 {
   * Embedded transformation. Can be used instead of a direct F ~> G.
   * Especially useful one is `UnliftIO`, a replacement for the `Effect` typeclass.
   */
-trait Unlift[F[_], G[_]] extends Lift[F, G] { self =>
+trait Unlift[F[_], G[_]] extends Lift[F, G] with ContextBase { self =>
   def lift[A](fa: F[A]): G[A]
   def unlift: G[G ~> F]
 
@@ -88,14 +87,6 @@ object Unlift extends UnliftInstances1 {
     def unlift: F[F ~> F]       = FunctionK.id[F].pure[F]
   }
 
-  implicit def unliftIOReaderT[F[_]: Effect, R]: UnliftIO[ReaderT[F, R, *]] = {
-    type RT[a] = ReaderT[F, R, a]
-    new UnliftIO[RT] {
-      def lift[A](fa: IO[A]): RT[A] = ReaderT.liftF(Effect[F].liftIO(fa))
-      def unlift: RT[RT ~> IO]      = ReaderT(r => funK[RT, IO](_.run(r).toIO).pure[F])
-    }
-  }
-
   def byIso[F[_], G[_]: Applicative](iso: IsoK[F, G]): Unlift[F, G] =
     new Unlift[F, G] {
       def lift[A](fa: F[A]): G[A] = iso.to(fa)
@@ -115,14 +106,19 @@ object Unlift extends UnliftInstances1 {
     override def unlift: F[F ~> G] =
       wrF.ask(a => funK(fa => wrG.askF(b => wrG.lift(wrF.runContext(fa)(lens.set(a, b))))))
   }
+
+  implicit def unliftIOReaderTViaUnliftIO[F[_]: UnliftIO: Functor, R]: UnliftIO[ReaderT[F, R, *]] = {
+    type RT[a] = ReaderT[F, R, a]
+    new UnliftIO[RT] {
+      def lift[A](fa: IO[A]): RT[A] = ReaderT.liftF(UnliftIO[F].lift(fa))
+      def unlift: RT[RT ~> IO]      = ReaderT(r => UnliftIO[F].unlift.map(toIO => funK[RT, IO](rt => toIO(rt.run(r)))))
+    }
+  }
 }
 
 private[lift] trait UnliftInstances1 {
-  implicit def unliftReaderT[F[_]: Applicative, R]: Unlift[F, ReaderT[F, R, *]] = {
-    type RT[a] = ReaderT[F, R, a]
-    new Unlift[F, RT] {
-      def lift[A](fa: F[A]): RT[A] = ReaderT.liftF(fa)
-      def unlift: RT[RT ~> F]      = ReaderT(r => funK[RT, F](_.run(r)).pure[F])
-    }
+  final implicit def unliftIOEffect[F[_]: Effect]: UnliftIO[F] = new UnliftIO[F] {
+    def lift[A](fa: IO[A]): F[A] = Effect[F].liftIO(fa)
+    def unlift: F[F ~> IO]       = Effect.toIOK[F].pure[F]
   }
 }
