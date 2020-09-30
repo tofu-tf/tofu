@@ -9,19 +9,22 @@ import tofu.lift.Lift
 import tofu.optics.PUpcast.GenericSubtypeImpl
 import tofu.optics.{Downcast, Subset, Upcast}
 import scala.annotation.implicitNotFound
+import com.github.ghik.silencer.silent
 
 /**
   * Allows to raise `E` inside type `F`.
   */
 @implicitNotFound("""can't understand how to raise ${E} inside ${F} 
 provide an instance of Raise[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Upcast[..., ${E}]""")
+@silent("deprecated")
 trait Raise[F[_], E] extends ErrorBase with Raise.ContravariantRaise[F, E] {
   def raise[A](err: E): F[A]
 }
 
 object Raise extends DataEffectComp[Raise] {
 
-  trait ContravariantRaise[F[_], -E] {
+  @deprecated("Raise has automatic upcasting, use Raise[F, E]", since = "0.8.1")
+  trait ContravariantRaise[F[_], -E] extends ErrorBase {
     def raise[A](err: E): F[A]
 
     def reRaise[A, E1 <: E](fa: F[Either[E1, A]])(implicit F: FlatMap[F], A: Applicative[F]): F[A] =
@@ -129,15 +132,16 @@ object Errors extends DataEffectComp[Errors]
   * Base trait for instance search
   */
 trait ErrorBase
-object ErrorBase extends ErrorsBaseInstances {
-  final implicit def errorByCatsError[F[_]: ApplicativeError[*[_], E], E]: Errors[F, E] =
+object ErrorBase          extends ErrorsBaseInstances  {
+  final implicit def errorByCatsError[F[_], E](implicit F: ApplicativeError[F, E]): Errors[F, E] =
     new HandleApErr[F, E] with RaiseAppApErr[F, E] with Errors[F, E]
-
 }
 class ErrorsBaseInstances extends ErrorsBaseInstances1 {
-  final implicit def errorPrismatic[F[_], E, E1](implicit e: Errors[F, E], prism: Subset[E, E1]): Errors[F, E1] =
+  final implicit def errorPrismatic[F[_], E, E1](implicit
+      e: Errors[F, E],
+      prism: Subset[E, E1]
+  ): Errors[F, E1] =
     new FromPrism[F, E, E1, Errors, Subset] with RaisePrism[F, E, E1] with HandlePrism[F, E, E1] with Errors[F, E1]
-
 }
 
 class ErrorsBaseInstances1 extends ErrorsBaseInstances2 {

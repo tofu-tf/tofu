@@ -2,15 +2,39 @@ package tofu
 package syntax
 
 import cats.{Applicative, Functor, Monad}
-import tofu.Raise.ContravariantRaise
-
+import cats.ApplicativeError
 object raise {
+
+  //** special alias for Raise[F, E] for use in situations when F[_] can be unknown from the start */
+  type FindRaise[E] = FindRaise.Search[E]
+
+  object FindRaise extends FindRaiseLowPrio {
+    trait Find[E] extends Any
+    type Search[E]    = AnyRef with Find[E] { type Eff[_] }
+    type Aux[E, F[_]] = FindRaise[E] { type Eff[a] = F[a] }
+
+    def wrap[F[_], E](r: Raise[F, E]): Aux[E, F]   = r.asInstanceOf[Aux[E, F]]
+    def unwrap[F[_], E](r: Aux[E, F]): Raise[F, E] = r.asInstanceOf[Raise[F, E]]
+
+    implicit final def findByApplicativeError[F[_], E1, E](implicit
+        app: ApplicativeError[F, E],
+        evE: E1 <:< E
+    ): Aux[E1, F] = wrap(implicitly)
+  }
+
+  trait FindRaiseLowPrio {
+    implicit final def findByRaise[F[_], E1, E](implicit
+        app: Raise[F, E],
+        evE: E1 <:< E
+    ): FindRaise.Aux[E1, F] = FindRaise.wrap(implicitly)
+  }
+
   implicit final class RaiseOps[E](private val err: E) extends AnyVal {
-    def raise[F[_], A](implicit raise: ContravariantRaise[F, E]): F[A] = raise.raise(err)
+    def raise[F[_], A](implicit raise: FindRaise.Aux[E, F]): F[A] = FindRaise.unwrap(raise).raise(err)
   }
 
   implicit final class RaiseMonadOps[F[_], A](private val fa: F[A]) extends AnyVal {
-    def verified[E](p: A => Boolean)(err: E)(implicit raise: ContravariantRaise[F, E], F: Monad[F]): F[A] =
+    def verified[E](p: A => Boolean)(err: E)(implicit raise: Raise[F, E], F: Monad[F]): F[A] =
       F.flatMap(fa)(a => if (p(a)) F.pure(a) else raise.raise(err))
   }
 
@@ -22,18 +46,18 @@ object raise {
   implicit final class RaiseEitherOps[E, A](private val either: Either[E, A]) extends AnyVal {
     def toRaise[F[_]](implicit
         app: Applicative[F],
-        raise: ContravariantRaise[F, E]
+        raise: FindRaise.Aux[E, F]
     ): F[A] =
       either match {
-        case Left(err)    => raise.raise(err)
+        case Left(err)    => FindRaise.unwrap(raise).raise(err)
         case Right(value) => app.pure(value)
       }
   }
 
   class RaiseOptionApplied[F[_], A](val opt: Option[A]) extends AnyVal {
-    def apply[E](err: => E)(implicit raise: ContravariantRaise[F, E], app: Applicative[F]): F[A] =
+    def apply[E](err: => E)(implicit raise: FindRaise.Aux[E, F], app: Applicative[F]): F[A] =
       opt match {
-        case None    => raise.raise(err)
+        case None    => FindRaise.unwrap(raise).raise(err)
         case Some(a) => app.pure(a)
       }
   }
