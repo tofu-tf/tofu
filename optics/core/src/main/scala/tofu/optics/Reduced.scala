@@ -62,7 +62,7 @@ object Reduced extends MonoOpticCompanion(PReduced) {
 
 object PReduced extends OpticCompanion[PReduced] {
   def compose[S, T, A, B, U, V](f: PReduced[A, B, U, V], g: PReduced[S, T, A, B]): PReduced[S, T, U, V] =
-    new PReduced[S, T, U, V] {
+    new PComposed[PReduced, S, T, A, B, U, V](g, f) with PReduced[S, T, U, V] {
       def reduceMap[X: Semigroup](s: S)(fux: U => X): X = g.reduceMap(s)(f.reduceMap(_)(fux))
     }
 

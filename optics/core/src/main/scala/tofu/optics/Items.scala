@@ -41,7 +41,7 @@ object PItems extends OpticCompanion[PItems] {
   }
 
   def compose[S, T, A, B, U, V](f: PItems[A, B, U, V], g: PItems[S, T, A, B]): PItems[S, T, U, V] =
-    new PItems[S, T, U, V] {
+    new PComposed[PItems, S, T, A, B, U, V](g, f) with PItems[S, T, U, V] {
       def traverse[F[+_]: Applicative](a: S)(fc: U => F[V]): F[T] = g.traverse(a)(f.traverse(_)(fc))
     }
 

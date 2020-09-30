@@ -15,7 +15,9 @@ object Upcast extends MonoOpticCompanion(PUpcast)
 object PUpcast extends OpticCompanion[PUpcast] with OpticProduct[PUpcast] {
 
   def compose[S, T, A, B, U, V](f: PUpcast[A, B, U, V], g: PUpcast[S, T, A, B]): PUpcast[S, T, U, V] =
-    v => g.upcast(f.upcast(v))
+    new PComposed[PUpcast, S, T, A, B, U, V](g, f) with PUpcast[S, T, U, V] {
+      def upcast(v: V): T = g.upcast(f.upcast(v))
+    }
 
   override def product[S1, S2, T1, T2, A1, A2, B1, B2](
       f: PUpcast[S1, T1, A1, B1],

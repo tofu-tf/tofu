@@ -21,7 +21,9 @@ object Extract extends MonoOpticCompanion(PExtract)
 
 object PExtract extends OpticCompanion[PExtract] {
   def compose[S, T, A, B, U, V](f: PExtract[A, B, U, V], g: PExtract[S, T, A, B]): PExtract[S, T, U, V] =
-    s => f.extract(g.extract(s))
+    new PComposed[PExtract, S, T, A, B, U, V](g, f) with PExtract[S, T, U, V] {
+      def extract(s: S): U = f.extract(g.extract(s))
+    }
 
   trait Context extends PContains.Context {
     type X

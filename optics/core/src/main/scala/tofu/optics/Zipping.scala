@@ -27,9 +27,8 @@ trait PZipping[-S, +T, +A, -B] extends PBase[PZipping, S, T, A, B] with PUpdate[
 
 object PZipping extends OpticCompanion[PZipping] {
   override def compose[S, T, A, B, U, V](f: PZipping[A, B, U, V], g: PZipping[S, T, A, B]): PZipping[S, T, U, V] =
-    new PZipping[S, T, U, V] {
-      override def grate(suv: (S => U) => V): T =
-        g.grate(sa => f.grate(au => suv(au compose sa)))
+    new PComposed[PZipping, S, T, A, B, U, V](g, f) with PZipping[S, T, U, V] {
+      def grate(suv: (S => U) => V): T = g.grate(sa => f.grate(au => suv(au compose sa)))
     }
 
   override def delayed[S, T, A, B](o: () => PZipping[S, T, A, B]): PZipping[S, T, A, B] = new PZipping[S, T, A, B] {

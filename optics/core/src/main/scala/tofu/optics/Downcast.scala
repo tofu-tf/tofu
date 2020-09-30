@@ -5,7 +5,7 @@ import cats.instances.option._
 import cats.syntax.foldable._
 import tofu.optics.data.Constant
 
-import scala.reflect.ClassTag
+import scala.reflect.{ClassTag, classTag}
 
 /** S could be T or not
   * partial function from S to T
@@ -24,7 +24,9 @@ object Downcast extends MonoOpticCompanion(PDowncast)
 object PDowncast extends OpticCompanion[PDowncast] {
 
   def compose[S, T, A, B, U, V](f: PDowncast[A, B, U, V], g: PDowncast[S, T, A, B]): PDowncast[S, T, U, V] =
-    s => g.downcast(s).flatMap(f.downcast)
+    new PComposed[PDowncast, S, T, A, B, U, V](g, f) with PDowncast[S, T, U, V] {
+      def downcast(s: S): Option[U] = g.downcast(s).flatMap(f.downcast)
+    }
 
   trait Context extends PExtract.Context {
     def default: X
@@ -43,8 +45,15 @@ object PDowncast extends OpticCompanion[PDowncast] {
         def default: Option[A] = None
       })(a => Some(a))(s)
 
-  implicit def subType[A, B <: A: ClassTag]: Downcast[A, B]                               =
-    (s: A) => Some(s).collect { case b: B => b }
+  implicit def subType[A, B <: A: ClassTag]: Downcast[A, B] =
+    new Downcast[A, B] {
+      def downcast(s: A): Option[B] = Some(s).collect { case b: B => b }
+
+      override def toString: String = {
+        val name = classTag[B].runtimeClass.getCanonicalName.split("\\.").last
+        s":$name"
+      }
+    }
 
   override def delayed[S, T, A, B](o: () => PDowncast[S, T, A, B]): PDowncast[S, T, A, B] = new PDowncast[S, T, A, B] {
     lazy val opt                  = o()

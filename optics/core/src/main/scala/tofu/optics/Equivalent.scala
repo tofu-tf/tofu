@@ -45,6 +45,13 @@ object Equivalent extends MonoOpticCompanion(PEquivalent) {
       def extract(s: A): B = fget(s)
       def back(b: B): A    = finv(b)
     }
+
+    def apply[B](name: String)(fget: A => B)(finv: B => A): Equivalent[A, B] = new Equivalent[A, B] {
+      def extract(s: A): B = fget(s)
+      def back(b: B): A    = finv(b)
+
+      override def toString(): String = name
+    }
   }
 }
 
@@ -56,10 +63,17 @@ object PEquivalent extends OpticCompanion[PEquivalent] with OpticProduct[PEquiva
       def extract(s: S): A = fget(s)
       def back(b: B): T    = finv(b)
     }
+
+    def apply[T, A](name: String)(fget: S => A)(finv: B => T): PEquivalent[S, T, A, B] = new PEquivalent[S, T, A, B] {
+      def extract(s: S): A = fget(s)
+      def back(b: B): T    = finv(b)
+
+      override def toString(): String = name
+    }
   }
 
   def compose[S, T, A, B, U, V](f: PEquivalent[A, B, U, V], g: PEquivalent[S, T, A, B]): PEquivalent[S, T, U, V] =
-    new PEquivalent[S, T, U, V] {
+    new PComposed[PEquivalent, S, T, A, B, U, V](g, f) with PEquivalent[S, T, U, V] {
       def extract(s: S): U = f.extract(g.extract(s))
       def back(v: V): T    = g.upcast(f.upcast(v))
     }

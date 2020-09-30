@@ -79,17 +79,12 @@ private[macros] class MacroImpl(val c: blackbox.Context) {
       .find(_.name.decodedName.toString == strFieldName)
       .getOrElse(c.abort(c.enclosingPosition, s"Cannot find constructor field named $fieldName in $sTpe"))
 
+    val name = s"_.$strFieldName"
     c.Expr[PContains[S, T, A, B]](q"""
       import _root_.tofu.optics.PContains
       import _root_.scala.language.higherKinds // prevent warning at call site
 
-      new PContains[$sTpe, $tTpe, $aTpe, $bTpe]{
-        override def extract(s: $sTpe): $aTpe =
-          s.$fieldMethod
-
-        override def set(s: $sTpe, a: $bTpe): $tTpe =
-          s.copy($field = a)
-      }
+      PContains[$sTpe, $bTpe][$aTpe, $tTpe]($name)((s : $sTpe) => s.$fieldMethod)((s: $sTpe, a: $bTpe) => s.copy($field = a))
     """)
   }
 }

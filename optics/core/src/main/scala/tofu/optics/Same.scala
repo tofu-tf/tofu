@@ -25,6 +25,7 @@ object PSame extends OpticCompanion[PSame] with OpticProduct[PSame] {
 
   private def refl[A, B]: PSame[A, B, A, B] = new PSame[A, B, A, B] {
     def rsubst[K[_, _]](k: K[A, B]): K[A, B] = k
+    override def toString                    = "id"
   }
 
   private val anyId               = refl[Any, Any]

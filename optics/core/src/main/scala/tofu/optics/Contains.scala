@@ -59,10 +59,17 @@ object PContains extends OpticCompanion[PContains] with OpticProduct[PContains] 
       def set(s: S, b: B): T = fset(s, b)
       def extract(s: S): A   = fget(s)
     }
+
+    def apply[A, T](name: String)(fget: S => A)(fset: (S, B) => T): PContains[S, T, A, B] = new PContains[S, T, A, B] {
+      def set(s: S, b: B): T = fset(s, b)
+      def extract(s: S): A   = fget(s)
+
+      override def toString(): String = name
+    }
   }
 
   def compose[S, T, A, B, U, V](f: PContains[A, B, U, V], g: PContains[S, T, A, B]): PContains[S, T, U, V] =
-    new PContains[S, T, U, V] {
+    new PComposed[PContains, S, T, A, B, U, V](g, f) with PContains[S, T, U, V] {
       def set(s: S, b: V): T = g.set(s, f.set(g.extract(s), b))
       def extract(a: S): U   = f.extract(g.extract(a))
     }

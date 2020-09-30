@@ -12,3 +12,10 @@ trait PBase[+O[-s, +t, +a, -b] <: PBase[O, s, t, a, b], -S, +T, +A, -B] { self: 
 
   def >>[O1[-s, +t, +a, -b] >: O[s, t, a, b] @uv212: Category2, U, V](o1: O1[A, B, U, V]): O1[S, T, U, V] = andThen(o1)
 }
+
+class PComposed[+O[-s, +t, +a, -b] <: PBase[O, s, t, a, b], -S, +T, A, B, +U, -V](
+    x: PBase[O, S, T, A, B],
+    y: PBase[O, A, B, U, V]
+) extends PBase[O, S, T, U, V] { self: O[S, T, U, V] =>
+  override def toString(): String = s"($x) >> ($y)"
+}
