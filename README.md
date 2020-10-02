@@ -54,6 +54,7 @@ of `"tofu"`):
 # Adopters
 
 Proud user of ToFu? Feel free to [add your company!](https://github.com/TinkoffCreditSystems/tofu/edit/master/README.md)
+
 <img align="left" src="logos/yandex-travel-logo.svg" height="200px" />
 
 <img align="left" src="logos/tele2-ru-logo.svg" height="200px" />
