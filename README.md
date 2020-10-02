@@ -50,10 +50,13 @@ of `"tofu"`):
 
 <img align="right" src="logos/tofu-logo.png" height="100px" style="padding-left: 5px"/>
 
-# Copyright
-Copyright the maintainers, 2020
 
-Logos made with love by [@impurepics](https://twitter.com/impurepics)
+# Adopters
+
+Proud user of ToFu? Feel free to [add your company!](https://github.com/TinkoffCreditSystems/tofu/edit/master/README.md)
+<img align="left" src="logos/yandex-travel-logo.svg" height="200px" />
+
+<img align="left" src="logos/tele2-ru-logo.svg" height="200px" />
 
 # Contributing
 
@@ -64,3 +67,8 @@ Please note we use the following labels for automated release descriptions:
 ## Formatting
   We have an automated check for style conformance. You can run `sbt checkfmt` before PR.
   If you have any trouble during this check, just run `sbt fmt` and commit again.
+  
+# Copyright
+Copyright the maintainers, 2020
+
+Logos made with love by [@impurepics](https://twitter.com/impurepics)
