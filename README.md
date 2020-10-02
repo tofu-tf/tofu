@@ -55,9 +55,9 @@ of `"tofu"`):
 
 Proud user of ToFu? Feel free to [add your company!](https://github.com/TinkoffCreditSystems/tofu/edit/master/README.md)
 
-<img align="left" src="logos/yandex-travel-logo.svg" height="200px" />
+<a href="https://tinkoff.ru/"><img width="40%" src="logos/yandex-travel-logo.svg?sanitize=true" /></a>
 
-<img align="left" src="logos/tele2-ru-logo.svg" height="200px" />
+<a href="https://tele2.ru/"><img width="40%" src="logos/tele2-ru-logo.svg?sanitize=true" /></a>
 
 
 # Contributing
