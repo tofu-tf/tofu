@@ -59,6 +59,7 @@ Proud user of ToFu? Feel free to [add your company!](https://github.com/TinkoffC
 
 <img align="left" src="logos/tele2-ru-logo.svg" height="200px" />
 
+
 # Contributing
 
 Please note we use the following labels for automated release descriptions:
