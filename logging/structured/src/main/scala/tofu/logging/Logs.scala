@@ -21,8 +21,7 @@ import tofu.higherKind.Pre
 import tofu.higherKind.Post
 import tofu.higherKind.Mid
 
-/**
-  * A helper for creating instances of [[tofu.logging.Logging]], defining a way these instances will behave while doing logging.
+/** A helper for creating instances of [[tofu.logging.Logging]], defining a way these instances will behave while doing logging.
   * Can create instances either on a by-name basic or a type tag basic.
   * An instance of [[tofu.logging.Logs]] can be shared between different pieces of code depending
   * on whether logging behaviour should be shared.
@@ -74,8 +73,7 @@ object Logs extends LogsInstances0 {
   def provide[I[_], F[_]]                                                                 = new Provide[I, F]
   def provideM[I[_], F[_]]                                                                = new ProvideM[I, F]
 
-  /**
-    * Returns an instance of [[tofu.logging.Logs]] that requires [[cats.effect.Sync]] to perform logging side-effects.
+  /** Returns an instance of [[tofu.logging.Logs]] that requires [[cats.effect.Sync]] to perform logging side-effects.
     * Has no notion of context.
     */
   def sync[I[_]: Sync, F[_]: Sync]: Logs[I, F] = new Logs[I, F] {
@@ -94,21 +92,18 @@ object Logs extends LogsInstances0 {
     }
   }
 
-  /**
-    * Returns an instance of [[tofu.logging.Logs]] that will produce the same constant [[tofu.logging.Logging]] instances.
+  /** Returns an instance of [[tofu.logging.Logs]] that will produce the same constant [[tofu.logging.Logging]] instances.
     */
   def const[I[_]: Applicative, F[_]](logging: Logging[F]): Logs[I, F] = new Logs[I, F] {
     def forService[Svc: ClassTag]: I[Logging[F]] = logging.pure[I]
     def byName(name: String): I[Logging[F]]      = logging.pure[I]
   }
 
-  /**
-    * Returns an instance of [[tofu.logging.Logs]] that will produce a no-op [[tofu.logging.Logging]] instances.
+  /** Returns an instance of [[tofu.logging.Logs]] that will produce a no-op [[tofu.logging.Logging]] instances.
     */
   def empty[I[_]: Applicative, F[_]: Applicative]: Logs[I, F] = const[I, F](Logging.empty[F])
 
-  /**
-    * Combines two instances of [[tofu.logging.Logs]], resulting in a single one that will produce
+  /** Combines two instances of [[tofu.logging.Logs]], resulting in a single one that will produce
     * instances of [[tofu.logging.Logging]] by combining.
     * Resulting [[tofu.logging.Logging]] instance will call both implementations in order.
     */
@@ -148,15 +143,13 @@ object Logs extends LogsInstances0 {
         F: FlatMap[F]
     ): I[Universal[F]] = cached.map(_.universal)
 
-    /**
-      * Collection of useful methods for creating middleware
+    /** Collection of useful methods for creating middleware
       * ${logs.logged[Service].mid(implicit l => new Service[Mid[F, *]]{... })}
       */
     final def logged[U[_[_]]](implicit c: ClassTag[U[Any]]): LogWares[U, I, F] =
       new LogWares(logs.forService[U[Any]])
 
-    /**
-      * Collection of useful methods for creating middleware
+    /** Collection of useful methods for creating middleware
       * ${logs.nameLogged[Service]("service").mid(implicit l => new Service[Mid[F, *]]{... })}
       */
     final def nameLogged[U[_[_]]](name: String): LogWares[U, I, F] =
