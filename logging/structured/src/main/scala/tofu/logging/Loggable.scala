@@ -29,8 +29,7 @@ import scala.collection.{immutable, mutable}
 import scala.concurrent.duration.FiniteDuration
 import scala.{PartialFunction => PF, specialized => sp}
 
-/**
-  * Typeclass for adding custom log values to message
+/** Typeclass for adding custom log values to message
   */
 @typeclass
 trait Loggable[A] extends Loggable.Base[A] {
@@ -79,8 +78,7 @@ object Loggable {
     def putField[I, V, R, S](a: A, name: String, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
       r.sub(name, i)(putValue(a, _))
 
-    /**
-      * add list of custom fields for value
+    /** add list of custom fields for value
       *
       * @param a        value for logging
       * @param addParam side-effectful function, adding custom field to log entry
@@ -88,16 +86,14 @@ object Loggable {
     def logVia(a: A, addParam: (String, Any) => Unit): Unit =
       fields(a: A, "")(LogRenderer.prefixed(addParam))
 
-    /**
-      * display value in log message
+    /** display value in log message
       *
       * @param a value for logging
       * @return displayed form
       */
     def logShow(a: A): String
 
-    /**
-      * Convert value to LoggedValue
+    /** Convert value to LoggedValue
       *
       * @param a value for logging
       * @return new Logged Value

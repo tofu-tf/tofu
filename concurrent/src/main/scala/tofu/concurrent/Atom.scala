@@ -14,16 +14,14 @@ import tofu.data.calc.CalcM
 /** a middleground between cats.concurrent.Ref and zio.Ref */
 trait Atom[+F[_], A] {
 
-  /**
-    * Obtains the current value.
+  /** Obtains the current value.
     *
     * Since `Ref` is always guaranteed to have a value, the returned action
     * completes immediately after being bound.
     */
   def get: F[A]
 
-  /**
-    * Sets the current value to `a`.Agent
+  /** Sets the current value to `a`.Agent
     *
     * The returned action completes after the reference has been successfully set.
     *
@@ -32,13 +30,11 @@ trait Atom[+F[_], A] {
     */
   def set(a: A): F[Unit]
 
-  /**
-    * Replaces the current value with `a`, returning the previous value.
+  /** Replaces the current value with `a`, returning the previous value.
     */
   def getAndSet(a: A): F[A]
 
-  /**
-    * Modifies the current value using the supplied update function. If another modification
+  /** Modifies the current value using the supplied update function. If another modification
     * occurs between the time the current value is read and subsequently updated, the modification
     * is retried using the new value. Hence, `f` may be invoked multiple times.
     *
@@ -47,8 +43,7 @@ trait Atom[+F[_], A] {
     */
   def update(f: A => A): F[Unit]
 
-  /**
-    * Like `tryModify` but does not complete until the update has been successfully made.
+  /** Like `tryModify` but does not complete until the update has been successfully made.
     */
   def modify[B](f: A => (A, B)): F[B]
 }

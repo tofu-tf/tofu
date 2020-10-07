@@ -16,8 +16,7 @@ object bracket {
     def guaranteeIf[B](fb: Boolean => F[B])(implicit FG: Guarantee[F], F: Applicative[F]) =
       FG.bracket(F.unit)(_ => fa)((_, b) => fb(b))
 
-    /**
-      * Apply function to [[fa]] with effectful transformation. In case of error or cancellation [[fa]] is released
+    /** Apply function to [[fa]] with effectful transformation. In case of error or cancellation [[fa]] is released
       * @param use function to modify value contained in [[fa]]
       * @param release function to release value contained in [[fa]]
       * @return `F[B]` updated value
@@ -27,8 +26,7 @@ object bracket {
     )(release: A => F[C])(implicit F: Applicative[F], FG: Guarantee[F]): F[B]                     =
       FG.bracket(fa)(use) { case (a, success) => success unless_ release(a) }
 
-    /**
-      * Apply function to [[fa]] with effectful transformation. [[fa]] is always released
+    /** Apply function to [[fa]] with effectful transformation. [[fa]] is always released
       * @param use function to modify value contained in [[fa]]
       * @param release function to release value contained in [[fa]]
       * @return `F[B]` updated value
@@ -38,24 +36,21 @@ object bracket {
     )(release: A => F[C])(implicit FG: Guarantee[F]): F[B]                                        =
       FG.bracket(fa)(use) { case (a, _) => release(a) }
 
-    /**
-      * Guarantee finalization of [[fa]]. `release` is called in case of error or cancellation
+    /** Guarantee finalization of [[fa]]. `release` is called in case of error or cancellation
       * @param release function to release value contained in [[fa]]
       * @return `F[B]` updated value
       */
     def guaranteeIncomplete[B](release: F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[A] =
       FG.bracket(F.unit)(_ => fa)((_, success) => success unless_ release)
 
-    /**
-      * Guarantee finalization of [[fa]]. `release` is alwyas called
+    /** Guarantee finalization of [[fa]]. `release` is alwyas called
       * @param release function to release value contained in [[fa]]
       * @return `F[A]` updated value
       */
     def guaranteeAlways[B](release: F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[A] =
       FG.bracket(F.unit)(_ => fa)((_, _) => release)
 
-    /**
-      * Guarantee finalization of [[fa]].
+    /** Guarantee finalization of [[fa]].
       * `release` is always called and boolean indicating success of usage is passed to it
       * @param release function to release value contained in [[fa]] depending on success of usage
       * @return `F[A]` updated value
@@ -63,8 +58,7 @@ object bracket {
     def guaranteeOpt[B](release: Boolean => F[B])(implicit F: Applicative[F], FG: Guarantee[F]): F[A] =
       FG.bracket(F.unit)(_ => fa)((_, success) => release(success))
 
-    /**
-      * Replace value in [[fa]]. In case of error or cancellation old value of [[fa]] is passed to `commit`, otherwise
+    /** Replace value in [[fa]]. In case of error or cancellation old value of [[fa]] is passed to `commit`, otherwise
       * result of `use` is passed.
       * @param use function to modify value contained in [[fa]]
       * @param commit function to commit passed value
@@ -75,8 +69,7 @@ object bracket {
         success unless_ commit(oldA)
       })(newA => commit(newA) as newA) { (_, _) => A.unit }
 
-    /**
-      * Use value contained in [[fa]]. `release` is guaranteed to be called
+    /** Use value contained in [[fa]]. `release` is guaranteed to be called
       * @param use function to modify value contained in [[fa]]
       * @param release function to release value contained in [[fa]]
       * @return `F[B]` updated value
@@ -84,8 +77,7 @@ object bracket {
     def bracketOpt[B, C](use: A => F[B])(release: (A, Boolean) => F[C])(implicit FG: Guarantee[F]): F[B] =
       FG.bracket(fa)(use)(release)
 
-    /**
-      * Update value in [[fa]] while producing additional one.
+    /** Update value in [[fa]] while producing additional one.
       * In case of error or cancellation old value of [[fa]] is passed to `commit`, otherwise
       * result of `use` is passed.
       * @param use function to modify value contained in [[fa]] and produce additional one
@@ -99,8 +91,7 @@ object bracket {
         success unless_ commit(oldA)
       }) { case (newA, b) => commit(newA) as b } { (_, _) => A.unit }
 
-    /**
-      * Update value in [[fa]] and then release with respect to exit cause.
+    /** Update value in [[fa]] and then release with respect to exit cause.
       * @param use function to modify value contained in [[fa]]
       * @param release function to release value depending on exit cause
       * @return `F[B]` modified value
@@ -112,16 +103,14 @@ object bracket {
   @nowarn("cat=deprecation")
   implicit final class TofuBracketMVarOps[F[_], A](private val mvar: MVar[F, A]) extends AnyVal {
 
-    /**
-      * Update value with effectful transformation. In case of error or cancellation value remains unchanged
+    /** Update value with effectful transformation. In case of error or cancellation value remains unchanged
       * @param use function to atomically modify value contained in `MVar`
       * @return `F[A]` modified value contained in `MVar`
       */
     def bracketUpdate(use: A => F[A])(implicit FG: Guarantee[F], A: Applicative[F]): F[A] =
       mvar.take.bracketReplace(use)(mvar.put)
 
-    /**
-      * Modify value with effectful transformation, calculating result. In case of error or cancellation value remains unchanged
+    /** Modify value with effectful transformation, calculating result. In case of error or cancellation value remains unchanged
       * @param use function to atomically modify value contained in `MVar` and produce result
       * @return `F[B]`
       */
