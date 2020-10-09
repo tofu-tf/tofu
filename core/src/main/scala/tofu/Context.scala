@@ -10,7 +10,7 @@ import tofu.syntax.funk._
 trait ContextBase
 
 object ContextBase {
-  final implicit def readerTContext[F[_] : Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
+  final implicit def readerTContext[F[_]: Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
     new WithRun[ReaderT[F, C, *], F, C] {
       def lift[A](fa: F[A]): ReaderT[F, C, A] = ReaderT.liftF(fa)
 
@@ -19,10 +19,9 @@ object ContextBase {
       def local[A](fa: ReaderT[F, C, A])(project: C => C): ReaderT[F, C, A] = fa.local(project)
 
       val functor: Functor[ReaderT[F, C, *]] = Functor[ReaderT[F, C, *]]
-      val context: ReaderT[F, C, C] = ReaderT.ask[F, C]
+      val context: ReaderT[F, C, C]          = ReaderT.ask[F, C]
     }
 }
-
 
 /** Declares that [[F]] can provide value of type  Ctx
   *
@@ -35,9 +34,7 @@ object ContextBase {
   * @example
   * One common use of this is to make contextual logging:
   * {{{
-  *    import tofu.Console
   *    import tofu.syntax.console._
-  *    import tofu.HasContext
   *
   *    case class MyCtx(id: Int)
   *
@@ -105,9 +102,9 @@ object Context {
     * }
     * }}}
     */
-  def const[F[_] : Applicative, C](c: C): WithContext[F, C] = new WithContext[F, C] {
+  def const[F[_]: Applicative, C](c: C): WithContext[F, C] = new WithContext[F, C] {
     val functor: Functor[F] = Functor[F]
-    val context: F[C] = Applicative[F].pure(c)
+    val context: F[C]       = Applicative[F].pure(c)
   }
 
   /** Same as const but context is effectful here
@@ -123,11 +120,10 @@ object Context {
     *     _ <- handleRequest[F](request)
     *    } yield ()
     * }}}
-    *
     */
-  def make[F[_] : Functor, A](fa: F[A]): WithContext[F, A] = new WithContext[F, A] {
+  def make[F[_]: Functor, A](fa: F[A]): WithContext[F, A] = new WithContext[F, A] {
     val functor: Functor[F] = implicitly
-    val context: F[A] = fa
+    val context: F[A]       = fa
   }
 
   /** A mix-in for supplying environment data type companions with useful things
@@ -143,9 +139,9 @@ object Context {
     type Has[F[_]] = WithContext[F, C]
 
     implicit def tofuPromoteContextStructure[F[_], A](implicit
-                                                      context: WithLocal[F, C],
-                                                      field: C Contains A
-                                                     ): WithLocal[F, A] =
+        context: WithLocal[F, C],
+        field: C Contains A
+    ): WithLocal[F, A] =
       context.subcontext(field)
   }
 
@@ -157,7 +153,7 @@ object Context {
   * import tofu.In
   * val fHasMyCtx: MyCtx In F = ???
   * }}}
-  * */
+  */
 trait WithContext[F[_], C] extends Context[F] {
   override type Ctx = C
 }
@@ -200,7 +196,6 @@ trait Local[F[_]] extends Context[F] {
     * @return result of ran computation `fa`
     */
   def local[A](fa: F[A])(project: Ctx => Ctx): F[A]
-
 
   /** Allows to focus [[Local]] on inner parts of its context with lens.
     *
@@ -283,7 +278,7 @@ object Provide {
 
   type Aux[F[_], G[_], C] = HasProvide[F, G, C]
 
-  final implicit def readerTContext[F[_] : Applicative, C]: HasProvide[ReaderT[F, C, *], F, C] =
+  final implicit def readerTContext[F[_]: Applicative, C]: HasProvide[ReaderT[F, C, *], F, C] =
     ContextBase.readerTContext[F, C]
 }
 
@@ -293,7 +288,7 @@ object Provide {
   */
 trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
   override type Lower[A] = G[A]
-  override type Ctx = C
+  override type Ctx      = C
 }
 
 object WithProvide {
@@ -312,7 +307,7 @@ object RunContext {
 
   type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
 
-  final implicit def readerTContext[F[_] : Applicative, C]: HasContextRun[ReaderT[F, C, *], F, C] =
+  final implicit def readerTContext[F[_]: Applicative, C]: HasContextRun[ReaderT[F, C, *], F, C] =
     ContextBase.readerTContext[F, C]
 }
 
@@ -325,21 +320,21 @@ object WithRun {
 }
 
 private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F HasContext C1, extract: C1 Extract C2)
-  extends WithContext[F, C2] {
+    extends WithContext[F, C2] {
   def functor: Functor[F] = ctx.functor
 
   def context: F[C2] = functor.map(ctx.context)(extract.extract)
 }
 
 private[tofu] class LocalContainsInstance[F[_], C1, C2](ctx: F HasLocal C1, contains: C1 Contains C2)
-  extends ContextExtractInstance[F, C1, C2](ctx, contains) with WithLocal[F, C2] {
+    extends ContextExtractInstance[F, C1, C2](ctx, contains) with WithLocal[F, C2] {
   def local[A](fa: F[A])(project: C2 => C2): F[A] = ctx.local(fa)(contains.update(_, project))
 }
 
 private[tofu] class ProvideExtractInstance[F[_], G[_], C1, C2](
-                                                                ctx: HasProvide[F, G, C1],
-                                                                extract: C2 Extract C1
-                                                              ) extends WithProvide[F, G, C2] {
+    ctx: HasProvide[F, G, C1],
+    extract: C2 Extract C1
+) extends WithProvide[F, G, C2] {
   def runContext[A](fa: F[A])(c: Ctx): G[A] =
     ctx.runContext(fa)(extract.extract(c))
 
@@ -347,9 +342,9 @@ private[tofu] class ProvideExtractInstance[F[_], G[_], C1, C2](
 }
 
 private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](
-                                                                      ctx: HasContextRun[F, G, C1],
-                                                                      equivalent: C1 Equivalent C2
-                                                                    ) extends LocalContainsInstance[F, C1, C2](ctx, equivalent) with WithRun[F, G, C2] {
+    ctx: HasContextRun[F, G, C1],
+    equivalent: C1 Equivalent C2
+) extends LocalContainsInstance[F, C1, C2](ctx, equivalent) with WithRun[F, G, C2] {
   def runContext[A](fa: F[A])(c: C2): G[A] = ctx.runContext(fa)(equivalent.upcast(c))
 
   def lift[A](ga: G[A]): F[A] = ctx.lift(ga)
