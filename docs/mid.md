@@ -19,7 +19,7 @@ trait MyBusinessModule[F[_]]{
 ```
 Often `F` presented like some `IO` or any transformer
 
-But signature doesn't oblige to be strict. Moreover, there are no necessity to use functor
+But signature doesn't oblige to be strict. Moreover, there is no necessity to use functor
 
 Let's start with simple example
 ```scala
@@ -49,7 +49,7 @@ This is contravariant type. The module takes the form
   def undoBusinessThing(entity: Entity): Respect => F[Unit]
 }
 ```
-Having been received the result the new essence could be taken to log or, for example, send the events to kafka
+Such an implementation of a module can express logging or validation of a computation result.
 
 Completes the next type
 ```scala
@@ -65,17 +65,17 @@ Applying this to the module
   def undoBusinessThing(entity: Entity): F[Respect] => F[Respect]
 }
 ```
-It is capable of what the previous ones, but also "run" `F` multiple times or not run at all
+`Mid` provides capabilities of both `Pre` and `Post`, but also allows to "run" `F` multiple times or not to run it at all.
 
-Such middleware can be caching, retrying or another logic, which is not implemented in infrastructure, but demand additional reflection
+Such middleware can be caching, retrying or another logic, which is not implemented in infrastructure, but requires additional reflection
 
 ## Usage
 
-It turns out enough [ApplyK](https://typelevel.org/cats-tagless/api/cats/tagless/ApplyK.html). Via
+It turns out that [ApplyK](https://typelevel.org/cats-tagless/api/cats/tagless/ApplyK.html) is enough. Via
 ```scala
 def map2K[F[_], G[_], H[_]](af: A[F], ag: A[G])(f: Tuple2K[F, G, *]~> H]): A[H]
 ```
-Possible to compose main and plugin results i.e. origin implementation and addictive
+It makes it possible to compose the result of a main computation and the result of a plug-in computation. Hence, we can also compose main module implementation and pluggable one.
 
 `map2K` call with `F = F, G = Mid[F, *], H = F` substitute, gives `MyBusinessModule[F]` and plugin `MyBusinessModule[Mid]`
 as `af` and `ag`, only remains to implements `Tuple2K[F, G, *]~> H]` i.e. `[A] (F[A], F[A] => F[A]) => F[A]` or `(fa, f) => f(fa)`
