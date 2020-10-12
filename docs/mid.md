@@ -1,5 +1,5 @@
 ---
-id: HigherKind
+id: mid
 title: Mid
 ---
 
@@ -19,9 +19,9 @@ trait MyBusinessModule[F[_]]{
 ```
 Often `F` presented like some `IO` or any transformer
 
-But signature doesn't oblige to be strict. Moreover, there is no necessity to use functor
+But signature doesn't oblige to be strict. Moreover, there is no necessity to use a functor
 
-Let's start with simple example
+Let's start with an example
 ```scala
 type Pre[F[_], A] = F[Unit]
 ``` 
@@ -35,13 +35,13 @@ Apply `MyBusinessModule[F[_]]` to `Pre[F[_], *]`
   def undoBusinessThing(entity: Entity): F[Unit]
 }
 ```
-Only the effect produced without any result. It could be logging, input validation or something like that
+Only the effect is produced without any result. It could be logging, input validation, or something like that
 
 Now consider the following type
 ```scala
 type Post[F[_], A] = A => F[Unit]
 ```
-This is contravariant type. The module takes the form
+This is a contravariant type. The module takes the form
 ```scala
 //MyBusinessModule[Post[F, *]]
 {
@@ -49,7 +49,7 @@ This is contravariant type. The module takes the form
   def undoBusinessThing(entity: Entity): Respect => F[Unit]
 }
 ```
-Such an implementation of a module can express logging or validation of a computation result.
+Such an implementation of a module can express logging or validation of a computation result
 
 Completes the next type
 ```scala
@@ -65,9 +65,9 @@ Applying this to the module
   def undoBusinessThing(entity: Entity): F[Respect] => F[Respect]
 }
 ```
-`Mid` provides capabilities of both `Pre` and `Post`, but also allows to "run" `F` multiple times or not to run it at all.
+`Mid` provides capabilities of both `Pre` and `Post`, but also allows to run `F` multiple times or not to run it at all.
 
-Such middleware can be caching, retrying or another logic, which is not implemented in infrastructure, but requires additional reflection
+Such middleware can be caching, retrying, or another logic, which is not implemented in infrastructure but requires additional reflection
 
 ## Usage
 
@@ -75,12 +75,12 @@ It turns out that [ApplyK](https://typelevel.org/cats-tagless/api/cats/tagless/A
 ```scala
 def map2K[F[_], G[_], H[_]](af: A[F], ag: A[G])(f: Tuple2K[F, G, *]~> H]): A[H]
 ```
-It makes it possible to compose the result of a main computation and the result of a plug-in computation. Hence, we can also compose main module implementation and pluggable one.
+It makes it possible to compose the result of the main computation and the result of a plug-in computation. Hence, we can also compose the main module implementation and pluggable one
 
-`map2K` call with `F = F, G = Mid[F, *], H = F` substitute, gives `MyBusinessModule[F]` and plugin `MyBusinessModule[Mid]`
-as `af` and `ag`, only remains to implements `Tuple2K[F, G, *]~> H]` i.e. `[A] (F[A], F[A] => F[A]) => F[A]` or `(fa, f) => f(fa)`
+Calling `map2K` with `F = F, G = Mid[F, *], H = F`, then substituting `MyBusinessModule[F]` and plugin `MyBusinessModule[Mid]` 
+as `af` and `ag`, only remains to implement `Tuple2K[F, G, *]~> H]` i.e. the polymorphic function `[A] (F[A], F[A] => F[A]) => F[A]` or `(fa, f) => f(fa)`
 
-So plugin application is just the process of applying function to the result of every method. The macro generating `ApplyK[MyBusinessModule]` will do rest of all
+So plugin application is just the process of applying the function to the result of every method. The macro generating `ApplyK[MyBusinessModule]` will do the rest of all
 
 ## Example
 
