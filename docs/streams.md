@@ -8,7 +8,7 @@ Tofu Streams offers a set of type-classes allowing to abstract functional stream
 
 ### Emits
 
-`Emits` allows to emit some collection of elements into a stream:
+`Emits` lets you emit some collection of elements into a stream:
 
 ```scala
 import cats.instances.list._
@@ -23,7 +23,7 @@ def names[F[_]: Emits]: F[String] = {
 
 ### Evals
 
-`Evals` allows to evaluate some other effect inside a streaming effect.
+`Evals` allows you to evaluate some other effect inside a streaming effect.
 In the example below `Stream[IO, *]` can be put in place of `F[_]` and `IO` in place of `G[_]`. 
 
 ```scala
@@ -103,7 +103,7 @@ def batchProcess[
 
 ### Merge
 
-`Merge` allows to interleave two input streams non-deterministically:
+`Merge` allows you to interleave two input streams non-deterministically:
 In the example below we want `printFakeOfTrue` to continually print either fake or true facts pulled from
 two different sources respectively:
 
@@ -129,7 +129,7 @@ def printFakeOfTrue[F[_]: Merge: Evals[*[_], G], G[_]: Console](
 
 ### ParFlatten
 
-`ParFlatten` allows to run multiple streams inside an outer stream simultaneously merging
+`ParFlatten` allows you to run multiple streams inside an outer stream simultaneously merging
 their outputs into a single stream non-deterministically.
 In the example below we want to run multiple processes concurrently:
 
@@ -149,6 +149,100 @@ trait Sensor[F[_]] {
 
 def readDataFromAllSensors[F[_]: ParFlatten: Emits](sensors: List[Sensor[F]]): F[SensorData] =
   emits(sensors.map(_.run)).parFlattenUnbounded
+```
+
+### Region
+
+`Region` is responsible for managing resources withing a stream.
+In the following example let's imagine we want `ping` to acquire connection and then send "PING" 
+message continually until it is interrupted.
+
+```scala
+import cats.{Applicative, Defer, Monad, SemigroupK}
+import tofu.streams._
+import tofu.syntax.streams.region._
+import tofu.syntax.streams.evals._
+import tofu.syntax.streams.combineK._
+import tofu.syntax.monadic._
+
+trait Socket[F[_]] {
+  def write(bytes: Array[Byte]): F[Unit]
+  def close: F[Unit]
+}
+
+trait MakeSocket[F[_]] {
+  def open[I[_]]: I[Socket[F]]
+}
+
+def ping[
+  F[_]: Monad: SemigroupK: Defer: Region[*[_], G, E]: Evals[*[_], G],
+  G[_],
+  E
+](socket: MakeSocket[G]): F[Unit] =
+  region(socket.open[G])(_.close).flatMap { sock =>
+    // `.repeat` is a special syntax from `tofu.syntax.streams.combineK` based on `SemigroupK` and `Defer`.
+    eval(sock.write("PING".getBytes)).repeat
+  }
+```
+
+### Pace
+
+`Pace` lets you regulate the pace of a stream.
+Looking at the `ping` implementation from the previous example you might have 
+admitted that we don't need to send pings at the maximum possible rate. 
+Let's throttle it down to 1 ping at 10 seconds:
+
+```scala
+import cats.{Applicative, Defer, Monad, SemigroupK}
+import tofu.streams._
+import tofu.syntax.streams.region._
+import tofu.syntax.streams.evals._
+import tofu.syntax.streams.combineK._
+import tofu.syntax.streams.pace._
+import tofu.syntax.monadic._
+
+import scala.concurrent.duration._
+
+trait Socket[F[_]] {
+  def write(bytes: Array[Byte]): F[Unit]
+  def close: F[Unit]
+}
+
+trait MakeSocket[F[_]] {
+  def open[I[_]]: I[Socket[F]]
+}
+
+def ping[
+  F[_]: Monad: SemigroupK: Defer: Region[*[_], G, E]: Evals[*[_], G]: Pace,
+  G[_],
+  E
+](socket: MakeSocket[G]): F[Unit] =
+  region(socket.open[G])(_.close).flatMap { sock =>
+    eval(sock.write("PING".getBytes)).repeat.throttled(10.seconds)
+  }
+```
+
+### Broadcast
+
+`Broadcast` makes it possible to pipe outputs of a stream to several processors `F[A] => F[B]` 
+simultaneously.
+
+```scala
+import tofu.streams.Broadcast
+import tofu.syntax.streams.broadcast._
+
+case class Order()
+
+trait Stats[F[_]] {
+  def process: F[Order] => F[Unit]
+}
+
+trait Shipping[F[_]] {
+  def process: F[Order] => F[Unit]
+}
+
+def processOrders[F[_]: Broadcast](shipping: Shipping[F], stats: Stats[F]): F[Order] => F[Unit] =
+  _.broadcast(shipping.process, stats.process)
 ```
 
 ### Compile
@@ -184,4 +278,37 @@ trait Cats[F[_]] {
 
 def catsList[F[_]: Compile[*[_], G], G[_]](n: Int)(cats: Cats[F]): G[LazyList[Cat]] =
    cats.emit.to[LazyList]
+```
+
+## Abstracting from legacy API
+
+In real applications we usually would have to deal with API exposing concrete stream datatype.
+In order to abstract from it all we need is `type LiftStream[S[_], F[_]] = Lift[Stream[F, *], S]`.
+
+```scala
+  import cats.tagless.FunctorK
+  import fs2.Stream
+  import derevo.derive
+  import tofu.higherKind.derived.representableK
+  import tofu.fs2.LiftStream
+
+  case class Event(name: String)
+
+  @derive(representableK)
+  trait Consumer[F[_]] {
+    def eventStream: F[Event]
+  }
+
+  object Consumer {
+
+    // smart-constructor for `Consumer` lifting `Consumer[Stream[G, *]]` into `Consumer[F]` 
+    // parametrized with an abstract streaming effect `F`.
+    def make[F[_]: LiftStream[*[_], G], G[_]]: Consumer[F] =
+      FunctorK[Consumer].mapK(new Impl[G])(LiftStream[F, G].liftF)
+
+    // concrete implementation of consumer parametrized with `Stream[F, *]`
+    final class Impl[F[_]] extends Consumer[Stream[F, *]] {
+      def eventStream: Stream[F, Event] = ??? // implementation based on a legacy API exposing `Stream` datatype.
+    }
+  }
 ```
