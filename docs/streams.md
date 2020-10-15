@@ -312,3 +312,7 @@ In order to abstract from it all we need is `type LiftStream[S[_], F[_]] = Lift[
     }
   }
 ```
+
+## Apps built on Tofu Streams
+
+[binance-aggregator](https://github.com/oskin1/binance-aggregator)
