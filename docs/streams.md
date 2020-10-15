@@ -286,31 +286,31 @@ In real applications we usually would have to deal with API exposing concrete st
 In order to abstract from it all we need is `type LiftStream[S[_], F[_]] = Lift[Stream[F, *], S]`.
 
 ```scala
-  import cats.tagless.FunctorK
-  import fs2.Stream
-  import derevo.derive
-  import tofu.higherKind.derived.representableK
-  import tofu.fs2.LiftStream
+import cats.tagless.FunctorK
+import fs2.Stream
+import derevo.derive
+import tofu.higherKind.derived.representableK
+import tofu.fs2.LiftStream
 
-  case class Event(name: String)
+case class Event(name: String)
 
-  @derive(representableK)
-  trait Consumer[F[_]] {
-    def eventStream: F[Event]
+@derive(representableK)
+trait Consumer[F[_]] {
+  def eventStream: F[Event]
+}
+
+object Consumer {
+
+  // smart-constructor for `Consumer` lifting `Consumer[Stream[G, *]]` into `Consumer[F]` 
+  // parametrized with an abstract streaming effect `F`.
+  def make[F[_]: LiftStream[*[_], G], G[_]]: Consumer[F] =
+    FunctorK[Consumer].mapK(new Impl[G])(LiftStream[F, G].liftF)
+
+  // concrete implementation of consumer parametrized with `Stream[F, *]`
+  final class Impl[F[_]] extends Consumer[Stream[F, *]] {
+    def eventStream: Stream[F, Event] = ??? // implementation based on a legacy API exposing `Stream` datatype.
   }
-
-  object Consumer {
-
-    // smart-constructor for `Consumer` lifting `Consumer[Stream[G, *]]` into `Consumer[F]` 
-    // parametrized with an abstract streaming effect `F`.
-    def make[F[_]: LiftStream[*[_], G], G[_]]: Consumer[F] =
-      FunctorK[Consumer].mapK(new Impl[G])(LiftStream[F, G].liftF)
-
-    // concrete implementation of consumer parametrized with `Stream[F, *]`
-    final class Impl[F[_]] extends Consumer[Stream[F, *]] {
-      def eventStream: Stream[F, Event] = ??? // implementation based on a legacy API exposing `Stream` datatype.
-    }
-  }
+}
 ```
 
 ## Apps built on Tofu Streams
