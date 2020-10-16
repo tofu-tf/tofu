@@ -6,23 +6,6 @@ import tofu.lift.{Lift, Unlift}
 import tofu.optics.{Contains, Equivalent, Extract}
 import tofu.syntax.funk._
 
-/** Common base for instances */
-trait ContextBase
-
-object ContextBase {
-  final implicit def readerTContext[F[_]: Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
-    new WithRun[ReaderT[F, C, *], F, C] {
-      def lift[A](fa: F[A]): ReaderT[F, C, A] = ReaderT.liftF(fa)
-
-      def runContext[A](fa: ReaderT[F, C, A])(ctx: C): F[A] = fa.run(ctx)
-
-      def local[A](fa: ReaderT[F, C, A])(project: C => C): ReaderT[F, C, A] = fa.local(project)
-
-      val functor: Functor[ReaderT[F, C, *]] = Functor[ReaderT[F, C, *]]
-      val context: ReaderT[F, C, C]          = ReaderT.ask[F, C]
-    }
-}
-
 /** Declares that [[F]] can provide value of type  Ctx
   *
   * In other words this trait tells you that F is some kind of Reader
@@ -34,15 +17,10 @@ object ContextBase {
   * @example
   * One common use of this is to make contextual logging:
   * {{{
-  *    import tofu.syntax.console._
+  *     import tofu.syntax.console._
   *
-  *    case class MyCtx(id: Int)
-  *
-  *    def contexualConsolling[F[_]: Console](message: String)
-  *                             (implicit hasMyCtx: F HasContext MyCtx): F[Unit] =
-  *       hasMyCtx.askF(
-  *           ctx => puts"$message (Also context: $ctx)"
-  *      )
+  *   def contexualConsolling[F[_]: Console: FlatMap](message: String)(implicit hasMyCtx: F HasContext MyCtx): F[Unit] =
+  *     hasMyCtx.askF(ctx => puts"$message (Also context: $ctx)")
   * }}}
   * so when you have `MyCtx(3)`
   * the call of `contextualConsolling("Hi!")` prints `Hi! (Also MyCtx(3))`
@@ -72,7 +50,7 @@ trait Context[F[_]] extends ContextBase {
     */
   def ask[A](f: Ctx => A): F[A] = functor.map(context)(f)
 
-  /** Same as [[ask]] but `f` is effectful */
+  /** Same as [[ask]] but `f` is effectual */
   def askF[A](f: Ctx => F[A])(implicit F: FlatMap[F]): F[A] = F.flatMap(context)(f)
 
   /** Allows to focus context on its inside with lens.
@@ -82,6 +60,7 @@ trait Context[F[_]] extends ContextBase {
   def extract[A](extract: Extract[Ctx, A]): WithContext[F, A] = new ContextExtractInstance[F, Ctx, A](this, extract)
 }
 
+/** Companion object for [[Context]] */
 object Context {
   def apply[F[_]](implicit ctx: Context[F]): HasContext[F, ctx.Ctx] = ctx
 
@@ -96,10 +75,10 @@ object Context {
     *   case class MyCtx(id: Int)
     *
     *   val program: Option[String] = {
-    *   implicit val ctx = Context.const[Option, MyCtx](MyCtx(3))
+    *     implicit val ctx = Context.const[Option, MyCtx](MyCtx(3))
     *
-    *   Context[Option].ask(ctx => ctx.id.toString)
-    * }
+    *     Context[Option].ask(ctx => ctx.id.toString)
+    *   }
     * }}}
     */
   def const[F[_]: Applicative, C](c: C): WithContext[F, C] = new WithContext[F, C] {
@@ -107,18 +86,17 @@ object Context {
     val context: F[C]       = Applicative[F].pure(c)
   }
 
-  /** Same as const but context is effectful here
+  /** Same as const but context is effectual here
     *
     * @example {{{
+    *   def handleRequest[F[_]: Monad: *[_] WithContext TraceId](httpRequest: Request) = ???
     *
-    * def handleRequest[F[_]: Monad: *[_] WithContext TraceId](httpRequest: Request) = ???
-    *
-    * def myProgram[F[_]: Monad] =
-    *    for {
-    *     request <- getRequest[F]
-    *     implicit0(ctx: TraceId In F) <- Context.make(genTraceId[F])
-    *     _ <- handleRequest[F](request)
-    *    } yield ()
+    *   def myProgram[F[_]: Monad] =
+    *     for {
+    *       request                                 <- getRequest[F]
+    *       implicit0(ctx: TraceId In F) <- Context.make(genTraceId[F])
+    *       _                                       <- handleRequest[F](request)
+    *     } yield ()
     * }}}
     */
   def make[F[_]: Functor, A](fa: F[A]): WithContext[F, A] = new WithContext[F, A] {
@@ -149,8 +127,9 @@ object Context {
 
 /** Synonym for [[Context]] with explicit C as Ctx for better type inference
   *
-  * There is also a nice type alias:{{{
+  * There is also a nice type alias: {{{
   * import tofu.In
+  *
   * val fHasMyCtx: MyCtx In F = ???
   * }}}
   */
@@ -158,6 +137,7 @@ trait WithContext[F[_], C] extends Context[F] {
   override type Ctx = C
 }
 
+/** Companion object for [[WithContext]] */
 object WithContext {
   def apply[F[_], C](implicit ctx: WithContext[F, C]): WithContext[F, C] = ctx
 }
@@ -171,25 +151,23 @@ trait Local[F[_]] extends Context[F] {
     *
     * @example
     * Example of usage is to hide sensitive information {{{
+    *   case class UserContext(
+    *       id: String,
+    *       phoneNumber: String //very sensitive
+    *   )
     *
-    * import tofu.syntax.context._
+    *   def hidePartOfPhoneNumber: String => String = ???
     *
-    * case class UserContext(
-    *              id: String,
-    *              phoneNumber: String //very sensitive
-    *            )
-    * def hidePartOfPhoneNumber: String => String = ???
-    *
-    * def contextualLogInfo[F[_]](message: String)
-    *     (implicit hasUserContext: UserContext In F): F[Unit] =
+    *   def contextualLogInfo[F[_]](message: String)(implicit hasUserContext: UserContext In F): F[Unit] =
     *     ??? //logs both message AND UserContext
     *
-    * def program[F[_]: Monad: ] = for {
-    *    user <- obtainUserSomehow[F]
-    *    implicit0(hasUserContext: User In F) <- Context.const[F, User](user.toContext)
-    *    logUser =  contextualLogInfo[F](s"Successfully obtained user")
-    *    _ <- logUser.local(hidePartOfPhoneNumber) //logs only part of phone number
-    * } yield ()
+    *   def program[F[_]: Monad] = for {
+    *     user                                   <- obtainUserSomehow[F]
+    *     implicit0(hasUserContext: In[User, F]) <- Context.const[F, User](user.toContext)
+    *     logUser                                 = contextualLogInfo[F](s"Successfully obtained user")
+    *     _                                      <- logUser.local(hidePartOfPhoneNumber) //logs only part of phone number
+    *   } yield ()
+    *
     * }}}
     * @param fa      computation that is going to run with different context
     * @param project pure function
@@ -213,6 +191,7 @@ object Local {
 /** Synonym for [[Local]] with explicit C as Ctx for better type inference */
 trait WithLocal[F[_], C] extends Local[F] with WithContext[F, C]
 
+/** Companion object for [[WithLocal]] */
 object WithLocal {
   def apply[F[_], C](implicit ctx: WithLocal[F, C]): WithLocal[F, C] = ctx
 }
@@ -236,28 +215,23 @@ trait Provide[F[_]] extends ContextBase {
     *
     * @example
     * Example of usage is to hide sensitive information across a part of service {{{
+    *   import tofu.syntax.context._
     *
-    * import tofu.syntax.context._
+    *   case class UserContext(
+    *       id: String,
+    *       phoneNumber: String //very sensitive
+    *   )
+    *   def hidePartOfPhoneNumber: String => String = ???
     *
-    * case class UserContext(
-    *              id: String,
-    *              phoneNumber: String //very sensitive
-    *            )
-    * def hidePartOfPhoneNumber: String => String = ???
-    *
-    * def contextualLogInfo[F[_]](message: String)
-    *     (implicit hasUserContext: UserContext In F): F[Unit] =
+    *   def contextualLogInfo[F[_]](message: String)(implicit hasUserContext: UserContext In F): F[Unit] =
     *     ??? //logs both message AND UserContext
     *
-    * def program[F[_]: Monad: ] = for {
-    *    user <- obtainUserSomehow[F]
-    *    implicit0(hasUserContext: User In F) <- Context.const[F, User](user.toContext)
-    *    logUser =  contextualLogInfo[F](s"Successfully obtained user")
-    *    _ <- logUser.local(hidePartOfPhoneNumber) //logs only part of phone number
-    * } yield ()
+    *   def program[F[_]: WithRun[*[_], G[_], UserContext], G[_]: Monad] = for {
+    *     user   <- obtainUserSomehow[G]
+    *     logUser = contextualLogInfo[F](s"Successfully obtained user")
+    *     _      <- runContext[F](logUser)(user.toContext) //G[Unit]
+    *   } yield ()
     * }}}
-    *
-    *
     * @param fa Contextual computation
     * @return Result of running fa and providing it context
     */
@@ -274,9 +248,9 @@ trait Provide[F[_]] extends ContextBase {
     *   val contextualProcessHandler: ProcessHandler[IO WithMyContext *] = ???
     *
     *   val processHandler: ProcessHandler[IO] =
-    *        processHandler.mapK(
-    *            WithProvide[IO WithMyContext *, IO, MyCtx].runContextK
-    *        )
+    *     processHandler.mapK(
+    *       WithProvide[IO WithMyContext *, IO, MyCtx].runContextK
+    *     )
     * }}}
     */
   def runContextK(ctx: Ctx): F ~> Lower = funK(runContext(_)(ctx))
@@ -285,6 +259,7 @@ trait Provide[F[_]] extends ContextBase {
     *
     * One can treat `F[A]` as function of type `Ctx => Lower[A]` so this method
     * creates  something like `_  => la` which has type `Ctx => Lower[A]`
+    *
     * @return
     */
   def lift[A](la: Lower[A]): F[A]
@@ -297,6 +272,7 @@ trait Provide[F[_]] extends ContextBase {
     new ProvideExtractInstance[F, Lower, Ctx, A](this, extract)
 }
 
+/** Companion object for [[Provide]] */
 object Provide {
   def apply[F[_]](implicit p: Provide[F]): HasProvide[F, p.Lower, p.Ctx] = p
 
@@ -315,13 +291,12 @@ trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
   override type Ctx      = C
 }
 
+/** Companion object for [[WithProvide]] */
 object WithProvide {
   def apply[F[_], G[_], C](implicit p: WithProvide[F, G, C]): WithProvide[F, G, C] = p
 }
 
 /** Combination of [[Local]] and [[Provide]]
-  *
-  *
   *
   * @tparam F context-aware effect e.g.`ReaderT[Lower, Ctx, *]`
   */
@@ -330,8 +305,7 @@ trait RunContext[F[_]] extends Local[F] with Provide[F] {
   /** Allows to convert some context-unaware computation into contextual one.
     *
     * @example {{{
-    *
-    *  trait ProcessHandler[G[_]] {
+    *   trait ProcessHandler[G[_]] {
     *     def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ???
     *     //...other methods
     *   }
@@ -340,20 +314,24 @@ trait RunContext[F[_]] extends Local[F] with Provide[F] {
     *
     *   val processHandler: ProcessHandler[IO WithMyContext *] = ???
     *
-    *   val processHandler: ProcessHandler[IO] =
-    *        processHandler.mapK(
-    *            WithProvide[I
-    *
+    *   val contextualHandler: IO WithMyContext ProcessHandler[IO] =
+    *     processHandler.mapK(
+    *       WithRun[WithMyContext[IO, *], IO, MyCtx].unlift.map(fk => processHandler.mapK(fk))
+    *     ) //now it is able to process MyCtx but is wrapped in IO WithMyContext *
     * }}}
-    *
     * @return
     */
   def unlift: F[F ~> Lower] = ask(ctx => funK(runContext(_)(ctx)))
 
+  /** Allows to focus [[Provide]] on inner parts of its context with equivalence lens.
+    *
+    * @param eq lens that can convert from `Ctx` value of type `A`
+    */
   def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, Lower, A] =
     new RunContextEquivalentInstance[F, Lower, Ctx, A](this, eq)
 }
 
+/** Companion object for [[RunContext]] */
 object RunContext {
   def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx
 
@@ -362,7 +340,8 @@ object RunContext {
   final implicit def readerTContext[F[_]: Applicative, C]: HasContextRun[ReaderT[F, C, *], F, C] =
     ContextBase.readerTContext[F, C]
 }
-/** Synonym for [[Provide]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
+
+/** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
   *
   * Can be seen as transformation `F[*] = C => G[*]`
   */
@@ -370,8 +349,26 @@ trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] w
   override type Ctx = C
 }
 
+/** Companion object for [[WithRun]] */
 object WithRun {
   def apply[F[_], G[_], C](implicit ctx: WithRun[F, G, C]): WithRun[F, G, C] = ctx
+}
+
+/** Common base for instances */
+trait ContextBase
+
+object ContextBase {
+  final implicit def readerTContext[F[_]: Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
+    new WithRun[ReaderT[F, C, *], F, C] {
+      def lift[A](fa: F[A]): ReaderT[F, C, A] = ReaderT.liftF(fa)
+
+      def runContext[A](fa: ReaderT[F, C, A])(ctx: C): F[A] = fa.run(ctx)
+
+      def local[A](fa: ReaderT[F, C, A])(project: C => C): ReaderT[F, C, A] = fa.local(project)
+
+      val functor: Functor[ReaderT[F, C, *]] = Functor[ReaderT[F, C, *]]
+      val context: ReaderT[F, C, C]          = ReaderT.ask[F, C]
+    }
 }
 
 private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F HasContext C1, extract: C1 Extract C2)
