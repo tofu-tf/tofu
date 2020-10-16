@@ -147,7 +147,7 @@ object Context {
 
 }
 
-/** Synonym for [[Context]] with C as Ctx for better type inference
+/** Synonym for [[Context]] with explicit C as Ctx for better type inference
   *
   * There is also a nice type alias:{{{
   * import tofu.In
@@ -210,7 +210,7 @@ object Local {
   type Aux[F[_], C] = HasLocal[F, C]
 }
 
-/** Synonym for [[Local]] with C as Ctx for better type inference */
+/** Synonym for [[Local]] with explicit C as Ctx for better type inference */
 trait WithLocal[F[_], C] extends Local[F] with WithContext[F, C]
 
 object WithLocal {
@@ -234,6 +234,30 @@ trait Provide[F[_]] extends ContextBase {
     *
     * One can treat F as function of type `Ctx => Lower[A]` so this method applies it to `ctx`.
     *
+    * @example
+    * Example of usage is to hide sensitive information across a part of service {{{
+    *
+    * import tofu.syntax.context._
+    *
+    * case class UserContext(
+    *              id: String,
+    *              phoneNumber: String //very sensitive
+    *            )
+    * def hidePartOfPhoneNumber: String => String = ???
+    *
+    * def contextualLogInfo[F[_]](message: String)
+    *     (implicit hasUserContext: UserContext In F): F[Unit] =
+    *     ??? //logs both message AND UserContext
+    *
+    * def program[F[_]: Monad: ] = for {
+    *    user <- obtainUserSomehow[F]
+    *    implicit0(hasUserContext: User In F) <- Context.const[F, User](user.toContext)
+    *    logUser =  contextualLogInfo[F](s"Successfully obtained user")
+    *    _ <- logUser.local(hidePartOfPhoneNumber) //logs only part of phone number
+    * } yield ()
+    * }}}
+    *
+    *
     * @param fa Contextual computation
     * @return Result of running fa and providing it context
     */
@@ -247,9 +271,9 @@ trait Provide[F[_]] extends ContextBase {
     *     //...other methods
     *   }
     *   type WithMyContext[F[_], A] = ReaderT[F, MyCtx, A]
-    *   val processHandler: ProcessHandler[IO WithMyContext *] = ???
+    *   val contextualProcessHandler: ProcessHandler[IO WithMyContext *] = ???
     *
-    *   val contextualProcessHandler: ProcessHandler[IO] =
+    *   val processHandler: ProcessHandler[IO] =
     *        processHandler.mapK(
     *            WithProvide[IO WithMyContext *, IO, MyCtx].runContextK
     *        )
@@ -282,7 +306,7 @@ object Provide {
     ContextBase.readerTContext[F, C]
 }
 
-/** Synonym for [[Local]] with `C` as `Ctx` and `G` as `Lower` for better type inference
+/** Synonym for [[Provide]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
   *
   * Can be seen as transformation `F[*] = C => G[*]`
   */
@@ -295,7 +319,35 @@ object WithProvide {
   def apply[F[_], G[_], C](implicit p: WithProvide[F, G, C]): WithProvide[F, G, C] = p
 }
 
+/** Combination of [[Local]] and [[Provide]]
+  *
+  *
+  *
+  * @tparam F context-aware effect e.g.`ReaderT[Lower, Ctx, *]`
+  */
 trait RunContext[F[_]] extends Local[F] with Provide[F] {
+
+  /** Allows to convert some context-unaware computation into contextual one.
+    *
+    * @example {{{
+    *
+    *  trait ProcessHandler[G[_]] {
+    *     def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ???
+    *     //...other methods
+    *   }
+    *
+    *   type WithMyContext[F[_], A] = ReaderT[F, MyCtx, A]
+    *
+    *   val processHandler: ProcessHandler[IO WithMyContext *] = ???
+    *
+    *   val processHandler: ProcessHandler[IO] =
+    *        processHandler.mapK(
+    *            WithProvide[I
+    *
+    * }}}
+    *
+    * @return
+    */
   def unlift: F[F ~> Lower] = ask(ctx => funK(runContext(_)(ctx)))
 
   def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, Lower, A] =
@@ -310,7 +362,10 @@ object RunContext {
   final implicit def readerTContext[F[_]: Applicative, C]: HasContextRun[ReaderT[F, C, *], F, C] =
     ContextBase.readerTContext[F, C]
 }
-
+/** Synonym for [[Provide]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
+  *
+  * Can be seen as transformation `F[*] = C => G[*]`
+  */
 trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] with RunContext[F] with Unlift[G, F] {
   override type Ctx = C
 }
