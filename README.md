@@ -61,6 +61,7 @@ Proud user of ToFu? Feel free to [add your company!](https://github.com/TinkoffC
 
 <a href="https://konfy.care/"><img width="40%" src="logos/konfy-logo.svg?sanitize=true" /></a>
 
+<a href="https://www.raiffeisen.ru/en/"><img width="40%" src="logos/raiffeisen-logo.svg?sanitize=true" alt="Raiffeisen Bank Russia"/></a>
 
 # Contributing
 
