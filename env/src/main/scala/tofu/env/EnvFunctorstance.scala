@@ -108,7 +108,7 @@ private[env] class EnvFunctorstance[E]
   override def deferFuture[A](f: => Future[A]): Env[E, A]                        = Env.deferFuture(f)
 
   //Timeout
-  override def timeoutTo[A](fa: Env[E, A], after: FiniteDuration, fallback: Env[E, A]): Env[E, A] =
+  override def timeoutTo[A](fa: Env[E, A])(after: FiniteDuration, fallback: Env[E, A]): Env[E, A] =
     fa.mapTask2(fallback)(_.timeoutTo(after, _))
 
   //Race

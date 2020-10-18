@@ -81,7 +81,7 @@ class ZioTofuWithRunInstance[R, E] extends WithRun[ZIO[R, E, *], ZIO[Any, E, *],
 }
 
 class ZioTofuTimeoutInstance[R <: Clock, E] extends Timeout[ZIO[R, E, *]] {
-  final def timeoutTo[A](fa: ZIO[R, E, A], after: FiniteDuration, fallback: ZIO[R, E, A]): ZIO[R, E, A] =
+  final def timeoutTo[A](fa: ZIO[R, E, A])(after: FiniteDuration, fallback: ZIO[R, E, A]): ZIO[R, E, A] =
     fa.timeoutTo(fallback)(ZIO.succeed(_))(zio.duration.Duration.fromScala(after)).flatten
 }
 
