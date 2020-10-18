@@ -1,4 +1,5 @@
-import Publish._, Dependencies._
+import Publish._
+import Dependencies.{http4s, _}
 import com.typesafe.sbt.SbtGit.git
 
 moduleName := "tofu"
@@ -233,7 +234,7 @@ lazy val doobie  = project
     libraryDependencies ++= List(doobieCore, derevo, monix % Test),
     defaultSettings
   )
-  .dependsOn(core, derivation, env % Test, zioInterop % Test)
+  .dependsOn(core,concurrent, derivation, env % Test, zioInterop % Test)
 
 lazy val streams = project
   .in(file("streams"))
@@ -251,6 +252,14 @@ lazy val commonModules =
 
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
+
+lazy val examples  = project
+  .in(file("examples"))
+  .settings(
+    libraryDependencies ++= List(zioCats, derevo, derevoCirce, http4s, http4dsl, http4circe),
+    defaultSettings
+  )
+  .dependsOn(core, derivation, zioInterop, loggingDer)
 
 lazy val docs = project // new documentation project
   .in(file("tofu-docs"))

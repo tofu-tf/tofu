@@ -45,6 +45,8 @@ object Dependencies {
 
     val doobie = "0.9.2"
 
+    val http4s = "0.21.8"
+
     // Compile time only
     val macroParadise = "2.1.1"
 
@@ -73,6 +75,7 @@ object Dependencies {
   val magnolia         = "com.propensive"             %% "magnolia"                % Version.magnolia
   val derevo           = "org.manatki"                %% "derevo-core"             % Version.derevo
   val derevoTagless    = "org.manatki"                %% "derevo-cats-tagless"     % Version.derevo
+  val derevoCirce      = "org.manatki"                %% "derevo-circe"            % Version.derevo
   val enumeratum       = "com.beachape"               %% "enumeratum"              % Version.enumeratum
   val fs2              = "co.fs2"                     %% "fs2-io"                  % Version.fs2
   val tethys           = "com.tethys-json"            %% "tethys-core"             % Version.tethys
@@ -85,6 +88,9 @@ object Dependencies {
   val shapeless        = "com.chuusai"                %% "shapeless"               % Version.shapeless
   val refined          = "eu.timepit"                 %% "refined"                 % Version.refined
   val doobieCore       = "org.tpolecat"               %% "doobie-core"             % Version.doobie
+  val http4s           = "org.http4s"                 %% "http4s-blaze-server"     % Version.http4s
+  val http4dsl         = "org.http4s"                 %% "http4s-dsl"              % Version.http4s
+  val http4circe       = "org.http4s"                 %% "http4s-circe"            % Version.http4s
   val collectionCompat = "org.scala-lang.modules"     %% "scala-collection-compat" % Version.collectionCompat
 
   // Compile-time only
