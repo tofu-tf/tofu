@@ -259,7 +259,7 @@ lazy val examples  = project
     libraryDependencies ++= List(zioCats, derevo, derevoCirce, http4s, http4dsl, http4circe),
     defaultSettings
   )
-  .dependsOn(core, derivation, zioInterop, loggingDer)
+  .dependsOn(core, derivation, zioInterop, loggingDer, logging)
 
 lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
