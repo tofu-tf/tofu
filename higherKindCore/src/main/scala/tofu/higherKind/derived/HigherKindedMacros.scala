@@ -35,9 +35,11 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       case _                => Ident(p.name)
     }
 
+  def unimplementedMethodsOf(tpe: Type): Iterable[Symbol] = overridableMembersOf(tpe).filter(_.isAbstract)
+
   private def tabulateTemplate(algebra: Type)(impl: TabulateParams): Type => Tree = {
     case PolyType(List(f), MethodType(List(hom), af)) =>
-      val members = overridableMembersOf(af)
+      val members = unimplementedMethodsOf(af)
       val types   = delegateAbstractTypes(af, members, af)
       val repk    = impl.repk
       val alg     = TermName(c.freshName("alg"))
@@ -84,7 +86,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
           abort(s"something wrong with $faf parameter, this should not happen, also I hate macros")
       }
 
-      val members = overridableMembersOf(Af)
+      val members = unimplementedMethodsOf(Af)
       val types   = delegateAbstractTypes(Af, members, Af)
 
       val methods = delegateMethods(Af, members, faf) {
