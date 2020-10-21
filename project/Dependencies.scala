@@ -27,6 +27,8 @@ object Dependencies {
 
     val logback = "1.2.3"
 
+    val scribe = "2.8.5"
+
     val monix = "3.2.2"
 
     val scalatest = "3.2.2"
@@ -66,6 +68,7 @@ object Dependencies {
   val catsEffect       = "org.typelevel"              %% "cats-effect"             % Version.catsEffect
   val monix            = "io.monix"                   %% "monix"                   % Version.monix
   val logback          = "ch.qos.logback"              % "logback-classic"         % Version.logback
+  val scribe           = "com.outr"                   %% "scribe"                  % Version.scribe
   val slf4j            = "org.slf4j"                   % "slf4j-api"               % Version.slf4j     % Provided
   val circeCore        = "io.circe"                   %% "circe-core"              % Version.circe
   val circeJava8       = "io.circe"                   %% "circe-java8"             % Version.circe

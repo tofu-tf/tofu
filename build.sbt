@@ -90,12 +90,21 @@ lazy val loggingLayout = project
   )
   .dependsOn(loggingStr)
 
+lazy val loggingScribe = project
+  .in(file("logging/scribe"))
+  .settings(
+    defaultSettings,
+    libraryDependencies ++= Seq(catsCore, catsEffect, scribe, slf4j),
+    publishName := "logging-scribe"
+  )
+  .dependsOn(loggingStr)
+
 lazy val loggingUtil = project
   .in(file("logging/util"))
   .settings(
     defaultSettings,
     publishName := "logging-util",
-    libraryDependencies += slf4j,
+    libraryDependencies += slf4j
   )
   .dependsOn(loggingStr, concurrent)
 
