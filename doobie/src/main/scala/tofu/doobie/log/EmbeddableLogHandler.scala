@@ -31,6 +31,7 @@ final class EmbeddableLogHandler[F[_]](val self: F[LogHandler]) extends AnyVal {
   * of [[doobie.util.log.LogHandler]].
   */
 object EmbeddableLogHandler {
+  def apply[F[_]](implicit elh: EmbeddableLogHandler[F]): elh.type = elh
 
   /** Preferably use `async` as its underlying unsafe run is potentially less harmful.
     */
