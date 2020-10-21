@@ -1,8 +1,11 @@
 package tofu.examples.context.server
 import java.util.UUID
 
-import cats.Defer
+import cats.{Defer, Show}
 import cats.effect.{ConcurrentEffect, ContextShift, Resource, Sync, Timer}
+import cats.syntax.show._
+import cats.instances.uuid._
+import derevo.derive
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.dsl.Http4sDsl
@@ -10,9 +13,11 @@ import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
 import org.http4s.{EntityDecoder, HttpApp, HttpRoutes}
-import tofu.{MonadThrow, WithRun}
+import tofu.{HasContext, MonadThrow, WithContext, WithRun}
 import tofu.examples.context.server.model._
 import tofu.generate.GenUUID
+import tofu.logging.{Loggable, LoggableContext, Logs}
+import tofu.logging.derivation.{loggable, show}
 import tofu.syntax.monadic._
 import zio.internal.Platform
 import zio.interop.catz._
@@ -29,6 +34,8 @@ object Main extends CatsApp {
 
   def makeApp[I[_]: Sync, F[_]: Sync : WithRun[*[_], I, RecipeTrace]]: I[HttpApp[I]] = {
     val validator: RecipeValidate[F] = RecipeValidate.make[F]
+    implicit  val logsCtx: Logs[I, F] = Logs.withContext[I, F](implicitly, implicitly, RecipeTrace.loggableContext[F])
+
     for {
       recipeRepository <- RecipeRepository.make[I, F]
       recipeService     = RecipeService.make[F](validator, recipeRepository)
@@ -53,8 +60,17 @@ object server {
       .resource
   }
 }
-
 final case class RecipeTrace(id: UUID)
+
+object RecipeTrace {
+  implicit val recipeTraceShow: Show[RecipeTrace] = Show.show(trace => s"RecipeTrace(id = ${trace.id.show}")
+  implicit val traceLoggable: Loggable[RecipeTrace] = loggable.byShow("recipeTraceId")
+  implicit def loggableContext[G[_]: *[_] HasContext RecipeTrace]
+  : LoggableContext[G] =
+    LoggableContext
+      .of[G]
+      .instance[RecipeTrace]
+}
 
 
 object routes {
