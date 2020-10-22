@@ -157,7 +157,7 @@ class ZioTofuUnliftHasInstance[R <: Has[_], E, C: Tag] extends WithRun[ZIO[R wit
 class ZioTofuBlockingInstance[R <: Blocking, E] extends BlockExec[ZIO[R, E, *]] {
   def runScoped[A](fa: ZIO[R, E, A]): ZIO[R, E, A] = blocking(fa)
 
-  def executionContext: ZIO[R, E, ExecutionContext] = blocking(ZIO.runtime.map(_.platform.executor.asEC))
+  def executionContext: ZIO[R, E, ExecutionContext] = blockingExecutor.map(_.asEC)
 
   def deferFutureAction[A](f: ExecutionContext => Future[A]): ZIO[R, E, A] =
     blocking(ZIO.fromFuture(f).orDie)
