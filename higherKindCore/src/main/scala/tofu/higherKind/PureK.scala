@@ -1,13 +1,15 @@
 package tofu.higherKind
 import simulacrum.typeclass
 
+import scala.annotation.nowarn
+
 /** Higher-order form of lax unital functor
   * Transform identity in monoidal (with Tuple2K) category of endofunctors
   * into its image
   *
   * @tparam U - higher order functor
   */
-@typeclass
+@typeclass @nowarn("cat=unused-imports")
 trait UnitalK[U[_[_]]] {
   def unitK: U[UnitK]
 }
@@ -17,7 +19,7 @@ trait UnitalK[U[_[_]]] {
   *
   * @tparam U - higher order functor
   */
-@typeclass
+@typeclass @nowarn("cat=unused-imports")
 trait PureK[U[_[_]]] extends UnitalK[U] {
   def pureK[F[_]](p: Point[F]): U[F]
 

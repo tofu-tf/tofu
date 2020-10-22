@@ -8,8 +8,10 @@ import cats.syntax.option._
 import cats.effect.syntax.concurrent._
 import cats.effect.syntax.bracket._
 
+import scala.annotation.nowarn
+
 /** WARNING breaks referential transparency, use with great care */
-@typeclass
+@typeclass @nowarn("cat=unused-imports")
 trait Memoize[F[_]] {
   def memoize[A](fa: F[A]): F[F[A]]
 
