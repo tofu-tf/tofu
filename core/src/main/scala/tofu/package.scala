@@ -33,5 +33,5 @@ package object tofu {
   type BlockExec[F[_]] = ScopedExecute[Scoped.Blocking, F]
 
   type Calculates[F[_]] = Scoped[Scoped.Calculation, F]
-  type CalcExec[F[_]]   = Scoped[Scoped.Calculation, F]
+  type CalcExec[F[_]]   = ScopedExecute[Scoped.Calculation, F]
 }

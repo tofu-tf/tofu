@@ -8,7 +8,10 @@ import magnolia.{CaseClass, Magnolia, SealedTrait}
 import simulacrum.typeclass
 import derevo.Derivation
 
-@typeclass trait Merge[A] {
+import scala.annotation.nowarn
+
+@typeclass @nowarn("cat=unused-imports")
+trait Merge[A] {
   def merge(a: A, b: A): A
 }
 

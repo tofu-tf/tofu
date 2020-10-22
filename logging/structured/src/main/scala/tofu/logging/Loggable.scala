@@ -1,7 +1,7 @@
 package tofu.logging
 
 import java.io.{PrintWriter, StringWriter}
-import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime, OffsetDateTime}
+import java.time.{Instant, LocalDate, LocalDateTime, OffsetDateTime, ZonedDateTime}
 import java.util.UUID
 
 import alleycats.std.iterable._
@@ -24,6 +24,7 @@ import tofu.syntax.logRenderer._
 import tofu.compat._
 import tofu.compat.lazySeqInstances._
 
+import scala.annotation.nowarn
 import scala.collection.immutable.SortedSet
 import scala.collection.{immutable, mutable}
 import scala.concurrent.duration.FiniteDuration
@@ -31,7 +32,7 @@ import scala.{PartialFunction => PF, specialized => sp}
 
 /** Typeclass for adding custom log values to message
   */
-@typeclass
+@typeclass @nowarn("cat=unused-imports")
 trait Loggable[A] extends Loggable.Base[A] {
 
   /** same as this loggable, but do not show any info in the message string */
@@ -61,7 +62,7 @@ trait Loggable[A] extends Loggable.Base[A] {
 object Loggable {
 
   /** contravariant version of `Loggable` if one need it */
-  @typeclass
+  @typeclass @nowarn("cat=unused-imports")
   trait Base[-A] {
     self =>
 

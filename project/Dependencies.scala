@@ -13,7 +13,7 @@ object Dependencies {
 
     val catsEffect = "2.2.0"
 
-    val catsTagless = "0.11"
+    val catsTagless = "0.12"
 
     val monocle = "2.1.0"
 
@@ -48,7 +48,7 @@ object Dependencies {
     // Compile time only
     val macroParadise = "2.1.1"
 
-    val simulacrum = "1.0.0"
+    val simulacrum = "1.0.1"
 
     val silencer = "1.7.1"
 

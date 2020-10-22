@@ -37,6 +37,12 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
   def unimplementedMembersOf(tpe: Type): Iterable[Symbol] = overridableMembersOf(tpe).filter(_.isAbstract)
 
+  // copied from the old version of cats.tagless.DeriveMacros
+  private def summon[A: TypeTag](typeArgs: Type*): Tree = {
+    val tpe = appliedType(typeOf[A].typeConstructor, typeArgs: _*)
+    c.inferImplicitValue(tpe).orElse(abort(s"could not find implicit value of type $tpe"))
+  }
+
   private def tabulateTemplate(algebra: Type)(impl: TabulateParams): Type => Tree = {
     case PolyType(List(f), MethodType(List(hom), af)) =>
       val members = unimplementedMembersOf(af)

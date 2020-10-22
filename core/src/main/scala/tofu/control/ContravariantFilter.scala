@@ -2,7 +2,10 @@ package tofu.control
 
 import cats.Contravariant
 import simulacrum.typeclass
-@typeclass
+
+import scala.annotation.nowarn
+
+@typeclass @nowarn("cat=unused-imports")
 trait ContravariantFilter[F[_]] extends Contravariant[F] with Optional[F] {
   def contramapFilter[A, B](fa: F[A])(f: B => Option[A]): F[B]
 

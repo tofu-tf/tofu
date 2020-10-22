@@ -6,9 +6,10 @@ import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
 
+import scala.annotation.nowarn
 import scala.util.Random
 
-@typeclass
+@typeclass @nowarn("cat=unused-imports")
 trait GenRandom[F[_]] {
 
   /** generate random 8-bit number */

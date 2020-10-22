@@ -7,7 +7,9 @@ import cats.{Functor, Invariant, MonoidK}
 import tofu.Void
 import simulacrum.typeclass
 
-@typeclass
+import scala.annotation.nowarn
+
+@typeclass @nowarn("cat=unused-imports")
 trait Partial[F[_]] extends Switch[F] with Invariant[F] with MonoidK[F] with Optional[F] {
   override def optional[A](fa: F[A]): F[Option[A]] = imap(switch(empty[Unit], fa))(_.toOption)(_.toRight(()))
   def skip: F[Void]                                = empty[Void]

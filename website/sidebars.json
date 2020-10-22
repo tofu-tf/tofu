@@ -47,6 +47,13 @@
           "logging",
           "memo"
         ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Streams",
+        "ids": [
+          "streams"
+        ]
       }
     ]
   }

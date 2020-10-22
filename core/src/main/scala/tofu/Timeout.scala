@@ -5,9 +5,10 @@ import simulacrum.typeclass
 import tofu.syntax.feither._
 import tofu.internal.NonTofu
 
+import scala.annotation.nowarn
 import scala.concurrent.duration.FiniteDuration
 
-@typeclass
+@typeclass @nowarn("cat=unused-imports")
 trait Timeout[F[_]] {
   def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A]
 }

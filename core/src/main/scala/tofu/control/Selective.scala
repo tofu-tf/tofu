@@ -8,7 +8,9 @@ import cats.{Applicative, Monad, Monoid}
 import simulacrum._
 import tofu.control.impl._
 
-@typeclass
+import scala.annotation.nowarn
+
+@typeclass @nowarn("cat=unused-imports")
 trait Selective[F[_]] extends Applicative[F] {
   @noop def selectAp[A, B](fe: F[Either[A, B]])(ff: => F[A => B]): F[B]
 
