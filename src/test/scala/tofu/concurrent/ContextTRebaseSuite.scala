@@ -19,6 +19,8 @@ import tofu.syntax.monadic._
 import tofu.syntax.raise._
 import tofu.syntax.selective._
 
+import scala.annotation.nowarn
+
 class ContextTRebaseSuite extends AnyFunSuite {
   val count = 100
 
@@ -46,7 +48,7 @@ class ContextTRebaseSuite extends AnyFunSuite {
 }
 
 object ContextTRebaseSuite {
-  @typeclass
+  @typeclass @nowarn("cat=unused-imports")
   @derive(representableK)
   trait Name[F[_]] {
     def getName: F[String]
@@ -54,7 +56,7 @@ object ContextTRebaseSuite {
   }
   object Name extends ContextEmbed[Name]
 
-  @typeclass
+  @typeclass @nowarn("cat=unused-imports")
   @derive(representableK)
   trait Auth[F[_]] {
     def hasAuth(key: String): F[Boolean]
@@ -63,7 +65,7 @@ object ContextTRebaseSuite {
 
   object Auth extends ContextEmbed[Auth]
 
-  @typeclass
+  @typeclass @nowarn("cat=unused-imports")
   @derive(embed, invariantK)
   trait History[F[_]] {
     def readHistory: F[List[String]]
