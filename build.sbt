@@ -363,9 +363,10 @@ lazy val publishSettings = Seq(
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
   homepage := Some(url("https://github.com/TinkoffCreditSystems/tofu")),
   developers := List(
-    Developer("odomontois", "Oleg Nizhnik", "odomontois@gmail.com", url("https://github.com/odomontois")),
+    Developer("catostrophe", "λoλcat", "catostrophe@pm.me", url("https://github.com/catostrophe")),
     Developer("danslapman", "Daniil Smirnov", "danslapman@gmail.com", url("https://github.com/danslapman")),
-    Developer("Phill101", "Nikita Filimonov", "holypics6@gmail.com", url("https://github.com/Phill101"))
+    Developer("odomontois", "Oleg Nizhnik", "odomontois@gmail.com", url("https://github.com/odomontois")),
+    Developer("oskin1", "Ilya Oskin", "ilya.arcadich@gmail.com", url("https://github.com/oskin1")),
   )
 )
 
