@@ -99,5 +99,7 @@ object RepresentableKSuite {
     def bar(a: List[Int]): F[Unit]
 
     def baz(a: List[String]): OptionT[F, Unit]
+
+    def widen[G[x] >: F[x]]: Foo[G] = this.asInstanceOf[Foo[G]]
   }
 }
