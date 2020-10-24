@@ -10,33 +10,33 @@ Obviously, this is a module inside `TOFU` for interop between some [Cats MTL](ht
 For example, you have external code using `Cats MTL` like this:
 
 ```scala
-  import cats.mtl.Ask
-  import cats.Functor
-  import cats.syntax.functor._
+import cats.mtl.Ask
+import cats.Functor
+import cats.syntax.functor._
 
-  def externalProgram[F[_]: Functor](m: Int, f: String => String)(implicit A: Ask[F, String]): F[String] = {
-    for {
-      ctx <- A.ask
-      res = f(ctx) 
-    } yield res * m
-  }
+def externalProgram[F[_]: Functor](m: Int, f: String => String)(implicit A: Ask[F, String]): F[String] = {
+for {
+  ctx <- A.ask
+  res = f(ctx) 
+} yield res * m
+}
 ```     
 
 and your code using `TOFU` where you have different context typeclasses:
 ```scala
-  import cats.effect.Sync
-  import cats.syntax.functor._
-  import cats.syntax.flatMap._
-  import tofu.WithContext
-                                                
-  import scala.util.Random
+import cats.effect.Sync
+import cats.syntax.functor._
+import cats.syntax.flatMap._
+import tofu.WithContext
+                                              
+import scala.util.Random
 
-  def yourProgram[F[_]: Sync: WithContext[*[_], String]]: F[String] = {
-    for {    
-      int <- Sync[F].delay(scala.util.Random.nextInt())
-      result <- externalProgram[F](int, identity)
-    } yield result
-  }
+def yourProgram[F[_]: Sync: WithContext[*[_], String]]: F[String] = {
+for {    
+  int <- Sync[F].delay(scala.util.Random.nextInt())
+  result <- externalProgram[F](int, identity)
+} yield result
+}
 ```
 
 so you have a problem - how we can easy use `extermalProblem`?

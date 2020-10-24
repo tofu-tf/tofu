@@ -253,7 +253,19 @@ lazy val streams = project
   .dependsOn(core)
 
 lazy val coreModules =
-  Seq(higherKindCore, core, opticsMacro, memo, derivation, env, concurrent, opticsCore, data, streams, coreCatsMtlInterop)
+  Seq(
+    higherKindCore,
+    core,
+    opticsMacro,
+    memo,
+    derivation,
+    env,
+    concurrent,
+    opticsCore,
+    data,
+    streams,
+    coreCatsMtlInterop
+  )
 
 lazy val commonModules =
   Seq(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)

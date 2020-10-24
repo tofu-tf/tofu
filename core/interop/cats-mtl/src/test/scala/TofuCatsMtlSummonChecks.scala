@@ -9,22 +9,24 @@ object TofuCatsMtlSummonChecks {
     Ask[F, A]
   }
 
-  def checkForMtlContextNonAmbiguous[F[_]: Applicative, A: WithLocal[F, *]] = {
+  def checkForMtlLocal[F[_]: Applicative, A: WithLocal[F, *]] = {
     Local[F, A]
-    Ask[F, A]
   }
 
-  def checkForTofuContext[F[_], A: Ask[F, *]] = {
+  def checkForTofuWithContext[F[_], A: Ask[F, *]] = {
     WithContext[F, A]
   }
 
-  def checkForTofuContextNonAmbiguous[F[_], A: Local[F, *]] = {
+  def checkForTofuWithLocal[F[_], A: Local[F, *]] = {
     WithLocal[F, A]
-    WithContext[F, A]
   }
 
   def checkForMtlRaise[F[_]: Functor, E: Raise[F, *]] = {
     MRaise[F, E]
+  }
+
+  def checkForMtlHandle[F[_]: Applicative, E: Errors[F, *]] = {
+    MHandle[F, E]
   }
 
   def checkForTofuRaise[F[_], E: MRaise[F, *]] = {
@@ -32,16 +34,7 @@ object TofuCatsMtlSummonChecks {
   }
 
   def checkForTofuErrorsAndHandle[F[_]: Functor, E: MHandle[F, *]] = {
-    Handle[F, E]
     Errors[F, E]
-  }
-
-  def checkForMtlHandle[F[_]: Applicative, E: Errors[F, *]] = {
-    MHandle[F, E]
-  }
-
-  def checkForHandleAndRaiseNonAmbiguous[F[_]: Applicative, E: Errors[F, *]] = {
-    MHandle[F, E]
-    MRaise[F, E]
+    Handle[F, E]
   }
 }
