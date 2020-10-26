@@ -7,7 +7,7 @@ import tofu.{Errors, Raise, WithContext, WithLocal}
 private[catsmtl] object CatsMTLTofuInstances {
   private[catsmtl] class CatsMTLAskInstance[F[_], C](L: WithContext[F, C], A: Applicative[F]) extends Ask[F, C] {
     def applicative: Applicative[F] = A
-    def ask[E2 >: C]: F[E2]         = A.map(L.context)(identity(_: E2))
+    def ask[E2 >: C]: F[E2]         = A.widen[C, E2](L.context)
   }
 
   private[catsmtl] class CatsMTLLocalInstance[F[_], C](L: WithLocal[F, C], A: Applicative[F])

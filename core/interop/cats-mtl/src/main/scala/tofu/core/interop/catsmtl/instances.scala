@@ -12,8 +12,8 @@ object instances {
   def makeTofuWithLocalFromMtl[F[_], C](local: Local[F, C]): WithLocal[F, C] =
     new TofuCatsMTLInstances.TofuWithLocalInstance(local)
 
-  def makeTofuErrorsFromMtl[F[_], E](handle: MHandle[F, E])(implicit F: Functor[F]): Errors[F, E] =
-    new TofuCatsMTLInstances.TofuErrorsInstance(handle, F)
+  def makeTofuErrorsFromMtl[F[_], E](handle: MHandle[F, E]): Errors[F, E] =
+    new TofuCatsMTLInstances.TofuErrorsInstance(handle)
 
   def makeTofuRaiseFromMtl[F[_], E](raise: MRaise[F, E]): Raise[F, E] =
     new TofuCatsMTLInstances.TofuRaiseInstance(raise)

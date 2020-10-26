@@ -42,15 +42,15 @@ for {
 so you have a problem - how we can easy use `extermalProblem`?
 Usually programmers write your own implicits conversions, but `TOFU` could provide this instances for you!
 
-## Install
-For installation interop import dependency into your project: 
-`"ru.tinkoff" %% "tofu-core-cats-mtl" % tofu-version` 
-import it into your code files: 
-```scala 
-import tofu.core.interop.catsmtl.implicits._
-```
+### Install
+For installation interop, add dependency into your project: 
+`"ru.tinkoff" %% "tofu-core-cats-mtl" % tofu-version`
 
-Also, there are explicit conversions with explicit type classes as parameters in `tofu.core.interop.catsmtl.instances` object.
+This library provides three modules with conversions:
+import it into your code files:
+ * From `Cats MTL` instances to `TOFU` instances: `import tofu.core.interop.catsmtl.tofuimplicits._`
+ * From `TOFU` instances to `Cats MTL` instances: `import tofu.core.interop.catsmtl.mtlimplicits._`
+ * Explicit conversions between `Cats MTL` and `TOFU` instances: `import tofu.core.interop.catsmtl.instances._`
 
 ### Conversions
 
@@ -60,8 +60,8 @@ In this module we provide some conversions to `Cats MTL` typeclasses from `TOFU`
  * [F[_], E] (Raise[F, E], Functor[F]) => Raise[F, E]
  * [F[_], E] (Errors[F, E], Applicative[F]) => Handle[F, E]
 
-Also conversions to `TOFU` typeclasses from `Cats MTL` typeclasses:
+Also, we provide conversions to `TOFU` typeclasses from `Cats MTL` typeclasses:
  * [F[_], C] (Ask[F, C]) => WithContext[F, C]
  * [F[_], C] (Local[F, C]) => WithLocal[F, C]
  * [F[_], E] (Raise[F, E]) => Raise[F, E]
- * [F[_], E] (Handle[F, E], Functor[F, E]) => Errors[F, E]
+ * [F[_], E] (Handle[F, E]) => Errors[F, E]
