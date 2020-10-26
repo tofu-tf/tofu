@@ -50,16 +50,18 @@ import it into your code files:
 import tofu.core.interop.catsmtl.implicits._
 ```
 
+Also, there are explicit conversions with explicit type classes as parameters in `tofu.core.interop.catsmtl.instances` object.
+
 ### Conversions
 
 In this module we provide some conversions to `Cats MTL` typeclasses from `TOFU` typeclasses:
- * [F[_], C] (Applicative[F], WithContext[F, C]) => Ask[F, C]
- * [F[_], C] (Applicative[F], WithLocal[F, C]) => Local[F, C]
- * [F[_], E] (Functor[F], Raise[F, E]) => Raise[F, E]
- * [F[_], E] (Applicative[F], Errors[F, E]) => Handle[F, E]
+ * [F[_], C] (WithContext[F, C], Applicative[F]) => Ask[F, C]
+ * [F[_], C] (WithLocal[F, C], Applicative[F], ) => Local[F, C]
+ * [F[_], E] (Raise[F, E], Functor[F]) => Raise[F, E]
+ * [F[_], E] (Errors[F, E], Applicative[F]) => Handle[F, E]
 
 Also conversions to `TOFU` typeclasses from `Cats MTL` typeclasses:
  * [F[_], C] (Ask[F, C]) => WithContext[F, C]
  * [F[_], C] (Local[F, C]) => WithLocal[F, C]
  * [F[_], E] (Raise[F, E]) => Raise[F, E]
- * [F[_], E] (Functor[F, E], Handle[F, E]) => Errors[F, E]
+ * [F[_], E] (Handle[F, E], Functor[F, E]) => Errors[F, E]
