@@ -140,7 +140,8 @@ class RioTofuUnsafeExecFutureInstance[R] extends UnsafeExecFuture[RIO[R, *]] {
   def unlift: RIO[R, RIO[R, *] ~> Future] = RIO.runtime[R].map(r => funK(r.unsafeRunToFuture(_)))
 }
 
-class ZioTofuUnliftHasInstance[R <: Has[_], E, C: Tag] extends WithRun[ZIO[R with Has[C], E, *], ZIO[R, E, *], C] {
+final class ZioTofuUnliftHasInstance[R <: Has[_], E, C: Tag]
+    extends WithRun[ZIO[R with Has[C], E, *], ZIO[R, E, *], C] {
   override def functor: Functor[ZIO[R with Has[C], E, *]] = zio.interop.catz.monadErrorInstance
 
   override def runContext[A](fa: ZIO[R with Has[C], E, A])(ctx: C): ZIO[R, E, A] =
