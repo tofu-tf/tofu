@@ -57,12 +57,18 @@ object feither {
       e.flatMap(_.traverse(f))
     }
 
+    def mapIn[B](f: R => B)(implicit F: Functor[F]): F[Either[L, B]] =
+      e.map(_.map(f))
+
     def leftMapF[L1](f: L => F[L1])(implicit F: Monad[F]): F[Either[L1, R]] = {
       e.flatMap {
         case Left(left)       => f(left).map(_.asLeft)
         case right @ Right(_) => right.leftCast[L1].pure[F]
       }
     }
+
+    def leftMapIn[B](f: L => B)(implicit F: Functor[F]): F[Either[B, R]] =
+      e.map(_.left.map(f))
 
     def flatMapIn[L1 >: L, B](f: R => Either[L1, B])(implicit F: Functor[F]): F[Either[L1, B]] = {
       e.map(_.flatMap(f))
@@ -158,6 +164,12 @@ object feither {
     def asRightF[F[_]: Applicative, L]: F[Either[L, A]] = id.asRight[L].pure[F]
 
     def asLeftF[F[_]: Applicative, R]: F[Either[A, R]] = id.asLeft[R].pure[F]
+  }
+
+  implicit final class TofuEitherFOps[F[_], A](private val fa: F[A]) extends AnyVal {
+    def rightIn[L](implicit F: Functor[F]): F[Either[L, A]] = fa.map(_.asRight[L])
+
+    def leftIn[R](implicit F: Functor[F]): F[Either[A, R]] = fa.map(_.asLeft[R])
   }
 
   implicit final class EitherFObjectOps(private val o: Either.type) extends AnyVal {
