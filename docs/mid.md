@@ -25,7 +25,7 @@ Let's start with an example
 ```scala
 type Pre[F[_], A] = F[Unit]
 ``` 
-Despite `Pre` has type-parameter, it doesn't put any information to the result
+Despite `Pre` has type-parameter `A`, it doesn't put any information to the result
 
 Apply `MyBusinessModule[F[_]]` to `Pre[F[_], *]`
 ```scala
