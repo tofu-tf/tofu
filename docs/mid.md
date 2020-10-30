@@ -17,7 +17,7 @@ trait MyBusinessModule[F[_]] {
   def undoBusinessThing(entity: Entity): F[Respect]
 }
 ```
-Often `F` presented like some `IO` or any transformer
+Often `F` presented like some `IO`, reader, or any transformer
 
 But signature doesn't oblige to be strict. Moreover, there is no necessity to use a functor
 
