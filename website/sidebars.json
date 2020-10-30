@@ -33,6 +33,13 @@
       },
       {
         "type": "subcategory",
+        "label": "Higher-Kind",
+        "ids": [
+          "mid"
+        ]
+      },
+      {
+        "type": "subcategory",
         "label": "Optics",
         "ids": [
           "optics"
