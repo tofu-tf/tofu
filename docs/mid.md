@@ -12,7 +12,7 @@ or as a standalone dependency:
 
 Consider some trait
 ```scala
-trait MyBusinessModule[F[_]]{
+trait MyBusinessModule[F[_]] {
   def doBusinessThing(entity: Entity, info: Info): F[Value]
   def undoBusinessThing(entity: Entity): F[Respect]
 }
@@ -29,8 +29,7 @@ Despite `Pre` has type-parameter, it doesn't put any information to the result
 
 Apply `MyBusinessModule[F[_]]` to `Pre[F[_], *]`
 ```scala
-// MyBusinessModule[Pre[F, *]]
-{
+trait MyBusinessModule[Pre[F, *]] {
   def doBusinessThing(entity: Entity, info: Info): F[Unit]
   def undoBusinessThing(entity: Entity): F[Unit]
 }
@@ -43,8 +42,7 @@ type Post[F[_], A] = A => F[Unit]
 ```
 This is a contravariant type. The module takes the form
 ```scala
-//MyBusinessModule[Post[F, *]]
-{
+trait MyBusinessModule[Post[F, *]] {
   def doBusinessThing(entity: Entity, info: Info): Value => F[Unit]
   def undoBusinessThing(entity: Entity): Respect => F[Unit]
 }
@@ -59,8 +57,7 @@ With `Monad[F]` both `Pre` and `Post` can be turned into `Mid`
 
 Applying this to the module
 ```scala
-//MyBusinessModule[Mid[F, *]]
-{
+trait MyBusinessModule[Mid[F, *]] {
   def doBusinessThing(entity: Entity, info: Info): F[Value] => F[Value]
   def undoBusinessThing(entity: Entity): F[Respect] => F[Respect]
 }
