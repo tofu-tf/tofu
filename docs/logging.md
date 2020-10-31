@@ -173,3 +173,81 @@ Using a syntax we achieve a few important goals.
 First, it will log a message containing a string representation of your value of type `User` as you defined it in `Loggable` instance.  
 Second, it will create a `LoggedValue` from your `Loggable` description and pass it to underlying logger and your `LogRendered`, 
 so your structured logging will work as expected. 
+
+### Integration with logs4cats
+There is a library for effectful logging named [log4cats](https://github.com/ChristopherDavenport/log4cats) which shares
+the goal of representing logging as an effect and providing the ability to log context values. 
+It is used by some of the open-source libraries which may require you
+to pass an instance of `io.chrisdavenport.log4cats.Logger` to it in order to log something.
+Module `tofu-logging-log4cats` contains a helper that can create an instance of log4cats `Logger` from our existing
+`tofu.logging.Logging` one. If our `Logging` instance is contextual, it will continue leveraging that despite being wrapped
+in log4cats `Logger`. Moveover, it will log context values that are passed to log4cats `Logger` API as `Map[String, String]`.  
+This means that not only you will not lose your context, but additional values that are passed to `Logger` will also be logged.  
+Let's take a look at the example:
+```scala:reset
+import io.chrisdavenport.log4cats.{Logger, StructuredLogger}
+import tofu.env.Env
+import tofu.logging._
+
+// Suppose we have some external APIs that leverage log4cats's Logger and StructuredLogger
+def logWithLog4Cats[F[_]](implicit logger: Logger[F]): F[Unit] =
+    logger.info("Hello Tofu!")
+
+def logWithLog4CatsContextual[F[_]](implicit logger: StructuredLogger[F]): F[Unit] =
+    logger.info(Map("field" -> "value"))("Hello contextual Tofu!")
+
+// And we have our own context that can be logged as a structure
+case class Context(start: Long)
+object Context {
+  implicit val loggable: Loggable[Context] = new DictLoggable[Context] {
+    override def fields[I, V, R, S](a: Context, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
+      r.addInt("start", a.start.toInt, i)
+    override def logShow(a: Context): String                                                  =
+      a.toString
+  }
+}
+
+// This context will be embedded in our Env monad and be logged at each logging call
+type AppEnv[A] = Env[Context, A]
+implicit val loggableContext: LoggableContext[AppEnv] = LoggableContext.of[AppEnv].instance
+val logs: Logs[AppEnv, AppEnv]                        = Logs.withContext[AppEnv, AppEnv]
+
+// first we need to import converter function
+import tofu.logging.log4cats._
+ 
+// then we can create an instance of Logger, passing an instance of tofu.logging.Logging implicitly
+val env1: AppEnv[Unit] =
+  logs.byName("Main").flatMap { implicit logging =>
+    implicit val log4catsLogger: StructuredLogger[AppEnv] = toLog4CatsLogger
+    logWithLog4Cats *> logWithLog4CatsContextual
+  }
+
+// or passing it explicitly in case you have more than one Logging instance in scope
+val env2: AppEnv[Unit] =
+  logs.byName("Main").flatMap { logging =>
+    implicit val log4catsLogger: StructuredLogger[AppEnv] = toLog4CatsLogger(logging)
+    logWithLog4Cats *> logWithLog4CatsContextual
+  }
+
+// you can also create an instance of Logger for each call, but this is not advised since it will make unnecessary allocations
+val env3: AppEnv[Unit] =
+  logs.byName("Main").flatMap(implicit logging => logWithLog4Cats *> logWithLog4CatsContextual)
+
+// we can then import Scheduler and run our Env with some context
+import monix.execution.Scheduler.Implicits.global
+
+(for {
+  _ <- env1.run(Context(123))
+  _ <- env2.run(Context(456))
+  _ <- env3.run(Context(789))
+} yield ()).runSyncUnsafe(Duration.Inf)
+
+// If we have a configured layout for structured logging, supporting context values (i.e. tofu.logging.ElkLayout)
+// we will see JSON logs that contain not only values from our Context, but also values that were passed to log4cats Logger by the external API
+// {"@timestamp":"2020-10-31T14:11:31.059Z","loggerName":"Main","threadName":"main","level":"INFO","message":"Hello Tofu!","start":123}
+// {"@timestamp":"2020-10-31T14:11:31.167Z","loggerName":"Main","threadName":"main","level":"INFO","message":"Hello contextual Tofu!","start":123,"field":"value"}
+// {"@timestamp":"2020-10-31T14:11:31.168Z","loggerName":"Main","threadName":"main","level":"INFO","message":"Hello Tofu!","start":456}
+// {"@timestamp":"2020-10-31T14:11:31.168Z","loggerName":"Main","threadName":"main","level":"INFO","message":"Hello contextual Tofu!","start":456,"field":"value"}
+// {"@timestamp":"2020-10-31T14:11:31.169Z","loggerName":"Main","threadName":"main","level":"INFO","message":"Hello Tofu!","start":789}
+// {"@timestamp":"2020-10-31T14:11:31.169Z","loggerName":"Main","threadName":"main","level":"INFO","message":"Hello contextual Tofu!","start":789,"field":"value"}
+```

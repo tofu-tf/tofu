@@ -57,6 +57,8 @@ object Dependencies {
     val betterMonadicFor = "0.3.1"
 
     val collectionCompat = "2.2.0"
+
+    val log4Cats = "1.1.1"
   }
 
   val catsCore         = "org.typelevel"              %% "cats-core"               % Version.cats
@@ -86,6 +88,7 @@ object Dependencies {
   val refined          = "eu.timepit"                 %% "refined"                 % Version.refined
   val doobieCore       = "org.tpolecat"               %% "doobie-core"             % Version.doobie
   val collectionCompat = "org.scala-lang.modules"     %% "scala-collection-compat" % Version.collectionCompat
+  val log4Cats         = "io.chrisdavenport"          %% "log4cats-core"           % Version.log4Cats
 
   // Compile-time only
   val macroParadise    = "org.scalamacros" % "paradise"           % Version.macroParadise cross CrossVersion.patch

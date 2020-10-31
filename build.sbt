@@ -117,9 +117,18 @@ lazy val loggingRefined = project
   )
   .dependsOn(loggingStr)
 
+lazy val loggingLog4Cats = project
+  .in(file("logging/interop/log4cats"))
+  .settings(
+    defaultSettings,
+    publishName := "logging-log4cats",
+    libraryDependencies += log4Cats
+  )
+  .dependsOn(loggingStr)
+
 lazy val logging = project
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
-  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
   .settings(defaultSettings)
 
 lazy val env = project
@@ -324,9 +333,9 @@ lazy val simulacrumOptions = Seq(
     new RuleTransformer(new RewriteRule {
       override def transform(node: xml.Node): Seq[xml.Node] = node match {
         case e: xml.Elem
-            if e.label == "dependency" &&
-              e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
-              e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
+          if e.label == "dependency" &&
+            e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
+            e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
           Nil
         case _ => Seq(node)
       }
