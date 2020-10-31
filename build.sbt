@@ -333,9 +333,9 @@ lazy val simulacrumOptions = Seq(
     new RuleTransformer(new RewriteRule {
       override def transform(node: xml.Node): Seq[xml.Node] = node match {
         case e: xml.Elem
-          if e.label == "dependency" &&
-            e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
-            e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
+            if e.label == "dependency" &&
+              e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
+              e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
           Nil
         case _ => Seq(node)
       }
