@@ -61,6 +61,11 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def flatTap[B](f: C => F[B])(implicit F: FlatMap[F]): F[C]             = F.flatTap(fa)(f)
     def replicateM_(n: Int)(implicit F: Monad[F]): F[Unit]                 =
       F.tailRecM(n)(k => if (k <= 0) F.pure(Right(())) else F.as(fa, Left(k - 1)))
+
+    def flatMap2[A, B](fb: => F[A])(f: (C, A) => F[B])(implicit F: FlatMap[F]): F[B] =
+      F.flatMap(fa)(a => F.flatMap(fb)(b => f(a, b)))
+    def flatTap2[A, B](fb: => F[A])(f: (C, A) => F[B])(implicit F: FlatMap[F]): F[C] =
+      F.flatTap(fa)(a => F.flatTap(fb)(b => f(a, b)))
   }
 
   implicit final def tofuSyntaxApplyOps[F[_], A](fa: F[A]): ApplyOps[F, A]               = new ApplyOps(fa)

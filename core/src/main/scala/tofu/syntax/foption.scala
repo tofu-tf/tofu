@@ -15,6 +15,10 @@ object foption {
     def someF[F[_]: Applicative]: F[Option[A]] = a.some.pure[F]
   }
 
+  implicit final class TofuFOptionFOps[F[_], A](private val a: F[A]) extends AnyVal {
+    def someIn(implicit F: Functor[F]): F[Option[A]] = F.map(a)(Some(_))
+  }
+
   implicit final class FOptionSyntax[F[_], A](private val lhs: F[Option[A]]) extends AnyVal {
     def getOrElseF[B >: A](fa: => F[B])(implicit F: Monad[F]): F[B] =
       lhs.flatMap(_.fold(fa)(F.pure))
@@ -31,6 +35,12 @@ object foption {
     def semiflatMap[B](f: A => F[B])(implicit F: Monad[F]): F[Option[B]] =
       lhs.flatMapF(f(_).map(_.some))
 
+    def mapIn[B](f: A => B)(implicit F: Functor[F]): F[Option[B]] =
+      lhs.map(_.map(f))
+
+    def flatMapIn[B](f: A => Option[B])(implicit F: Functor[F]): F[Option[B]] =
+      lhs.map(_.flatMap(f))
+
     def flatMapF[B](f: A => F[Option[B]])(implicit F: Monad[F]): F[Option[B]] =
       lhs.flatMap(_.fold(noneF[F, B])(f(_)))
 
@@ -40,11 +50,17 @@ object foption {
         case _           => left.map(Left(_))
       }
 
+    def toRightIn[B](left: => B)(implicit F: Functor[F]): F[Either[B, A]] =
+      lhs.map(_.toRight(left))
+
     def toLeftF[B](right: => F[B])(implicit F: Monad[F]): F[Either[A, B]] =
       lhs.flatMap {
         case Some(value) => value.asLeftF[F, B]
         case None        => right.map(Right(_))
       }
+
+    def toLeftIn[B](right: => B)(implicit F: Functor[F]): F[Either[A, B]] =
+      lhs.map(_.toLeft(right))
 
     def filterIn(f: A => Boolean)(implicit F: Functor[F]): F[Option[A]] =
       lhs.map(_.filter(f))
@@ -70,6 +86,12 @@ object foption {
         case Some(value) => f(value).ifM(value.asRightF[F, B], err.map(Left(_)))
         case None        => err.map(Left(_))
       }
+
+    def collectF[B](f: PartialFunction[A, F[B]])(implicit F: Monad[F]): F[Option[B]] =
+      lhs.flatMap(_.flatMap(f.lift).sequence)
+
+    def collectIn[B](f: PartialFunction[A, B])(implicit F: Functor[F]): F[Option[B]] =
+      lhs.map(_.collect(f))
 
     def traverseF[G[_]: Applicative, B](f: A => G[B])(implicit F: Functor[F]): F[G[Option[B]]] =
       lhs.map(_.traverse(f))
