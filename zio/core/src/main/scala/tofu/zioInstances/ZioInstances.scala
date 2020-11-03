@@ -9,6 +9,7 @@ import zio.console.Console
 import zio.random.Random
 import zio.{Has, Tag}
 import zio.blocking.Blocking
+import zio.ZIO
 
 private[zioInstances] class ZioInstances {
   private[this] val rioTofuInstanceAny: RioTofuInstance[Any] = new RioTofuInstance
@@ -62,6 +63,19 @@ private[zioInstances] class ZioInstances {
 
   final def zioTofuUnliftHasInstance[R <: Has[_], E, C: Tag]: ZioTofuUnliftHasInstance[R, E, C] =
     new ZioTofuUnliftHasInstance
+
+  /**  a shortcut for simplifying WithLocal instance definition,
+    *  since zioTofuUnliftHasInstance has trouble to infer R
+    * {{{
+    *   case class MyContext()
+    *   type HasMy = Has[MyContext]
+    *   type Context = Blocking with Clock with HasMy
+    *   type My[+A] = RIO[Context, A]
+    *   implicit val myLocal: My WithLocal MyContext = zioLocal
+    * }}}
+    */
+  final def zioLocal[R <: Has[C], E, C: Tag]: ZIO[R, E, *] WithLocal C =
+    tofu.zioInstances.zioTofuUnliftHasInstance[R, E, C]
 
   private[this] val zioTofuBlockingInstanceAny                                       =
     new ZioTofuBlockingInstance[Blocking, Any]
