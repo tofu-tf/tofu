@@ -69,4 +69,9 @@ object RaiseSute {
 
     def crow4: G[Unit] = e.toRaise
   }
+
+  object ErrorSubsetDerivation {
+    def foo[F[_]: Raise[*[_], LalErr]]: F[Unit]   = ???
+    def bar[F[_]: Raise[*[_], Throwable]]: F[Unit] = foo
+  }
 }
