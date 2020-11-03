@@ -117,9 +117,18 @@ lazy val loggingRefined = project
   )
   .dependsOn(loggingStr)
 
+lazy val loggingLog4Cats = project
+  .in(file("logging/interop/log4cats"))
+  .settings(
+    defaultSettings,
+    publishName := "logging-log4cats",
+    libraryDependencies += log4Cats
+  )
+  .dependsOn(loggingStr)
+
 lazy val logging = project
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
-  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
   .settings(defaultSettings)
 
 lazy val env = project
