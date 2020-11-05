@@ -126,9 +126,6 @@ object Errors extends DataEffectComp[Errors]
 trait ErrorBase
 object ErrorBase extends ErrorsBaseInstances {
 
-  final implicit def errorByCatsError[F[_], E](implicit F: ApplicativeError[F, E]): Errors[F, E] =
-    new HandleApErr[F, E] with RaiseAppApErr[F, E] with Errors[F, E]
-
   final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
     new Errors[ReaderT[F, R, *], E] {
       def raise[A](err: E): ReaderT[F, R, A] =
@@ -144,6 +141,13 @@ object ErrorBase extends ErrorsBaseInstances {
     }
 }
 class ErrorsBaseInstances extends ErrorsBaseInstances1 {
+
+  final implicit def errorByCatsError[F[_], E](implicit F: ApplicativeError[F, E]): Errors[F, E] =
+    new HandleApErr[F, E] with RaiseAppApErr[F, E] with Errors[F, E]
+}
+
+class ErrorsBaseInstances1 extends ErrorsBaseInstances2 {
+
   final implicit def errorPrismatic[F[_], E, E1](implicit
       e: Errors[F, E],
       prism: Subset[E, E1]
@@ -151,7 +155,8 @@ class ErrorsBaseInstances extends ErrorsBaseInstances1 {
     new FromPrism[F, E, E1, Errors, Subset] with RaisePrism[F, E, E1] with HandlePrism[F, E, E1] with Errors[F, E1]
 }
 
-class ErrorsBaseInstances1 extends ErrorsBaseInstances2 {
+class ErrorsBaseInstances2 extends ErrorsBaseInstances3 {
+
   final implicit def handleDowncast[F[_], E, E1](implicit h: Handle[F, E], prism: Downcast[E, E1]): Handle[F, E1] =
     new FromPrism[F, E, E1, Handle, Downcast] with HandlePrism[F, E, E1]
 
@@ -166,7 +171,7 @@ class ErrorsBaseInstances1 extends ErrorsBaseInstances2 {
     }
 }
 
-class ErrorsBaseInstances2 {
+class ErrorsBaseInstances3 {
 
   final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, *], F, E] =
     new EitherTErrorsTo[F, E]
