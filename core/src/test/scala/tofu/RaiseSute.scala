@@ -70,8 +70,18 @@ object RaiseSute {
     def crow4: G[Unit] = e.toRaise
   }
 
+  class BaseErr()      extends Throwable
+  case class ErrorA1() extends BaseErr
+  class ErrorB1()      extends BaseErr
+  case class ErrorB2() extends ErrorB1
+
   object ErrorSubsetDerivation {
-    def foo[F[_]: Raise[*[_], LalErr]]: F[Unit]   = ???
+    def foo[F[_]: Raise[*[_], ErrorA1]]: F[Unit]   = ???
     def bar[F[_]: Raise[*[_], Throwable]]: F[Unit] = foo
+  }
+
+  object ErrorMultiBranchDerivation {
+    def foo[F[_]: Raise[*[_], ErrorB1]: Raise[*[_], ErrorA1]] =
+      implicitly[Raise[F, ErrorB2]]
   }
 }
