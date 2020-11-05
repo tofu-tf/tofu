@@ -124,9 +124,24 @@ object Errors extends DataEffectComp[Errors]
 /** Base trait for instance search
   */
 trait ErrorBase
-object ErrorBase          extends ErrorsBaseInstances  {
+object ErrorBase extends ErrorsBaseInstances {
+
   final implicit def errorByCatsError[F[_], E](implicit F: ApplicativeError[F, E]): Errors[F, E] =
     new HandleApErr[F, E] with RaiseAppApErr[F, E] with Errors[F, E]
+
+  final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
+    new Errors[ReaderT[F, R, *], E] {
+      def raise[A](err: E): ReaderT[F, R, A] =
+        ReaderT.liftF(F.raise(err))
+
+      def tryHandleWith[A](fa: ReaderT[F, R, A])(f: E => Option[ReaderT[F, R, A]]): ReaderT[F, R, A] =
+        ReaderT(r => F.tryHandleWith(fa.run(r))(e => f(e).map(_.run(r))))
+
+      def restore[A](fa: ReaderT[F, R, A]): ReaderT[F, R, Option[A]] =
+        ReaderT(r => F.restore(fa.run(r)))
+
+      def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
+    }
 }
 class ErrorsBaseInstances extends ErrorsBaseInstances1 {
   final implicit def errorPrismatic[F[_], E, E1](implicit
@@ -152,19 +167,6 @@ class ErrorsBaseInstances1 extends ErrorsBaseInstances2 {
 }
 
 class ErrorsBaseInstances2 {
-  final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
-    new Errors[ReaderT[F, R, *], E] {
-      def raise[A](err: E): ReaderT[F, R, A] =
-        ReaderT.liftF(F.raise(err))
-
-      def tryHandleWith[A](fa: ReaderT[F, R, A])(f: E => Option[ReaderT[F, R, A]]): ReaderT[F, R, A] =
-        ReaderT(r => F.tryHandleWith(fa.run(r))(e => f(e).map(_.run(r))))
-
-      def restore[A](fa: ReaderT[F, R, A]): ReaderT[F, R, Option[A]] =
-        ReaderT(r => F.restore(fa.run(r)))
-
-      def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
-    }
 
   final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, *], F, E] =
     new EitherTErrorsTo[F, E]
