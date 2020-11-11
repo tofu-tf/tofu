@@ -45,6 +45,15 @@ lazy val core = project dependsOn (opticsCore, higherKindCore) settings (
   libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
 )
 
+lazy val coreCatsMtlInterop = project
+  .in(file("core/interop/cats-mtl"))
+  .settings(
+    defaultSettings,
+    publishName := "core-cats-mtl",
+    libraryDependencies += catsMtl
+  )
+  .dependsOn(core)
+
 lazy val memo = project
   .dependsOn(core, concurrent)
   .settings(
@@ -253,7 +262,19 @@ lazy val streams = project
   .dependsOn(core)
 
 lazy val coreModules =
-  Seq(higherKindCore, core, opticsMacro, memo, derivation, env, concurrent, opticsCore, data, streams)
+  Seq(
+    higherKindCore,
+    core,
+    opticsMacro,
+    memo,
+    derivation,
+    env,
+    concurrent,
+    opticsCore,
+    data,
+    streams,
+    coreCatsMtlInterop
+  )
 
 lazy val commonModules =
   Seq(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)
