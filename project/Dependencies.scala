@@ -54,7 +54,7 @@ object Dependencies {
 
     val silencer = "1.7.1"
 
-    val kindProjector = "0.11.0"
+    val kindProjector = "0.11.1"
 
     val betterMonadicFor = "0.3.1"
 
