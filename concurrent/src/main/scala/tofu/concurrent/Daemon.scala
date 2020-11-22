@@ -125,27 +125,23 @@ object Daemon            extends DaemonInstances {
 
 }
 
-@nowarn("cat=deprecation")
-final class Actor[F[_], E, A] private (queue: MVar[F, A], val daemon: Daemon[F, E, Void]) {
+trait Actor[F[_], E, A] {
 
   /** fire message waiting for receive */
-  def !!(message: A): F[Unit] = queue.put(message)
+  def !!(message: A): F[Unit]
 
   /** fire and forget */
-  def !(message: A)(implicit F: Start[F]): F[Fiber[F, Unit]] = queue.put(message).start
+  def !(message: A)(implicit F: Start[F]): F[Fiber[F, Unit]]
 
   /** ask pattern with error handling */
-  def ??[B](make: (Either[Throwable, B] => Unit) => A)(implicit F: Concurrent[F]): F[B] =
-    F.asyncF(cb => !!(make(cb)))
+  def ??[B](make: (Either[Throwable, B] => Unit) => A)(implicit F: Concurrent[F]): F[B]
 
   /** ask pattern without error handling */
-  def ?[B](make: (B => Unit) => A)(implicit F: Concurrent[F]): F[B] =
-    F.asyncF(cb => !!(make(b => cb(Right(b)))))
+  def ?[B](make: (B => Unit) => A)(implicit F: Concurrent[F]): F[B]
 
-  def onStop(action: F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] = watch(_ => action)
+  def onStop(action: F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]]
 
-  def watch(action: Exit[E, Void] => F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] =
-    (daemon.exit >>= action).start
+  def watch(action: Exit[E, Void] => F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]]
 
   def send(message: A): F[Unit] = this !! message
 
@@ -153,7 +149,34 @@ final class Actor[F[_], E, A] private (queue: MVar[F, A], val daemon: Daemon[F, 
 }
 
 object Actor {
+
   final case class Behavior[F[_], A](receive: A => F[Option[Behavior[F, A]]])
+
+  /** Default in-memory Actor implementation.
+    */
+  @nowarn("cat=deprecation")
+  final class LocalActor[F[_], E, A] private[concurrent] (queue: MVar[F, A], val daemon: Daemon[F, E, Void])
+      extends Actor[F, E, A] {
+
+    /** fire message waiting for receive */
+    def !!(message: A): F[Unit] = queue.put(message)
+
+    /** fire and forget */
+    def !(message: A)(implicit F: Start[F]): F[Fiber[F, Unit]] = queue.put(message).start
+
+    /** ask pattern with error handling */
+    def ??[B](make: (Either[Throwable, B] => Unit) => A)(implicit F: Concurrent[F]): F[B] =
+      F.asyncF(cb => !!(make(cb)))
+
+    /** ask pattern without error handling */
+    def ?[B](make: (B => Unit) => A)(implicit F: Concurrent[F]): F[B] =
+      F.asyncF(cb => !!(make(b => cb(Right(b)))))
+
+    def onStop(action: F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] = watch(_ => action)
+
+    def watch(action: Exit[E, Void] => F[Unit])(implicit FS: Start[F], F: FlatMap[F]): F[Fiber[F, Unit]] =
+      (daemon.exit >>= action).start
+  }
 
   def spawn[F[_]: MVars: Monad: Daemonic[*[_], E], E, A](behavior: Behavior[F, A]): F[Actor[F, E, A]] =
     for {
@@ -164,13 +187,13 @@ object Actor {
                                         r <- behavior.receive(a)
                                       } yield r.getOrElse(b)
                                     )
-    } yield new Actor(mvar, daemon)
+    } yield new LocalActor(mvar, daemon)
 
   def apply[F[_]: MVars: Monad: Daemonic[*[_], E], E, A](receive: A => F[Unit]): F[Actor[F, E, A]] =
     for {
       mvar                       <- MakeMVar[F, F].empty[A]
       daemon: Daemon[F, E, Void] <- Daemon.repeat(mvar.take >>= receive)
-    } yield new Actor(mvar, daemon)
+    } yield new LocalActor(mvar, daemon)
 
   def sync[F[_]: Concurrent, A](receive: A => Unit): F[Actor[F, Throwable, A]] = apply(a => receive(a).pure[F])
 
