@@ -61,10 +61,7 @@ private[zioInstances] class ZioInstances {
   final def zioTofuWithRunInstance[R, E]: ZioTofuWithRunInstance[R, E] =
     zioTofuWithRunInstanceAny.asInstanceOf[ZioTofuWithRunInstance[R, E]]
 
-  final def zioTofuUnliftHasInstance[R <: Has[_], R1 <: Has[_], E, C: Tag](implicit
-      ev1: R1 <:< R with Has[C],
-      ev2: R with Has[C] <:< R1
-  ): ZioTofuUnliftHasInstance[R, R1, E, C] =
+  final def zioTofuUnliftHasInstance[R <: Has[_], E, C: Tag]: ZioTofuUnliftHasInstance[R, R with Has[C], E, C] =
     new ZioTofuUnliftHasInstance
 
   /**  a shortcut for simplifying WithLocal instance definition,
@@ -78,7 +75,7 @@ private[zioInstances] class ZioInstances {
     * }}}
     */
   final def zioLocal[R <: Has[C], E, C: Tag]: ZIO[R, E, *] WithLocal C =
-    tofu.zioInstances.zioTofuUnliftHasInstance[R, R with Has[C], E, C]
+    tofu.zioInstances.zioTofuUnliftHasInstance[R, E, C]
 
   private[this] val zioTofuBlockingInstanceAny                                       =
     new ZioTofuBlockingInstance[Blocking, Any]

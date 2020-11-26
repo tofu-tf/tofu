@@ -51,5 +51,5 @@ private[zioInstances] trait ZioTofuImplicits3 {
       ev1: R1 <:< R with Has[C],
       ev2: R with Has[C] <:< R1
   ): ZioTofuUnliftHasInstance[R, R1, E, C] =
-    zioTofuUnliftHasInstance
+    new ZioTofuUnliftHasInstance
 }
