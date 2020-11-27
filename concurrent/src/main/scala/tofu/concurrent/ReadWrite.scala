@@ -7,6 +7,7 @@ import cats.effect.syntax.bracket._
 import cats.syntax.option._
 import tofu.syntax.monadic._
 
+import scala.annotation.nowarn
 import scala.collection.immutable.Queue
 
 /** A purely functional ReadWriteLock.
@@ -178,6 +179,7 @@ object ReadWrite {
       }
 
     private def extractReadersBatch(state: State[F, A], quantity: Int): (State[F, A], List[Reader[F, A]], Int) = {
+      @nowarn("cat=other-match-analysis")
       def impl(
           state: State[F, A],
           batch: List[Reader[F, A]],
@@ -195,6 +197,7 @@ object ReadWrite {
       impl(state, Nil, quantity, 0)
     }
 
+    @nowarn("cat=other-match-analysis")
     private val releaseRead: F[Unit] =
       state.modify {
         dropPrecedingTrashed(_) match {
