@@ -6,7 +6,7 @@ import tofu.lift.Unlift
 
 object unlift {
 
-  @deprecated("Unsafe, loses local context changes within G[_]")
+  @deprecated("Unsafe, loses local context changes within G[_]", "0.9.0")
   implicit final class UnliftEffectOps[F[_], G[_]](private val U: Unlift[F, G]) extends AnyVal {
     def effect(implicit GA: Async[G], FE: Effect[F]): G[Effect[G]] =
       GA.map(U.unlift) { unliftF =>
