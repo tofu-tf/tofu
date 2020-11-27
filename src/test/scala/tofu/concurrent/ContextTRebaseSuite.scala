@@ -47,8 +47,9 @@ class ContextTRebaseSuite extends AnyFunSuite {
   }
 }
 
+@nowarn("cat=unused-imports")
 object ContextTRebaseSuite {
-  @typeclass @nowarn("cat=unused-imports")
+  @typeclass
   @derive(representableK)
   trait Name[F[_]] {
     def getName: F[String]
@@ -56,16 +57,15 @@ object ContextTRebaseSuite {
   }
   object Name extends ContextEmbed[Name]
 
-  @typeclass @nowarn("cat=unused-imports")
+  @typeclass
   @derive(representableK)
   trait Auth[F[_]] {
     def hasAuth(key: String): F[Boolean]
     def checkAuth(key: String): F[Unit]
   }
-
   object Auth extends ContextEmbed[Auth]
 
-  @typeclass @nowarn("cat=unused-imports")
+  @typeclass
   @derive(embed, invariantK)
   trait History[F[_]] {
     def readHistory: F[List[String]]
