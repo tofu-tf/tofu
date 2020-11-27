@@ -5,7 +5,7 @@ moduleName := "tofu"
 
 val libVersion = "0.8.0"
 
-val scalaV = "2.13.3"
+val scalaV = "2.13.4"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
