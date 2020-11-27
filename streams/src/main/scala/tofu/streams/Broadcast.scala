@@ -10,3 +10,7 @@ trait Broadcast[F[_]] {
     */
   def broadcastThrough[A, B](fa: F[A])(processors: F[A] => F[B]*): F[B]
 }
+
+object Broadcast {
+  def apply[F[_]](implicit ev: Broadcast[F]): Broadcast[F] = ev
+}

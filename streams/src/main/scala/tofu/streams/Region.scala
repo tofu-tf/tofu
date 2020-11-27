@@ -12,3 +12,7 @@ trait Region[F[_], G[_], +Exit] {
   final def region[R](open: G[R])(close: R => G[Unit]): F[R] =
     regionCase[R](open) { case (r, _) => close(r) }
 }
+
+object Region {
+  def apply[F[_], G[_], Exit](implicit ev: Region[F, G, Exit]): Region[F, G, Exit] = ev
+}
