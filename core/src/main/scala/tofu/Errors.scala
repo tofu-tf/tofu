@@ -3,13 +3,14 @@ package tofu
 import cats.data.{EitherT, OptionT, ReaderT}
 import cats.syntax.either._
 import cats.{Applicative, ApplicativeError, FlatMap, Functor, Id, Monad}
+import com.github.ghik.silencer.silent
 import tofu.errorInstances._
 import tofu.internal.{CachedMatcher, DataEffectComp}
 import tofu.lift.Lift
 import tofu.optics.PUpcast.GenericSubtypeImpl
 import tofu.optics.{Downcast, Subset, Upcast}
+
 import scala.annotation.implicitNotFound
-import com.github.ghik.silencer.silent
 
 /** Allows to raise `E` inside type `F`.
   */
@@ -22,14 +23,12 @@ trait Raise[F[_], E] extends ErrorBase with Raise.ContravariantRaise[F, E] {
 
 object Raise extends DataEffectComp[Raise] {
 
-  @deprecated("Raise has automatic upcasting, use Raise[F, E]", since = "0.8.1")
   trait ContravariantRaise[F[_], -E] extends ErrorBase {
     def raise[A](err: E): F[A]
 
     def reRaise[A, E1 <: E](fa: F[Either[E1, A]])(implicit F: FlatMap[F], A: Applicative[F]): F[A] =
       F.flatMap(fa)(_.fold(raise[A], A.pure))
   }
-
 }
 
 /** Allows to recover after some error in a ${F} transiting to a ${G} as a result.
