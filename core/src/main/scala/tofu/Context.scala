@@ -1,7 +1,7 @@
 package tofu
 
-import cats.{Applicative, FlatMap, Functor, ~>}
 import cats.data.ReaderT
+import cats.{Applicative, FlatMap, Functor, ~>}
 import tofu.lift.{Lift, Unlift}
 import tofu.optics.{Contains, Equivalent, Extract}
 import tofu.syntax.funk._
@@ -113,16 +113,30 @@ object Context {
     * object MyContext extends Context.Companion[MyContext]
     * }}}
     */
-  trait Companion[C] {
+  trait Companion[C] extends ContextInstances[C] {
     type Has[F[_]] = WithContext[F, C]
 
-    implicit def tofuPromoteContextStructure[F[_], A](implicit
+    implicit def promoteContextStructure[F[_], A](implicit
+        withContext: WithContext[F, C],
+        field: C Contains A
+    ): WithContextContainsInstance[F, C, A] =
+      new WithContextContainsInstance[F, C, A]
+  }
+
+  trait ContextInstances[C] {
+
+    implicit def promoteLocalStructure[F[_], A](implicit
         context: WithLocal[F, C],
         field: C Contains A
     ): WithLocal[F, A] =
       context.subcontext(field)
   }
+}
 
+final class WithContextContainsInstance[F[_], A, B](implicit wc: WithContext[F, A], lens: A Contains B)
+    extends WithContext[F, B] {
+  def functor: Functor[F] = wc.functor
+  def context: F[B]       = wc.extract(lens).context
 }
 
 /** Synonym for [[Context]] with explicit C as Ctx for better type inference
