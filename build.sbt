@@ -400,5 +400,5 @@ lazy val publishSettings = Seq(
   )
 )
 
-addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
-addCommandAlias("checkfmt", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
+addCommandAlias("fmt", "all tofu/scalafmtSbt tofu/scalafmtAll")
+addCommandAlias("checkfmt", "all tofu/scalafmtSbtCheck tofu/scalafmtCheckAll")

@@ -47,6 +47,9 @@ private[zioInstances] trait ZioTofuImplicits2 extends ZioTofuImplicits3 {
 }
 
 private[zioInstances] trait ZioTofuImplicits3 {
-  @inline final implicit def zioTofuUnliftHasImplicit[R <: Has[_], E, C: Tag]: ZioTofuUnliftHasInstance[R, E, C] =
-    zioTofuUnliftHasInstance
+  @inline final implicit def zioTofuUnliftHasImplicit[R <: Has[_], R1 <: Has[_], E, C: Tag](implicit
+      ev1: R1 <:< R with Has[C],
+      ev2: R with Has[C] <:< R1
+  ): ZioTofuUnliftHasInstance[R, R1, E, C] =
+    new ZioTofuUnliftHasInstance
 }

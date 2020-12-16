@@ -61,7 +61,7 @@ private[zioInstances] class ZioInstances {
   final def zioTofuWithRunInstance[R, E]: ZioTofuWithRunInstance[R, E] =
     zioTofuWithRunInstanceAny.asInstanceOf[ZioTofuWithRunInstance[R, E]]
 
-  final def zioTofuUnliftHasInstance[R <: Has[_], E, C: Tag]: ZioTofuUnliftHasInstance[R, E, C] =
+  final def zioTofuUnliftHasInstance[R <: Has[_], E, C: Tag]: ZioTofuUnliftHasInstance[R, R with Has[C], E, C] =
     new ZioTofuUnliftHasInstance
 
   /**  a shortcut for simplifying WithLocal instance definition,
