@@ -5,7 +5,7 @@ moduleName := "tofu"
 
 val libVersion = "0.8.0"
 
-val scalaV = "2.13.3"
+val scalaV = "2.13.4"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -369,7 +369,7 @@ lazy val publishSettings = Seq(
   publishVersion := libVersion,
   publishMavenStyle := true,
   description := "Opinionated set of tools for functional programming in Scala",
-  crossScalaVersions := Seq("2.12.12", "2.13.3"),
+  crossScalaVersions := Seq("2.12.12", "2.13.4"),
   publishTo := {
     if (isSnapshot.value) {
       Some(Opts.resolver.sonatypeSnapshots)
