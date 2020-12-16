@@ -2,6 +2,7 @@ package tofu
 
 import cats.Applicative
 import cats.data.ReaderT
+import tofu.optics.Contains
 
 object ContextSuite {
   type Ctx >: Unit
@@ -25,4 +26,20 @@ object ContextSuite {
     runContext(fa)(ctx)
   }
 
+  case class B()
+  case class D(a: B)
+
+  object D extends Context.Companion[D]
+
+  import D._
+
+  def contextFromLocalSummon[F[_]: WithLocal[*[_], D]](implicit lens: D Contains B): Unit = {
+    implicitly[WithContext[F, B]]
+    ()
+  }
+
+  def contextFromContextSummon[F[_]: WithContext[*[_], D]](implicit lens: D Contains B): Unit = {
+    implicitly[WithContext[F, B]]
+    ()
+  }
 }
