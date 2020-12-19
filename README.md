@@ -40,6 +40,7 @@ of `"tofu"`):
   * `tofu-logging-util` for logging util only
   * `tofu-logging-refined` for interop between tofu-logging and [Refined](https://github.com/fthomas/refined) 
   * `tofu-logging-shapeless` for interop between tofu-logging and [Shapeless](https://github.com/milessabin/shapeless) tag
+  * `tofu-logging-log4cats` for interop with [Log4Cats](https://github.com/ChristopherDavenport/log4cats)
 * `tofu-memo` for caching utils
 * `tofu-observable` for `monix.reactive.Observable` utils
 * `tofu-optics-core` for optics core (Optics typeclasses)
