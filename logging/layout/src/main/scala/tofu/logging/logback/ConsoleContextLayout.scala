@@ -17,11 +17,14 @@ class ConsoleContextLayout extends PatternLayout {
 class WrappedEvent(event: ILoggingEvent) extends ILoggingEvent {
 
   lazy val getMDCPropertyMap: util.Map[String, String] = {
-    val map             = new util.HashMap[String, String]
+    val map                   = new util.HashMap[String, String]
     map.putAll(event.getMDCPropertyMap)
-    def intoMdc(x: Any) = x match {
+    def intoMdc(x: Any): Unit = x match {
       case lv: LoggedValue =>
-        lv.foreachLog((name, value) => map.put(name, value.toString))
+        lv.foreachLog { (name, value) =>
+          map.put(name, value.toString)
+          ()
+        }
       case _               =>
     }
     event.getMarker match {
