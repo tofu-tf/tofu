@@ -137,5 +137,3 @@ private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
 trait LoggingCompanion[U[_[_]]] {
   type Log[F[_]] = ServiceLogging[F, U[Any]]
 }
-
-
