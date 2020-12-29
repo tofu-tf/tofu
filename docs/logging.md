@@ -193,7 +193,7 @@ class MyService[F[_] : Monad](logger: Logging[F]) {
     logger.info("Doing simplest thing").as(arg.length) <* logger.debug("Yep, counted length")
 }
 
-object MyService extends LoggingCompanion {
+object MyService {
   def makeNamed[I[_] : Monad, F[_] : Monad](logs: Logs[I, F]): I[MyService[F]] =
     logs.byName("my-service-log").map(new MyService[F](_))
 }

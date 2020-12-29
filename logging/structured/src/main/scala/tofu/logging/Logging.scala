@@ -13,8 +13,8 @@ import tofu.{Init, higherKind}
 
 import scala.reflect.ClassTag
 
-/** typeclass equivalent of Logger
-  * may contain specified some Logger instance
+/** Typeclass equivalent of Logger.
+  * May contain specified some Logger instance
   * or try to read it from the context
   */
 trait LoggingBase[F[_]] {
@@ -65,8 +65,9 @@ trait LoggingBase[F[_]] {
     writeCause(Error, message, cause, values: _*)
 }
 
-/** Logging tagged with some arbitrary tag type
-  *  note there are not any guarantees that `Service` correspond to the type parameter of `Logs.forService` method
+/** Logging tagged with some arbitrary tag type.
+  *
+  * @note there are no guarantees that `Service` correspond to the type parameter of `Logs.forService` method
   */
 trait ServiceLogging[F[_], Service] extends LoggingBase[F] {
   final def to[Svc2]: ServiceLogging[F, Svc2] = this.asInstanceOf[ServiceLogging[F, Svc2]]
@@ -88,8 +89,8 @@ object ServiceLogging {
     unilogs.service[Svc]
 }
 
-/** typeclass for logging using specified logger or set of loggers
-  * see `Logs` for creating instances of that
+/** Typeclass for logging.
+  * @see [[tofu.logging.Logs]] for creating instances of that trait
   */
 trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
   final def widen[G[a] >: F[a]]: Logging[G] = this.asInstanceOf[Logging[G]]
@@ -119,7 +120,7 @@ object Logging {
     def combine(x: Logging[F], y: Logging[F]): Logging[F] = Logging.combine(x, y)
   }
 
-  /** log level enumeration */
+  /** Log level */
   sealed trait Level
 
   case object Trace extends Level
@@ -134,6 +135,13 @@ private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
   def write(level: Level, message: String, values: LoggedValue*): F[Unit] = noop
 }
 
+/** Mix-in trait that supposed to be extended by companion of service
+  *
+  * @example {{{
+  * class FooService[F[_] : FooService.Log]
+  * object FooService extends LoggingCompanion[FooService]
+  * }}}
+  */
 trait LoggingCompanion[U[_[_]]] {
   type Log[F[_]] = ServiceLogging[F, U[Any]]
 }

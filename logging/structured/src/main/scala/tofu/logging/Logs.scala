@@ -28,7 +28,7 @@ import tofu.higherKind.Mid
   * However it's not uncommon to use different [[Logs]] for different parts of program.
   *
   * Sample usage would be:
-  * {{{
+  * @example {{{
   *   val logs: Logs[F, F] = Logs.sync[F, F]
   *
   *   def program[F[_]: Sync] =
@@ -147,13 +147,13 @@ object Logs extends LogsInstances0 {
     ): I[Universal[F]] = cached.map(_.universal)
 
     /** Collection of useful methods for creating middleware
-      * ${logs.logged[Service].mid(implicit l => new Service[Mid[F, *]]{... })}
+      * {{{logs.logged[Service].mid(implicit l => new Service[Mid[F, *]]{... })}}}
       */
     final def logged[U[_[_]]](implicit c: ClassTag[U[Any]]): LogWares[U, I, F] =
       new LogWares(logs.forService[U[Any]])
 
     /** Collection of useful methods for creating middleware
-      * ${logs.nameLogged[Service]("service").mid(implicit l => new Service[Mid[F, *]]{... })}
+      * {{{logs.nameLogged[Service]("service").mid(implicit l => new Service[Mid[F, *]]{... })}}}
       */
     final def nameLogged[U[_[_]]](name: String): LogWares[U, I, F] =
       new LogWares(logs.byName(name))
