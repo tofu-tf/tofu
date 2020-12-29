@@ -163,12 +163,12 @@ class FooService[F[_] : FooService.Log : Monad] {
 
 object FooService extends LoggingCompanion[FooService] {
   def make[I[_] : Functor, F[_] : Monad](logs: Logs[I, F]): I[FooService[F]] =
-    logs.service[FooService].map(implicit l => new FooService[F])
+    logs.of[FooService].map(implicit l => new FooService[F])
 }
 
 ```
 
-Note that using it like `logs.named("foo")` is going to fail compilation.
+Note that using it like `logs.named["foo"]` or `logs.byName("foo")` is going to fail compilation.
 
 This is also the intended way to create `Logging[F]` or `ServiceLogging[F, Service]` instance for your classes.
 
@@ -192,14 +192,15 @@ import tofu.logging._
 type F[A] = cats.effect.IO[A]
 
 class MyService
-
+class MyTaglessService[F[_]]
 // defines simple logging behaviour without any notion of contexts
 val syncLogs = Logs.sync[F, F]
 
 // describing creation of logging instances and logging itself. When being run, this will log a message
 val effect: F[Unit] = for {
   loggingBN <- syncLogs.byName("my-logger") // you can create instances by name
-  loggingFS <- syncLogs.forService[MyService] // you can create instances by type tags
+  loggingFS <- syncLogs.forService[MyService] // you can create instances by type of your non-tagless-final services
+  loggingFS <- syncLogs.of[MyTaglessService] // you can create instances by type of your tagless-final services
   _ <- loggingBN.info("This is an INFO message")
   _ <- loggingFS.warn("This is a WARN message")
 } yield ()
@@ -285,7 +286,7 @@ object Example extends zio.App {
 
     def make[I[_] : Functor, F[_] : Monad](logs: Logs[I, F]): I[BusinessService[F]] =
       logs
-        .service[BusinessService[Any]]
+        .of[BusinessService]
         .map(implicit l => new BusinessService[F])
   }
 

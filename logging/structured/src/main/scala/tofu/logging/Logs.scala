@@ -55,7 +55,7 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
 
   final def service[Svc: ClassTag]: I[ServiceLogging[F, Svc]] = forService[Svc].asInstanceOf[I[ServiceLogging[F, Svc]]]
 
-  final def serviceOf[Svc[_[_]]](implicit tag: ClassTag[Svc[Any]]): I[ServiceLogging[F, Svc[Any]]] =
+  final def of[Svc[_[_]]](implicit tag: ClassTag[Svc[Any]]): I[ServiceLogging[F, Svc[Any]]] =
     forService[Svc[Any]].asInstanceOf[I[ServiceLogging[F, Svc[Any]]]]
 }
 
