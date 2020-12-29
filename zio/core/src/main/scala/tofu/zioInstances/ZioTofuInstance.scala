@@ -140,18 +140,21 @@ class RioTofuUnsafeExecFutureInstance[R] extends UnsafeExecFuture[RIO[R, *]] {
   def unlift: RIO[R, RIO[R, *] ~> Future] = RIO.runtime[R].map(r => funK(r.unsafeRunToFuture(_)))
 }
 
-class ZioTofuUnliftHasInstance[R <: Has[_], E, C: Tag] extends WithRun[ZIO[R with Has[C], E, *], ZIO[R, E, *], C] {
-  override def functor: Functor[ZIO[R with Has[C], E, *]] = zio.interop.catz.monadErrorInstance
+final class ZioTofuUnliftHasInstance[R <: Has[_], R1 <: Has[_], E, C: Tag](implicit
+    ev1: R1 <:< R with Has[C],
+    ev2: R with Has[C] <:< R1
+) extends WithRun[ZIO[R1, E, *], ZIO[R, E, *], C] {
+  override def functor: Functor[ZIO[R1, E, *]] = zio.interop.catz.monadErrorInstance
 
-  override def runContext[A](fa: ZIO[R with Has[C], E, A])(ctx: C): ZIO[R, E, A] =
+  override def runContext[A](fa: ZIO[R1, E, A])(ctx: C): ZIO[R, E, A] =
     fa.provideSome((_: R) add ctx)
 
-  override def context: ZIO[R with Has[C], E, C] = ZIO.access(_.get[C])
+  override def context: ZIO[R1, E, C] = ZIO.access(_.get[C])
 
-  override def local[A](fa: ZIO[R with Has[C], E, A])(project: C => C): ZIO[R with Has[C], E, A] =
+  override def local[A](fa: ZIO[R1, E, A])(project: C => C): ZIO[R1, E, A] =
     fa.provideSome(r => r add project(r.get[C]))
 
-  override def lift[A](fa: ZIO[R, E, A]): ZIO[R with Has[C], E, A] = fa
+  override def lift[A](fa: ZIO[R, E, A]): ZIO[R1, E, A] = fa.provideSome(ev1)
 }
 
 class ZioTofuBlockingInstance[R <: Blocking, E] extends BlockExec[ZIO[R, E, *]] {

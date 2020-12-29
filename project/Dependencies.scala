@@ -9,9 +9,11 @@ object Dependencies {
 
     val tethys = "0.11.0"
 
-    val cats = "2.2.0"
+    val cats = "2.3.1"
 
-    val catsEffect = "2.2.0"
+    val catsEffect = "2.3.1"
+
+    val catsMtl = "1.1.1"
 
     val catsTagless = "0.12"
 
@@ -23,13 +25,13 @@ object Dependencies {
 
     val slf4j = "1.7.30"
 
-    val fs2 = "2.4.4"
+    val fs2 = "2.5.0"
 
     val logback = "1.2.3"
 
-    val monix = "3.2.2"
+    val monix = "3.3.0"
 
-    val scalatest = "3.2.2"
+    val scalatest = "3.2.3"
 
     val magnolia = "0.17.0"
 
@@ -41,9 +43,9 @@ object Dependencies {
 
     val shapeless = "2.3.3"
 
-    val refined = "0.9.17"
+    val refined = "0.9.19"
 
-    val doobie = "0.9.2"
+    val doobie = "0.9.4"
 
     // Compile time only
     val macroParadise = "2.1.1"
@@ -52,15 +54,18 @@ object Dependencies {
 
     val silencer = "1.7.1"
 
-    val kindProjector = "0.11.0"
+    val kindProjector = "0.11.2"
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.2.0"
+    val collectionCompat = "2.3.2"
+
+    val log4Cats = "1.1.1"
   }
 
   val catsCore         = "org.typelevel"              %% "cats-core"               % Version.cats
   val catsFree         = "org.typelevel"              %% "cats-free"               % Version.cats
+  val catsMtl          = "org.typelevel"              %% "cats-mtl"                % Version.catsMtl
   val monocle          = "com.github.julien-truffaut" %% "monocle-core"            % Version.monocle
   val alleycats        = "org.typelevel"              %% "alleycats-core"          % Version.cats
   val catsEffect       = "org.typelevel"              %% "cats-effect"             % Version.catsEffect
@@ -86,6 +91,7 @@ object Dependencies {
   val refined          = "eu.timepit"                 %% "refined"                 % Version.refined
   val doobieCore       = "org.tpolecat"               %% "doobie-core"             % Version.doobie
   val collectionCompat = "org.scala-lang.modules"     %% "scala-collection-compat" % Version.collectionCompat
+  val log4Cats         = "io.chrisdavenport"          %% "log4cats-core"           % Version.log4Cats
 
   // Compile-time only
   val macroParadise    = "org.scalamacros" % "paradise"           % Version.macroParadise cross CrossVersion.patch

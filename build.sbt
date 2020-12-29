@@ -3,9 +3,9 @@ import com.typesafe.sbt.SbtGit.git
 
 moduleName := "tofu"
 
-val libVersion = "0.8.0"
+val libVersion = "0.9.0"
 
-val scalaV = "2.13.3"
+val scalaV = "2.13.4"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -44,6 +44,15 @@ lazy val core = project dependsOn (opticsCore, higherKindCore) settings (
   publishName := "core",
   libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
 )
+
+lazy val coreCatsMtlInterop = project
+  .in(file("core/interop/cats-mtl"))
+  .settings(
+    defaultSettings,
+    publishName := "core-cats-mtl",
+    libraryDependencies += catsMtl
+  )
+  .dependsOn(core)
 
 lazy val memo = project
   .dependsOn(core, concurrent)
@@ -117,9 +126,18 @@ lazy val loggingRefined = project
   )
   .dependsOn(loggingStr)
 
+lazy val loggingLog4Cats = project
+  .in(file("logging/interop/log4cats"))
+  .settings(
+    defaultSettings,
+    publishName := "logging-log4cats",
+    libraryDependencies += log4Cats
+  )
+  .dependsOn(loggingStr)
+
 lazy val logging = project
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
-  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined)
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
   .settings(defaultSettings)
 
 lazy val env = project
@@ -244,7 +262,19 @@ lazy val streams = project
   .dependsOn(core)
 
 lazy val coreModules =
-  Seq(higherKindCore, core, opticsMacro, memo, derivation, env, concurrent, opticsCore, data, streams)
+  Seq(
+    higherKindCore,
+    core,
+    opticsMacro,
+    memo,
+    derivation,
+    env,
+    concurrent,
+    opticsCore,
+    data,
+    streams,
+    coreCatsMtlInterop
+  )
 
 lazy val commonModules =
   Seq(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)
@@ -339,7 +369,7 @@ lazy val publishSettings = Seq(
   publishVersion := libVersion,
   publishMavenStyle := true,
   description := "Opinionated set of tools for functional programming in Scala",
-  crossScalaVersions := Seq("2.12.12", "2.13.3"),
+  crossScalaVersions := Seq("2.12.12", "2.13.4"),
   publishTo := {
     if (isSnapshot.value) {
       Some(Opts.resolver.sonatypeSnapshots)
@@ -370,5 +400,5 @@ lazy val publishSettings = Seq(
   )
 )
 
-addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
-addCommandAlias("checkfmt", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
+addCommandAlias("fmt", "all tofu/scalafmtSbt tofu/scalafmtAll")
+addCommandAlias("checkfmt", "all tofu/scalafmtSbtCheck tofu/scalafmtCheckAll")

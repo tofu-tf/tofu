@@ -2,7 +2,6 @@ package tofu.syntax.streams
 
 import cats.syntax.functor._
 import cats.{Foldable, Functor}
-import tofu.lift.Lift
 import tofu.streams.Evals
 
 private[syntax] final class EvalsOps[F[_], G[_], A](private val fa: F[A]) extends AnyVal {
@@ -12,7 +11,7 @@ private[syntax] final class EvalsOps[F[_], G[_], A](private val fa: F[A]) extend
 }
 
 private[syntax] final class EvalPA[F[_]](private val __ : Boolean) extends AnyVal {
-  def apply[G[_], A](ga: G[A])(implicit ev: Lift[G, F]): F[A] = ev.lift(ga)
+  def apply[G[_], A](ga: G[A])(implicit ev: Evals[F, G]): F[A] = ev.eval(ga)
 }
 
 private[syntax] final class EvalsPA[F[_]](private val __ : Boolean) extends AnyVal {

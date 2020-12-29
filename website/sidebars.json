@@ -20,7 +20,8 @@
         "label": "Contextual",
         "ids": [
           "env",
-          "hascontext"
+          "hascontext",
+          "corecatsmtlinterop"
         ]
       },
       {
@@ -29,6 +30,13 @@
         "ids": [
           "agent",
           "concurrent-makeref"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Higher-Kind",
+        "ids": [
+          "mid"
         ]
       },
       {
