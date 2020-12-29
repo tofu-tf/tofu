@@ -30,7 +30,7 @@ logging is an effect that can be composed.
 It looks very similar to interfaces we all are used to (from SLF4J and other logging libraries and facades), introducing
 some new concepts:
 
-```scala
+```scala:reset
 import tofu.logging.LoggedValue
 
 trait Logging[F[_]] {
@@ -74,7 +74,7 @@ functionality:
 
 ### Loggable example
 
-```scala
+```scala:reset
 import tofu.logging._
 import cats.syntax.semigroup._
 
@@ -116,7 +116,7 @@ exist though).
 * by asking that name from user:
   For example here we create named instance and pass it explicitly.
 
-```scala
+```scala:reset
 import tofu.logging._
 import tofu.syntax.logging._
 import tofu.syntax.monadic._
@@ -136,7 +136,7 @@ object MyService extends LoggingCompanion {
 
 * by generating that name from type-parameter, which is a class intended to use logging with:
 
-```scala
+```scala:reset
 def makeNamed[I[_] : Monad, F[_] : Monad](logs: Logs[I, F]): I[MyService[F]] =
   logs.byName("my-service-log").map(new MyService[F](_))
 ```
@@ -150,7 +150,7 @@ Creating plain `Logging[F]` and using it around tends to be error-prune: one can
 service `FooService` instead of `BarService`. Tofu has a solution — newtype `ServiceLogging[F, Service]`
 and `LoggingCompanion` which contains simple type alias `Log[F[_]] = ServiceLogging[F, Service]`.
 
-```scala
+```scala:reset
 import tofu.logging._
 import tofu.syntax.logging._
 import tofu.syntax.monadic._
@@ -185,7 +185,7 @@ There are multiple ways to create `Logs` instance, among them:
   `Logging` instance that is created this way will be a combination of two underlying instances, produced by both `Logs`
   . This means that both `Logging` implementations will be called in sequence
 
-```scala
+```scala:reset
 import tofu.logging._
 
 // for simplification, you can use whatever F you like
@@ -260,7 +260,7 @@ Luckily for us, tofu has two special Layouts:
 
 ### Example
 
-```scala
+```scala:reset
 import tofu.WithRun
 import tofu.logging.derivation.loggable._
 import tofu.logging.{LoggableContext, Logging, LoggingCompanion, Logs}
@@ -444,7 +444,7 @@ in `Loggable` instance.
 Second, it will create a `LoggedValue` from your `Loggable` description and pass it to underlying logger and
 your `LogRendered`, so your structured logging will work as expected. 
 
-### Integration with logs4cats
+## Integration with logs4cats
 There is a library for effectful logging named [log4cats](https://github.com/ChristopherDavenport/log4cats) which shares
 the goal of representing logging as an effect and providing the ability to log context values. 
 It is used by some of the open-source libraries which may require you
