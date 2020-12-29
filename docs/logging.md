@@ -50,7 +50,7 @@ trait Logging[F[_]] {
 Basically, that's the main user API you can interact with throughout your code. It resembles well-known solutions,
 keeping in mind that logging is an effect, though introducing the concept of `LoggedValue`.
 
-## Logs representation (using Loggable)
+## Representation
 
 To represent a value in logs we use a concept of `Loggable` (it's a typeclass). It describes how a value of some type
 can be logged, both as a string representation in log message and as a component of structured logging. Given an
@@ -97,58 +97,25 @@ Second, we define two methods that describe how `User` should be logged:
 * `fields`, that represents `User` as a structure, containing two fields with their respective names and values
 * `logShow`, that represents `User` as a string in a log message
 
-
-
-## Creation 
+## Creation
 
 Creating an instance of `Logging` in Tofu is an effect itself. You can use helper class `Logs` that can produce values
-of type `I[Logging[F]]` (where `I` and `F` are intended to be two different effects, former is a `I`nitialization effect (`Task` or `IO`)  and latter is some ReaderT-ish effect or just main program effect type, but they can be the same though) and define a behaviour of
-your `Logging` instances. An instance of `Logs` is supposed to be shared by different parts of user code. It's not a
-restriction though.
+of type `I[Logging[F]]` (where `I` and `F` are intended to be two different effects, former is a `I`nitialization
+effect (`Task` or `IO`)  and latter is some ReaderT-ish effect or just main program effect type, but they can be the
+same though) and define a behaviour of your `Logging` instances. An instance of `Logs` is supposed to be shared by
+different parts of user code. It's not a restriction though.
 
-Tofu logs are built on top of existing Java logging infrastructure hence each logger for some class needs to have distinctive name,
-as well as whole logging system has to be configured with a `logback.xml` (default configuration does exist though).
+Tofu logs are built on top of existing Java logging infrastructure hence each logger for some class needs to have
+distinctive name, as well as whole logging system has to be configured with a `logback.xml` (default configuration does
+exist though).
 
 `Logs` methods close the first requirement in different ways:
+
 ### Plain `Logging`
+
 * by asking that name from user:
-```scala
-import zio.IO
+  For example here we create named instance and pass it explicitly.
 
-val myServiceLogger(logs: Logs[IO, IO]): IO[Logging[IO]] =  logs.byName("my-service")
-```
-* by generating that name from type-parameter, which is a class intended to use logging with:
-```scala
-import zio.IO
-class MyService[F[_]]
-val myServiceLogger(logs: Logs[IO, IO]): IO[Logging[IO]] =  logs.forService[MyService[IO]]
-```
-  Logging instance created by this method for class `MyService[IO]` in package `com.bar.foo.pckg` will be named `com.bar.foo.pckg.MyService`
-
-### Typesafe `ServiceLogging`
-
-Creating plain `Logging[F]` and using it around tends to be error-prune: one can easily pass logger created for service `FooService` instead of `BarService`.
-Tofu has a solution —  newtype `ServiceLogging[F, Service]` and `LoggingCompanion` which contains simple type alias `Log[F[_]] = ServiceLogging[F, Service]`.
-```scala
-import tofu.logging._
-import tofu.syntax.logging._
-import tofu.syntax.monadic._
-import cats._
-
-class FooService[F[_] : FooService.Log : Monad] {
-  def makeFoo(arg: Int): F[String] = 
-    info"Doing yet another simplest thing".as(arg.toString) <* debug"Yep, called toString"
-}
-object FooService extends LoggingCompanion[FooService]{
-  def make[I[_]: Functor, F[_]: Monad](logs: Logs[I, F]): I[FooService[F]] = 
-    logs.service[FooService].map(implicit l => new FooService[F])
-}
-```
-
-  Note that using it like `logs.named("foo")` is going to fail compilation.
-
-This is also the intended way to create `Logging[F]` or `ServiceLogging[F, Service]` instance for your classes.
-For example here we create named instance and pass it explicitly.
 ```scala
 import tofu.logging._
 import tofu.syntax.logging._
@@ -156,7 +123,7 @@ import tofu.syntax.monadic._
 import cats._
 
 class MyService[F[_] : Monad](logger: Logging[F]) {
-  def makeFoo(arg: String): F[Int] = 
+  def makeFoo(arg: String): F[Int] =
     logger.info("Doing simplest thing").as(arg.length) <* logger.debug("Yep, counted length")
 }
 
@@ -164,8 +131,46 @@ object MyService extends LoggingCompanion {
   def makeNamed[I[_] : Monad, F[_] : Monad](logs: Logs[I, F]): I[MyService[F]] =
     logs.byName("my-service-log").map(new MyService[F](_))
 }
+
 ```
-  Note that LoggingCompanion is not neccesary when  using plain named `Logging`
+
+* by generating that name from type-parameter, which is a class intended to use logging with:
+
+```scala
+def makeNamed[I[_] : Monad, F[_] : Monad](logs: Logs[I, F]): I[MyService[F]] =
+  logs.byName("my-service-log").map(new MyService[F](_))
+```
+
+Logging instance created by this method for class `MyService[IO]` in package `com.bar.foo.pckg` will be
+named `com.bar.foo.pckg.MyService`
+
+### Typesafe `ServiceLogging`
+
+Creating plain `Logging[F]` and using it around tends to be error-prune: one can easily pass logger created for
+service `FooService` instead of `BarService`. Tofu has a solution — newtype `ServiceLogging[F, Service]`
+and `LoggingCompanion` which contains simple type alias `Log[F[_]] = ServiceLogging[F, Service]`.
+
+```scala
+import tofu.logging._
+import tofu.syntax.logging._
+import tofu.syntax.monadic._
+import cats._
+
+class FooService[F[_] : FooService.Log : Monad] {
+  def makeFoo(arg: Int): F[String] =
+    info"Doing yet another simplest thing".as(arg.toString) <* debug"Yep, called toString"
+}
+
+object FooService extends LoggingCompanion[FooService] {
+  def make[I[_] : Functor, F[_] : Monad](logs: Logs[I, F]): I[FooService[F]] =
+    logs.service[FooService].map(implicit l => new FooService[F])
+}
+
+```
+
+Note that using it like `logs.named("foo")` is going to fail compilation.
+
+This is also the intended way to create `Logging[F]` or `ServiceLogging[F, Service]` instance for your classes.
 
 ### Ways to create Logs
 
@@ -202,15 +207,189 @@ val effect: F[Unit] = for {
 
 ## Context logging
 
-It is possible to log the context of your computations (MDC, remember?) if you have an instance of `tofu.Context` for
-your effect type and a `Loggable` for your context. That's natural - describe how we can obtain a context from a
-computation `F` and a way to represent that context in log, and we will ensure it will be logged anytime you
-use `Logging` operations. You can log that context to string as well as use it as a part of structured logging.
+It is possible to log the context of your computations along with actual log message. Often it comes along with
+structured logging. To illustrate it consider this pseudocode:
 
-Here, we defined our `Loggable` as a `DictLoggable` that has a notion of `fields`. Fields are a structure of
-your `Loggable` that is used for structured logging by your `LogRendered`. Tofu comes with a `tofu.logging.ElkLayout` (
-present in `tofu-logging-layout` library), that will log the structure (fields) of your `Loggable`
-as JSON fields.
+```
+structuredLogger.info("I am a message", context = Map("transaction_id" -> 2342234, "request_name" -> "req"))
+//it logs 
+{ "level": "INFO", "message": "I am a message", "transaction_id": 2342234, "request_name": "req" }
+```
+
+That's neat, right? But it is verbose and clumsy to use, so tofu provides an abstraction for it.
+
+If you have an instance of `tofu.Context` for your effect type and a `Loggable` for your context, you can have it logged
+automagically. That is natural — describe how we can get a context from a computation `F` and a way to represent that
+context in log, and we will ensure it will be logged anytime you use `Logging` operations. You can log that context to
+string as well as use it as a part of structured logging.
+
+### Layouts
+
+Tofu is built upon [Logback](http://logback.qos.ch/) so it needs a custom `logback.xml` file with contexual logging
+support. Tofu uses mechanism called markers to store context in logs, so it won't work with existing Layouts e.g.
+with [Logstash-encoder](https://github.com/logstash/logstash-logback-encoder).
+
+Luckily for us, tofu has two special Layouts:
+
+* [ELKLayout](https://github.com/TinkoffCreditSystems/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ELKLayout.scala)
+  that outputs structured logs in JSON format. Example appender looks like that:
+
+```xml
+
+<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+        <layout class="tofu.logging.ELKLayout"/>
+    </encoder>
+</appender>
+  ```
+
+* [ConsoleContextLayout](https://github.com/TinkoffCreditSystems/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ConsoleContextLayout.scala)
+  that outputs simple text logs. Example appender looks like that:
+
+```xml
+
+<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+        <layout class="tofu.logging.ConsoleContextLayout">
+            <pattern>%d{HH:mm:ss} %-5level %logger{36} - %msg%n [%mdc]%n</pattern>
+        </layout>
+    </encoder>
+</appender>
+```
+
+### Example
+
+```scala
+import tofu.WithRun
+import tofu.logging.derivation.loggable._
+import tofu.logging.{LoggableContext, Logging, LoggingCompanion, Logs}
+import cats.{Functor, Monad}
+import tofu.syntax.console._
+import tofu.syntax.context._
+import tofu.syntax.logging._
+import tofu.syntax.monadic._
+import tofu.zioInstances.implicits._
+import zio._
+import zio.interop.catz._
+
+object Example extends zio.App {
+
+  class BusinessService[F[_] : BusinessService.Log : Monad] {
+    private def logic(arg: String): String = arg.repeat(3).replace("a", "b")
+
+    def runLogic(arg: String): F[String] =
+      info"Doing some business logic" as logic(arg)
+  }
+
+  object BusinessService extends LoggingCompanion[BusinessService] {
+
+    def make[I[_] : Functor, F[_] : Monad](logs: Logs[I, F]): I[BusinessService[F]] =
+      logs
+        .service[BusinessService[Any]]
+        .map(implicit l => new BusinessService[F])
+  }
+
+  case class RequestContext(id: Long, method: String)
+
+  class Server[I[_] : Monad : Logging, F[_] : WithRun[*[_], I, RequestContext]](
+                                                                                 business: BusinessService[F]
+                                                                               ) {
+
+    def handleRequest(request: Server.Request): I[Server.Response] = for {
+      _ <- info"Got request $request"
+      context = RequestContext(request.id, request.method)
+      logicComputation = business.runLogic(request.body)
+
+      result <- runContext[F](logicComputation)(context)
+
+      response = Server.Response(result)
+      _ <- info"Got response $response"
+    } yield response
+
+  }
+
+  object Server {
+
+    case class Request(id: Long, body: String, method: String)
+
+    case class Response(answer: String)
+
+  }
+
+  type Contextual[A] = RIO[RequestContext, A]
+
+  def run(args: List[String]): URIO[ZEnv, ExitCode] = {
+    implicit val loggableContext: LoggableContext[Contextual] =
+      LoggableContext.of[Contextual].instance[RequestContext]
+    val contextLogs: Logs[Task, Contextual] = Logs.withContext[Task, Contextual]
+    val mainLogs: Logs[Task, Task] = Logs.sync[Task, Task]
+
+    for {
+      implicit0(mainLogging: Logging[Task]) <- mainLogs.byName("main")
+      bs <- BusinessService.make(contextLogs)
+      server = new Server[Task, Contextual](bs)
+      userRequest <- readRequest
+      response <- server.handleRequest(userRequest)
+      _ <- putStrLn[Task](s"Got response $response")
+    } yield ()
+
+  }.catchAll(_ => URIO.unit).as(zio.ExitCode.success)
+
+  def readRequest: Task[Server.Request] =
+    (
+      readStrLn[Task]
+        .map(_.toLongOption)
+        .someOrFail(new Exception("Please provide numeric id")),
+      readStrLn[Task],
+      readStrLn[Task]
+      ).mapN(Server.Request.apply)
+
+}
+
+```
+
+#### Business Logic
+
+We got `BusinessService` as our business logic. It does some stuff but most importantly it does not know it has any kind
+of special logging. It just logs some stuff and all it needs for it is `Logging` instance.
+
+As you can see it is created with the same factory-pattern as discussed before.
+
+#### Server
+
+Next we have a `Server` of some kind that should get some request, run some business logic on it and then return
+response. Also, we want to have all the logs that business logic produces to have special RequestContext in it. To
+achieve this we run the logic in special contextual effect type `F` which then can be evaluated into our main effect `I`
+.
+(More information on this can be found in scaladoc for `tofu.WithRun` etc.)
+Moreover `Server` itself logs some messages and requires its own instance of `Logging`.
+
+#### Loggable derivation
+
+As one can see in [Representation part](#representation) for any of those logged values (like `$request`)  `Loggable`
+instance should be in scope. In the example they are generated by macro, we just need to import it:
+
+```scala
+ import tofu.logging.derivation.loggable._
+ ```
+
+#### Running
+
+It is a simple ZIO-app that reads user input from console and passes it to server.
+So when running possible output will
+look like this, if ran with `ConsoleContextLayout` in `logback.xml`:
+
+```bash
+sbt>run
+10102
+foo bar body
+GET
+23:20:14 INFO  main - Got request Request{id=10102,body=foo bar body,method=GET}
+23:20:14 INFO  c.t.c.n.c.Example$BusinessService - Doing some business logic
+ [method=GET, id=10102]
+23:20:14 INFO  main - Got response Response{answer=foo bbr bodyfoo bbr bodyfoo bbr body}
+Got response Response(foo bbr bodyfoo bbr bodyfoo bbr body)
+```
 
 ## Syntax extensions
 

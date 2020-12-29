@@ -3,7 +3,7 @@ package tofu.logging
 import Logging._
 import cats.kernel.Monoid
 import cats.syntax.apply._
-import cats.{Applicative, Apply, FlatMap}
+import cats.{Applicative, Apply, FlatMap, Monad}
 import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.compat.unused
 import tofu.{Init, higherKind}
@@ -137,3 +137,5 @@ private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
 trait LoggingCompanion[U[_[_]]] {
   type Log[F[_]] = ServiceLogging[F, U[Any]]
 }
+
+

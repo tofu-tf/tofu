@@ -54,7 +54,9 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
   final def biwiden[I1[a] >: I[a], F1[a] >: F[a]]: Logs[I1, F1] = this.asInstanceOf[Logs[I1, F1]]
 
   final def service[Svc: ClassTag]: I[ServiceLogging[F, Svc]] = forService[Svc].asInstanceOf[I[ServiceLogging[F, Svc]]]
-  final def service[U[_[_]]: ClassTag]: I[ServiceLogging[F, U[Any]]] = forService[U[Any]].asInstanceOf[I[ServiceLogging[F, U[Any]]]]
+
+  final def serviceOf[Svc[_[_]]](implicit tag: ClassTag[Svc[Any]]): I[ServiceLogging[F, Svc[Any]]] =
+    forService[Svc[Any]].asInstanceOf[I[ServiceLogging[F, Svc[Any]]]]
 }
 
 object Logs extends LogsInstances0 {
