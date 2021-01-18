@@ -6,7 +6,6 @@ import cats.data.Chain
 import tofu.syntax.foldable._
 import cats.instances.lazyList._
 import org.scalatest.flatspec.AnyFlatSpec
-import scala.collection.compat._
 
 class FoldableSuite extends AnyFlatSpec {
   def add(s: Int, x: Int) = x > 0 whenOpt Writer.tell(Chain(s)).as(s + x)

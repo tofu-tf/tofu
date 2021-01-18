@@ -7,9 +7,9 @@ import tofu.lift.UnliftSubcontext.FatApp
 import tofu.optics.Contains
 import UnliftSubcontext._
 import cats.Monad
-import com.github.ghik.silencer.silent
 import org.scalatest.matchers.should.Matchers
 import tofu.HasContext
+import tofu.compat.unused
 
 class UnliftSubcontext extends AnyFlatSpec with Matchers {
   def context[F[_]: HasContext[*[_], Big]]: F[Big]      = HasContext[F, Big].context
@@ -47,7 +47,7 @@ object UnliftSubcontext {
   type FatApp[A] = ReaderT[IO, Big, A]
 
   def summonUnliftSubContext[F[_]: Monad](): Unit = {
-    @silent("never used")
+    @unused
     val ul: Unlift[ReaderT[F, Small, *], ReaderT[F, Big, *]] = Unlift.subContextUnlift
     ()
   }
