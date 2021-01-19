@@ -1,12 +1,8 @@
 package tofu
 
 import cats.MonadError
-
 import Raise.ContravariantRaise
 import tofu.syntax.raise._
-
-import com.github.ghik.silencer.silent
-
 import cats.Applicative
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -28,7 +24,6 @@ class RaiseSuite extends AnyFunSuite {
   }
 }
 
-@silent("deprecated")
 object RaiseSute {
   trait CommonError
   final case class ConcreteError() extends CommonError

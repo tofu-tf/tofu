@@ -21,12 +21,10 @@ lazy val defaultSettings = Seq(
   setMinorVersion,
   setModuleName,
   defaultScalacOptions,
-  versionSpecificScalacOptions,
+  scalacWarningConfig,
   libraryDependencies ++= Seq(
     compilerPlugin(kindProjector),
     compilerPlugin(betterMonadicFor),
-    compilerPlugin(silencerPlugin),
-    silencerLib,
     scalatest,
     collectionCompat,
     scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided
@@ -319,11 +317,10 @@ lazy val defaultScalacOptions = scalacOptions := {
     opts
 }
 
-lazy val scala213WarningConfig = {
+lazy val scalacWarningConfig = scalacOptions += {
   // ignore unused imports that cannot be removed due to cross-compilation
   val suppressUnusedImports = Seq(
-    "scala/tofu/config/typesafe.scala",
-    "scala-2.13/tofu.syntax/FoldableSuite.scala"
+    "scala/tofu/config/typesafe.scala"
   ).map { src =>
     s"src=${scala.util.matching.Regex.quote(src)}&cat=unused-imports:s"
   }.mkString(",")
@@ -332,13 +329,6 @@ lazy val scala213WarningConfig = {
   val verboseWarnings = "any:wv"
 
   s"-Wconf:$suppressUnusedImports,$verboseWarnings"
-}
-
-lazy val versionSpecificScalacOptions = scalacOptions ++= {
-  minorVersion.value match {
-    case 13 => Seq(scala213WarningConfig)
-    case 12 => Seq()
-  }
 }
 
 lazy val macros = Seq(
@@ -369,7 +359,7 @@ lazy val publishSettings = Seq(
   publishVersion := libVersion,
   publishMavenStyle := true,
   description := "Opinionated set of tools for functional programming in Scala",
-  crossScalaVersions := Seq("2.12.12", "2.13.4"),
+  crossScalaVersions := Seq("2.12.13", "2.13.4"),
   publishTo := {
     if (isSnapshot.value) {
       Some(Opts.resolver.sonatypeSnapshots)

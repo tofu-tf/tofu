@@ -3,7 +3,6 @@ package tofu
 import cats.data.{EitherT, OptionT, ReaderT}
 import cats.syntax.either._
 import cats.{Applicative, ApplicativeError, FlatMap, Functor, Id, Monad}
-import com.github.ghik.silencer.silent
 import tofu.errorInstances._
 import tofu.internal.{CachedMatcher, DataEffectComp}
 import tofu.lift.Lift
@@ -16,7 +15,6 @@ import scala.annotation.implicitNotFound
   */
 @implicitNotFound("""can't understand how to raise ${E} inside ${F} 
 provide an instance of Raise[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Upcast[..., ${E}]""")
-@silent("deprecated")
 trait Raise[F[_], E] extends ErrorBase with Raise.ContravariantRaise[F, E] {
   def raise[A](err: E): F[A]
 }
