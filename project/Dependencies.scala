@@ -9,7 +9,7 @@ object Dependencies {
 
     val tethys = "0.20.0"
 
-    val cats = "2.3.1"
+    val cats = "2.4.0"
 
     val catsEffect = "2.3.1"
 
