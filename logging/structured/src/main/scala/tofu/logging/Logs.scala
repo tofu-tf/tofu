@@ -28,7 +28,7 @@ import tofu.higherKind.Mid
   * However it's not uncommon to use different [[Logs]] for different parts of program.
   *
   * Sample usage would be:
-  * {{{
+  * @example {{{
   *   val logs: Logs[F, F] = Logs.sync[F, F]
   *
   *   def program[F[_]: Sync] =
@@ -54,6 +54,9 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
   final def biwiden[I1[a] >: I[a], F1[a] >: F[a]]: Logs[I1, F1] = this.asInstanceOf[Logs[I1, F1]]
 
   final def service[Svc: ClassTag]: I[ServiceLogging[F, Svc]] = forService[Svc].asInstanceOf[I[ServiceLogging[F, Svc]]]
+
+  final def of[Svc[_[_]]](implicit tag: ClassTag[Svc[Any]]): I[ServiceLogging[F, Svc[Any]]] =
+    forService[Svc[Any]].asInstanceOf[I[ServiceLogging[F, Svc[Any]]]]
 }
 
 object Logs extends LogsInstances0 {
@@ -144,13 +147,13 @@ object Logs extends LogsInstances0 {
     ): I[Universal[F]] = cached.map(_.universal)
 
     /** Collection of useful methods for creating middleware
-      * ${logs.logged[Service].mid(implicit l => new Service[Mid[F, *]]{... })}
+      * {{{logs.logged[Service].mid(implicit l => new Service[Mid[F, *]]{... })}}}
       */
     final def logged[U[_[_]]](implicit c: ClassTag[U[Any]]): LogWares[U, I, F] =
       new LogWares(logs.forService[U[Any]])
 
     /** Collection of useful methods for creating middleware
-      * ${logs.nameLogged[Service]("service").mid(implicit l => new Service[Mid[F, *]]{... })}
+      * {{{logs.nameLogged[Service]("service").mid(implicit l => new Service[Mid[F, *]]{... })}}}
       */
     final def nameLogged[U[_[_]]](name: String): LogWares[U, I, F] =
       new LogWares(logs.byName(name))
