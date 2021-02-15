@@ -27,12 +27,12 @@ class WrappedEvent(event: ILoggingEvent) extends ILoggingEvent {
         }
       case _               =>
     }
-    
+
     event.getMarker match {
       case ContextMarker(ctx, _) => intoMdc(ctx)
       case _                     =>
     }
-    
+
     for (arr <- Option(event.getArgumentArray); arg <- arr) intoMdc(arg)
 
     map
