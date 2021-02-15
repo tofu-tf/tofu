@@ -65,6 +65,6 @@ object logging {
 
   implicit final class LoggingCauseOps(private val message: String) extends AnyVal {
     def cause[F[_]](ex: Throwable)(implicit logging: LocationLogging[F], location: Location): F[Unit] =
-      logging.errorCause(message, ex)
+      logging.errorCause(message, location, ex)
   }
 }

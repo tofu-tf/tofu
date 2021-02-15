@@ -74,7 +74,8 @@ lazy val loggingStr = project
       alleycats,
       scalatest,
       derevo,
-      catsTagless
+      catsTagless,
+      "org.slf4j" % "slf4j-log4j12" % "1.7.30" % Test
     ),
   )
   .dependsOn(core, concurrent, data)
