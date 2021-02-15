@@ -31,10 +31,7 @@ class WrappedEvent(event: ILoggingEvent) extends ILoggingEvent {
       case ContextMarker(ctx, _) => intoMdc(ctx)
       case _                     =>
     }
-    val argumentArray: Array[AnyRef] = event.getArgumentArray
-
-    if (argumentArray != null)
-      argumentArray.foreach(intoMdc(_))
+   for (arr <- Option(event.getArgumentArray); arg <- arr) intoMdc(arg)
 
     map
   }
