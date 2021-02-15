@@ -19,7 +19,8 @@ import scala.reflect.ClassTag
   */
 trait LoggingBase[F[_]] {
 
-  /** push new message to log, level will be automatically checked
+  /** Push new message to log, level will be automatically checked
+    *
     * @param level desired level of logging, message will not be rendered\sent, if logging level
     *              of current logger is not low enough
     * @param message composed string with `{}` placeholders for values
