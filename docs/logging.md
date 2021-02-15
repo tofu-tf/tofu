@@ -317,7 +317,7 @@ Luckily for us, tofu has two special Layouts:
 
 <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-        <layout class="tofu.logging.ConsoleContextLayout">
+        <layout class="tofu.logging.logback.ConsoleContextLayout">
             <pattern>%d{HH:mm:ss} %-5level %logger{36} - %msg%n [%mdc]%n</pattern>
         </layout>
     </encoder>
