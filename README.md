@@ -6,11 +6,11 @@
 
 | CI | Release | Chat |
 | --- | --- | --- |
-| ![Scala CI](https://github.com/TinkoffCreditSystems/tofu/workflows/Scala%20CI/badge.svg) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu-core_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu-core) | [![Discord Chat](https://img.shields.io/discord/657318688025739283.svg)](https://discord.gg/qPD5GGH)
+| ![Scala CI](https://github.com/tofu-tf/tofu/workflows/Scala%20CI/badge.svg) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu-core_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu-core) | [![Discord Chat](https://img.shields.io/discord/657318688025739283.svg)](https://discord.gg/qPD5GGH)
 
 # Quick Start
 
-## see [the docs on the microsite](https://tinkoffcreditsystems.github.io/tofu)
+## see [the docs on the microsite](https://docs.tofu.tf)
 
 To use the whole utils pack just add to your `build.sbt`: 
 
@@ -55,7 +55,7 @@ of `"tofu"`):
 
 # Adopters
 
-Proud user of ToFu? Feel free to [add your company!](https://github.com/TinkoffCreditSystems/tofu/edit/master/README.md)
+Proud user of ToFu? Feel free to [add your company!](https://github.com/tofu-tf/tofu/edit/master/README.md)
 
 <a href="https://tinkoff.ru/"><img width="40%" src="logos/yandex-travel-logo.svg?sanitize=true" /></a>
 
