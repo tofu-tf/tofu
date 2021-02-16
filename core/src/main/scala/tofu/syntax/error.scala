@@ -14,8 +14,8 @@ object raise {
     type Search[E]    = AnyRef with Find[E] { type Eff[_] }
     type Aux[E, F[_]] = FindRaise[E] { type Eff[a] = F[a] }
 
-    def wrap[F[_], E](r: ContravariantRaise[F, E]): Aux[E, F] = r.asInstanceOf[Aux[E, F]]
-    def unwrap[F[_], E](r: Aux[E, F]): Raise[F, E]            = r.asInstanceOf[Raise[F, E]]
+    def wrap[F[_], E](r: ContravariantRaise[F, E]): Aux[E, F]   = r.asInstanceOf[Aux[E, F]]
+    def unwrap[F[_], E](r: Aux[E, F]): ContravariantRaise[F, E] = r.asInstanceOf[ContravariantRaise[F, E]]
 
     implicit final def findByApplicativeError[F[_], E1, E](implicit
         app: ApplicativeError[F, E],

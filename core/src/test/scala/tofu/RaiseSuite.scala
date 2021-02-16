@@ -26,17 +26,28 @@ class RaiseSuite extends AnyFunSuite {
 
 object RaiseSuite {
   trait CommonError
-  final case class ConcreteError() extends CommonError
+  final case class ConcreteError()        extends CommonError
   final case class AnotherConcreteError() extends CommonError
 
   object CrowErr               extends Exception("Oh no!")
   case class LalErr(s: String) extends Exception(s)
 
-  def foo0[F[_]: Raise[*[_], ConcreteError]: Raise[*[_], AnotherConcreteError]]: F[Unit] =
+  def foo0[F[_]: Raise[*[_], ConcreteError]: Raise[*[_], AnotherConcreteError]]: F[Unit] = {
+    ConcreteError().raise[F, Unit]
     AnotherConcreteError().raise[F, Unit]
+  }
 
-  def foo1[F[_]: ContravariantRaise[*[_], AnotherConcreteError]]: F[Unit] =
-    AnotherConcreteError().raise[F, Unit]
+  def foo1[F[_]: Raise[*[_], CommonError]]: F[Unit] =
+    ConcreteError().raise[F, Unit]
+
+  def foo2[F[_]: ContravariantRaise[*[_], CommonError]]: F[Unit] =
+    ConcreteError().raise[F, Unit]
+
+  def foo3[F[_]: ContravariantRaise[*[_], ConcreteError]]: F[Unit] =
+    ConcreteError().raise[F, Unit]
+
+  def foo4[F[_]: ContravariantRaise[*[_], ConcreteError]: ContravariantRaise[*[_], AnotherConcreteError]]: F[Unit] =
+    ConcreteError().raise[F, Unit]
 
   {
     type F[+A] = Either[CommonError, A]
