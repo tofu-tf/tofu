@@ -82,7 +82,7 @@ object LoggingSuite {
     def forService[Svc: ClassTag]: Logging[Run] = byName(classTag[Svc].runtimeClass.getName)
 
     def byName(name: String): Logging[Run] =
-      (level, message, values) =>
+      (level, loc, message, values) =>
         (Calc.read: Run[Pasque]).flatMap { ctx =>
           val json = LogTree.build((ctx.loggedValue +: values): _*)
           Calc.write(Vector(LogEntry(level, message, json)))

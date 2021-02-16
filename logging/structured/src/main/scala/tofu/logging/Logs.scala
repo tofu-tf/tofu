@@ -78,17 +78,22 @@ object Logs extends LogsInstances0 {
     */
   def sync[I[_]: Sync, F[_]: Sync]: Logs[I, F] = new Logs[I, F] {
     def forService[Svc: ClassTag]: I[Logging[F]] =
-      Sync[I].delay(new SyncLogging[F](loggerForService[Svc]))
-    def byName(name: String): I[Logging[F]]      = Sync[I].delay(new SyncLogging[F](LoggerFactory.getLogger(name)))
+      Sync[I].delay(new SyncLogging[F](loggerForService[Svc], LoggerFactory.getILoggerFactory))
+    def byName(name: String): I[Logging[F]]      =
+      Sync[I].delay(new SyncLogging[F](LoggerFactory.getLogger(name), LoggerFactory.getILoggerFactory))
   }
 
   def withContext[I[_]: Sync, F[_]: Sync](implicit ctx: LoggableContext[F]): Logs[I, F] = {
     import ctx.loggable
     new Logs[I, F] {
-      def forService[Svc: ClassTag]: I[Logging[F]]     =
-        Sync[I].delay(new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, loggerForService[Svc]))
-      override def byName(name: String): I[Logging[F]] =
-        Sync[I].delay(new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, LoggerFactory.getLogger(name)))
+      def forService[Svc: ClassTag]: I[Logging[F]] = Sync[I]
+        .delay(new SyncLogging[F](loggerForService[Svc], LoggerFactory.getILoggerFactory))
+        .map(sl => new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, sl))
+
+      override def byName(name: String): I[Logging[F]] = Sync[I]
+        .delay(new SyncLogging[F](LoggerFactory.getLogger(name), LoggerFactory.getILoggerFactory))
+        .map(sl => new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, sl))
+
     }
   }
 

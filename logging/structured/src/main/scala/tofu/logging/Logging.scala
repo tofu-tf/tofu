@@ -9,6 +9,7 @@ import tofu.compat.unused
 import tofu.{Init, higherKind}
 import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.logging.impl.EmbedLogging
+import tofu.logging.location.Location
 import tofu.syntax.monoidalK._
 
 import scala.reflect.ClassTag
@@ -27,43 +28,60 @@ trait LoggingBase[F[_]] {
     *                 do not create strings on each call, use constant template string instead
     * @param values  log parameters , values of types having `Loggable` instance would be converted automatically
     */
-  def write(level: Level, message: String, values: LoggedValue*): F[Unit]
+  def write(level: Level, location: Option[Location], message: String, values: LoggedValue*): F[Unit]
 
   /** could be overridden in the implementation, same as `write` but add additional info via marker */
-  def writeMarker(level: Level, message: String, @unused marker: Marker, values: LoggedValue*): F[Unit] =
-    write(level, message, values: _*)
+  def writeMarker(
+      level: Level,
+      location: Option[Location],
+      message: String,
+      @unused marker: Marker,
+      values: LoggedValue*
+  ): F[Unit] =
+    write(level, location, message, values: _*)
 
   /** could be overridden in the implementations, write message about some exception */
-  def writeCause(level: Level, message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    write(level, message, values :+ LoggedValue.error(cause): _*)
+  def writeCause(
+      level: Level,
+      location: Option[Location],
+      message: String,
+      cause: Throwable,
+      values: LoggedValue*
+  ): F[Unit] =
+    write(level, location, message, values :+ LoggedValue.error(cause): _*)
 
-  def trace(message: String, values: LoggedValue*): F[Unit] = write(Trace, message, values: _*)
-  def debug(message: String, values: LoggedValue*): F[Unit] = write(Debug, message, values: _*)
-  def info(message: String, values: LoggedValue*): F[Unit]  = write(Info, message, values: _*)
-  def warn(message: String, values: LoggedValue*): F[Unit]  = write(Warn, message, values: _*)
-  def error(message: String, values: LoggedValue*): F[Unit] = write(Error, message, values: _*)
+  def trace(message: String, location: Option[Location], values: LoggedValue*): F[Unit] =
+    write(Trace, location, message, values: _*)
+  def debug(message: String, location: Option[Location], values: LoggedValue*): F[Unit] =
+    write(Debug, location, message, values: _*)
+  def info(message: String, location: Option[Location], values: LoggedValue*): F[Unit]  =
+    write(Info, location, message, values: _*)
+  def warn(message: String, location: Option[Location], values: LoggedValue*): F[Unit]  =
+    write(Warn, location, message, values: _*)
+  def error(message: String, location: Option[Location], values: LoggedValue*): F[Unit] =
+    write(Error, location, message, values: _*)
 
-  def traceWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
-    writeMarker(Trace, message, marker, values: _*)
-  def debugWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
-    writeMarker(Debug, message, marker, values: _*)
-  def infoWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit]  =
-    writeMarker(Info, message, marker, values: _*)
-  def warnWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit]  =
-    writeMarker(Warn, message, marker, values: _*)
-  def errorWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
-    writeMarker(Error, message, marker, values: _*)
+  def traceWithMarker(message: String, location: Option[Location], marker: Marker, values: LoggedValue*): F[Unit] =
+    writeMarker(Trace, location, message, marker, values: _*)
+  def debugWithMarker(message: String, location: Option[Location], marker: Marker, values: LoggedValue*): F[Unit] =
+    writeMarker(Debug, location, message, marker, values: _*)
+  def infoWithMarker(message: String, location: Option[Location], marker: Marker, values: LoggedValue*): F[Unit]  =
+    writeMarker(Info, location, message, marker, values: _*)
+  def warnWithMarker(message: String, location: Option[Location], marker: Marker, values: LoggedValue*): F[Unit]  =
+    writeMarker(Warn, location, message, marker, values: _*)
+  def errorWithMarker(message: String, location: Option[Location], marker: Marker, values: LoggedValue*): F[Unit] =
+    writeMarker(Error, location, message, marker, values: _*)
 
-  def traceCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    writeCause(Trace, message, cause, values: _*)
-  def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    writeCause(Debug, message, cause, values: _*)
-  def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
-    writeCause(Info, message, cause, values: _*)
-  def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
-    writeCause(Warn, message, cause, values: _*)
-  def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    writeCause(Error, message, cause, values: _*)
+  def traceCause(message: String, location: Option[Location], cause: Throwable, values: LoggedValue*): F[Unit] =
+    writeCause(Trace, location, message, cause, values: _*)
+  def debugCause(message: String, location: Option[Location], cause: Throwable, values: LoggedValue*): F[Unit] =
+    writeCause(Debug, location, message, cause, values: _*)
+  def infoCause(message: String, location: Option[Location], cause: Throwable, values: LoggedValue*): F[Unit]  =
+    writeCause(Info, location, message, cause, values: _*)
+  def warnCause(message: String, location: Option[Location], cause: Throwable, values: LoggedValue*): F[Unit]  =
+    writeCause(Warn, location, message, cause, values: _*)
+  def errorCause(message: String, location: Option[Location], cause: Throwable, values: LoggedValue*): F[Unit] =
+    writeCause(Error, location, message, cause, values: _*)
 }
 
 /** Logging tagged with some arbitrary tag type
@@ -132,7 +150,7 @@ object Logging {
 
 private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
   private[this] val noop                                                  = Applicative[F].unit
-  def write(level: Level, message: String, values: LoggedValue*): F[Unit] = noop
+  def write(level: Level, location: Option[Location], message: String, values: LoggedValue*): F[Unit] = noop
 }
 
 trait LoggingCompanion[U[_[_]]] {

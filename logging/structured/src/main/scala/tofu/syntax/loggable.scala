@@ -15,41 +15,41 @@ object logging {
   implicit final class LoggingInterpolator(private val sctx: StringContext) extends AnyVal {
     import loggable._
     def error[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
-      logging.error(sctx.s(braces(values.size): _*), values: _*)
+      logging.error(sctx.s(braces(values.size): _*), None, values: _*)
     def warn[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit]  =
-      logging.warn(sctx.s(braces(values.size): _*), values: _*)
+      logging.warn(sctx.s(braces(values.size): _*),None,  values: _*)
     def info[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit]  =
-      logging.info(sctx.s(braces(values.size): _*), values: _*)
+      logging.info(sctx.s(braces(values.size): _*),None,  values: _*)
     def debug[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
-      logging.debug(sctx.s(braces(values.size): _*), values: _*)
+      logging.debug(sctx.s(braces(values.size): _*),None,  values: _*)
     def trace[F[_]](values: LoggedValue*)(implicit logging: LoggingBase[F]): F[Unit] =
-      logging.trace(sctx.s(braces(values.size): _*), values: _*)
+      logging.trace(sctx.s(braces(values.size): _*), None, values: _*)
 
     def errorWith[F[_]](values: LoggedValue*)(add: (String, LoggedValue)*)(implicit logging: LoggingBase[F]): F[Unit] =
-      logging.error(sctx.s(braces(values.size): _*), (values :+ add.toMap.loggedValue): _*)
+      logging.error(sctx.s(braces(values.size): _*),None,  (values :+ add.toMap.loggedValue): _*)
     def warnWith[F[_]](values: LoggedValue*)(add: (String, LoggedValue)*)(implicit logging: LoggingBase[F]): F[Unit]  =
-      logging.warn(sctx.s(braces(values.size): _*), (values :+ add.toMap.loggedValue): _*)
+      logging.warn(sctx.s(braces(values.size): _*), None, (values :+ add.toMap.loggedValue): _*)
     def infoWith[F[_]](values: LoggedValue*)(add: (String, LoggedValue)*)(implicit logging: LoggingBase[F]): F[Unit]  =
-      logging.info(sctx.s(braces(values.size): _*), (values :+ add.toMap.loggedValue): _*)
+      logging.info(sctx.s(braces(values.size): _*),None,  (values :+ add.toMap.loggedValue): _*)
     def debugWith[F[_]](values: LoggedValue*)(add: (String, LoggedValue)*)(implicit logging: LoggingBase[F]): F[Unit] =
-      logging.debug(sctx.s(braces(values.size): _*), (values :+ add.toMap.loggedValue): _*)
+      logging.debug(sctx.s(braces(values.size): _*), None, (values :+ add.toMap.loggedValue): _*)
     def traceWith[F[_]](values: LoggedValue*)(add: (String, LoggedValue)*)(implicit logging: LoggingBase[F]): F[Unit] =
-      logging.trace(sctx.s(braces(values.size): _*), (values :+ add.toMap.loggedValue): _*)
+      logging.trace(sctx.s(braces(values.size): _*), None, (values :+ add.toMap.loggedValue): _*)
 
     def errorCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
-      logging.errorCause(sctx.s(braces(values.size): _*), ex, values: _*)
+      logging.errorCause(sctx.s(braces(values.size): _*), None, ex, values: _*)
     def warnCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit]  =
-      logging.warnCause(sctx.s(braces(values.size): _*), ex, values: _*)
+      logging.warnCause(sctx.s(braces(values.size): _*), None, ex, values: _*)
     def infoCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit]  =
-      logging.infoCause(sctx.s(braces(values.size): _*), ex, values: _*)
+      logging.infoCause(sctx.s(braces(values.size): _*), None, ex, values: _*)
     def debugCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
-      logging.debugCause(sctx.s(braces(values.size): _*), ex, values: _*)
+      logging.debugCause(sctx.s(braces(values.size): _*),None,  ex, values: _*)
     def traceCause[F[_]](values: LoggedValue*)(ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] =
-      logging.traceCause(sctx.s(braces(values.size): _*), ex, values: _*)
+      logging.traceCause(sctx.s(braces(values.size): _*),None,  ex, values: _*)
   }
 
   implicit final class LoggingCauseOps(private val message: String) extends AnyVal {
-    def cause[F[_]](ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] = logging.errorCause(message, ex)
+    def cause[F[_]](ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] = logging.errorCause(message,None,  ex)
   }
 }
 

@@ -2,6 +2,7 @@ package tofu.logging.impl
 import cats.Monad
 import tofu.Guarantee
 import tofu.concurrent.QVar
+import tofu.logging.location.Location
 import tofu.logging.{LoggedValue, Logging, Logs}
 import tofu.syntax.bracket._
 import tofu.syntax.monadic._
@@ -14,7 +15,7 @@ class CachedLogs[I[_]: Monad: Guarantee, F[_]](
     tagCache: QVar[I, Map[ClassTag[_], Logging[F]]]
 ) extends Logs[I, F] {
   private[this] case object NoneLogging extends Logging[F] {
-    def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit] =
+    def write(level: Logging.Level, location: Option[Location],message: String, values: LoggedValue*): F[Unit] =
       throw new UnsupportedOperationException("CachedLogs.NonLogging should be never used")
   }
 

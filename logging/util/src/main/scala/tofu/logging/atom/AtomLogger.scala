@@ -1,11 +1,11 @@
 package tofu.logging.atom
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-
 import cats.effect.Clock
 import cats.{Applicative, FlatMap}
 import tofu.concurrent.Atom
 import tofu.higherKind.Embed
+import tofu.logging.location.Location
 import tofu.logging.{LoggedValue, Logging, Logs}
 import tofu.syntax.monadic._
 
@@ -20,7 +20,7 @@ final case class LogLine(
 )
 
 class AtomLogging[F[_]: FlatMap: Clock](log: Atom[F, Vector[LogLine]], name: String) extends Logging[F] {
-  override def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit] =
+  override def write(level: Logging.Level,location: Option[Location], message: String, values: LoggedValue*): F[Unit] =
     Clock[F].realTime(TimeUnit.MILLISECONDS).flatMap { time =>
       log.update(
         _ :+ LogLine(

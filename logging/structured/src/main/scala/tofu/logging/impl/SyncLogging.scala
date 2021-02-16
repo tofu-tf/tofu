@@ -2,40 +2,93 @@ package tofu.logging
 package impl
 
 import cats.effect.Sync
-import cats.syntax.applicative._
-import org.slf4j.{Logger, Marker}
+import org.slf4j.{ILoggerFactory, Logger, Marker}
+import tofu.logging.location.Location
+import tofu.syntax.monadic._
+class SyncLogging[F[_]](val logger: Logger, factory: ILoggerFactory)(implicit F: Sync[F]) extends LoggingImpl[F] {
 
-class SyncLogging[F[_]](logger: Logger)(implicit F: Sync[F]) extends LoggingImpl[F](logger) {
-  override def trace(message: String, values: LoggedValue*): F[Unit] =
-    F.delay(logger.trace(message, values: _*)).whenA(traceEnabled)
-  override def debug(message: String, values: LoggedValue*): F[Unit] =
-    F.delay(logger.debug(message, values: _*)).whenA(debugEnabled)
-  override def info(message: String, values: LoggedValue*): F[Unit]  =
-    F.delay(logger.info(message, values: _*)).whenA(infoEnabled)
-  override def warn(message: String, values: LoggedValue*): F[Unit]  =
-    F.delay(logger.warn(message, values: _*)).whenA(warnEnabled)
-  override def error(message: String, values: LoggedValue*): F[Unit] =
-    F.delay(logger.error(message, values: _*)).whenA(errorEnabled)
+  private[tofu] def log(l: Logger => Unit, location: Option[Location], when: Logger => Boolean) =
+    location match {
+      case Some(location) =>
+        for {
+          lg <- F.delay(factory.getLogger(location.loggerName)) //we should also use other fields from location
+          _  <- F.delay(l(lg)).whenA(when(lg))
+        } yield ()
+      case None           => F.delay(l(logger)).whenA(when(logger))
+    }
 
-  override def traceWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
-    F.delay(logger.trace(marker, message, values: _*)).whenA(traceEnabled)
-  override def debugWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
-    F.delay(logger.debug(marker, message, values: _*)).whenA(debugEnabled)
-  override def infoWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit]  =
-    F.delay(logger.info(marker, message, values: _*)).whenA(infoEnabled)
-  override def warnWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit]  =
-    F.delay(logger.warn(marker, message, values: _*)).whenA(warnEnabled)
-  override def errorWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
-    F.delay(logger.error(marker, message, values: _*)).whenA(errorEnabled)
 
-  override def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    F.delay(logger.error(message, values :+ cause: _*)).whenA(errorEnabled)
-  override def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
-    F.delay(logger.warn(message, values :+ cause: _*)).whenA(warnEnabled)
-  override def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
-    F.delay(logger.info(message, values :+ cause: _*)).whenA(infoEnabled)
-  override def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    F.delay(logger.debug(message, values :+ cause: _*)).whenA(debugEnabled)
-  override def traceCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
-    F.delay(logger.trace(message, values :+ cause: _*)).whenA(traceEnabled)
+  override def trace(message: String, location: Option[Location], values: LoggedValue*): F[Unit] =
+    log(_.trace(message, values: _*), location, traceEnabled)
+  override def debug(message: String, location: Option[Location], values: LoggedValue*): F[Unit] =
+    log(_.debug(message, values: _*), location, debugEnabled)
+  override def info(message: String, location: Option[Location], values: LoggedValue*): F[Unit]  =
+    log(_.info(message, values: _*), location, infoEnabled)
+  override def warn(message: String, location: Option[Location], values: LoggedValue*): F[Unit]  =
+    log(_.warn(message, values: _*), location, warnEnabled)
+  override def error(message: String, location: Option[Location], values: LoggedValue*): F[Unit] =
+    log(_.error(message, values: _*), location, errorEnabled)
+
+  override def traceWithMarker(
+      message: String,
+      location: Option[Location],
+      marker: Marker,
+      values: LoggedValue*
+  ): F[Unit] =
+    log(_.trace(marker, message, values: _*), location, traceEnabled)
+  override def debugWithMarker(
+      message: String,
+      location: Option[Location],
+      marker: Marker,
+      values: LoggedValue*
+  ): F[Unit] =
+    log(_.debug(marker, message, values: _*), location, debugEnabled)
+  override def infoWithMarker(
+      message: String,
+      location: Option[Location],
+      marker: Marker,
+      values: LoggedValue*
+  ): F[Unit] =
+    log(_.info(marker, message, values: _*), location, infoEnabled)
+  override def warnWithMarker(
+      message: String,
+      location: Option[Location],
+      marker: Marker,
+      values: LoggedValue*
+  ): F[Unit] =
+    log(_.warn(marker, message, values: _*), location, warnEnabled)
+  override def errorWithMarker(
+      message: String,
+      location: Option[Location],
+      marker: Marker,
+      values: LoggedValue*
+  ): F[Unit] =
+    log(_.error(marker, message, values: _*), location, errorEnabled)
+
+  override def errorCause(
+      message: String,
+      location: Option[Location],
+      cause: Throwable,
+      values: LoggedValue*
+  ): F[Unit]                                                                                                           =
+    log(_.error(message, values :+ cause: _*), location, errorEnabled)
+  override def warnCause(message: String, location: Option[Location], cause: Throwable, values: LoggedValue*): F[Unit] =
+    log(_.warn(message, values :+ cause: _*), location, warnEnabled)
+  override def infoCause(message: String, location: Option[Location], cause: Throwable, values: LoggedValue*): F[Unit] =
+    log(_.info(message, values :+ cause: _*), location, infoEnabled)
+  override def debugCause(
+      message: String,
+      location: Option[Location],
+      cause: Throwable,
+      values: LoggedValue*
+  ): F[Unit]                                                                                                           =
+    log(_.debug(message, values :+ cause: _*), location, debugEnabled)
+  override def traceCause(
+      message: String,
+      location: Option[Location],
+      cause: Throwable,
+      values: LoggedValue*
+  ): F[Unit]                                                                                                           =
+    log(_.trace(message, values :+ cause: _*), location, traceEnabled)
+  
 }
