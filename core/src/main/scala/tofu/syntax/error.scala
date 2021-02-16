@@ -3,18 +3,19 @@ package syntax
 
 import cats.{Applicative, Functor, Monad}
 import cats.ApplicativeError
+import tofu.Raise.ContravariantRaise
 object raise {
 
   //** special alias for Raise[F, E] for use in situations when F[_] can be unknown from the start */
   type FindRaise[E] = FindRaise.Search[E]
 
-  object FindRaise extends FindRaiseLowPrio {
+  object FindRaise extends FindRaiseInstances {
     trait Find[E] extends Any
     type Search[E]    = AnyRef with Find[E] { type Eff[_] }
     type Aux[E, F[_]] = FindRaise[E] { type Eff[a] = F[a] }
 
-    def wrap[F[_], E](r: Raise[F, E]): Aux[E, F]   = r.asInstanceOf[Aux[E, F]]
-    def unwrap[F[_], E](r: Aux[E, F]): Raise[F, E] = r.asInstanceOf[Raise[F, E]]
+    def wrap[F[_], E](r: ContravariantRaise[F, E]): Aux[E, F] = r.asInstanceOf[Aux[E, F]]
+    def unwrap[F[_], E](r: Aux[E, F]): Raise[F, E]            = r.asInstanceOf[Raise[F, E]]
 
     implicit final def findByApplicativeError[F[_], E1, E](implicit
         app: ApplicativeError[F, E],
@@ -22,9 +23,15 @@ object raise {
     ): Aux[E1, F] = wrap(implicitly)
   }
 
-  trait FindRaiseLowPrio {
+  trait FindRaiseInstances extends FindRaiseInstances1 {
+    implicit final def findByContravariantRaise[F[_], E](implicit
+        raise: ContravariantRaise[F, E]
+    ): FindRaise.Aux[E, F] = FindRaise.wrap(implicitly)
+  }
+
+  trait FindRaiseInstances1 {
     implicit final def findByRaise[F[_], E1, E](implicit
-        app: Raise[F, E],
+        raise: Raise[F, E],
         evE: E1 <:< E
     ): FindRaise.Aux[E1, F] = FindRaise.wrap(implicitly)
   }

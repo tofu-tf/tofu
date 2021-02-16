@@ -7,29 +7,36 @@ import cats.Applicative
 import org.scalatest.funsuite.AnyFunSuite
 
 class RaiseSuite extends AnyFunSuite {
-  import tofu.RaiseSute._
+  import tofu.RaiseSuite._
   val rooster1 = new Rooster1[Either[Throwable, *]]
   val rooster2 = new Rooster2[Either[Throwable, *]]
 
   test("error should be raised") {
-    assert(rooster1.crow === Left(RaiseSute.CrowErr))
-    assert(rooster1.crow2 === Left(RaiseSute.CrowErr))
-    assert(rooster1.crow3 === Left(RaiseSute.CrowErr))
-    assert(rooster1.crow4 === Left(RaiseSute.CrowErr))
+    assert(rooster1.crow === Left(CrowErr))
+    assert(rooster1.crow2 === Left(CrowErr))
+    assert(rooster1.crow3 === Left(CrowErr))
+    assert(rooster1.crow4 === Left(CrowErr))
 
-    assert(rooster2.crow === Left(RaiseSute.CrowErr))
-    assert(rooster2.crow2 === Left(RaiseSute.CrowErr))
-    assert(rooster2.crow3 === Left(RaiseSute.CrowErr))
-    assert(rooster2.crow4 === Left(RaiseSute.CrowErr))
+    assert(rooster2.crow === Left(CrowErr))
+    assert(rooster2.crow2 === Left(CrowErr))
+    assert(rooster2.crow3 === Left(CrowErr))
+    assert(rooster2.crow4 === Left(CrowErr))
   }
 }
 
-object RaiseSute {
+object RaiseSuite {
   trait CommonError
   final case class ConcreteError() extends CommonError
+  final case class AnotherConcreteError() extends CommonError
 
   object CrowErr               extends Exception("Oh no!")
   case class LalErr(s: String) extends Exception(s)
+
+  def foo0[F[_]: Raise[*[_], ConcreteError]: Raise[*[_], AnotherConcreteError]]: F[Unit] =
+    AnotherConcreteError().raise[F, Unit]
+
+  def foo1[F[_]: ContravariantRaise[*[_], AnotherConcreteError]]: F[Unit] =
+    AnotherConcreteError().raise[F, Unit]
 
   {
     type F[+A] = Either[CommonError, A]
