@@ -381,7 +381,7 @@ lazy val publishSettings = Seq(
     )
   ),
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
-  homepage := Some(url("https://github.com/TinkoffCreditSystems/tofu")),
+  homepage := Some(url("https://github.com/tofu-tf/tofu")),
   developers := List(
     Developer("catostrophe", "λoλcat", "catostrophe@pm.me", url("https://github.com/catostrophe")),
     Developer("danslapman", "Daniil Smirnov", "danslapman@gmail.com", url("https://github.com/danslapman")),
