@@ -355,7 +355,7 @@ lazy val simulacrumOptions = Seq(
 )
 
 lazy val publishSettings = Seq(
-  organization := "ru.tinkoff",
+  organization := "tf.tofu",
   publishVersion := libVersion,
   publishMavenStyle := true,
   description := "Opinionated set of tools for functional programming in Scala",
