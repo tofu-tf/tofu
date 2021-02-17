@@ -365,7 +365,7 @@ lazy val publishSettings = Seq(
       Some(Opts.resolver.sonatypeSnapshots)
     } else sonatypePublishToBundle.value
   },
-  credentials ++= ((Path.userHome / ".sbt" / ".ossrh-credentials") :: Nil)
+  credentials ++= ((Path.userHome / ".sbt" / "tofu.credentials") :: Nil)
     .filter(_.exists())
     .map(Credentials.apply),
   version := {
