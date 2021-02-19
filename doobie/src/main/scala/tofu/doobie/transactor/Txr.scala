@@ -96,7 +96,7 @@ object Txr {
   private[transactor] final class ContextualPA[G[_]](private val dummy: Boolean = true) extends AnyVal {
     def apply[F[_]: BracketThrow, R](
         t: Transactor[F]
-    )(implicit L: Lift[F, G], F: Monad[G], C: G HasContext R): Txr.Contextual[G, R] =
+    )(implicit L: Lift[F, G], G: Monad[G], C: G HasContext R): Txr.Contextual[G, R] =
       new Txr[G] {
         type DB[x] = ConnectionRIO[R, x]
 
