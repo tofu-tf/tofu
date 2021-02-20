@@ -42,10 +42,15 @@ trait Txr[F[_]] {
 }
 
 object Txr {
-  type Aux[F[_], DB0[_]]     = Txr[F] { type DB[x] = DB0[x] }
+  type Aux[F[_], DB0[_]]     = Txr[F] { type DB[x] >: DB0[x] <: DB0[x] }
   type Plain[F[_]]           = Aux[F, ConnectionIO]
   type Lifted[F[_]]          = Aux[F, ConnectionIO]
   type Contextual[F[_], Ctx] = Aux[F, ConnectionRIO[Ctx, *]]
+
+  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB]                      = ev
+  def Plain[F[_]](implicit ev: Plain[F]): Plain[F]                               = ev
+  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F]                            = ev
+  def Contextual[F[_], Ctx](implicit ev: Contextual[F, Ctx]): Contextual[F, Ctx] = ev
 
   /** Creates a plain facade that preserves the effect of `Transactor` with `ConnectionIO` as the database effect.
     */
@@ -91,7 +96,7 @@ object Txr {
   private[transactor] final class ContextualPA[G[_]](private val dummy: Boolean = true) extends AnyVal {
     def apply[F[_]: BracketThrow, R](
         t: Transactor[F]
-    )(implicit L: Lift[F, G], F: Monad[G], C: G HasContext R): Txr.Contextual[G, R] =
+    )(implicit L: Lift[F, G], G: Monad[G], C: G HasContext R): Txr.Contextual[G, R] =
       new Txr[G] {
         type DB[x] = ConnectionRIO[R, x]
 
