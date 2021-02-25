@@ -2,11 +2,12 @@
 
 # ToFu
 
-**Functional programming toolkit aimed at taming the complexity of Tagless Final approach.** 
+[![Build & Release](https://github.com/tofu-tf/tofu/workflows/Scala%20CI/badge.svg)](https://github.com/tofu-tf/tofu/actions?query=workflow%3A%22Scala+CI%22)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core_2.13)
+[![Discord Chat](https://img.shields.io/discord/657318688025739283.svg)](https://discord.gg/qPD5GGH)
+[![Scala Steward badge](https://img.shields.io/badge/Scala_Steward-helping-blue.svg?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAQCAMAAAARSr4IAAAAVFBMVEUAAACHjojlOy5NWlrKzcYRKjGFjIbp293YycuLa3pYY2LSqql4f3pCUFTgSjNodYRmcXUsPD/NTTbjRS+2jomhgnzNc223cGvZS0HaSD0XLjbaSjElhIr+AAAAAXRSTlMAQObYZgAAAHlJREFUCNdNyosOwyAIhWHAQS1Vt7a77/3fcxxdmv0xwmckutAR1nkm4ggbyEcg/wWmlGLDAA3oL50xi6fk5ffZ3E2E3QfZDCcCN2YtbEWZt+Drc6u6rlqv7Uk0LdKqqr5rk2UCRXOk0vmQKGfc94nOJyQjouF9H/wCc9gECEYfONoAAAAASUVORK5CYII=)](https://scala-steward.org)
 
-| CI | Release | Chat |
-| --- | --- | --- |
-| ![Scala CI](https://github.com/tofu-tf/tofu/workflows/Scala%20CI/badge.svg) | [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/tofu-core_2.13.svg)](https://search.maven.org/search?q=ru.tinkoff.tofu-core) | [![Discord Chat](https://img.shields.io/discord/657318688025739283.svg)](https://discord.gg/qPD5GGH)
+**Functional programming toolkit aimed at taming the complexity of Tagless Final approach.** 
 
 # Quick Start
 
@@ -15,7 +16,7 @@
 To use the whole utils pack just add to your `build.sbt`: 
 
 ```scala
-libraryDependencies += "ru.tinkoff" %% "tofu" % "latest version in badge"
+libraryDependencies += "tf.tofu" %% "tofu" % "latest version in badge"
 ```
 
 Of course, you can also specify an exact list of `tofu` modules that you want to add to your dependencies (used in place
@@ -78,6 +79,6 @@ Please note we use the following labels for automated release descriptions:
   If you have any trouble during this check, just run `sbt fmt` and commit again.
   
 # Copyright
-Copyright the maintainers, 2020
+Copyright the maintainers, 2019-2021
 
 Logos made with love by [@impurepics](https://twitter.com/impurepics)
