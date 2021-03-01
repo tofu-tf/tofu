@@ -6,6 +6,7 @@ import tofu.optics.Contains
 
 object ContextSuite {
   type Ctx >: Unit
+  type CtxIn >: String
 
   val ctx: Ctx = ()
 
@@ -18,6 +19,7 @@ object ContextSuite {
     implicitly[WithProvide[ReaderT[F, Ctx, *], F, Ctx]]
     implicitly[HasContextRun[ReaderT[F, Ctx, *], F, Ctx]]
     implicitly[WithRun[ReaderT[F, Ctx, *], F, Ctx]]
+    implicitly[WithContext[ReaderT[λ[a => ReaderT[F, CtxIn, a]], Ctx, *], CtxIn]]
     ()
   }
 

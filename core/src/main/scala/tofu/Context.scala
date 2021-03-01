@@ -124,7 +124,6 @@ object Context {
   }
 
   trait ContextInstances[C] {
-
     implicit def promoteLocalStructure[F[_], A](implicit
         context: WithLocal[F, C],
         field: C Contains A
@@ -154,6 +153,15 @@ trait WithContext[F[_], C] extends Context[F] {
 /** Companion object for [[WithContext]] */
 object WithContext {
   def apply[F[_], C](implicit ctx: WithContext[F, C]): WithContext[F, C] = ctx
+
+  implicit def transContext[F[_], G[_]: Functor, C0](implicit
+      ctx: F WithContext C0,
+      lift: Lift[F, G]
+  ): G WithContext C0 =
+    new WithContext[G, C0] {
+      def functor: Functor[G] = implicitly
+      def context: G[C0]      = lift.lift(ctx.context)
+    }
 }
 
 /** Allows to run some computation with notion of altered context
