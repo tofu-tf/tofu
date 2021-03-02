@@ -28,7 +28,7 @@ of `"tofu"`):
 * `tofu-concurrent` for concurrent utils
 * `tofu-config` for config utils
 * `tofu-data` for data utils
-* `tofu-derivation` for derivation utils and [derevo](https://github.com/manatki/derevo) annotations
+* `tofu-derivation` for derivation utils and [derevo](https://github.com/tofu-tf/derevo) annotations
 * `tofu-doobie` for [Doobie](https://github.com/tpolecat/doobie) utils
 * `tofu-enums` for [Enumeratum](https://github.com/lloydmeta/enumeratum) utils
 * `tofu-env` for `Env` (a variation of a Reader Monad based on [Monix](https://github.com/monix/monix) Task)

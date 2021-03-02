@@ -13,7 +13,7 @@ or as a standalone dependency:
 which provides:
 * parallel error accumulation, which won't give up parsing upon the first error;
 * out-of-the box support for case classes and sealed hierarchies through [`Magnolia`](https://github.com/propensive/magnolia) derivation,
-sugared with [`Derevo`](https://github.com/manatki/derevo) macro-annotations;
+sugared with [`Derevo`](https://github.com/tofu-tf/derevo) macro-annotations;
 * [`Typesafe Config`](https://github.com/lightbend/config) interoperability;
 * ease of integration with custom configuration sources and types.
 

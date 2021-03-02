@@ -100,7 +100,7 @@ Second, we define two methods that describe how `User` should be logged:
 
 ## Loggable derivation
 a
-Tofu has integration with [derevo](https://github.com/manatki/derevo) library. It allows you to easily generate
+Tofu has integration with [derevo](https://github.com/tofu-tf/derevo) library. It allows you to easily generate
 instances of `Loggable[YourClass]` for case classes or ADTs:
 
 ```scala:reset
