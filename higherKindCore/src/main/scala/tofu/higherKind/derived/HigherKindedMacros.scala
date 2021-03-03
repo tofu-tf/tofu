@@ -171,9 +171,11 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
     val types   = delegateAbstractTypes(Alg.tpe, members, Alg.tpe)
     val Af      = appliedType(Alg.tpe, List(f))
 
-    val methods = delegateMethods(Af, members, NoSymbol) { case method =>
+    val prepared = c.freshName(TermName("builder"))
+    val methods  = delegateMethods(Af, members, NoSymbol) { case method =>
+      val methodName  = method.name.encodedName.toString
       val start: Tree = method.returnType match {
-        case TypeRef(_, _, List(x)) => q"$builder.start[$x](${method.name.encodedName.toString})"
+        case TypeRef(_, _, List(x)) => q"$prepared.start[$x]($methodName)"
       }
 
       val withParams =
@@ -186,7 +188,9 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       method.copy(body = q"$withParams.result")
     }
 
-    implementSimple(Af)(f)(types ++ methods)
+    q"""
+    val $prepared = $builder.prepare[$Alg]
+    ${implementSimple(Af)(f)(types ++ methods)}"""
   }
 
   def representableK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
@@ -205,5 +209,10 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       F: WeakTypeTag[F[Any]],
       Alg: WeakTypeTag[Alg[Any]]
   ): Tree = factorizeApply[F, Alg](builder)
+
+  def factorizeThis[F[_], Alg[_[_]]](implicit
+      F: WeakTypeTag[F[Any]],
+      Alg: WeakTypeTag[Alg[Any]]
+  ): Tree = factorizeApply[F, Alg](c.prefix.tree)
 
 }

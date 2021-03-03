@@ -1,7 +1,6 @@
 package tofu.logging
 
 import cats.kernel.Monoid
-import cats.syntax.apply._
 import cats.{Applicative, Apply, FlatMap}
 import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.compat.unused
@@ -9,9 +8,18 @@ import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.logging.Logging._
 import tofu.logging.impl.EmbedLogging
 import tofu.syntax.monoidalK._
+import tofu.syntax.monadic._
+import tofu.syntax.funk._
+import cats.tagless.syntax.functorK._
 import tofu.{Init, higherKind}
 
 import scala.reflect.ClassTag
+import cats.Functor
+import cats.tagless.ApplyK
+import cats.tagless.FunctorK
+import tofu.higherKind.Mid
+import tofu.syntax.funk
+import cats.Monad
 
 /** Typeclass equivalent of Logger.
   * May contain specified some Logger instance
@@ -107,6 +115,12 @@ object Logging {
   /** having two logging implementation call `first` after `second` */
   def combine[F[_]: Apply](first: Logging[F], second: Logging[F]): Logging[F] =
     first.zipWithK(second)(Function2K[F, F, F](_ *> _))
+
+  def mid[U[_[_]]: FunctorK, I[_]: Functor, F[_]: Monad](implicit
+      logs: Logs[I, F],
+      UCls: ClassTag[U[F]],
+      lmid: U[LoggingMid]
+  ): I[U[Mid[F, *]]] = logs.forService[U[F]].map(implicit logging => lmid.mapK(funK(_.toMid)))
 
   private[logging] def loggerForService[S](implicit ct: ClassTag[S]): Logger =
     LoggerFactory.getLogger(ct.runtimeClass)
