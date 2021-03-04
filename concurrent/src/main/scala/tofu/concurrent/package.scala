@@ -16,11 +16,12 @@ package object concurrent {
   type MVars[F[_]]      = MakeMVar[F, F]
   type Deferreds[F[_]]  = MakeDeferred[F, F]
 
-  type Atoms[F[_]]      = MakeAtom[F, F]
-  type QVars[F[_]]      = MakeQVar[F, F]
-  type Stoplights[F[_]] = MakeStoplight[F, F]
-  type Mutexes[F[_]]    = MakeMutex[F, F]
-  type Agents[F[_]]     = MakeAgent[F, F]
+  type Atoms[F[_]]        = MakeAtom[F, F]
+  type QVars[F[_]]        = MakeQVar[F, F]
+  type Stoplights[F[_]]   = MakeStoplight[F, F]
+  type Mutexes[F[_]]      = MakeMutex[F, F]
+  type Agents[F[_]]       = MakeAgent[F, F]
+  type SerialAgents[F[_]] = MakeSerialAgent[F, F]
 
   def newRef[F[_]: Refs]              = MakeRef[F, F]
   def newSemaphore[F[_]: Semaphores]  = MakeSemaphore[F, F]

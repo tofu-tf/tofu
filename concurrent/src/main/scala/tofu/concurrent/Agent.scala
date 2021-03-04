@@ -8,20 +8,7 @@ import tofu.syntax.monadic._
 /** A mutable atomic reference augmented with effectful operations.
   * Can be thought as TF version of zio.RefM
   */
-trait Agent[F[_], A] {
-
-  /** Reads the value from the `Agent`.
-    *
-    * @return `F[A]` value from `Agent`
-    */
-  def get: F[A]
-
-  /** Update value with effectful transformation, wait for the new result
-    *
-    * @param f function to atomically modify the `Agent`
-    * @return `F[A]` modified value of `Agent`
-    */
-  def updateM(f: A => F[A]): F[A]
+trait Agent[F[_], A] extends SerialAgent[F, A] {
 
   /** Enqueue transformation, return immediately.
     *
@@ -30,32 +17,6 @@ trait Agent[F[_], A] {
     */
   def fireUpdateM(f: A => F[A]): F[Unit]
 
-  /** Modify value with effectful transformation, calculating result.
-    *
-    * @param f function which computes a return value for the modification
-    * @return `F[B]` modified value of `Agent`
-    */
-  def modifyM[B](f: A => F[(B, A)]): F[B]
-
-  /** Modifies the `Agent` with the specified partial function.
-    * If function is undefined on the current value it doesn't change it.
-    *
-    * @param f partial function to modify the `Agent`
-    * @return `F[A]` modified value of `Agent`
-    */
-  def updateSomeM(f: PartialFunction[A, F[A]]): F[A]
-
-  // NOTE: B => F[B] looks like tagless encoding of F[Option[B]]
-  // we are choosing towards ZIO to simplify adoption
-  /** Modifies the `Agent` with the specified partial function, which computes
-    * a return value for the modification if the function is defined in the current value.
-    * Otherwise it returns a default value.
-    *
-    * @param default value to be returned if the partial function is not defined on the current value
-    * @param f partial function to modify the `Agent`
-    * @return `F[B]` modified value of `Agent`
-    */
-  def modifySomeM[B](default: B)(f: PartialFunction[A, F[(B, A)]]): F[B]
 }
 
 object Agent {
