@@ -114,6 +114,7 @@ object Context {
     * }}}
     */
   trait Companion[C] extends ContextInstances[C] {
+
     type Has[F[_]] = WithContext[F, C]
 
     implicit def promoteContextStructure[F[_], A](implicit
@@ -121,6 +122,11 @@ object Context {
         field: C Contains A
     ): WithContextContainsInstance[F, C, A] =
       new WithContextContainsInstance[F, C, A]
+
+    /** Access [[C]] in [[F]].
+      */
+    final def access[F[_]](implicit has: Has[F]): F[C] =
+      has.context
   }
 
   trait ContextInstances[C] {
