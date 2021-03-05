@@ -8,14 +8,17 @@ import tofu.higherKind.Mid
 import cats.Monad
 import tofu.higherKind.derived.HigherKindedMacros
 
-object LoggingMid extends LoggingMidBuilder.Default {
-  def instance[U[_[_]]]: U[LoggingMid] = macro HigherKindedMacros.factorizeThis[LoggingMid, U]
-}
-
+/** Logging middleware */
 abstract class LoggingMid[A] {
   def apply[F[_]: Monad: Logging](fa: F[A]): F[A]
 
   def toMid[F[_]: Monad: Logging]: Mid[F, A] = apply(_)
+}
+
+object LoggingMid extends LoggingMidBuilder.Default {
+  def instance[U[_[_]]]: U[LoggingMid] = macro HigherKindedMacros.factorizeThis[LoggingMid, U]
+
+  type Of[U[_[_]]] = U[LoggingMid]
 }
 
 /** Logging middleware generator */

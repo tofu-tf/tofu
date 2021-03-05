@@ -39,7 +39,39 @@ class FactorizeSuite extends AnyFunSuite {
 
   import FactorizeSuite.{Builder => `strange and fancy name`}
   import `strange and fancy name`.{conjure => `🤫`}
-  test("derive factorization")(`🤫`[Foo, MapF])
+  test("derive factorization")(testFactorization(`🤫`[Foo, MapF]))
+
+  type MapB[E, A] = Map[String, (Class[_], String)]
+
+  def testBiFactorization(barMap: Bar[MapB]) = {
+    assert(
+      barMap.building[Int](100)(List(1, 2, 3)) ===
+        Map(
+          ""             -> (classOf[Bar[Any]]  -> ""),
+          "building-res" -> (classOf[List[Any]] -> ""),
+          "building-err" -> (classOf[String]    -> ""),
+          "weight"       -> (classOf[Double]    -> (100: Double).show),
+          "elems"        -> (classOf[List[Int]] -> List(1, 2, 3).show),
+        )
+    )
+
+    assert(
+      barMap.person("Oli", 26) ===
+        Map(
+          ""           -> (classOf[Bar[Any]] -> ""),
+          "person-err" -> (classOf[Nothing]  -> ""),
+          "person-res" -> (classOf[Unit]     -> ""),
+          "name"       -> (classOf[String]   -> "Oli"),
+          "age"        -> (classOf[Int]      -> "26"),
+        )
+    )
+  }
+
+  test("simple bifactorization")(testBiFactorization(derived.bifactorize[BiBuilder.type, MapB, Bar](BiBuilder)))
+
+  import FactorizeSuite.{BiBuilder => `frightening and inappropriate name`}
+  import `frightening and inappropriate name`.{conjure => `😨`}
+  test("derive bifactorization")(testBiFactorization(`😨`[Bar, MapB]))
 
 }
 
@@ -47,6 +79,11 @@ object FactorizeSuite {
   trait Foo[F[_]] {
     def person(name: String, age: Int): F[Unit]
     def building[A: Show](weight: Double)(elems: List[A]): F[List[Double]]
+  }
+
+  trait Bar[F[_, _]] {
+    def person(name: String, age: Int): F[Nothing, Unit]
+    def building[A: Show](weight: Double)(elems: List[A]): F[String, List[Double]]
   }
 
   object Builder {
@@ -57,21 +94,28 @@ object FactorizeSuite {
 
   class Builder(algCls: Class[_]) {
     def start[Res: ClassTag](name: String): Building =
-      Building(algCls, classTag[Res].runtimeClass, name)
+      Building(Map(name -> (classTag[Res].runtimeClass -> ""), "" -> (algCls -> "")))
   }
 
-  case class Building(
-      algClass: Class[_],
-      resClass: Class[_],
-      methodName: String,
-      params: Vector[(String, (Class[_], String))] = Vector()
-  ) {
+  object BiBuilder {
+    def prepare[Alg[_[_, _]]](implicit Alg: ClassTag[Alg[Any]]) = new BiBuilder(Alg.runtimeClass)
 
+    def conjure[U[f[_, _]], F[_, _]]: U[F] = macro HigherKindedMacros.bifactorizeThis[F, U]
+  }
+
+  class BiBuilder(algCls: Class[_]) {
+    def start[Err: ClassTag, Res: ClassTag](name: String): Building =
+      Building(
+        Map(
+          s"$name-err" -> (classTag[Err].runtimeClass -> ""),
+          s"$name-res" -> (classTag[Res].runtimeClass -> ""),
+          ""           -> (algCls                     -> "")
+        )
+      )
+  }
+
+  case class Building(result: Map[String, (Class[_], String)] = Map()) {
     def arg[V: ClassTag: Show](name: String, a: V): Building =
-      copy(params = params :+ (name -> (classTag[V].runtimeClass -> a.show)))
-
-    def result: Map[String, (Class[_], String)]              =
-      params.toMap + (methodName -> (resClass -> "")) + ("" -> (algClass -> ""))
+      copy(result = result + (name -> (classTag[V].runtimeClass -> a.show)))
   }
-
 }

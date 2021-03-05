@@ -164,18 +164,19 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
   }
 
   def factorizeApply[F[_], Alg[_[_]]](
-      builder: Tree
-  )(implicit Alg: WeakTypeTag[Alg[Any]], F: WeakTypeTag[F[Any]]): Tree = {
-    val f       = F.tpe
-    val members = overridableMembersOf(Alg.tpe)
-    val types   = delegateAbstractTypes(Alg.tpe, members, Alg.tpe)
-    val Af      = appliedType(Alg.tpe, List(f))
+      builder: Tree,
+      Alg: Type,
+      F: Type
+  ): Tree = {
+    val members = overridableMembersOf(Alg)
+    val types   = delegateAbstractTypes(Alg, members, Alg)
+    val Af      = appliedType(Alg, List(F))
 
     val prepared = c.freshName(TermName("builder"))
     val methods  = delegateMethods(Af, members, NoSymbol) { case method =>
       val methodName  = method.name.encodedName.toString
       val start: Tree = method.returnType match {
-        case TypeRef(_, _, List(x)) => q"$prepared.start[$x]($methodName)"
+        case TypeRef(_, _, xs) => q"$prepared.start[..$xs]($methodName)"
       }
 
       val withParams =
@@ -190,7 +191,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
     q"""
     val $prepared = $builder.prepare[$Alg]
-    ${implementSimple(Af)(f)(types ++ methods)}"""
+    ${implementSimple(Af)(F)(types ++ methods)}"""
   }
 
   def representableK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
@@ -208,11 +209,21 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
   def factorize[Builder, F[_], Alg[_[_]]](builder: Tree)(implicit
       F: WeakTypeTag[F[Any]],
       Alg: WeakTypeTag[Alg[Any]]
-  ): Tree = factorizeApply[F, Alg](builder)
+  ): Tree = factorizeApply(builder, Alg.tpe, F.tpe)
 
   def factorizeThis[F[_], Alg[_[_]]](implicit
       F: WeakTypeTag[F[Any]],
       Alg: WeakTypeTag[Alg[Any]]
-  ): Tree = factorizeApply[F, Alg](c.prefix.tree)
+  ): Tree = factorizeApply(c.prefix.tree, Alg.tpe, F.tpe)
+
+  def bifactorize[Builder, F[_, _], Alg[_[_, _]]](builder: Tree)(implicit
+      F: WeakTypeTag[F[Any, Any]],
+      Alg: WeakTypeTag[Alg[Any]]
+  ): Tree = factorizeApply(builder, Alg.tpe, F.tpe)
+
+  def bifactorizeThis[F[_, _], Alg[_[_, _]]](implicit
+      F: WeakTypeTag[F[Any, Any]],
+      Alg: WeakTypeTag[Alg[Any]]
+  ): Tree = factorizeApply(c.prefix.tree, Alg.tpe, F.tpe)
 
 }

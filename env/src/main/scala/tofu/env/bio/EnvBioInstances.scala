@@ -30,8 +30,7 @@ class EnvBioBifunctorInstance[R]
 
   override def raise[E, A](e: E): EnvBio[R, E, A] = EnvBio.raiseError(e)
 
-  override def foldWith[E, A, X, B](
-      fa: EnvBio[R, E, A],
+  override def foldWith[E, A, X, B](fa: EnvBio[R, E, A])(
       h: E => EnvBio[R, X, B],
       f: A => EnvBio[R, X, B]
   ): EnvBio[R, X, B] = fa.foldWith(h, f)

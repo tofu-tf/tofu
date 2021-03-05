@@ -16,7 +16,7 @@ trait BindInstanceChain[TC[f[_, _]] >: Bind[f]] {
 
     def raise[E, A](e: E): Either[E, A] = Left(e)
 
-    def foldWith[E, A, X, R](fa: Either[E, A], h: E => Either[X, R], f: A => Either[X, R]): Either[X, R] = fa.fold(h, f)
+    def foldWith[E, A, X, R](fa: Either[E, A])(h: E => Either[X, R], f: A => Either[X, R]): Either[X, R] = fa.fold(h, f)
 
     def foldRec[E, A, X, B](init: Either[E, A])(
         step: Either[E, A] => Either[Either[E, X], Either[A, B]]
@@ -59,8 +59,7 @@ trait BindInstanceChain[TC[f[_, _]] >: Bind[f]] {
 
     def raise[E, A](e: E): EitherT[F, E, A] = EitherT.leftT(e)
 
-    def foldWith[E, A, X, R](
-        fa: EitherT[F, E, A],
+    def foldWith[E, A, X, R](fa: EitherT[F, E, A])(
         h: E => EitherT[F, X, R],
         f: A => EitherT[F, X, R]
     ): EitherT[F, X, R] =
