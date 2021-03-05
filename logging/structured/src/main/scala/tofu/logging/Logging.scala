@@ -15,10 +15,8 @@ import tofu.{Init, higherKind}
 
 import scala.reflect.ClassTag
 import cats.Functor
-import cats.tagless.ApplyK
 import cats.tagless.FunctorK
 import tofu.higherKind.Mid
-import tofu.syntax.funk
 import cats.Monad
 
 /** Typeclass equivalent of Logger.
@@ -107,6 +105,8 @@ trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
 object Logging {
   type ForService[F[_], Svc] <: Logging[F]
 
+  type Safe[F[_, _]] = Logging[F[Nothing, *]]
+
   def apply[F[_]](implicit logging: Logging[F]): Logging[F] = logging
 
   /** the do-nothing Logging */
@@ -158,4 +158,16 @@ private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
   */
 trait LoggingCompanion[U[_[_]]] {
   type Log[F[_]] = ServiceLogging[F, U[Any]]
+
+  def midIn[I[_]: Functor, F[_]: Monad](implicit
+      L: Logs[I, F],
+      svc: ClassTag[U[F]],
+      U: FunctorK[U],
+      UM: LoggingMid.Of[U]
+  ): I[U[Mid[F, *]]] = Logging.mid[U, I, F]
+
+}
+
+trait LoggingBiCompanion[U[_[_, _]]] {
+  type Log[F[_, _]] = ServiceLogging[F[Nothing, *], U[Any]]
 }

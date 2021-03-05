@@ -144,15 +144,13 @@ trait BiRun[F[_, _], G[_, _], X, C] extends BiLocal[F, X, C] with BiUnlift[G, F]
   def runEitherK(ctx: Either[X, C]): F FunBK G = FunBK[F](runEither(_)(ctx))
 
   override def bilocal[E, A](fea: F[E, A])(lproj: X => X, rproj: C => C): F[E, A] =
-    bifunctor.foldWith[X, C, E, A](
-      context,
+    bifunctor.foldWith[X, C, E, A](context)(
       x => lift(runLeft(fea)(lproj(x))),
       c => lift(runRight(fea)(rproj(c)))
     )
 
   override def disclose[E, A](k: FunBK[F, G] => F[E, A]): F[E, A] =
-    bifunctor.foldWith[X, C, E, A](
-      context,
+    bifunctor.foldWith[X, C, E, A](context)(
       x => k(FunBK.apply(runLeft(_)(x))),
       c => k(FunBK.apply(runRight(_)(c)))
     )

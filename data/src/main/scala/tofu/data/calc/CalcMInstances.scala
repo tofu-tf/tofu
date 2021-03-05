@@ -50,8 +50,7 @@ class CalcBindInstance[F[+_, +_], R, S] extends StackSafeBind[CalcM[F, R, S, S, 
 
   override def raise[E, A](e: E): CalcM[F, R, S, S, E, A] = CalcM.raise(e)
 
-  override def foldWith[E, A, X, B](
-      fa: CalcM[F, R, S, S, E, A],
+  override def foldWith[E, A, X, B](fa: CalcM[F, R, S, S, E, A])(
       h: E => CalcM[F, R, S, S, X, B],
       f: A => CalcM[F, R, S, S, X, B]
   ): CalcM[F, R, S, S, X, B] = fa.foldWith(f, h)
