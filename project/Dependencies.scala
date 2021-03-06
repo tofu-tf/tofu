@@ -21,7 +21,7 @@ object Dependencies {
 
     val enumeratum = "1.6.1"
 
-    val derevo = "0.11.6"
+    val derevo = "0.12.1"
 
     val slf4j = "1.7.30"
 
@@ -74,8 +74,8 @@ object Dependencies {
   val circeJava8       = "io.circe"                   %% "circe-java8"             % Version.circe
   val circeDerivation  = "io.circe"                   %% "circe-derivation"        % Version.circe
   val magnolia         = "com.propensive"             %% "magnolia"                % Version.magnolia
-  val derevo           = "org.manatki"                %% "derevo-core"             % Version.derevo
-  val derevoTagless    = "org.manatki"                %% "derevo-cats-tagless"     % Version.derevo
+  val derevo           = "tf.tofu"                    %% "derevo-core"             % Version.derevo
+  val derevoTagless    = "tf.tofu"                    %% "derevo-cats-tagless"     % Version.derevo
   val enumeratum       = "com.beachape"               %% "enumeratum"              % Version.enumeratum
   val fs2              = "co.fs2"                     %% "fs2-io"                  % Version.fs2
   val tethys           = "com.tethys-json"            %% "tethys-core"             % Version.tethys

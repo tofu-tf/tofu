@@ -296,7 +296,7 @@ lazy val docs = project // new documentation project
 lazy val tofu = project
   .in(file("."))
   .settings(defaultSettings)
-  .settings(libraryDependencies += "org.manatki" %% "derevo-cats-tagless" % Version.derevo)
+  .settings(libraryDependencies += "tf.tofu" %% "derevo-cats-tagless" % Version.derevo)
   .aggregate((coreModules ++ commonModules).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
