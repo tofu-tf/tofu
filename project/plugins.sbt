@@ -12,7 +12,7 @@ addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.2.18")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.3")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.4")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.2")
 
 addSbtPlugin("com.timushev.sbt" % "sbt-rewarn" % "0.1.3")
 
