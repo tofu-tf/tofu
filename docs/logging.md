@@ -511,9 +511,9 @@ your `LogRendered`, so your structured logging will work as expected.
 
 ## Integration with logs4cats
 
-There is a library for effectful logging named [log4cats](https://github.com/ChristopherDavenport/log4cats) which shares
+There is a library for effectful logging named [log4cats](https://github.com/typelevel/log4cats) which shares
 the goal of representing logging as an effect and providing the ability to log context values. It is used by some of the
-open-source libraries which may require you to pass an instance of `io.chrisdavenport.log4cats.Logger` to it in order to
+open-source libraries which may require you to pass an instance of `org.typelevel.log4cats.Logger` to it in order to
 log something. Module `tofu-logging-log4cats` contains a helper that can create an instance of log4cats `Logger` from
 our existing
 `tofu.logging.Logging` one. If our `Logging` instance is contextual, it will continue leveraging that despite being
@@ -524,7 +524,7 @@ logged.
 Let's take a look at the example:
 
 ```scala:reset
-import io.chrisdavenport.log4cats.{Logger, StructuredLogger}
+import org.typelevel.log4cats.{Logger, StructuredLogger}
 import tofu.env.Env
 import tofu.logging._
 
