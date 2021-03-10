@@ -1,6 +1,6 @@
 package tofu.logging
 
-import io.chrisdavenport.log4cats._
+import org.typelevel.log4cats._
 
 package object log4cats {
   implicit def toLog4CatsLogger[F[_]](implicit logging: Logging[F]): StructuredLogger[F] = new StructuredLogger[F] {
