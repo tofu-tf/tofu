@@ -29,7 +29,6 @@ object foption {
         case x    => x.pure[F]
       }
 
-
     def orThrow[E](err: => E)(implicit F: Monad[F], raise: FindRaise.Aux[E, F]): F[A] =
       lhs.getOrElseF(FindRaise.unwrap(raise).raise(err))
 
