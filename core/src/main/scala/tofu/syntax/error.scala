@@ -41,8 +41,8 @@ object raise {
   }
 
   implicit final class RaiseMonadOps[F[_], A](private val fa: F[A]) extends AnyVal {
-    def verified[E](p: A => Boolean)(err: E)(implicit raise: Raise[F, E], F: Monad[F]): F[A] =
-      F.flatMap(fa)(a => if (p(a)) F.pure(a) else raise.raise(err))
+    def verified[E](p: A => Boolean)(err: E)(implicit raise: FindRaise.Aux[E, F], F: Monad[F]): F[A] =
+      F.flatMap(fa)(a => if (p(a)) F.pure(a) else FindRaise.unwrap(raise).raise(err))
   }
 
   implicit final class RaiseOptionOps[A](private val opt: Option[A]) extends AnyVal {

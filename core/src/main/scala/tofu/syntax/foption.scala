@@ -4,9 +4,9 @@ import cats.{Applicative, Functor, Monad, Traverse}
 import cats.syntax.traverse.toTraverseOps
 import cats.instances.option.catsStdInstancesForOption
 import cats.syntax.option._
-import tofu.Raise
 import tofu.syntax.monadic._
 import tofu.syntax.feither.EitherIdFOps
+import raise.FindRaise
 
 object foption {
   def noneF[F[_]: Applicative, A]: F[Option[A]] = none[A].pure[F]
@@ -29,8 +29,8 @@ object foption {
         case x    => x.pure[F]
       }
 
-    def orThrow[E](err: => E)(implicit F: Monad[F], FE: Raise[F, E]): F[A] =
-      lhs.getOrElseF(FE.raise(err))
+    def orThrow[E](err: => E)(implicit F: Monad[F], raise: FindRaise.Aux[E, F]): F[A] =
+      lhs.getOrElseF(FindRaise.unwrap(raise).raise(err))
 
     def semiflatMap[B](f: A => F[B])(implicit F: Monad[F]): F[Option[B]] =
       lhs.flatMapF(f(_).map(_.some))

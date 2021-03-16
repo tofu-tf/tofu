@@ -4,9 +4,9 @@ import cats.instances.either._
 import cats.syntax.either._
 import cats.{Applicative, Functor, Monad, Traverse}
 import cats.syntax.traverse._
-import tofu.Raise
 import tofu.syntax.either._
 import tofu.syntax.monadic._
+import raise.FindRaise
 
 object feither {
 
@@ -27,8 +27,8 @@ object feither {
       e.flatMap(_.fold(f, F.pure(_: R1)))
     }
 
-    def absolve[R1 >: R](implicit R: Raise[F, L], F: Monad[F]): F[R1] = {
-      e.flatMap(_.fold(R.raise[R1], F.pure(_: R1)))
+    def absolve[R1 >: R](implicit R: FindRaise.Aux[L, F], F: Monad[F]): F[R1] = {
+      e.flatMap(_.fold(FindRaise.unwrap(R).raise[R1], F.pure(_: R1)))
     }
 
     def assocR[A, B](implicit F: Functor[F], ev: R <:< Either[A, B]): F[Either[Either[L, A], B]] = {
@@ -157,7 +157,7 @@ object feither {
       e.map(_.fold(ev, identity(_: A)))
     }
 
-    def reRaise(implicit R: Raise[F, L], M: Monad[F]): F[R] = R.reRaise(e)
+    def reRaise(implicit R: FindRaise.Aux[L, F], M: Monad[F]): F[R] = FindRaise.unwrap(R).reRaise(e)
   }
 
   implicit final class EitherIdFOps[A](private val id: A) extends AnyVal {
