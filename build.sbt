@@ -335,22 +335,6 @@ lazy val simulacrumOptions = Seq(
   }
 )
 
-lazy val defaultScalacOptions = scalacOptions := {
-  val tpolecatOptions = scalacOptions.value
-
-  val dropLints = Set(
-    "-Ywarn-dead-code",
-    "-Wdead-code" // ignore dead code paths where `Nothing` is involved
-  )
-
-  val opts = tpolecatOptions.filterNot(dropLints)
-
-  // drop `-Xfatal-warnings` on dev and 2.12 CI
-  if (!sys.env.get("CI").contains("true") || (minorVersion.value == 12))
-    opts.filterNot(Set("-Xfatal-warnings"))
-  else
-    opts
-}
 
 lazy val publishSettings = Seq(
   organization := "ru.tinkoff",
