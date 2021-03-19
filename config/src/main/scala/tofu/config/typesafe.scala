@@ -11,9 +11,6 @@ import tofu.syntax.monadic._
 import tofu.syntax.funk._
 import cats.effect.SyncIO
 
-import scala.annotation.nowarn
-import scala.collection.compat._
-
 object typesafe {
   def fromConfig(cfg: Config): ConfigItem[Id] =
     fromValue(cfg.root())
@@ -21,7 +18,6 @@ object typesafe {
   def fromValue(cfg: ConfigValue): ConfigItem[Id] =
     if (cfg == null) Null else fromUnwrapped(cfg.unwrapped())
 
-  @nowarn("cat=other-match-analysis")
   def fromUnwrapped(el: Any): ConfigItem[Id] =
     el match {
       case null                                   => Null
@@ -35,7 +31,8 @@ object typesafe {
       case b: java.lang.Boolean                   => Bool(b)
       case s: String                              => Str(s)
       case l: java.util.List[_]                   => seq(l.asScala.toVector.map(fromUnwrapped))
-      case m: java.util.Map[String @unchecked, _] => dict(m.asScala.view.mapValues(fromUnwrapped).toMap)
+      case m: java.util.Map[String @unchecked, _] =>
+        dict(m.asScala.iterator.map { case (k, v) => (k, fromUnwrapped(v)) }.toMap)
     }
 
   def parseValue[F[_]: Refs: MonadThrow: ParallelReader, A: Configurable](cfg: ConfigValue): F[A] =
