@@ -1,7 +1,7 @@
 package tofu
 
-import cats.{Applicative, Functor, Monad}
 import cats.data.ReaderT
+import cats.{Applicative, Functor, Monad}
 import tofu.optics.{Contains, Equivalent, Extract}
 
 /** lightweight version of ApplicativeAsk */

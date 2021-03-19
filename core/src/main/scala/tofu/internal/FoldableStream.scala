@@ -1,7 +1,6 @@
 package tofu.internal
 
-import cats.Foldable
-import cats.Eval
+import cats.{Eval, Foldable}
 
 sealed trait FoldableStream[+A]
 

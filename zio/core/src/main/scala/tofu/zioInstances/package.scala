@@ -1,9 +1,6 @@
 package tofu
-import java.io.IOException
-
-import tofu.optics.Contains
-import tofu.optics.{Contains, Extract}
 import tofu.optics.functions.extractSubtype
+import tofu.optics.{Contains, Extract}
 import tofu.zioInstances.{
   RioTofuInstance,
   ZIOTofuConsoleInstance,
@@ -18,6 +15,8 @@ import tofu.zioInstances.{
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
+
+import java.io.IOException
 
 package object zioInstances extends ZioInstances1
 

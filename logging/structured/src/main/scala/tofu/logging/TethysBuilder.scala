@@ -1,13 +1,13 @@
 package tofu
 package logging
 
-import java.io.StringWriter
-
 import cats.instances.unit._
 import cats.kernel.Monoid
-import com.github.ghik.silencer.silent
-import tofu.logging.LogRenderer.LogRendererUnit
 import tethys.writers.tokens.TokenWriter
+import tofu.logging.LogRenderer.LogRendererUnit
+
+import java.io.StringWriter
+import scala.annotation.nowarn
 
 class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilder[String] {
   type Top    = TokenWriter
@@ -16,7 +16,7 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
   type Output = Unit
 
   /** override to add predefined fields */
-  @silent def predefined(tokenWriter: TokenWriter): Unit = {}
+  @nowarn def predefined(tokenWriter: TokenWriter): Unit = {}
 
   def writeValue(value: LogParamValue, writer: TokenWriter): Unit = value match {
     case StrValue(v)     => writer.writeString(v)

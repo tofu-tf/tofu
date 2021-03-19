@@ -1,12 +1,11 @@
 package tofu
 package errorInstances
 
-import cats.ApplicativeError
+import cats.data.{EitherT, OptionT}
+import cats.{ApplicativeError, Id, Monad}
 import tofu.optics.{Downcast, Upcast}
 
 import scala.reflect.ClassTag
-import cats.data.{EitherT, OptionT}
-import cats.{Monad, Id}
 
 private[tofu] class FromAppErr[F[_], E, E1](
     implicit

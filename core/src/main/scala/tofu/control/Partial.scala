@@ -4,8 +4,8 @@ import cats.syntax.either._
 import cats.syntax.functor._
 import cats.syntax.semigroupk._
 import cats.{Functor, Invariant, MonoidK}
-import tofu.Void
 import simulacrum.typeclass
+import tofu.Void
 
 @typeclass
 trait Partial[F[_]] extends Switch[F] with Invariant[F] with MonoidK[F] with Optional[F] {

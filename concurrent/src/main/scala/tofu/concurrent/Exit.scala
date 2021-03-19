@@ -1,7 +1,7 @@
 package tofu.concurrent
 
-import cats.{Applicative, Eval, Traverse}
 import cats.effect.ExitCase
+import cats.{Applicative, Eval, Traverse}
 import tofu.control.ApplicativeZip
 import tofu.syntax.monadic._
 

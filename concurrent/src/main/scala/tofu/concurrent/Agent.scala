@@ -1,6 +1,6 @@
 package tofu.concurrent
-import cats.{FlatMap, Monad}
 import cats.effect.concurrent.{Ref, Semaphore}
+import cats.{FlatMap, Monad}
 import tofu.Fire
 import tofu.syntax.fire._
 import tofu.syntax.monadic._

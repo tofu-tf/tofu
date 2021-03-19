@@ -1,9 +1,9 @@
 package tofu
 
 import cats.effect.{Concurrent, ContextShift, IO, Timer}
-import simulacrum.typeclass
 import cats.syntax.apply._
 import cats.syntax.functor._
+import simulacrum.typeclass
 
 import scala.concurrent.duration.FiniteDuration
 

@@ -1,13 +1,12 @@
 package tofu.higherKind.derived
 
-import RepresentableKSuite.Foo
 import cats.data.{OptionT, Tuple2K}
 import cats.instances.either._
 import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.functor._
-import cats.syntax.traverse._
 import cats.syntax.option._
+import cats.syntax.traverse._
 import cats.tagless.syntax.functorK._
 import cats.tagless.syntax.semigroupalK._
 import cats.{Id, ~>}
@@ -18,6 +17,8 @@ import tofu.syntax.embed._
 import tofu.syntax.functionK.funK
 
 import scala.util.Try
+
+import RepresentableKSuite.Foo
 
 class RepresentableKSuite extends FlatSpec with Matchers {
   val checkingFoo: Foo[Either[String, *]] = new Foo[Either[String, *]] {

@@ -2,7 +2,6 @@ package tofu.syntax
 
 import cats.{MonoidK, SemigroupK}
 import tofu.control.{Consume, Partial, Switch}
-import tofu.control.{Partial, Switch}
 
 object consume
     extends Consume.ToConsumeOps with Partial.ToPartialOps with Switch.ToSwitchOps with MonoidK.ToMonoidKOps

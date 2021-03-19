@@ -5,9 +5,10 @@ import cats.Foldable
 import cats.kernel.{Monoid, Semigroup}
 import cats.syntax.monoid._
 import tofu.data.PArray
-import syntax.logRenderer._
 
 import scala.{specialized => sp}
+
+import syntax.logRenderer._
 
 /**
   * contextual log construction

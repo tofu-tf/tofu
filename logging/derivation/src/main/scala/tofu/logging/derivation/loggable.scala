@@ -2,8 +2,8 @@ package tofu.logging
 package derivation
 
 import cats.Show
-import magnolia.{CaseClass, Magnolia, SealedTrait}
 import derevo.Derivation
+import magnolia.{CaseClass, Magnolia, SealedTrait}
 
 object loggable extends Derivation[Loggable] {
   type Typeclass[A] = Loggable[A]

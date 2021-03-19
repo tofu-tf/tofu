@@ -1,8 +1,8 @@
 package tofu.logging.zlogs.impl
 
-import tofu.logging.{Loggable, LoggedValue}
 import org.slf4j.{Logger, Marker}
 import tofu.logging.impl.{ContextMarker, LoggingImpl}
+import tofu.logging.{Loggable, LoggedValue}
 import zio.{UIO, URIO}
 
 class URIOZLoggingImpl[R: Loggable](logger: Logger) extends LoggingImpl[URIO[R, *]](logger) {

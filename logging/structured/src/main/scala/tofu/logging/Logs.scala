@@ -1,16 +1,17 @@
 package tofu.logging
 
-import Logging.loggerForService
 import cats.effect.Sync
 import cats.kernel.Monoid
 import cats.{Applicative, Apply, FlatMap, Functor}
-import impl.{ContextSyncLoggingImpl, SyncLogging}
 import org.slf4j.LoggerFactory
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
 import tofu.syntax.monadic._
 
 import scala.reflect.ClassTag
+
+import Logging.loggerForService
+import impl.{ContextSyncLoggingImpl, SyncLogging}
 
 trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
   def forService[Svc: ClassTag]: I[Logging[F]]

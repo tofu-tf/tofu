@@ -3,11 +3,11 @@ package tofu.syntax
 import cats.Applicative
 import cats.data.EitherT
 import cats.effect.concurrent.MVar
-import cats.effect.{Bracket, ExitCase}
 import cats.effect.syntax.bracket._
-import cats.syntax.functor._
+import cats.effect.{Bracket, ExitCase}
 import cats.syntax.applicative._
 import cats.syntax.either._
+import cats.syntax.functor._
 import tofu.{Finally, Guarantee}
 
 object bracket {

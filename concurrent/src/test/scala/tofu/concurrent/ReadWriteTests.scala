@@ -9,8 +9,7 @@ import cats.syntax.apply._
 import cats.syntax.parallel._
 import cats.syntax.traverse._
 import org.scalatest.{AsyncWordSpec, Ignore, Inside, Matchers}
-import tofu.concurrent.ReadWrite._
-import tofu.concurrent.ReadWrite.ConcurrentReadWrite
+import tofu.concurrent.ReadWrite.{ConcurrentReadWrite, _}
 
 import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext

@@ -6,7 +6,6 @@ import monix.eval.Task
 import monix.execution.Scheduler
 import tofu.lift.{Unlift, UnsafeExecFuture}
 import tofu.syntax.functionK._
-import tofu.lift.Unlift
 
 import scala.concurrent.Future
 

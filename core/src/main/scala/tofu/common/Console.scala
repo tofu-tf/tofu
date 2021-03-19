@@ -1,12 +1,11 @@
 package tofu.common
 
-import java.io.{BufferedReader, PrintStream}
-
 import cats.effect.Sync
 import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
 
+import java.io.{BufferedReader, PrintStream}
 import scala.{Console => ScalaConsole}
 
 @typeclass

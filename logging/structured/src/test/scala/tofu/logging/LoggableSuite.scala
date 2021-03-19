@@ -1,13 +1,13 @@
 package tofu.logging
 
-import java.time.LocalDate
-
 import cats.syntax.either._
 import cats.syntax.monoid._
 import org.scalatest.{FlatSpec, Matchers}
 import tofu.logging.LoggableSuite.TestInt
 import tofu.syntax.logRenderer._
 import tofu.syntax.loggable._
+
+import java.time.LocalDate
 
 class LoggableSuite extends FlatSpec with Matchers {
 

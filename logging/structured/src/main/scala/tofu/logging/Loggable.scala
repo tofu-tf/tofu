@@ -1,7 +1,5 @@
 package tofu.logging
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
-
 import alleycats.std.iterable._
 import alleycats.std.set._
 import cats.data._
@@ -15,16 +13,17 @@ import cats.syntax.foldable._
 import cats.syntax.monoid._
 import cats.syntax.show._
 import cats.{Foldable, Show}
-import impl._
+import simulacrum.typeclass
 import tofu.control.Consume
 import tofu.logging.Loggable.Base
 import tofu.syntax.logRenderer._
-import simulacrum.typeclass
-import tofu.control.Consume
 
+import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 import scala.collection.immutable.SortedSet
 import scala.collection.{immutable, mutable}
 import scala.{PartialFunction => =?>, specialized => sp}
+
+import impl._
 
 /**
   * Typeclass for adding custom log values to message

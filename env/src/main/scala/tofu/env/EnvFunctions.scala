@@ -1,7 +1,5 @@
 package tofu.env
 
-import java.util.concurrent.TimeUnit.MILLISECONDS
-
 import cats.Eval
 import cats.data.ReaderT
 import cats.effect._
@@ -9,6 +7,7 @@ import cats.syntax.either._
 import monix.eval.{Coeval, Task}
 import monix.execution.Scheduler
 
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try

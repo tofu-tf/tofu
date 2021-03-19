@@ -1,13 +1,12 @@
 package tofu.syntax
 
-import org.scalatest.FlatSpec
-import cats.data.Writer
-import tofu.syntax.monadic._
-import cats.data.Chain
 import cats.Monad
-import tofu.syntax.foldable._
-import cats.instances.stream._
+import cats.data.{Chain, Writer}
 import cats.instances.int._
+import cats.instances.stream._
+import org.scalatest.FlatSpec
+import tofu.syntax.foldable._
+import tofu.syntax.monadic._
 
 class FoldableSuite extends FlatSpec {
   def add(s: Int, x: Int) = x > 0 whenOpt Writer.tell(Chain(s)).as(s + x)

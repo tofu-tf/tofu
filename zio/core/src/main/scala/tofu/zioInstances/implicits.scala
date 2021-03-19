@@ -1,10 +1,10 @@
 package tofu.zioInstances
-import java.io.IOException
-
 import tofu.optics.Extract
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
+
+import java.io.IOException
 
 object implicits {
   @inline final implicit def rioTofuImplicit[R]: RioTofuInstance[R] = rioTofuInstance

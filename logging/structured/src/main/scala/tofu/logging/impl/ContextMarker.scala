@@ -1,10 +1,9 @@
 package tofu.logging
 package impl
 
-import java.util
-
 import org.slf4j.Marker
 
+import java.util
 import scala.collection.immutable.{List, Seq}
 
 final case class ContextMarker(ctx: LoggedValue, referenceList: Seq[Marker] = List.empty) extends Marker {

@@ -1,6 +1,8 @@
 package tofu
 package config
 
+import scala.concurrent.{BlockContext, Future}
+
 trait ConfigArr[U[_[_]], A] {
   def apply[F[_]: ConfigMonad](input: U[F]): F[A]
 }

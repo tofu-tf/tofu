@@ -1,7 +1,6 @@
 package tofu.syntax
 
-import cats.Foldable
-import cats.Monad
+import cats.{Foldable, Monad}
 import tofu.internal.FoldableStream
 
 object foldable {

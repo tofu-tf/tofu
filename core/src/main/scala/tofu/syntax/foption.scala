@@ -1,7 +1,7 @@
 package tofu.syntax
 
-import cats.{Applicative, Monad}
 import cats.syntax.option._
+import cats.{Applicative, Monad}
 import tofu.Raise
 import tofu.syntax.monadic._
 

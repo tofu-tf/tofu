@@ -44,9 +44,8 @@ object Dependencies {
 
     val simulacrum = "1.0.0"
 
-    val silencer = "1.6.0"
 
-    val kindProjector = "0.11.0"
+    val kindProjector = "0.11.3"
 
     val betterMonadicFor = "0.3.1"
   }
@@ -80,6 +79,4 @@ object Dependencies {
   val kindProjector    = "org.typelevel"   %% "kind-projector"     % Version.kindProjector cross CrossVersion.patch
   val simulacrum       = "org.typelevel"   %% "simulacrum"         % Version.simulacrum
   val betterMonadicFor = "com.olegpy"      %% "better-monadic-for" % Version.betterMonadicFor
-  val silencerPlugin   = "com.github.ghik" % "silencer-plugin"     % Version.silencer cross CrossVersion.full
-  val silencerLib      = "com.github.ghik" % "silencer-lib"        % Version.silencer % Provided cross CrossVersion.full
 }

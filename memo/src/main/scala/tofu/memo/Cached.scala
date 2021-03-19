@@ -1,13 +1,12 @@
 package tofu.memo
 
-import java.util.concurrent.TimeUnit
-
 import cats.effect.Clock
-import tofu.syntax.monadic._
 import cats.{Functor, Monad}
 import tofu.Guarantee
 import tofu.concurrent.{MakeMVar, MakeRef}
+import tofu.syntax.monadic._
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 
 object Cached {

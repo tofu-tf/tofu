@@ -1,10 +1,11 @@
 package tofu.syntax
 
-import cats.{ApplicativeError, MonadError}
 import cats.data.EitherT
 import cats.syntax.applicativeError._
 import cats.syntax.either._
 import cats.syntax.functor._
+import cats.{ApplicativeError, MonadError}
+
 import either._
 
 object monadError {

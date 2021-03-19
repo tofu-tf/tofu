@@ -4,7 +4,6 @@ import cats.arrow.Compose
 import cats.syntax.either._
 import cats.syntax.option._
 import tofu.optics.classes.PChoice
-import tofu.optics.classes.PChoice
 
 /** reversed version of cats.data.Const */
 final case class Tagged[-A, +B](value: B) extends AnyVal {

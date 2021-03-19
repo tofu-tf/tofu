@@ -2,6 +2,7 @@ package tofu
 
 import cats.MonadError
 import cats.instances.either._
+
 import Raise.ContravariantRaise
 
 object RaiseSute {

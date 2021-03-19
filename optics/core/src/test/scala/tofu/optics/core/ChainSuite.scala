@@ -3,6 +3,7 @@ package core
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers.convertToAnyShouldWrapper
 import tofu.optics.tags.{every, index}
+
 import language.postfixOps
 
 class ChainSuite extends FlatSpec {

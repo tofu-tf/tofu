@@ -1,10 +1,10 @@
 package tofu.optics
 
+import alleycats.std.map._
 import cats.Apply
+import cats.instances.all._
 import cats.syntax.apply._
 import cats.syntax.either._
-import cats.instances.all._
-import alleycats.std.map._
 
 object functions {
   def both2[A, B] = new PRepeated[(A, A), (B, B), A, B] {

@@ -1,9 +1,8 @@
 package tofu.logging.derivation
 
 import cats.Show
-
-import magnolia.{CaseClass, Magnolia, SealedTrait}
 import derevo.Derivation
+import magnolia.{CaseClass, Magnolia, SealedTrait}
 
 object show extends Derivation[Show] {
 

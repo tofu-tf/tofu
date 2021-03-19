@@ -1,17 +1,18 @@
 package tofu.logging
 
-import Logging._
 import cats.kernel.Monoid
 import cats.syntax.apply._
 import cats.{Applicative, Apply, FlatMap}
-import com.github.ghik.silencer.silent
 import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.higherKind
 import tofu.higherKind.{Embed, Function2K, RepresentableK}
 import tofu.logging.impl.EmbedLogging
 import tofu.syntax.monoidalK._
 
+import scala.annotation.nowarn
 import scala.reflect.ClassTag
+
+import Logging._
 
 /** typeclass equivalent of Logger
   * may contain specified some Logger instance
@@ -28,7 +29,7 @@ trait LoggingBase[F[_]] {
   def write(level: Level, message: String, values: LoggedValue*): F[Unit]
 
   /** could be overridden in the implementation, same as `write` but add additional info via marker */
-  @silent def writeMarker(level: Level, message: String, marker: Marker, values: LoggedValue*): F[Unit] =
+  @nowarn def writeMarker(level: Level, message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     write(level, message, values: _*)
 
   /** could be overridden in the implementations, write message about some exception */

@@ -1,7 +1,7 @@
 package tofu.syntax
 
-import cats.{Applicative, Traverse, TraverseFilter}
 import cats.syntax.functor._
+import cats.{Applicative, Traverse, TraverseFilter}
 
 object traverse {
   implicit final class TraverseOps[F[_], A](private val ta: F[A]) extends AnyVal {

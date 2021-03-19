@@ -1,9 +1,8 @@
 package tofu.data
-import org.scalatest.FlatSpec
 import cats.Id
-import org.scalatest.Matchers
 import cats.instances.int._
 import cats.instances.list._
+import org.scalatest.{FlatSpec, Matchers}
 
 class FluxSuite extends FlatSpec with Matchers {
   val flux: Flux.Stream[Id, Int] = Flux.Stream.range[Id, Int](1, 11)

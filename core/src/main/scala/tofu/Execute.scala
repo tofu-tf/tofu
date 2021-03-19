@@ -1,11 +1,10 @@
 package tofu
 
 import cats.effect.{Async, ContextShift}
-
-import tofu.syntax.monadic._
-import scala.concurrent.{ExecutionContext, Future}
-
 import simulacrum.typeclass
+import tofu.syntax.monadic._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 @typeclass
 trait Execute[F[_]] {

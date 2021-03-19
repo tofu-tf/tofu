@@ -1,7 +1,7 @@
 package tofu.syntax
 
-import cats.instances.list._
 import cats.instances.either._
+import cats.instances.list._
 import org.scalatest.flatspec.AnyFlatSpec
 import tofu.syntax.foption._
 

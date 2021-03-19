@@ -6,8 +6,6 @@ import monix.eval.Task
 import monix.execution.Scheduler
 import tofu.memo.Memoize
 import tofu.{Execute, RunContext, Timeout}
-import tofu.memo.Memoize
-import tofu.{Execute, RunContext, Timeout}
 
 import scala.concurrent.duration.{FiniteDuration, TimeUnit}
 import scala.concurrent.{ExecutionContext, Future}

@@ -4,8 +4,9 @@ package lift
 import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.{Applicative, Functor, Monad, ~>}
-import syntax.functionK._
 import tofu.syntax.monadic._
+
+import syntax.functionK._
 
 trait Lift[F[_], G[_]] {
   def lift[A](fa: F[A]): G[A]

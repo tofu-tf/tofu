@@ -1,10 +1,11 @@
 package tofu.data.derived
 
-import java.time.LocalDate
-
-import org.scalatest.FlatSpec
 import cats.syntax.option._
 import derevo.derive
+import org.scalatest.FlatSpec
+
+import java.time.LocalDate
+
 import MergeSuite.{Bar, Foo}
 
 class MergeSuite extends FlatSpec {

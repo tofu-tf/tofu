@@ -1,5 +1,5 @@
 package tofu.higherKind.derived
-import derevo.{Derevo, delegating, DerivationK2}
+import derevo.{Derevo, DerivationK2, delegating}
 import tofu.higherKind.{Embed, RepresentableK}
 
 @delegating("tofu.higherKind.derived.genRepresentableK")

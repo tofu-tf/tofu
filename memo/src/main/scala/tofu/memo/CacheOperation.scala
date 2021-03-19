@@ -1,10 +1,10 @@
 package tofu.memo
 
-import cats.{Monad, ~>}
 import cats.syntax.applicative._
 import cats.syntax.functor._
 import cats.syntax.option._
 import cats.tagless.FunctorK
+import cats.{Monad, ~>}
 
 sealed trait CacheOperation[F[_], A, B] {
   def tryGet(cval: CacheVal[A])(implicit F: Monad[F]): Option[B]

@@ -10,6 +10,7 @@ import monix.execution.compat.BuildFrom
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
+
 import internal.CollectionMapper
 
 trait EnvSpecializedFunctions[E] {

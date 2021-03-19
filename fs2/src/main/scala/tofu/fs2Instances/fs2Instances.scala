@@ -1,9 +1,9 @@
 package tofu
 package fs2Instances
-import cats.{FlatMap, Functor, ~>}
 import cats.tagless.FunctorK
-import tofu.higherKind.Embed
+import cats.{FlatMap, Functor, ~>}
 import fs2._
+import tofu.higherKind.Embed
 
 class FS2StreamInstance[A] extends Embed[Stream[*[_], A]] with FunctorK[Stream[*[_], A]] {
   def embed[F[_]: FlatMap](ft: F[Stream[F, A]]): Stream[F, A]      = fs2.Stream.force(ft)

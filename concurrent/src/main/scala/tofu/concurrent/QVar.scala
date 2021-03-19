@@ -1,7 +1,7 @@
 package tofu.concurrent
+import cats.Applicative
 import cats.effect.concurrent.MVar
 import cats.effect.{Concurrent, Sync}
-import cats.Applicative
 import tofu.Guarantee
 import tofu.concurrent.QVar.QVarByMVar
 import tofu.higherKind.{RepresentableK, derived}

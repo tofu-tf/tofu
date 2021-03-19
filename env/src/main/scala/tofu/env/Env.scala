@@ -2,10 +2,10 @@ package tofu.env
 
 import cats.data.ReaderT
 import cats.effect._
-import monix.eval.Task
-import monix.execution.{Cancelable, CancelableFuture, Scheduler}
 import cats.syntax.either._
+import monix.eval.Task
 import monix.execution.annotations.UnsafeBecauseImpure
+import monix.execution.{Cancelable, CancelableFuture, Scheduler}
 
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.duration.FiniteDuration

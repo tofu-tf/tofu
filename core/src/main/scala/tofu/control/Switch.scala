@@ -1,8 +1,8 @@
 package tofu.control
 
 import cats.Invariant
-import tofu.Void
 import simulacrum.typeclass
+import tofu.Void
 
 /** monoidal with respect to Either */
 @typeclass

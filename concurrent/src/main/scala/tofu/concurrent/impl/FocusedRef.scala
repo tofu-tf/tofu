@@ -2,8 +2,8 @@ package tofu.concurrent.impl
 import cats.Functor
 import cats.data.State
 import cats.effect.concurrent.Ref
-import tofu.optics.Contains
 import cats.syntax.functor._
+import tofu.optics.Contains
 
 /** Having A Contains B relation, make a ref that would change only marked part of state */
 final case class FocusedRef[F[_]: Functor, A, B](ref: Ref[F, A], focus: Contains[A, B]) extends Ref[F, B] {

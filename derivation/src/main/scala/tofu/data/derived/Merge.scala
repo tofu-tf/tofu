@@ -1,12 +1,12 @@
 package tofu.data
 package derived
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
-
 import cats.kernel.Semigroup
+import derevo.Derivation
 import magnolia.{CaseClass, Magnolia, SealedTrait}
 import simulacrum.typeclass
-import derevo.Derivation
+
+import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 
 @typeclass trait Merge[A] {
   def merge(a: A, b: A): A

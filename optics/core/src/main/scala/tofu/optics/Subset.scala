@@ -9,8 +9,6 @@ import cats.syntax.foldable._
 import cats.syntax.profunctor._
 import tofu.optics.classes.PChoice
 import tofu.optics.data.{Identity, Tagged}
-import tofu.optics.classes.PChoice
-import tofu.optics.data.Tagged
 
 import scala.reflect.ClassTag
 

@@ -1,8 +1,8 @@
 package tofu.data
 
+import cats.syntax.foldable._
 import cats.{Eval, Foldable, Monad, MonoidK}
 import tofu.internal.Newtype1Covariant
-import cats.syntax.foldable._
 
 object PArray extends Newtype1Covariant {
   private def fromArray[X, A](xs: Array[X]): Type[A] = xs.asInstanceOf[Type[A]]
