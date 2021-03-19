@@ -1,4 +1,5 @@
 package tofu.logging.derivation
+import tofu.compat.unused
 import tofu.logging.{LogTree, Loggable}
 import tofu.syntax.loggable._
 
@@ -17,7 +18,7 @@ object Disc extends App {
   )
 
   object Discriminated {
-    implicit def lg[T: Loggable]: Loggable[Discriminated[T]] = loggable.instance
+    implicit def lg[T](implicit @unused ev: Loggable[T]): Loggable[Discriminated[T]] = loggable.instance
 
     def wrap[A <: Product](implicit instance: Loggable[A]): Loggable[A] =
       Loggable[Discriminated[A]].contramap(a => Discriminated(a.productPrefix, a))
