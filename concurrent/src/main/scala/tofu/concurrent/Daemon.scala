@@ -120,7 +120,7 @@ object Daemon            extends DaemonInstances {
   def state[F[_]: Monad: Daemonic[*[_], E], E, S, A, B](init: S)(state: StateT[F, S, A]): F[Daemon[F, E, B]] =
     iterate(init)(state.runS)
 
-  def resource[F[_]: Monad: Daemonic[*[_], E], E, A](daemon: F[Daemon[F, E, A]]): Resource[F, Daemon[F, E, A]] =
+  def resource[F[_]: Monad, E, A](daemon: F[Daemon[F, E, A]]): Resource[F, Daemon[F, E, A]] =
     Resource.make(daemon)(_.cancel)
 
 }
