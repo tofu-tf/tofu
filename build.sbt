@@ -317,16 +317,17 @@ lazy val defaultScalacOptions = scalacOptions := {
 
 lazy val scalacWarningConfig = scalacOptions += {
   // ignore unused imports that cannot be removed due to cross-compilation
-  val suppressUnusedImports = Seq(
-    "scala/tofu/config/typesafe.scala"
+  val suppressUnusedImports = Seq[String](
+    // put here relative file paths whose unused imports should be ignored,
+    // e.g. "scala/tofu/config/typesafe.scala"
   ).map { src =>
     s"src=${scala.util.matching.Regex.quote(src)}&cat=unused-imports:iv"
-  }.mkString(",")
+  }
 
-  // print warning category for @nowarn("cat=...")
+  // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
   val verboseWarnings = "any:wv"
 
-  s"-Wconf:$suppressUnusedImports,$verboseWarnings"
+  s"-Wconf:${(suppressUnusedImports :+ verboseWarnings).mkString(",")}"
 }
 
 lazy val macros = Seq(
