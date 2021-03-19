@@ -10,6 +10,8 @@ import tofu.concurrent.Refs
 import tofu.syntax.monadic._
 import tofu.syntax.funk._
 import cats.effect.SyncIO
+
+import scala.annotation.nowarn
 import scala.collection.compat._
 
 object typesafe {
@@ -19,6 +21,7 @@ object typesafe {
   def fromValue(cfg: ConfigValue): ConfigItem[Id] =
     if (cfg == null) Null else fromUnwrapped(cfg.unwrapped())
 
+  @nowarn("cat=other-match-analysis")
   def fromUnwrapped(el: Any): ConfigItem[Id] =
     el match {
       case null                                   => Null
