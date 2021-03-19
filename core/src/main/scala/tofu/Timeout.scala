@@ -2,6 +2,7 @@ package tofu
 
 import cats.effect.{Concurrent, ContextShift, IO, Timer}
 import simulacrum.typeclass
+import tofu.compat.unused
 import tofu.syntax.feither._
 import tofu.internal.NonTofu
 
@@ -20,7 +21,7 @@ object Timeout extends LowPriorTimeoutImplicits {
 }
 
 trait LowPriorTimeoutImplicits { self: Timeout.type =>
-  implicit def concurrent[F[_]: NonTofu](implicit F: Concurrent[F], timer: Timer[F]): Timeout[F] =
+  implicit def concurrent[F[_]](implicit F: Concurrent[F], timer: Timer[F], @unused nt: NonTofu[F]): Timeout[F] =
     new Timeout[F] {
       override def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A] =
         F.race(timer.sleep(after), fa).getOrElseF(fallback)
