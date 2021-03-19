@@ -1,5 +1,4 @@
 package tofu.logging
-import java.io.{PrintWriter, StringWriter}
 
 import scala.{specialized => sp}
 
@@ -36,11 +35,8 @@ object LoggedValue {
 final class LoggedThrowable(cause: Throwable) extends Throwable(cause.getMessage, cause) with LoggedValue {
   override def toString: String = cause.toString
 
-  def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R = {
-    val strWriter = new StringWriter()
-    cause.printStackTrace(new PrintWriter(strWriter))
-    f.addString("stacktrace", strWriter.toString, input)
-  }
+  def logFields[I, V, @sp(Unit) R, @sp M](input: I)(implicit f: LogRenderer[I, V, R, M]): R =
+    Loggable.throwableLoggable.fields(cause, input)
 
   override def typeName: String  = cause.getClass.getTypeName
   override def shortName: String = "exception"

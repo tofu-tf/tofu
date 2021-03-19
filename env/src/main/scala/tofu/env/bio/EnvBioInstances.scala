@@ -8,7 +8,7 @@ import tofu.higherKind.bi.FunBK
 trait EnvBioInstances {}
 
 class EnvBioBifunctorInstance[R]
-    extends StackSafeBind[EnvBio[R, *, *]] with BiRun[EnvBio[R, *, *], BiTask, Nothing, R] {
+    extends StackSafeBind[EnvBio[R, *, *]] with BiRun[EnvBio[R, +*, +*], BiTask, Nothing, R] {
 
   override def disclose[E, A](k: FunBK[EnvBio[R, *, *], BiTask] => EnvBio[R, E, A]): EnvBio[R, E, A] =
     EnvBio.context.flatMap((ctx: R) => k(FunBK.apply(bio => bio.run(ctx))))

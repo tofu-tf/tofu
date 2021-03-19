@@ -23,6 +23,8 @@ import cats.{Foldable, Show}
 import tofu.compat._
 import tofu.compat.lazySeqInstances._
 import tofu.syntax.logRenderer._
+import java.io.StringWriter
+import java.io.PrintWriter
 
 class LoggableInstances {
   final implicit val stringValue: Loggable[String] = new SingleValueLoggable[String] {
@@ -93,6 +95,26 @@ class LoggableInstances {
         receiver: LogRenderer[I, V, R, M]
     ): R                                    =
       receiver.addBool(name, a, input)
+  }
+
+  final implicit val unitLoggable: Loggable[Unit] = new SingleValueLoggable[Unit] {
+    def logValue(a: Unit): LogParamValue = NullValue
+    override def putField[I, V, R, M](a: Unit, name: String, input: I)(implicit
+        receiver: LogRenderer[I, V, R, M]
+    ): R                                 = receiver.noop(input)
+  }
+
+  final implicit val throwableLoggable: Loggable[Throwable] = new Loggable[Throwable] {
+    override def fields[I, V, R, S](cause: Throwable, i: I)(implicit r: LogRenderer[I, V, R, S]): R = {
+      val strWriter = new StringWriter()
+      cause.printStackTrace(new PrintWriter(strWriter))
+      r.addString("stacktrace", strWriter.toString, i)
+    }
+
+    override def putValue[I, V, R, S](a: Throwable, v: V)(implicit r: LogRenderer[I, V, R, S]): S =
+      r.putString(a.toString(), v)
+
+    override def logShow(a: Throwable): String = a.toString
   }
 
   private[this] def fldLoggable[T[x]: Foldable, A](implicit A: Loggable[A]): Loggable[T[A]] =

@@ -8,6 +8,9 @@ import cats.{ContravariantMonoidal, MonoidK, ~>}
   */
 trait Point[F[_]] {
   def point[A]: F[A]
+
+  def pureK[U[_[_]]](implicit U: PureK[U]): U[F] = U.pureK(this)
+  def pure[U[_[_]]: PureK]: U[F]                 = pureK
 }
 
 object Point {

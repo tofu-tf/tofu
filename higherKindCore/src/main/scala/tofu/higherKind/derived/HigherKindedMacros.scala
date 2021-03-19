@@ -146,10 +146,9 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
     })
 
   /** Implement a possibly refined `algebra` with the provided `members`. */
-  def implementSimple(algebra: Type)(typeArgs: Type*)(members: Iterable[Tree]): Tree = {
+  def implementSimple(applied: Type)(members: Iterable[Tree]): Tree = {
     // If `members.isEmpty` we need an extra statement to ensure the generation of an anonymous class.
     val nonEmptyMembers = if (members.isEmpty) q"()" :: Nil else members
-    val applied         = appliedType(algebra, typeArgs.toList)
 
     applied match {
       case RefinedType(parents, scope) =>
@@ -163,14 +162,29 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
     }
   }
 
-  def factorizeApply[F[_], Alg[_[_]]](
+  type Place
+  val Place = symbolOf[Place]
+
+  def factorizeApply(
       builder: Tree,
       Alg: Type,
-      F: Type
+      F: Type,
   ): Tree = {
+    F match {
+      case TypeRef(t, s, ts) =>
+        c.info(c.enclosingPosition, (t, s, ts).toString(), false)
+      case _                 =>
+    }
+
+    val Af = Alg match {
+      case PolyType(_, TypeRef(t, s, as)) => typeRef(t, s, as.init :+ F)
+      case _                              => appliedType(Alg, List(F))
+    }
+
+    c.info(c.enclosingPosition, s"Af $Af", true)
+
     val members = overridableMembersOf(Alg)
     val types   = delegateAbstractTypes(Alg, members, Alg)
-    val Af      = appliedType(Alg, List(F))
 
     val prepared = c.freshName(TermName("builder"))
     val methods  = delegateMethods(Af, members, NoSymbol) { case method =>
@@ -191,7 +205,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
     q"""
     val $prepared = $builder.prepare[$Alg]
-    ${implementSimple(Af)(F)(types ++ methods)}"""
+    ${implementSimple(Af)(types ++ methods)}"""
   }
 
   def representableK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
@@ -211,19 +225,24 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       Alg: WeakTypeTag[Alg[Any]]
   ): Tree = factorizeApply(builder, Alg.tpe, F.tpe)
 
-  def factorizeThis[F[_], Alg[_[_]]](implicit
-      F: WeakTypeTag[F[Any]],
+  def factorizeThis[Alg[_[_]]](implicit
       Alg: WeakTypeTag[Alg[Any]]
-  ): Tree = factorizeApply(c.prefix.tree, Alg.tpe, F.tpe)
+  ): Tree = {
+
+    val that = c.typecheck(tq"${c.prefix.tree}.Result", mode = c.TYPEmode).tpe
+    factorizeApply(c.prefix.tree, Alg.tpe, that)
+  }
 
   def bifactorize[Builder, F[_, _], Alg[_[_, _]]](builder: Tree)(implicit
       F: WeakTypeTag[F[Any, Any]],
       Alg: WeakTypeTag[Alg[Any]]
   ): Tree = factorizeApply(builder, Alg.tpe, F.tpe)
 
-  def bifactorizeThis[F[_, _], Alg[_[_, _]]](implicit
-      F: WeakTypeTag[F[Any, Any]],
+  def bifactorizeThis[Alg[_[_, _]]](implicit
       Alg: WeakTypeTag[Alg[Any]]
-  ): Tree = factorizeApply(c.prefix.tree, Alg.tpe, F.tpe)
+  ): Tree = {
+    val that = c.typecheck(tq"${c.prefix.tree}.Result", mode = c.TYPEmode).tpe
+    factorizeApply(c.prefix.tree, Alg.tpe, that)
+  }
 
 }

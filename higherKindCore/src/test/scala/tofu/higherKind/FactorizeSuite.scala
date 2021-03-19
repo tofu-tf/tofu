@@ -11,7 +11,7 @@ import tofu.higherKind.derived.HigherKindedMacros
 class FactorizeSuite extends AnyFunSuite {
   import FactorizeSuite._
 
-  type MapF[A] = Map[String, (Class[_], String)]
+  type MapF[A] = MyMap
 
   def testFactorization(fooMap: Foo[MapF]) = {
     assert(
@@ -39,6 +39,7 @@ class FactorizeSuite extends AnyFunSuite {
 
   import FactorizeSuite.{Builder => `strange and fancy name`}
   import `strange and fancy name`.{conjure => `🤫`}
+
   test("derive factorization")(testFactorization(`🤫`[Foo, MapF]))
 
   type MapB[E, A] = Map[String, (Class[_], String)]
@@ -76,6 +77,8 @@ class FactorizeSuite extends AnyFunSuite {
 }
 
 object FactorizeSuite {
+  type MyMap = Map[String, (Class[_], String)]
+
   trait Foo[F[_]] {
     def person(name: String, age: Int): F[Unit]
     def building[A: Show](weight: Double)(elems: List[A]): F[List[Double]]
@@ -87,9 +90,11 @@ object FactorizeSuite {
   }
 
   object Builder {
+    type Result[A] = MyMap
+
     def prepare[Alg[_[_]]](implicit Alg: ClassTag[Alg[Any]]) = new Builder(Alg.runtimeClass)
 
-    def conjure[U[f[_]], F[_]]: U[F] = macro HigherKindedMacros.factorizeThis[F, U]
+    def conjure[U[f[_]], F[_]]: U[F] = macro HigherKindedMacros.factorizeThis[U]
   }
 
   class Builder(algCls: Class[_]) {
@@ -98,9 +103,11 @@ object FactorizeSuite {
   }
 
   object BiBuilder {
+    type Result[E, A] = MyMap
+
     def prepare[Alg[_[_, _]]](implicit Alg: ClassTag[Alg[Any]]) = new BiBuilder(Alg.runtimeClass)
 
-    def conjure[U[f[_, _]], F[_, _]]: U[F] = macro HigherKindedMacros.bifactorizeThis[F, U]
+    def conjure[U[f[_, _]], F[_, _]]: U[F] = macro HigherKindedMacros.bifactorizeThis[U]
   }
 
   class BiBuilder(algCls: Class[_]) {

@@ -2,21 +2,21 @@ package tofu.logging.bi
 import tofu.control.Bind
 import tofu.logging.Logging
 import tofu.logging.LoggedValue
-import tofu.higherKind.derived.HigherKindedMacros
 import scala.reflect.ClassTag
 import tofu.logging.Loggable
 import scala.collection.mutable.Buffer
-import tofu.syntax.bind._
+import tofu.syntax.bindInv._
 import tofu.logging.LogRenderer
+import tofu.higherKind.bi.BiMid
 
 /** logging middleware for binary tc parameterized traits */
 abstract class LoggingBiMid[E, A] {
   def apply[F[+_, +_]: Bind: Logging.Safe](fa: F[E, A]): F[E, A]
+
+  def toMid[F[+_, +_]: Bind: Logging.Safe]: BiMid[F, E, A] = fx => apply(fx)
 }
 
 object LoggingBiMid extends LoggingBiMidBuilder.Default {
-  def instance[U[_[_, _]]]: U[LoggingBiMid] = macro HigherKindedMacros.bifactorizeThis[LoggingBiMid, U]
-
   type Of[U[_[_, _]]] = U[LoggingBiMid]
 }
 

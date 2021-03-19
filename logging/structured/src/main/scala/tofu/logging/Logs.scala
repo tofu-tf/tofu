@@ -60,7 +60,8 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
 }
 
 object Logs extends LogsInstances0 {
-  type Universal[F[_]] = Logs[Id, F]
+  type Universal[F[_]]     = Logs[Id, F]
+  type Safe[I[_], F[_, _]] = Logs[I, F[Nothing, *]]
 
   def apply[I[_], F[_]](implicit logs: Logs[I, F]): Logs[I, F] = logs
 
