@@ -6,6 +6,7 @@ import tofu.syntax.feither._
 import tofu.syntax.funk
 import ExceptTInstances1._
 import cats.data.EitherT
+import tofu.compat.unused
 import tofu.control.Bind
 
 object Embedded extends ExceptTInstances {
@@ -26,7 +27,7 @@ object ExceptT {
 }
 
 trait ExceptTInstances extends ExceptTInstances1 {
-  implicit def exceptTVeryParallel[G[+_]: Parallel, E](implicit
+  implicit def exceptTVeryParallel[G[+_], E](implicit
       G: Parallel[G],
       E: Semigroup[E]
   ): Parallel.Aux[ExceptT[G, E, *], ExceptTPar[G.F, E, *]] =
@@ -110,8 +111,9 @@ trait ExceptTInstances1 {
 
     }
 
-  implicit def exceptTParallel[G[+_]: Parallel, E: Semigroup](implicit
-      G: Monad[G]
+  implicit def exceptTParallel[G[+_], E: Semigroup](implicit
+      G: Monad[G],
+      @unused P: Parallel[G]
   ): Parallel.Aux[ExceptT[G, E, *], ExceptTPar[G, E, *]] =
     new Parallel[ExceptT[G, E, *]] {
       type F[A] = ExceptTPar[G, E, A]
@@ -131,7 +133,8 @@ private[tofu] object ExceptTInstances1 {
   @inline final def fromPar[F[_], E, A](et: ExceptTPar[F, E, A])          = et.asInstanceOf[F[Either[E, A]]]
   @inline final def fromPartoExcept[F[+_], E, A](et: ExceptTPar[F, E, A]) = et.asInstanceOf[ExceptT[F, E, A]]
 
-  class ParApplicative[F[_]: Applicative, E: Semigroup] extends Applicative[ExceptTPar[F, E, *]] {
+  class ParApplicative[F[_]: Applicative, E](implicit @unused E: Semigroup[E])
+      extends Applicative[ExceptTPar[F, E, *]] {
     def pure[A](x: A): ExceptTPar[F, E, A] = toPar(x.asRightF[F, E])
 
     def ap[A, B](ff: ExceptTPar[F, E, A => B])(fa: ExceptTPar[F, E, A]): ExceptTPar[F, E, B] = map2(ff, fa)(_(_))
