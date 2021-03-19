@@ -20,6 +20,10 @@ import scala.reflect.ClassTag
 import tofu.higherKind.Pre
 import tofu.higherKind.Post
 import tofu.higherKind.Mid
+import tofu.logging.impl.UniversalLogs
+import tofu.Delay
+import tofu.WithContext
+import tofu.logging.impl.UniversalContextLogs
 
 /** A helper for creating instances of [[tofu.logging.Logging]], defining a way these instances will behave while doing logging.
   * Can create instances either on a by-name basic or a type tag basic.
@@ -44,7 +48,7 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
   /** Creates an instance of [[tofu.logging.Logging]] with a given arbitrary type tag,
     * using it as a class to create underlying [[org.slf4j.Logger]] with.
     */
-  def forService[Svc: ClassTag]: I[Logging[F]]
+  def forService[Svc](implicit Svc: ClassTag[Svc]): I[Logging[F]] = byName(Svc.runtimeClass.getName())
 
   /** Creates an instance of [[tofu.logging.Logging]] for a given arbitrary string name,
     * using it to create underlying [[org.slf4j.Logger]] with.
@@ -60,8 +64,9 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
 }
 
 object Logs extends LogsInstances0 {
-  type Universal[F[_]]     = Logs[Id, F]
-  type Safe[I[_], F[_, _]] = Logs[I, F[Nothing, *]]
+  type Universal[F[_]]        = Logs[Id, F]
+  type Safe[I[_], F[_, _]]    = Logs[I, F[Nothing, *]]
+  type SafeUniversal[F[_, _]] = Logs[Id, F[Nothing, *]]
 
   def apply[I[_], F[_]](implicit logs: Logs[I, F]): Logs[I, F] = logs
 
@@ -81,17 +86,19 @@ object Logs extends LogsInstances0 {
     * Has no notion of context.
     */
   def sync[I[_]: Sync, F[_]: Sync]: Logs[I, F] = new Logs[I, F] {
-    def forService[Svc: ClassTag]: I[Logging[F]] =
-      Sync[I].delay(new SyncLogging[F](loggerForService[Svc]))
-    def byName(name: String): I[Logging[F]]      = Sync[I].delay(new SyncLogging[F](LoggerFactory.getLogger(name)))
+    def byName(name: String): I[Logging[F]] = Sync[I].delay(new SyncLogging[F](LoggerFactory.getLogger(name)))
   }
+
+  def universal[F[_]: Delay]: Logs.Universal[F]                                                      = new UniversalLogs
+  def contextual[F[_]: FlatMap: Delay, C: Loggable](implicit FC: F WithContext C): Logs.Universal[F] =
+    new UniversalContextLogs[F, C]
 
   def withContext[I[_]: Sync, F[_]: Sync](implicit ctx: LoggableContext[F]): Logs[I, F] = {
     import ctx.loggable
     new Logs[I, F] {
-      def forService[Svc: ClassTag]: I[Logging[F]]     =
+      override def forService[Svc: ClassTag]: I[Logging[F]] =
         Sync[I].delay(new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, loggerForService[Svc]))
-      override def byName(name: String): I[Logging[F]] =
+      override def byName(name: String): I[Logging[F]]      =
         Sync[I].delay(new ContextSyncLoggingImpl[F, ctx.Ctx](ctx.context, LoggerFactory.getLogger(name)))
     }
   }
@@ -99,8 +106,7 @@ object Logs extends LogsInstances0 {
   /** Returns an instance of [[tofu.logging.Logs]] that will produce the same constant [[tofu.logging.Logging]] instances.
     */
   def const[I[_]: Applicative, F[_]](logging: Logging[F]): Logs[I, F] = new Logs[I, F] {
-    def forService[Svc: ClassTag]: I[Logging[F]] = logging.pure[I]
-    def byName(name: String): I[Logging[F]]      = logging.pure[I]
+    def byName(name: String): I[Logging[F]] = logging.pure[I]
   }
 
   /** Returns an instance of [[tofu.logging.Logs]] that will produce a no-op [[tofu.logging.Logging]] instances.
@@ -112,8 +118,7 @@ object Logs extends LogsInstances0 {
     * Resulting [[tofu.logging.Logging]] instance will call both implementations in order.
     */
   def combine[I[_]: Apply, F[_]: Apply](las: Logs[I, F], lbs: Logs[I, F]): Logs[I, F] = new Logs[I, F] {
-    def forService[Svc: ClassTag]: I[Logging[F]] = las.forService.map2(lbs.forService)(Logging.combine[F])
-    def byName(name: String): I[Logging[F]]      = las.byName(name).map2(lbs.byName(name))(Logging.combine[F])
+    def byName(name: String): I[Logging[F]] = las.byName(name).map2(lbs.byName(name))(Logging.combine[F])
   }
 
   implicit def logsMonoid[I[_]: Applicative, F[_]: Applicative]: Monoid[Logs[I, F]] = new Monoid[Logs[I, F]] {
@@ -192,8 +197,8 @@ trait Logs2FunctorK[Y[_]] extends FunctorK[Logs[Y, *[_]]] {
   implicit def I: Functor[Y]
 
   def mapK[F[_], G[_]](af: Logs[Y, F])(fk: F ~> G): Logs[Y, G] = new Logs[Y, G] {
-    def forService[Svc: ClassTag]: Y[Logging[G]] = af.forService[Svc].map(_.mapK(fk))
-    def byName(name: String): Y[Logging[G]]      = af.byName(name).map(_.mapK(fk))
+    override def forService[Svc: ClassTag]: Y[Logging[G]] = af.forService[Svc].map(_.mapK(fk))
+    def byName(name: String): Y[Logging[G]]               = af.byName(name).map(_.mapK(fk))
   }
 }
 
@@ -202,8 +207,9 @@ trait Logs2ApplyK[Y[_]] extends Logs2FunctorK[Y] with ApplyK[Logs[Y, *[_]]] {
 
   def zipWith2K[F[_], G[_], H[_]](af: Logs[Y, F], ag: Logs[Y, G])(f2: Function2K[F, G, H]): Logs[Y, H] =
     new Logs[Y, H] {
-      def forService[Svc: ClassTag]: Y[Logging[H]] = (af.forService[Svc], ag.forService[Svc]).mapN(_.zipWithK(_)(f2))
-      def byName(name: String): Y[Logging[H]]      = (af.byName(name), ag.byName(name)).mapN(_.zipWithK(_)(f2))
+      override def forService[Svc: ClassTag]: Y[Logging[H]] =
+        (af.forService[Svc], ag.forService[Svc]).mapN(_.zipWithK(_)(f2))
+      def byName(name: String): Y[Logging[H]]               = (af.byName(name), ag.byName(name)).mapN(_.zipWithK(_)(f2))
     }
 
   def productK[F[_], G[_]](af: Logs[Y, F], ag: Logs[Y, G]): Logs[Y, Tuple2K[F, G, *]] =
@@ -214,7 +220,6 @@ trait Logs2MonoidalK[Y[_]] extends Logs2ApplyK[Y] with MonoidalK[Logs[Y, *[_]]] 
   implicit def I: Applicative[Y]
 
   def pureK[F[_]](p: Point[F]): Logs[Y, F] = new Logs[Y, F] {
-    def forService[Svc: ClassTag]: Y[Logging[F]] = p.pureK[Logging].pure[Y]
-    def byName(name: String): Y[Logging[F]]      = p.pureK[Logging].pure[Y]
+    def byName(name: String): Y[Logging[F]] = p.pureK[Logging].pure[Y]
   }
 }

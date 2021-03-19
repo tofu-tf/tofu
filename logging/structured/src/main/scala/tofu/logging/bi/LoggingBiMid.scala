@@ -1,19 +1,17 @@
 package tofu.logging.bi
-import tofu.control.Bind
-import tofu.logging.Logging
-import tofu.logging.LoggedValue
-import scala.reflect.ClassTag
-import tofu.logging.Loggable
 import scala.collection.mutable.Buffer
-import tofu.syntax.bindInv._
-import tofu.logging.LogRenderer
+import scala.reflect.ClassTag
+
+import tofu.control.Bind
 import tofu.higherKind.bi.BiMid
+import tofu.logging.{LogRenderer, Loggable, LoggedValue, Logging}
+import tofu.syntax.bindInv._
 
 /** logging middleware for binary tc parameterized traits */
 abstract class LoggingBiMid[E, A] {
-  def apply[F[+_, +_]: Bind: Logging.Safe](fa: F[E, A]): F[E, A]
+  def around[F[+_, +_]: Bind: Logging.Safe](fa: F[E, A]): F[E, A]
 
-  def toMid[F[+_, +_]: Bind: Logging.Safe]: BiMid[F, E, A] = fx => apply(fx)
+  def toMid[F[+_, +_]: Bind: Logging.Safe]: BiMid[F, E, A] = fx => around(fx)
 }
 
 object LoggingBiMid extends LoggingBiMidBuilder.Default {
@@ -47,7 +45,7 @@ abstract class LoggingBiMidBuilder {
     def result: LoggingBiMid[Err, Res] = new LoggingBiMid[Err, Res] {
       private[this] val argSeq = args.toSeq
 
-      def apply[F[+_, +_]: Bind: Logging.Safe](fa: F[Err, Res]): F[Err, Res] =
+      def around[F[+_, +_]: Bind: Logging.Safe](fa: F[Err, Res]): F[Err, Res] =
         onEnter(cls, method, argSeq) *>
           fa.tapBoth(
             err => onLeave(cls, method, argSeq, err, ok = false),

@@ -170,18 +170,10 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       Alg: Type,
       F: Type,
   ): Tree = {
-    F match {
-      case TypeRef(t, s, ts) =>
-        c.info(c.enclosingPosition, (t, s, ts).toString(), false)
-      case _                 =>
-    }
-
     val Af = Alg match {
       case PolyType(_, TypeRef(t, s, as)) => typeRef(t, s, as.init :+ F)
       case _                              => appliedType(Alg, List(F))
     }
-
-    c.info(c.enclosingPosition, s"Af $Af", true)
 
     val members = overridableMembersOf(Alg)
     val types   = delegateAbstractTypes(Alg, members, Alg)

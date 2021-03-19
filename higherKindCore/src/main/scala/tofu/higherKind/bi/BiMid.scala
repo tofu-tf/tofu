@@ -1,7 +1,6 @@
 package tofu.higherKind.bi
 import cats.{Monoid, Semigroup}
 import tofu.higherKind.bi.BiMid.BiMidCompose
-import tofu.higherKind.bi.BiPoint
 
 trait BiMid[F[_, _], E, A] {
   def apply(fa: F[E, A]): F[E, A]

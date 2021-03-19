@@ -100,7 +100,10 @@ trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
   def asLogging: Logging[F] = this
 }
 
-object Logging extends LoggingMidMethods {
+object Logging {
+
+  def mid: LoggingMidFunctions.type = LoggingMidFunctions
+
   type ForService[F[_], Svc] <: Logging[F]
 
   type Safe[F[_, _]] = Logging[F[Nothing, *]]
