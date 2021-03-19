@@ -129,7 +129,7 @@ object LoggingErrMidBuilder {
         args: Seq[(String, LoggedValue)],
         err: E
     )(implicit F: LoggingBase[F]): F[Unit] =
-      F.warn("error during {}.{} {} error is {}", cls.getName(), method, new ArgsLoggable(args), err)
+      F.error("error during {}.{} {} error is {}", cls.getName(), method, new ArgsLoggable(args), err)
 
   }
 

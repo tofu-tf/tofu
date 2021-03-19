@@ -80,9 +80,10 @@ lazy val loggingStr = project
 lazy val loggingDer = project
   .in(file("logging/derivation"))
   .dependsOn(loggingStr)
+  .dependsOn(opticsMacro % "compile->test", derivation % "compile->test")
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(derevo, magnolia),
+    libraryDependencies ++= Seq(derevo, magnolia, slf4j),
     publishName := "logging-derivation"
   )
 
