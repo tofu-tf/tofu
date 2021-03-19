@@ -9,6 +9,6 @@ class UniversalEmbedLogs[I[_], F[_]: FlatMap](underlying: Logs[I, F])(implicit l
     extends Logs.Universal[F] {
   override def forService[Svc: ClassTag]: Logging[F] =
     Logging.loggingRepresentable.embed(lift.lift(underlying.forService[Svc]))
-  def byName(name: String): Id[Logging[F]]  =
+  def byName(name: String): Id[Logging[F]]           =
     Logging.loggingRepresentable.embed(lift.lift(underlying.byName(name)))
 }

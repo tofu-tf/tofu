@@ -8,6 +8,7 @@ import tofu.logging.zlogs.impl.{UIOZLogging, URIOZLoggingImpl}
 import tofu.logging.{Loggable, Logging}
 import zio.interop.catz._
 import zio.{Has, UIO, ULayer, ZIO, ZLayer}
+import scala.annotation.nowarn
 
 object ZLogs {
   val uio: ZLogs[Any] = new ZLogs[Any] {

@@ -183,13 +183,17 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       val methodName  = method.name.encodedName.toString
       val start: Tree = method.returnType match {
         case TypeRef(_, _, xs) => q"$prepared.start[..$xs]($methodName)"
+        case _                 =>
+          c.abort(c.enclosingPosition, s"can't unpack ${method.name}'s return type: ${method.returnType}")
       }
 
       val withParams =
         method.paramLists.iterator.flatten
           .filter(vd => !vd.mods.hasFlag(Flag.IMPLICIT))
-          .foldLeft(start) { case (b, ValDef(_, param, _, _)) =>
-            q"$b.arg(${param.encodedName.toString()}, $param)"
+          .foldLeft(start) {
+            case (b, ValDef(_, param, _, _)) =>
+              q"$b.arg(${param.encodedName.toString()}, $param)"
+            case (_, p)                      => c.abort(c.enclosingPosition, s"unexpected error during handling argument $p of $method")
           }
 
       method.copy(body = q"$withParams.result")

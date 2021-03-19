@@ -55,9 +55,8 @@ class BiMidMonoidK[F[_, _]] extends MonoidBK[BiMid[F, *, *]] {
 
 class BiMidAlgebraMonoid[F[_, _], U[f[_, _]]: MonoidalBK]
     extends BiMidAlgebraSemigroup[F, U] with Monoid[U[BiMid[F, *, *]]] {
-  def empty: U[BiMid[F, *, *]] = BiMid.point[F].pure[U]
+  def empty: U[BiMid[F, *, *]] = BiMid.point[F].pure
 }
-
 class BiMidAlgebraSemigroup[F[_, _], U[f[_, _]]](implicit U: SemigroupalBK[U]) extends Semigroup[U[BiMid[F, *, *]]] {
   def combine(x: U[BiMid[F, *, *]], y: U[BiMid[F, *, *]]): U[BiMid[F, *, *]] =
     U.map2b(x, y)(Fun2BK.apply((m1, m2) => fa => m1(m2(fa))))
