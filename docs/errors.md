@@ -5,27 +5,31 @@ title: Error management
 
 ## Producing errors
 
-#### The problem
-One big problem of MTL style is error handling.
+### Problem
+One of the major issues of the MTL style is an error handling.
 
-Minimal error-enabled suite in cats is called [`ApplicativeError`](https://typelevel.org/cats/api/cats/ApplicativeError.html) and its problem is that you'll have full Applicative instances along with error-related methods.
-, still you're not allowed to have several `FunctorRaise` or `ApplicativeError` instances since it will give you errors like that
-```scala mdoc
+The weakest [`Cats`](https://typelevel.org/cats/) typeclass, which enables operations with errors, is an 
+[`ApplicativeError`](https://typelevel.org/cats/api/cats/ApplicativeError.html).
+ It brings a full `Applicative` instance apart from error-related methods and 
+ this means, that we are not allowed to have a few `FunctorRaise` or `ApplicativeError` instances in the scope, since 
+ their underlying `Functor`/`Applicative` instances will come into conflict:
+```scala 
     import cats._
     case class ArithmeticError() extends Throwable
     case class ParseError() extends Throwable
 
     def divideBad[F[_]](x: String, y: String)(implicit 
-        F1: MonadError[F, ArithmeticError],
-        F2: MonadError[F, ParseError]): F[String] = 
-        // can not use Monad / Applicative / Functor syntax here
+        F1: ApplicativeError[F, ArithmeticError],
+        F2: ApplicativeError[F, ParseError]): F[String] = 
+        // using Functor / Applicative syntax here will cause an
+        // "ambiguous implicit values" error
         ???
 ```
 
-So you are forced for your error type to have be one per type constructor.
+So we are forced to choose a single unified error type.
 
-#### Possible solution
-Simplest solution here to create type class that isn't subtype of Functor 
+### Solution
+The simplest solution here is to create a typeclass, that is not a subtype of Functor:
 
 
 ```scala
@@ -33,16 +37,17 @@ trait Raise[F[_], E]{
   def raise[A](err: E): F[A]
 }
 ```
-, see also 
-cats-mtl 's [`FunctorRaise`](https://typelevel.org/cats-mtl/mtl-classes/functorraise.html)
+(see also 
+cats-mtl 's [`FunctorRaise`](https://typelevel.org/cats-mtl/mtl-classes/functorraise.html)).
 
 
-now you can write just
-```scala mdoc
-import tofu._
-import tofu.syntax.raise._
-import tofu.syntax.monadic._
+It would allow us to distinguish between different types of errors:
+```scala 
 import cats.effect.IO
+import tofu._
+import tofu.syntax.monadic._
+import tofu.syntax.raise._
+
 def divide[F[_]: Monad](x: String, y: String)(implicit 
     F1: Raise[F, ArithmeticError],
     F2: Raise[F, ParseError]
@@ -62,16 +67,18 @@ divide[IO]("1", "0").attempt.unsafeRunSync()
 
 ## Recovering from errors
 
-#### Problem
-`ApplicativeError` gives the following method for error handling 
+### Problem
+`ApplicativeError` provides the following method for error handling:
 
 ```scala
   def handleErrorWith[A](fa: F[A])(f: E => F[A]): F[A]
 ```
 
-Here if `f` does not fail `F[A]` should describe successfull computation. The types however does not catch this fact, since we have no type for `Unexeptional` partner. read more [here](https://typelevel.org/blog/2018/04/13/rethinking-monaderror.html)
+Here, if `f` does not fail, `F[A]` should describe a successful computation. The types, however, do not convey this fact, 
+since we have no type for `Unexeptional` partner. Read more [here](https://typelevel.org/blog/2018/04/13/rethinking-monaderror.html)
 
-Tofu  support several typeclasses targeting this problem, the simplest is 
+### Solution
+`Tofu` is shipped with a few typeclasses targeting the problem. The simplest one is
 
 ```scala
 trait RestoreTo[F[_], G[_]] {
@@ -79,9 +86,9 @@ trait RestoreTo[F[_], G[_]] {
 }
 ```
 
-which can be used to simple restoration from any failure condition
+which can be used to restore from any failure condition.
 
-Next is 
+Another one is
 ```scala
 trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
   def handleWith[A](fa: F[A])(f: E => G[A]): G[A]
@@ -94,12 +101,12 @@ trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
 }
 ```
 
-which can handle concrete error type like that
+which can handle concrete error type:
 
-```scala mdoc
+```scala 
+import cats._
 import cats.data.EitherT
 import cats.instances.vector._
-import cats._
 import cats.syntax.foldable._
 import cats.syntax.traverse._
 import tofu._
@@ -125,13 +132,13 @@ splitErrors[Vector, Calc, Eval, String, Int](
 ```
 
 
-HandleTo empowered with Raise is called `ErrorsTo`
+HandleTo, empowered with Raise, is called `ErrorsTo`:
 
 ```scala
 trait ErrorsTo[F[_], G[_], E] extends Raise[F, E] with HandleTo[F, G, E]
 ```
 
-There are also specialized versions of `RestoreTo`, `HandleTo` and `ErrorsTo` without `To`
+There are also specialized versions of `RestoreTo`, `HandleTo` and `ErrorsTo` without `To`:
 
 ```scala
 trait Restore[F[_]] extends RestoreTo[F, F] {

@@ -1,15 +1,15 @@
 package tofu.config
-import cats.syntax.option._
-import com.typesafe.config.ConfigFactory
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import derevo.derive
-import org.scalatest.{FlatSpec, Matchers}
-import tofu.config.ConfigError.{BadNumber, BadType, NotFound}
-import tofu.config.ConfigItem.ValueType
-
+import com.typesafe.config.ConfigFactory
+import cats.syntax.option._
 import ConfigSuite.{Foe, Skill}
 import Key.{Index, Prop}
+import tofu.config.ConfigItem.ValueType
+import tofu.config.ConfigError.{BadType, NotFound, BadNumber}
 
-class ConfigSuite extends FlatSpec with Matchers {
+class ConfigSuite extends AnyFlatSpec with Matchers {
   import ConfigSuite.{tryParse, fallenParse}
 
   "sync parsing" should "parse lists" in {

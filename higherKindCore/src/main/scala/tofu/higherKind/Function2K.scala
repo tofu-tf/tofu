@@ -1,7 +1,7 @@
 package tofu.higherKind
 import cats.data.Tuple2K
 import cats.{FlatMap, ~>}
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
 
 trait Function2K[F[_], G[_], H[_]] {
@@ -18,7 +18,13 @@ object Function2K {
 
   def apply[F[_], G[_], H[_]](maker: MakeFunctionK[F, G, H]): Function2K[F, G, H] = maker
 
+  def apply[F[_], G[_]] = new Applied[F, G]
+
   def untupled[F[_], G[_], H[_]](fk: Tuple2K[F, G, *] ~> H): Function2K[F, G, H] = apply((f, g) => fk(Tuple2K(f, g)))
+
+  class Applied[F[_], G[_]](private val __ : Boolean = true) extends AnyVal {
+    def apply[H[_]](maker: MakeFunctionK[F, G, H]): Function2K[F, G, H] = maker
+  }
 
   abstract class MakeFunctionK[F[_], G[_], H[_]] extends Function2K[F, G, H] {
 

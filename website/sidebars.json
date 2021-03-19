@@ -1,16 +1,18 @@
 {
   "docs": {
     "Getting Started": [
-      "start"
+      "start",
+      "installation"
     ],
-    "Module Documentation": [
+    "Documentation": [
       {
         "type": "subcategory",
         "label": "Core",
         "ids": [
-          "typeclasses",
           "errors",
-          "fork"
+          "fork",
+          "timeout",
+          "typeclasses"
         ]
       },
       {
@@ -23,16 +25,34 @@
       },
       {
         "type": "subcategory",
+        "label": "Concurrent",
+        "ids": [
+          "agent",
+          "concurrent-makeref"
+        ]
+      },
+      {
+        "type": "subcategory",
+        "label": "Optics",
+        "ids": [
+          "optics"
+        ]
+      },
+      {
+        "type": "subcategory",
         "label": "Utilities",
         "ids": [
+          "config",
+          "console",
+          "logging",
           "memo"
         ]
       },
       {
         "type": "subcategory",
-        "label": "Concurrent",
+        "label": "Streams",
         "ids": [
-          "concurrent-makeref"
+          "streams"
         ]
       }
     ]

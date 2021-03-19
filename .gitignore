@@ -2,12 +2,14 @@
 **/target
 tasks/
 .metals
-project/metals.sbt
+metals.sbt
 .bloop
 website/build
 website/translated_docs
 website/yarn.lock
 website/node_modules
 website/i18n/*
-!website/i18n/en.json
 website/static/api
+/null
+.vscode
+.bsp

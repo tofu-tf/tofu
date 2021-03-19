@@ -1,18 +1,19 @@
 package tofu.logging
 
+import java.time.LocalDate
+
 import cats.syntax.either._
 import cats.syntax.monoid._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import tofu.logging.LoggableSuite.TestInt
 import tofu.syntax.logRenderer._
 import tofu.syntax.loggable._
 
-import java.time.LocalDate
-
-class LoggableSuite extends FlatSpec with Matchers {
+class LoggableSuite extends AnyFlatSpec with Matchers {
 
   implicit val testIntLoggable: Loggable[TestInt] = new Loggable[Int] {
-    def fields[I, V, R, S](a: Int, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
+    def fields[I, V, R, S](a: Int, i: I)(implicit r: LogRenderer[I, V, R, S]): R   =
       i.sub("missing")(r.zero) |+|
         i.sub("sign")((v: V) =>
           r.coalesce(

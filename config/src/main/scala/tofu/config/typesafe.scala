@@ -1,16 +1,16 @@
 package tofu
 package config
 
-import cats.Id
-import cats.effect.SyncIO
-import com.typesafe.config.{Config, ConfigValue}
-import tofu.concurrent.Refs
-import tofu.syntax.functionK._
-import tofu.syntax.monadic._
-
-import scala.collection.JavaConverters._
-
 import ConfigItem._
+import cats.Id
+import com.typesafe.config.{Config, ConfigValue}
+
+import scala.jdk.CollectionConverters._
+import tofu.concurrent.Refs
+import tofu.syntax.monadic._
+import tofu.syntax.funk._
+import cats.effect.SyncIO
+import scala.collection.compat._
 
 object typesafe {
   def fromConfig(cfg: Config): ConfigItem[Id] =
@@ -32,7 +32,7 @@ object typesafe {
       case b: java.lang.Boolean                   => Bool(b)
       case s: String                              => Str(s)
       case l: java.util.List[_]                   => seq(l.asScala.toVector.map(fromUnwrapped))
-      case m: java.util.Map[String @unchecked, _] => dict(m.asScala.mapValues(fromUnwrapped).toMap)
+      case m: java.util.Map[String @unchecked, _] => dict(m.asScala.view.mapValues(fromUnwrapped).toMap)
     }
 
   def parseValue[F[_]: Refs: MonadThrow: ParallelReader, A: Configurable](cfg: ConfigValue): F[A] =

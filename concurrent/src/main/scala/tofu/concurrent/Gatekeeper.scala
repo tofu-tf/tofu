@@ -10,27 +10,23 @@ import tofu.syntax.monadic._
 /** Semaphore-like structure */
 trait Gatekeeper[F[_], A] {
 
-  /**
-    * Returns the number of permits currently available.
+  /** Returns the number of permits currently available.
     * May be out of date the instant after it is retrieved.
     */
   def available: F[A]
 
-  /**
-    * Obtains a snapshot of the currently taken.
+  /** Obtains a snapshot of the currently taken.
     *
     * Like [[available]] when permits are available but returns the number of permits
     * callers are waiting for when there are no permits available.
     */
   def taken: F[A]
 
-  /**
-    * Returns an effect that acquires a permit, runs the supplied effect, and then releases the permit.
+  /** Returns an effect that acquires a permit, runs the supplied effect, and then releases the permit.
     */
   def withPermit[B](t: F[B]): F[B]
 
-  /**
-    * Returns an effect that acquires a permit, runs the supplied effect, and then releases the permit.
+  /** Returns an effect that acquires a permit, runs the supplied effect, and then releases the permit.
     */
   def withPermitN[B](take: A)(t: F[B]): F[B]
 }
@@ -61,9 +57,9 @@ object Gatekeeper {
     }
 
   final case class StoplightBySemaphore[F[_]: BracketThrow](semaphore: Semaphore[F]) extends Gatekeeper[F, Long] {
-    override def available: F[Long]           = semaphore.available
-    override def taken: F[Long]               = semaphore.count
-    override def withPermit[B](t: F[B]): F[B] = semaphore.withPermit(t)
+    override def available: F[Long]                        = semaphore.available
+    override def taken: F[Long]                            = semaphore.count
+    override def withPermit[B](t: F[B]): F[B]              = semaphore.withPermit(t)
     override def withPermitN[B](take: Long)(t: F[B]): F[B] =
       semaphore.acquireN(take).bracket(_ => t)(_ => semaphore.releaseN(take))
   }

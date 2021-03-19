@@ -3,7 +3,7 @@ import cats.data.Chain
 import cats.tagless.ApplyK
 import cats.{Monoid, MonoidK, Semigroup}
 import tofu.higherKind.Mid.MidCompose
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monoidalK._
 
 trait Mid[F[_], A] {
@@ -19,7 +19,7 @@ object Mid extends MidInstances {
     override def point[A]: Mid[F, A] = x => x
   }
 
-  /** when unification falls */
+  /** when unification fails */
   def attach[U[f[_]]: ApplyK, F[_]](up: U[Mid[F, *]])(alg: U[F]): U[F] = up.attach(alg)
 
   implicit final class TofuMidAlgebraSyntax[F[_], U[f[_]]](private val self: U[Mid[F, *]]) extends AnyVal {
@@ -28,7 +28,7 @@ object Mid extends MidInstances {
   }
 
   private final case class MidCompose[F[_], A](elems: Chain[Mid[F, A]]) extends Mid[F, A] {
-    override def apply(fa: F[A]): F[A] = elems.foldLeft(fa)((x, m) => m(x))
+    override def apply(fa: F[A]): F[A]               = elems.foldLeft(fa)((x, m) => m(x))
     override def compose(that: Mid[F, A]): Mid[F, A] = that match {
       case MidCompose(es) => MidCompose(elems ++ es)
       case _              => MidCompose(elems :+ that)
@@ -41,13 +41,13 @@ object Mid extends MidInstances {
 
 }
 trait MidInstances extends MidInstances1 {
-  implicit def preMonoidK[F[_]]: MonoidK[Mid[F, *]] = new MidMonoidK[F]
+  implicit def midMonoidK[F[_]]: MonoidK[Mid[F, *]] = new MidMonoidK[F]
 
-  implicit def preAlgebraMonoid[F[_], U[f[_]]: MonoidalK]: Monoid[U[Mid[F, *]]] = new MidAlgebraMonoid[F, U]
+  implicit def midAlgebraMonoid[F[_], U[f[_]]: MonoidalK]: Monoid[U[Mid[F, *]]] = new MidAlgebraMonoid[F, U]
 }
 
 trait MidInstances1 {
-  implicit def preAlgebraMonoid[F[_], U[f[_]]: ApplyK]: Semigroup[U[Mid[F, *]]] = new MidAlgebraSemigroup[F, U]
+  implicit def midAlgebraSemigroup[F[_], U[f[_]]: ApplyK]: Semigroup[U[Mid[F, *]]] = new MidAlgebraSemigroup[F, U]
 }
 
 class MidMonoidK[F[_]] extends MonoidK[Mid[F, *]] {

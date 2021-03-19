@@ -24,4 +24,10 @@ object either {
       case Right(Right(c)) => Right(c)
     }
   }
+
+  implicit final class TofuEitherOps[L, R](private val e: Either[L, R]) extends AnyVal {
+    def wideLeft[L1 >: L]: Either[L1, R] = e
+
+    def wideRight[R1 >: R]: Either[L, R1] = e
+  }
 }

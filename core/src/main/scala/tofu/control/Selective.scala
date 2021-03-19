@@ -8,7 +8,9 @@ import cats.{Applicative, Monad, Monoid}
 import simulacrum._
 import tofu.control.impl._
 
-@typeclass
+import scala.annotation.nowarn
+
+@typeclass @nowarn("cat=unused-imports")
 trait Selective[F[_]] extends Applicative[F] {
   @noop def selectAp[A, B](fe: F[Either[A, B]])(ff: => F[A => B]): F[B]
 
@@ -43,9 +45,9 @@ trait SelectiveInstances extends SelectiveInstances2 {
   final implicit def selectiveOverMonad[F[_]: Monad]: SelectiveOverMonad[F] = new SelectiveOverMonad[F]
 }
 trait SelectiveInstances2 {
-  final implicit def selectiveOptionT[F[_]: Selective]: Selective[OptionT[F, *]]       = new SelectiveOptionT[F]
-  final implicit def selectiveEitherT[F[_]: Selective, E]: Selective[EitherT[F, E, *]] = new SelectiveEitherT[F, E]
-  final implicit def selectiveReaderT[F[_]: Selective, R]: Selective[ReaderT[F, R, *]] = new SelectiveReaderT[F, R]
+  final implicit def selectiveOptionT[F[_]: Selective]: Selective[OptionT[F, *]]               = new SelectiveOptionT[F]
+  final implicit def selectiveEitherT[F[_]: Selective, E]: Selective[EitherT[F, E, *]]         = new SelectiveEitherT[F, E]
+  final implicit def selectiveReaderT[F[_]: Selective, R]: Selective[ReaderT[F, R, *]]         = new SelectiveReaderT[F, R]
   final implicit def selectiveWriterT[F[_]: Selective, W: Monoid]: Selective[WriterT[F, W, *]] =
     new SelectiveWriterT[F, W]
 }

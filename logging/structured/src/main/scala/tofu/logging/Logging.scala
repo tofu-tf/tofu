@@ -1,22 +1,22 @@
 package tofu.logging
 
+import Logging._
 import cats.kernel.Monoid
 import cats.syntax.apply._
 import cats.{Applicative, Apply, FlatMap}
 import org.slf4j.{Logger, LoggerFactory, Marker}
-import tofu.higherKind
-import tofu.higherKind.{Embed, Function2K, RepresentableK}
+import tofu.compat.unused
+import tofu.{Init, higherKind}
+import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.logging.impl.EmbedLogging
 import tofu.syntax.monoidalK._
 
-import scala.annotation.nowarn
 import scala.reflect.ClassTag
-
-import Logging._
 
 /** typeclass equivalent of Logger
   * may contain specified some Logger instance
-  * or try to read it from the context */
+  * or try to read it from the context
+  */
 trait LoggingBase[F[_]] {
 
   /** push new message to log, level will be automatically checked
@@ -29,7 +29,7 @@ trait LoggingBase[F[_]] {
   def write(level: Level, message: String, values: LoggedValue*): F[Unit]
 
   /** could be overridden in the implementation, same as `write` but add additional info via marker */
-  @nowarn def writeMarker(level: Level, message: String, marker: Marker, values: LoggedValue*): F[Unit] =
+  def writeMarker(level: Level, message: String, @unused marker: Marker, values: LoggedValue*): F[Unit] =
     write(level, message, values: _*)
 
   /** could be overridden in the implementations, write message about some exception */
@@ -46,9 +46,9 @@ trait LoggingBase[F[_]] {
     writeMarker(Trace, message, marker, values: _*)
   def debugWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     writeMarker(Debug, message, marker, values: _*)
-  def infoWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
+  def infoWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit]  =
     writeMarker(Info, message, marker, values: _*)
-  def warnWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
+  def warnWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit]  =
     writeMarker(Warn, message, marker, values: _*)
   def errorWithMarker(message: String, marker: Marker, values: LoggedValue*): F[Unit] =
     writeMarker(Error, message, marker, values: _*)
@@ -57,16 +57,17 @@ trait LoggingBase[F[_]] {
     writeCause(Trace, message, cause, values: _*)
   def debugCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     writeCause(Debug, message, cause, values: _*)
-  def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+  def infoCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
     writeCause(Info, message, cause, values: _*)
-  def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+  def warnCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit]  =
     writeCause(Warn, message, cause, values: _*)
   def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     writeCause(Error, message, cause, values: _*)
 }
 
 /** Logging tagged with some arbitrary tag type
-  *  note there are not any guarantees that `Service` correspond to the type parameter of `Logs.forService` method*/
+  *  note there are not any guarantees that `Service` correspond to the type parameter of `Logs.forService` method
+  */
 trait ServiceLogging[F[_], Service] extends LoggingBase[F] {
   final def to[Svc2]: ServiceLogging[F, Svc2] = this.asInstanceOf[ServiceLogging[F, Svc2]]
 }
@@ -75,12 +76,21 @@ object ServiceLogging {
   private[this] val representableAny: RepresentableK[ServiceLogging[*[_], Any]] =
     higherKind.derived.genRepresentableK[ServiceLogging[*[_], Any]]
 
+  implicit def initByLogs[I[_], F[_], Svc: ClassTag](implicit logs: Logs[I, F]): Init[I, ServiceLogging[F, Svc]] =
+    new Init[I, ServiceLogging[F, Svc]] {
+      def init: I[ServiceLogging[F, Svc]] = logs.service[Svc]
+    }
+
   final implicit def serviceLoggingRepresentable[Svc]: RepresentableK[ServiceLogging[*[_], Svc]] =
     representableAny.asInstanceOf[RepresentableK[ServiceLogging[*[_], Svc]]]
+
+  final implicit def byUniversal[F[_], Svc: ClassTag](implicit unilogs: Logs.Universal[F]): ServiceLogging[F, Svc] =
+    unilogs.service[Svc]
 }
 
 /** typeclass for logging using specified logger or set of loggers
-  * see `Logs` for creating instances of that*/
+  * see `Logs` for creating instances of that
+  */
 trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
   final def widen[G[a] >: F[a]]: Logging[G] = this.asInstanceOf[Logging[G]]
 }
@@ -109,10 +119,6 @@ object Logging {
     def combine(x: Logging[F], y: Logging[F]): Logging[F] = Logging.combine(x, y)
   }
 
-  implicit val loggingEmbed: Embed[Logging] = new Embed[Logging] {
-    def embed[F[_]: FlatMap](ft: F[Logging[F]]): Logging[F] = new EmbedLogging[F](ft)
-  }
-
   /** log level enumeration */
   sealed trait Level
 
@@ -126,4 +132,8 @@ object Logging {
 private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
   private[this] val noop                                                  = Applicative[F].unit
   def write(level: Level, message: String, values: LoggedValue*): F[Unit] = noop
+}
+
+trait LoggingCompanion[U[_[_]]] {
+  type Log[F[_]] = ServiceLogging[F, U[Any]]
 }

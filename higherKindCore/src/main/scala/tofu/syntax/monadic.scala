@@ -1,6 +1,6 @@
 package tofu.syntax
 import cats.syntax._
-import cats.{Applicative, Apply, FlatMap, Functor, Semigroupal}
+import cats.{Applicative, Apply, FlatMap, Functor, Monad, Semigroupal}
 
 object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadSyntax {
   def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit
@@ -25,12 +25,12 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def <*>(fa: F[A])(implicit F: Apply[F]): F[B] = F.ap(fab)(fa)
   }
 
-  implicit final class TofuApplicativeOps(private val condition: Boolean) extends AnyVal {
+  implicit final class TofuApplicativeBooleanOps(private val condition: Boolean) extends AnyVal {
     def when_[F[_], A](fa: => F[A])(implicit F: Applicative[F]): F[Unit] =
       if (condition) F.void(fa) else F.unit
 
     def unless_[F[_], A](fa: => F[A])(implicit F: Applicative[F]): F[Unit] =
-      if (condition) F.void(fa) else F.unit
+      if (condition) F.unit else F.void(fa)
 
     def whenOpt[F[_], A](fa: => F[A])(implicit F: Applicative[F]): F[Option[A]] =
       if (condition) F.map(fa)(Some(_)) else F.pure(None)
@@ -44,11 +44,11 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
   }
 
   implicit final class TofuApplyOps[F[_], C](private val fa: F[C]) extends AnyVal {
-    def productR[B](fb: F[B])(implicit F: Apply[F]): F[B]                = F.productR(fa)(fb)
-    def productL[B](fb: F[B])(implicit F: Apply[F]): F[C]                = F.productL(fa)(fb)
-    def *>[B](fb: F[B])(implicit F: Apply[F]): F[B]                      = F.productR(fa)(fb)
-    def <*[B](fb: F[B])(implicit F: Apply[F]): F[C]                      = F.productL(fa)(fb)
-    def map2[B, Z](fb: F[B])(f: (C, B) => Z)(implicit F: Apply[F]): F[Z] = F.map2(fa, fb)(f)
+    def productR[B](fb: F[B])(implicit F: Apply[F]): F[B]                                          = F.productR(fa)(fb)
+    def productL[B](fb: F[B])(implicit F: Apply[F]): F[C]                                          = F.productL(fa)(fb)
+    def *>[B](fb: F[B])(implicit F: Apply[F]): F[B]                                                = F.productR(fa)(fb)
+    def <*[B](fb: F[B])(implicit F: Apply[F]): F[C]                                                = F.productL(fa)(fb)
+    def map2[B, Z](fb: F[B])(f: (C, B) => Z)(implicit F: Apply[F]): F[Z]                           = F.map2(fa, fb)(f)
     def map2Eval[B, Z](fb: cats.Eval[F[B]])(f: (C, B) => Z)(implicit F: Apply[F]): cats.Eval[F[Z]] =
       F.map2Eval(fa, fb)(f)
   }
@@ -59,6 +59,8 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def productLEval[B](fb: cats.Eval[F[B]])(implicit F: FlatMap[F]): F[C] = F.productLEval(fa)(fb)
     def mproduct[B](f: C => F[B])(implicit F: FlatMap[F]): F[(C, B)]       = F.mproduct(fa)(f)
     def flatTap[B](f: C => F[B])(implicit F: FlatMap[F]): F[C]             = F.flatTap(fa)(f)
+    def replicateM_(n: Int)(implicit F: Monad[F]): F[Unit]                 =
+      F.tailRecM(n)(k => if (k <= 0) F.pure(Right(())) else F.as(fa, Left(k - 1)))
   }
 
   implicit final def tofuSyntaxApplyOps[F[_], A](fa: F[A]): ApplyOps[F, A]               = new ApplyOps(fa)

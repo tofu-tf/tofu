@@ -13,8 +13,7 @@ object GenEquivalent {
   /** Generate an [[Equivalent]] between an object `S` and `Unit`. */
   def unit[S]: Equivalent[S, Unit] = macro GenEquivalentImpl.genEquiv_unit_impl[S]
 
-  /**
-    * Generate an [[Equivalent]] between a case class `S` and its fields.
+  /** Generate an [[Equivalent]] between a case class `S` and its fields.
     *
     * Case classes with 0 fields will correspond with `Unit`, 1 with the field type, 2 or more with
     * a tuple of all field types in the same order as the fields themselves.
@@ -41,17 +40,20 @@ sealed abstract class GenEquivalentImplBase {
       val table = c.universe.asInstanceOf[SymbolTable]
       val tree  = table.gen
       val obj   = tree.mkAttributedQualifier(sTpe.asInstanceOf[tree.global.Type]).asInstanceOf[Tree]
+
+      val name = s"${sTpe.typeSymbol.name.decodedName}.type<->"
       q"""
-        _root_.tofu.optics.Equivalent[${sTpe}, Unit](Function.const(()))(Function.const(${obj}))
+        _root_.tofu.optics.Equivalent[${sTpe}]($name)(Function.const(()))(Function.const(${obj}))
       """
     } else {
+      val name = s"${sTpe.typeSymbol.name.decodedName}<->"
       caseAccessorsOf[S] match {
         case Nil =>
           val sTpeSym = sTpe.typeSymbol.companion
           q"""
-            _root_.tofu.optics.Equivalent[${sTpe}, Unit](Function.const(()))(Function.const(${sTpeSym}()))
+            _root_.tofu.optics.Equivalent[${sTpe}]($name)(Function.const(()))(Function.const(${sTpeSym}()))
           """
-        case _ => fail(s"$sTpe needs to be a case class with no accessor or an object.")
+        case _   => fail(s"$sTpe needs to be a case class with no accessor or an object.")
       }
     }
   }
@@ -65,23 +67,18 @@ class GenEquivalentImpl(override val c: blackbox.Context) extends GenEquivalentI
 
     val fieldMethod = caseAccessorsOf[S] match {
       case m :: Nil => m
-      case Nil =>
+      case Nil      =>
         fail(s"Cannot find a case class accessor for $sTpe, $sTpe needs to be a case class with a single accessor.")
-      case _ =>
+      case _        =>
         fail(s"Found several case class accessor for $sTpe, $sTpe needs to be a case class with a single accessor.")
     }
 
     val sTpeSym = sTpe.typeSymbol.companion
+    val name    = s"${sTpeSym.name.decodedName}<->"
 
     c.Expr[Equivalent[S, A]](q"""
       import _root_.tofu.optics.Equivalent
-      new Equivalent[$sTpe, $aTpe]{ self =>
-        override def extract(s: $sTpe): $aTpe =
-          s.$fieldMethod
-
-        override def upcast(a: $aTpe): $sTpe =
-         $sTpeSym(a)
-      }
+      Equivalent[$sTpe]($name)((s: $sTpe) => s.$fieldMethod)((a: $aTpe) => $sTpeSym(a))
     """)
   }
 
@@ -118,18 +115,18 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
       .getOrElse(fail(s"Unable to discern primary constructor for $sTpe."))
       .paramLists
 
+    val name = s"${sTpeSym.name.decodedName}<->"
+
     paramLists match {
       case Nil | Nil :: Nil =>
         genEquiv_unit_tree[S]
 
       case (param :: Nil) :: Nil =>
         val (pName, pType) = nameAndType(sTpe, param)
-        q"""
-          new _root_.tofu.optics.Equivalent[$sTpe, $pType] {
-            override def extract(s: $sTpe): $pType = s.$pName
 
-            override def upcast(a: $pType): $sTpe = ${sTpeSym.companion}(_)
-          }
+        q"""
+          import _root_.tofu.optics.Equivalent
+          Equivalent[$sTpe]($name)((s: $sTpe) => s.$pName)((a: $pType) => ${sTpeSym.companion}(a))
         """
 
       case params :: Nil =>
@@ -142,12 +139,14 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
           readTuple ::= q"a.${TermName("_" + (i + 1))}"
           types ::= pType
         }
-        q"""
-          new _root_.tofu.optics.Equivalent[$sTpe, (..$types)] {
-            override def extract(s: $sTpe): (..$types) = (..$readField)
 
-            override def upcast(a: (..$types)): $sTpe = ${sTpeSym.companion}(..$readTuple)
-          }
+        q"""
+          import _root_.tofu.optics.Equivalent
+          Equivalent[$sTpe]($name)(
+            (s: $sTpe) => (..$readField)
+            )(
+            (a: (..$types)) => ${sTpeSym.companion}(..$readTuple)
+          )          
         """
 
       case _ :: _ :: _ =>

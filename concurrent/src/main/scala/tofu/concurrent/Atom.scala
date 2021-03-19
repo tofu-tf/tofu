@@ -1,27 +1,27 @@
 package tofu.concurrent
+import cats.{Applicative, Functor}
 import cats.effect.Sync
 import cats.effect.concurrent.Ref
-import cats.{Applicative, Functor}
 import tofu.Guarantee
 import tofu.concurrent.Atom.AtomByRef
 import tofu.higherKind.{RepresentableK, derived}
 import tofu.optics.Contains
-import tofu.syntax.bracket._
 import tofu.syntax.monadic._
+import tofu.syntax.bracket._
+import cats.data.StateT
+import tofu.data.calc.CalcM
 
 /** a middleground between cats.concurrent.Ref and zio.Ref */
-trait Atom[F[_], A] {
+trait Atom[+F[_], A] {
 
-  /**
-    * Obtains the current value.
+  /** Obtains the current value.
     *
     * Since `Ref` is always guaranteed to have a value, the returned action
     * completes immediately after being bound.
     */
   def get: F[A]
 
-  /**
-    * Sets the current value to `a`.
+  /** Sets the current value to `a`.Agent
     *
     * The returned action completes after the reference has been successfully set.
     *
@@ -30,13 +30,11 @@ trait Atom[F[_], A] {
     */
   def set(a: A): F[Unit]
 
-  /**
-    * Replaces the current value with `a`, returning the previous value.
+  /** Replaces the current value with `a`, returning the previous value.
     */
   def getAndSet(a: A): F[A]
 
-  /**
-    * Modifies the current value using the supplied update function. If another modification
+  /** Modifies the current value using the supplied update function. If another modification
     * occurs between the time the current value is read and subsequently updated, the modification
     * is retried using the new value. Hence, `f` may be invoked multiple times.
     *
@@ -45,8 +43,7 @@ trait Atom[F[_], A] {
     */
   def update(f: A => A): F[Unit]
 
-  /**
-    * Like `tryModify` but does not complete until the update has been successfully made.
+  /** Like `tryModify` but does not complete until the update has been successfully made.
     */
   def modify[B](f: A => (A, B)): F[B]
 }
@@ -70,10 +67,10 @@ object Atom {
   }
 
   final case class QAtom[F[_]: Applicative: Guarantee, A](qvar: QVar[F, A]) extends Atom[F, A] {
-    def get: F[A]                  = qvar.read
-    def set(a: A): F[Unit]         = getAndSet(a).void
-    def getAndSet(a: A): F[A]      = qvar.take.guaranteeAlways(qvar.put(a))
-    def update(f: A => A): F[Unit] = qvar.take.bracketIncomplete(a => qvar.put(f(a)))(qvar.put)
+    def get: F[A]                       = qvar.read
+    def set(a: A): F[Unit]              = getAndSet(a).void
+    def getAndSet(a: A): F[A]           = qvar.take.guaranteeAlways(qvar.put(a))
+    def update(f: A => A): F[Unit]      = qvar.take.bracketIncomplete(a => qvar.put(f(a)))(qvar.put)
     def modify[B](f: A => (A, B)): F[B] = qvar.take.bracketIncomplete { a =>
       val (next, res) = f(a)
       qvar.put(next) as res
@@ -81,15 +78,37 @@ object Atom {
   }
 
   private[Atom] case class FocusedAtom[F[_]: Functor, A, B](v: Atom[F, A], focus: Contains[A, B]) extends Atom[F, B] {
-    def get: F[B]                  = v.get.map(focus.get)
-    def set(b: B): F[Unit]         = v.update(focus.set(_, b))
-    def getAndSet(b: B): F[B]      = v.modify(a => (focus.set(a, b), focus.get(a)))
-    def update(f: B => B): F[Unit] = v.update(focus.update(_, f))
+    def get: F[B]                       = v.get.map(focus.get)
+    def set(b: B): F[Unit]              = v.update(focus.set(_, b))
+    def getAndSet(b: B): F[B]           = v.modify(a => (focus.set(a, b), focus.get(a)))
+    def update(f: B => B): F[Unit]      = v.update(focus.update(_, f))
     def modify[C](f: B => (B, C)): F[C] = v.modify { a =>
       val (b, c) = f(focus.get(a))
       (focus.set(a, b), c)
     }
   }
+
+  def stateTAtom[F[_]: Applicative, A]: Atom[StateT[F, A, *], A] = StateTAtom()
+
+  private case class StateTAtom[F[_]: Applicative, A]() extends Atom[StateT[F, A, *], A] {
+    override def get: StateT[F, A, A]                       = StateT.get
+    override def set(a: A): StateT[F, A, Unit]              = StateT.set(a)
+    override def getAndSet(a: A): StateT[F, A, A]           = StateT(a1 => (a, a1).pure[F])
+    override def update(f: A => A): StateT[F, A, Unit]      = StateT.modify(f)
+    override def modify[B](f: A => (A, B)): StateT[F, A, B] = StateT(a => f(a).pure[F])
+  }
+
+  def calcMAtom[F[+_, +_], R, S, E]: Atom[CalcM[F, R, S, S, E, *], S] =
+    calcMAtomAny.asInstanceOf[Atom[CalcM[F, R, S, S, E, *], S]]
+
+  private class CalcMAtom[F[+_, +_], R, S, E]() extends Atom[CalcM[F, R, S, S, E, *], S] {
+    def get: CalcM[F, R, S, S, E, S]                       = CalcM.get
+    def set(a: S): CalcM[F, R, S, S, E, Unit]              = CalcM.set(a).void
+    def getAndSet(a: S): CalcM[F, R, S, S, E, S]           = CalcM.get[S] << CalcM.set(a)
+    def update(f: S => S): CalcM[F, R, S, S, E, Unit]      = CalcM.update(f).void
+    def modify[B](f: S => (S, B)): CalcM[F, R, S, S, E, B] = CalcM.state(f)
+  }
+  private[this] object calcMAtomAny             extends CalcMAtom[Any, Any, Any, Any]
 }
 
 trait MakeAtom[I[_], F[_]] {

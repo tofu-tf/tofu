@@ -1,13 +1,13 @@
 package tofu
 package logging
 
+import java.io.StringWriter
+
 import cats.instances.unit._
 import cats.kernel.Monoid
-import tethys.writers.tokens.TokenWriter
 import tofu.logging.LogRenderer.LogRendererUnit
-
-import java.io.StringWriter
-import scala.annotation.nowarn
+import tethys.writers.tokens.TokenWriter
+import tofu.compat.unused
 
 class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilder[String] {
   type Top    = TokenWriter
@@ -16,7 +16,7 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
   type Output = Unit
 
   /** override to add predefined fields */
-  @nowarn def predefined(tokenWriter: TokenWriter): Unit = {}
+  def predefined(@unused tokenWriter: TokenWriter): Unit = {}
 
   def writeValue(value: LogParamValue, writer: TokenWriter): Unit = value match {
     case StrValue(v)     => writer.writeString(v)
@@ -88,18 +88,18 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
       input.writeFieldName(name)
       input.writeBoolean(value)
     }
-    override def putString(value: String, input: TokenWriter): Boolean      = { input.writeString(value); true }
-    override def putInt(value: Long, input: TokenWriter): Boolean           = { input.writeNumber(value); true }
-    override def putFloat(value: Double, input: TokenWriter): Boolean       = { input.writeNumber(value); true }
-    override def putBigInt(value: BigInt, input: TokenWriter): Boolean      = { input.writeNumber(value); true }
+    override def putString(value: String, input: TokenWriter): Boolean = { input.writeString(value); true }
+    override def putInt(value: Long, input: TokenWriter): Boolean = { input.writeNumber(value); true }
+    override def putFloat(value: Double, input: TokenWriter): Boolean = { input.writeNumber(value); true }
+    override def putBigInt(value: BigInt, input: TokenWriter): Boolean = { input.writeNumber(value); true }
     override def putDecimal(value: BigDecimal, input: TokenWriter): Boolean = { input.writeNumber(value); true }
-    override def putBool(value: Boolean, input: TokenWriter): Boolean       = { input.writeBoolean(value); true }
+    override def putBool(value: Boolean, input: TokenWriter): Boolean = { input.writeBoolean(value); true }
   }
 
   def monoid: Monoid[Unit] = implicitly
 
   def make(f: TokenWriter => Unit): String = {
-    val sw = new StringWriter()
+    val sw     = new StringWriter()
     sw.append(prefix)
     val writer = tethys.jackson.jacksonTokenWriterProducer.forWriter(sw)
     writer.writeObjectStart()

@@ -1,8 +1,8 @@
 package tofu
 
 import cats.{Applicative, Functor, Monoid}
-import tofu.internal.DataEffectComp
 import tofu.optics.Folded
+import tofu.internal.DataEffectComp
 import tofu.optics.classes.Transform
 
 /** simply function A => F[Unit] in a typeclass form */
@@ -18,8 +18,8 @@ trait PushInstances extends PushInstances1 {
 }
 
 trait PushInstances1 {
-  final implicit def pushFolded[F[_], A, B](
-      implicit push: Push[F, B],
+  final implicit def pushFolded[F[_], A, B](implicit
+      push: Push[F, B],
       fold: Folded[A, B],
       F: Applicative[F]
   ): Push[F, A] = {
@@ -32,15 +32,15 @@ trait PushInstances1 {
   }
 }
 
-/** simply F[A] in a typeclass form*/
+/** simply F[A] in a typeclass form */
 trait Pull[F[_], A] {
   def pull: F[A]
 }
 
 object Pull extends PullInstances with DataEffectComp[Pull]
 trait PullInstances {
-  final implicit def pullTransformed[F[_], A, B](
-      implicit p: Pull[F, A],
+  final implicit def pullTransformed[F[_], A, B](implicit
+      p: Pull[F, A],
       F: Functor[F],
       transform: Transform[A, B]
   ): Pull[F, B] =

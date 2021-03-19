@@ -8,7 +8,10 @@ import simulacrum.typeclass
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 
-@typeclass trait Merge[A] {
+import scala.annotation.nowarn
+
+@typeclass @nowarn("cat=unused-imports")
+trait Merge[A] {
   def merge(a: A, b: A): A
 }
 

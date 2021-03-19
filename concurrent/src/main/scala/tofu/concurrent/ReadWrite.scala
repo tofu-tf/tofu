@@ -9,8 +9,7 @@ import tofu.syntax.monadic._
 
 import scala.collection.immutable.Queue
 
-/**
-  * A purely functional ReadWriteLock.
+/** A purely functional ReadWriteLock.
   *
   * It declare that only a single writer at a time can modify the data,
   * and predefined count of readers can concurrently read the data.
@@ -20,8 +19,7 @@ import scala.collection.immutable.Queue
   */
 trait ReadWrite[F[_], A] {
 
-  /**
-    * Acquires a single reader if there is no writers in queue
+  /** Acquires a single reader if there is no writers in queue
     * and if the max number of readers is not reached.
     *
     * Otherwise, it will be semantically blocked until operation become available.
@@ -32,8 +30,7 @@ trait ReadWrite[F[_], A] {
     */
   def read: F[(A, F[Unit])]
 
-  /**
-    * Acquires a single writer if there is no writers in queue and no one is reading.
+  /** Acquires a single writer if there is no writers in queue and no one is reading.
     *
     * Otherwise, it will be semantically blocked until operation become available.
     *
@@ -43,22 +40,19 @@ trait ReadWrite[F[_], A] {
     */
   def write: F[(A, A => F[Unit])]
 
-  /**
-    * Like `read`, but does not require explicit release.
+  /** Like `read`, but does not require explicit release.
     *
     * @return value snapshot
     */
   def get: F[A]
 
-  /**
-    * Like `tryRead`, but does not require explicit release
+  /** Like `tryRead`, but does not require explicit release
     *
     * @return value snapshot wrapped in `Some` or `None` if reading is unavailable.
     */
   def tryGet: F[Option[A]]
 
-  /**
-    * Acquires a single reader if there is no writers in queue
+  /** Acquires a single reader if there is no writers in queue
     * and if the max number of readers is not reached.
     *
     * If not, None will be returned as a result.
@@ -67,8 +61,7 @@ trait ReadWrite[F[_], A] {
     */
   def tryRead: F[Option[(A, F[Unit])]]
 
-  /**
-    * Acquires a single writer if there is no writers in queue and no one is reading.
+  /** Acquires a single writer if there is no writers in queue and no one is reading.
     *
     * Or else, `None` will be returned as a result.
     *
@@ -76,8 +69,7 @@ trait ReadWrite[F[_], A] {
     */
   def tryWrite: F[Option[(A, A => F[Unit])]]
 
-  /**
-    * Sets the current value to `a`.
+  /** Sets the current value to `a`.
     *
     * In scenarios where write operation is unavailable it may semantically blocks until operation successfully made.
     *
@@ -85,8 +77,7 @@ trait ReadWrite[F[_], A] {
     */
   def set(a: A): F[Unit] = update(_ => a)
 
-  /**
-    * Sets the current value to `a`.
+  /** Sets the current value to `a`.
     *
     * In scenarios where write operation is unavailable it may semantically blocks until operation successfully made.
     *
@@ -94,8 +85,7 @@ trait ReadWrite[F[_], A] {
     */
   def trySet(a: A): F[Boolean] = tryUpdate(_ => a)
 
-  /**
-    * Modifies the current value using the supplied update function.
+  /** Modifies the current value using the supplied update function.
     *
     * In scenarios where write operation is unavailable it may semantically blocks until operation successfully made.
     *
@@ -103,20 +93,17 @@ trait ReadWrite[F[_], A] {
     */
   def update(f: A => A): F[Unit]
 
-  /**
-    * Attempts to modify the current value with supplied function, returning `false` if writing is unavailable.
+  /** Attempts to modify the current value with supplied function, returning `false` if writing is unavailable.
     *
     * @return whether or not the update succeeded
     */
   def tryUpdate(f: A => A): F[Boolean]
 
-  /**
-    * Like `tryModify` but does not complete until the update has been successfully made.
+  /** Like `tryModify` but does not complete until the update has been successfully made.
     */
   def modify[B](f: A => (A, B)): F[B]
 
-  /**
-    * Like `tryUpdate` but allows the update function to return an output value of
+  /** Like `tryUpdate` but allows the update function to return an output value of
     * type `B`. The returned action completes with `None` if the value is not updated
     * successfully and `Some(b)` otherwise.
     */
@@ -160,12 +147,12 @@ object ReadWrite {
         state.modify {
           case s @ State(q, r, false, _, _, a) if r < maxReaders && q.headOption.forall(!_.isWriter) =>
             s.copy(currentReaders = r + 1) -> d.complete(a -> releaseRead)
-          case s @ State(q, _, _, _, _, _) => s.copy(q = q :+ Reader(d)) -> F.unit
+          case s @ State(q, _, _, _, _, _)                                                           => s.copy(q = q :+ Reader(d)) -> F.unit
         }.flatten *> d.get
       } {
         case (d, ExitCase.Canceled | ExitCase.Error(_)) =>
           state.update(s => s.copy(trashedReaders = s.trashedReaders + d))
-        case _ => F.unit
+        case _                                          => F.unit
       }
 
     override def write: F[(A, A => F[Unit])] =
@@ -173,12 +160,12 @@ object ReadWrite {
         state.modify {
           case s @ State(q, 0, false, _, _, a) if q.isEmpty =>
             s.copy(writeLocked = true) -> d.complete(a -> releaseWrite)
-          case s @ State(q, _, _, _, _, _) => s.copy(q = q :+ Writer(d)) -> F.unit
+          case s @ State(q, _, _, _, _, _)                  => s.copy(q = q :+ Writer(d)) -> F.unit
         }.flatten *> d.get
       } {
         case (d, ExitCase.Canceled | ExitCase.Error(_)) =>
           state.update(s => s.copy(trashedWriters = s.trashedWriters + d))
-        case _ => F.unit
+        case _                                          => F.unit
       }
 
     private def dropPrecedingTrashed(state: State[F, A]): State[F, A] =
@@ -187,7 +174,7 @@ object ReadWrite {
           dropPrecedingTrashed(state.copy(q = tl, trashedReaders = state.trashedReaders - d))
         case Writer(d) +: tl if state.trashedWriters(d) =>
           dropPrecedingTrashed(state.copy(q = tl, trashedWriters = state.trashedWriters - d))
-        case _ => state
+        case _                                          => state
       }
 
     private def extractReadersBatch(state: State[F, A], quantity: Int): (State[F, A], List[Reader[F, A]], Int) = {
@@ -200,7 +187,7 @@ object ReadWrite {
         if (remain <= 0) (state, batch, size)
         else
           dropPrecedingTrashed(state) match {
-            case s if s.q.isEmpty || s.q.head.isWriter => (state, batch, size)
+            case s if s.q.isEmpty || s.q.head.isWriter           => (state, batch, size)
             case s @ State((r @ Reader(_)) +: tl, _, _, _, _, _) =>
               impl(s.copy(q = tl), r :: batch, remain - 1, size + 1)
           }
@@ -215,17 +202,17 @@ object ReadWrite {
           case state @ State(Reader(d) +: tl, _, _, _, _, a) => state.copy(q = tl)                 -> d.complete(a -> releaseRead)
           case state @ State(Writer(d) +: tl, 1, _, _, _, a) =>
             state.copy(q = tl, currentReaders = 0, writeLocked = true) -> d.complete(a -> releaseWrite)
-          case state @ State(Writer(_) +: _, r, _, _, _, _) => state.copy(currentReaders = r - 1) -> F.unit
+          case state @ State(Writer(_) +: _, r, _, _, _, _)  => state.copy(currentReaders = r - 1) -> F.unit
         }
       }.flatten
 
     private def releaseWrite(newA: A): F[Unit] =
       state.modify {
         dropPrecedingTrashed(_) match {
-          case state @ State(q, _, _, _, _, _) if q.isEmpty => state.copy(a = newA, writeLocked = false) -> F.unit
+          case state @ State(q, _, _, _, _, _) if q.isEmpty  => state.copy(a = newA, writeLocked = false) -> F.unit
           case state @ State(Writer(d) +: tl, _, _, _, _, _) =>
             state.copy(q = tl, a = newA) -> d.complete(newA -> releaseWrite)
-          case s =>
+          case s                                             =>
             val (cleanState, readersBatch, batchSize) = extractReadersBatch(s, maxReaders)
             val readers                               = readersBatch.map(_.d.complete(newA -> releaseRead))
             cleanState.copy(a = newA, writeLocked = false, currentReaders = batchSize) -> readers.foldRight(F.unit)(
@@ -246,7 +233,7 @@ object ReadWrite {
       state.modify {
         case s @ State(q, r, false, _, _, a) if r < maxReaders && q.headOption.forall(!_.isWriter) =>
           s.copy(currentReaders = r + 1) -> (a -> releaseRead).some
-        case s => s -> none
+        case s                                                                                     => s -> none
       }
 
     override def tryWrite: F[Option[(A, A => F[Unit])]] =
@@ -260,10 +247,9 @@ object ReadWrite {
     override def tryUpdate(f: A => A): F[Boolean] = tryModify(a => (f(a), ())).map(_.isDefined)
 
     override def modify[B](f: A => (A, B)): F[B] =
-      write.flatMap {
-        case (a, putAndRelease) =>
-          val (u, b) = f(a)
-          putAndRelease(u).as(b)
+      write.flatMap { case (a, putAndRelease) =>
+        val (u, b) = f(a)
+        putAndRelease(u).as(b)
       }
 
     override def tryModify[B](f: A => (A, B)): F[Option[B]] =
@@ -271,7 +257,7 @@ object ReadWrite {
         case Some((a, putAndRelease)) =>
           val (u, b) = f(a)
           putAndRelease(u).as(b.some)
-        case _ => F.pure(none)
+        case _                        => F.pure(none)
       }
 
   }
@@ -279,8 +265,7 @@ object ReadWrite {
   private def assertNonNegative[F[_]](n: Int)(implicit F: ApplicativeError[F, Throwable]): F[Unit] =
     if (n < 0) F.raiseError(new IllegalArgumentException(s"n must be non-negative, was: $n")) else F.unit
 
-  /**
-    * Creates a `ReadWrite` initialized to the supplied value.
+  /** Creates a `ReadWrite` initialized to the supplied value.
     *
     * {{{
     *   import cats.effect.IO
@@ -291,7 +276,6 @@ object ReadWrite {
     *     ten <- rw.get
     *   } yield ten
     * }}}
-    *
     */
   def of[F[_]: Concurrent, A](initial: A, maxReaders: Int = Int.MaxValue): F[ReadWrite[F, A]] =
     assertNonNegative[F](maxReaders) *>
@@ -299,8 +283,7 @@ object ReadWrite {
         new ConcurrentReadWrite[F, A](_, maxReaders)
       }
 
-  /**
-    *  Builds a `ReadWrite` value for data types that are [[cats.effect.Sync]]
+  /**  Builds a `ReadWrite` value for data types that are [[cats.effect.Sync]]
     *  Like [[of]] but initializes state using another effect constructor
     */
   def in[F[_]: Sync, G[_]: Concurrent, A](initial: A, maxReaders: Int = Int.MaxValue): F[ReadWrite[G, A]] =

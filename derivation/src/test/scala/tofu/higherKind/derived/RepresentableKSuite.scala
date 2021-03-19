@@ -1,32 +1,32 @@
 package tofu.higherKind.derived
 
+import RepresentableKSuite.{Foo}
 import cats.data.{OptionT, Tuple2K}
 import cats.instances.either._
 import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.functor._
-import cats.syntax.option._
 import cats.syntax.traverse._
+import cats.syntax.option._
 import cats.tagless.syntax.functorK._
 import cats.tagless.syntax.semigroupalK._
 import cats.{Id, ~>}
 import derevo.derive
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import tofu.data.Embedded
 import tofu.syntax.embed._
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 
 import scala.util.Try
 
-import RepresentableKSuite.Foo
-
-class RepresentableKSuite extends FlatSpec with Matchers {
+class RepresentableKSuite extends AnyFlatSpec with Matchers {
   val checkingFoo: Foo[Either[String, *]] = new Foo[Either[String, *]] {
     override def foo(x: Int, s: String): Either[String, Double] =
       Try(s.toDouble).toEither.left.map(_ => s"could not parse $s as double").map(_ * x)
-    override def bar(a: List[Int]): Either[String, Unit] =
+    override def bar(a: List[Int]): Either[String, Unit]        =
       a.headOption.toRight("must contain at least one element").void
-    def baz(a: List[String]): OptionT[Either[String, *], Unit] =
+    def baz(a: List[String]): OptionT[Either[String, *], Unit]  =
       OptionT(a.headOption.traverse(_.asLeft[Unit]))
   }
 
@@ -56,7 +56,7 @@ class RepresentableKSuite extends FlatSpec with Matchers {
     mappedFoo.baz(Nil) should ===(OptionT[MapR, Unit](Embedded(("", List(None)))))
   }
 
-  "representableK" should "generate nice productK" in {
+  it should "generate nice productK" in {
     val zippedFoo: Foo[Tuple2K[Either[String, *], Id, *]] = checkingFoo.productK(defaultFoo)
 
     def tuple[A](e: Either[String, A], a: A) = Tuple2K[Either[String, *], Id, A](e, a)
@@ -72,7 +72,7 @@ class RepresentableKSuite extends FlatSpec with Matchers {
 
   }
 
-  "representableK" should "generate nice embed" in {
+  it should "generate nice embed" in {
     val rightFoo = checkingFoo.asRight[String].embed
     val leftFoo  = "failed".asLeft[Foo[Either[String, *]]].embed
 
@@ -99,5 +99,7 @@ object RepresentableKSuite {
     def bar(a: List[Int]): F[Unit]
 
     def baz(a: List[String]): OptionT[F, Unit]
+
+    def widen[G[x] >: F[x]]: Foo[G] = this.asInstanceOf[Foo[G]]
   }
 }

@@ -2,17 +2,49 @@ package tofu.optics
 
 import cats._
 import cats.data.NonEmptyList
-import tofu.optics.data.Constant
+import tofu.optics.data._
+import cats.syntax.semigroup._
+import cats.instances.option._
 
 /** aka NonEmptyFold
   * S has some occurences of A
   * and can collect then
   */
-trait PReduced[-S, +T, +A, -B] extends PFolded[S, T, A, B] {
+trait PReduced[-S, +T, +A, -B] extends PFolded[S, T, A, B] with PBase[PReduced, S, T, A, B] { self =>
   def reduceMap[X: Semigroup](s: S)(f: A => X): X
 
-  def foldMap[X: Monoid](s: S)(f: A => X): X = reduceMap(s)(f)
-  def getAll1(s: S): NonEmptyList[A]         = reduceMap(s)(NonEmptyList.one[A])
+  override def foldMap[X: Monoid](s: S)(f: A => X): X = reduceMap(s)(f)
+  def getAll1(s: S): NonEmptyList[A]                  = reduceMap(s)(NonEmptyList.one[A])
+
+  def +++[S1 <: S, A1 >: A](other: PReduced[S1, Any, A1, Nothing]): PReduced[S1, Nothing, A1, Any] =
+    new PReduced[S1, Nothing, A1, Any] {
+      override def reduceMap[X: Semigroup](s: S1)(f: A1 => X): X =
+        self.reduceMap(s)(f) |+| other.reduceMap(s)(f)
+    }
+
+  def :++[S1 <: S, A1 >: A](other: PFolded[S1, Any, A1, Nothing]): PReduced[S1, Nothing, A1, Any] =
+    other match {
+      case nonEmpty: PReduced[S1, Any, A1, Nothing] => +++(nonEmpty)
+      case _                                        =>
+        new PReduced[S1, Nothing, A1, Any] {
+          override def reduceMap[X: Semigroup](s: S1)(f: A1 => X): X = {
+            val res = self.reduceMap(s)(f)
+            other.foldMap[Option[X]](s)(a => Some(f(a))).fold(res)(res |+| _)
+          }
+        }
+    }
+
+  def ++:[S1 <: S, A1 >: A](other: PFolded[S1, Any, A1, Nothing]): PReduced[S1, Nothing, A1, Any] =
+    other match {
+      case nonEmpty: PReduced[S1, Any, A1, Nothing] => nonEmpty +++ self
+      case _                                        =>
+        new PReduced[S1, Nothing, A1, Any] {
+          override def reduceMap[X: Semigroup](s: S1)(f: A1 => X): X = {
+            val res = self.reduceMap(s)(f)
+            other.foldMap[Option[X]](s)(a => Some(f(a))).fold(res)(_ |+| res)
+          }
+        }
+    }
 }
 
 object Reduced extends MonoOpticCompanion(PReduced) {
@@ -30,7 +62,7 @@ object Reduced extends MonoOpticCompanion(PReduced) {
 
 object PReduced extends OpticCompanion[PReduced] {
   def compose[S, T, A, B, U, V](f: PReduced[A, B, U, V], g: PReduced[S, T, A, B]): PReduced[S, T, U, V] =
-    new PReduced[S, T, U, V] {
+    new PComposed[PReduced, S, T, A, B, U, V](g, f) with PReduced[S, T, U, V] {
       def reduceMap[X: Semigroup](s: S)(fux: U => X): X = g.reduceMap(s)(f.reduceMap(_)(fux))
     }
 
@@ -47,19 +79,23 @@ object PReduced extends OpticCompanion[PReduced] {
     }
   }
 
-  override def toGeneric[S, T, A, B](o: PReduced[S, T, A, B]): Optic[Context, S, T, A, B] =
+  override def toGeneric[S, T, A, B](o: PReduced[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
-        s => Constant.Impl(o.reduceMap(s)(a => p(a).value)(c.algebra))
+        s => o.reduceMap(s)(p)(c.algebra)
     }
   override def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): PReduced[S, T, A, B] =
     new PReduced[S, T, A, B] {
       def reduceMap[Y: Semigroup](s: S)(f: A => Y): Y =
         o.apply(new Context {
-            type X = Y
-            def algebra = Semigroup[Y]
-          })(a => Constant.Impl(f(a)))(s)
-          .value
+          type X = Y
+          def algebra = Semigroup[Y]
+        })(f)(s)
 
     }
+
+  override def delayed[S, T, A, B](o: () => PReduced[S, T, A, B]): PReduced[S, T, A, B] = new PReduced[S, T, A, B] {
+    lazy val opt                                    = o()
+    def reduceMap[X: Semigroup](s: S)(f: A => X): X = opt.reduceMap(s)(f)
+  }
 }

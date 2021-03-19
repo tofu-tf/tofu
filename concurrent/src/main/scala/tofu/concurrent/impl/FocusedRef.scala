@@ -12,9 +12,8 @@ final case class FocusedRef[F[_]: Functor, A, B](ref: Ref[F, A], focus: Contains
     focus.set(a, next) -> res
   }
 
-  def get: F[B]             = ref.get.map(focus.extract)
-  def set(b: B): F[Unit]    = ref.update(a => focus.set(a, b))
-  def getAndSet(b: B): F[B] = ref.modify(a => focus.set(a, b) -> focus.extract(a))
+  def get: F[B]          = ref.get.map(focus.extract)
+  def set(b: B): F[Unit] = ref.update(a => focus.set(a, b))
 
   def update(f: B => B): F[Unit]               = ref.update(focus.update(_, f))
   def modify[X](f: B => (B, X)): F[X]          = ref.modify(focusedMod(f))
@@ -24,7 +23,7 @@ final case class FocusedRef[F[_]: Functor, A, B](ref: Ref[F, A], focus: Contains
   def tryModify[X](f: B => (B, X)): F[Option[X]]          = ref.tryModify(focusedMod(f))
   def tryModifyState[X](state: State[B, X]): F[Option[X]] = ref.tryModifyState(focus.focusState(state))
 
-  def access: F[(B, B => F[Boolean])] = ref.access.map {
-    case (a, update) => (focus.extract(a), b => update(focus.set(a, b)))
+  def access: F[(B, B => F[Boolean])] = ref.access.map { case (a, update) =>
+    (focus.extract(a), b => update(focus.set(a, b)))
   }
 }

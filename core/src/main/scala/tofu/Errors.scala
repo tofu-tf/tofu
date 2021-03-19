@@ -2,41 +2,58 @@ package tofu
 
 import cats.data.{EitherT, OptionT, ReaderT}
 import cats.syntax.either._
-import cats.{Applicative, ApplicativeError, Functor, Id, Monad}
+import cats.{Applicative, ApplicativeError, FlatMap, Functor, Id, Monad}
 import tofu.errorInstances._
 import tofu.internal.{CachedMatcher, DataEffectComp}
 import tofu.lift.Lift
+import tofu.optics.PUpcast.GenericSubtypeImpl
 import tofu.optics.{Downcast, Subset, Upcast}
+import scala.annotation.implicitNotFound
+import com.github.ghik.silencer.silent
 
-import scala.reflect.ClassTag
-
-trait Raise[F[_], E] extends Raise.ContravariantRaise[F, E] {
+/** Allows to raise `E` inside type `F`.
+  */
+@implicitNotFound("""can't understand how to raise ${E} inside ${F} 
+provide an instance of Raise[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Upcast[..., ${E}]""")
+@silent("deprecated")
+trait Raise[F[_], E] extends ErrorBase with Raise.ContravariantRaise[F, E] {
   def raise[A](err: E): F[A]
 }
 
-object Raise extends RaiseInstances with DataEffectComp[Raise] with ErrorsInstanceChain[Raise] {
+object Raise extends DataEffectComp[Raise] {
 
-  trait ContravariantRaise[F[_], -E] {
+  @deprecated("Raise has automatic upcasting, use Raise[F, E]", since = "0.8.1")
+  trait ContravariantRaise[F[_], -E] extends ErrorBase {
     def raise[A](err: E): F[A]
+
+    def reRaise[A, E1 <: E](fa: F[Either[E1, A]])(implicit F: FlatMap[F], A: Applicative[F]): F[A] =
+      F.flatMap(fa)(_.fold(raise[A], A.pure))
   }
 
 }
 
-sealed class RaiseInstances {
-  final implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1] =
-    new FromPrism[F, E, E1, Raise, Upcast] with RaisePrism[F, E, E1]
-}
-
-trait RestoreTo[F[_], G[_]] extends Lift[G, F] {
+/** Allows to recover after some error in a ${F} transiting to a ${G} as a result.
+  * A `G` can either be the same as a `F` or some "subconstructor" having less errors semantically.
+  */
+@implicitNotFound("""can't understand how to restore from the type ${F} to the subtype ${G} 
+provide an instance of RestoreTo[${F}, ${G}], cats.ApplicativeError[${F}, ...]""")
+trait RestoreTo[F[_], G[_]] extends Lift[G, F] with ErrorBase {
   def restore[A](fa: F[A]): G[Option[A]]
 }
 
-object RestoreTo extends ErrorsToInstanceChain[λ[(f[_], g[_], e) => RestoreTo[f, g]]]
-
+/** Allows to recover after some error in a ${F}.
+  */
+@implicitNotFound("""can't understand how to restore in the type ${F}
+provide an instance of Restore[${F}], cats.ApplicativeError[${F}, ...]""")
 trait Restore[F[_]] extends RestoreTo[F, F] {
   def restoreWith[A](fa: F[A])(ra: => F[A]): F[A]
 }
 
+/** Allows to recover after an error of type ${E} in a ${F} transiting to a ${G} as a result.
+  * A `G` can either be the same as a `F` or some "subconstructor" having less errors semantically.
+  */
+@implicitNotFound("""can't understand how to recover from ${E} in the type ${F} to the subtype ${G} 
+provide an instance of HandleTo[${F}, ${G}, ${E}], cats.ApplicativeError[${F}, ${E}]""")
 trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
   def handleWith[A](fa: F[A])(f: E => G[A]): G[A]
 
@@ -47,8 +64,10 @@ trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
     handleWith(fa)(e => G.pure(f(e)))
 }
 
-object HandleTo extends ErrorsToInstanceChain[HandleTo]
-
+/** Allows to recover after an error of type ${E} in a ${F}.
+  */
+@implicitNotFound("""can't understand how to recover from ${E} in the type ${F}
+provide an instance of Handle[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Downcast[..., ${E}]""")
 trait Handle[F[_], E] extends HandleTo[F, F, E] with Restore[F] {
 
   def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A]
@@ -68,7 +87,7 @@ trait Handle[F[_], E] extends HandleTo[F, F, E] with Restore[F] {
     tryHandleWith(fa)(e => Some(f(e)))
 }
 
-object Handle extends HandleInstances with DataEffectComp[Handle] with ErrorsInstanceChain[Handle] {
+object Handle extends DataEffectComp[Handle] {
 
   trait ByRecover[F[_], E] extends Handle[F, E] {
     def recWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A]
@@ -84,40 +103,55 @@ object Handle extends HandleInstances with DataEffectComp[Handle] with ErrorsIns
   }
 }
 
-sealed class HandleInstances {
-  final implicit def handleDowncast[F[_], E, E1](implicit h: Handle[F, E], prism: Downcast[E, E1]): Handle[F, E1] =
-    new FromPrism[F, E, E1, Handle, Downcast] with HandlePrism[F, E, E1]
-}
-
+/** Allows to throw and handle errors of type ${E} in a ${F} transiting to a ${G} when recovering.
+  * A `G` can either be the same as `F` or some "subconstructor" having less errors semantically.
+  */
+@implicitNotFound("""can't understand how to deal with errors ${E} in the type ${F} with the subtype ${G}
+provide an instance of ErrorsTo[${F}, ${G}, ${E}], cats.ApplicativeError[${F}, ${E}] or Contains[..., ${E}]""")
 trait ErrorsTo[F[_], G[_], E] extends Raise[F, E] with HandleTo[F, G, E]
 
-object ErrorsTo extends ErrorsToInstanceChain[ErrorsTo]
-
-trait ErrorsToInstanceChain[TC[f[_], g[_], e] >: ErrorsTo[f, g, e]]
-    extends ErrorsInstanceChain[Lambda[(f[_], e) => TC[f, f, e]]] {
-  final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): TC[EitherT[F, E, *], F, E] =
-    new EitherTErrorsTo[F, E]
-
-  final implicit def optionTIntance[F[_]](implicit F: Monad[F]): TC[OptionT[F, *], F, Unit] = new OptionTErrorsTo[F]
-
-  final implicit def eitherIntance[E]: TC[Either[E, *], Id, E] =
-    new EitherErrorsTo[E]
-  final implicit val optionTIntance: TC[Option, Id, Unit] = OptionErrorsTo
+/** Allows to throw and handle errors of type ${E} in a ${F}.
+  */
+@implicitNotFound("""can't understand how to deal with errors ${E} in the type ${F}
+provide an instance of Errors[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Contains[..., ${E}]""")
+trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E] {
+  def adaptError[A](fa: F[A])(pf: PartialFunction[E, E]): F[A] =
+    recoverWith(fa)(pf.andThen(raise[A] _))
 }
 
-trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, E]
+object Errors extends DataEffectComp[Errors]
 
-object Errors extends ErrorInstances with DataEffectComp[Errors] with ErrorsInstanceChain[Errors]
-
-trait ErrorsInstanceChain[TC[f[_], e] >: Errors[f, e]] {
-  final implicit def errorByCatsError[F[_]: ApplicativeError[*[_], E], E, E1: ClassTag: * <:< E]: TC[F, E1] =
-    new HandleApErr[F, E, E1] with RaiseAppApErr[F, E, E1] with Errors[F, E1]
+/** Base trait for instance search
+  */
+trait ErrorBase
+object ErrorBase          extends ErrorsBaseInstances  {
+  final implicit def errorByCatsError[F[_], E](implicit F: ApplicativeError[F, E]): Errors[F, E] =
+    new HandleApErr[F, E] with RaiseAppApErr[F, E] with Errors[F, E]
 }
-
-trait ErrorInstances {
-  final implicit def errorPrismatic[F[_], E, E1](implicit e: Errors[F, E], prism: Subset[E, E1]): Errors[F, E1] =
+class ErrorsBaseInstances extends ErrorsBaseInstances1 {
+  final implicit def errorPrismatic[F[_], E, E1](implicit
+      e: Errors[F, E],
+      prism: Subset[E, E1]
+  ): Errors[F, E1] =
     new FromPrism[F, E, E1, Errors, Subset] with RaisePrism[F, E, E1] with HandlePrism[F, E, E1] with Errors[F, E1]
+}
 
+class ErrorsBaseInstances1 extends ErrorsBaseInstances2 {
+  final implicit def handleDowncast[F[_], E, E1](implicit h: Handle[F, E], prism: Downcast[E, E1]): Handle[F, E1] =
+    new FromPrism[F, E, E1, Handle, Downcast] with HandlePrism[F, E, E1]
+
+  final implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1] =
+    prism match {
+      case GenericSubtypeImpl =>
+        r.asInstanceOf[Raise[F, E1]]
+      case _                  =>
+        new Raise[F, E1] {
+          def raise[A](err: E1): F[A] = r.raise(prism.upcast(err))
+        }
+    }
+}
+
+class ErrorsBaseInstances2 {
   final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
     new Errors[ReaderT[F, R, *], E] {
       def raise[A](err: E): ReaderT[F, R, A] =
@@ -131,16 +165,13 @@ trait ErrorInstances {
 
       def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
     }
-}
 
-object HasContext {
-  def apply[F[_], C](implicit hc: HasContext[F, C]): HasContext[F, C] = hc
-}
+  final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, *], F, E] =
+    new EitherTErrorsTo[F, E]
 
-object HasLocal {
-  def apply[F[_], C](implicit hl: HasLocal[F, C]): HasLocal[F, C] = hl
-}
+  final implicit def optionTIntance[F[_]](implicit F: Monad[F]): ErrorsTo[OptionT[F, *], F, Unit] =
+    new OptionTErrorsTo[F]
 
-object HasContextRun {
-  def apply[F[_], G[_], C](implicit hcr: HasContextRun[F, G, C]): HasContextRun[F, G, C] = hcr
+  final implicit def eitherIntance[E]: ErrorsTo[Either[E, *], Id, E] = new EitherErrorsTo[E]
+  final implicit val optionTIntance: ErrorsTo[Option, Id, Unit]      = OptionErrorsTo
 }

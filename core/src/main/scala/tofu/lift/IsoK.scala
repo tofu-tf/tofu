@@ -1,7 +1,7 @@
 package tofu.lift
 
 import cats.~>
-import tofu.syntax.functionK._
+import tofu.syntax.funk._
 
 /** bidirectional transformation */
 trait IsoK[F[_], G[_]] { self =>
@@ -26,8 +26,16 @@ trait IsoK[F[_], G[_]] { self =>
 }
 
 object IsoK {
+  def apply[F[_], G[_]](implicit isoK: IsoK[F, G]): IsoK[F, G] = isoK
+
   def id[F[_]]: IsoK[F, F] = new IsoK[F, F] {
     def to[A](fa: F[A]): F[A]   = fa
     def from[A](ga: F[A]): F[A] = ga
   }
+
+  def byFunK[F[_], G[_]](fg: F ~> G)(gf: G ~> F): IsoK[F, G] =
+    new IsoK[F, G] {
+      def to[A](fa: F[A]): G[A]   = fg(fa)
+      def from[A](ga: G[A]): F[A] = gf(ga)
+    }
 }

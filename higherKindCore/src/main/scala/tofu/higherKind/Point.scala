@@ -1,12 +1,11 @@
 package tofu.higherKind
 import cats.{ContravariantMonoidal, MonoidK, ~>}
 
-/**
-  * equivalent of UnitK ~> F
+/** equivalent of UnitK ~> F
   * get F[A] for any given type A
   * useful for empty values or typeconstructors with phantom parameters
   * may look like a type class but is not
-  * */
+  */
 trait Point[F[_]] {
   def point[A]: F[A]
 }

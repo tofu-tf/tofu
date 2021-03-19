@@ -13,36 +13,37 @@ private[macros] class MacroImpl(val c: blackbox.Context) {
     import c.universe._
 
     /** Extractor for member select chains.
-      *e.g.: SelectChain.unapply(a.b.c) == Some("a",Seq(a.type -> "b", a.b.type -> "c")) */
+      * e.g.: SelectChain.unapply(a.b.c) == Some("a",Seq(a.type -> "b", a.b.type -> "c"))
+      */
     object SelectChain {
       def unapply(tree: Tree): Option[(Name, Seq[(Type, TermName)])] = tree match {
         case Select(tail @ Ident(termUseName), field: TermName) =>
           Some((termUseName, Seq(tail.tpe.widen -> field)))
-        case Select(tail, field: TermName) =>
+        case Select(tail, field: TermName)                      =>
           SelectChain
             .unapply(tail)
             .map(t => t.copy(_2 = t._2 :+ (tail.tpe.widen -> field)))
-        case _ => None
+        case _                                                  => None
       }
     }
 
     field match {
       // _.field
       case Expr(
-          Function(
-            List(ValDef(_, termDefName, _, EmptyTree)),
-            Select(Ident(termUseName), fieldNameName)
-          )
+            Function(
+              List(ValDef(_, termDefName, _, EmptyTree)),
+              Select(Ident(termUseName), fieldNameName)
+            )
           ) if termDefName.decodedName.toString == termUseName.decodedName.toString =>
         val fieldName = fieldNameName.decodedName.toString
         mkContains_impl[S, S, A, A](c.Expr[String](q"$fieldName"))
 
       // _.field1.field2...
       case Expr(
-          Function(
-            List(ValDef(_, termDefName, _, EmptyTree)),
-            SelectChain(termUseName, typesFields)
-          )
+            Function(
+              List(ValDef(_, termDefName, _, EmptyTree)),
+              SelectChain(termUseName, typesFields)
+            )
           ) if termDefName.decodedName.toString == termUseName.decodedName.toString =>
         c.Expr[Contains[S, A]](
           typesFields.map { case (t, f) => q"_root_.tofu.optics.macros.GenContains[$t](_.$f)" }
@@ -78,17 +79,12 @@ private[macros] class MacroImpl(val c: blackbox.Context) {
       .find(_.name.decodedName.toString == strFieldName)
       .getOrElse(c.abort(c.enclosingPosition, s"Cannot find constructor field named $fieldName in $sTpe"))
 
+    val name = s"_.$strFieldName"
     c.Expr[PContains[S, T, A, B]](q"""
       import _root_.tofu.optics.PContains
       import _root_.scala.language.higherKinds // prevent warning at call site
 
-      new PContains[$sTpe, $tTpe, $aTpe, $bTpe]{
-        override def extract(s: $sTpe): $aTpe =
-          s.$fieldMethod
-
-        override def set(s: $sTpe, a: $bTpe): $tTpe =
-          s.copy($field = a)
-      }
+      PContains[$sTpe, $bTpe][$aTpe, $tTpe]($name)((s : $sTpe) => s.$fieldMethod)((s: $sTpe, a: $bTpe) => s.copy($field = a))
     """)
   }
 }

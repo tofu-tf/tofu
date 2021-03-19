@@ -5,13 +5,12 @@ import cats.Foldable
 import cats.kernel.{Monoid, Semigroup}
 import cats.syntax.monoid._
 import tofu.data.PArray
+import syntax.logRenderer._
+import scala.collection.compat._
 
 import scala.{specialized => sp}
 
-import syntax.logRenderer._
-
-/**
-  * contextual log construction
+/** contextual log construction
   * could serve as weak form of JSON building
   * I and V could be the same type: prefix, mutable builder, etc
   * distinction is added to guide Loggable implementation
@@ -66,13 +65,13 @@ trait LogRenderer[I, V, @sp(Unit) R, @sp M] extends Semigroup[R] { self =>
   def putFoldable[F[_]: Foldable, A: Loggable](fa: F[A], v: V): M =
     foldable(fa, v)((v, a) => Loggable[A].putValue(a, v))
 
-  def coll[A](fa: TraversableOnce[A], v: V)(receive: (V, A) => M): M = {
+  def coll[A](fa: IterableOnce[A], v: V)(receive: (V, A) => M): M = {
     import PArray.ArrOps // for scala 2.11
     val arr = PArray.fromColl(fa)
     list(arr.length, v)((v, i) => receive(v, arr(i)))
   }
 
-  def putColl[A: Loggable](fa: TraversableOnce[A], v: V): M =
+  def putColl[A: Loggable](fa: IterableOnce[A], v: V): M =
     coll(fa, v)((v, a) => Loggable[A].putValue(a, v))
 
   def addString(name: String, value: String, input: I): R      = addField(name, StrValue(value), input)
@@ -106,13 +105,13 @@ trait LogBuilder[U] {
   /** `I` of contained renderer */
   type Top
 
-  /**  `V` of contained renderer */
+  /** `V` of contained renderer */
   type Value
 
-  /**  `M` of contained renderer */
+  /** `M` of contained renderer */
   type ValRes
 
-  /**  `R` of contained renderer */
+  /** `R` of contained renderer */
   @specialized(Unit) type Output
 
   implicit def receiver: LogRenderer[Top, Value, Output, ValRes]
@@ -147,14 +146,15 @@ object LogRenderer {
 
   /** simple imperative renderer, log everything with accumulated prefix */
   def prefixed(f: (String, Any) => Unit): Iso[String, Unit] = new IsoLogRendererUnit[String] {
-    def putValue(value: LogParamValue, input: String): Unit             = f(input, value.value)
-    def sub(name: String, input: String)(receive: String => Unit): Unit = receive(join(input, name))
+    def putValue(value: LogParamValue, input: String): Unit                  = f(input, value.value)
+    def sub(name: String, input: String)(receive: String => Unit): Unit      = receive(join(input, name))
     def list(size: Int, input: String)(receive: (String, Int) => Unit): Unit =
       for (i <- 0 until size) receive(join(input, i), i)
-    def dict(input: String)(receive: String => Unit): Unit = receive(input)
+    def dict(input: String)(receive: String => Unit): Unit                   = receive(input)
   }
 
-  /**  */
+  /**
+    */
   final case class IdxPrefix(init: String, group: String, name: String) {
     def sub(s: String) = IdxPrefix(init, join(group, name), s)
     def idx(i: Int)    = IdxPrefix(join(init, join(group, name)), "", i.toString)
@@ -162,10 +162,10 @@ object LogRenderer {
   }
 
   def idxPrefixed(f: (String, Any) => Unit): IsoLogRendererUnit[IdxPrefix] = new IsoLogRendererUnit[IdxPrefix] {
-    def putValue(value: LogParamValue, input: IdxPrefix): Unit                = f(input.loc, value.value)
-    def sub(name: String, input: IdxPrefix)(receive: IdxPrefix => Unit): Unit = receive(input.sub(name))
+    def putValue(value: LogParamValue, input: IdxPrefix): Unit                     = f(input.loc, value.value)
+    def sub(name: String, input: IdxPrefix)(receive: IdxPrefix => Unit): Unit      = receive(input.sub(name))
     def list(size: Int, input: IdxPrefix)(receive: (IdxPrefix, Int) => Unit): Unit =
       for (i <- 0 until size) receive(input.idx(i), i)
-    def dict(input: IdxPrefix)(receive: IdxPrefix => Unit): Unit = receive(input)
+    def dict(input: IdxPrefix)(receive: IdxPrefix => Unit): Unit                   = receive(input)
   }
 }

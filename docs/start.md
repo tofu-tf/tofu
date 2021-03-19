@@ -3,9 +3,8 @@ id: start
 title: Getting started
 ---
 
-### tofu
+## Tofu
+`Tofu` is a library for functional programming in `Scala`, which aims to provide 
+a comprehensive set of tools addressing real-world problems through the prism of the
+tagless-final approach and functional programming in general.
 
-Comprehensive set of functional programming goods
-
-Tofu is a library aimed to cover real-world problems targeting tagless-final approach
-and functional programming in general

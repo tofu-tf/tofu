@@ -19,17 +19,17 @@ class SelectiveOverMonad[F[_]](implicit val F: Monad[F]) extends Selective[F] wi
     case Some(a) => F.pure(a)
   }
 
-  override def whens[A](fb: F[Boolean])(fa: => F[A]): F[Option[A]] = F.flatMap(fb) {
+  override def whens[A](fb: F[Boolean])(fa: => F[A]): F[Option[A]]   = F.flatMap(fb) {
     if (_) F.map(fa)(Some(_)) else F.pure(None)
   }
   override def unlesss[A](fb: F[Boolean])(fa: => F[A]): F[Option[A]] = F.flatMap(fb) {
     if (_) F.pure(None) else F.map(fa)(Some(_))
   }
-  override def whens_[A](fb: F[Boolean])(fa: => F[A]): F[Unit] = F.flatMap(fb) {
-    if (_) F.unit else F.void(fa)
-  }
-  override def unlesss_[A](fb: F[Boolean])(fa: => F[A]): F[Unit] = F.flatMap(fb) {
+  override def whens_[A](fb: F[Boolean])(fa: => F[A]): F[Unit]       = F.flatMap(fb) {
     if (_) F.void(fa) else F.unit
+  }
+  override def unlesss_[A](fb: F[Boolean])(fa: => F[A]): F[Unit]     = F.flatMap(fb) {
+    if (_) F.unit else F.void(fa)
   }
 }
 

@@ -2,13 +2,15 @@ package tofu.syntax
 
 import cats.instances.list._
 import cats.instances.option._
+import cats.syntax.option.catsSyntaxOptionId
+import cats.syntax.option.none
 import cats.syntax.either._
-import cats.syntax.option.{catsSyntaxOptionId, none}
-import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import tofu.Raise
 import tofu.syntax.feither._
 
-class FEitherSuite extends WordSpec with MustMatchers {
+class FEitherSuite extends AnyWordSpec with Matchers {
 
   //--Helpers------------------------------------
 

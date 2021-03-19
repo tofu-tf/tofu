@@ -7,11 +7,12 @@ import tofu.concurrent.QVar.QVarByMVar
 import tofu.higherKind.{RepresentableK, derived}
 import tofu.syntax.monadic._
 
-/** a middleground between cats.concurrent.MVar and zio.Queue.bounded(1) */
-trait QVar[F[_], A] {
+import scala.annotation.nowarn
 
-  /**
-    * Returns `true` if the `MVar` is empty and can receive a `put`, or
+/** a middleground between cats.concurrent.MVar and zio.Queue.bounded(1) */
+trait QVar[+F[_], A] {
+
+  /** Returns `true` if the `MVar` is empty and can receive a `put`, or
     * `false` otherwise.
     *
     * Note that due to concurrent tasks, logic built in terms of `isEmpty`
@@ -19,8 +20,7 @@ trait QVar[F[_], A] {
     */
   def isEmpty: F[Boolean]
 
-  /**
-    * Fills the `MVar` if it is empty, or blocks (asynchronously)
+  /** Fills the `MVar` if it is empty, or blocks (asynchronously)
     * if the `MVar` is full, until the given value is next in
     * line to be consumed on [[take]].
     *
@@ -33,8 +33,7 @@ trait QVar[F[_], A] {
     */
   def put(a: A): F[Unit]
 
-  /**
-    * Empties the `MVar` if full, returning the contained value,
+  /** Empties the `MVar` if full, returning the contained value,
     * or blocks (asynchronously) until a value is available.
     *
     * This operation is atomic.
@@ -44,8 +43,7 @@ trait QVar[F[_], A] {
     */
   def take: F[A]
 
-  /**
-    * Tries reading the current value, or blocks (asynchronously)
+  /** Tries reading the current value, or blocks (asynchronously)
     * until there is a value available.
     *
     * This operation is atomic.
@@ -63,6 +61,7 @@ object QVar {
     def toAtom(implicit F: Applicative[F], FG: Guarantee[F]): Atom[F, A] = Atom.QAtom(self)
   }
 
+  @nowarn("cat=deprecation")
   final case class QVarByMVar[F[_], A](mvar: MVar[F, A]) extends QVar[F, A] {
     override def isEmpty: F[Boolean] = mvar.isEmpty
     override def put(a: A): F[Unit]  = mvar.put(a)

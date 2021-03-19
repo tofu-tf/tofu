@@ -1,0 +1,107 @@
+name: Scala CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CI: true
+
+jobs:
+  checkfmt:
+    runs-on: [ubuntu-latest]
+    steps:
+     - uses: actions/checkout@v2
+     
+     - name: Cache jabba
+       uses: actions/cache@v1
+       with:
+        path: ~/.jabba
+        key: ${{ runner.os }}-jabba-cache-${{ hashFiles('**/workflows/scala.yml') }}
+     
+     - name: Cache SBT ivy cache
+       uses: actions/cache@v1
+       with:
+        path: ~/.ivy2/cache
+        key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}  
+    
+     - name: Cache SBT
+       uses: actions/cache@v1
+       with:
+         path: ~/.sbt
+         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}  
+    
+     - uses: olafurpg/setup-scala@v5
+       with:
+         java-version: graalvm@20.0.0
+    
+     - name: Check format
+       run: sbt checkfmt
+  test:
+    runs-on: ${{matrix.os}}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        scala: [2.12.12, 2.13.3]
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Cache jabba
+      uses: actions/cache@v1
+      with:
+        path: ~/.jabba
+        key: ${{ runner.os }}-jabba-cache-${{ hashFiles('**/workflows/scala.yml') }}
+      
+    - name: Cache SBT ivy cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.ivy2/cache
+        key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
+    
+    - name: Cache SBT
+      uses: actions/cache@v1
+      with:
+        path: ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+    
+    - uses: olafurpg/setup-scala@v5
+      with:
+        java-version: graalvm@20.0.0
+    
+    - name: Test
+      run: sbt ++${{matrix.scala}} test
+      
+  docs:
+    runs-on: [ubuntu-latest]
+    steps:
+     - uses: actions/checkout@v2
+     
+     - name: Cache jabba
+       uses: actions/cache@v1
+       with:
+        path: ~/.jabba
+        key: ${{ runner.os }}-jabba-cache-${{ hashFiles('**/workflows/scala.yml') }}
+     
+     - name: Cache SBT ivy cache
+       uses: actions/cache@v1
+       with:
+        path: ~/.ivy2/cache
+        key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}  
+    
+     - name: Cache SBT
+       uses: actions/cache@v1
+       with:
+         path: ~/.sbt
+         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}  
+    
+     - uses: olafurpg/setup-scala@v5
+       with:
+         java-version: graalvm@20.0.0
+    
+     - name: Doc
+       run: sbt docs/mdoc
+  

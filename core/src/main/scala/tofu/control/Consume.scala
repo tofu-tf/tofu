@@ -3,11 +3,13 @@ package tofu.control
 import cats.ContravariantMonoidal
 import simulacrum.typeclass
 
-@typeclass
+import scala.annotation.nowarn
+
+@typeclass @nowarn("cat=unused-imports")
 trait Consume[F[_]] extends Partial[F] with ContravariantMonoidal[F] with ContravariantFilter[F] {
   override def product[A, B](fa: F[A], fb: F[B]): F[(A, B)] =
     combineK(contramap(fa)(_._1), contramap(fb)(_._2))
-  override def unit: F[Unit] = empty[Unit]
+  override def unit: F[Unit]                                = empty[Unit]
 
   override def trivial[A]: F[A] = empty[A]
 

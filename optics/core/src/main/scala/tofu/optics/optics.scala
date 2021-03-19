@@ -2,8 +2,11 @@ package tofu.optics
 
 import cats.arrow._
 import tofu.optics.classes.Category2
+import tofu.optics.tags.Tagger
+import tofu.optics.classes.Delayed
+import tofu.compat.uv212
 
-trait OpticCompanion[O[s, t, a, b] >: PSame[s, t, a, b]] {
+trait OpticCompanion[O[-s, +t, +a, -b] >: PSame[s, t, a, b] @uv212] {
   self =>
   type Context <: OpticContext
   type Mono[a, b] = O[a, a, b, b]
@@ -13,9 +16,15 @@ trait OpticCompanion[O[s, t, a, b] >: PSame[s, t, a, b]] {
   def toGeneric[S, T, A, B](o: O[S, T, A, B]): Optic[Context, S, T, A, B]
   def fromGeneric[S, T, A, B](o: Optic[Context, S, T, A, B]): O[S, T, A, B]
 
+  def delayed[S, T, A, B](o: () => O[S, T, A, B]): O[S, T, A, B]
+
   final implicit val category: Category[Mono] = new Category[Mono] {
     def id[A]                                                      = PSame.id[A, A]
     def compose[A, B, C](f: Mono[B, C], g: Mono[A, B]): Mono[A, C] = self.compose(f, g)
+  }
+
+  final implicit val delayed: Delayed[O] = new Delayed[O] {
+    override def delayed[S, T, A, B](o: () => O[S, T, A, B]): O[S, T, A, B] = self.delayed(o)
   }
 
   final implicit val category2: Category2[O] = new Category2[O] {
@@ -27,6 +36,15 @@ trait OpticCompanion[O[s, t, a, b] >: PSame[s, t, a, b]] {
 
   final implicit def toMonoOpticOps[S, A](o: O[S, S, A, A]) = new MonoOpticOps[O, S, A](o)
 
+  final implicit def toDelayOps[S, T, A, B](o: => O[S, T, A, B]) = new DelayedOps[O, S, T, A, B](() => o)
+
+}
+
+trait OpticProduct[O[s, t, a, b]] {
+  def product[S1, S2, T1, T2, A1, A2, B1, B2](
+      f: O[S1, T1, A1, B1],
+      g: O[S2, T2, A2, B2]
+  ): O[(S1, S2), (T1, T2), (A1, A2), (B1, B2)]
 }
 
 trait OpticContext {
@@ -34,7 +52,7 @@ trait OpticContext {
   type P[-_, +_]
 }
 
-abstract class MonoOpticCompanion[PO[s, t, a, b] >: PSame[s, t, a, b]](
+abstract class MonoOpticCompanion[PO[-s, +t, +a, -b] >: PSame[s, t, a, b] @uv212](
     poly: OpticCompanion[PO]
 ) {
   self =>
@@ -46,15 +64,25 @@ abstract class MonoOpticCompanion[PO[s, t, a, b] >: PSame[s, t, a, b]](
 }
 
 class OpticComposeOps[O[s, t, a, b], S, T, A, B](private val o: O[S, T, A, B]) extends AnyVal {
-  def andThen[O1[s, t, a, b] >: O[s, t, a, b], U, V](o1: O1[A, B, U, V])(
-      implicit category2: Category2[O1]
-  ): O1[S, T, U, V] = category2.compose(o1, o)
+  def to[O1[s, t, a, b] >: O[s, t, a, b]](
+      tagger: Tagger[O1]
+  ): WithTag[O1, S, T, A, B, tagger.Tag] =
+    new WithTag(o)
 
-  def >>[O1[s, t, a, b] >: O[s, t, a, b]: Category2, U, V](o1: O1[A, B, U, V]): O1[S, T, U, V] = andThen(o1)
+  def >[O1[s, t, a, b] >: O[s, t, a, b]](
+      tagger: Tagger[O1]
+  ): WithTag[O1, S, T, A, B, tagger.Tag] =
+    new WithTag(o)
 }
 
 class MonoOpticOps[O[s, t, a, b], S, A](private val o: O[S, S, A, A]) extends AnyVal {
   def ->:(s: S): Applied[O, S, S, A, A] = Applied(s, o)
+
+  def applied_:(s: S): Applied[O, S, S, A, A] = Applied(s, o)
+}
+
+class DelayedOps[O[s, t, a, b], S, T, A, B](private val of: () => O[S, T, A, B]) extends AnyVal {
+  def delayed(implicit d: Delayed[O]): O[S, T, A, B] = d.delayed(of)
 }
 
 /** generic optic form, aka Profunctor Optic */

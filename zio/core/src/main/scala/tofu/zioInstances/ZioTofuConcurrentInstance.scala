@@ -25,7 +25,7 @@ class ZioTofuConcurrentInstanceUIO[R, E] extends ZioTofuConcurrentInstance[Any, 
   def agentOf[A](a: A): ZIO[Any, Nothing, Agent[ZIO[R, E, *], A]] = RefM.make(a).map(ZioAgent(_))
 
   def daemonize[A](process: ZIO[R, E, A]): ZIO[R, E, Daemon[ZIO[R, E, *], Cause[E], A]] =
-    process.fork.map(ZIODaemon(_))
+    process.interruptible.forkDaemon.map(ZIODaemon(_))
 }
 
 final case class ZioDeferred[R, E, A](p: zio.Promise[E, A]) extends Deferred[ZIO[R, E, *], A] {
@@ -64,10 +64,10 @@ final case class ZIODaemon[R, E, A](fib: zio.Fiber[E, A]) extends Daemon[ZIO[R, 
 
 final case class ZioAgent[R, E, A](refm: RefM[A]) extends Agent[ZIO[R, E, *], A] {
   def get: ZIO[R, E, A]                                                                  = refm.get
-  def updateM(f: A => ZIO[R, E, A]): ZIO[R, E, A]                                        = refm.update(f)
-  def fireUpdateM(f: A => ZIO[R, E, A]): ZIO[R, E, Unit]                                 = refm.update(f).fork.unit
+  def updateM(f: A => ZIO[R, E, A]): ZIO[R, E, A]                                        = refm.getAndUpdate(f)
+  def fireUpdateM(f: A => ZIO[R, E, A]): ZIO[R, E, Unit]                                 = refm.update(f).forkDaemon.unit
   def modifyM[B](f: A => ZIO[R, E, (B, A)]): ZIO[R, E, B]                                = refm.modify(f)
-  def updateSomeM(f: PartialFunction[A, ZIO[R, E, A]]): ZIO[R, E, A]                     = refm.updateSome(f)
+  def updateSomeM(f: PartialFunction[A, ZIO[R, E, A]]): ZIO[R, E, A]                     = refm.getAndUpdateSome(f)
   def modifySomeM[B](default: B)(f: PartialFunction[A, ZIO[R, E, (B, A)]]): ZIO[R, E, B] = refm.modifySome(default)(f)
 }
 

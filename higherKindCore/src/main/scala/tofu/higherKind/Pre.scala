@@ -2,16 +2,20 @@ package tofu
 package higherKind
 import cats.tagless.ApplyK
 import cats.{Applicative, Apply, Monoid, MonoidK, Semigroup, SemigroupK, ~>}
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
 
-/**
-  * newtype for [F[_], A] =>> F[Unit]
-  * an algebra U[Pre[F], A] is an algebra which translates all actions to F[Unit]
-  * this is useful to represent actions preceding main logic
+/** Newtype for `[F[_], A] =>> F[Unit]`.
+  * An algebra `U[Pre[F, *]]` is an algebra which translates all actions to `F[Unit]`.
+  * This is useful to represent actions preceding main logic.
   */
 object Pre extends PreInstances {
   type T[F[_], A] <: Base with PreTag
+
+  type Unwrap[F[_], A] = F[Unit]
+
+  def wrap[U[_[_]], F[_]](ufu: U[Unwrap[F, *]]): U[T[F, *]]    = ufu.asInstanceOf[U[T[F, *]]]
+  def unwrap[U[_[_]], F[_]](upre: U[T[F, *]]): U[Unwrap[F, *]] = upre.asInstanceOf[U[Unwrap[F, *]]]
 
   type Base = Any { type PreOpaque }
   trait PreTag extends Any
@@ -28,7 +32,7 @@ object Pre extends PreInstances {
 
   def asMid[F[_]: Apply]: Pre[F, *] ~> Mid[F, *] = funK(p => fa => p.value *> fa)
 
-  /** when unification falls */
+  /** when unification fails */
   def attach[U[f[_]]: ApplyK, F[_]: Apply](up: U[T[F, *]])(alg: U[F]): U[F] = up.attach(alg)
 
   implicit final class TofuPreAlgebraSyntax[F[_], U[f[_]]](private val self: U[T[F, *]]) extends AnyVal {

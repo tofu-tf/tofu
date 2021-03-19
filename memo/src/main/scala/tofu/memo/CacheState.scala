@@ -9,6 +9,8 @@ import tofu.memo.CacheOperation.{CleanUp, GetOrElse}
 import tofu.syntax.bracket._
 import tofu.syntax.monadic._
 
+import scala.annotation.nowarn
+
 abstract class CacheState[F[_], A] {
   def runOperation[B](op: CacheOperation[F, A, B]): F[B]
   def value: F[CacheVal[A]]
@@ -24,8 +26,7 @@ object CacheState {
   ): F[CacheState[F, A]] =
     in[F, F, A](method, initial)
 
-  def in[I[_]: Functor, F[_]: Monad: Guarantee, A](method: CacheMethod, initial: CacheVal[A] = CacheVal.None)(
-      implicit
+  def in[I[_]: Functor, F[_]: Monad: Guarantee, A](method: CacheMethod, initial: CacheVal[A] = CacheVal.None)(implicit
       mvar: MakeMVar[I, F],
       refs: MakeRef[I, F]
   ): I[CacheState[F, A]] =
@@ -34,8 +35,8 @@ object CacheState {
       case CacheMethod.Ref  => refIn[I, F, A](initial)
     }
 
-  def mvarIn[I[_]: Functor, F[_]: Monad: Guarantee, A](initial: CacheVal[A] = CacheVal.none)(
-      implicit mvars: MakeMVar[I, F]
+  def mvarIn[I[_]: Functor, F[_]: Monad: Guarantee, A](initial: CacheVal[A] = CacheVal.none)(implicit
+      mvars: MakeMVar[I, F]
   ): I[CacheState[F, A]] = mvars.mvarOf(initial).map(CacheStateMVar(_))
 
   def refIn[I[_]: Functor, F[_]: Monad, A](
@@ -57,32 +58,28 @@ object CacheState {
   }
 }
 
+@nowarn("cat=deprecation")
 final case class CacheStateMVar[F[_]: Monad: Guarantee, A](state: MVar[F, CacheVal[A]]) extends CacheState[F, A] {
-  override def value: F[CacheVal[A]] = state.read
+  override def value: F[CacheVal[A]]                              = state.read
   override def runOperation[B](op: CacheOperation[F, A, B]): F[B] =
     for {
       cur <- state.read
       res <- op.getPureOrElse(cur)(
-              state.bracketUpdate(fresh =>
-                for {
-                  (next, res) <- op.update(fresh)
-                  _           <- state.put(next)
-                } yield res
-              )
-            )
+               state.bracketModify(fresh => op.update(fresh))
+             )
     } yield res
 }
 
 final case class CacheStateRef[F[_]: Monad, A](state: Ref[F, CacheVal[A]]) extends CacheState[F, A] {
-  override def value: F[CacheVal[A]] = state.get
+  override def value: F[CacheVal[A]]                              = state.get
   override def runOperation[B](op: CacheOperation[F, A, B]): F[B] =
     for {
       (cur, update) <- state.access
-      res <- op.getPureOrElse(cur)(
-              for {
-                (newVal, res) <- op.update(cur)
-                _             <- update(newVal)
-              } yield res
-            )
+      res           <- op.getPureOrElse(cur)(
+                         for {
+                           (newVal, res) <- op.update(cur)
+                           _             <- update(newVal)
+                         } yield res
+                       )
     } yield res
 }

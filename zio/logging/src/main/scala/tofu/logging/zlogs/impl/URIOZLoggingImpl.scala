@@ -10,9 +10,9 @@ class URIOZLoggingImpl[R: Loggable](logger: Logger) extends LoggingImpl[URIO[R, 
     URIO.accessM[R](ctx => UIO.effectTotal(logger.trace(ContextMarker(ctx), message, values: _*))).when(traceEnabled)
   override def debug(message: String, values: LoggedValue*) =
     URIO.accessM[R](ctx => UIO.effectTotal(logger.debug(ContextMarker(ctx), message, values: _*))).when(debugEnabled)
-  override def info(message: String, values: LoggedValue*) =
+  override def info(message: String, values: LoggedValue*)  =
     URIO.accessM[R](ctx => UIO.effectTotal(logger.info(ContextMarker(ctx), message, values: _*))).when(infoEnabled)
-  override def warn(message: String, values: LoggedValue*) =
+  override def warn(message: String, values: LoggedValue*)  =
     URIO.accessM[R](ctx => UIO.effectTotal(logger.warn(ContextMarker(ctx), message, values: _*))).when(warnEnabled)
   override def error(message: String, values: LoggedValue*) =
     URIO.accessM[R](ctx => UIO.effectTotal(logger.error(ContextMarker(ctx), message, values: _*))).when(errorEnabled)
@@ -25,11 +25,11 @@ class URIOZLoggingImpl[R: Loggable](logger: Logger) extends LoggingImpl[URIO[R, 
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.debug(ContextMarker(ctx).addMarker(marker), message, values: _*)))
       .when(debugEnabled)
-  override def infoWithMarker(message: String, marker: Marker, values: LoggedValue*): URIO[R, Unit] =
+  override def infoWithMarker(message: String, marker: Marker, values: LoggedValue*): URIO[R, Unit]  =
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.info(ContextMarker(ctx).addMarker(marker), message, values: _*)))
       .when(infoEnabled)
-  override def warnWithMarker(message: String, marker: Marker, values: LoggedValue*): URIO[R, Unit] =
+  override def warnWithMarker(message: String, marker: Marker, values: LoggedValue*): URIO[R, Unit]  =
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.warn(ContextMarker(ctx).addMarker(marker), message, values: _*)))
       .when(warnEnabled)
@@ -46,11 +46,11 @@ class URIOZLoggingImpl[R: Loggable](logger: Logger) extends LoggingImpl[URIO[R, 
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.debug(ContextMarker(ctx), message, values :+ cause: _*)))
       .when(debugEnabled)
-  override def infoCause(message: String, cause: Throwable, values: LoggedValue*): URIO[R, Unit] =
+  override def infoCause(message: String, cause: Throwable, values: LoggedValue*): URIO[R, Unit]  =
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.info(ContextMarker(ctx), message, values :+ cause: _*)))
       .when(infoEnabled)
-  override def warnCause(message: String, cause: Throwable, values: LoggedValue*): URIO[R, Unit] =
+  override def warnCause(message: String, cause: Throwable, values: LoggedValue*): URIO[R, Unit]  =
     URIO
       .accessM[R](ctx => UIO.effectTotal(logger.warn(ContextMarker(ctx), message, values :+ cause: _*)))
       .when(warnEnabled)

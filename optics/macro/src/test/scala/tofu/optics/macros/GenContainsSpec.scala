@@ -1,8 +1,9 @@
 package tofu.optics.macros
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class GenContainsSpec extends FunSuite with Matchers {
+class GenContainsSpec extends AnyFunSuite with Matchers {
 
   test("Nested GenContains") {
     val sut = GenContains[Foo](_.b.i)
@@ -10,6 +11,8 @@ class GenContainsSpec extends FunSuite with Matchers {
     val foo = Foo(Bar(42))
 
     sut.update(foo, _ + 1).b.i shouldBe 43
+
+    sut.toString shouldBe "(_.b) >> (_.i)"
   }
 
   test("Annotation-generated optics") {

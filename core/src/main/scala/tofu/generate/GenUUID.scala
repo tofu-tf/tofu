@@ -1,5 +1,7 @@
 package tofu.generate
 
+import java.util.UUID
+
 import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
@@ -7,9 +9,9 @@ import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
 
-import java.util.UUID
+import scala.annotation.nowarn
 
-@typeclass
+@typeclass @nowarn("cat=unused-imports")
 trait GenUUID[F[_]] {
   def randomUUID: F[UUID]
 }

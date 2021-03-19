@@ -15,18 +15,14 @@ private class GenSubsetImpl(val c: blackbox.Context) {
     import c.universe._
 
     val (sTpe, aTpe) = (weakTypeOf[S], weakTypeOf[A])
+    val aName        = ":" + (aTpe: Type).typeSymbol.name.decodedName.toString()
 
     c.Expr[Subset[S, A]](q"""
-      import _root_.tofu.optics.Subset
-
-      new Subset[$sTpe, $aTpe]{
-        override def narrow(s: $sTpe): $sTpe Either $aTpe =
+      _root_.tofu.optics.PSubset[$sTpe, $aTpe]($aName)(
+        (s: $sTpe) => 
           if(s.isInstanceOf[$aTpe]) Right(s.asInstanceOf[$aTpe])
           else Left(s)
-
-        override def upcast(a: $aTpe): $sTpe =
-          a.asInstanceOf[$sTpe]
-      }
+        )((a: $aTpe) => a.asInstanceOf[$sTpe])      
     """)
   }
 }

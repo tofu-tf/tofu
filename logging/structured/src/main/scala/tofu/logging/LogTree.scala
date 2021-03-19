@@ -13,7 +13,7 @@ import tofu.syntax.monadic._
 sealed trait LogTree {
   import LogTree._
   def json: SyncIO[Json] = this match {
-    case LogDict(values) =>
+    case LogDict(values)      =>
       values.get.flatMap { d => d.toList.traverse { case (name, t) => t.json.map(name -> _) }.map(Json.obj(_: _*)) }
     case LogArr(items)        => items.toList.traverse(_.json).map(Json.arr(_: _*))
     case value: LogParamValue => value.jsonVal.pure[SyncIO]
@@ -39,12 +39,12 @@ object LogTree extends LogBuilder[Json] {
 
   val receiver: LogRenderer[LogDict, Value, Output, ValRes] = new LogRenderer[LogDict, Value, Output, ValRes] {
 
-    def coalesce(f: Value => ValRes, g: Value => ValRes, v: Value): ValRes =
+    def coalesce(f: Value => ValRes, g: Value => ValRes, v: Value): ValRes                                =
       f(v).flatMap(written => if (written) SyncIO(true) else g(v))
-    def zero(v: Ref[SyncIO, LogTree]): SyncIO[Boolean]                               = SyncIO(false)
-    def noop(i: LogDict): SyncIO[Unit]                                               = SyncIO.unit
-    def combine(x: SyncIO[Unit], y: SyncIO[Unit]): SyncIO[Unit]                      = x *> y
-    def putValue(value: LogParamValue, input: Ref[SyncIO, LogTree]): SyncIO[Boolean] = input.set(value) as true
+    def zero(v: Ref[SyncIO, LogTree]): SyncIO[Boolean]                                                    = SyncIO(false)
+    def noop(i: LogDict): SyncIO[Unit]                                                                    = SyncIO.unit
+    def combine(x: SyncIO[Unit], y: SyncIO[Unit]): SyncIO[Unit]                                           = x *> y
+    def putValue(value: LogParamValue, input: Ref[SyncIO, LogTree]): SyncIO[Boolean]                      = input.set(value) as true
     def sub(name: String, input: LogDict)(receive: Ref[SyncIO, LogTree] => SyncIO[Boolean]): SyncIO[Unit] =
       for {
         t <- newtree
@@ -60,7 +60,7 @@ object LogTree extends LogBuilder[Json] {
         vs <- ts.traverse(_.get)
         _  <- input.set(LogArr(vs))
       } yield true
-    def dict(input: Ref[SyncIO, LogTree])(receive: LogDict => SyncIO[Unit]): SyncIO[Boolean] =
+    def dict(input: Ref[SyncIO, LogTree])(receive: LogDict => SyncIO[Unit]): SyncIO[Boolean]                    =
       newdict flatMap input.set as true
   }
 
@@ -89,7 +89,7 @@ final case class BigIntValue(value: BigInt)      extends LogParamValue
 final case class DecimalValue(value: BigDecimal) extends LogParamValue
 final case class FloatValue(value: Double)       extends LogParamValue
 final case class BoolValue(value: Boolean)       extends LogParamValue
-case object NullValue extends LogParamValue {
+case object NullValue                            extends LogParamValue {
   def value = null
 }
 object LogParamValue {

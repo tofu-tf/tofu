@@ -1,13 +1,12 @@
 package tofu.higherKind
 import cats.tagless.ApplyK
 import cats.{Applicative, Apply, FlatMap, Monoid, MonoidK, Semigroup, SemigroupK, ~>}
-import tofu.syntax.functionK.funK
+import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
 
-/**
-  * a function [F[_], A] =>> A => F[Unit]
-  * an algebra U[Post[F], A] is an algebra which translates all actions to A => F[Unit]
-  * this is useful to represent actions succeeding main logic
+/** A function `[F[_], A] =>> A => F[Unit]`
+  * An algebra `U[Post[F, *]]` is an algebra which translates all actions to `A => F[Unit]`.
+  * This is useful to represent actions succeeding main logic.
   */
 trait Post[F[_], A] {
   def apply(a: A): F[Unit]
@@ -18,7 +17,7 @@ object Post extends PostInstances {
     override def point[A]: Post[F, A] = _ => F.unit
   }
 
-  /** when unification falls */
+  /** when unification fails */
   def attach[U[f[_]]: ApplyK, F[_]: FlatMap](up: U[Post[F, *]])(alg: U[F]): U[F] = up.attach(alg)
 
   def asMid[F[_]: FlatMap]: Post[F, *] ~> Mid[F, *] = funK(p => fa => fa.flatTap(p(_)))
