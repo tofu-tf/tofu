@@ -53,6 +53,7 @@ object ZioInstancesSuite {
     ()
   }
 
+  @nowarn("cat=unused-params")
   def taskAmbiguity: Any = {
     import cats.effect.Sync
     import tofu.Raise

@@ -54,7 +54,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
         fa.compile.to(ev)
     }
 
-  implicit def fs2ParFlattenInstance[F[_]: Concurrent: Timer]: ParFlatten[Stream[F, *]] =
+  implicit def fs2ParFlattenInstance[F[_]: Concurrent]: ParFlatten[Stream[F, *]] =
     new ParFlatten[Stream[F, *]] {
       override def parFlatten[A](ffa: Stream[F, Stream[F, A]])(maxConcurrent: Int): Stream[F, A] =
         ffa.parJoin(maxConcurrent)

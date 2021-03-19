@@ -5,8 +5,6 @@ moduleName := "tofu"
 
 val libVersion = "0.10.0"
 
-val scalaV = "2.13.4"
-
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, v)) => v.toInt
@@ -17,7 +15,7 @@ lazy val setMinorVersion = minorVersion := {
 lazy val setModuleName = moduleName := { s"tofu-${(publishName or name).value}" }
 
 lazy val defaultSettings = Seq(
-  scalaVersion := scalaV,
+  scalaVersion := Version.scala213,
   setMinorVersion,
   setModuleName,
   defaultScalacOptions,
@@ -319,16 +317,17 @@ lazy val defaultScalacOptions = scalacOptions := {
 
 lazy val scalacWarningConfig = scalacOptions += {
   // ignore unused imports that cannot be removed due to cross-compilation
-  val suppressUnusedImports = Seq(
-    "scala/tofu/config/typesafe.scala"
+  val suppressUnusedImports = Seq[String](
+    // put here relative file paths whose unused imports should be ignored,
+    // e.g. "scala/tofu/config/typesafe.scala"
   ).map { src =>
-    s"src=${scala.util.matching.Regex.quote(src)}&cat=unused-imports:s"
-  }.mkString(",")
+    s"src=${scala.util.matching.Regex.quote(src)}&cat=unused-imports:iv"
+  }
 
-  // print warning category for @nowarn("cat=...")
+  // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
   val verboseWarnings = "any:wv"
 
-  s"-Wconf:$suppressUnusedImports,$verboseWarnings"
+  s"-Wconf:${(suppressUnusedImports :+ verboseWarnings).mkString(",")}"
 }
 
 lazy val macros = Seq(
@@ -359,7 +358,7 @@ lazy val publishSettings = Seq(
   publishVersion := libVersion,
   publishMavenStyle := true,
   description := "Opinionated set of tools for functional programming in Scala",
-  crossScalaVersions := Seq("2.12.13", "2.13.4"),
+  crossScalaVersions := Seq(Version.scala212, Version.scala213),
   publishTo := {
     if (isSnapshot.value) {
       Some(Opts.resolver.sonatypeSnapshots)

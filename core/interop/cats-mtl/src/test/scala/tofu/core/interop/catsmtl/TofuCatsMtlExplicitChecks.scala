@@ -35,7 +35,7 @@ object TofuCatsMtlExplicitChecks {
     makeTofuRaiseFromMtl[F, E](R)
   }
 
-  def checkForTofuErrorsAndHandle[F[_]: Functor, E](H: MHandle[F, E]) = {
+  def checkForTofuErrorsAndHandle[F[_], E](H: MHandle[F, E]) = {
     makeTofuErrorsFromMtl[F, E](H)
   }
 }

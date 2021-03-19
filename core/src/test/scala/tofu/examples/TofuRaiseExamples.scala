@@ -2,6 +2,7 @@ package tofu.examples
 
 import cats.FlatMap
 import cats.syntax.flatMap._
+import tofu.compat.unused
 import tofu.syntax.handle._
 import tofu.syntax.raise._
 import tofu.{Errors, Handle, Raise}
@@ -24,6 +25,7 @@ object CardStorage {
 
   def make[F[_]: Raise[*[_], CardNotFound]]: CardStorage[F] = new Impl[F]
 
+  @unused
   private final class Impl[F[_]: Raise[*[_], CardNotFound]] extends CardStorage[F] {
     override def get(cardId: Long): F[Card]                             = ???
     override def updateBalance(cardId: Long, newBalance: Long): F[Unit] = ???
@@ -38,6 +40,7 @@ object UserStorage {
 
   def make[F[_]: Raise[*[_], UserNotFound]]: UserStorage[F] = new Impl[F]
 
+  @unused
   private final class Impl[F[_]: Raise[*[_], UserNotFound]] extends UserStorage[F] {
     override def get(userId: Long): F[User] = ???
   }

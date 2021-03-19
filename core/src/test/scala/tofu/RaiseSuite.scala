@@ -5,6 +5,7 @@ import Raise.ContravariantRaise
 import tofu.syntax.raise._
 import cats.Applicative
 import org.scalatest.funsuite.AnyFunSuite
+import tofu.compat.unused
 
 class RaiseSuite extends AnyFunSuite {
   import tofu.RaiseSuite._
@@ -46,6 +47,7 @@ object RaiseSuite {
   def foo3[F[_]: ContravariantRaise[*[_], ConcreteError]]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
+  @unused
   def foo4[F[_]: ContravariantRaise[*[_], ConcreteError]: ContravariantRaise[*[_], AnotherConcreteError]]: F[Unit] =
     ConcreteError().raise[F, Unit]
 

@@ -1,6 +1,7 @@
 package tofu.data
 
 import cats._
+import cats.syntax.parallel._
 import tofu.syntax.monadic._
 import tofu.syntax.feither._
 import tofu.syntax.funk
@@ -26,7 +27,7 @@ object ExceptT {
 }
 
 trait ExceptTInstances extends ExceptTInstances1 {
-  implicit def exceptTVeryParallel[G[+_]: Parallel, E](implicit
+  implicit def exceptTVeryParallel[G[+_], E](implicit
       G: Parallel[G],
       E: Semigroup[E]
   ): Parallel.Aux[ExceptT[G, E, *], ExceptTPar[G.F, E, *]] =
@@ -110,7 +111,7 @@ trait ExceptTInstances1 {
 
     }
 
-  implicit def exceptTParallel[G[+_]: Parallel, E: Semigroup](implicit
+  implicit def exceptTParallel[G[+_], E: Semigroup](implicit
       G: Monad[G]
   ): Parallel.Aux[ExceptT[G, E, *], ExceptTPar[G, E, *]] =
     new Parallel[ExceptT[G, E, *]] {
@@ -137,6 +138,6 @@ private[tofu] object ExceptTInstances1 {
     def ap[A, B](ff: ExceptTPar[F, E, A => B])(fa: ExceptTPar[F, E, A]): ExceptTPar[F, E, B] = map2(ff, fa)(_(_))
 
     override def map2[A, B, C](fa: ExceptTPar[F, E, A], fb: ExceptTPar[F, E, B])(f: (A, B) => C): ExceptTPar[F, E, C] =
-      toPar((fromPar(fa).map2(fromPar(fb))((ea, eb) => ea.map2(eb)(f))))
+      toPar((fromPar(fa).map2(fromPar(fb))((ea, eb) => (ea, eb).parMapN(f))))
   }
 }

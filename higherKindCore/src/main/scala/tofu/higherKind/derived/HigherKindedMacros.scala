@@ -22,8 +22,9 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
   implicit final class MethodOps(private val m: Method) {
     def occursInParams(symbol: Symbol): Boolean =
-      m.paramLists.exists(_.exists { case ValDef(_, _, tpe, _) =>
-        tpe.exists(_.tpe.typeSymbol == symbol)
+      m.paramLists.exists(_.exists {
+        case ValDef(_, _, tpe, _) => tpe.exists(_.tpe.typeSymbol == symbol)
+        case _                    => false
       })
   }
 
@@ -75,6 +76,8 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
       val res = implement(algebra)(f)(types ++ methods)
       res
+    case t                                            =>
+      abort(s"Type ${t.typeSymbol.name.decodedName} is not a polymorphic type")
   }
 
   private def embedTemplate(algebra: Type)(impl: EmbedParams): Type => Tree = {
@@ -111,6 +114,9 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       }
 
       implement(Af)(f)(types ++ methods)
+
+    case t =>
+      abort(s"Type ${t.typeSymbol.name.decodedName} is not a polymorphic type")
   }
 
   def tabulate(algebra: Type): (String, Type => Tree) =
