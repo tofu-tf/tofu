@@ -7,9 +7,8 @@ import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.profunctor._
 import tofu.optics.Subset.ByDowncast
-import tofu.optics.data.Identity
 import tofu.optics.classes.PChoice
-import tofu.optics.data._
+import tofu.optics.data.{Identity, _}
 
 import scala.reflect.ClassTag
 

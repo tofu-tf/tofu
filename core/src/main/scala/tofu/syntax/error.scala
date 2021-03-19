@@ -1,8 +1,7 @@
 package tofu
 package syntax
 
-import cats.{Applicative, Functor, Monad}
-import cats.ApplicativeError
+import cats.{Applicative, ApplicativeError, Functor, Monad}
 object raise {
 
   //** special alias for Raise[F, E] for use in situations when F[_] can be unknown from the start */

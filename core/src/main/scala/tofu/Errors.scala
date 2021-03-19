@@ -3,13 +3,14 @@ package tofu
 import cats.data.{EitherT, OptionT, ReaderT}
 import cats.syntax.either._
 import cats.{Applicative, ApplicativeError, FlatMap, Functor, Id, Monad}
+import com.github.ghik.silencer.silent
 import tofu.errorInstances._
 import tofu.internal.{CachedMatcher, DataEffectComp}
 import tofu.lift.Lift
 import tofu.optics.PUpcast.GenericSubtypeImpl
 import tofu.optics.{Downcast, Subset, Upcast}
+
 import scala.annotation.implicitNotFound
-import com.github.ghik.silencer.silent
 
 /** Allows to raise `E` inside type `F`.
   */

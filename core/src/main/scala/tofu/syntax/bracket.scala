@@ -3,11 +3,11 @@ package tofu.syntax
 import cats.Applicative
 import cats.data.EitherT
 import cats.effect.concurrent.MVar
-import cats.effect.{Bracket, ExitCase}
 import cats.effect.syntax.bracket._
+import cats.effect.{Bracket, ExitCase}
 import cats.syntax.either._
-import tofu.{Finally, Guarantee}
 import tofu.syntax.monadic._
+import tofu.{Finally, Guarantee}
 
 import scala.annotation.nowarn
 

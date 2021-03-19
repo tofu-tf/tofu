@@ -1,9 +1,5 @@
 package tofu.logging
 
-import java.io.{PrintWriter, StringWriter}
-import java.time.{Instant, LocalDate, LocalDateTime, OffsetDateTime, ZonedDateTime}
-import java.util.UUID
-
 import alleycats.std.iterable._
 import alleycats.std.set._
 import cats.data._
@@ -17,13 +13,16 @@ import cats.syntax.monoid._
 import cats.syntax.show._
 import cats.{Foldable, Show}
 import simulacrum.typeclass
+import tofu.compat._
+import tofu.compat.lazySeqInstances._
 import tofu.control.Consume
 import tofu.logging.Loggable.Base
 import tofu.logging.impl._
 import tofu.syntax.logRenderer._
-import tofu.compat._
-import tofu.compat.lazySeqInstances._
 
+import java.io.{PrintWriter, StringWriter}
+import java.time.{Instant, LocalDate, LocalDateTime, OffsetDateTime, ZonedDateTime}
+import java.util.UUID
 import scala.annotation.nowarn
 import scala.collection.immutable.SortedSet
 import scala.collection.{immutable, mutable}

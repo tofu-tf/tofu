@@ -2,11 +2,10 @@ package tofu
 package syntax
 
 import cats.FlatMap
+import cats.effect.{Blocker, Sync}
 import tofu.syntax.monadic._
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
-import cats.effect.Sync
-import cats.effect.Blocker
+
+import scala.concurrent.{ExecutionContext, Future}
 
 object scoped {
   import Scoped.{Blocking, Calculation, Main}

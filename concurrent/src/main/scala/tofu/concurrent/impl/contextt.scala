@@ -9,6 +9,7 @@ import cats.tagless.InvariantK
 import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
 import tofu.{RunContext, WithContext, WithRun}
+
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.ExecutionContext
 

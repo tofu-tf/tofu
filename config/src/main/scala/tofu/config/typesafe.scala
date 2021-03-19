@@ -1,16 +1,17 @@
 package tofu
 package config
 
-import ConfigItem._
 import cats.Id
-import com.typesafe.config.{Config, ConfigValue}
-
-import scala.jdk.CollectionConverters._
-import tofu.concurrent.Refs
-import tofu.syntax.monadic._
-import tofu.syntax.funk._
 import cats.effect.SyncIO
+import com.typesafe.config.{Config, ConfigValue}
+import tofu.concurrent.Refs
+import tofu.syntax.funk._
+import tofu.syntax.monadic._
+
 import scala.collection.compat._
+import scala.jdk.CollectionConverters._
+
+import ConfigItem._
 
 object typesafe {
   def fromConfig(cfg: Config): ConfigItem[Id] =

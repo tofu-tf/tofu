@@ -1,14 +1,11 @@
 package tofu
 
-import cats.MonadError
-
-import Raise.ContravariantRaise
+import cats.{Applicative, MonadError}
+import com.github.ghik.silencer.silent
+import org.scalatest.funsuite.AnyFunSuite
 import tofu.syntax.raise._
 
-import com.github.ghik.silencer.silent
-
-import cats.Applicative
-import org.scalatest.funsuite.AnyFunSuite
+import Raise.ContravariantRaise
 
 class RaiseSuite extends AnyFunSuite {
   import tofu.RaiseSute._

@@ -1,9 +1,9 @@
 package tofu.zioInstances
 
+import tofu._
 import tofu.lift.{Lift, Unlift, UnliftIO}
 import tofu.optics.{Contains, Extract}
 import tofu.zioInstances.implicits._
-import tofu._
 import zio._
 
 object ZioInstancesSuite {

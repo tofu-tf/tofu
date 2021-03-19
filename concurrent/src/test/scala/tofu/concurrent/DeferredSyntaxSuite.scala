@@ -1,10 +1,10 @@
 package tofu.concurrent
 
+import cats.effect.{ContextShift, IO}
 import org.scalatest.flatspec.AnyFlatSpec
-import cats.effect.ContextShift
-import cats.effect.IO
-import scala.concurrent.ExecutionContext
 import tofu.concurrent.syntax.deferred._
+
+import scala.concurrent.ExecutionContext
 
 class DeferredSyntaxSuite extends AnyFlatSpec {
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)

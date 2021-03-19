@@ -7,7 +7,6 @@ import magnolia.{CaseClass, Magnolia, SealedTrait}
 import simulacrum.typeclass
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
-
 import scala.annotation.nowarn
 
 @typeclass @nowarn("cat=unused-imports")

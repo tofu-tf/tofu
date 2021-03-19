@@ -1,10 +1,9 @@
 package tofu.optics
 
 import cats.arrow._
-import tofu.optics.classes.Category2
-import tofu.optics.tags.Tagger
-import tofu.optics.classes.Delayed
 import tofu.compat.uv212
+import tofu.optics.classes.{Category2, Delayed}
+import tofu.optics.tags.Tagger
 
 trait OpticCompanion[O[-s, +t, +a, -b] >: PSame[s, t, a, b] @uv212] {
   self =>

@@ -1,7 +1,7 @@
 package tofu.optics
 package functions
-import tofu.syntax.monadic._
 import cats.Apply
+import tofu.syntax.monadic._
 
 trait TupleFunctions {
   def both2[A]: Repeated[(A, A), A]         = everyTuple2

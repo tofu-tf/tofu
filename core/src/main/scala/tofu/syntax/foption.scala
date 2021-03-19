@@ -1,12 +1,12 @@
 package tofu.syntax
 
-import cats.{Applicative, Functor, Monad, Traverse}
-import cats.syntax.traverse.toTraverseOps
 import cats.instances.option.catsStdInstancesForOption
 import cats.syntax.option._
+import cats.syntax.traverse.toTraverseOps
+import cats.{Applicative, Functor, Monad, Traverse}
 import tofu.Raise
-import tofu.syntax.monadic._
 import tofu.syntax.feither.EitherIdFOps
+import tofu.syntax.monadic._
 
 object foption {
   def noneF[F[_]: Applicative, A]: F[Option[A]] = none[A].pure[F]

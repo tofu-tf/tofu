@@ -1,10 +1,9 @@
 package tofu.common
 
-import java.time._
-
 import cats.Monad
 import cats.effect.Sync
 
+import java.time._
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 

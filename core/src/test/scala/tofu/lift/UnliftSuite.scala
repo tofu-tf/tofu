@@ -1,9 +1,9 @@
 package tofu.lift
 
-import cats.{Applicative, Functor}
 import cats.data.ReaderT
 import cats.effect.{Effect, IO}
 import cats.syntax.option._
+import cats.{Applicative, Functor}
 import org.scalatest.flatspec.AnyFlatSpec
 import tofu.compat.unused
 

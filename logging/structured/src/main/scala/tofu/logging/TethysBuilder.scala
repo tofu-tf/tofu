@@ -1,13 +1,13 @@
 package tofu
 package logging
 
-import java.io.StringWriter
-
 import cats.instances.unit._
 import cats.kernel.Monoid
-import tofu.logging.LogRenderer.LogRendererUnit
 import tethys.writers.tokens.TokenWriter
 import tofu.compat.unused
+import tofu.logging.LogRenderer.LogRendererUnit
+
+import java.io.StringWriter
 
 class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilder[String] {
   type Top    = TokenWriter

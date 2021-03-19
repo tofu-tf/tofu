@@ -1,10 +1,10 @@
 package tofu
 package syntax
 
-import cats.{Eval, Foldable}
 import cats.syntax.foldable._
-import tofu.logging._
-import tofu.logging.LoggingBase
+import cats.{Eval, Foldable}
+import tofu.logging.{LoggingBase, _}
+
 import scala.collection.compat._
 
 object loggable extends Loggable.ToLoggableOps with Loggable.Base.ToBaseOps

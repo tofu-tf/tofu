@@ -1,12 +1,11 @@
 package tofu.concurrent
 
-import java.util.concurrent.Executors
-
 import cats.effect.{ContextShift, IO}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import tofu.concurrent.syntax.daemon._
 
+import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 
 class DaemonTests extends AnyWordSpec with Matchers {

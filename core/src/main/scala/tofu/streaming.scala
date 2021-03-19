@@ -1,8 +1,8 @@
 package tofu
 
 import cats.{Applicative, Functor, Monoid}
-import tofu.optics.Folded
 import tofu.internal.DataEffectComp
+import tofu.optics.Folded
 import tofu.optics.classes.Transform
 
 /** simply function A => F[Unit] in a typeclass form */

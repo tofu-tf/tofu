@@ -2,8 +2,8 @@ package tofu
 
 import cats.effect.{Concurrent, ContextShift, IO, Timer}
 import simulacrum.typeclass
-import tofu.syntax.feither._
 import tofu.internal.NonTofu
+import tofu.syntax.feither._
 
 import scala.annotation.nowarn
 import scala.concurrent.duration.FiniteDuration

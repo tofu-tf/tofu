@@ -1,13 +1,10 @@
 package tofu.bi
 
 import cats.Bifunctor
-import tofu.optics.Extract
-import tofu.optics.Same
-import tofu.optics.Contains
 import tofu.bi.lift.BiUnlift
-import tofu.higherKind.bi.FunBK
 import tofu.control.Bind
-import tofu.optics.Equivalent
+import tofu.higherKind.bi.FunBK
+import tofu.optics.{Contains, Equivalent, Extract, Same}
 
 /** typeclass for access a functional environment in a bifuntor
   * @tparam X contextual error

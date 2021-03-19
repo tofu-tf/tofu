@@ -3,12 +3,12 @@ package tofu.syntax
 import cats.Applicative
 import cats.effect.IO
 import cats.effect.concurrent.Ref
+import cats.syntax.all._
 import org.scalatest.flatspec.AnyFlatSpec
-import tofu.{ApplicativeThrow, Errors, Handle, Raise}
+import tofu.optics.Downcast
 import tofu.syntax.handle._
 import tofu.syntax.raise._
-import cats.syntax.all._
-import tofu.optics.Downcast
+import tofu.{ApplicativeThrow, Errors, Handle, Raise}
 
 class RetrySuite extends AnyFlatSpec {
 

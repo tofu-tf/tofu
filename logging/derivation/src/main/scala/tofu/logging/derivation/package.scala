@@ -1,6 +1,7 @@
 package tofu.logging
 
 import magnolia.TypeName
+
 import scala.collection.compat._
 
 package object derivation {

@@ -1,8 +1,7 @@
 package tofu.env.bio
 
-import tofu.control.Bind
-import tofu.control.StackSafeBind
 import tofu.bi.BiRun
+import tofu.control.{Bind, StackSafeBind}
 import tofu.higherKind.bi.FunBK
 
 trait EnvBioInstances {}

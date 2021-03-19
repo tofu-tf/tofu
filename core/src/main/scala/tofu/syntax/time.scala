@@ -1,12 +1,12 @@
 package tofu.syntax
 
 import cats.effect.Clock
-import java.time._
-import java.util.concurrent.TimeUnit
-
 import cats.{Apply, Functor}
 import tofu.common.{TimeData, TimeZone}
 import tofu.syntax.monadic._
+
+import java.time._
+import java.util.concurrent.TimeUnit
 
 object time {
   object zone {

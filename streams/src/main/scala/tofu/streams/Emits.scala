@@ -1,7 +1,7 @@
 package tofu.streams
 
-import cats.{Applicative, Foldable, Monad, MonoidK}
 import cats.syntax.flatMap._
+import cats.{Applicative, Foldable, Monad, MonoidK}
 import tofu.lift.Lift
 
 trait Emits[F[_]] {

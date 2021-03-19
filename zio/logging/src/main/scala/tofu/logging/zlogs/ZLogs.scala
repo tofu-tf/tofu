@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory
 import tofu.logging.Logging.loggerForService
 import tofu.logging.zlogs.impl.{UIOZLogging, URIOZLoggingImpl}
 import tofu.logging.{Loggable, Logging}
+import zio.interop.catz._
 import zio.{Has, UIO, ULayer, ZIO, ZLayer}
 
 import scala.reflect.ClassTag
-import zio.interop.catz._
 
 object ZLogs {
   val uio: ZLogs[Any] = new ZLogs[Any] {

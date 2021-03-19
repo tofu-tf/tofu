@@ -3,10 +3,10 @@ package tofu.env.bio
 import cats.effect.concurrent.Ref
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
-
-import scala.concurrent.duration.Duration
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import scala.concurrent.duration.Duration
 
 class EnvBioSuite extends AnyFlatSpec with Matchers {
   "pure" should "lift constant value into EnvBio context" in {

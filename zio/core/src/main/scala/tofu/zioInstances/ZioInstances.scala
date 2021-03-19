@@ -1,14 +1,15 @@
 package tofu
 package zioInstances
 
-import java.io.IOException
 import tofu.optics.functions.extractSubtype
 import tofu.optics.{Contains, Extract}
+import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
 import zio.{Has, Tag}
-import zio.blocking.Blocking
+
+import java.io.IOException
 
 private[zioInstances] class ZioInstances {
   private[this] val rioTofuInstanceAny: RioTofuInstance[Any] = new RioTofuInstance

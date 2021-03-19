@@ -1,17 +1,18 @@
 package tofu.logging
 
-import Logging._
 import cats.kernel.Monoid
 import cats.syntax.apply._
 import cats.{Applicative, Apply, FlatMap}
 import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.compat.unused
-import tofu.{Init, higherKind}
 import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.logging.impl.EmbedLogging
 import tofu.syntax.monoidalK._
+import tofu.{Init, higherKind}
 
 import scala.reflect.ClassTag
+
+import Logging._
 
 /** typeclass equivalent of Logger
   * may contain specified some Logger instance

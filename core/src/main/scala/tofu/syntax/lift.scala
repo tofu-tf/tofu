@@ -1,8 +1,8 @@
 package tofu.syntax
 
-import cats.{Functor, ~>}
 import cats.effect.concurrent.{Deferred, MVar, MVar2, Ref, Semaphore}
 import cats.tagless.{FunctorK, InvariantK}
+import cats.{Functor, ~>}
 import tofu.lift.{IsoK, Lift, Unlift}
 
 import scala.annotation.nowarn

@@ -1,13 +1,11 @@
 package tofu.optics
 
-import cats.Functor
-import tofu.syntax.monadic._
-import tofu.optics.data.Identity
-import tofu.optics.data.{CoKleisli, CoKleisliProfunctor}
 import cats.arrow.Profunctor
 import cats.instances.function._
-import cats.Applicative
+import cats.{Applicative, Functor}
 import tofu.compat.uv212
+import tofu.optics.data.{CoKleisli, CoKleisliProfunctor, Identity}
+import tofu.syntax.monadic._
 
 /**  aka Grate
   *  see https://r6research.livejournal.com/28050.html

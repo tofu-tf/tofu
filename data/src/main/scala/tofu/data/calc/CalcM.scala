@@ -1,12 +1,10 @@
 package tofu.data.calc
 
+import cats.Monoid
+import cats.evidence.{As, Is}
 import tofu.higherKind.bi.FunBK
 
-import cats.evidence.Is
-import cats.Monoid
-
 import scala.annotation.tailrec
-import cats.evidence.As
 
 sealed abstract class CalcM[+F[+_, +_], -R, -SI, +SO, +E, +A] extends CalcMOps[F, R, SI, SO, E, A] {
   def translateState[G[+_, +_], ST, R1](

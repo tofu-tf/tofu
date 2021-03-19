@@ -1,7 +1,7 @@
 package tofu.higherKind.derived
 
-import tofu.higherKind.{Embed, RepresentableK}
 import tofu.higherKind.bi.{EmbedBK, RepresentableB}
+import tofu.higherKind.{Embed, RepresentableK}
 
 import scala.reflect.macros.blackbox
 

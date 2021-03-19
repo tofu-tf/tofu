@@ -1,7 +1,6 @@
 package tofu.control
 
-import cats.Bifunctor
-import cats.Monad
+import cats.{Bifunctor, Monad}
 import tofu.control.impl.BindInstanceChain
 
 trait BiMonad[L[_, _], R[_, _]] {

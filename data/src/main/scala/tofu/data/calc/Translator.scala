@@ -1,6 +1,7 @@
 package tofu.data.calc
 
 import tofu.higherKind.bi.FunBK
+
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 
 trait Translator[-F[_, _], +G[+_, +_], ST, +RI, -RO] { self =>

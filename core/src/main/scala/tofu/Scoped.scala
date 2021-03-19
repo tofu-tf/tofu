@@ -1,12 +1,12 @@
 package tofu
 
-import tofu.higherKind.{Mid, Point, PureK}
 import cats._
+import cats.effect.{Async, Blocker, ContextShift}
+import tofu.higherKind.{Mid, Point, PureK}
 import tofu.syntax.funk._
 import tofu.syntax.monadic._
+
 import scala.concurrent.{ExecutionContext, Future}
-import cats.effect.{ContextShift, Async}
-import cats.effect.Blocker
 
 /** can be used for scoped transformations
   * @tparam Tag arbitrary type tag for discriminating scopes

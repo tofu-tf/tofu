@@ -1,7 +1,7 @@
 package tofu
 
-import cats.{Applicative, FlatMap, Functor, ~>}
 import cats.data.ReaderT
+import cats.{Applicative, FlatMap, Functor, ~>}
 import tofu.lift.{Lift, Unlift}
 import tofu.optics.{Contains, Equivalent, Extract}
 import tofu.syntax.funk._

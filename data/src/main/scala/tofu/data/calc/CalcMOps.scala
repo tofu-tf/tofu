@@ -1,12 +1,10 @@
 package tofu.data.calc
 
+import cats.data.IndexedState
+import tofu.compat.uv212
 import tofu.control.Bind
 import tofu.higherKind.bi.FunBK
-
-import cats.data.IndexedState
 import tofu.optics.PContains
-
-import tofu.compat.uv212
 import tofu.optics.functions._
 
 class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, A] =>

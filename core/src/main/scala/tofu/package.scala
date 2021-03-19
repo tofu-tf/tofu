@@ -1,6 +1,6 @@
+import cats.data.Ior
 import cats.effect.Bracket
 import cats.{ApplicativeError, MonadError}
-import cats.data.Ior
 
 package object tofu {
   type In[C, F[_]] = WithContext[F, C]

@@ -1,8 +1,9 @@
 package tofu.data
 
+import cats.syntax.foldable._
 import cats.{Eval, Foldable, Monad, MonoidK}
 import tofu.internal.Newtype1Covariant
-import cats.syntax.foldable._
+
 import scala.collection.compat._
 
 object PArray extends Newtype1Covariant {

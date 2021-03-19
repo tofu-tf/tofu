@@ -2,8 +2,8 @@ package tofu.syntax
 
 import cats.instances.either._
 import cats.syntax.either._
-import cats.{Applicative, Functor, Monad, Traverse}
 import cats.syntax.traverse._
+import cats.{Applicative, Functor, Monad, Traverse}
 import tofu.Raise
 import tofu.syntax.either._
 import tofu.syntax.monadic._

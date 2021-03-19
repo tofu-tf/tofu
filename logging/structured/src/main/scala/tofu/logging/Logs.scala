@@ -8,18 +8,15 @@ import cats.tagless.{ApplyK, FunctorK}
 import cats.{Applicative, Apply, FlatMap, Functor, Id, Monad, ~>}
 import org.slf4j.LoggerFactory
 import tofu.concurrent.QVars
-import tofu.{Guarantee, higherKind}
-import tofu.higherKind.{Function2K, MonoidalK, Point, RepresentableK}
+import tofu.higherKind.{Function2K, Mid, MonoidalK, Point, Post, Pre, RepresentableK}
 import tofu.lift.Lift
 import tofu.logging.Logging.loggerForService
 import tofu.logging.impl.{CachedLogs, ContextSyncLoggingImpl, SyncLogging, UniversalEmbedLogs}
 import tofu.syntax.monadic._
 import tofu.syntax.monoidalK._
+import tofu.{Guarantee, higherKind}
 
 import scala.reflect.ClassTag
-import tofu.higherKind.Pre
-import tofu.higherKind.Post
-import tofu.higherKind.Mid
 
 /** A helper for creating instances of [[tofu.logging.Logging]], defining a way these instances will behave while doing logging.
   * Can create instances either on a by-name basic or a type tag basic.
