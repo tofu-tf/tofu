@@ -73,7 +73,7 @@ object unlift {
     def bracketCase[A, B](acquire: G[A])(use: A => G[B])(release: (A, ExitCase[Throwable]) => G[Unit]): G[B] =
       G.bracketCase(acquire)(use)(release)
 
-    def suspend[A](thunk: => G[A]): G[A] = G.suspend(thunk)
+    def suspend[A](thunk: => G[A]): G[A] = G.defer(thunk)
 
     def async[A](k: (Either[Throwable, A] => Unit) => Unit): G[A] = G.async(k)
 
