@@ -256,7 +256,7 @@ final class ContextTBracketI[F[+_], C[_[_]], E](implicit val F: Bracket[F, E]) e
 trait ContextTSync[F[+_], C[_[_]]] extends Sync[ContextT[F, C, *]] with ContextTBracket[F, C, Throwable] {
   implicit def F: Sync[F]
 
-  final override def suspend[A](thunk: => ContextT[F, C, A]): ContextT[F, C, A] = c => F.suspend(thunk.run(c))
+  final override def suspend[A](thunk: => ContextT[F, C, A]): ContextT[F, C, A] = c => F.defer(thunk.run(c))
   final override def delay[A](thunk: => A): ContextT[F, C, A]                   = _ => F.delay(thunk)
 }
 
