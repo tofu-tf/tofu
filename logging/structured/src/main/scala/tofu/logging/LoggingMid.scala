@@ -63,11 +63,11 @@ object LoggingMidBuilder {
   trait Default extends LoggingMidBuilder {
     def onEnter[F[_]](cls: Class[_], method: String, args: Seq[(String, LoggedValue)])(implicit
         F: LoggingBase[F]
-    ): F[Unit] = F.debug("entering {}.{} {}", cls.getName(), method, new ArgsLoggable(args))
+    ): F[Unit] = F.debug("entering {} {}", method, new ArgsLoggable(args))
 
     def onLeave[F[_]](cls: Class[_], method: String, args: Seq[(String, LoggedValue)], res: LoggedValue)(implicit
         F: LoggingBase[F]
-    ): F[Unit] = F.debug("leaving {}.{} {} with result {}", cls.getName(), method, new ArgsLoggable(args), res)
+    ): F[Unit] = F.debug("leaving {} {} with result {}", method, new ArgsLoggable(args), res)
   }
 
   class DefaultImpl extends Default
@@ -129,7 +129,7 @@ object LoggingErrMidBuilder {
         args: Seq[(String, LoggedValue)],
         err: E
     )(implicit F: LoggingBase[F]): F[Unit] =
-      F.error("error during {}.{} {} error is {}", cls.getName(), method, new ArgsLoggable(args), err)
+      F.error("error during {} {} error is {}", method, new ArgsLoggable(args), err)
 
   }
 

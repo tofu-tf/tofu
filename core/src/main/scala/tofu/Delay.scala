@@ -1,6 +1,6 @@
 package tofu
 
-import cats.{Applicative, Defer}
+import cats.effect.Sync
 
 trait Delay[F[_]] {
   def delay[A](a: => A): F[A]
@@ -12,8 +12,8 @@ object Delay extends CatsDelay {
 }
 
 class CatsDelay {
-  implicit def byCatsDefer[F[_]](implicit FD: Defer[F], F: Applicative[F]): Delay[F] =
+  implicit def byCatsSync[F[_]](implicit FS: Sync[F]): Delay[F] =
     new Delay[F] {
-      def delay[A](a: => A): F[A] = FD.defer(F.pure(a))
+      def delay[A](a: => A): F[A] = FS.delay(a)
     }
 }
