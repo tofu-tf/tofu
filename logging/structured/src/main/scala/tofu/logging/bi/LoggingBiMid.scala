@@ -7,11 +7,15 @@ import tofu.higherKind.bi.BiMid
 import tofu.logging.{LogRenderer, Loggable, LoggedValue, Logging}
 import tofu.syntax.bindInv._
 
-/** logging middleware for binary tc parameterized traits */
+/** Logging middleware for binary typeconstructor parameterized algebras
+  * Alg[LoggingBiMid] is a special form of implicit evidence of injectable logging support
+  * generally you don't need `Logging` instance to derive this
+  * so choice of logging postponed until this middleware is attached to the core instance
+  */
 abstract class LoggingBiMid[E, A] {
-  def around[F[+_, +_]: Bind: Logging.Safe](fa: F[E, A]): F[E, A]
+  def around[F[+_, +_]: Bind: Logging.SafeBase](fa: F[E, A]): F[E, A]
 
-  def toMid[F[+_, +_]: Bind: Logging.Safe]: BiMid[F, E, A] = fx => around(fx)
+  def toMid[F[+_, +_]: Bind: Logging.SafeBase]: BiMid[F, E, A] = fx => around(fx)
 }
 
 object LoggingBiMid extends LoggingBiMidBuilder.Default {
@@ -19,13 +23,16 @@ object LoggingBiMid extends LoggingBiMidBuilder.Default {
 }
 
 abstract class LoggingBiMidBuilder {
-  def onEnter[F[+_, +_]: Logging.Safe](
+
+  /** do some logging upon enter to method invocation */
+  def onEnter[F[+_, +_]: Logging.SafeBase](
       cls: Class[_],
       method: String,
       args: Seq[(String, LoggedValue)]
   ): F[Nothing, Unit]
 
-  def onLeave[F[+_, +_]: Logging.Safe](
+  /** do some logging after leaving method invocation with known result or error */
+  def onLeave[F[+_, +_]: Logging.SafeBase](
       cls: Class[_],
       method: String,
       args: Seq[(String, LoggedValue)],
@@ -45,7 +52,7 @@ abstract class LoggingBiMidBuilder {
     def result: LoggingBiMid[Err, Res] = new LoggingBiMid[Err, Res] {
       private[this] val argSeq = args.toSeq
 
-      def around[F[+_, +_]: Bind: Logging.Safe](fa: F[Err, Res]): F[Err, Res] =
+      def around[F[+_, +_]: Bind: Logging.SafeBase](fa: F[Err, Res]): F[Err, Res] =
         onEnter(cls, method, argSeq) *>
           fa.tapBoth(
             err => onLeave(cls, method, argSeq, err, ok = false),
@@ -62,8 +69,8 @@ abstract class LoggingBiMidBuilder {
 object LoggingBiMidBuilder {
   class Default extends LoggingBiMidBuilder {
     def onEnter[F[_, _]](cls: Class[_], method: String, args: Seq[(String, LoggedValue)])(implicit
-        F: Logging.Safe[F]
-    ): F[Nothing, Unit] = F.debug("entering {}.{} {}", cls.getName(), method, new ArgsLoggable(args))
+        F: Logging.SafeBase[F]
+    ): F[Nothing, Unit] = F.debug("entering {} {}", cls.getName(), method, new ArgsLoggable(args))
 
     def onLeave[F[_, _]](
         cls: Class[_],
@@ -72,9 +79,12 @@ object LoggingBiMidBuilder {
         res: LoggedValue,
         ok: Boolean,
     )(implicit
-        F: Logging.Safe[F]
+        F: Logging.SafeBase[F]
     ): F[Nothing, Unit] =
-      F.debug("leaving {}.{} {}", cls.getName(), method, new ArgsLoggable(args))
+      if (ok)
+        F.debug("leaving {} {} result is {}", method, new ArgsLoggable(args), res)
+      else
+        F.error("error during {} {} error is {}", method, new ArgsLoggable(args), res)
   }
 
   class ArgsLoggable(values: Seq[(String, LoggedValue)]) extends LoggedValue {

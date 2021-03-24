@@ -59,8 +59,8 @@ class LoggingMidSuite extends AnyFunSuite {
     assert(result === Left(MissingName()))
     assert(
       logs === Vector(
-        s"[Debug] <$GreeterName> entering $GreeterName.hello ()",
-        s"[Error] <$GreeterName> error during $GreeterName.hello () error is $ErrName"
+        s"[Debug] <$GreeterName> entering hello ()",
+        s"[Error] <$GreeterName> error during hello () error is $ErrName"
       )
     )
   }
@@ -71,10 +71,10 @@ class LoggingMidSuite extends AnyFunSuite {
 
     assert(
       logs === Vector(
-        s"[Debug] <$GreeterName> entering $GreeterName.setName (name = Tofu)",
-        s"[Debug] <$GreeterName> leaving $GreeterName.setName (name = Tofu) with result ()",
-        s"[Debug] <$GreeterName> entering $GreeterName.hello ()",
-        s"[Debug] <$GreeterName> leaving $GreeterName.hello () with result Hello, Tofu"
+        s"[Debug] <$GreeterName> entering setName (name = Tofu)",
+        s"[Debug] <$GreeterName> leaving setName (name = Tofu) with result ()",
+        s"[Debug] <$GreeterName> entering hello ()",
+        s"[Debug] <$GreeterName> leaving hello () with result Hello, Tofu"
       )
     )
   }

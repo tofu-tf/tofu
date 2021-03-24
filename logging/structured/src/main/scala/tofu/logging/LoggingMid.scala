@@ -10,7 +10,11 @@ import tofu.higherKind.derived.HigherKindedMacros
 import tofu.Errors
 import tofu.syntax.handle._
 
-/** Logging middleware */
+/** Logging middleware
+  * Alg[LoggingMid] is a special form of implicit evidence of injectable logging support
+  * generally you don't need `Logging` instance to derive this
+  * so choice of logging postponed until this middleware is attached to the core instance
+  */
 abstract class LoggingMid[A] {
   def around[F[_]: Monad: LoggingBase](fa: F[A]): F[A]
 
@@ -25,10 +29,12 @@ object LoggingMid extends LoggingMidBuilder.DefaultImpl {
 }
 
 /** Logging middleware generator */
-
 trait LoggingMidBuilder {
+
+  /** do some logging upon enter to method invocation */
   def onEnter[F[_]: LoggingBase](cls: Class[_], method: String, args: Seq[(String, LoggedValue)]): F[Unit]
 
+  /** do some logging after leaving method invocation with known result */
   def onLeave[F[_]: LoggingBase](
       cls: Class[_],
       method: String,
@@ -73,7 +79,11 @@ object LoggingMidBuilder {
   class DefaultImpl extends Default
 }
 
-/** Logging middleware */
+/** Logging middleware supporting error reporting
+  * Alg[LoggingErrMid[E, *]] is a special form of implicit evidence of injectable logging support
+  * generally you don't need `Logging` instance to derive this
+  * so choice of logging postponed until this middleware is attached to the core instance
+  */
 abstract class LoggingErrMid[E, A] extends LoggingMid[A] {
   def aroundErr[F[_]: Monad: Errors[*[_], E]: LoggingBase](fa: F[A]): F[A]
 

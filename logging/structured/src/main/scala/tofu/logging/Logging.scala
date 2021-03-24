@@ -106,7 +106,8 @@ object Logging {
 
   type ForService[F[_], Svc] <: Logging[F]
 
-  type Safe[F[_, _]] = Logging[F[Nothing, *]]
+  type Safe[F[_, _]]     = Logging[F[Nothing, *]]
+  type SafeBase[F[_, _]] = LoggingBase[F[Nothing, *]]
 
   def apply[F[_]](implicit logging: Logging[F]): Logging[F] = logging
 
