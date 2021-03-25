@@ -26,12 +26,13 @@ object loggingMid
   def instance[U[f[_]]]: U[LoggingMid] = macro HigherKindedMacros.factorizeThis[U]
 }
 
-/** Default logging with errors derivation mechanism for unary effect algebras,
-  * adds logging around invocation of each method at DEBUG level and error alert at ERROR level
-  * class name is not printed by default
+/** Default logging derivation mechanism for unary effect algebras with error reporting.
   *
-  * for customization create object with same parents and abstract type member Result
-  * and redefine [onEnter], [onLeave] and [onFault] methods of the LoggingErrMidBuilder trait
+  * Adds logging around the invocation of each method at DEBUG level and error alert at ERROR level
+  * @note Class name is not printed by default.
+  *
+  * For customization create object with the same parents and abstract type member `Result`
+  * and redefine [onEnter], [onLeave] and [onFault] methods of the `LoggingErrMidBuilder` trait.
   */
 object loggingMidTry
     extends LoggingErrMidBuilder.DefaultImpl[Throwable] with DerivationKN3[LoggingErrMid.Try] with PassTypeArgs
@@ -40,12 +41,13 @@ object loggingMidTry
   def instance[U[f[_]]]: U[Result] = macro HigherKindedMacros.factorizeThis[U]
 }
 
-/** Default logging with errors derivation mechanism for binary effect algebras,
-  * adds logging around invocation of each method at DEBUG level and error alert at ERROR level
-  * class name is not printed by default
+/** Default logging with errors derivation mechanism for binary effect algebras.
   *
-  * for customization create object with same parents and abstract type member Result
-  * and redefine [onEnter], [onLeave] methods of the LoggingBiMidBuilder trait
+  * Adds logging around invocation of each method at DEBUG level and error alert at ERROR level
+  * @note Class name is not printed by default.
+  *
+  * For customization create object with the same parents and abstract type member `Result`
+  * and redefine [onEnter], [onLeave] methods of the `LoggingBiMidBuilder` trait.
   */
 object loggingBiMid
     extends LoggingBiMidBuilder.Default with DerivationKN11[LoggingBiMid.Of] with PassTypeArgs
