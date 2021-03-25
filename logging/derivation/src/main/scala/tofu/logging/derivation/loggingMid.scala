@@ -11,12 +11,14 @@ import tofu.logging.builder.LoggingMidBuilder
 import tofu.logging.builder.LoggingErrMidBuilder
 import tofu.logging.builder.LoggingBiMidBuilder
 
-/** Default logging derivation mechanism unary effect algebras,,
-  * adds logging around successful invocation of each method at DEBUG level
-  * class name is not printed by default
+/** Default logging derivation mechanism for unary effect algebras
   *
-  * for customization create object with same parents and abstract type member Result
-  * and redefine [onEnter] and [onLeave] methods of the LoggingMidBuilder trait
+  * Adds logging around the successful invocation of each method at DEBUG level.
+  *
+  * @note Class name is not printed by default.
+  *
+  * For customization create an object with the same parents and abstract type member `Result`
+  * and redefine [onEnter] and [onLeave] methods of the `LoggingMidBuilder` trait.
   */
 object loggingMid
     extends LoggingMidBuilder.Default with DerivationKN3[LoggingMid.Of] with PassTypeArgs with ParamRequire[Loggable] {
