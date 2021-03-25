@@ -5,9 +5,11 @@ import tofu.higherKind.derived.HigherKindedMacros
 import derevo.DerivationKN3
 import derevo.DerivationKN11
 import tofu.logging.bi.LoggingBiMid
-import tofu.logging.bi.LoggingBiMidBuilder
 import derevo.PassTypeArgs
 import derevo.ParamRequire
+import tofu.logging.builder.LoggingMidBuilder
+import tofu.logging.builder.LoggingErrMidBuilder
+import tofu.logging.builder.LoggingBiMidBuilder
 
 /** Default logging derivation mechanism unary effect algebras,,
   * adds logging around successful invocation of each method at DEBUG level

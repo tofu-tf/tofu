@@ -7,7 +7,7 @@ import tofu.logging.Logging.{Debug, Error, Info, Trace, Warn}
 import tofu.{Delay, WithContext}
 
 object UniversalLogging {
-  final def enabled(level: Logging.Level, logger: Logger): Boolean = level match {
+  private[impl] final def enabled(level: Logging.Level, logger: Logger): Boolean = level match {
     case Trace => logger.isTraceEnabled()
     case Debug => logger.isDebugEnabled()
     case Info  => logger.isInfoEnabled()
@@ -15,20 +15,22 @@ object UniversalLogging {
     case Error => logger.isErrorEnabled()
   }
 
-  final def write(level: Logging.Level, logger: Logger, message: String, values: Seq[LoggedValue]): Unit = level match {
-    case Trace => logger.trace(message, values: _*)
-    case Debug => logger.debug(message, values: _*)
-    case Info  => logger.info(message, values: _*)
-    case Warn  => logger.warn(message, values: _*)
-    case Error => logger.error(message, values: _*)
-  }
-  final def writeMarker(
+  private[impl] final def write(level: Logging.Level, logger: Logger, message: String, values: Seq[LoggedValue]): Unit =
+    level match {
+      case Trace => logger.trace(message, values: _*)
+      case Debug => logger.debug(message, values: _*)
+      case Info  => logger.info(message, values: _*)
+      case Warn  => logger.warn(message, values: _*)
+      case Error => logger.error(message, values: _*)
+    }
+
+  private[impl] final def writeMarker(
       level: Logging.Level,
       logger: Logger,
       marker: Marker,
       message: String,
       values: Seq[LoggedValue]
-  ): Unit                                                                                                =
+  ): Unit =
     level match {
       case Trace => logger.trace(marker, message, values: _*)
       case Debug => logger.debug(marker, message, values: _*)
