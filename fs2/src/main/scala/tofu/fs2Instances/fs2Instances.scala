@@ -1,7 +1,7 @@
 package tofu
 package fs2Instances
 import _root_.fs2._
-import cats.effect.{Concurrent, ExitCase, Sync, Timer}
+import cats.effect.{Concurrent, ExitCase, Sync}
 import cats.tagless.FunctorK
 import cats.{FlatMap, Functor, ~>}
 import tofu.higherKind.Embed
@@ -10,6 +10,7 @@ import tofu.streams._
 import tofu.syntax.funk._
 
 import scala.concurrent.duration.FiniteDuration
+import cats.effect.Temporal
 
 private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   private[this] val fs2HKInstanceAny = new FS2StreamHKInstance[Any]
@@ -60,7 +61,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
         ffa.parJoin(maxConcurrent)
     }
 
-  implicit def fs2PaceInstance[F[_]: Timer]: Pace[Stream[F, *]] =
+  implicit def fs2PaceInstance[F[_]: Temporal]: Pace[Stream[F, *]] =
     new Pace[Stream[F, *]] {
 
       override def throttled[A](fa: Stream[F, A])(rate: FiniteDuration): Stream[F, A] = fa.metered(rate)
@@ -68,7 +69,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override def delay[A](fa: Stream[F, A])(d: FiniteDuration): Stream[F, A] = fa.delayBy(d)
     }
 
-  implicit def fs2TemporalInstance[F[_]: Timer: Concurrent]: Temporal[Stream[F, *], Chunk] =
+  implicit def fs2TemporalInstance[F[_]: Temporal: Concurrent]: Temporal[Stream[F, *], Chunk] =
     new Temporal[Stream[F, *], Chunk] {
       override def groupWithin[A](fa: Stream[F, A])(n: Int, d: FiniteDuration): Stream[F, Chunk[A]] =
         fa.groupWithin(n, d)

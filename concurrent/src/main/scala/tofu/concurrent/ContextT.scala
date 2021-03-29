@@ -8,6 +8,7 @@ import tofu.optics.Contains
 import tofu.syntax.funk.{funK, funKFrom}
 import tofu.syntax.monadic._
 import tofu.{HasContextRun, WithLocal}
+import cats.effect.{ MonadCancel, Temporal }
 
 /** a ReaderT analog, allowing to have context referring resulting type
   *  for instance you can define
@@ -120,7 +121,7 @@ trait ContextTInstancesU extends ContextTInstancesV { self: ContextTInstances =>
 }
 
 trait ContextTInstancesT extends ContextTInstancesU { self: ContextTInstances =>
-  final implicit def contextTBracket[F[+_]: Bracket[*[_], E], C[_[_]], E]: Bracket[ContextT[F, C, *], E] =
+  final implicit def contextTBracket[F[+_]: Bracket[*[_], E], C[_[_]], E]: MonadCancel[ContextT[F, C, *], E] =
     new ContextTBracketI
 }
 
@@ -158,12 +159,10 @@ trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
   final implicit def contextTParallel[F[+_]: Parallel, C[_[_]]: InvariantK]: Parallel[ContextT[F, C, *]] =
     new ContextTParallelI[F, C]
 
-  final implicit def contextTTimer[F[+_], C[_[_]]](implicit t: Timer[F]): Timer[ContextT[F, C, *]] =
-    Timer.TimerOps[F](t).mapK(ContextT.liftF)
+  final implicit def contextTTimer[F[+_], C[_[_]]](implicit t: Temporal[F]): Temporal[ContextT[F, C, *]] =
+    Temporal.TimerOps[F](t).mapK(ContextT.liftF)
 
-  final implicit def contextTContextShift[F[+_], C[_[_]]](implicit
-      cs: ContextShift[F]
-  ): ContextShift[ContextT[F, C, *]] =
+  final implicit def contextTContextShift[F[+_], C[_[_]]]: ContextShift[ContextT[F, C, *]] =
     new ContextTContextShift[F, C]
 
   final implicit def contextTUnlifting[F[+_]: Monad, In[_[_]], Out[_[_]]](implicit

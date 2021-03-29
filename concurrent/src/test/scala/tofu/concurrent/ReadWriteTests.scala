@@ -1,7 +1,6 @@
 package tofu.concurrent
 
-import cats.effect.concurrent.{Deferred, Ref}
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.IO
 import cats.instances.list._
 import cats.instances.vector._
 import cats.syntax.applicative._
@@ -16,13 +15,14 @@ import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.Random
+import cats.effect.{ Deferred, Ref, Temporal }
 
 @Ignore
 class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
 
   implicit override def executionContext: ExecutionContext = ExecutionContext.Implicits.global
   implicit val cs: ContextShift[IO]                        = IO.contextShift(executionContext)
-  implicit val timer: Timer[IO]                            = IO.timer(executionContext)
+  implicit val timer: Temporal[IO]                            = IO.timer(executionContext)
   val smallDelay                                           = timer.sleep(20.millis)
 
   def rwOf(initial: Int, maxReaders: Int = 5): IO[ConcurrentReadWrite[IO, Int]] =

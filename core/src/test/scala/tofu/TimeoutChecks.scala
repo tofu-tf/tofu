@@ -1,13 +1,14 @@
 package tofu
 
 import cats.data.ReaderT
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.IO
+import cats.effect.Temporal
 
 object TimeoutChecks {
-  def checks(implicit cs: ContextShift[IO], t: Timer[IO]) = {
+  def checks(implicit t: Temporal[IO]) = {
     type T[A] = ReaderT[IO, String, A]
     ContextShift[T]
-    Timer[T]
+    Temporal[T]
 
     Timeout[T]
     Timeout[IO]

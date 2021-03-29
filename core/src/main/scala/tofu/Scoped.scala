@@ -5,8 +5,7 @@ import cats._
 import tofu.syntax.funk._
 import tofu.syntax.monadic._
 import scala.concurrent.{ExecutionContext, Future}
-import cats.effect.{ContextShift, Async}
-import cats.effect.Blocker
+import cats.effect.Async
 
 /** can be used for scoped transformations
   * @tparam Tag arbitrary type tag for discriminating scopes
@@ -85,7 +84,7 @@ trait ScopedExecute[Tag, F[_]] extends Scoped[Tag, F] {
 trait ScopedInstances {
   final def makeExecute[Tag, F[_]](
       ec: ExecutionContext
-  )(implicit cs: ContextShift[F], F: Async[F]): ScopedExecute[Tag, F] =
+  )(implicit F: Async[F]): ScopedExecute[Tag, F] =
     new ScopedExecute[Tag, F] {
       def runScoped[A](fa: F[A]): F[A] = cs.evalOn(ec)(fa)
 
@@ -97,13 +96,10 @@ trait ScopedInstances {
 
   final implicit def asyncExecute[F[_]](implicit
       ec: ExecutionContext,
-      cs: ContextShift[F],
       F: Async[F]
   ): Execute[F] = makeExecute[Scoped.Main, F](ec)
 
   final implicit def blockerExecute[F[_]](implicit
-      cs: ContextShift[F],
-      blocker: Blocker,
       F: Async[F]
   ): BlockExec[F] = makeExecute[Scoped.Blocking, F](blocker.blockingContext)
 }

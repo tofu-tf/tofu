@@ -1,7 +1,6 @@
 package tofu.concurrent
 import cats.{Applicative, Functor}
 import cats.effect.Sync
-import cats.effect.concurrent.Ref
 import tofu.Guarantee
 import tofu.concurrent.Atom.AtomByRef
 import tofu.higherKind.{RepresentableK, derived}
@@ -10,6 +9,7 @@ import tofu.syntax.monadic._
 import tofu.syntax.bracket._
 import cats.data.StateT
 import tofu.data.calc.CalcM
+import cats.effect.Ref
 
 /** a middleground between cats.concurrent.Ref and zio.Ref */
 trait Atom[+F[_], A] {

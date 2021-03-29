@@ -2,13 +2,13 @@ package tofu.concurrent
 
 import cats.ApplicativeError
 import cats.effect._
-import cats.effect.concurrent.{Deferred, Ref}
 import cats.effect.syntax.bracket._
 import cats.syntax.option._
 import tofu.syntax.monadic._
 
 import scala.annotation.nowarn
 import scala.collection.immutable.Queue
+import cats.effect.{ Deferred, Ref }
 
 /** A purely functional ReadWriteLock.
   *

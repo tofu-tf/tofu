@@ -1,9 +1,10 @@
 package tofu.concurrent
 import cats.{FlatMap, Monad}
-import cats.effect.concurrent.{Ref, Semaphore}
 import tofu.Fire
 import tofu.syntax.fire._
 import tofu.syntax.monadic._
+import cats.effect.Ref
+import cats.effect.std.Semaphore
 
 /** A mutable atomic reference augmented with effectful operations.
   * Can be thought as TF version of zio.RefM

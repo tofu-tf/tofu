@@ -1,12 +1,12 @@
 package tofu.concurrent.syntax
 import cats.data.OptionT
 import cats.effect.Resource
-import cats.effect.concurrent.Ref
 import cats.{Functor, Monad}
 import tofu.BracketThrow
 import tofu.concurrent.impl.FocusedRef
 import tofu.optics.{Contains, PProperty}
 import tofu.syntax.monadic._
+import cats.effect.Ref
 
 object ref {
   implicit final class TofuRefOps[F[_], A](private val self: Ref[F, A]) extends AnyVal {

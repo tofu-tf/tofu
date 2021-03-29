@@ -2,9 +2,10 @@ package tofu.concurrent
 
 import cats.{FlatMap, Functor, Monad}
 import tofu.lift.Lift
-import cats.effect.concurrent.{Ref, Semaphore}
 import tofu.syntax.monadic._
 import tofu.syntax.lift._
+import cats.effect.Ref
+import cats.effect.std.Semaphore
 
 /**  A less powerful version of [[tofu.concurrent.Agent]].
   *  It does not have the `fireUpdateM` method and thus can be created for greater variety of `F`

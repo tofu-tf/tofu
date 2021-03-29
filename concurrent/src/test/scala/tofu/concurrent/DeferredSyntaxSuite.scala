@@ -1,7 +1,6 @@
 package tofu.concurrent
 
 import org.scalatest.flatspec.AnyFlatSpec
-import cats.effect.ContextShift
 import cats.effect.IO
 import scala.concurrent.ExecutionContext
 import tofu.concurrent.syntax.deferred._

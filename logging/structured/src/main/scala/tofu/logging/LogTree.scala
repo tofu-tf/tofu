@@ -1,7 +1,6 @@
 package tofu.logging
 
 import cats.effect.SyncIO
-import cats.effect.concurrent.Ref
 import cats.instances.list._
 import cats.instances.unit._
 import tofu.syntax.monadic._
@@ -10,6 +9,7 @@ import cats.syntax.traverse._
 
 import cats.{Applicative, Monoid}
 import io.circe.Json
+import cats.effect.Ref
 
 sealed trait LogTree {
   import LogTree._

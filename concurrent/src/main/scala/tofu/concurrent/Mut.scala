@@ -2,12 +2,12 @@ package tofu
 package concurrent
 
 import cats.Functor
-import cats.effect.Bracket
-import cats.effect.concurrent.{MVar, Ref}
+import cats.effect.concurrent.MVar
 import cats.syntax.functor._
 import tofu.concurrent.Mut.FocusedMut
 import tofu.optics.Contains
 import tofu.syntax.bracket._
+import cats.effect.{ MonadCancel, Ref }
 
 /** simplified form of synchonized mutable variable, that could be satisfied both by MVar and Ref */
 @deprecated("use Atom / qvar.toAtom", since = "0.5.6")
@@ -21,7 +21,7 @@ trait Mut[F[_], A] {
 
 object Mut {
   def ref[F[_], A](ref: Ref[F, A]): Mut[F, A]                                        = new RefMut(ref)
-  def mvar[F[_], E, A](mvar: MVar[F, A])(implicit bracket: Bracket[F, E]): Mut[F, A] = new MVarMut(mvar)
+  def mvar[F[_], E, A](mvar: MVar[F, A])(implicit bracket: MonadCancel[F, E]): Mut[F, A] = new MVarMut(mvar)
 
   private class RefMut[F[_], A](ref: Ref[F, A]) extends Mut[F, A] {
     def get: F[A]                   = ref.get

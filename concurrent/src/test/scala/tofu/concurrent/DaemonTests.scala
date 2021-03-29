@@ -2,7 +2,7 @@ package tofu.concurrent
 
 import java.util.concurrent.Executors
 
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import tofu.concurrent.syntax.daemon._

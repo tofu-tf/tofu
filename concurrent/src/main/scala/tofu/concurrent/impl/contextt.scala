@@ -10,6 +10,7 @@ import tofu.syntax.monadic._
 import tofu.{RunContext, WithContext, WithRun}
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.ExecutionContext
+import cats.effect.MonadCancel
 
 trait ContextTInvariant[F[+_], C[_[_]]] extends Invariant[ContextT[F, C, *]] {
   implicit def F: Invariant[F]
@@ -228,8 +229,8 @@ trait ContextTMonadError[F[+_], C[_[_]], E]
 
 final class ContextTMonadErrorI[F[+_], C[_[_]], E](implicit val F: MonadError[F, E]) extends ContextTMonadError[F, C, E]
 
-trait ContextTBracket[F[+_], C[_[_]], E] extends Bracket[ContextT[F, C, *], E] with ContextTMonadError[F, C, E] {
-  implicit def F: Bracket[F, E]
+trait ContextTBracket[F[+_], C[_[_]], E] extends MonadCancel[ContextT[F, C, *], E] with ContextTMonadError[F, C, E] {
+  implicit def F: MonadCancel[F, E]
 
   final override def bracketCase[A, B](
       acquire: ContextT[F, C, A]
@@ -240,9 +241,9 @@ trait ContextTBracket[F[+_], C[_[_]], E] extends Bracket[ContextT[F, C, *], E] w
   )(use: A => ContextT[F, C, B])(release: A => ContextT[F, C, Unit]): ContextT[F, C, B]                      =
     c => F.bracket(acquire.run(c))(a => use(a).run(c))(a => release(a).run(c))
   final override def uncancelable[A](fa: ContextT[F, C, A]): ContextT[F, C, A]                               =
-    c => F.uncancelable(fa.run(c))
+    c => F.uncancelable(_ => fa.run(c))
   final override def guarantee[A](fa: ContextT[F, C, A])(finalizer: ContextT[F, C, Unit]): ContextT[F, C, A] =
-    c => F.guarantee(fa.run(c))(finalizer.run(c))
+    c => F.guarantee(fa.run(c), finalizer.run(c))
   final override def guaranteeCase[A](
       fa: ContextT[F, C, A]
   )(finalizer: ExitCase[E] => ContextT[F, C, Unit]): ContextT[F, C, A]                                       =
@@ -251,7 +252,7 @@ trait ContextTBracket[F[+_], C[_[_]], E] extends Bracket[ContextT[F, C, *], E] w
     c => F.onCancel(fa.run(c))(finalizer.run(c))
 }
 
-final class ContextTBracketI[F[+_], C[_[_]], E](implicit val F: Bracket[F, E]) extends ContextTBracket[F, C, E]
+final class ContextTBracketI[F[+_], C[_[_]], E](implicit val F: MonadCancel[F, E]) extends ContextTBracket[F, C, E]
 
 trait ContextTSync[F[+_], C[_[_]]] extends Sync[ContextT[F, C, *]] with ContextTBracket[F, C, Throwable] {
   implicit def F: Sync[F]
@@ -272,7 +273,7 @@ final class ContextTLiftIOI[F[+_], C[_[_]]](implicit val F: LiftIO[F]) extends C
 
 trait ContextTAsync[F[+_], C[_[_]]]                                  extends Async[ContextT[F, C, *]] with ContextTLiftIO[F, C] with ContextTSync[F, C] {
   implicit def F: Async[F]
-  final override def async[A](k: (Either[Throwable, A] => Unit) => Unit): ContextT[F, C, A]                  = _ => F.async(k)
+  final override def async[A](k: (Either[Throwable, A] => Unit) => Unit): ContextT[F, C, A]                  = _ => F.async_(k)
   final override def asyncF[A](k: (Either[Throwable, A] => Unit) => ContextT[F, C, Unit]): ContextT[F, C, A] =
     c => F.asyncF(cb => k(cb).run(c))
   final override def never[A]: ContextT[F, C, A]                                                             = _ => F.never

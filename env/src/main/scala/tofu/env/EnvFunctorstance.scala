@@ -9,9 +9,10 @@ import tofu.memo.Memoize
 
 import scala.concurrent.duration.{FiniteDuration, TimeUnit}
 import scala.concurrent.{ExecutionContext, Future}
+import cats.effect.Temporal
 
 private[env] class EnvFunctorstance[E]
-    extends Concurrent[Env[E, *]] with Timer[Env[E, *]] with WithRun[Env[E, *], Task, E] with Execute[Env[E, *]]
+    extends Concurrent[Env[E, *]] with Temporal[Env[E, *]] with WithRun[Env[E, *], Task, E] with Execute[Env[E, *]]
     with Memoize[Env[E, *]] with ContextShift[Env[E, *]] with Timeout[Env[E, *]] with Start[Env[E, *]] {
   import Env._
 

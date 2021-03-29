@@ -3,13 +3,14 @@ package tofu.syntax
 import cats.Applicative
 import cats.data.EitherT
 import cats.effect.concurrent.MVar
-import cats.effect.{Bracket, ExitCase}
+import cats.effect.ExitCase
 import cats.effect.syntax.bracket._
 import cats.syntax.either._
 import tofu.{Finally, Guarantee}
 import tofu.syntax.monadic._
 
 import scala.annotation.nowarn
+import cats.effect.MonadCancel
 
 object bracket {
   implicit class TofuBracketOps[F[_], A](val fa: F[A]) extends AnyVal {
@@ -123,7 +124,7 @@ object bracket {
     /** special bracket form that could handle both Either logic error and F underlying error */
     def bracketCaseErr[U, B](
         use: A => EitherT[F, E, B]
-    )(release: (A, ExitCase[Either[E, U]]) => F[Unit])(implicit bracket: Bracket[F, U]): EitherT[F, E, B] =
+    )(release: (A, ExitCase[Either[E, U]]) => F[Unit])(implicit bracket: MonadCancel[F, U]): EitherT[F, E, B] =
       EitherT(
         e.value.bracketCase[Either[E, B]] {
           //could not acquire resource
@@ -147,7 +148,7 @@ object bracket {
     /** special bracket form that could handle both Either logic error and F underlying error */
     def bracketIncompleteErr[U, B](
         use: A => EitherT[F, E, B]
-    )(release: A => F[Unit])(implicit bracket: Bracket[F, U]): EitherT[F, E, B] =
+    )(release: A => F[Unit])(implicit bracket: MonadCancel[F, U]): EitherT[F, E, B] =
       bracketCaseErr[U, B](use) { (a, cas) =>
         cas match {
           case ExitCase.Completed => bracket.unit

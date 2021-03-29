@@ -75,7 +75,7 @@ object unlift {
 
     def suspend[A](thunk: => G[A]): G[A] = G.defer(thunk)
 
-    def async[A](k: (Either[Throwable, A] => Unit) => Unit): G[A] = G.async(k)
+    def async[A](k: (Either[Throwable, A] => Unit) => Unit): G[A] = G.async_(k)
 
     def asyncF[A](k: (Either[Throwable, A] => Unit) => G[Unit]): G[A] = G.asyncF[A](k)
 

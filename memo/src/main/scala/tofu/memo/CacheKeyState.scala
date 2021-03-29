@@ -1,7 +1,7 @@
 package tofu.memo
 
 import cats.data.OptionT
-import cats.effect.concurrent.{MVar, Ref}
+import cats.effect.concurrent.MVar
 import cats.instances.list._
 import cats.instances.option._
 import cats.syntax.foldable._
@@ -15,6 +15,7 @@ import tofu.syntax.bracket._
 import tofu.syntax.monadic._
 
 import scala.annotation.nowarn
+import cats.effect.Ref
 
 trait CacheKeyState[F[_], -K, A] {
   def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B]

@@ -1,7 +1,7 @@
 package tofu
 
 import cats.data.ReaderT
-import cats.effect.{ContextShift, IO}
+import cats.effect.IO
 
 class IOSummonChecks(implicit cs: ContextShift[IO]) {
   implicitly[Fire[IO[*]]]

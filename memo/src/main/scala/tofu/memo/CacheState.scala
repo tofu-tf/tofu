@@ -1,7 +1,7 @@
 package tofu
 package memo
 
-import cats.effect.concurrent.{MVar, Ref}
+import cats.effect.concurrent.MVar
 import cats.tagless.InvariantK
 import cats.{Functor, Monad, ~>}
 import tofu.concurrent.{MVars, MakeMVar, MakeRef, Refs}
@@ -10,6 +10,7 @@ import tofu.syntax.bracket._
 import tofu.syntax.monadic._
 
 import scala.annotation.nowarn
+import cats.effect.Ref
 
 abstract class CacheState[F[_], A] {
   def runOperation[B](op: CacheOperation[F, A, B]): F[B]

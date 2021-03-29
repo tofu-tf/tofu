@@ -1,10 +1,10 @@
 package tofu.env
 
-import cats.effect.concurrent.Ref
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import cats.effect.Ref
 
 class EnvTraverseSuite extends AnyFlatSpec with Matchers {
   object IntRef extends EnvSpecializedFunctions[Ref[Task, Int]]

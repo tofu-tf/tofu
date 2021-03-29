@@ -2,7 +2,6 @@ package tofu
 package config
 
 import cats.data.ReaderT
-import cats.effect.concurrent.Ref
 import cats.{Monad, Parallel}
 import tofu.concurrent._
 import tofu.config.ConfigTContext.Fail
@@ -13,6 +12,7 @@ import cats.Applicative
 import cats.~>
 import tofu.syntax.funk._
 import cats.syntax.applicativeError._
+import cats.effect.Ref
 
 trait ConfigMonad[F[_]] {
   implicit def monad: Monad[F]

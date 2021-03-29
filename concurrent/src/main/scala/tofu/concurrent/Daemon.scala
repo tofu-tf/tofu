@@ -14,6 +14,8 @@ import tofu.syntax.start._
 import tofu.concurrent.syntax.deferred._
 
 import scala.annotation.nowarn
+import cats.MonadThrow
+import cats.effect.MonadCancelThrow
 
 trait Daemonic[F[_], E] {
   def daemonize[A](process: F[A]): F[Daemon[F, E, A]]
@@ -44,7 +46,7 @@ object Daemonic extends DaemonicInstances {
     }
 
   /** instance making safe Daemons that throws exception on joining canceled fiber */
-  implicit def safeInstance[F[_]: Start: TryableDeferreds: BracketThrow]: Daemonic[F, Throwable] =
+  implicit def safeInstance[F[_]: Start: TryableDeferreds: MonadCancelThrow]: Daemonic[F, Throwable] =
     mkInstance[F, Throwable](
       Function2K[Fiber[F, *], Promise[F, Throwable, *]]((fib, promise) => new Daemon.SafeImpl(fib, promise))
     )

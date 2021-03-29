@@ -1,11 +1,13 @@
 package tofu.syntax
 
 import cats.{Functor, ~>}
-import cats.effect.concurrent.{Deferred, MVar, MVar2, Ref, Semaphore}
+import cats.effect.concurrent.{MVar, MVar2}
 import cats.tagless.{FunctorK, InvariantK}
 import tofu.lift.{IsoK, Lift, Unlift}
 
 import scala.annotation.nowarn
+import cats.effect.{ Deferred, Ref }
+import cats.effect.std.Semaphore
 
 object lift {
   implicit final class LiftSyntax[F[_], A](private val fa: F[A]) extends AnyVal {

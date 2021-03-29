@@ -1,6 +1,7 @@
-import cats.effect.Bracket
+
 import cats.{ApplicativeError, MonadError}
 import cats.data.Ior
+import cats.effect.MonadCancel
 
 package object tofu {
   type In[C, F[_]] = WithContext[F, C]
@@ -15,7 +16,7 @@ package object tofu {
 
   type ApplicativeThrow[F[_]] = ApplicativeError[F, Throwable]
   type MonadThrow[F[_]]       = MonadError[F, Throwable]
-  type BracketThrow[F[_]]     = Bracket[F, Throwable]
+  type BracketThrow[F[_]]     = MonadCancel[F, Throwable]
 
   type Throws[F[_]]  = Raise[F, Throwable]
   type Catches[F[_]] = Handle[F, Throwable]

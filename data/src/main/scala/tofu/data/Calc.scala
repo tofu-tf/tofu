@@ -154,7 +154,7 @@ object Calc {
 
   class CalcFunctorInstance[R, S, E]
       extends MonadError[Calc[R, S, S, E, *], E] with cats.Defer[Calc[R, S, S, E, *]]
-      with StackSafeMonad[Calc[R, S, S, E, *]] with cats.effect.Bracket[Calc[R, S, S, E, *], E] {
+      with StackSafeMonad[Calc[R, S, S, E, *]] with cats.effect.MonadCancel[Calc[R, S, S, E, *], E] {
     def defer[A](fa: => Calc[R, S, S, E, A]): Calc[R, S, S, E, A]                                              = Calc.defer(fa)
     def raiseError[A](e: E): Calc[R, S, S, E, A]                                                               = Calc.raise(e)
     def handleErrorWith[A](fa: Calc[R, S, S, E, A])(f: E => Calc[R, S, S, E, A]): Calc[R, S, S, E, A]          = fa.handleWith(f)

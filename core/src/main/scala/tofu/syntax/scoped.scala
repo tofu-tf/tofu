@@ -6,7 +6,6 @@ import tofu.syntax.monadic._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import cats.effect.Sync
-import cats.effect.Blocker
 
 object scoped {
   import Scoped.{Blocking, Calculation, Main}
