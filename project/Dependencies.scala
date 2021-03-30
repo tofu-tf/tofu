@@ -62,7 +62,7 @@ object Dependencies {
 
     val collectionCompat = "2.4.3"
 
-    val log4Cats = "2.0.0"
+    val log4Cats = "1.2.1"
   }
 
   val catsCore         = "org.typelevel"              %% "cats-core"               % Version.cats
