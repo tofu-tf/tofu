@@ -60,7 +60,7 @@ object Dependencies {
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.4.2"
+    val collectionCompat = "2.4.3"
 
     val log4Cats = "1.2.1"
   }
