@@ -17,7 +17,7 @@ object Dependencies {
 
     val catsEffect = "2.4.0"
 
-    val catsMtl = "1.1.2"
+    val catsMtl = "1.1.3"
 
     val catsTagless = "0.12"
 
