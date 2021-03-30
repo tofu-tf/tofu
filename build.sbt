@@ -80,9 +80,10 @@ lazy val loggingStr = project
 lazy val loggingDer = project
   .in(file("logging/derivation"))
   .dependsOn(loggingStr)
+  .dependsOn(opticsMacro % "compile->test", derivation % "compile->test")
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(derevo, magnolia),
+    libraryDependencies ++= Seq(derevo, magnolia, slf4j),
     publishName := "logging-derivation"
   )
 
@@ -316,18 +317,17 @@ lazy val defaultScalacOptions = scalacOptions := {
 }
 
 lazy val scalacWarningConfig = scalacOptions += {
-  // ignore unused imports that cannot be removed due to cross-compilation
-  val suppressUnusedImports = Seq[String](
-    // put here relative file paths whose unused imports should be ignored,
-    // e.g. "scala/tofu/config/typesafe.scala"
-  ).map { src =>
-    s"src=${scala.util.matching.Regex.quote(src)}&cat=unused-imports:iv"
-  }
+  // // ignore unused imports that cannot be removed due to cross-compilation
+  // val suppressUnusedImports = Seq(
+  //   "scala/tofu/config/typesafe.scala"
+  // ).map { src =>
+  //   s"src=${scala.util.matching.Regex.quote(src)}&cat=unused-imports:s"
+  // }.mkString(",")
 
   // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
   val verboseWarnings = "any:wv"
 
-  s"-Wconf:${(suppressUnusedImports :+ verboseWarnings).mkString(",")}"
+  s"-Wconf:$verboseWarnings"
 }
 
 lazy val macros = Seq(

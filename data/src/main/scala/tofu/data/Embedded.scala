@@ -84,8 +84,7 @@ trait ExceptTInstances1 {
 
       def raise[E, A](e: E): ExceptT[F, E, A] = Embedded(e.asLeftF[F, A])
 
-      def foldWith[E, A, X, R](
-          fa: ExceptT[F, E, A],
+      def foldWith[E, A, X, R](fa: ExceptT[F, E, A])(
           h: E => ExceptT[F, X, R],
           f: A => ExceptT[F, X, R]
       ): ExceptT[F, X, R] = Embedded(fa.value.flatMap {

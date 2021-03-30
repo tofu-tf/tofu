@@ -145,6 +145,65 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       override def embMethod(retConst: Type): Tree                         = q"${summon[EmbedBK[Any]](retConst)}.biembed"
     })
 
+  /** Implement a possibly refined `algebra` with the provided `members`. */
+  def implementSimple(applied: Type)(members: Iterable[Tree]): Tree = {
+    // If `members.isEmpty` we need an extra statement to ensure the generation of an anonymous class.
+    val nonEmptyMembers = if (members.isEmpty) q"()" :: Nil else members
+
+    applied match {
+      case RefinedType(parents, scope) =>
+        val refinements = delegateTypes(applied, scope.filterNot(_.isAbstract)) { (tpe, _) =>
+          tpe.typeSignatureIn(applied).resultType
+        }
+
+        q"new ..$parents { ..$refinements; ..$nonEmptyMembers }"
+      case _                           =>
+        q"new $applied { ..$nonEmptyMembers }"
+    }
+  }
+
+  type Place
+  val Place = symbolOf[Place]
+
+  def factorizeApply(
+      builder: Tree,
+      Alg: Type,
+      F: Type,
+  ): Tree = {
+    val Af = Alg match {
+      case PolyType(_, TypeRef(t, s, as)) => typeRef(t, s, as.init :+ F)
+      case _                              => appliedType(Alg, List(F))
+    }
+
+    val members = overridableMembersOf(Alg)
+    val types   = delegateAbstractTypes(Alg, members, Alg)
+
+    val prepared = c.freshName(TermName("builder"))
+    val methods  = delegateMethods(Af, members, NoSymbol) { case method =>
+      val methodName  = method.name.encodedName.toString
+      val start: Tree = method.returnType match {
+        case TypeRef(_, _, xs) => q"$prepared.start[..$xs]($methodName)"
+        case _                 =>
+          c.abort(c.enclosingPosition, s"can't unpack ${method.name}'s return type: ${method.returnType}")
+      }
+
+      val withParams =
+        method.paramLists.iterator.flatten
+          .filter(vd => !vd.mods.hasFlag(Flag.IMPLICIT))
+          .foldLeft(start) {
+            case (b, ValDef(_, param, _, _)) =>
+              q"$b.arg(${param.encodedName.toString()}, $param)"
+            case (_, p)                      => c.abort(c.enclosingPosition, s"unexpected error during handling argument $p of $method")
+          }
+
+      method.copy(body = q"$withParams.result")
+    }
+
+    q"""
+    val $prepared = $builder.prepare[$Alg]
+    ${implementSimple(Af)(types ++ methods)}"""
+  }
+
   def representableK[Alg[_[_]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
     instantiate[RepresentableK[Alg]](tag)(tabulate, productK, mapK, embedf)
 
@@ -156,4 +215,30 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
   def embedB[Alg[_[_, _]]](implicit tag: WeakTypeTag[Alg[Any]]): Tree =
     instantiate[EmbedBK[Alg]](tag)(biembed)
+
+  def factorize[Builder, F[_], Alg[_[_]]](builder: Tree)(implicit
+      F: WeakTypeTag[F[Any]],
+      Alg: WeakTypeTag[Alg[Any]]
+  ): Tree = factorizeApply(builder, Alg.tpe, F.tpe)
+
+  def factorizeThis[Alg[_[_]]](implicit
+      Alg: WeakTypeTag[Alg[Any]]
+  ): Tree = {
+
+    val that = c.typecheck(tq"${c.prefix.tree}.Result", mode = c.TYPEmode).tpe
+    factorizeApply(c.prefix.tree, Alg.tpe, that)
+  }
+
+  def bifactorize[Builder, F[_, _], Alg[_[_, _]]](builder: Tree)(implicit
+      F: WeakTypeTag[F[Any, Any]],
+      Alg: WeakTypeTag[Alg[Any]]
+  ): Tree = factorizeApply(builder, Alg.tpe, F.tpe)
+
+  def bifactorizeThis[Alg[_[_, _]]](implicit
+      Alg: WeakTypeTag[Alg[Any]]
+  ): Tree = {
+    val that = c.typecheck(tq"${c.prefix.tree}.Result", mode = c.TYPEmode).tpe
+    factorizeApply(c.prefix.tree, Alg.tpe, that)
+  }
+
 }

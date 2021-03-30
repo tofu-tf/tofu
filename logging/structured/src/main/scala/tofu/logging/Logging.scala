@@ -1,17 +1,17 @@
 package tofu.logging
 
+import scala.reflect.ClassTag
+
 import cats.kernel.Monoid
-import cats.syntax.apply._
 import cats.{Applicative, Apply, FlatMap}
 import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.compat.unused
 import tofu.higherKind.{Function2K, RepresentableK}
-import tofu.logging.Logging._
+import tofu.logging.Logging.{Debug, Error, Info, Level, Trace, Warn}
 import tofu.logging.impl.EmbedLogging
+import tofu.syntax.monadic._
 import tofu.syntax.monoidalK._
 import tofu.{Init, higherKind}
-
-import scala.reflect.ClassTag
 
 /** Typeclass equivalent of Logger.
   * May contain specified some Logger instance
@@ -63,6 +63,8 @@ trait LoggingBase[F[_]] {
     writeCause(Warn, message, cause, values: _*)
   def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     writeCause(Error, message, cause, values: _*)
+
+  def asLogging: Logging[F]
 }
 
 /** Logging tagged with some arbitrary tag type.
@@ -94,10 +96,18 @@ object ServiceLogging {
   */
 trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
   final def widen[G[a] >: F[a]]: Logging[G] = this.asInstanceOf[Logging[G]]
+
+  def asLogging: Logging[F] = this
 }
 
 object Logging {
+
+  def mid: LoggingMidFunctions.type = LoggingMidFunctions
+
   type ForService[F[_], Svc] <: Logging[F]
+
+  type Safe[F[_, _]]     = Logging[F[Nothing, *]]
+  type SafeBase[F[_, _]] = LoggingBase[F[Nothing, *]]
 
   def apply[F[_]](implicit logging: Logging[F]): Logging[F] = logging
 
@@ -133,15 +143,4 @@ object Logging {
 private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
   private[this] val noop                                                  = Applicative[F].unit
   def write(level: Level, message: String, values: LoggedValue*): F[Unit] = noop
-}
-
-/** Mix-in trait that supposed to be extended by companion of service
-  *
-  * @example {{{
-  * class FooService[F[_] : FooService.Log]
-  * object FooService extends LoggingCompanion[FooService]
-  * }}}
-  */
-trait LoggingCompanion[U[_[_]]] {
-  type Log[F[_]] = ServiceLogging[F, U[Any]]
 }

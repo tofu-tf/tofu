@@ -23,7 +23,7 @@ import zio.blocking._
 
 class ZioTofuInstance[R, E]
     extends Errors[ZIO[R, E, *], E] with Start[ZIO[R, E, *]] with Finally[ZIO[R, E, *], Exit[E, *]]
-    with Execute[ZIO[R, E, *]] {
+    with Execute[ZIO[R, E, *]] with Delay[ZIO[R, E, *]] {
   final def restore[A](fa: ZIO[R, E, A]): ZIO[R, E, Option[A]]                             = fa.option
   final def raise[A](err: E): ZIO[R, E, A]                                                 = ZIO.fail(err)
   final def lift[A](fa: ZIO[R, E, A]): ZIO[R, E, A]                                        = fa
@@ -63,10 +63,14 @@ class ZioTofuInstance[R, E]
   def executionContext: ZIO[R, E, ExecutionContext] = ZIO.runtime[R].map(_.platform.executor.asEC)
 
   def deferFutureAction[A](f: ExecutionContext => Future[A]): ZIO[R, E, A] = ZIO.fromFuture(f).orDie
+
+  def delay[A](a: => A): ZIO[R, E, A] = ZIO.effectTotal(a)
 }
 
 class RioTofuInstance[R] extends ZioTofuInstance[R, Throwable] {
   override def deferFutureAction[A](f: ExecutionContext => Future[A]): ZIO[R, Throwable, A] = ZIO.fromFuture(f)
+
+  override def delay[A](a: => A): ZIO[R, Throwable, A] = ZIO.effect(a)
 }
 
 class ZioTofuWithRunInstance[R, E] extends WithRun[ZIO[R, E, *], ZIO[Any, E, *], R] {

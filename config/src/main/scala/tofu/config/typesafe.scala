@@ -10,7 +10,6 @@ import tofu.concurrent.Refs
 import tofu.syntax.monadic._
 import tofu.syntax.funk._
 import cats.effect.SyncIO
-
 import scala.annotation.nowarn
 
 object typesafe {
