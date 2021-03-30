@@ -29,7 +29,7 @@ object Dependencies {
 
     val slf4j = "1.7.30"
 
-    val fs2 = "2.5.3"
+    val fs2 = "2.5.4"
 
     val logback = "1.2.3"
 
