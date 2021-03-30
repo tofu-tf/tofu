@@ -43,7 +43,7 @@ object Dependencies {
 
     val zio = "1.0.5"
 
-    val zioCats = "2.3.1.0"
+    val zioCats = "2.4.0.0"
 
     val shapeless = "2.3.3"
 
