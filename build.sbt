@@ -3,7 +3,7 @@ import com.typesafe.sbt.SbtGit.git
 
 moduleName := "tofu"
 
-val libVersion = "0.10.0"
+val libVersion = "0.10.1"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
