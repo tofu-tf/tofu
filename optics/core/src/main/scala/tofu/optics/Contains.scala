@@ -2,7 +2,6 @@ package tofu.optics
 
 import cats._
 import cats.data._
-import cats.syntax.bifunctor._
 import cats.syntax.functor._
 import tofu.optics.classes.PChoice
 import tofu.optics.data._
@@ -111,6 +110,8 @@ object PContains extends OpticCompanion[PContains] with OpticProduct[PContains] 
 
   implicit final class PContainsOps[S, T, A, B](private val self: PContains[S, T, A, B]) extends AnyVal {
     def focusState[F[+_]: Functor, R](state: IndexedStateT[F, A, B, R]): IndexedStateT[F, S, T, R] =
-      IndexedStateT.applyF(state.runF.map(afbr => (s: S) => afbr(self.extract(s)).map(_.leftMap(self.set(s, _)))))
+      IndexedStateT.applyF[F, S, T, R](
+        state.runF.map(afbr => (s: S) => afbr(self.extract(s)).map { case (b, r) => (self.set(s, b), r) })
+      )
   }
 }
