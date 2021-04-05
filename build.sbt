@@ -279,21 +279,44 @@ lazy val commonModules =
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
 
-lazy val docs = project // new documentation project
-  .in(file("tofu-docs"))
-  .settings(
-    defaultSettings,
-    unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(allModuleRefs: _*),
-    target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
-    cleanFiles += (target in (ScalaUnidoc, unidoc)).value,
-    docusaurusCreateSite := docusaurusCreateSite.dependsOn(unidoc in Compile).value,
-    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(unidoc in Compile).value
+lazy val paradocs = (project in file("docs"))
+  .enablePlugins(
+    SitePlugin,
+    SiteScaladocPlugin,
+    ParadoxPlugin,
+    ParadoxSitePlugin,
+    ParadoxMaterialThemePlugin
   )
-  .dependsOn(allModuleDeps: _*)
-  .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
+  .settings(
+    Compile / paradox / sourceDirectory := baseDirectory.value / "src",
+    version := libVersion,
+    paradoxTheme := Some("io.github.jonas" % "paradox-material-theme" % "0.6.0"),
+    paradoxGroups := Map("Language" -> Seq("Scala")),
+    paradoxProperties ++= Map(
+      "scaladoc.base_url" -> "api/"
+    ),
+    Compile / paradoxMaterialTheme ~= { defaultTheme =>
+      val theme = defaultTheme
+        .withRepository(
+          uri("https://github.com/tofu-tf/tofu")
+        )
+      theme.copy(
+        theme.properties ++ Map(
+          "repo.type" -> "github",
+          "repo.name" -> "tofu-tf/tofu"
+        )
+      )
+    },
+    apidocRootPackage := "tofu"
+  )
+
 
 lazy val tofu = project
   .in(file("."))
+  .enablePlugins(ParadoxPlugin)
+  .settings(
+    paradoxTheme := Some(builtinParadoxTheme("generic"))
+  )
   .settings(defaultSettings)
   .settings(libraryDependencies += "tf.tofu" %% "derevo-cats-tagless" % Version.derevo)
   .aggregate((coreModules ++ commonModules).map(x => x: ProjectReference): _*)
@@ -336,7 +359,7 @@ lazy val macros = Seq(
 )
 
 lazy val simulacrumOptions = Seq(
-  libraryDependencies += simulacrum % Provided,
+  libraryDependencies += simulacrum % Compile,
   pomPostProcess := { node =>
     import scala.xml.transform.{RewriteRule, RuleTransformer}
 
