@@ -116,7 +116,14 @@ trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, 
     recoverWith(fa)(pf.andThen(raise[A] _))
 }
 
-object Errors extends DataEffectComp[Errors]
+object Errors extends DataEffectComp[Errors] {
+
+  trait Companion[E] {
+    type Raise[F[_]]  = tofu.Raise[F, E]
+    type Handle[F[_]] = tofu.Handle[F, E]
+    type Errors[F[_]] = tofu.Errors[F, E]
+  }
+}
 
 /** Base trait for instance search
   */
