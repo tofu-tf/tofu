@@ -143,7 +143,7 @@ lazy val env = project
 
 lazy val observable = project.settings(
   defaultSettings,
-  libraryDependencies += monix,
+  libraryDependencies ++= Vector(monix, catsEffect),
   libraryDependencies += scalatest
 )
 
@@ -170,7 +170,7 @@ lazy val opticsCore = project
 lazy val opticsInterop = project
   .in(file("optics/interop"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, libraryDependencies += monocle, publishName := "optics-interop")
+  .settings(defaultSettings, libraryDependencies ++= Vector(monocle, catsCore), publishName := "optics-interop")
 
 lazy val opticsMacro = project
   .in(file("optics/macro"))
@@ -259,7 +259,7 @@ lazy val streams = project
   .dependsOn(core)
 
 lazy val coreModules =
-  Seq(
+  Vector(
     higherKindCore,
     core,
     opticsMacro,
@@ -274,7 +274,7 @@ lazy val coreModules =
   )
 
 lazy val commonModules =
-  Seq(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)
+  Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)
 
 lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
@@ -283,7 +283,10 @@ lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
   .settings(
     defaultSettings,
-    unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(allModuleRefs: _*),
+    addCompilerPlugin(simulacrum),
+    macros,
+    scalacOptions in (ScalaUnidoc, unidoc) += "-Ymacro-expand:none",
+    unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(allModuleRefs: _*) -- inProjects(opticsMacro),
     target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
     cleanFiles += (target in (ScalaUnidoc, unidoc)).value,
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(unidoc in Compile).value,
@@ -295,7 +298,10 @@ lazy val docs = project // new documentation project
 lazy val tofu = project
   .in(file("."))
   .settings(defaultSettings)
-  .settings(libraryDependencies += "tf.tofu" %% "derevo-cats-tagless" % Version.derevo)
+  .settings(
+    libraryDependencies += "tf.tofu" %% "derevo-cats-tagless" % Version.derevo,
+    libraryDependencies += catsEffect,
+  )
   .aggregate((coreModules ++ commonModules).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 

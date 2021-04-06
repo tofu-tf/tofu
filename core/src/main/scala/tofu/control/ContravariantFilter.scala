@@ -1,11 +1,9 @@
 package tofu.control
 
 import cats.Contravariant
-import simulacrum.typeclass
 
-import scala.annotation.nowarn
+import tofu.internal.EffectComp
 
-@typeclass @nowarn("cat=unused-imports")
 trait ContravariantFilter[F[_]] extends Contravariant[F] with Optional[F] {
   def contramapFilter[A, B](fa: F[A])(f: B => Option[A]): F[B]
 
@@ -17,3 +15,5 @@ trait ContravariantFilter[F[_]] extends Contravariant[F] with Optional[F] {
   def contraFilter[A](fa: F[A])(f: A => Boolean): F[A] =
     contramapFilter(fa)(a => if (f(a)) Some(a) else None)
 }
+
+object ContravariantFilter extends EffectComp[ContravariantFilter]

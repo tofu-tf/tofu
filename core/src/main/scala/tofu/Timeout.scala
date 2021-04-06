@@ -1,20 +1,18 @@
 package tofu
 
 import cats.effect.{Concurrent, ContextShift, IO, Timer}
-import simulacrum.typeclass
 import tofu.compat.unused
 import tofu.syntax.feither._
 import tofu.internal.NonTofu
 
-import scala.annotation.nowarn
 import scala.concurrent.duration.FiniteDuration
+import tofu.internal.EffectComp
 
-@typeclass @nowarn("cat=unused-imports")
 trait Timeout[F[_]] {
   def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A]
 }
 
-object Timeout extends LowPriorTimeoutImplicits {
+object Timeout extends LowPriorTimeoutImplicits with EffectComp[Timeout] {
   implicit def io(implicit timer: Timer[IO], cs: ContextShift[IO]): Timeout[IO] = new Timeout[IO] {
     override def timeoutTo[A](fa: IO[A], after: FiniteDuration, fallback: IO[A]): IO[A] = fa.timeoutTo(after, fallback)
   }

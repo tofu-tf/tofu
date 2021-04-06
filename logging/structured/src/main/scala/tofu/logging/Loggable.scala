@@ -1,21 +1,18 @@
 package tofu.logging
 
-import scala.annotation.nowarn
-
 import scala.{PartialFunction => PF, specialized => sp}
 
 import cats.syntax.show._
 import cats.{Show}
-import simulacrum.typeclass
 
 import tofu.control.Consume
 import tofu.logging.Loggable.Base
 import tofu.logging.impl._
 import tofu.syntax.logRenderer._
+import tofu.internal.DataComp
 
 /** Typeclass for adding custom log values to message
   */
-@typeclass @nowarn("cat=unused-imports")
 trait Loggable[A] extends Loggable.Base[A] {
 
   /** same as this loggable, but do not show any info in the message string */
@@ -42,10 +39,9 @@ trait Loggable[A] extends Loggable.Base[A] {
   def narrow[B <: A]: Loggable[B] = this.asInstanceOf[Loggable[B]]
 }
 
-object Loggable extends LoggableInstances {
+object Loggable extends LoggableInstances with DataComp[Loggable] {
 
   /** contravariant version of `Loggable` if one need it */
-  @typeclass @nowarn("cat=unused-imports")
   trait Base[-A] {
     self =>
 
@@ -118,6 +114,8 @@ object Loggable extends LoggableInstances {
 
     def narrow[B <: A]: Loggable[B]
   }
+
+  object Base extends DataComp[Base]
 
   /** do nothing log */
   def empty[A]: SingleValueLoggable[A] = EmptyLoggable.narrow[A]

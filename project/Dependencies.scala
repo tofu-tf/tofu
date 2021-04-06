@@ -1,5 +1,6 @@
 import sbt._
 import Keys._
+import org.apache.ivy.core.module.descriptor.ExcludeRule
 
 object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
@@ -65,18 +66,25 @@ object Dependencies {
     val log4Cats = "1.2.1"
   }
 
+  val noCatsCore       =
+    Vector(ExclusionRule("org.typelevel", "cats-core_2.13"), ExclusionRule("org.typelevel", "cats-core_2.12"))
+  val noCatsEffect     =
+    Vector(
+      ExclusionRule("org.typelevel", "cats-effect_2.13"),
+      ExclusionRule("org.typelevel", "cats-effect_2.12")
+    )
   val catsCore         = "org.typelevel"              %% "cats-core"               % Version.cats
   val catsFree         = "org.typelevel"              %% "cats-free"               % Version.cats
   val catsMtl          = "org.typelevel"              %% "cats-mtl"                % Version.catsMtl
-  val monocle          = "com.github.julien-truffaut" %% "monocle-core"            % Version.monocle
+  val monocle          = "com.github.julien-truffaut" %% "monocle-core"            % Version.monocle excludeAll (noCatsCore: _*)
   val alleycats        = "org.typelevel"              %% "alleycats-core"          % Version.cats
   val catsEffect       = "org.typelevel"              %% "cats-effect"             % Version.catsEffect
-  val monix            = "io.monix"                   %% "monix"                   % Version.monix
+  val monix            = "io.monix"                   %% "monix"                   % Version.monix excludeAll (noCatsEffect: _*)
   val logback          = "ch.qos.logback"              % "logback-classic"         % Version.logback
   val slf4j            = "org.slf4j"                   % "slf4j-api"               % Version.slf4j     % Provided
-  val circeCore        = "io.circe"                   %% "circe-core"              % Version.circe
-  val circeJava8       = "io.circe"                   %% "circe-java8"             % Version.circe
-  val circeDerivation  = "io.circe"                   %% "circe-derivation"        % Version.circe
+  val circeCore        = "io.circe"                   %% "circe-core"              % Version.circe excludeAll (noCatsCore: _*)
+  val circeJava8       = "io.circe"                   %% "circe-java8"             % Version.circe excludeAll (noCatsCore: _*)
+  val circeDerivation  = "io.circe"                   %% "circe-derivation"        % Version.circe excludeAll (noCatsCore: _*)
   val magnolia         = "com.propensive"             %% "magnolia"                % Version.magnolia
   val derevo           = "tf.tofu"                    %% "derevo-core"             % Version.derevo
   val derevoTagless    = "tf.tofu"                    %% "derevo-cats-tagless"     % Version.derevo
