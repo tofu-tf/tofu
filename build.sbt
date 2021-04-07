@@ -285,12 +285,12 @@ lazy val docs = project // new documentation project
     defaultSettings,
     addCompilerPlugin(simulacrum),
     macros,
-    scalacOptions in (ScalaUnidoc, unidoc) += "-Ymacro-expand:none",
-    unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(allModuleRefs: _*) -- inProjects(opticsMacro),
-    target in (ScalaUnidoc, unidoc) := (baseDirectory in LocalRootProject).value / "website" / "static" / "api",
-    cleanFiles += (target in (ScalaUnidoc, unidoc)).value,
-    docusaurusCreateSite := docusaurusCreateSite.dependsOn(unidoc in Compile).value,
-    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(unidoc in Compile).value
+    ScalaUnidoc / unidoc / scalacOptions += "-Ymacro-expand:none",
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*) -- inProjects(opticsMacro),
+    ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
+    cleanFiles += (ScalaUnidoc / unidoc / target).value,
+    docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
+    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
   .dependsOn(allModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
@@ -378,7 +378,7 @@ lazy val publishSettings = Seq(
     if (branch == "master") publishVersion.value
     else s"${publishVersion.value}-$branch-SNAPSHOT"
   },
-  sources in (Compile, doc) := Seq.empty,
+  Compile / doc / sources := Seq.empty,
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/TinkoffCreditSystems/tofu"),
