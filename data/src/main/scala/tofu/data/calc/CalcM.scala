@@ -26,9 +26,9 @@ object CalcM extends CalcMInstances {
   def get[S]: CalcM[Nothing, Any, S, S, Nothing, S]           = Get()
   def set[S](s: S): CalcM[Nothing, Any, Any, S, Nothing, S]   = Set(s)
 
-  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, S2]                                  =
+  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, S2]       =
     get[S1].flatMapS(s => set(f(s)))
-  def state[S1, S2, A](f: S1 => (S2, A)): CalcM[Nothing, Any, S1, S2, Nothing, A]                            =
+  def state[S1, S2, A](f: S1 => (S2, A)): CalcM[Nothing, Any, S1, S2, Nothing, A] =
     get[S1].flatMapS { s1 =>
       val (s2, a) = f(s1)
       set(s2) as a
