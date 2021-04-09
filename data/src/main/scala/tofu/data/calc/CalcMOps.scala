@@ -161,7 +161,7 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
     }
   }
 
-  def runTailRecSingle[F1[+y] >: F[Any, y] @uv212, E1 >: E @uv212](r: R, init: SI)(implicit
+  def runTailRecSingle[F1[+y] >: F[Any, y] @uv212, E1 >: E](r: R, init: SI)(implicit
       F: Monad[F1],
       ev: E1 <:< Nothing
   ): F1[(SO, A)] = {
