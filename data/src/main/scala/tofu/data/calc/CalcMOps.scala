@@ -1,5 +1,6 @@
 package tofu.data.calc
 
+import cats.Monad
 import tofu.control.Bind
 import tofu.higherKind.bi.FunBK
 
@@ -156,6 +157,23 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
         case StepResult.Ok(s, a)                             => F.pure(Right((s, a)))
         case StepResult.Error(s, e)                          => F.raise(Right((s, e)))
         case wrap: StepResult.Wrap[F1, r, s, SO, x, E, m, A] => F.bimap(wrap.provided)(Left(_), Left(_))
+      }
+    }
+  }
+
+  def runTailRecSingle[F1[+y] >: F[Any, y] @uv212, E1 >: E @uv212](r: R, init: SI)(implicit
+      F: Monad[F1],
+      ev: E1 =:= Nothing
+  ): F1[(SO, A)] = {
+    type F2[+x, +y] = F1[y]
+    F.tailRecM[CalcM[F2, Any, Any, SO, Nothing, A], (SO, A)](
+      ev.substituteCo[CalcM[F2, Any, Any, SO, *, A]](this.provideSet(r, init).widenF[F2])
+    ) { s =>
+      s.step((), ()) match {
+        case StepResult.Ok(s, a)                                   => F.pure(Right((s, a)))
+        case err: StepResult.Error[SO, Nothing]                    => err.error
+        case wrap: StepResult.Wrap[F2, r, s, SO, x, Nothing, m, A] =>
+          F.map(wrap.inner)(m => Left(wrap.cont.success(wrap.state, m).provideSet(wrap.input, wrap.state)))
       }
     }
   }

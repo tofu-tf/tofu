@@ -7,6 +7,7 @@ import cats.Monoid
 
 import scala.annotation.tailrec
 import cats.evidence.As
+import tofu.data.CalcT
 
 sealed abstract class CalcM[+F[+_, +_], -R, -SI, +SO, +E, +A] extends CalcMOps[F, R, SI, SO, E, A] {
   def translateState[G[+_, +_], ST, R1](
@@ -26,12 +27,18 @@ object CalcM extends CalcMInstances {
   def get[S]: CalcM[Nothing, Any, S, S, Nothing, S]           = Get()
   def set[S](s: S): CalcM[Nothing, Any, Any, S, Nothing, S]   = Set(s)
 
-  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, S2]       =
+  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, S2]                                  =
     get[S1].flatMapS(s => set(f(s)))
-  def state[S1, S2, A](f: S1 => (S2, A)): CalcM[Nothing, Any, S1, S2, Nothing, A] =
+  def state[S1, S2, A](f: S1 => (S2, A)): CalcM[Nothing, Any, S1, S2, Nothing, A]                            =
     get[S1].flatMapS { s1 =>
       val (s2, a) = f(s1)
       set(s2) as a
+    }
+  def stateT[F[+_], S1, S2, A](f: S1 => F[(S2, A)]): CalcM[λ[(`+x`, `+y`) => F[y]], Any, S1, S2, Nothing, A] =
+    CalcM.get[S1].flatMapS { s1 =>
+      CalcT.lift(f(s1)).flatMapS { case (s2, x) =>
+        CalcM.set(s2) as x
+      }
     }
 
   def raise[S, E](e: E): CalcM[Nothing, Any, S, S, E, Nothing]           = Raise(e)
