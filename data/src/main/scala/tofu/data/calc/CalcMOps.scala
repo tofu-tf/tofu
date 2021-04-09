@@ -163,11 +163,11 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
 
   def runTailRecSingle[F1[+y] >: F[Any, y] @uv212, E1 >: E @uv212](r: R, init: SI)(implicit
       F: Monad[F1],
-      ev: E1 =:= Nothing
+      ev: E1 <:< Nothing
   ): F1[(SO, A)] = {
     type F2[+x, +y] = F1[y]
     F.tailRecM[CalcM[F2, Any, Any, SO, Nothing, A], (SO, A)](
-      ev.substituteCo[CalcM[F2, Any, Any, SO, *, A]](this.provideSet(r, init).widenF[F2])
+      ev.substituteCo[CalcM[F2, Any, Any, SO, +*, A]](this.provideSet(r, init).widenF[F2])
     ) { s =>
       s.step((), ()) match {
         case StepResult.Ok(s, a)                                   => F.pure(Right((s, a)))
