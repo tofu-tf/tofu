@@ -1,5 +1,6 @@
 ---
-id: logging title: Logging
+id: logging 
+title: Logging
 ---
 
 ## Installation
