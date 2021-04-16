@@ -104,6 +104,8 @@ class LoggableInstances {
     ): R                                 = receiver.noop(input)
   }
 
+  final implicit val nothingLoggable: Loggable[Nothing] = unitLoggable.narrow
+
   final implicit val throwableLoggable: Loggable[Throwable] = new Loggable[Throwable] {
     override def fields[I, V, R, S](cause: Throwable, i: I)(implicit r: LogRenderer[I, V, R, S]): R = {
       val strWriter = new StringWriter()

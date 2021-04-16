@@ -74,7 +74,7 @@ object LoggingBiMidBuilder {
   class Default extends LoggingBiMidBuilder {
     def onEnter[F[_, _]](cls: Class[_], method: String, args: Seq[(String, LoggedValue)])(implicit
         F: Logging.SafeBase[F]
-    ): F[Nothing, Unit] = F.debug("entering {} {}", cls.getName(), method, new ArgsLoggable(args))
+    ): F[Nothing, Unit] = F.debug("entering {} {}", method, new ArgsLoggable(args))
 
     def onLeave[F[_, _]](
         cls: Class[_],

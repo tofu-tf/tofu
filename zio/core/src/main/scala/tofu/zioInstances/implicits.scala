@@ -38,6 +38,8 @@ private[zioInstances] class ZioTofuImplicits1 extends ZioTofuImplicits2 {
 
   @inline final implicit def rioTofuBlockingImplicit[R <: Blocking]: RioTofuBlockingInstance[R] =
     rioTofuBlockingInstance[R]
+
+  @inline final implicit def zioTofuBiImplicit[R]: ZioTofuBiInstance[R] = zioTofuBiInstance[R]
 }
 private[zioInstances] trait ZioTofuImplicits2 extends ZioTofuImplicits3 {
   @inline final implicit def zioTofuImplicit[R, E]: ZioTofuInstance[R, E]                             = zioTofuInstance
