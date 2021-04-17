@@ -119,31 +119,39 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       abort(s"Type ${t.typeSymbol.name.decodedName} is not a polymorphic type")
   }
 
-  def tabulate(algebra: Type): (String, Type => Tree) =
-    "tabulate" -> tabulateTemplate(algebra)(new TabulateParams {
-      def repk                            = reify(tofu.higherKind.RepK).tree
-      def tabMethod(retConst: Type): Tree = q"${summon[RepresentableK[Any]](retConst)}.tab"
-    })
+  def tabulate(algebra: Type): MethodDef =
+    MethodDef("tabulate") { case t =>
+      tabulateTemplate(algebra)(new TabulateParams {
+        def repk                            = reify(tofu.higherKind.RepK).tree
+        def tabMethod(retConst: Type): Tree = q"${summon[RepresentableK[Any]](retConst)}.tab"
+      })(t)
+    }
 
-  def bitabulate(algebra: Type): (String, Type => Tree) =
-    "bitabulate" -> tabulateTemplate(algebra)(new TabulateParams {
-      def repk                            = reify(tofu.higherKind.bi.RepBK).tree
-      def tabMethod(retConst: Type): Tree = q"${summon[RepresentableB[Any]](retConst)}.tab"
-    })
+  def bitabulate(algebra: Type): MethodDef =
+    MethodDef("bitabulate") { case t =>
+      tabulateTemplate(algebra)(new TabulateParams {
+        def repk                            = reify(tofu.higherKind.bi.RepBK).tree
+        def tabMethod(retConst: Type): Tree = q"${summon[RepresentableB[Any]](retConst)}.tab"
+      })(t)
+    }
 
-  def embedf(algebra: Type): (String, Type => Tree) =
-    "embed" -> embedTemplate(algebra)(new EmbedParams {
-      def join(instance: Symbol, arg: Symbol, lam: Tree): Tree    = q"$instance.flatMap($arg)($lam)"
-      def joinEmb(instance: Symbol, arg: Symbol, lam: Tree): Tree = q"$instance.map($arg)($lam)"
-      def embMethod(retConst: Type): Tree                         = q"${summon[Embed[Any]](retConst)}.embed"
-    })
+  def embedf(algebra: Type): MethodDef =
+    MethodDef("embed") { case t =>
+      embedTemplate(algebra)(new EmbedParams {
+        def join(instance: Symbol, arg: Symbol, lam: Tree): Tree    = q"$instance.flatMap($arg)($lam)"
+        def joinEmb(instance: Symbol, arg: Symbol, lam: Tree): Tree = q"$instance.map($arg)($lam)"
+        def embMethod(retConst: Type): Tree                         = q"${summon[Embed[Any]](retConst)}.embed"
+      })(t)
+    }
 
-  def biembed(algebra: Type): (String, Type => Tree) =
-    "biembed" -> embedTemplate(algebra)(new EmbedParams {
-      override def join(instance: Symbol, arg: Symbol, lam: Tree): Tree    = q"$instance.foldWith($arg)($lam)($lam)"
-      override def joinEmb(instance: Symbol, arg: Symbol, lam: Tree): Tree = q"$instance.bimap($lam, $lam)"
-      override def embMethod(retConst: Type): Tree                         = q"${summon[EmbedBK[Any]](retConst)}.biembed"
-    })
+  def biembed(algebra: Type): MethodDef =
+    MethodDef("biembed") { case t =>
+      embedTemplate(algebra)(new EmbedParams {
+        override def join(instance: Symbol, arg: Symbol, lam: Tree): Tree    = q"$instance.foldWith($arg)($lam)($lam)"
+        override def joinEmb(instance: Symbol, arg: Symbol, lam: Tree): Tree = q"$instance.bimap($lam, $lam)"
+        override def embMethod(retConst: Type): Tree                         = q"${summon[EmbedBK[Any]](retConst)}.biembed"
+      })(t)
+    }
 
   /** Implement a possibly refined `algebra` with the provided `members`. */
   def implementSimple(applied: Type)(members: Iterable[Tree]): Tree = {
@@ -192,7 +200,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
           .filter(vd => !vd.mods.hasFlag(Flag.IMPLICIT))
           .foldLeft(start) {
             case (b, ValDef(_, param, _, _)) =>
-              q"$b.arg(${param.encodedName.toString()}, $param)"
+              q"$b.arg(${param.encodedName.toString}, $param)"
             case (_, p)                      => c.abort(c.enclosingPosition, s"unexpected error during handling argument $p of $method")
           }
 

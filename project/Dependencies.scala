@@ -20,13 +20,13 @@ object Dependencies {
 
     val catsMtl = "1.1.3"
 
-    val catsTagless = "0.12"
+    val catsTagless = "0.13.0"
 
     val monocle = "2.1.0"
 
     val enumeratum = "1.6.1"
 
-    val derevo = "0.12.2"
+    val derevo = "0.12.3"
 
     val slf4j = "1.7.30"
 
