@@ -42,7 +42,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
     c.inferImplicitValue(tpe).orElse(abort(s"could not find implicit value of type $tpe"))
   }
 
-  private def tabulateTemplate(algebra: Type)(impl: TabulateParams): Type => Tree = {
+  private def tabulateTemplate(algebra: Type)(impl: TabulateParams): PartialFunction[Type, Tree] = {
     case PolyType(List(f), MethodType(List(hom), af)) =>
       val members = overridableMembersOf(af)
       val types   = delegateAbstractTypes(af, members, af)
@@ -76,11 +76,9 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
 
       val res = implement(algebra)(f)(types ++ methods)
       res
-    case t                                            =>
-      abort(s"Type ${t.typeSymbol.name.decodedName} is not a polymorphic type")
   }
 
-  private def embedTemplate(algebra: Type)(impl: EmbedParams): Type => Tree = {
+  private def embedTemplate(algebra: Type)(impl: EmbedParams): PartialFunction[Type, Tree] = {
     case PolyType(List(f), MethodType(List(faf), MethodType(List(fmonad), _))) =>
       def makeMethod(method: Method)(body: List[List[Tree]] => Tree): Method = {
         val params = methodArgs(method, algebra)
@@ -114,44 +112,33 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       }
 
       implement(Af)(f)(types ++ methods)
-
-    case t =>
-      abort(s"Type ${t.typeSymbol.name.decodedName} is not a polymorphic type")
   }
 
   def tabulate(algebra: Type): MethodDef =
-    MethodDef("tabulate") { case t =>
-      tabulateTemplate(algebra)(new TabulateParams {
-        def repk                            = reify(tofu.higherKind.RepK).tree
-        def tabMethod(retConst: Type): Tree = q"${summon[RepresentableK[Any]](retConst)}.tab"
-      })(t)
-    }
+    MethodDef("tabulate")(tabulateTemplate(algebra)(new TabulateParams {
+      def repk                            = reify(tofu.higherKind.RepK).tree
+      def tabMethod(retConst: Type): Tree = q"${summon[RepresentableK[Any]](retConst)}.tab"
+    }))
 
   def bitabulate(algebra: Type): MethodDef =
-    MethodDef("bitabulate") { case t =>
-      tabulateTemplate(algebra)(new TabulateParams {
-        def repk                            = reify(tofu.higherKind.bi.RepBK).tree
-        def tabMethod(retConst: Type): Tree = q"${summon[RepresentableB[Any]](retConst)}.tab"
-      })(t)
-    }
+    MethodDef("bitabulate")(tabulateTemplate(algebra)(new TabulateParams {
+      def repk                            = reify(tofu.higherKind.bi.RepBK).tree
+      def tabMethod(retConst: Type): Tree = q"${summon[RepresentableB[Any]](retConst)}.tab"
+    }))
 
   def embedf(algebra: Type): MethodDef =
-    MethodDef("embed") { case t =>
-      embedTemplate(algebra)(new EmbedParams {
-        def join(instance: Symbol, arg: Symbol, lam: Tree): Tree    = q"$instance.flatMap($arg)($lam)"
-        def joinEmb(instance: Symbol, arg: Symbol, lam: Tree): Tree = q"$instance.map($arg)($lam)"
-        def embMethod(retConst: Type): Tree                         = q"${summon[Embed[Any]](retConst)}.embed"
-      })(t)
-    }
+    MethodDef("embed")(embedTemplate(algebra)(new EmbedParams {
+      def join(instance: Symbol, arg: Symbol, lam: Tree): Tree    = q"$instance.flatMap($arg)($lam)"
+      def joinEmb(instance: Symbol, arg: Symbol, lam: Tree): Tree = q"$instance.map($arg)($lam)"
+      def embMethod(retConst: Type): Tree                         = q"${summon[Embed[Any]](retConst)}.embed"
+    }))
 
   def biembed(algebra: Type): MethodDef =
-    MethodDef("biembed") { case t =>
-      embedTemplate(algebra)(new EmbedParams {
-        override def join(instance: Symbol, arg: Symbol, lam: Tree): Tree    = q"$instance.foldWith($arg)($lam)($lam)"
-        override def joinEmb(instance: Symbol, arg: Symbol, lam: Tree): Tree = q"$instance.bimap($lam, $lam)"
-        override def embMethod(retConst: Type): Tree                         = q"${summon[EmbedBK[Any]](retConst)}.biembed"
-      })(t)
-    }
+    MethodDef("biembed")(embedTemplate(algebra)(new EmbedParams {
+      override def join(instance: Symbol, arg: Symbol, lam: Tree): Tree    = q"$instance.foldWith($arg)($lam)($lam)"
+      override def joinEmb(instance: Symbol, arg: Symbol, lam: Tree): Tree = q"$instance.bimap($lam, $lam)"
+      override def embMethod(retConst: Type): Tree                         = q"${summon[EmbedBK[Any]](retConst)}.biembed"
+    }))
 
   /** Implement a possibly refined `algebra` with the provided `members`. */
   def implementSimple(applied: Type)(members: Iterable[Tree]): Tree = {
