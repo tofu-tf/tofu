@@ -222,7 +222,7 @@ lazy val zioLogging =
       libraryDependencies ++= List(zio, zioCats, slf4j, logback % Test),
       publishName := "zio-logging"
     )
-    .dependsOn(loggingStr, loggingDer % "test")
+    .dependsOn(loggingStr, loggingDer % "test", zioCore % Test)
 
 lazy val zioInterop = project
   .in(file("zio"))

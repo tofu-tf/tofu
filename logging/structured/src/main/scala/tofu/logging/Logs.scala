@@ -76,6 +76,9 @@ object Logs extends LogsInstances0 {
   implicit def logs1Representable[Y[_]]: RepresentableK[Logs[*[_], Y]] =
     logs1RepresentableAny.asInstanceOf[RepresentableK[Logs[*[_], Y]]]
 
+  implicit val logs2UniversalRepresentable: RepresentableK[Logs[Id, *[_]]] =
+    higherKind.derived.genRepresentableK[Logs[Id, *[_]]]
+
   implicit def logs2MonoidalK[Y[_]](implicit Y: Applicative[Y]): MonoidalK[Logs[Y, *[_]]] =
     new Logs2MonoidalK[Y] { def I: Applicative[Y] = Y }
 
