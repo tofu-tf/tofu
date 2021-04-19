@@ -16,19 +16,19 @@ jobs:
      - uses: actions/checkout@v2
      
      - name: Cache jabba
-       uses: actions/cache@v2.1.4
+       uses: actions/cache@v2.1.5
        with:
         path: ~/.jabba
         key: ${{ runner.os }}-jabba-cache-${{ hashFiles('**/workflows/scala.yml') }}
      
      - name: Cache SBT ivy cache
-       uses: actions/cache@v2.1.4
+       uses: actions/cache@v2.1.5
        with:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}  
     
      - name: Cache SBT
-       uses: actions/cache@v2.1.4
+       uses: actions/cache@v2.1.5
        with:
          path: ~/.sbt
          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}  
@@ -51,19 +51,19 @@ jobs:
     - uses: actions/checkout@v2
       
     - name: Cache jabba
-      uses: actions/cache@v2.1.4
+      uses: actions/cache@v2.1.5
       with:
         path: ~/.jabba
         key: ${{ runner.os }}-jabba-cache-${{ hashFiles('**/workflows/scala.yml') }}
       
     - name: Cache SBT ivy cache
-      uses: actions/cache@v2.1.4
+      uses: actions/cache@v2.1.5
       with:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
     
     - name: Cache SBT
-      uses: actions/cache@v2.1.4
+      uses: actions/cache@v2.1.5
       with:
         path: ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
@@ -81,19 +81,19 @@ jobs:
      - uses: actions/checkout@v2
      
      - name: Cache jabba
-       uses: actions/cache@v2.1.4
+       uses: actions/cache@v2.1.5
        with:
         path: ~/.jabba
         key: ${{ runner.os }}-jabba-cache-${{ hashFiles('**/workflows/scala.yml') }}
      
      - name: Cache SBT ivy cache
-       uses: actions/cache@v2.1.4
+       uses: actions/cache@v2.1.5
        with:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}  
     
      - name: Cache SBT
-       uses: actions/cache@v2.1.4
+       uses: actions/cache@v2.1.5
        with:
          path: ~/.sbt
          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}  
