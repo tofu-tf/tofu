@@ -66,7 +66,7 @@ Proud user of ToFu? Feel free to [add your company!](https://github.com/tofu-tf/
 
 <a href="https://www.raiffeisen.ru/en/"><img width="40%" src="logos/raiffeisen-logo.svg?sanitize=true" alt="Raiffeisen Bank Russia"/></a>
 
-<a href="https://rms.com/"><img width="40%" src="logos/rms-logo.svg?sanitize=true" alt="Risk Management Solutions" /></a>
+<a href="https://www.rms.com/"><img width="15%" src="logos/rms-logo.svg?sanitize=true" alt="Risk Management Solutions" /></a>
 
 # Contributing
 
