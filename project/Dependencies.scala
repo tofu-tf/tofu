@@ -63,7 +63,7 @@ object Dependencies {
 
     val collectionCompat = "2.4.3"
 
-    val log4Cats = "1.2.2"
+    val log4Cats = "1.3.0"
   }
 
   val noCatsCore       =
