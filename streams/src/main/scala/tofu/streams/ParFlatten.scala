@@ -12,3 +12,7 @@ trait ParFlatten[F[_]] {
     */
   final def parFlattenUnbounded[A](ffa: F[F[A]]): F[A] = parFlatten(ffa)(Int.MaxValue)
 }
+
+object ParFlatten {
+  def apply[F[_]](implicit ev: ParFlatten[F]): ParFlatten[F] = ev
+}

@@ -62,14 +62,14 @@ final case class WithTag[O[s, t, a, b], S, T, A, B, Tag](private val o: O[S, T, 
   )(implicit tag: PTagApply[O, A, B, U, V, Tag, Unit], cat: Category2[O]): WithTag[O1, S, T, U, V, tagger.Tag] =
     new WithTag(end)
 
-  def >>[O1[s, t, a, b] >: O[s, t, a, b]: Category2, U, V, X, Y](o1: O1[U, V, X, Y])(implicit
+  def >>[O1[s, t, a, b] >: O[s, t, a, b], U, V, X, Y](o1: O1[U, V, X, Y])(implicit
       tag: PTagApply[O, A, B, U, V, Tag, Unit],
       cat1: Category2[O],
       cat: Category2[O1],
   ): O1[S, T, X, Y] =
     cat.compose(o1, end)
 
-  def andThen[O1[s, t, a, b] >: O[s, t, a, b]: Category2, U, V, X, Y](o1: O1[U, V, X, Y])(implicit
+  def andThen[O1[s, t, a, b] >: O[s, t, a, b], U, V, X, Y](o1: O1[U, V, X, Y])(implicit
       tag: PTagApply[O, A, B, U, V, Tag, Unit],
       cat1: Category2[O],
       cat: Category2[O1],

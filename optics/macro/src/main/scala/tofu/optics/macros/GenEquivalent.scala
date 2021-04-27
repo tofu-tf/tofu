@@ -13,8 +13,7 @@ object GenEquivalent {
   /** Generate an [[Equivalent]] between an object `S` and `Unit`. */
   def unit[S]: Equivalent[S, Unit] = macro GenEquivalentImpl.genEquiv_unit_impl[S]
 
-  /**
-    * Generate an [[Equivalent]] between a case class `S` and its fields.
+  /** Generate an [[Equivalent]] between a case class `S` and its fields.
     *
     * Case classes with 0 fields will correspond with `Unit`, 1 with the field type, 2 or more with
     * a tuple of all field types in the same order as the fields themselves.
@@ -99,7 +98,7 @@ class GenEquivalentImplW(override val c: whitebox.Context) extends GenEquivalent
 
     val a = s.asTerm.name match {
       case n: TermName => n
-      case n: TypeName => fail("Expected a TermName, got " + n)
+      case n           => fail("Expected a TermName, got " + n)
     }
     val A = paramType(a)
     (a, A)

@@ -1,8 +1,9 @@
 package tofu.control
 
-import simulacrum.typeclass
+import tofu.internal.EffectComp
 
-@typeclass
 trait Optional[F[_]] {
   def optional[A](fa: F[A]): F[Option[A]]
 }
+
+object Optional extends EffectComp[Optional]

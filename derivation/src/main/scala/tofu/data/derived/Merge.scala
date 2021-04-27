@@ -2,13 +2,14 @@ package tofu.data
 package derived
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
-
 import cats.kernel.Semigroup
 import magnolia.{CaseClass, Magnolia, SealedTrait}
-import simulacrum.typeclass
 import derevo.Derivation
+import tofu.compat.unused
 
-@typeclass trait Merge[A] {
+import tofu.internal.DataComp
+
+trait Merge[A] {
   def merge(a: A, b: A): A
 }
 
@@ -24,11 +25,13 @@ trait MergeInstances1 {
   implicit def instance[A]: Merge[A] = macro Magnolia.gen[A]
 }
 
-object Merge extends Derivation[Merge] with MergeInstances1 {
+object Merge extends Derivation[Merge] with MergeInstances1 with DataComp[Merge] {
   implicit def optionInstance[A](implicit m: Merge[A]): Merge[Option[A]] =
     (ao, bo) => ao.fold(bo)(a => bo.fold(ao)(b => Some(m.merge(a, b))))
 
-  implicit def primitiveInstance[A: Primitive]: Merge[A] = (a: A, _: A) => a
+  implicit def primitiveInstance[A](implicit @unused ev: Primitive[A]): Merge[A] = (a: A, _: A) => a
+
+  val ops: tofu.syntax.merge.type = tofu.syntax.merge
 
   sealed class Primitive[A]
   final implicit object primitiveByte          extends Primitive[Byte]

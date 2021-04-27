@@ -16,26 +16,26 @@ jobs:
      - uses: actions/checkout@v2
      
      - name: Cache jabba
-       uses: actions/cache@v1
+       uses: actions/cache@v2.1.5
        with:
         path: ~/.jabba
         key: ${{ runner.os }}-jabba-cache-${{ hashFiles('**/workflows/scala.yml') }}
      
      - name: Cache SBT ivy cache
-       uses: actions/cache@v1
+       uses: actions/cache@v2.1.5
        with:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}  
     
      - name: Cache SBT
-       uses: actions/cache@v1
+       uses: actions/cache@v2.1.5
        with:
          path: ~/.sbt
          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}  
     
-     - uses: olafurpg/setup-scala@v5
+     - uses: olafurpg/setup-scala@v10
        with:
-         java-version: graalvm@20.0.0
+         java-version: graalvm-ce-java11@20.3.0
     
      - name: Check format
        run: sbt checkfmt
@@ -45,32 +45,32 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        scala: [2.12.12, 2.13.3]
+        scala: [2.12.13, 2.13.5]
 
     steps:
     - uses: actions/checkout@v2
       
     - name: Cache jabba
-      uses: actions/cache@v1
+      uses: actions/cache@v2.1.5
       with:
         path: ~/.jabba
         key: ${{ runner.os }}-jabba-cache-${{ hashFiles('**/workflows/scala.yml') }}
       
     - name: Cache SBT ivy cache
-      uses: actions/cache@v1
+      uses: actions/cache@v2.1.5
       with:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
     
     - name: Cache SBT
-      uses: actions/cache@v1
+      uses: actions/cache@v2.1.5
       with:
         path: ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
     
-    - uses: olafurpg/setup-scala@v5
+    - uses: olafurpg/setup-scala@v10
       with:
-        java-version: graalvm@20.0.0
+        java-version: graalvm-ce-java11@20.3.0
     
     - name: Test
       run: sbt ++${{matrix.scala}} test
@@ -81,26 +81,26 @@ jobs:
      - uses: actions/checkout@v2
      
      - name: Cache jabba
-       uses: actions/cache@v1
+       uses: actions/cache@v2.1.5
        with:
         path: ~/.jabba
         key: ${{ runner.os }}-jabba-cache-${{ hashFiles('**/workflows/scala.yml') }}
      
      - name: Cache SBT ivy cache
-       uses: actions/cache@v1
+       uses: actions/cache@v2.1.5
        with:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}  
     
      - name: Cache SBT
-       uses: actions/cache@v1
+       uses: actions/cache@v2.1.5
        with:
          path: ~/.sbt
          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}  
     
-     - uses: olafurpg/setup-scala@v5
+     - uses: olafurpg/setup-scala@v10
        with:
-         java-version: graalvm@20.0.0
+         java-version: graalvm-ce-java11@20.3.0
     
      - name: Doc
        run: sbt docs/mdoc

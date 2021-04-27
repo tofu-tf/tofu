@@ -2,7 +2,6 @@ package tofu.control.impl
 import cats.data.{EitherT, OptionT, ReaderT, WriterT}
 import cats.instances.either._
 import cats.instances.option._
-import cats.instances.tuple._
 import cats.{Applicative, Monad, Monoid}
 import tofu.control.Selective
 import tofu.syntax.either._

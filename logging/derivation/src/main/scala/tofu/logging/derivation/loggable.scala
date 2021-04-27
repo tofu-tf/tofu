@@ -4,8 +4,9 @@ package derivation
 import cats.Show
 import magnolia.{CaseClass, Magnolia, SealedTrait}
 import derevo.Derivation
+import derevo.NewTypeDerivation
 
-object loggable extends Derivation[Loggable] {
+object loggable extends Derivation[Loggable] with NewTypeDerivation[Loggable] {
   type Typeclass[A] = Loggable[A]
 
   def byShow[T: Show](name: String): Loggable[T] =

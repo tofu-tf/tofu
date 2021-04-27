@@ -6,6 +6,8 @@ import simulacrum.typeclass
 import tofu.syntax.funk
 import tofu.syntax.monadic._
 
+import scala.annotation.nowarn
+
 trait RepK[U[_[_]], A] {
   def apply[R[_]](ar: U[R]): R[A]
 }
@@ -26,7 +28,8 @@ object RepK {
   }
 }
 
-@typeclass trait RepresentableK[U[_[_]]] extends MonoidalK[U] with Embed[U] {
+@typeclass @nowarn("cat=unused-imports")
+trait RepresentableK[U[_[_]]] extends MonoidalK[U] with Embed[U] {
   import RepresentableK.Tab
   def tabulate[F[_]](hom: RepK[U, *] ~> F): U[F]
 

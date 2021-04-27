@@ -5,19 +5,19 @@ import cats.instances.option._
 import cats.syntax.coflatMap._
 import cats.syntax.option._
 import cats.{Applicative, Monad, Monoid}
-import simulacrum._
 import tofu.control.impl._
 
-@typeclass
-trait Selective[F[_]] extends Applicative[F] {
-  @noop def selectAp[A, B](fe: F[Either[A, B]])(ff: => F[A => B]): F[B]
+import tofu.internal.EffectComp
 
-  @noop def select[A](fo: F[Option[A]])(fa: => F[A]): F[A] =
+trait Selective[F[_]] extends Applicative[F] {
+  def selectAp[A, B](fe: F[Either[A, B]])(ff: => F[A => B]): F[B]
+
+  def select[A](fo: F[Option[A]])(fa: => F[A]): F[A] =
     selectAp[Unit, A](map(fo)(_.toRight(())))(map(fa)(a => (_: Unit) => a))
 
   def selectRight[A](fb: F[A], fo: F[Option[A]]): F[A] = select(fo)(fb)
 
-  @noop def orElses[A](fx: F[Option[A]])(fy: => F[Option[A]]): F[Option[A]] = select(map(fx)(_.coflatten))(fy)
+  def orElses[A](fx: F[Option[A]])(fy: => F[Option[A]]): F[Option[A]] = select(map(fx)(_.coflatten))(fy)
 
   def whens[A](fb: F[Boolean])(fa: => F[A]): F[Option[A]] =
     select(map(fb)(x => if (x) None else Some(none[A])))(map(fa)(_.some))
@@ -31,13 +31,13 @@ trait Selective[F[_]] extends Applicative[F] {
   def unlesss_[A](fb: F[Boolean])(fa: => F[A]): F[Unit] =
     select(map(fb)(x => if (x) Some(()) else None))(void(fa))
 
-  @noop def optionMonoid[A]: Monoid[F[Option[A]]] = new Monoid[F[Option[A]]] {
+  def optionMonoid[A]: Monoid[F[Option[A]]] = new Monoid[F[Option[A]]] {
     def empty: F[Option[A]]                                     = pure(None)
     def combine(x: F[Option[A]], y: F[Option[A]]): F[Option[A]] = orElses(x)(y)
   }
 }
 
-object Selective extends SelectiveInstances
+object Selective extends SelectiveInstances with EffectComp[Selective]
 
 trait SelectiveInstances extends SelectiveInstances2 {
   final implicit def selectiveOverMonad[F[_]: Monad]: SelectiveOverMonad[F] = new SelectiveOverMonad[F]

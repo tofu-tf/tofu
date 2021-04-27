@@ -9,8 +9,7 @@ import tofu.lift.Lift
 import tofu.syntax.funk._
 import tofu.{BracketThrow, HasContext}
 
-/**
-  * A simple facade for [[doobie.Transactor]] that holds an inner database effect type `DB[_]` and provides
+/** A simple facade for [[doobie.Transactor]] that holds an inner database effect type `DB[_]` and provides
   * natural transformations from this effect to the target effect `F[_]`.
   *
   * The motivation for using this facade instead of `Transactor` is to:
@@ -43,13 +42,17 @@ trait Txr[F[_]] {
 }
 
 object Txr {
-  type Aux[F[_], DB0[_]]     = Txr[F] { type DB[x] = DB0[x] }
+  type Aux[F[_], DB0[_]]     = Txr[F] { type DB[x] >: DB0[x] <: DB0[x] }
   type Plain[F[_]]           = Aux[F, ConnectionIO]
   type Lifted[F[_]]          = Aux[F, ConnectionIO]
   type Contextual[F[_], Ctx] = Aux[F, ConnectionRIO[Ctx, *]]
 
-  /**
-    * Creates a plain facade that preserves the effect of `Transactor` with `ConnectionIO` as the database effect.
+  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB]                      = ev
+  def Plain[F[_]](implicit ev: Plain[F]): Plain[F]                               = ev
+  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F]                            = ev
+  def Contextual[F[_], Ctx](implicit ev: Contextual[F, Ctx]): Contextual[F, Ctx] = ev
+
+  /** Creates a plain facade that preserves the effect of `Transactor` with `ConnectionIO` as the database effect.
     */
   def plain[F[_]: BracketThrow](t: Transactor[F]): Txr.Plain[F] =
     new Txr[F] {
@@ -62,8 +65,7 @@ object Txr {
       def rawTransP: Stream[ConnectionIO, *] ~> Stream[F, *] = t.rawTransP
     }
 
-  /**
-    * Creates a facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` with `ConnectionIO` as the database
+  /** Creates a facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` with `ConnectionIO` as the database
     * effect.
     */
   def lifted[G[_]]: LiftedPA[G] = new LiftedPA[G]
@@ -86,8 +88,7 @@ object Txr {
       }
   }
 
-  /**
-    * Creates a contextual facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` given `G HasContext R`
+  /** Creates a contextual facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` given `G HasContext R`
     * with `ConnectionRIO[R, *]` as the database effect.
     */
   def contextual[G[_]]: ContextualPA[G] = new ContextualPA[G]
@@ -95,7 +96,7 @@ object Txr {
   private[transactor] final class ContextualPA[G[_]](private val dummy: Boolean = true) extends AnyVal {
     def apply[F[_]: BracketThrow, R](
         t: Transactor[F]
-    )(implicit L: Lift[F, G], F: Monad[G], C: G HasContext R): Txr.Contextual[G, R] =
+    )(implicit L: Lift[F, G], G: Monad[G], C: G HasContext R): Txr.Contextual[G, R] =
       new Txr[G] {
         type DB[x] = ConnectionRIO[R, x]
 

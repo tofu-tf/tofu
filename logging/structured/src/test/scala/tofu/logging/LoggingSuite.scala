@@ -9,8 +9,6 @@ import tofu.syntax.logRenderer._
 import tofu.syntax.loggable._
 import tofu.syntax.logging._
 
-import scala.reflect.{ClassTag, classTag}
-
 class LoggingSuite extends AnyFlatSpec {
   val exprs = new Exprs[Run]
 
@@ -79,8 +77,6 @@ object LoggingSuite {
   type Run[+A] = ICalc[Pasque, Vector[LogEntry], Nothing, A]
 
   implicit val logs: Logs.Universal[Run] = new Logs.Universal[Run] {
-    def forService[Svc: ClassTag]: Logging[Run] = byName(classTag[Svc].runtimeClass.getName)
-
     def byName(name: String): Logging[Run] =
       (level, message, values) =>
         (Calc.read: Run[Pasque]).flatMap { ctx =>
