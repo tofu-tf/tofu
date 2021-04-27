@@ -14,8 +14,6 @@ import scala.reflect.{ClassTag, classTag}
 trait PDowncast[-S, +T, +A, -B] extends PFolded[S, T, A, B] with PBase[PDowncast, S, T, A, B] {
   def downcast(s: S): Option[A]
 
-  override def as[B1, T1]: PDowncast[S, T1, A, B1] = this.asInstanceOf[PDowncast[S, T1, A, B1]]
-
   def getOption(s: S): Option[A] = downcast(s)
 
   def foldMap[X: Monoid](s: S)(f: A => X): X = downcast(s).foldMap(f)

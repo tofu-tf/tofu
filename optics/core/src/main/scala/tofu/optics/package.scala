@@ -1,6 +1,7 @@
 package tofu
 
-/** a collection of classic monomorphic optics
+/**
+  * a collection of classic monomorphic optics
   * based on http://hackage.haskell.org/package/lens
   * and http://julien-truffaut.github.io/Monocle/
   * using names readable for user unfamiliar with then

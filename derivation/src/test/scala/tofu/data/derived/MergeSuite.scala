@@ -6,12 +6,10 @@ import cats.syntax.option._
 import derevo.derive
 import MergeSuite.{Bar, Foo}
 import org.scalatest.flatspec.AnyFlatSpec
-import Merge.ops._
 
 class MergeSuite extends AnyFlatSpec {
   "simple merge" should "prefer left value" in {
     assert(Merge[Int].merge(1, 2) === 1)
-    assert(1.merge(2) === 1)
   }
 
   "option merge" should "prefer left some value" in {

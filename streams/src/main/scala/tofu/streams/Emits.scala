@@ -20,8 +20,6 @@ object Emits {
       override val monoidK: MonoidK[F]         = implicitly
       override val applicative: Applicative[F] = implicitly
     }
-
-  def apply[F[_]](implicit ev: Emits[F]): Emits[F] = ev
 }
 
 trait Evals[F[_], G[_]] extends Emits[F] with Lift[G, F] {
@@ -48,6 +46,4 @@ object Evals {
 
       override def lift[A](fa: G[A]): F[A] = lft.lift(fa)
     }
-
-  def apply[F[_], G[_]](implicit ev: Evals[F, G]): Evals[F, G] = ev
 }

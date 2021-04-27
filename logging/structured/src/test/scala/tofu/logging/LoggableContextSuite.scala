@@ -1,7 +1,6 @@
 package tofu.logging
 
 import tofu.HasContext
-import tofu.compat.unused
 
 object LoggableContextSuite {
 
@@ -10,7 +9,6 @@ object LoggableContextSuite {
     ()
   }
 
-  @unused
   def summonInstanceUnambiguously[R1: Loggable, R2: Loggable, F[_]: *[_] HasContext R1: *[_] HasContext R2](): Unit = {
     LoggableContext.of[F].instance[R1]
     ()

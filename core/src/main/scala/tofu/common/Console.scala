@@ -7,10 +7,9 @@ import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
 
-import scala.annotation.nowarn
 import scala.{Console => ScalaConsole}
 
-@typeclass @nowarn("cat=unused-imports")
+@typeclass
 trait Console[F[_]] {
   def readStrLn: F[String]
 

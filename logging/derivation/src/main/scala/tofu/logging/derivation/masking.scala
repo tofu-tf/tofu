@@ -7,14 +7,8 @@ import magnolia.Param
 
 sealed trait MaskMode
 object MaskMode {
-
-  /** Replaces each digit with "#" and each letter with "*". Other symbols are not changed */
-  case object Full extends MaskMode
-
-  /** Replaces value with "..." */
-  case object Erase extends MaskMode
-
-  /** Same as [[Full]] but for some part of value */
+  case object Full                                       extends MaskMode
+  case object Erase                                      extends MaskMode
   case class ForLength(offset: Int, maxLength: Int = -1) extends MaskMode {
     def this(length: Int) = this(0, length)
   }

@@ -10,7 +10,8 @@ import scala.collection.compat._
 
 import scala.{specialized => sp}
 
-/** contextual log construction
+/**
+  * contextual log construction
   * could serve as weak form of JSON building
   * I and V could be the same type: prefix, mutable builder, etc
   * distinction is added to guide Loggable implementation

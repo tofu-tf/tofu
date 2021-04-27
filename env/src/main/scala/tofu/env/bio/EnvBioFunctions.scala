@@ -86,20 +86,23 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
   def delay[A](x: => A): EnvBio[Any, Throwable, A] =
     fromTask(Task.delay(x))
 
-  /** Introduces an asynchronous boundary, effectfully shifting execution
+  /**
+    * Introduces an asynchronous boundary, effectfully shifting execution
     * to another thread or call stack.
     * An implementaion delegates to Monix's implementation (see [[monix.eval.Task.shift]])
     */
   def shift: EnvBio[Any, Nothing, Unit] = fromTaskTotal(Task.shift)
 
-  /** Introduces an asynchronous boundary, effectfully shifting execution
+  /**
+    * Introduces an asynchronous boundary, effectfully shifting execution
     * to another thread or call stack. This implementation differs in that underlying
     * Monix `Task` will be executed on injected `Scheduler`.
     * An implementaion delegates to Monix's implementation (see [[monix.eval.Task.shift]])
     */
   def shift(ec: ExecutionContext): EnvBio[Any, Nothing, Unit] = fromTaskTotal(Task.shift(ec))
 
-  /** Creates a new `EnvBio` that will sleep for given duration, and then continue execution.
+  /**
+    * Creates a new `EnvBio` that will sleep for given duration, and then continue execution.
     * This operation doesn't block a thread, the blocking is semantic.
     *
     * @param duration duration for 'sleeping', after which a tick will be emitted and execution will go on

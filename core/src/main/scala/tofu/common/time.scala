@@ -8,7 +8,8 @@ import cats.effect.Sync
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 
-/** wrapping around ZoneId methods
+/**
+  * wrapping around ZoneId methods
   */
 trait TimeZone[F[_]] {
 
@@ -24,7 +25,8 @@ trait TimeZone[F[_]] {
     */
   def of(zoneId: String): F[ZoneId]
 
-  /** Obtains an instance of {@code ZoneId} wrapping an offset.
+  /**
+    * Obtains an instance of {@code ZoneId} wrapping an offset.
     * <p>
     * If the prefix is "GMT", "UTC", or "UT" a {@code ZoneId}
     * with the prefix and the non-zero offset is returned.

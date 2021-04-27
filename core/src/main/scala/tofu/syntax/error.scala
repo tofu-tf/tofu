@@ -3,19 +3,18 @@ package syntax
 
 import cats.{Applicative, Functor, Monad}
 import cats.ApplicativeError
-import tofu.Raise.ContravariantRaise
 object raise {
 
   //** special alias for Raise[F, E] for use in situations when F[_] can be unknown from the start */
   type FindRaise[E] = FindRaise.Search[E]
 
-  object FindRaise extends FindRaiseInstances {
+  object FindRaise extends FindRaiseLowPrio {
     trait Find[E] extends Any
     type Search[E]    = AnyRef with Find[E] { type Eff[_] }
     type Aux[E, F[_]] = FindRaise[E] { type Eff[a] = F[a] }
 
-    def wrap[F[_], E](r: ContravariantRaise[F, E]): Aux[E, F]   = r.asInstanceOf[Aux[E, F]]
-    def unwrap[F[_], E](r: Aux[E, F]): ContravariantRaise[F, E] = r.asInstanceOf[ContravariantRaise[F, E]]
+    def wrap[F[_], E](r: Raise[F, E]): Aux[E, F]   = r.asInstanceOf[Aux[E, F]]
+    def unwrap[F[_], E](r: Aux[E, F]): Raise[F, E] = r.asInstanceOf[Raise[F, E]]
 
     implicit final def findByApplicativeError[F[_], E1, E](implicit
         app: ApplicativeError[F, E],
@@ -23,15 +22,9 @@ object raise {
     ): Aux[E1, F] = wrap(implicitly)
   }
 
-  trait FindRaiseInstances extends FindRaiseInstances1 {
-    implicit final def findByContravariantRaise[F[_], E](implicit
-        raise: ContravariantRaise[F, E]
-    ): FindRaise.Aux[E, F] = FindRaise.wrap(implicitly)
-  }
-
-  trait FindRaiseInstances1 {
+  trait FindRaiseLowPrio {
     implicit final def findByRaise[F[_], E1, E](implicit
-        raise: Raise[F, E],
+        app: Raise[F, E],
         evE: E1 <:< E
     ): FindRaise.Aux[E1, F] = FindRaise.wrap(implicitly)
   }
@@ -41,8 +34,8 @@ object raise {
   }
 
   implicit final class RaiseMonadOps[F[_], A](private val fa: F[A]) extends AnyVal {
-    def verified[E](p: A => Boolean)(err: E)(implicit raise: FindRaise.Aux[E, F], F: Monad[F]): F[A] =
-      F.flatMap(fa)(a => if (p(a)) F.pure(a) else FindRaise.unwrap(raise).raise(err))
+    def verified[E](p: A => Boolean)(err: E)(implicit raise: Raise[F, E], F: Monad[F]): F[A] =
+      F.flatMap(fa)(a => if (p(a)) F.pure(a) else raise.raise(err))
   }
 
   implicit final class RaiseOptionOps[A](private val opt: Option[A]) extends AnyVal {

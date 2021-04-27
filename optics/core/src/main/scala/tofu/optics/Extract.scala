@@ -12,8 +12,6 @@ trait PExtract[-S, +T, +A, -B]
     extends PDowncast[S, T, A, B] with PReduced[S, T, A, B] with PBase[PExtract, S, T, A, B] {
   def extract(s: S): A
 
-  override def as[B1, T1]: PExtract[S, T1, A, B1] = this.asInstanceOf[PExtract[S, T1, A, B1]]
-
   def downcast(s: S): Option[A]                       = Some(extract(s))
   def reduceMap[X: Semigroup](s: S)(f: A => X): X     = f(extract(s))
   override def foldMap[X: Monoid](s: S)(f: A => X): X = f(extract(s))

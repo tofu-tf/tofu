@@ -107,23 +107,3 @@ trait ScopedInstances {
       F: Async[F]
   ): BlockExec[F] = makeExecute[Scoped.Blocking, F](blocker.blockingContext)
 }
-
-object Execute {
-  def apply[F[_]](implicit F: Execute[F]): F.type = F
-}
-
-object Blocks {
-  def apply[F[_]](implicit F: Blocks[F]): F.type = F
-}
-
-object BlockExec {
-  def apply[F[_]](implicit F: BlockExec[F]): F.type = F
-}
-
-object Calculates {
-  def apply[F[_]](implicit F: Calculates[F]): F.type = F
-}
-
-object CalcExec {
-  def apply[F[_]](implicit F: CalcExec[F]): F.type = F
-}

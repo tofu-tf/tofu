@@ -27,8 +27,10 @@ trait TwinMonad[F[_, _]] extends BiMonad[F, F] with Bifunctor[F] { self =>
 
   def raise[E, A](e: E): F[E, A]
 
-  def foldWith[E, A, X, R](fa: F[E, A])(h: E => F[X, R], f: A => F[X, R]): F[X, R]
-  def foldWithC[E, A, X, R](fa: F[E, A])(h: E => F[X, R])(f: A => F[X, R]): F[X, R] = foldWith(fa)(h, f)
+  def foldWith[E, A, X, R](fa: F[E, A], h: E => F[X, R], f: A => F[X, R]): F[X, R]
+
+  final def foldWithC[E, A, X, R](fa: F[E, A])(h: E => F[X, R])(f: A => F[X, R]): F[X, R] =
+    foldWith(fa, h, f)
 
   def fromEither[E, A](ea: Either[E, A]): F[E, A] = ea match {
     case Left(e)  => raise(e)
@@ -36,37 +38,19 @@ trait TwinMonad[F[_, _]] extends BiMonad[F, F] with Bifunctor[F] { self =>
   }
 
   def fold[E, A, X, R](fa: F[E, A])(h: E => R, f: A => R): F[X, R] =
-    foldWith[E, A, X, R](fa)(e => pure(h(e)), a => pure(f(a)))
+    foldWith[E, A, X, R](fa, e => pure(h(e)), a => pure(f(a)))
 
   def flatMap[E, A, B](fa: F[E, A], f: A => F[E, B]): F[E, B] =
-    foldWith(fa)(raise[E, B], f)
-
-  def tapBoth[E, A, X, B, Y, C](fa: F[E, A])(h: E => F[X, B], f: A => F[Y, C]): F[E, A] =
-    foldWith(fa)(e => replaceErr(h(e))(e), a => replace(f(a))(a))
-
-  def flatTap[E, A, B](fa: F[E, A], f: A => F[E, B]): F[E, A] =
-    flatMap(fa, (a: A) => as(f(a))(a))
-
-  def tryTap[E, X, A, B](fa: F[E, A], f: A => F[X, B]): F[E, A] =
-    flatMap(fa, (a: A) => replace(f(a))(a))
+    foldWith(fa, raise[E, B], f)
 
   def map[E, A, B](fa: F[E, A])(f: A => B): F[E, B] = flatMap(fa, (a: A) => pure(f(a)))
 
   def as[E, A, B](fa: F[E, A])(b: => B): F[E, B] = map(fa)(_ => b)
 
-  def replaceBoth[E, A, X, B](fa: F[E, A])(x: => X)(b: => B): F[X, B] =
-    foldWith(fa)(_ => raise(x), _ => pure(b))
-
-  def replace[E, A, X, B](fa: F[E, A])(b: => B): F[X, B] =
-    foldWith(fa)((_: E) => pure(b), (_: A) => pure(b))
-
-  def replaceErr[E, A, X, B](fa: F[E, A])(x: => X): F[X, B] =
-    foldWith(fa)(_ => raise(x), _ => raise(x))
-
   def void[E, A](fa: F[E, A]): F[E, Unit] = map(fa)(_ => ())
 
   def flatMapErr[E, A, X](fa: F[E, A], f: E => F[X, A]): F[X, A] =
-    foldWith(fa)(f, pure[X, A])
+    foldWith(fa, f, pure[X, A])
 
   def mapErr[E, A, X](fa: F[E, A])(f: E => X): F[X, A] =
     flatMapErr(fa, (e: E) => raise(f(e)))
@@ -75,13 +59,7 @@ trait TwinMonad[F[_, _]] extends BiMonad[F, F] with Bifunctor[F] { self =>
     flatMap(fa, (a: A) => raise(f(a)))
 
   def handleWith[E, X, A](fa: F[E, A], h: E => F[X, A]): F[X, A] =
-    foldWith(fa)(h, pure[X, A])
-
-  def handleTap[E, X, A](fa: F[E, A], f: E => F[X, A]): F[E, A] =
-    handleWith(fa, (e: E) => errAs(f(e))(e))
-
-  def tapError[E, X, A, B](fa: F[E, A], f: E => F[X, B]): F[E, A] =
-    handleWith(fa, (e: E) => replaceErr(f(e))(e))
+    foldWith(fa, h, pure[X, A])
 
   def handle[E, X, A](fa: F[E, A], h: E => A): F[X, A] =
     handleWith[E, X, A](fa, e => pure(h(e)))
@@ -91,20 +69,20 @@ trait TwinMonad[F[_, _]] extends BiMonad[F, F] with Bifunctor[F] { self =>
   def voidErr[E, A](fa: F[E, A]): F[Unit, A] = mapErr(fa)(_ => ())
 
   def bimap[A, B, C, D](fab: F[A, B])(f: A => C, g: B => D): F[C, D] =
-    foldWith[A, B, C, D](fab)(a => raise(f(a)), b => pure(g(b)))
+    foldWith[A, B, C, D](fab, a => raise(f(a)), b => pure(g(b)))
 
   def swapMap[E, A, X, B](fab: F[E, A])(f: E => B, g: A => X): F[X, B] =
-    foldWith[E, A, X, B](fab)(e => pure(f(e)), a => raise(g(a)))
+    foldWith[E, A, X, B](fab, e => pure(f(e)), a => raise(g(a)))
 
-  def swap[E, A](fab: F[E, A]): F[A, E] = foldWith[E, A, A, E](fab)(e => pure(e), a => raise(a))
+  def swap[E, A](fab: F[E, A]): F[A, E] = foldWith[E, A, A, E](fab, e => pure(e), a => raise(a))
 
   def left[A, B](a: A): F[A, B] = raise(a)
 
   def right[A, B](b: B): F[A, B] = pure(b)
 
-  def leftFlatMap[A, B, C, D](lab: F[A, B])(fl: A => F[C, D], fr: B => F[C, D]): F[C, D] = foldWith(lab)(fl, fr)
+  def leftFlatMap[A, B, C, D](lab: F[A, B])(fl: A => F[C, D], fr: B => F[C, D]): F[C, D] = foldWith(lab, fl, fr)
 
-  def rightFlatMap[A, B, C, D](rab: F[A, B])(fl: A => F[C, D], fr: B => F[C, D]): F[C, D] = foldWith(rab)(fl, fr)
+  def rightFlatMap[A, B, C, D](rab: F[A, B])(fl: A => F[C, D], fr: B => F[C, D]): F[C, D] = foldWith(rab, fl, fr)
 
   def bifunctor: Bifunctor[F] = new Bifunctor[F] {
     def bimap[A, B, C, D](fab: F[A, B])(f: A => C, g: B => D): F[C, D] = self.bimap(fab)(f, g)
@@ -157,7 +135,8 @@ object Bind extends BindInstanceChain[Bind] {
 
 trait StackSafeBind[F[_, _]] extends Bind[F] { self =>
   override def foldRec[E, A, X, B](init: Either[E, A])(step: Either[E, A] => F[Either[E, X], Either[A, B]]): F[X, B] =
-    foldWith[Either[E, X], Either[A, B], X, B](step(init))(
+    foldWith[Either[E, X], Either[A, B], X, B](
+      step(init),
       {
         case Left(e)  => foldRec(Left(e))(step)
         case Right(x) => raise(x)

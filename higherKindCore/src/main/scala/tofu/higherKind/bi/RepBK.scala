@@ -10,7 +10,7 @@ object RepBK {
 
   class Applied[T[_[_, _]]](private val __ : Boolean = true) extends AnyVal {
     type Arb[_, _]
-    def apply[E >: Nothing, A](maker: MakeRepr[T, E, A, Arb]): RepBK[T, E, A] = maker
+    def apply[E, A](maker: MakeRepr[T, E, A, Arb]): RepBK[T, E, A] = maker
   }
 
   abstract class MakeRepr[T[_[_, _]], E, A, Arb[_, _]] extends RepBK[T, E, A] {

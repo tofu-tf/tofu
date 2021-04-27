@@ -9,9 +9,7 @@ import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
 
-import scala.annotation.nowarn
-
-@typeclass @nowarn("cat=unused-imports")
+@typeclass
 trait GenUUID[F[_]] {
   def randomUUID: F[UUID]
 }

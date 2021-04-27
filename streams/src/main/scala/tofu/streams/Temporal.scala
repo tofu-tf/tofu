@@ -9,7 +9,3 @@ trait Temporal[F[_], C[_]] {
     */
   def groupWithin[A](fa: F[A])(n: Int, d: FiniteDuration): F[C[A]]
 }
-
-object Temporal {
-  def apply[F[_], C[_]](implicit ev: Temporal[F, C]): Temporal[F, C] = ev
-}

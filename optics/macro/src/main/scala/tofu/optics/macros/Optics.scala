@@ -121,7 +121,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
           }
           val defParams       = tparams ++ tparams
             .filter(x => tpnamesToChange.contains(x.name))
-            .collect { case TypeDef(mods, name, tps, rhs) =>
+            .map { case TypeDef(mods, name, tps, rhs) =>
               TypeDef(mods, tpnamesMap(name), tps, rhs)
             }
             .toSet

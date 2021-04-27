@@ -5,6 +5,7 @@ import cats.FlatMap
 import tofu.syntax.monadic._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import cats.effect.Sync
 import cats.effect.Blocker
 
 object scoped {
@@ -20,12 +21,8 @@ object scoped {
   /** delay calculation in scope */
   def scopedDelay[Tag, F[_]] = new ScopedDelay[Tag, F]
 
-  def blockingDelay[F[_]] = scopedDelay[Scoped.Blocking, F]
-
-  def calcDelay[F[_]] = scopedDelay[Scoped.Calculation, F]
-
   class ScopedDelay[Tag, F[_]](private val __ : Boolean = true) extends AnyVal {
-    def apply[A](la: => A)(implicit FS: Scoped[Tag, F], F: Delay[F]): F[A] = FS.runScoped(F.delay(la))
+    def apply[A](la: => A)(implicit FS: Scoped[Tag, F], F: Sync[F]): F[A] = FS.runScoped(F.delay(la))
   }
 
   /** run process in blocking scope */

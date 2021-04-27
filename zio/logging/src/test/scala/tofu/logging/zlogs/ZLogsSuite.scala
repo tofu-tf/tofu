@@ -1,5 +1,4 @@
-package tofu.logging
-package zlogs
+package tofu.logging.zlogs
 
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent

@@ -50,7 +50,8 @@ class CalcBindInstance[F[+_, +_], R, S] extends StackSafeBind[CalcM[F, R, S, S, 
 
   override def raise[E, A](e: E): CalcM[F, R, S, S, E, A] = CalcM.raise(e)
 
-  override def foldWith[E, A, X, B](fa: CalcM[F, R, S, S, E, A])(
+  override def foldWith[E, A, X, B](
+      fa: CalcM[F, R, S, S, E, A],
       h: E => CalcM[F, R, S, S, X, B],
       f: A => CalcM[F, R, S, S, X, B]
   ): CalcM[F, R, S, S, X, B] = fa.foldWith(f, h)
@@ -67,7 +68,7 @@ class CalcContextInstance[F[+_, +_], R, S, E] extends WithRun[CalcM[F, R, S, S, 
 }
 
 class CalcBiContextInstance[F[+_, +_], R, S]
-    extends BiRun[CalcM[F, R, S, S, +*, +*], CalcM[F, Any, S, S, +*, +*], Nothing, R] {
+    extends BiRun[CalcM[F, R, S, S, *, *], CalcM[F, Any, S, S, *, *], Nothing, R] {
   override def bifunctor: Bind[CalcM[F, R, S, S, *, *]] = CalcM.calcBindInstance
 
   override def lift[E, A](fa: CalcM[F, Any, S, S, E, A]): CalcM[F, R, S, S, E, A] = fa

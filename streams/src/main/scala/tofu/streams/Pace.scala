@@ -12,7 +12,3 @@ trait Pace[F[_]] {
     */
   def delay[A](fa: F[A])(d: FiniteDuration): F[A]
 }
-
-object Pace {
-  def apply[F[_]](implicit ev: Pace[F]): Pace[F] = ev
-}

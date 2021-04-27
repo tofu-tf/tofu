@@ -8,28 +8,33 @@ import tofu.internal.{CachedMatcher, DataEffectComp}
 import tofu.lift.Lift
 import tofu.optics.PUpcast.GenericSubtypeImpl
 import tofu.optics.{Downcast, Subset, Upcast}
-
 import scala.annotation.implicitNotFound
+import com.github.ghik.silencer.silent
 
-/** Allows to raise `E` inside type `F`.
+/**
+  * Allows to raise `E` inside type `F`.
   */
 @implicitNotFound("""can't understand how to raise ${E} inside ${F} 
 provide an instance of Raise[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Upcast[..., ${E}]""")
+@silent("deprecated")
 trait Raise[F[_], E] extends ErrorBase with Raise.ContravariantRaise[F, E] {
   def raise[A](err: E): F[A]
 }
 
 object Raise extends DataEffectComp[Raise] {
 
+  @deprecated("Raise has automatic upcasting, use Raise[F, E]", since = "0.8.1")
   trait ContravariantRaise[F[_], -E] extends ErrorBase {
     def raise[A](err: E): F[A]
 
     def reRaise[A, E1 <: E](fa: F[Either[E1, A]])(implicit F: FlatMap[F], A: Applicative[F]): F[A] =
       F.flatMap(fa)(_.fold(raise[A], A.pure))
   }
+
 }
 
-/** Allows to recover after some error in a ${F} transiting to a ${G} as a result.
+/**
+  * Allows to recover after some error in a ${F} transiting to a ${G} as a result.
   * A `G` can either be the same as a `F` or some "subconstructor" having less errors semantically.
   */
 @implicitNotFound("""can't understand how to restore from the type ${F} to the subtype ${G} 
@@ -38,7 +43,8 @@ trait RestoreTo[F[_], G[_]] extends Lift[G, F] with ErrorBase {
   def restore[A](fa: F[A]): G[Option[A]]
 }
 
-/** Allows to recover after some error in a ${F}.
+/**
+  * Allows to recover after some error in a ${F}.
   */
 @implicitNotFound("""can't understand how to restore in the type ${F}
 provide an instance of Restore[${F}], cats.ApplicativeError[${F}, ...]""")
@@ -46,7 +52,8 @@ trait Restore[F[_]] extends RestoreTo[F, F] {
   def restoreWith[A](fa: F[A])(ra: => F[A]): F[A]
 }
 
-/** Allows to recover after an error of type ${E} in a ${F} transiting to a ${G} as a result.
+/**
+  * Allows to recover after an error of type ${E} in a ${F} transiting to a ${G} as a result.
   * A `G` can either be the same as a `F` or some "subconstructor" having less errors semantically.
   */
 @implicitNotFound("""can't understand how to recover from ${E} in the type ${F} to the subtype ${G} 
@@ -61,7 +68,8 @@ trait HandleTo[F[_], G[_], E] extends RestoreTo[F, G] {
     handleWith(fa)(e => G.pure(f(e)))
 }
 
-/** Allows to recover after an error of type ${E} in a ${F}.
+/**
+  * Allows to recover after an error of type ${E} in a ${F}.
   */
 @implicitNotFound("""can't understand how to recover from ${E} in the type ${F}
 provide an instance of Handle[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Downcast[..., ${E}]""")
@@ -100,14 +108,16 @@ object Handle extends DataEffectComp[Handle] {
   }
 }
 
-/** Allows to throw and handle errors of type ${E} in a ${F} transiting to a ${G} when recovering.
+/**
+  * Allows to throw and handle errors of type ${E} in a ${F} transiting to a ${G} when recovering.
   * A `G` can either be the same as `F` or some "subconstructor" having less errors semantically.
   */
 @implicitNotFound("""can't understand how to deal with errors ${E} in the type ${F} with the subtype ${G}
 provide an instance of ErrorsTo[${F}, ${G}, ${E}], cats.ApplicativeError[${F}, ${E}] or Contains[..., ${E}]""")
 trait ErrorsTo[F[_], G[_], E] extends Raise[F, E] with HandleTo[F, G, E]
 
-/** Allows to throw and handle errors of type ${E} in a ${F}.
+/**
+  * Allows to throw and handle errors of type ${E} in a ${F}.
   */
 @implicitNotFound("""can't understand how to deal with errors ${E} in the type ${F}
 provide an instance of Errors[${F}, ${E}], cats.ApplicativeError[${F}, ${E}] or Contains[..., ${E}]""")
@@ -116,42 +126,17 @@ trait Errors[F[_], E] extends Raise[F, E] with Handle[F, E] with ErrorsTo[F, F, 
     recoverWith(fa)(pf.andThen(raise[A] _))
 }
 
-object Errors extends DataEffectComp[Errors] {
+object Errors extends DataEffectComp[Errors]
 
-  trait Companion[E] {
-    type Raise[F[_]]  = tofu.Raise[F, E]
-    type Handle[F[_]] = tofu.Handle[F, E]
-    type Errors[F[_]] = tofu.Errors[F, E]
-  }
-}
-
-/** Base trait for instance search
+/**
+  * Base trait for instance search
   */
 trait ErrorBase
-object ErrorBase extends ErrorsBaseInstances {
-
-  final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
-    new Errors[ReaderT[F, R, *], E] {
-      def raise[A](err: E): ReaderT[F, R, A] =
-        ReaderT.liftF(F.raise(err))
-
-      def tryHandleWith[A](fa: ReaderT[F, R, A])(f: E => Option[ReaderT[F, R, A]]): ReaderT[F, R, A] =
-        ReaderT(r => F.tryHandleWith(fa.run(r))(e => f(e).map(_.run(r))))
-
-      def restore[A](fa: ReaderT[F, R, A]): ReaderT[F, R, Option[A]] =
-        ReaderT(r => F.restore(fa.run(r)))
-
-      def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
-    }
-}
-class ErrorsBaseInstances extends ErrorsBaseInstances1 {
-
+object ErrorBase          extends ErrorsBaseInstances  {
   final implicit def errorByCatsError[F[_], E](implicit F: ApplicativeError[F, E]): Errors[F, E] =
     new HandleApErr[F, E] with RaiseAppApErr[F, E] with Errors[F, E]
 }
-
-class ErrorsBaseInstances1 extends ErrorsBaseInstances2 {
-
+class ErrorsBaseInstances extends ErrorsBaseInstances1 {
   final implicit def errorPrismatic[F[_], E, E1](implicit
       e: Errors[F, E],
       prism: Subset[E, E1]
@@ -159,8 +144,7 @@ class ErrorsBaseInstances1 extends ErrorsBaseInstances2 {
     new FromPrism[F, E, E1, Errors, Subset] with RaisePrism[F, E, E1] with HandlePrism[F, E, E1] with Errors[F, E1]
 }
 
-class ErrorsBaseInstances2 extends ErrorsBaseInstances3 {
-
+class ErrorsBaseInstances1 extends ErrorsBaseInstances2 {
   final implicit def handleDowncast[F[_], E, E1](implicit h: Handle[F, E], prism: Downcast[E, E1]): Handle[F, E1] =
     new FromPrism[F, E, E1, Handle, Downcast] with HandlePrism[F, E, E1]
 
@@ -175,7 +159,20 @@ class ErrorsBaseInstances2 extends ErrorsBaseInstances3 {
     }
 }
 
-class ErrorsBaseInstances3 {
+class ErrorsBaseInstances2 {
+  final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
+    new Errors[ReaderT[F, R, *], E] {
+      def raise[A](err: E): ReaderT[F, R, A] =
+        ReaderT.liftF(F.raise(err))
+
+      def tryHandleWith[A](fa: ReaderT[F, R, A])(f: E => Option[ReaderT[F, R, A]]): ReaderT[F, R, A] =
+        ReaderT(r => F.tryHandleWith(fa.run(r))(e => f(e).map(_.run(r))))
+
+      def restore[A](fa: ReaderT[F, R, A]): ReaderT[F, R, Option[A]] =
+        ReaderT(r => F.restore(fa.run(r)))
+
+      def lift[A](fa: ReaderT[F, R, A]): ReaderT[F, R, A] = fa
+    }
 
   final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, *], F, E] =
     new EitherTErrorsTo[F, E]

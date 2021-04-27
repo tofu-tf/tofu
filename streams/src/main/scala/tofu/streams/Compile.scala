@@ -16,7 +16,3 @@ trait Compile[F[_], G[_]] {
     */
   def to[C[_], A](fa: F[A])(implicit ev: internal.Factory[A, C[A]]): G[C[A]]
 }
-
-object Compile {
-  def apply[F[_], G[_]](implicit ev: Compile[F, G]): Compile[F, G] = ev
-}

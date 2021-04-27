@@ -6,7 +6,3 @@ trait Merge[F[_]] {
     */
   def merge[A](fa: F[A])(that: F[A]): F[A]
 }
-
-object Merge {
-  def apply[F[_]](implicit ev: Merge[F]): Merge[F] = ev
-}

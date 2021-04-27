@@ -19,8 +19,6 @@ import tofu.syntax.monadic._
 import tofu.syntax.raise._
 import tofu.syntax.selective._
 
-import scala.annotation.nowarn
-
 class ContextTRebaseSuite extends AnyFunSuite {
   val count = 100
 
@@ -47,7 +45,6 @@ class ContextTRebaseSuite extends AnyFunSuite {
   }
 }
 
-@nowarn("cat=unused-imports")
 object ContextTRebaseSuite {
   @typeclass
   @derive(representableK)
@@ -63,6 +60,7 @@ object ContextTRebaseSuite {
     def hasAuth(key: String): F[Boolean]
     def checkAuth(key: String): F[Unit]
   }
+
   object Auth extends ContextEmbed[Auth]
 
   @typeclass

@@ -20,8 +20,7 @@
         "label": "Contextual",
         "ids": [
           "env",
-          "hascontext",
-          "corecatsmtlinterop"
+          "hascontext"
         ]
       },
       {
@@ -30,13 +29,6 @@
         "ids": [
           "agent",
           "concurrent-makeref"
-        ]
-      },
-      {
-        "type": "subcategory",
-        "label": "Higher-Kind",
-        "ids": [
-          "mid"
         ]
       },
       {
@@ -54,13 +46,6 @@
           "console",
           "logging",
           "memo"
-        ]
-      },
-      {
-        "type": "subcategory",
-        "label": "Streams",
-        "ids": [
-          "streams"
         ]
       }
     ]

@@ -1,20 +1,20 @@
 package tofu.logging
 
-import scala.reflect.ClassTag
-
+import Logging._
 import cats.kernel.Monoid
+import cats.syntax.apply._
 import cats.{Applicative, Apply, FlatMap}
 import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.compat.unused
-import tofu.higherKind.{Function2K, RepresentableK}
-import tofu.logging.Logging.{Debug, Error, Info, Level, Trace, Warn}
-import tofu.logging.impl.EmbedLogging
-import tofu.syntax.monadic._
-import tofu.syntax.monoidalK._
 import tofu.{Init, higherKind}
+import tofu.higherKind.{Function2K, RepresentableK}
+import tofu.logging.impl.EmbedLogging
+import tofu.syntax.monoidalK._
 
-/** Typeclass equivalent of Logger.
-  * May contain specified some Logger instance
+import scala.reflect.ClassTag
+
+/** typeclass equivalent of Logger
+  * may contain specified some Logger instance
   * or try to read it from the context
   */
 trait LoggingBase[F[_]] {
@@ -63,13 +63,10 @@ trait LoggingBase[F[_]] {
     writeCause(Warn, message, cause, values: _*)
   def errorCause(message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
     writeCause(Error, message, cause, values: _*)
-
-  def asLogging: Logging[F]
 }
 
-/** Logging tagged with some arbitrary tag type.
-  *
-  * @note there are no guarantees that `Service` correspond to the type parameter of `Logs.forService` method
+/** Logging tagged with some arbitrary tag type
+  *  note there are not any guarantees that `Service` correspond to the type parameter of `Logs.forService` method
   */
 trait ServiceLogging[F[_], Service] extends LoggingBase[F] {
   final def to[Svc2]: ServiceLogging[F, Svc2] = this.asInstanceOf[ServiceLogging[F, Svc2]]
@@ -91,23 +88,15 @@ object ServiceLogging {
     unilogs.service[Svc]
 }
 
-/** Typeclass for logging.
-  * @see [[tofu.logging.Logs]] for creating instances of that trait
+/** typeclass for logging using specified logger or set of loggers
+  * see `Logs` for creating instances of that
   */
 trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
   final def widen[G[a] >: F[a]]: Logging[G] = this.asInstanceOf[Logging[G]]
-
-  def asLogging: Logging[F] = this
 }
 
 object Logging {
-
-  def mid: LoggingMidFunctions.type = LoggingMidFunctions
-
   type ForService[F[_], Svc] <: Logging[F]
-
-  type Safe[F[_, _]]     = Logging[F[Nothing, *]]
-  type SafeBase[F[_, _]] = LoggingBase[F[Nothing, *]]
 
   def apply[F[_]](implicit logging: Logging[F]): Logging[F] = logging
 
@@ -130,7 +119,7 @@ object Logging {
     def combine(x: Logging[F], y: Logging[F]): Logging[F] = Logging.combine(x, y)
   }
 
-  /** Log level */
+  /** log level enumeration */
   sealed trait Level
 
   case object Trace extends Level
@@ -143,4 +132,8 @@ object Logging {
 private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
   private[this] val noop                                                  = Applicative[F].unit
   def write(level: Level, message: String, values: LoggedValue*): F[Unit] = noop
+}
+
+trait LoggingCompanion[U[_[_]]] {
+  type Log[F[_]] = ServiceLogging[F, U[Any]]
 }

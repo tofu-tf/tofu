@@ -7,7 +7,8 @@ import tofu.internal.FoldableStream
 object foldable {
   final implicit class TofuFoldableOps[F[_], A](private val fa: F[A]) extends AnyVal {
 
-    /** Applies monadic transfomation, feeding source collection,
+    /**
+      * Applies monadic transfomation, feeding source collection,
       * until operation results in None or collection is consumed
       *
       * @param initial initial state
@@ -24,7 +25,8 @@ object foldable {
           }
       }
 
-    /** transforms each element to another type using monadic transformation
+    /**
+      * transforms each element to another type using monadic transformation
       * until it resutls in None
       *
       * @param f element transformation, None would not be continued

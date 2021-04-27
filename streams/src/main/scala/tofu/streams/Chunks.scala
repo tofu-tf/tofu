@@ -19,7 +19,3 @@ trait Chunks[F[_], C[_]] {
     */
   def mapChunks[A, B](fa: F[A])(f: C[A] => C[B]): F[B]
 }
-
-object Chunks {
-  def apply[F[_], C[_]](implicit ev: Chunks[F, C]): Chunks[F, C] = ev
-}

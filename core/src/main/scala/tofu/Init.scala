@@ -1,6 +1,7 @@
 package tofu
 
-/** Initialize value of type A in type F
+/**
+  * Initialize value of type A in type F
   *
   * @tparam F initialization effect type
   * @tparam A result type

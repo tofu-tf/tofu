@@ -23,7 +23,8 @@ object time {
       */
     def of[F[_]](zoneId: String)(implicit tz: TimeZone[F]): F[ZoneId] = tz.of(zoneId)
 
-    /** Obtains an instance of {@code ZoneId} wrapping an offset.
+    /**
+      * Obtains an instance of {@code ZoneId} wrapping an offset.
       * <p>
       * If the prefix is "GMT", "UTC", or "UT" a {@code ZoneId}
       * with the prefix and the non-zero offset is returned.

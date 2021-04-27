@@ -1,6 +1,5 @@
-Tofu was made possible thanks to the following people (in alphabetical order):
-* Daniil Smirnov
-* Ilya Oskin
-* Kirill Shelopugin
+Tofu was made possible thanks to following people:
 * Oleg Nizhnik
-* λoλcat
+* Daniil Smirnov
+* Nikita Filimonov
+* Kirill Shelopugin

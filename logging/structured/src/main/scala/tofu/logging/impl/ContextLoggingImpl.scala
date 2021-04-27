@@ -6,7 +6,9 @@ import cats.Applicative
 import cats.syntax.applicative._
 import org.slf4j.{Logger, Marker}
 
-class ContextLoggingImpl[F[_]: Applicative, C: Loggable, Service](context: F HasContext C, logger: Logger)
+import scala.reflect.ClassTag
+
+class ContextLoggingImpl[F[_]: Applicative, C: Loggable, Service: ClassTag](context: F HasContext C, logger: Logger)
     extends LoggingImpl[F](logger) {
 
   override def trace(message: String, values: LoggedValue*) =

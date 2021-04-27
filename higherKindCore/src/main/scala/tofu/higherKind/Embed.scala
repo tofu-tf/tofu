@@ -4,10 +4,7 @@ import cats.FlatMap
 import cats.free.Free
 import simulacrum.typeclass
 
-import scala.annotation.nowarn
-
-@typeclass @nowarn("cat=unused-imports")
-trait Embed[U[_[_]]] {
+@typeclass trait Embed[U[_[_]]] {
   def embed[F[_]: FlatMap](ft: F[U[F]]): U[F]
 }
 

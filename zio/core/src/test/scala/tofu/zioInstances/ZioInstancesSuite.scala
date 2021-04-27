@@ -6,8 +6,6 @@ import tofu.zioInstances.implicits._
 import tofu._
 import zio._
 
-import scala.annotation.nowarn
-
 object ZioInstancesSuite {
 
   def summonZioInstances[E1, E2: * Extract E1, R1, R2: * Contains R1](): Unit = {
@@ -42,18 +40,6 @@ object ZioInstancesSuite {
     ()
   }
 
-  @nowarn("cat=unused-locals")
-  def summonZioInstances[E, Ctx: Tag](): Unit = {
-    type ZContext = Has[Ctx]
-
-    implicitly[WithRun[ZIO[ZEnv with ZContext, E, *], ZIO[ZEnv, E, *], Ctx]]
-    implicitly[WithRun[ZIO[ZContext with ZEnv, E, *], ZIO[ZEnv, E, *], Ctx]]
-    implicitly[WithLocal[ZIO[ZEnv with ZContext, E, *], Ctx]]
-    implicitly[WithLocal[ZIO[ZContext with ZEnv, E, *], Ctx]]
-    ()
-  }
-
-  @nowarn("cat=unused-params")
   def taskAmbiguity: Any = {
     import cats.effect.Sync
     import tofu.Raise

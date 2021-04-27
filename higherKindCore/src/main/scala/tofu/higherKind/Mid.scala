@@ -4,6 +4,7 @@ import cats.tagless.ApplyK
 import cats.{Monoid, MonoidK, Semigroup}
 import tofu.higherKind.Mid.MidCompose
 import tofu.syntax.funk.funK
+import tofu.syntax.monoidalK._
 
 trait Mid[F[_], A] {
   def apply(fa: F[A]): F[A]
@@ -58,6 +59,6 @@ class MidAlgebraMonoid[F[_], U[f[_]]: MonoidalK] extends MidAlgebraSemigroup[F, 
   def empty: U[Mid[F, *]] = Mid.point[F].pureK[U]
 }
 
-class MidAlgebraSemigroup[F[_], U[f[_]]](implicit U: ApplyK[U]) extends Semigroup[U[Mid[F, *]]] {
+class MidAlgebraSemigroup[F[_], U[f[_]]: ApplyK](implicit U: ApplyK[U]) extends Semigroup[U[Mid[F, *]]] {
   def combine(x: U[Mid[F, *]], y: U[Mid[F, *]]): U[Mid[F, *]] = U.map2K(x, y)(funK(t2 => fa => t2.first(t2.second(fa))))
 }

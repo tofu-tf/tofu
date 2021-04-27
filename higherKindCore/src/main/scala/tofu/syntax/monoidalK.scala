@@ -2,7 +2,6 @@ package tofu.syntax
 import tofu.higherKind.{Function2K, MonoidalK, Point, PureK}
 
 object monoidalK {
-  @deprecated("this extension moved to the [Point] itself", since = "0.10.1")
   implicit final class TofuPointKOps[F[_]](private val point: Point[F]) extends AnyVal {
     def pureK[U[_[_]]](implicit U: PureK[U]): U[F] = U.pureK(point)
   }

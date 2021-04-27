@@ -9,10 +9,4 @@ package object derived {
   def genRepresentableB[Alg[_[_, _]]]: RepresentableB[Alg] = macro HigherKindedMacros.representableB[Alg]
 
   def genEmbedB[Alg[_[_, _]]]: EmbedBK[Alg] = macro HigherKindedMacros.embedB[Alg]
-
-  def factorize[Builder, F[_], Alg[_[_]]](builder: Builder): Alg[F] =
-    macro HigherKindedMacros.factorize[Builder, F, Alg]
-
-  def bifactorize[Builder, F[_, _], Alg[_[_, _]]](builder: Builder): Alg[F] =
-    macro HigherKindedMacros.bifactorize[Builder, F, Alg]
 }

@@ -5,8 +5,9 @@ import cats.syntax.functor._
 import cats.syntax.semigroupk._
 import cats.{Functor, Invariant, MonoidK}
 import tofu.Void
-import tofu.internal.EffectComp
+import simulacrum.typeclass
 
+@typeclass
 trait Partial[F[_]] extends Switch[F] with Invariant[F] with MonoidK[F] with Optional[F] {
   override def optional[A](fa: F[A]): F[Option[A]] = imap(switch(empty[Unit], fa))(_.toOption)(_.toRight(()))
   def skip: F[Void]                                = empty[Void]
@@ -14,7 +15,7 @@ trait Partial[F[_]] extends Switch[F] with Invariant[F] with MonoidK[F] with Opt
 
 }
 
-object Partial extends PartialInstances[Partial] with EffectComp[Partial]
+object Partial extends PartialInstances[Partial]
 
 trait PartialInstances[+TC[f[_]] >: Partial[f]] {
   final implicit def byCovariant[F[_]: Functor: MonoidK]: TC[F] = new Partial[F] {
