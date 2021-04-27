@@ -6,7 +6,7 @@ title: Logging
 ## Installation
 
 Logging are available as a separate project
-`"ru.tinkoff" %% "tofu-logging" % tofu-version`
+`"tf.tofu" %% "tofu-logging" % tofu-version`
 
 ## Motivation
 

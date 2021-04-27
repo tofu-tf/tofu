@@ -4,11 +4,11 @@ title: Tofu optics
 ---
 
 ## Installation
-`"ru.tinkoff" %% "tofu" % tofu-version`  
+`"tf.tofu" %% "tofu" % tofu-version`  
 or as standalone dependencies:   
-`"ru.tinkoff" %% "tofu-optics-core" % tofu-version`  
-`"ru.tinkoff" %% "tofu-optics-macro" % tofu-version`  
-`"ru.tinkoff" %% "tofu-optics-interop" % tofu-version`  
+`"tf.tofu" %% "tofu-optics-core" % tofu-version`  
+`"tf.tofu" %% "tofu-optics-macro" % tofu-version`  
+`"tf.tofu" %% "tofu-optics-interop" % tofu-version`  
  
 ## Functionality
 Tofu contains its own optics library with some notable features:

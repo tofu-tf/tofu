@@ -4,9 +4,9 @@ title: Config
 ---
 
 ## Installation
-`"ru.tinkoff" %% "tofu" % tofu-version`  
+`"tf.tofu" %% "tofu" % tofu-version`  
 or as a standalone dependency:   
-`"ru.tinkoff" %% "tofu-config" % tofu-version`  
+`"tf.tofu" %% "tofu-config" % tofu-version`  
 
 ## Features
 `tofu-config` is a boilerplate-free way to load configuration files as Scala classes, 

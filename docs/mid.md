@@ -4,9 +4,9 @@ title: Mid
 ---
 
 ## Installation
-`"ru.tinkoff" %% "tofu" % tofu-version`  
+`"tf.tofu" %% "tofu" % tofu-version`  
 or as a standalone dependency:   
-`"ru.tinkoff" %% "tofu-core-higher-kind" % tofu-version` 
+`"tf.tofu" %% "tofu-core-higher-kind" % tofu-version` 
 
 ## Assumption
 
