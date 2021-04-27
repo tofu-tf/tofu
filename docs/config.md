@@ -167,6 +167,6 @@ println(syncParseConfig[Limits](ConfigFactory.parseResources("limits.conf")))
 ## Custom config sources
 In order to provide a way to parse config from a custom source, one needs to provide a 
 mapping from that source's types into `tofu.config.ConfigItem`.
-For an example, please refer to the [`typesafe integration`](https://github.com/TinkoffCreditSystems/tofu/blob/master/config/src/main/scala/tofu/config/typesafe.scala#L21).
+For an example, please refer to the [`typesafe integration`](https://github.com/tofu-tf/tofu/blob/master/config/src/main/scala/tofu/config/typesafe.scala#L21).
 
 
