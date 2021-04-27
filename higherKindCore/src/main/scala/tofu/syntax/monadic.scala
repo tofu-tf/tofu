@@ -61,11 +61,16 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def flatTap[B](f: C => F[B])(implicit F: FlatMap[F]): F[C]             = F.flatTap(fa)(f)
     def replicateM_(n: Int)(implicit F: Monad[F]): F[Unit]                 =
       F.tailRecM(n)(k => if (k <= 0) F.pure(Right(())) else F.as(fa, Left(k - 1)))
+
+    def flatMap2[A, B](fb: => F[A])(f: (C, A) => F[B])(implicit F: FlatMap[F]): F[B] =
+      F.flatMap(fa)(a => F.flatMap(fb)(b => f(a, b)))
+    def flatTap2[A, B](fb: => F[A])(f: (C, A) => F[B])(implicit F: FlatMap[F]): F[C] =
+      F.flatTap(fa)(a => F.flatTap(fb)(b => f(a, b)))
   }
 
-  implicit final def tofuSyntaxApplyOps[F[_], A](fa: F[A]): ApplyOps[F, A]               = new ApplyOps(fa)
-  implicit final def tofuSyntaxFlatten[F[_]: FlatMap, A](ffa: F[F[A]]): FlattenOps[F, A] = new FlattenOps[F, A](ffa)
-  implicit final def tofuSyntaxIfM[F[_]: FlatMap](fa: F[Boolean]): IfMOps[F]             = new IfMOps[F](fa)
-  implicit final def tofuSyntaxFlatMapIdOps[A](a: A): FlatMapIdOps[A]                    = new FlatMapIdOps[A](a)
-  implicit final def tofuSyntaxFlatMapOps[F[_]: FlatMap, A](fa: F[A]): FlatMapOps[F, A]  = new FlatMapOps[F, A](fa)
+  implicit final def tofuSyntaxApplyOps[F[_], A](fa: F[A]): ApplyOps[F, A]      = new ApplyOps(fa)
+  implicit final def tofuSyntaxFlatten[F[_], A](ffa: F[F[A]]): FlattenOps[F, A] = new FlattenOps[F, A](ffa)
+  implicit final def tofuSyntaxIfM[F[_]](fa: F[Boolean]): IfMOps[F]             = new IfMOps[F](fa)
+  implicit final def tofuSyntaxFlatMapIdOps[A](a: A): FlatMapIdOps[A]           = new FlatMapIdOps[A](a)
+  implicit final def tofuSyntaxFlatMapOps[F[_], A](fa: F[A]): FlatMapOps[F, A]  = new FlatMapOps[F, A](fa)
 }

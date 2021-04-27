@@ -2,20 +2,20 @@ logLevel := Level.Warn
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "1.0.0")
 
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.11")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.27")
 
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.8.1")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.7")
 
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.0.0")
+addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
 
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.0.3")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.2.20")
 
-addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.2")
+addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.3")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.0")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.2")
 
-addSbtPlugin("com.timushev.sbt" % "sbt-rewarn" % "0.1.0")
+addSbtPlugin("com.timushev.sbt" % "sbt-rewarn" % "0.1.3")
 
-addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.13")
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.17")
 
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.5.1")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.5.3")

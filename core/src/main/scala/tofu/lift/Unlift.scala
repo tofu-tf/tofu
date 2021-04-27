@@ -52,8 +52,7 @@ private[lift] trait LiftInstances2 {
     }
 }
 
-/**
-  * Embedded transformation. Can be used instead of a direct F ~> G.
+/** Embedded transformation. Can be used instead of a direct F ~> G.
   * Especially useful one is `UnliftIO`, a replacement for the `Effect` typeclass.
   */
 trait Unlift[F[_], G[_]] extends Lift[F, G] with ContextBase { self =>

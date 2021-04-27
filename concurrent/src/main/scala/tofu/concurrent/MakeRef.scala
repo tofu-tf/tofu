@@ -3,8 +3,7 @@ package tofu.concurrent
 import cats.effect.Sync
 import cats.effect.concurrent.Ref
 
-/**
-  * Effectful making and initialization for `Ref`.
+/** Effectful making and initialization for `Ref`.
   * A 'Ref' instance will be initialized in the `I[_]' effect.
   * 'F[_]' is the effect in which 'Ref' will work.
   */
@@ -14,8 +13,7 @@ trait MakeRef[I[_], F[_]] {
 
 object Refs {
 
-  /**
-    * Creates a `MakeRef[F,F]` when both effect constructors are the same.
+  /** Creates a `MakeRef[F,F]` when both effect constructors are the same.
     *
     * @param agents an given instance of `Refs[F]' (type alias for `MakeRef[F, F]`)
     * @return instace of [[Applier[F, F]]]
@@ -25,8 +23,7 @@ object Refs {
 
 object MakeRef {
 
-  /**
-    * Makes a `Ref` instance
+  /** Makes a `Ref` instance
     *
     * Uses the
     * [[https://typelevel.org/cats/guidelines.html#partially-applied-type-params Partially-Applied Type]]
@@ -43,8 +40,7 @@ object MakeRef {
 
   final class Applier[I[_], F[_]](private val makeRef: MakeRef[I, F]) extends AnyVal {
 
-    /**
-      * Makes a Ref initialized to the supplied value.
+    /** Makes a Ref initialized to the supplied value.
       * Like [[Ref.of]] but initializes state using another effect constructor.
       *
       * @see [[MakeRef.refOf]]
@@ -53,8 +49,7 @@ object MakeRef {
     def of[A](a: A): I[Ref[F, A]] = makeRef.refOf(a)
   }
 
-  /**
-    * Give an instance of `MakeRef[I, F]` to making `Ref` for effect with `Sync` type class.
+  /** Give an instance of `MakeRef[I, F]` to making `Ref` for effect with `Sync` type class.
     *
     * @return instance of [[MakeRef[I,F]]]
     */

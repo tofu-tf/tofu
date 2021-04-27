@@ -8,12 +8,14 @@ package object data {
   type PArray[+A]                   = PArray.Type[A]
   type ICalc[-R, S, +E, +A]         = Calc[R, S, S, E, A]
   type Embedded[+F[+_], +G[+_], +A] = Embedded.T[F, G, A]
-  type ∘[+F[+_], +G[+_], +A]        = Embedded.T[F, G, A]
-  type Flux[+F[_], +G[_], +A]       = Flux.FluxRepr[F, G, A]
-  type Identity[+A]                 = A
+  type ExceptT[+F[+_], +E, +A]      = Embedded[F, Either[E, +*], A]
+
+  type ∘[+F[+_], +G[+_], +A]  = Embedded.T[F, G, A]
+  type Flux[+F[_], +G[_], +A] = Flux.FluxRepr[F, G, A]
+  type Identity[+A]           = A
   type Nothing1 <: Nothing
-  type NothingT[+A]                 = Nothing
-  type Nothing2T[+A, +B]            = Nothing
+  type NothingT[+A]           = Nothing
+  type Nothing2T[+A, +B]      = Nothing
 
   val CalcM: tofu.data.calc.CalcM.type = tofu.data.calc.CalcM
   val CalcT: tofu.data.calc.CalcT.type = tofu.data.calc.CalcT

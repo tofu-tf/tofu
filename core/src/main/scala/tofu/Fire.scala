@@ -1,34 +1,33 @@
 package tofu
 
 import cats.effect.{Concurrent, Fiber}
-import simulacrum.typeclass
 import tofu.compat.unused
 import tofu.internal.NonTofu
 
 import scala.util.Either
+import tofu.internal.EffectComp
 
-@typeclass
 trait Fire[F[_]] {
   def fireAndForget[A](fa: F[A]): F[Unit]
 }
 
-object Fire extends StartInstances[Fire]
+object Fire extends StartInstances[Fire] with EffectComp[Fire]
 
-@typeclass
 trait Race[F[_]] extends Fire[F] {
   def race[A, B](fa: F[A], fb: F[B]): F[Either[A, B]]
   def never[A]: F[A]
 }
 
-object Race extends StartInstances[Race]
+object Race extends StartInstances[Race] with EffectComp[Race] {
+  def never[F[_], A](implicit race: Race[F]): F[A] = race.never
+}
 
-@typeclass
 trait Start[F[_]] extends Fire[F] with Race[F] {
   def start[A](fa: F[A]): F[Fiber[F, A]]
   def racePair[A, B](fa: F[A], fb: F[B]): F[Either[(A, Fiber[F, B]), (Fiber[F, A], B)]]
 }
 
-object Start extends StartInstances[Start]
+object Start extends StartInstances[Start] with EffectComp[Start]
 
 trait StartInstances[TC[f[_]] >: Start[f]] {
   final implicit def concurrentInstance[F[_]](implicit F: Concurrent[F], @unused _nonTofu: NonTofu[F]): TC[F] =

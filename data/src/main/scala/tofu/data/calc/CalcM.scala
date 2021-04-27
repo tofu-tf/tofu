@@ -33,6 +33,14 @@ object CalcM extends CalcMInstances {
       val (s2, a) = f(s1)
       set(s2) as a
     }
+  def stateT[F[+_], S1, S2, A](f: S1 => F[(S2, A)]): CalcM[λ[(`+x`, `+y`) => F[y]], Any, S1, S2, Nothing, A] = {
+    type F2[+x, +y] = F[y]
+    CalcM.get[S1].flatMapS { s1 =>
+      CalcT.lift(f(s1)).flatMapS[F2, Any, S2, Nothing, A] { case (s2, x) =>
+        CalcM.set(s2) as x
+      }
+    }
+  }
 
   def raise[S, E](e: E): CalcM[Nothing, Any, S, S, E, Nothing]           = Raise(e)
   def defer[F[+_, +_], R, S1, S2, E, A](x: => CalcM[F, R, S1, S2, E, A]) = Defer(() => x)

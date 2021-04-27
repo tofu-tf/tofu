@@ -6,9 +6,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import tofu.optics.tags.{every, index}
 
 import language.postfixOps
-import scala.annotation.nowarn
 
-@nowarn("cat=lint-multiarg-infix")
 class ChainSuite extends AnyFlatSpec {
   type Onion[A] = Map[String, Vector[List[Map[Boolean, A]]]]
 
