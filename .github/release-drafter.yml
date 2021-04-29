@@ -21,6 +21,8 @@ categories:
   - title: 'Maintenance'
     labels:
       - 'chore'
+      - 'dependencies'
+      - 'dependency-update'
 exclude-labels:
   - 'skip-changelog'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
