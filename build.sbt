@@ -3,7 +3,7 @@ import com.typesafe.sbt.SbtGit.git
 
 moduleName := "tofu"
 
-val libVersion = "0.10.1"
+val libVersion = "0.10.2"
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -363,6 +363,7 @@ lazy val publishSettings = Seq(
   organization := "tf.tofu",
   publishVersion := libVersion,
   publishMavenStyle := true,
+  versionScheme := Some("semver-spec"),
   description := "Opinionated set of tools for functional programming in Scala",
   crossScalaVersions := Seq(Version.scala212, Version.scala213),
   publishTo := {
