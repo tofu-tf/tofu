@@ -20,7 +20,7 @@ object Dependencies {
 
     val catsMtl = "1.2.0"
 
-    val catsTagless = "0.13.0"
+    val catsTagless = "0.14.0"
 
     val monocle = "2.1.0"
 
