@@ -4,9 +4,9 @@ title: Config
 ---
 
 ## Installation
-`"ru.tinkoff" %% "tofu" % tofu-version`  
+`"tf.tofu" %% "tofu" % tofu-version`  
 or as a standalone dependency:   
-`"ru.tinkoff" %% "tofu-config" % tofu-version`  
+`"tf.tofu" %% "tofu-config" % tofu-version`  
 
 ## Features
 `tofu-config` is a boilerplate-free way to load configuration files as Scala classes, 
@@ -167,6 +167,6 @@ println(syncParseConfig[Limits](ConfigFactory.parseResources("limits.conf")))
 ## Custom config sources
 In order to provide a way to parse config from a custom source, one needs to provide a 
 mapping from that source's types into `tofu.config.ConfigItem`.
-For an example, please refer to the [`typesafe integration`](https://github.com/TinkoffCreditSystems/tofu/blob/master/config/src/main/scala/tofu/config/typesafe.scala#L21).
+For an example, please refer to the [`typesafe integration`](https://github.com/tofu-tf/tofu/blob/master/config/src/main/scala/tofu/config/typesafe.scala#L21).
 
 

@@ -44,7 +44,7 @@ Usually programmers write your own implicits conversions, but `TOFU` could provi
 
 ### Install
 For installation interop, add dependency into your project: 
-`"ru.tinkoff" %% "tofu-core-cats-mtl" % tofu-version`
+`"tf.tofu" %% "tofu-core-cats-mtl" % tofu-version`
 
 This library provides three modules with conversions:
 import it into your code files:

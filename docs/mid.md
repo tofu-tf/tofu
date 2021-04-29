@@ -4,9 +4,9 @@ title: Mid
 ---
 
 ## Installation
-`"ru.tinkoff" %% "tofu" % tofu-version`  
+`"tf.tofu" %% "tofu" % tofu-version`  
 or as a standalone dependency:   
-`"ru.tinkoff" %% "tofu-core-higher-kind" % tofu-version` 
+`"tf.tofu" %% "tofu-core-higher-kind" % tofu-version` 
 
 ## Assumption
 
@@ -81,7 +81,7 @@ So plugin application is just the process of applying the function to the result
 
 ## Example
 
-Example `representableK` can be found in the [source](https://github.com/TinkoffCreditSystems/tofu/blob/master/doobie/src/test/scala/tofu/doobie/example/TofuDoobieExample.scala)
+Example `representableK` can be found in the [source](https://github.com/tofu-tf/tofu/blob/master/doobie/src/test/scala/tofu/doobie/example/TofuDoobieExample.scala)
 
 Example `applyK` for authorship of https://t.me/ppressives
 

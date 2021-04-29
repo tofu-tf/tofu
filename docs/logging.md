@@ -6,7 +6,7 @@ title: Logging
 ## Installation
 
 Logging are available as a separate project
-`"ru.tinkoff" %% "tofu-logging" % tofu-version`
+`"tf.tofu" %% "tofu-logging" % tofu-version`
 
 ## Motivation
 
@@ -299,7 +299,7 @@ with [Logstash-encoder](https://github.com/logstash/logstash-logback-encoder).
 
 Luckily for us, tofu has two special Layouts:
 
-* [ELKLayout](https://github.com/TinkoffCreditSystems/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ELKLayout.scala)
+* [ELKLayout](https://github.com/tofu-tf/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ELKLayout.scala)
   that outputs structured logs in JSON format. Example appender looks like that:
 
 ```xml
@@ -311,7 +311,7 @@ Luckily for us, tofu has two special Layouts:
 </appender>
   ```
 
-* [ConsoleContextLayout](https://github.com/TinkoffCreditSystems/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ConsoleContextLayout.scala)
+* [ConsoleContextLayout](https://github.com/tofu-tf/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ConsoleContextLayout.scala)
   that outputs simple text logs. Example appender looks like that:
 
 ```xml
