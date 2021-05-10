@@ -8,6 +8,7 @@ private[syntax] final class EvalsOps[F[_], G[_], A](private val fa: F[A]) extend
   def evalMap[B](f: A => G[B])(implicit evals: Evals[F, G]): F[B]                      = evals.evalMap(fa)(f)
   def evalTap[B](f: A => G[B])(implicit evals: Evals[F, G], functor: Functor[G]): F[A] =
     evals.evalMap(fa)(a => f(a) as a)
+  def evalFilter(f: A => G[Boolean])(implicit evals: Evals[F, G]): F[A]                = evals.evalFilter(fa)(f)
 }
 
 private[syntax] final class EvalPA[F[_]](private val __ : Boolean) extends AnyVal {
