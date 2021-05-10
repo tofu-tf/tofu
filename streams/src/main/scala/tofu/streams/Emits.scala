@@ -1,8 +1,8 @@
 package tofu.streams
 
 import cats.{Applicative, Foldable, Monad, MonoidK}
-import cats.syntax.flatMap._
 import tofu.lift.Lift
+import tofu.syntax.monadic._
 
 trait Emits[F[_]] {
 
@@ -37,6 +37,9 @@ trait Evals[F[_], G[_]] extends Emits[F] with Lift[G, F] {
 
   def evalMap[A, B](fa: F[A])(f: A => G[B]): F[B] =
     fa >>= (a => eval(f(a)))
+
+  def evalFilter[A](fa: F[A])(p: A => G[Boolean]): F[A] =
+    fa >>= (a => eval(p(a)).ifM(a.pure, monoidK.empty))
 }
 
 object Evals {
