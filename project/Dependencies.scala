@@ -8,7 +8,7 @@ object Dependencies {
   object Version {
     val scala212 = "2.12.13"
 
-    val scala213 = "2.13.5"
+    val scala213 = "2.13.6"
 
     val circe = "0.13.0"
 
