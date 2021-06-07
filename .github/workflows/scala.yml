@@ -33,7 +33,7 @@ jobs:
          path: ~/.sbt
          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}  
     
-     - uses: olafurpg/setup-scala@v10
+     - uses: olafurpg/setup-scala@v12
        with:
          java-version: graalvm-ce-java11@20.3.0
     
@@ -68,7 +68,7 @@ jobs:
         path: ~/.sbt
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
     
-    - uses: olafurpg/setup-scala@v10
+    - uses: olafurpg/setup-scala@v12
       with:
         java-version: graalvm-ce-java11@20.3.0
     
@@ -98,7 +98,7 @@ jobs:
          path: ~/.sbt
          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}  
     
-     - uses: olafurpg/setup-scala@v10
+     - uses: olafurpg/setup-scala@v12
        with:
          java-version: graalvm-ce-java11@20.3.0
     
