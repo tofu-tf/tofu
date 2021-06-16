@@ -1,13 +1,23 @@
 package tofu
 
-import cats.data.{EitherT, OptionT, ReaderT}
+import cats.data.EitherT
+import cats.data.OptionT
+import cats.data.ReaderT
 import cats.syntax.either._
-import cats.{Applicative, ApplicativeError, FlatMap, Functor, Id, Monad}
+import cats.Applicative
+import cats.ApplicativeError
+import cats.FlatMap
+import cats.Functor
+import cats.Id
+import cats.Monad
 import tofu.errorInstances._
-import tofu.internal.{CachedMatcher, DataEffectComp}
+import tofu.internal.CachedMatcher
+import tofu.internal.DataEffectComp
 import tofu.lift.Lift
 import tofu.optics.PUpcast.GenericSubtypeImpl
-import tofu.optics.{Downcast, Subset, Upcast}
+import tofu.optics.Downcast
+import tofu.optics.Subset
+import tofu.optics.Upcast
 
 import scala.annotation.implicitNotFound
 

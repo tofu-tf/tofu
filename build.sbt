@@ -34,8 +34,12 @@ lazy val higherKindCore = project settings (
   publishName := "core-higher-kind",
   libraryDependencies ++= Seq(catsCore, catsFree, catsTagless),
 )
-
-lazy val core = project dependsOn (opticsCore, higherKindCore) settings (
+lazy val kernel = project in file("kernel") dependsOn (opticsCore, higherKindCore) settings (
+  defaultSettings,
+  publishName := "kernel",
+  libraryDependencies ++= Seq(catsCore, catsTagless),
+)
+lazy val core = project dependsOn (opticsCore, higherKindCore, kernel) settings (
   defaultSettings,
   publishName := "core",
   libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
@@ -261,6 +265,7 @@ lazy val streams = project
 lazy val coreModules =
   Vector(
     higherKindCore,
+    kernel,
     core,
     opticsMacro,
     memo,
