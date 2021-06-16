@@ -1,6 +1,7 @@
 import cats.ApplicativeError
 import cats.data.Ior
 import cats.MonadError
+
 package object tofu {
   type In[C, F[_]] = WithContext[F, C]
 

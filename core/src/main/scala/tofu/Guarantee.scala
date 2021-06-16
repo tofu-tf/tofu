@@ -1,6 +1,7 @@
 package tofu
 
 import cats.effect.{Bracket, ExitCase}
+import tofu.TConst
 
 /** Bracket-like typeclass allowing to understand if operation was succeed
   * @tparam F effect process

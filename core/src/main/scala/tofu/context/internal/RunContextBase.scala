@@ -1,7 +1,8 @@
 package tofu.context.internal
+
 import cats.Functor
 import cats.data.ReaderT
-import tofu.WithProvide
+import tofu.WithRun
 import cats.Applicative
 
 trait RunContextBase

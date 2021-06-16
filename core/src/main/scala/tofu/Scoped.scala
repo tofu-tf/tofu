@@ -7,6 +7,7 @@ import tofu.syntax.monadic._
 import scala.concurrent.{ExecutionContext, Future}
 import cats.effect.{ContextShift, Async}
 import cats.effect.Blocker
+import tofu.core._
 
 /** can be used for scoped transformations
   * @tparam Tag arbitrary type tag for discriminating scopes

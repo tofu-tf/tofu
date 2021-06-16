@@ -1,8 +1,7 @@
+package tofu
 import cats.effect.Bracket
-import cats.{ApplicativeError, MonadError}
-import cats.data.Ior
 
-package object tofu {
+package object core {
   type BracketThrow[F[_]]           = Bracket[F, Throwable]
   type HasContextRun[F[_], G[_], C] = RunContext[F] { type Lower[A] = G[A]; type Ctx = C; }
 

@@ -1,6 +1,7 @@
 package tofu
 package lift
 
+import tofu.context.internal.RunContextBase
 import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.effect.{Effect, IO}
@@ -12,7 +13,7 @@ import tofu.syntax.monadic._
 /** Embedded transformation. Can be used instead of a direct F ~> G.
   * Especially useful one is `UnliftIO`, a replacement for the `Effect` typeclass.
   */
-trait Unlift[F[_], G[_]] extends Lift[F, G] with ContextBase { self =>
+trait Unlift[F[_], G[_]] extends Lift[F, G] with RunContextBase { self =>
   def lift[A](fa: F[A]): G[A]
   def unlift: G[G ~> F]
 

@@ -7,7 +7,7 @@ import tofu.lift.Unlift
 import tofu.optics.Equivalent
 import tofu.syntax.funk.funK
 import tofu.context.internal._
-
+import tofu.core._
 /** Combination of [[Local]] and [[Provide]]
   *
   * @tparam F context-aware effect e.g.`ReaderT[Lower, Ctx, *]`
@@ -59,7 +59,7 @@ object RunContext {
   type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
 
   final implicit def readerTContext[F[_]: Applicative, C]: HasContextRun[ReaderT[F, C, *], F, C] =
-    ContextBase.readerTContext[F, C]
+    RunContextBase.readerTContext[F, C]
 }
 
 /** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
