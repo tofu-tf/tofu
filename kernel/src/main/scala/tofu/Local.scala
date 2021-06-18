@@ -2,6 +2,7 @@ package tofu
 
 import tofu.optics.Contains
 import tofu.context.internal._
+import tofu.kernel._
 
 /** Allows to run some computation with notion of altered context
   * consider using `WithLocal` for better type inference

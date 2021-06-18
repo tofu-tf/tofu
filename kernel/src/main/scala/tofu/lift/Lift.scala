@@ -5,6 +5,7 @@ import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.~>
 import syntax.funk._
+import tofu.kernel._
 
 trait Lift[F[_], G[_]] {
   def lift[A](fa: F[A]): G[A]

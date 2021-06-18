@@ -1,8 +1,11 @@
+package tofu
 import cats.ApplicativeError
 import cats.data.Ior
 import cats.MonadError
 
-package object tofu {
+object kernel extends KernelTypes
+
+trait KernelTypes {
   type In[C, F[_]] = WithContext[F, C]
 
   type HasContext[F[_], C] = Context[F] { type Ctx = C }

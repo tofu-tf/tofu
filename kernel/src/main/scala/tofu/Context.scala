@@ -3,6 +3,7 @@ package tofu
 import cats.{Applicative, FlatMap, Functor}
 import tofu.context.internal.{ContextBase, _}
 import tofu.optics.{Contains, Extract}
+import tofu.kernel._
 
 /** Declares that [[F]] can provide value of type  Ctx
   *

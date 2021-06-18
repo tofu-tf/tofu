@@ -7,7 +7,7 @@ import tofu.lift.Unlift
 import tofu.optics.Equivalent
 import tofu.syntax.funk.funK
 import tofu.context.internal._
-import tofu.core._
+
 /** Combination of [[Local]] and [[Provide]]
   *
   * @tparam F context-aware effect e.g.`ReaderT[Lower, Ctx, *]`

@@ -6,6 +6,7 @@ import tofu.context.internal._
 import tofu.lift.Lift
 import tofu.optics.Extract
 import tofu.syntax.funk.funK
+import tofu.kernel._
 
 /** Allows to evaluate contextual computation with some context
   *

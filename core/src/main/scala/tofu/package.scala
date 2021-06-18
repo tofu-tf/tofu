@@ -1,7 +1,6 @@
-package tofu
 import cats.effect.Bracket
 
-package object core {
+package object tofu extends KernelTypes {
   type BracketThrow[F[_]]           = Bracket[F, Throwable]
   type HasContextRun[F[_], G[_], C] = RunContext[F] { type Lower[A] = G[A]; type Ctx = C; }
 

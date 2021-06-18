@@ -2,6 +2,7 @@ package tofu.syntax
 
 import cats.{FlatMap, ~>}
 import tofu._
+import tofu.kernel._
 
 object context {
   def context[F[_]](implicit ctx: Context[F]): F[ctx.Ctx] = ctx.context

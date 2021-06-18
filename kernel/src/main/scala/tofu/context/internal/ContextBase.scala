@@ -5,6 +5,8 @@ import cats.{Applicative, Functor}
 import tofu.optics.{Contains, Equivalent, Extract}
 import tofu._
 
+import tofu.kernel._
+
 /** Common base for instances */
 trait ContextBase
 
