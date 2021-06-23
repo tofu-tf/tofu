@@ -1,6 +1,5 @@
 package tofu.doobie
 
-import cats.Applicative
 import cats.data.ReaderT
 import cats.effect.{IO, SyncIO}
 import doobie.ConnectionIO
@@ -15,7 +14,7 @@ import zio.interop.catz._
 
 object DoobieInstancesSuite {
 
-  def summonImplicitsViaLiftToIO[F[_]: Applicative, R](implicit L: Lift[F, IO]): Unit = {
+  def summonImplicitsViaLiftToIO[F[_], R](implicit L: Lift[F, IO]): Unit = {
     Lift[F, ConnectionIO]
     Lift[F, ConnectionRIO[R, *]]
     Lift[ReaderT[F, R, *], ConnectionRIO[R, *]]

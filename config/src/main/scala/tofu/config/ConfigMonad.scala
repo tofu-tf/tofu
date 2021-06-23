@@ -13,6 +13,7 @@ import cats.Applicative
 import cats.~>
 import tofu.syntax.funk._
 import cats.syntax.applicativeError._
+import tofu.HasLocal
 
 trait ConfigMonad[F[_]] {
   implicit def monad: Monad[F]
@@ -98,7 +99,7 @@ object ConfigTContext {
 
     val monad: Monad[ConfigT[F, *]]         = Monad[ConfigT[F, *]]
     val paralleled: Parallel[ConfigT[F, *]] = FP.paralleled
-    val path: HasLocal[ConfigT[F, *], Path] = Local[ConfigT[F, *]].subcontext(contextPath[F])
+    val path: HasLocal[ConfigT[F, *], Path] = Local.apply[ConfigT[F, *]].subcontext(contextPath[F])
     val config: ConfigRaise[ConfigT[F, *]]  = new ConfigRaise[ConfigT[F, *]] {
       def raise[A](err: ConfigError): ConfigT[F, A] =
         ReaderT(ctx => ctx.ref.update(_ :+ ConfigParseMessage(ctx.path, err)) *> FR.raise(Fail))

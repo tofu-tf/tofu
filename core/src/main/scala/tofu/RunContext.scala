@@ -56,7 +56,7 @@ private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](
 object RunContext {
   def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx
 
-  type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
+  type Aux[F[_], G[_], C] = RunContext[F] { type Lower[A] = G[A]; type Ctx = C; }
 
   final implicit def readerTContext[F[_]: Applicative, C]: HasContextRun[ReaderT[F, C, *], F, C] =
     RunContextBase.readerTContext[F, C]

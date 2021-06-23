@@ -1,12 +1,12 @@
 package tofu
 
+import cats.Applicative
 import cats.data.ReaderT
-import cats.{Applicative, ~>}
+import cats.~>
 import tofu.context.internal._
 import tofu.lift.Lift
 import tofu.optics.Extract
 import tofu.syntax.funk.funK
-import tofu.kernel._
 
 /** Allows to evaluate contextual computation with some context
   *
@@ -86,12 +86,12 @@ trait Provide[F[_]] extends ContextBase {
 
 /** Companion object for [[Provide]] */
 object Provide {
-  def apply[F[_]](implicit p: Provide[F]): HasProvide[F, p.Lower, p.Ctx] = p
+  def apply[F[_]](implicit p: Provide[F]): Aux[F, p.Lower, p.Ctx] = p
 
-  type Aux[F[_], G[_], C] = HasProvide[F, G, C]
+  type Aux[F[_], G[_], C] = Provide[F] { type Ctx = C; type Lower[A] = G[A] }
 
-  final implicit def readerTContext[F[_]: Applicative, C]: HasProvide[ReaderT[F, C, *], F, C] =
-    ContextBase.readerTContext[F, C]
+  final implicit def readerTContext[F[_]: Applicative, C]: Provide.Aux[ReaderT[F, C, *], F, C] =
+    ContextBase.readerTWithProvide[F, C]
 }
 
 /** Synonym for [[Provide]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference

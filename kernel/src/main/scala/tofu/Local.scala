@@ -2,7 +2,6 @@ package tofu
 
 import tofu.optics.Contains
 import tofu.context.internal._
-import tofu.kernel._
 
 /** Allows to run some computation with notion of altered context
   * consider using `WithLocal` for better type inference
@@ -45,9 +44,9 @@ trait Local[F[_]] extends Context[F] {
 }
 
 object Local {
-  def apply[F[_]](implicit ctx: Local[F]): HasLocal[F, ctx.Ctx] = ctx
+  def apply[F[_]](implicit ctx: Local[F]): Aux[F, ctx.Ctx] = ctx
 
-  type Aux[F[_], C] = HasLocal[F, C]
+  type Aux[F[_], C] = Local[F] { type Ctx = C }
 }
 
 /** Synonym for [[Local]] with explicit C as Ctx for better type inference */

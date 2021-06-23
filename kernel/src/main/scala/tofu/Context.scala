@@ -3,7 +3,6 @@ package tofu
 import cats.{Applicative, FlatMap, Functor}
 import tofu.context.internal.{ContextBase, _}
 import tofu.optics.{Contains, Extract}
-import tofu.kernel._
 
 /** Declares that [[F]] can provide value of type  Ctx
   *
@@ -61,9 +60,9 @@ trait Context[F[_]] extends ContextBase {
 
 /** Companion object for [[Context]] */
 object Context {
-  def apply[F[_]](implicit ctx: Context[F]): HasContext[F, ctx.Ctx] = ctx
+  def apply[F[_]](implicit ctx: Context[F]): Context[F] { type Ctx = ctx.Ctx } = ctx
 
-  type Aux[F[_], C] = HasContext[F, C]
+  type Aux[F[_], C] = Context[F] { type Ctx = C }
 
   /** Creates constant Context of type C into F
     *
@@ -162,13 +161,13 @@ object WithContext {
 }
 
 object HasContext {
-  def apply[F[_], C](implicit hc: HasContext[F, C]): HasContext[F, C] = hc
+  def apply[F[_], C](implicit hc: Context.Aux[F, C]): Context.Aux[F, C] = hc
 }
 
 object HasLocal {
-  def apply[F[_], C](implicit hl: HasLocal[F, C]): HasLocal[F, C] = hl
+  def apply[F[_], C](implicit hl: Local.Aux[F, C]): Local.Aux[F, C] = hl
 }
 
 object HasProvide {
-  def apply[F[_], G[_], C](implicit hp: HasProvide[F, G, C]): HasProvide[F, G, C] = hp
+  def apply[F[_], G[_], C](implicit hp: Provide.Aux[F, G, C]): Provide.Aux[F, G, C] = hp
 }

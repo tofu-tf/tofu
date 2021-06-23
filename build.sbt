@@ -324,7 +324,7 @@ lazy val defaultScalacOptions = scalacOptions := {
   if (!sys.env.get("CI").contains("true") || (minorVersion.value == 12))
     opts.filterNot(Set("-Xfatal-warnings"))
   else
-    opts
+    opts ++ Seq("-Xlog-implicits")
 }
 
 lazy val scalacWarningConfig = scalacOptions += {

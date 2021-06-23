@@ -2,7 +2,7 @@ package tofu
 package concurrent
 
 import cats.data.StateT
-import cats.effect.{MonadThrow => _, _}
+import cats.effect.{MonadThrow => _, BracketThrow => _, _}
 import cats.effect.concurrent.{MVar, TryableDeferred}
 import cats.effect.syntax.bracket._
 import cats.syntax.applicativeError._

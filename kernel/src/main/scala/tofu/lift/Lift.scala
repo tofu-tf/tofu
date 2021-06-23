@@ -5,7 +5,6 @@ import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.~>
 import syntax.funk._
-import tofu.kernel._
 
 trait Lift[F[_], G[_]] {
   def lift[A](fa: F[A]): G[A]
@@ -14,6 +13,7 @@ trait Lift[F[_], G[_]] {
 }
 
 object Lift extends LiftInstances1 {
+  private[tofu] type AnyK[_] = Any
   def apply[F[_], G[_]](implicit lift: Lift[F, G]): Lift[F, G] = lift
   def trans[F[_], G[_]](implicit lift: Lift[F, G]): F ~> G     = lift.liftF
 
