@@ -1,10 +1,11 @@
 name: Scala CI
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
+    branches: ['**']
+  push:
+    branches: ['**']
+  workflow_dispatch:
 
 env:
   CI: true
