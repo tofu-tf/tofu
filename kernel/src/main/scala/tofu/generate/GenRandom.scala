@@ -1,13 +1,14 @@
 package tofu.generate
 
-import cats.effect.Sync
-import cats.syntax.functor._
 import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
+import tofu.syntax.monadic._
 
 import scala.annotation.nowarn
 import scala.util.Random
+import tofu.Delay
+import cats.Functor
 
 @typeclass @nowarn("cat=unused-imports")
 trait GenRandom[F[_]] {
@@ -26,7 +27,10 @@ object GenRandom {
   def nextLong[F[_]](implicit g: GenRandom[F]): F[Long]       = g.nextLong
   def nextInt[F[_]](n: Int)(implicit g: GenRandom[F]): F[Int] = g.nextInt(n)
 
-  def instance[I[_]: Sync, F[_]: Sync](seed: Option[Long] = None, secure: Boolean = false): I[GenRandom[F]] = {
+  def instance[I[_]: Delay: Functor, F[_]: Delay](
+      seed: Option[Long] = None,
+      secure: Boolean = false
+  ): I[GenRandom[F]] = {
     def createStd() = seed.fold(new java.util.Random)(new java.util.Random(_))
     def createSecure() = {
       val rnd = new java.security.SecureRandom()
@@ -35,10 +39,10 @@ object GenRandom {
     }
 
     def random(): java.util.Random = if (secure) createSecure() else createStd()
-    for (rnd <- Sync[I].delay(new Random(random()))) yield new ScalaUtil[F](rnd)
+    for (rnd <- Delay[I].delay(new Random(random()))) yield new ScalaUtil[F](rnd)
   }
 
-  private class ScalaUtil[F[_]](rnd: Random)(implicit F: Sync[F]) extends GenRandom[F] {
+  private class ScalaUtil[F[_]](rnd: Random)(implicit F: Delay[F]) extends GenRandom[F] {
     def nextLong: F[Long]         = F.delay(rnd.nextLong())
     def nextInt(max: Int): F[Int] = F.delay(rnd.nextInt(max))
   }
