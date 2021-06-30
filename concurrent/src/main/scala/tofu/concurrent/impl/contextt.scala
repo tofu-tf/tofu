@@ -7,7 +7,7 @@ import cats.syntax.bifunctor._
 import cats.tagless.InvariantK
 import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
-import tofu.{RunContext, WithContext, WithRun}
+import tofu.{WithContext, WithRun}
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.ExecutionContext
 
@@ -319,8 +319,7 @@ final class ContextTRunContext[F[+_]: Applicative, C[_[_]]](implicit FD: Defer[F
 
 // instance that does not defer locals. could be stack-unsafe
 final class ContextTRunContextUnsafe[F[+_]: Applicative, C[_[_]]]
-    extends ContextTContext[F, C] with RunContext[ContextT[F, C, *]]                       {
-  type Lower[+A] = F[A]
+    extends ContextTContext[F, C] with WithRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] {
 
   def runContext[A](fa: ContextT[F, C, A])(ctx: C[ContextT[F, C, *]]): F[A]                                     = fa.run(ctx)
   def local[A](fa: ContextT[F, C, A])(project: C[ContextT[F, C, *]] => C[ContextT[F, C, *]]): ContextT[F, C, A] =

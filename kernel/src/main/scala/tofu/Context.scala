@@ -5,6 +5,11 @@ import cats.{Applicative, FlatMap, Functor, ~>}
 import tofu.lift.{Lift, Unlift}
 import tofu.optics.{Contains, Equivalent, Extract}
 import tofu.syntax.funk._
+import cats.Monad
+import tofu.kernel.types._
+import cats.arrow.FunctionK
+import tofu.syntax.monadic._
+import tofu.lift.UnliftEffect
 
 /** Declares that [[F]] can provide value of type  Ctx
   *
@@ -289,17 +294,16 @@ trait Provide[F[_]] extends ContextBase {
     * @param extract lens that can extract from `Ctx` value of type `A`
     */
   def runExtract[A](extract: A Extract Ctx): WithProvide[F, Lower, A] =
-    new ProvideExtractInstance[F, Lower, Ctx, A](this, extract)
+    new ProvideExtractInstance[F, Lower, Ctx, A](self, extract)
+
+  def self: WithProvide[F, Lower, Ctx]
 }
 
 /** Companion object for [[Provide]] */
 object Provide {
-  def apply[F[_]](implicit p: Provide[F]): HasProvide[F, p.Lower, p.Ctx] = p
+  def apply[F[_]](implicit p: Provide[F]): HasProvide[F, p.Lower, p.Ctx] = p.self
 
   type Aux[F[_], G[_], C] = HasProvide[F, G, C]
-
-  final implicit def readerTContext[F[_]: Applicative, C]: HasProvide[ReaderT[F, C, *], F, C] =
-    ContextBase.readerTContext[F, C]
 }
 
 /** Synonym for [[Provide]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
@@ -309,6 +313,8 @@ object Provide {
 trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
   override type Lower[A] = G[A]
   override type Ctx      = C
+
+  def self = this
 }
 
 /** Companion object for [[WithProvide]] */
@@ -343,22 +349,21 @@ trait RunContext[F[_]] extends Local[F] with Provide[F] {
     */
   def unlift: F[F ~> Lower] = ask(ctx => funK(runContext(_)(ctx)))
 
+  def self: WithRun[F, Lower, Ctx]
+
   /** Allows to focus [[Provide]] on inner parts of its context with equivalence lens.
     *
     * @param eq lens that can convert from `Ctx` value of type `A`
     */
   def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, Lower, A] =
-    new RunContextEquivalentInstance[F, Lower, Ctx, A](this, eq)
+    new RunContextEquivalentInstance[F, Lower, Ctx, A](self, eq)
 }
 
 /** Companion object for [[RunContext]] */
 object RunContext {
-  def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx
+  def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx.self
 
   type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
-
-  final implicit def readerTContext[F[_]: Applicative, C]: HasContextRun[ReaderT[F, C, *], F, C] =
-    ContextBase.readerTContext[F, C]
 }
 
 /** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
@@ -367,6 +372,7 @@ object RunContext {
   */
 trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] with RunContext[F] with Unlift[G, F] {
   override type Ctx = C
+  override def self = this
 }
 
 /** Companion object for [[WithRun]] */
@@ -377,7 +383,12 @@ object WithRun {
 /** Common base for instances */
 trait ContextBase
 
-object ContextBase {
+object ContextBase extends ContextBaseInstances1 {
+  implicit def unliftIdentity[F[_]: Applicative]: Unlift[F, F] = new Unlift[F, F] {
+    def lift[A](fa: F[A]): F[A] = fa
+    def unlift: F[F ~> F]       = FunctionK.id[F].pure[F]
+  }
+
   final implicit def readerTContext[F[_]: Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
     new WithRun[ReaderT[F, C, *], F, C] {
       def lift[A](fa: F[A]): ReaderT[F, C, A] = ReaderT.liftF(fa)
@@ -389,6 +400,16 @@ object ContextBase {
       val functor: Functor[ReaderT[F, C, *]] = Functor[ReaderT[F, C, *]]
       val context: ReaderT[F, C, C]          = ReaderT.ask[F, C]
     }
+}
+
+trait ContextBaseInstances1 extends ContextBaseInstances2 {
+  final implicit def unliftReaderCompose[F[_]: Monad, G[_], R](implicit FG: Unlift[G, F]): Unlift[G, ReaderT[F, R, *]] =
+    FG.andThen(ContextBase.readerTContext[F, R])
+}
+
+trait ContextBaseInstances2 {
+  final implicit def unliftIOEffect[F[_], G[_]](implicit carrier: UnliftEffect[F, G]): Unlift[F, G] =
+    carrier.value
 }
 
 private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F HasContext C1, extract: C1 Extract C2)
