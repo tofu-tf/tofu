@@ -3,10 +3,10 @@ package tofu.common
 import java.time._
 
 import cats.Monad
-import cats.effect.Sync
 
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
+import tofu.Delay
 
 /** wrapping around ZoneId methods
   */
@@ -34,7 +34,7 @@ trait TimeZone[F[_]] {
 }
 
 object TimeZone {
-  implicit def syncSystem[F[_]](implicit F: Sync[F]): TimeZone[F] = new TimeZone[F] {
+  implicit def syncSystem[F[_]](implicit F: Delay[F]): TimeZone[F] = new TimeZone[F] {
     def system: F[ZoneId] = F.delay(ZoneId.systemDefault())
 
     def available: F[Set[String]] = F.delay(ZoneId.getAvailableZoneIds.asScala.toSet)

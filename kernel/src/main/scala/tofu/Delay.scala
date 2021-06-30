@@ -1,7 +1,7 @@
 package tofu
 
-import cats.effect.Sync
 import tofu.internal.EffectComp
+import tofu.internal.Interop
 
 trait Delay[F[_]] {
   def delay[A](a: => A): F[A]
@@ -13,8 +13,6 @@ object Delay extends CatsDelay with EffectComp[Delay] {
 }
 
 class CatsDelay {
-  implicit def byCatsSync[F[_]](implicit FS: Sync[F]): Delay[F] =
-    new Delay[F] {
-      def delay[A](a: => A): F[A] = FS.delay(a)
-    }
+  implicit def byCatsSync[F[_]]: Delay[F] =
+    macro Interop.delegate[Delay[F], F, { val `tofu.interop.CE2Kernel.delayViaSync`: Unit }]
 }

@@ -43,10 +43,17 @@ lazy val kernel = project
     publishName := "kernel"
   )
 
-lazy val core = project dependsOn (kernel) settings (
+lazy val kernelCE2Interop = project
+  .dependsOn(kernel)
+  .settings(
+    defaultSettings,
+    publishName := "kernel-ce2-interop",
+    libraryDependencies += catsEffect
+  )
+
+lazy val core = project dependsOn (kernel, kernelCE2Interop) settings (
   defaultSettings,
   publishName := "core",
-  libraryDependencies ++= Seq(catsCore, catsEffect, catsTagless),
 )
 
 lazy val coreCatsMtlInterop = project

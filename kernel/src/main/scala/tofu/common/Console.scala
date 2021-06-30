@@ -2,13 +2,13 @@ package tofu.common
 
 import java.io.{BufferedReader, PrintStream}
 
-import cats.effect.Sync
 import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
 
 import scala.annotation.nowarn
 import scala.{Console => ScalaConsole}
+import tofu.Delay
 
 @typeclass @nowarn("cat=unused-imports")
 trait Console[F[_]] {
@@ -39,15 +39,16 @@ object Console {
 
   implicit val representableKInstance: RepresentableK[Console] = higherKind.derived.genRepresentableK[Console]
 
-  implicit def syncInstance[F[_]: Sync]: Console[F] = instance(ScalaConsole.in, ScalaConsole.out, ScalaConsole.err)
+  implicit def delayInstance[F[_]: Delay]: Console[F] = instance(ScalaConsole.in, ScalaConsole.out, ScalaConsole.err)
 
-  def instance[F[_]: Sync](in: BufferedReader, out: PrintStream, err: PrintStream): Console[F] = new Console[F] {
-    def readStrLn: F[String] = Sync[F].delay(in.readLine())
+  def instance[F[_]](in: BufferedReader, out: PrintStream, err: PrintStream)(implicit FD: Delay[F]): Console[F] =
+    new Console[F] {
+      def readStrLn: F[String] = FD.delay(in.readLine())
 
-    def putStr(s: String): F[Unit]   = Sync[F].delay(out.print(s))
-    def putStrLn(s: String): F[Unit] = Sync[F].delay(out.println(s))
+      def putStr(s: String): F[Unit]   = FD.delay(out.print(s))
+      def putStrLn(s: String): F[Unit] = FD.delay(out.println(s))
 
-    def putErr(e: String): F[Unit]   = Sync[F].delay(err.print(e))
-    def putErrLn(e: String): F[Unit] = Sync[F].delay(err.println(e))
-  }
+      def putErr(e: String): F[Unit]   = FD.delay(err.print(e))
+      def putErrLn(e: String): F[Unit] = FD.delay(err.println(e))
+    }
 }

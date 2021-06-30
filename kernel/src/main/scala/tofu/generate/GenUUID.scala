@@ -3,13 +3,13 @@ package tofu.generate
 import java.util.UUID
 
 import cats.Functor
-import cats.effect.Sync
 import cats.syntax.functor._
 import simulacrum.typeclass
 import tofu.higherKind
 import tofu.higherKind.RepresentableK
 
 import scala.annotation.nowarn
+import tofu.Delay
 
 @typeclass @nowarn("cat=unused-imports")
 trait GenUUID[F[_]] {
@@ -20,7 +20,7 @@ object GenUUID {
   def random[F[_]](implicit gen: GenUUID[F]): F[UUID] = gen.randomUUID
   def randomString[F[_]: Functor: GenUUID]: F[String] = random[F].map(_.toString)
 
-  implicit def syncGenUUID[F[_]](implicit F: Sync[F]): GenUUID[F] = new GenUUID[F] {
+  implicit def syncGenUUID[F[_]](implicit F: Delay[F]): GenUUID[F] = new GenUUID[F] {
     val randomUUID: F[UUID] = F.delay(UUID.randomUUID())
   }
 
