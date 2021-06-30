@@ -1,6 +1,8 @@
 package tofu.kernel
 
-import tofu.{WithContext, Local, Context, Provide, RunContext}
+import tofu.{WithContext, Local, Context}
+import tofu.WithProvide
+import tofu.WithRun
 
 object types {
   type In[C, F[_]] = WithContext[F, C]
@@ -9,7 +11,7 @@ object types {
 
   type HasLocal[F[_], C] = Local[F] { type Ctx = C }
 
-  type HasProvide[F[_], G[_], C] = Provide[F] { type Ctx = C; type Lower[A] = G[A] }
+  type HasProvide[F[_], G[_], C] = WithProvide[F, G, C]
 
-  type HasContextRun[F[_], G[_], C] = RunContext[F] { type Lower[A] = G[A]; type Ctx = C; }
+  type HasContextRun[F[_], G[_], C] = WithRun[F, G, C]
 }

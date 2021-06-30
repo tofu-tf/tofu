@@ -294,12 +294,14 @@ trait Provide[F[_]] extends ContextBase {
     * @param extract lens that can extract from `Ctx` value of type `A`
     */
   def runExtract[A](extract: A Extract Ctx): WithProvide[F, Lower, A] =
-    new ProvideExtractInstance[F, Lower, Ctx, A](this, extract)
+    new ProvideExtractInstance[F, Lower, Ctx, A](self, extract)
+
+  def self: WithProvide[F, Lower, Ctx]
 }
 
 /** Companion object for [[Provide]] */
 object Provide {
-  def apply[F[_]](implicit p: Provide[F]): HasProvide[F, p.Lower, p.Ctx] = p
+  def apply[F[_]](implicit p: Provide[F]): HasProvide[F, p.Lower, p.Ctx] = p.self
 
   type Aux[F[_], G[_], C] = HasProvide[F, G, C]
 }
@@ -311,6 +313,8 @@ object Provide {
 trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
   override type Lower[A] = G[A]
   override type Ctx      = C
+
+  def self = this
 }
 
 /** Companion object for [[WithProvide]] */
@@ -345,17 +349,19 @@ trait RunContext[F[_]] extends Local[F] with Provide[F] {
     */
   def unlift: F[F ~> Lower] = ask(ctx => funK(runContext(_)(ctx)))
 
+  def self: WithRun[F, Lower, Ctx]
+
   /** Allows to focus [[Provide]] on inner parts of its context with equivalence lens.
     *
     * @param eq lens that can convert from `Ctx` value of type `A`
     */
   def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, Lower, A] =
-    new RunContextEquivalentInstance[F, Lower, Ctx, A](this, eq)
+    new RunContextEquivalentInstance[F, Lower, Ctx, A](self, eq)
 }
 
 /** Companion object for [[RunContext]] */
 object RunContext {
-  def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx
+  def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx.self
 
   type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
 }
@@ -366,6 +372,7 @@ object RunContext {
   */
 trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] with RunContext[F] with Unlift[G, F] {
   override type Ctx = C
+  override def self = this
 }
 
 /** Companion object for [[WithRun]] */
