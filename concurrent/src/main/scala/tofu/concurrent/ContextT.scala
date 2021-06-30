@@ -71,7 +71,7 @@ object ContextT extends ContextTInstances {
 
 }
 
-trait ContextTInstances extends ContextTInstancesQ
+trait ContextTInstances extends ContextTInstancesP
 
 trait ContextTInstancesZ { self: ContextTInstances =>
   final implicit def contextTInvariant[F[+_]: Invariant, C[_[_]]]: Invariant[ContextT[F, C, *]] = new ContextTInvariantI
@@ -145,15 +145,18 @@ trait ContextTInstancesR extends ContextTInstancesS { self: ContextTInstances =>
 }
 
 trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
+  final implicit def runContextUnsafe[F[+_]: Applicative, C[_[_]]]
+      : HasContextRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] =
+    new ContextTRunContextUnsafe[F, C]
+
+}
+
+trait ContextTInstancesP extends ContextTInstancesQ { self: ContextTInstances =>
   final implicit def contextTConcurrent[F[+_]: Concurrent, C[_[_]]]: Concurrent[ContextT[F, C, *]] =
     new ContextTConcurrentI
 
   final implicit def contextTRunContext[F[+_]: Applicative: Defer, C[_[_]]]: ContextTRunContext[F, C] =
     new ContextTRunContext
-
-  final implicit def runContextUnsafe[F[+_]: Applicative, C[_[_]]]
-      : HasContextRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] =
-    new ContextTRunContextUnsafe[F, C]
 
   final implicit def contextTParallel[F[+_]: Parallel, C[_[_]]: InvariantK]: Parallel[ContextT[F, C, *]] =
     new ContextTParallelI[F, C]

@@ -3,7 +3,7 @@ package tofu.lift
 import cats.FlatMap
 import cats.tagless.{FunctorK, InvariantK}
 import tofu.higherKind.Embed
-import tofu.syntax.lift._
+import tofu.syntax.liftKernel._
 
 trait Rebase[U[_[_]]] {
   def rebase[F[_], G[_]: FlatMap](uf: U[F])(implicit FG: Unlift[F, G]): U[G]

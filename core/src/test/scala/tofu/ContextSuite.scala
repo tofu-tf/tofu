@@ -14,9 +14,9 @@ object ContextSuite {
     implicitly[WithContext[ReaderT[F, Ctx, *], Ctx]]
     implicitly[HasLocal[ReaderT[F, Ctx, *], Ctx]]
     implicitly[WithLocal[ReaderT[F, Ctx, *], Ctx]]
-    implicitly[HasProvide[ReaderT[F, Ctx, *], F, Ctx]]
+    implicitly[HasProvide[ReaderT[F, Ctx, *], F, Ctx]](ContextBase.readerTContext[F, Ctx])
     implicitly[WithProvide[ReaderT[F, Ctx, *], F, Ctx]]
-    implicitly[HasContextRun[ReaderT[F, Ctx, *], F, Ctx]]
+    implicitly[HasContextRun[ReaderT[F, Ctx, *], F, Ctx]](ContextBase.readerTContext[F, Ctx])
     implicitly[WithRun[ReaderT[F, Ctx, *], F, Ctx]]
     ()
   }

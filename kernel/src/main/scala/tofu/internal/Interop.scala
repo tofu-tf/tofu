@@ -3,11 +3,19 @@ import scala.reflect.macros.blackbox._
 
 class Interop(val c: Context) {
   import c.universe._
-  def delegate[R, F[_], N](implicit R: c.WeakTypeTag[R], FU: c.WeakTypeTag[F[Unit]], N: c.WeakTypeTag[N]): c.Expr[R] = {
-    val s   = N.tpe.decls.head.asTerm.name.decodedName.toString()
-    val exp = c.parse(s)
-    val F   = FU.tpe.typeConstructor
+  import c.{WeakTypeTag => WTT}
+  private type WTTU[F[_]] = WTT[F[Unit]]
 
-    c.Expr[R](q"$exp[$F]")
+  private def tc[F[_]](implicit wttu: WTTU[F]) = wttu.tpe.typeConstructor
+
+  private def delegateImpl[R, N](ts: Type*)(implicit R: WTT[R], N: WTT[N]): c.Expr[R] = {
+    val s   = N.tpe.decls.head.asTerm.name.decodedName.toString
+    val exp = c.parse(s)
+
+    c.Expr[R](q"$exp[..$ts]")
   }
+
+  def delegate[R: WTT, F[_]: WTTU, N: WTT]: c.Expr[R] = delegateImpl[R, N](tc[F])
+
+  def delegate2[R: WTT, F[_]: WTTU, G[_]: WTTU, N: WTT]: c.Expr[R] = delegateImpl[R, N](tc[F], tc[G])
 }

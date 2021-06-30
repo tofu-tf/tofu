@@ -1,11 +1,12 @@
 package tofu.lift
 
-import cats.{Applicative, Functor}
+import cats.Applicative
 import cats.data.ReaderT
 import cats.effect.{Effect, IO}
 import cats.syntax.option._
 import org.scalatest.flatspec.AnyFlatSpec
 import tofu.compat.unused
+import cats.Monad
 
 class UnliftSuite extends AnyFlatSpec {
   "Lift implicit def implementations" should "cast instances properly" in {
@@ -50,6 +51,7 @@ object UnliftSuite {
   }
 
   def summonUnliftIOInstances1[F[_]: Effect, R](): Unit = {
+    // Unlift.unliftIOEffect[IO]
     implicitly[UnliftIO[F]]
     implicitly[UnliftIO[ReaderT[F, R, *]]]
     implicitly[Unlift[F, ReaderT[F, R, *]]]
@@ -62,7 +64,7 @@ object UnliftSuite {
     ()
   }
 
-  def summonUnliftIOInstances3[F[_]: UnliftIO: Functor, R](): Unit = {
+  def summonUnliftIOInstances3[F[_]: UnliftIO: Monad, R](): Unit = {
     implicitly[UnliftIO[ReaderT[F, R, *]]]
     ()
   }

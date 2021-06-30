@@ -5,6 +5,11 @@ import cats.{Applicative, FlatMap, Functor, ~>}
 import tofu.lift.{Lift, Unlift}
 import tofu.optics.{Contains, Equivalent, Extract}
 import tofu.syntax.funk._
+import cats.Monad
+import tofu.kernel.types._
+import cats.arrow.FunctionK
+import tofu.syntax.monadic._
+import tofu.lift.UnliftEffect
 
 /** Declares that [[F]] can provide value of type  Ctx
   *
@@ -297,9 +302,6 @@ object Provide {
   def apply[F[_]](implicit p: Provide[F]): HasProvide[F, p.Lower, p.Ctx] = p
 
   type Aux[F[_], G[_], C] = HasProvide[F, G, C]
-
-  final implicit def readerTContext[F[_]: Applicative, C]: HasProvide[ReaderT[F, C, *], F, C] =
-    ContextBase.readerTContext[F, C]
 }
 
 /** Synonym for [[Provide]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
@@ -356,9 +358,6 @@ object RunContext {
   def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx
 
   type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
-
-  final implicit def readerTContext[F[_]: Applicative, C]: HasContextRun[ReaderT[F, C, *], F, C] =
-    ContextBase.readerTContext[F, C]
 }
 
 /** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
@@ -377,7 +376,12 @@ object WithRun {
 /** Common base for instances */
 trait ContextBase
 
-object ContextBase {
+object ContextBase extends ContextBaseInstances1 {
+  implicit def unliftIdentity[F[_]: Applicative]: Unlift[F, F] = new Unlift[F, F] {
+    def lift[A](fa: F[A]): F[A] = fa
+    def unlift: F[F ~> F]       = FunctionK.id[F].pure[F]
+  }
+
   final implicit def readerTContext[F[_]: Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
     new WithRun[ReaderT[F, C, *], F, C] {
       def lift[A](fa: F[A]): ReaderT[F, C, A] = ReaderT.liftF(fa)
@@ -389,6 +393,16 @@ object ContextBase {
       val functor: Functor[ReaderT[F, C, *]] = Functor[ReaderT[F, C, *]]
       val context: ReaderT[F, C, C]          = ReaderT.ask[F, C]
     }
+}
+
+trait ContextBaseInstances1 extends ContextBaseInstances2 {
+  final implicit def unliftReaderCompose[F[_]: Monad, G[_], R](implicit FG: Unlift[G, F]): Unlift[G, ReaderT[F, R, *]] =
+    FG.andThen(ContextBase.readerTContext[F, R])
+}
+
+trait ContextBaseInstances2 {
+  final implicit def unliftIOEffect[F[_], G[_]](implicit carrier: UnliftEffect[F, G]): Unlift[F, G] =
+    carrier.value
 }
 
 private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F HasContext C1, extract: C1 Extract C2)

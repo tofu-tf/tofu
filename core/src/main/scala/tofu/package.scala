@@ -9,9 +9,9 @@ package object tofu {
 
   type HasLocal[F[_], C] = Local[F] { type Ctx = C }
 
-  type HasProvide[F[_], G[_], C] = Provide[F] { type Ctx = C; type Lower[A] = G[A] }
+  type HasProvide[F[_], G[_], C] = WithProvide[F, G, C]
 
-  type HasContextRun[F[_], G[_], C] = RunContext[F] { type Lower[A] = G[A]; type Ctx = C; }
+  type HasContextRun[F[_], G[_], C] = WithRun[F, G, C]
 
   type ApplicativeThrow[F[_]] = ApplicativeError[F, Throwable]
   type MonadThrow[F[_]]       = MonadError[F, Throwable]
