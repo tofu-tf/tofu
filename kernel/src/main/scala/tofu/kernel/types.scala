@@ -14,4 +14,6 @@ object types {
   type HasProvide[F[_], G[_], C] = WithProvide[F, G, C]
 
   type HasContextRun[F[_], G[_], C] = WithRun[F, G, C]
+
+  type AnyK[_] = Any
 }

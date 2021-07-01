@@ -8,6 +8,7 @@ import syntax.funk._
 import tofu.optics.Contains
 import tofu.syntax.monadic._
 import tofu.internal.Interop
+import kernel.types._
 
 trait Lift[F[_], G[_]] {
   def lift[A](fa: F[A]): G[A]
@@ -24,12 +25,12 @@ object Lift extends LiftInstances1 {
       def lift[A](fa: F[A]): G[A] = fk(fa)
     }
 
-  private val liftIdentityAny: Lift[Any, Any] = new Lift[Any, Any] {
+  private val liftIdentityAny: Lift[AnyK, AnyK] = new Lift[AnyK, AnyK] {
     def lift[A](fa: Any): Any = fa
   }
   implicit def liftIdentity[F[_]]: Lift[F, F] = liftIdentityAny.asInstanceOf[Lift[F, F]]
 
-  private val liftReaderTAny: Lift[Any, ReaderT[Any, Any, *]] = {
+  private val liftReaderTAny: Lift[AnyK, ReaderT[Any, Any, *]] = {
     type RT[a] = ReaderT[Any, Any, a]
     new Lift[Any, RT] {
       def lift[A](fa: Any): RT[A] = ReaderT.liftF(fa)

@@ -51,7 +51,6 @@ object UnliftSuite {
   }
 
   def summonUnliftIOInstances1[F[_]: Effect, R](): Unit = {
-    // Unlift.unliftIOEffect[IO]
     implicitly[UnliftIO[F]]
     implicitly[UnliftIO[ReaderT[F, R, *]]]
     implicitly[Unlift[F, ReaderT[F, R, *]]]
