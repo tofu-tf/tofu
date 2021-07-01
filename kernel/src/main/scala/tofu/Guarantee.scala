@@ -1,6 +1,7 @@
 package tofu
 
-import cats.effect.{Bracket, ExitCase}
+import tofu.internal.Interop
+import cats.MonadError
 
 /** Bracket-like typeclass allowing to understand if operation was succeed
   * @tparam F effect process
@@ -36,16 +37,7 @@ trait Finally[F[_], Exit[_]] extends Guarantee[F] {
 object Finally extends FinallyInstanceChain[Finally]
 
 trait FinallyInstanceChain[T[f[_], exit[_]] >: Finally[f, exit]] {
-  final implicit def fromBracket[F[_], E](implicit F: Bracket[F, E]): T[F, TConst[ExitCase[E], *]] =
-    new Finally[F, TConst[ExitCase[E], *]] {
-      def finallyCase[A, B, C](init: F[A])(action: A => F[B])(release: (A, ExitCase[E]) => F[C]): F[B] =
-        F.bracketCase(init)(action) { case (a, exit) =>
-          F.void(release(a, exit))
-        }
-      def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]         =
-        F.bracketCase(init)(action) {
-          case (a, ExitCase.Completed) => F.void(release(a, true))
-          case (a, _)                  => F.void(release(a, false))
-        }
-    }
+  // we need this MonadError evidence to infer `E`
+  final implicit def fromBracket[F[_], E, Exit[_]](implicit ev1: MonadError[F, E]): T[F, Exit] =
+    macro Interop.delegate1e1[Finally[F, Exit], F, E, { val `tofu.interop.CE2Kernel.finallyFromBracket`: Unit }]
 }
