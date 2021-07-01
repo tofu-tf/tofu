@@ -24,7 +24,7 @@ trait GuaranteeInstanceChain[T[f[_]] >: Guarantee[f]] extends FinallyInstanceCha
   * @tparam F effect process
   * @tparam Exit structure, describing process exit like `ExitCase` or `Exit`
   */
-trait Finally[F[_], Exit[_]] extends Guarantee[F] {
+trait Finally[F[_], +Exit[_]] extends Guarantee[F] {
 
   /** guarantee of finalization
     * @param init initialization process, probably acquiring some resources, need for finalization

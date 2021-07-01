@@ -6,7 +6,7 @@ object GuaranteeSuite {
 
   def summonInstancesForBracket[F[_]: BracketThrow](): Unit = {
     implicitly[Guarantee[F]]
-    implicitly[Finally[F, TConst[ExitCase[Throwable], *]]]
+    implicitly[Finally[F, TConst[ExitCase[Throwable], *]]](Finally.fromBracket)
     ()
   }
 
