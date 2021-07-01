@@ -16,10 +16,13 @@ import tofu.internal.NonTofu
 import tofu.compat.unused
 import cats.effect.Bracket
 import tofu.Finally
-import tofu.kernel.types._
 import cats.effect.ExitCase
+import tofu.FinallyCarrier
 
 object CE2Kernel {
+  // 2.12 sometimes gets mad on Const partial alias during implicit search
+  type CEExit[E, A] >: ExitCase[E] <: ExitCase[E]
+
   def delayViaSync[K[_]](implicit KS: Sync[K]): Delay[K] =
     new Delay[K] {
       def delay[A](a: => A): K[A] = KS.delay(a)
@@ -37,17 +40,21 @@ object CE2Kernel {
     override def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A] =
       Concurrent.timeoutTo(fa, after, fallback)
   }
-  
-  final implicit def finallyFromBracket[F[_], E](implicit F: Bracket[F, E]): Finally[F, TConst[ExitCase[E], *]] =
-    new Finally[F, TConst[ExitCase[E], *]] {
-      def finallyCase[A, B, C](init: F[A])(action: A => F[B])(release: (A, ExitCase[E]) => F[C]): F[B] =
-        F.bracketCase(init)(action) { case (a, exit) =>
-          F.void(release(a, exit))
-        }
-      def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]         =
-        F.bracketCase(init)(action) {
-          case (a, ExitCase.Completed) => F.void(release(a, true))
-          case (a, _)                  => F.void(release(a, false))
-        }
-    }
+
+  final implicit def finallyFromBracket[F[_], E](implicit
+      F: Bracket[F, E]
+  ): FinallyCarrier.Aux[F, E, CEExit[E, *]] =
+    FinallyCarrier[F, E, CEExit[E, *]](
+      new Finally[F, CEExit[E, *]] {
+        def finallyCase[A, B, C](init: F[A])(action: A => F[B])(release: (A, CEExit[E, B]) => F[C]): F[B] =
+          F.bracketCase(init)(action) { case (a, exit) =>
+            F.void(release(a, exit))
+          }
+        def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]         =
+          F.bracketCase(init)(action) {
+            case (a, ExitCase.Completed) => F.void(release(a, true))
+            case (a, _)                  => F.void(release(a, false))
+          }
+      }
+    )
 }
