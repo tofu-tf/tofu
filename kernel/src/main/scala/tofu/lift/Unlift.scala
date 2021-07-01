@@ -103,7 +103,7 @@ object Unlift{
   }
 }
 
-// This is purely workaround for scala 2
+// This is purely workaround for scala 2.12
 // Which denies to unfold the macros (and recieve a type error) 
 // before checking an implicit for eligibility
 class UnliftEffect[F[_], G[_]](val value: Unlift[F, G]) extends AnyVal
