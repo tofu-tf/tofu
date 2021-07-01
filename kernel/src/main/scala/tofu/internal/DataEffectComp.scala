@@ -8,6 +8,10 @@ trait EffectComp[TC[_[_]]] {
   @inline final def apply[F[_]](implicit instance: TC[F]): TC[F] = instance
 }
 
+trait Effect2Comp[TC[f[_], g[_]]] {
+  @inline final def apply[F[_], G[_]](implicit instance: TC[F, G]): TC[F, G] = instance
+}
+
 trait DataComp[TC[_]] {
   @inline final def apply[A](implicit instance: TC[A]): TC[A] = instance
 }
