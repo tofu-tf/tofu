@@ -25,7 +25,7 @@ object Race extends EffectComp[Race] {
 
 trait Fibers[F[_], Exit[_], Fib[_]] extends Race[F] {
   def start[A](fa: F[A]): F[Fib[A]]
-  def racePair[A, B](fa: F[A], fb: F[B]): F[Either[(A, Fib[B]), (Fib[A], B)]]
+  def racePair[A, B](fa: F[A], fb: F[B]): F[Either[(Exit[A], Fib[B]), (Fib[A], Exit[B])]]
 }
 
 object Fibers extends Effect3Comp[Fibers]
