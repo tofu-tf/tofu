@@ -7,7 +7,7 @@ import tofu.Delay
 import cats.effect.Effect
 import cats.effect.IO
 import tofu.syntax.monadic._
-import cats.~>
+import cats.{~>, Id}
 import cats.effect.Concurrent
 import cats.effect.Timer
 import cats.effect.Fiber
@@ -60,9 +60,9 @@ object CE2Kernel {
   final implicit def startFromConcurrent[F[_]](implicit
       F: Concurrent[F],
       @unused _nonTofu: NonTofu[F]
-  ): FibersCarrier.Aux[F, Fiber[F, *]] =
-    FibersCarrier[F, Fiber[F, *]](
-      new Fibers[F, Fiber[F, *]] {
+  ): FibersCarrier.Aux[F, Id, Fiber[F, *]] =
+    FibersCarrier[F, Id, Fiber[F, *]](
+      new Fibers[F, Id, Fiber[F, *]] {
         def start[A](fa: F[A]): F[Fiber[F, A]]                                                = F.start(fa)
         def fireAndForget[A](fa: F[A]): F[Unit]                                               = F.void(start(fa))
         def racePair[A, B](fa: F[A], fb: F[B]): F[Either[(A, Fiber[F, B]), (Fiber[F, A], B)]] = F.racePair(fa, fb)
