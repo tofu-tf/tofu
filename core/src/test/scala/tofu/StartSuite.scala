@@ -4,6 +4,8 @@ import cats.effect.Concurrent
 import scala.annotation.nowarn
 import cats.effect.IO
 import cats.effect.ContextShift
+import tofu.syntax.start._
+import tofu.syntax.monadic._
 
 @nowarn("msg=parameter")
 object StartSuite {
@@ -17,5 +19,12 @@ object StartSuite {
     Fire[IO]
     Start[IO]
     Race[IO]
+  }
+
+  def testStartSyntaxCheck[A, B, F[_]: Concurrent](fa: F[A], fb: F[B]): F[(A, B)] = {
+    fa.racePair(fb).flatMap {
+      case Left((a, eb))  => eb.join.tupleLeft(a)
+      case Right((ea, b)) => ea.join.tupleRight(b)
+    }
   }
 }
