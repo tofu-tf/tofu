@@ -8,6 +8,12 @@ import cats.effect.IO
 import tofu.syntax.monadic._
 import cats.~>
 import tofu.lift.UnliftEffect
+import cats.effect.Concurrent
+import cats.effect.Timer
+import scala.concurrent.duration.FiniteDuration
+import tofu.Timeout
+import tofu.internal.NonTofu
+import tofu.compat.unused
 
 object CE2Kernel {
   def delayViaSync[K[_]](implicit KS: Sync[K]): Delay[K] =
@@ -22,4 +28,9 @@ object CE2Kernel {
         def unlift: K[K ~> IO]       = Effect.toIOK[K].pure[K]
       }
     )
+
+  def concurrentTimeout[F[_]: Concurrent: Timer](implicit @unused nonTofu: NonTofu[F]): Timeout[F] = new Timeout[F] {
+    override def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A] =
+      Concurrent.timeoutTo(fa, after, fallback)
+  }
 }
