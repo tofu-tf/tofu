@@ -1,10 +1,12 @@
-package tofu.kernel
+package tofu
+package kernel
 
-import tofu.{WithContext, Local, Context}
-import tofu.WithProvide
-import tofu.WithRun
+import cats.ApplicativeError
+import cats.MonadError
 
-object types {
+object types extends KernelTypes
+
+trait KernelTypes extends Any {
   type In[C, F[_]] = WithContext[F, C]
 
   type HasContext[F[_], C] = Context[F] { type Ctx = C }
@@ -16,4 +18,13 @@ object types {
   type HasContextRun[F[_], G[_], C] = WithRun[F, G, C]
 
   type AnyK[_] = Any
+
+  type TConst[A, B] = A
+
+  type ApplicativeThrow[F[_]] = ApplicativeError[F, Throwable]
+  type MonadThrow[F[_]]       = MonadError[F, Throwable]
+
+  type Throws[F[_]]  = Raise[F, Throwable]
+  type Catches[F[_]] = Handle[F, Throwable]
+  type Tries[F[_]]   = Errors[F, Throwable]
 }

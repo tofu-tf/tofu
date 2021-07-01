@@ -1,6 +1,8 @@
 package tofu
 
-import cats.effect.{Bracket, ExitCase}
+import tofu.internal.WBInterop
+import cats.MonadError
+import scala.annotation.unused
 
 /** Bracket-like typeclass allowing to understand if operation was succeed
   * @tparam F effect process
@@ -15,9 +17,14 @@ trait Guarantee[F[_]] {
   def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]
 }
 
-object Guarantee extends GuaranteeInstanceChain[Guarantee]
+object Guarantee{
+  final implicit def fromBracket[F[_], E, Exit[_]](implicit
+      @unused ev1: MonadError[F, E],
+      carrier: FinallyCarrier.Aux[F, E, Exit]
+  ): Finally[F, Exit] =
+    carrier.content
+}
 
-trait GuaranteeInstanceChain[T[f[_]] >: Guarantee[f]] extends FinallyInstanceChain[λ[(`f[_]`, `exit[_]`) => T[f]]]
 
 /** Bracket-like typeclass allowing to match exit of the process
   * @tparam F effect process
@@ -33,19 +40,19 @@ trait Finally[F[_], Exit[_]] extends Guarantee[F] {
   def finallyCase[A, B, C](init: F[A])(action: A => F[B])(release: (A, Exit[B]) => F[C]): F[B]
 }
 
-object Finally extends FinallyInstanceChain[Finally]
+abstract class FinallyCarrier[F[_], E] {
+  type Exit[_]
+  val content: Finally[F, Exit]
+}
 
-trait FinallyInstanceChain[T[f[_], exit[_]] >: Finally[f, exit]] {
-  final implicit def fromBracket[F[_], E](implicit F: Bracket[F, E]): T[F, TConst[ExitCase[E], *]] =
-    new Finally[F, TConst[ExitCase[E], *]] {
-      def finallyCase[A, B, C](init: F[A])(action: A => F[B])(release: (A, ExitCase[E]) => F[C]): F[B] =
-        F.bracketCase(init)(action) { case (a, exit) =>
-          F.void(release(a, exit))
-        }
-      def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]         =
-        F.bracketCase(init)(action) {
-          case (a, ExitCase.Completed) => F.void(release(a, true))
-          case (a, _)                  => F.void(release(a, false))
-        }
-    }
+object FinallyCarrier {
+  type Aux[F[_], E, Ex[_]] = FinallyCarrier[F, E] { type Exit[a] = Ex[a] }
+  def apply[F[_], E, Ex[_]](fin: Finally[F, Ex]) = new FinallyCarrier[F, E] {
+    type Exit[a] = Ex[a]
+    val content = fin
+  }
+
+
+  final implicit def fromBracket[F[_], E, Exit[_]]: Aux[F, E, Exit] =
+    macro WBInterop.delegate1[F, E, { val `tofu.interop.CE2Kernel.finallyFromBracket`: Unit }]
 }
