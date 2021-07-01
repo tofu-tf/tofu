@@ -28,7 +28,7 @@ object Lift extends LiftInstances1 {
   private val liftIdentityAny: Lift[AnyK, AnyK] = new Lift[AnyK, AnyK] {
     def lift[A](fa: Any): Any = fa
   }
-  implicit def liftIdentity[F[_]]: Lift[F, F] = liftIdentityAny.asInstanceOf[Lift[F, F]]
+  implicit def liftIdentity[F[_]]: Lift[F, F]   = liftIdentityAny.asInstanceOf[Lift[F, F]]
 
   private val liftReaderTAny: Lift[AnyK, ReaderT[Any, Any, *]] = {
     type RT[a] = ReaderT[Any, Any, a]
@@ -79,7 +79,7 @@ trait Unlift[F[_], G[_]] extends Lift[F, G] with ContextBase { self =>
     }
 }
 
-object Unlift{
+object Unlift {
   def apply[F[_], G[_]](implicit unlift: Unlift[F, G]): Unlift[F, G] = unlift
 
   def byIso[F[_], G[_]: Applicative](iso: IsoK[F, G]): Unlift[F, G] =
@@ -104,11 +104,11 @@ object Unlift{
 }
 
 // This is purely workaround for scala 2.12
-// Which denies to unfold a macro (and recieve a type error) 
+// Which denies to unfold a macro (and recieve a type error)
 // before checking an implicit for eligibility
 class UnliftEffect[F[_], G[_]](val value: Unlift[F, G]) extends AnyVal
 
-object UnliftEffect{
+object UnliftEffect {
   final implicit def unliftIOEffect[F[_], G[_]]: UnliftEffect[F, G] =
     macro Interop.delegate[UnliftEffect[F, G], G, { val `tofu.interop.CE2Kernel.unliftEffect`: Unit }]
 }
