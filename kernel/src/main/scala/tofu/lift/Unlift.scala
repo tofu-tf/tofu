@@ -103,9 +103,12 @@ object Unlift{
   }
 }
 
+// This is purely workaround for scala 2
+// Which denies to unfold the macros (and recieve a type error) 
+// before checking an implicit for eligibility
 class UnliftEffect[F[_], G[_]](val value: Unlift[F, G]) extends AnyVal
 
 object UnliftEffect{
   final implicit def unliftIOEffect[F[_], G[_]]: UnliftEffect[F, G] =
-    macro Interop.delegate2[UnliftEffect[F, G], F, G, { val `tofu.interop.CE2Kernel.unliftEffect`: Unit }]
+    macro Interop.delegate[UnliftEffect[F, G], G, { val `tofu.interop.CE2Kernel.unliftEffect`: Unit }]
 }

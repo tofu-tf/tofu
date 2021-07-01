@@ -16,6 +16,4 @@ class Interop(val c: Context) {
   }
 
   def delegate[R: WTT, F[_]: WTTU, N: WTT]: c.Expr[R] = delegateImpl[R, N](tc[F])
-
-  def delegate2[R: WTT, F[_]: WTTU, G[_]: WTTU, N: WTT]: c.Expr[R] = delegateImpl[R, N](tc[F], tc[G])
 }

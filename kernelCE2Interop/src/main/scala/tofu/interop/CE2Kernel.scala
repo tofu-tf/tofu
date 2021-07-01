@@ -15,11 +15,11 @@ object CE2Kernel {
       def delay[A](a: => A): K[A] = KS.delay(a)
     }
 
-  def unliftEffect[E[x] >: IO[x] <: IO[x], K[_]](implicit KE: Effect[K]): UnliftEffect[E, K] =
+  def unliftEffect[K[_]](implicit KE: Effect[K]): UnliftEffect[IO, K] =
     new UnliftEffect(
-      new Unlift[E, K] {
-        def lift[A](fa: E[A]): K[A] = Effect[K].liftIO(fa)
-        def unlift: K[K ~> E]       = Effect.toIOK[K].pure[K]
+      new Unlift[IO, K] {
+        def lift[A](fa: IO[A]): K[A] = Effect[K].liftIO(fa)
+        def unlift: K[K ~> IO]       = Effect.toIOK[K].pure[K]
       }
     )
 }
