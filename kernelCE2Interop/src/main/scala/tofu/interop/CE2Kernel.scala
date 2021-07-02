@@ -1,4 +1,5 @@
-package tofu.interop
+package tofu
+package interop
 import tofu.lift.Unlift
 
 import cats.effect.Sync
@@ -6,18 +7,16 @@ import tofu.Delay
 import cats.effect.Effect
 import cats.effect.IO
 import tofu.syntax.monadic._
-import cats.~>
-import tofu.lift.UnliftEffect
+import cats.{~>, Id}
 import cats.effect.Concurrent
 import cats.effect.Timer
+import cats.effect.Fiber
 import scala.concurrent.duration.FiniteDuration
-import tofu.Timeout
 import tofu.internal.NonTofu
 import tofu.compat.unused
 import cats.effect.Bracket
-import tofu.Finally
 import cats.effect.ExitCase
-import tofu.FinallyCarrier
+import tofu.internal.carriers._
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search
@@ -50,11 +49,25 @@ object CE2Kernel {
           F.bracketCase(init)(action) { case (a, exit) =>
             F.void(release(a, exit))
           }
-        def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]         =
+        def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]          =
           F.bracketCase(init)(action) {
             case (a, ExitCase.Completed) => F.void(release(a, true))
             case (a, _)                  => F.void(release(a, false))
           }
+      }
+    )
+
+  final implicit def startFromConcurrent[F[_]](implicit
+      F: Concurrent[F],
+      @unused _nonTofu: NonTofu[F]
+  ): FibersCarrier.Aux[F, Id, Fiber[F, *]] =
+    FibersCarrier[F, Id, Fiber[F, *]](
+      new Fibers[F, Id, Fiber[F, *]] {
+        def start[A](fa: F[A]): F[Fiber[F, A]]                                                = F.start(fa)
+        def fireAndForget[A](fa: F[A]): F[Unit]                                               = F.void(start(fa))
+        def racePair[A, B](fa: F[A], fb: F[B]): F[Either[(A, Fiber[F, B]), (Fiber[F, A], B)]] = F.racePair(fa, fb)
+        def race[A, B](fa: F[A], fb: F[B]): F[Either[A, B]]                                   = F.race(fa, fb)
+        def never[A]: F[A]                                                                    = F.never
       }
     )
 }

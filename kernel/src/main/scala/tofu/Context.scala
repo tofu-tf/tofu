@@ -9,7 +9,7 @@ import cats.Monad
 import tofu.kernel.types._
 import cats.arrow.FunctionK
 import tofu.syntax.monadic._
-import tofu.lift.UnliftEffect
+import tofu.internal.carriers.UnliftEffect
 
 /** Declares that [[F]] can provide value of type  Ctx
   *

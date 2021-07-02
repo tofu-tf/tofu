@@ -2,6 +2,7 @@ package tofu
 
 import scala.annotation.nowarn
 import tofu.interop.CE2Kernel.CEExit
+import tofu.internal.carriers.FinallyCarrier
 
 object GuaranteeSuite {
 
