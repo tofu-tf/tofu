@@ -17,6 +17,12 @@ import tofu.compat.unused
 import cats.effect.Bracket
 import cats.effect.ExitCase
 import tofu.internal.carriers._
+import scala.concurrent.ExecutionContext
+import cats.effect.ContextShift
+import cats.effect.Async
+import tofu.kernel.types._
+import scala.concurrent.Future
+import cats.effect.Blocker
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search
@@ -70,4 +76,28 @@ object CE2Kernel {
         def never[A]: F[A]                                                                    = F.never
       }
     )
+
+  final def makeExecute[Tag, F[_]](
+      ec: ExecutionContext
+  )(implicit cs: ContextShift[F], F: Async[F]): ScopedExecute[Tag, F] =
+    new ScopedExecute[Tag, F] {
+      def runScoped[A](fa: F[A]): F[A] = cs.evalOn(ec)(fa)
+
+      def executionContext: F[ExecutionContext] = ec.pure[F]
+
+      def deferFutureAction[A](f: ExecutionContext => Future[A]): F[A] =
+        Async.fromFuture(runScoped(F.delay(f(ec))))
+    }
+
+  final def asyncExecute[F[_]](implicit
+      ec: ExecutionContext,
+      cs: ContextShift[F],
+      F: Async[F]
+  ): Execute[F] = makeExecute[Scoped.Main, F](ec)
+
+  final def blockerExecute[F[_]](implicit
+      cs: ContextShift[F],
+      blocker: Blocker,
+      F: Async[F]
+  ): BlockExec[F] = makeExecute[Scoped.Blocking, F](blocker.blockingContext)
 }

@@ -3,13 +3,19 @@ package tofu
 import tofu.higherKind.{Mid, Point, PureK}
 import cats._
 import tofu.syntax.funk._
-import tofu.syntax.monadic._
 import scala.concurrent.{ExecutionContext, Future}
-import cats.effect.{ContextShift, Async}
-import cats.effect.Blocker
+import tofu.internal.EffectComp
+import tofu.internal.Interop
+import tofu.kernel.types._
 
 /** can be used for scoped transformations
-  * @tparam Tag arbitrary type tag for discriminating scopes
+  * @tparam Tag arbitrary type tag f  type Execute[F[_]] = ScopedExecute[Scoped.Main, F]
+  *
+  *  type Blocks[F[_]]    = Scoped[Scoped.Blocking, F]
+  *  type BlockExec[F[_]] = ScopedExecute[Scoped.Blocking, F]
+  *
+  *  type Calculates[F[_]] = Scoped[Scoped.Calculation, F]
+  *  type CalcExec[F[_]]   = ScopedExecute[Scoped.Calculation, F]or discriminating scopes
   * @tparam F process type
   */
 trait Scoped[Tag, F[_]] {
@@ -83,47 +89,22 @@ trait ScopedExecute[Tag, F[_]] extends Scoped[Tag, F] {
 }
 
 trait ScopedInstances {
-  final def makeExecute[Tag, F[_]](
-      ec: ExecutionContext
-  )(implicit cs: ContextShift[F], F: Async[F]): ScopedExecute[Tag, F] =
-    new ScopedExecute[Tag, F] {
-      def runScoped[A](fa: F[A]): F[A] = cs.evalOn(ec)(fa)
+  final def makeExecute[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
+    macro Interop.delegate1p1[Execute[F], Tag, F, { val `tofu.interop.CE2Kernel.makeExecute`: Unit }]
 
-      def executionContext: F[ExecutionContext] = ec.pure[F]
+  final implicit def asyncExecute[F[_]]: Execute[F] =
+    macro Interop.delegate[Execute[F], F, { val `tofu.interop.CE2Kernel.asyncExecute`: Unit }]
 
-      def deferFutureAction[A](f: ExecutionContext => Future[A]): F[A] =
-        Async.fromFuture(runScoped(F.delay(f(ec))))
-    }
-
-  final implicit def asyncExecute[F[_]](implicit
-      ec: ExecutionContext,
-      cs: ContextShift[F],
-      F: Async[F]
-  ): Execute[F] = makeExecute[Scoped.Main, F](ec)
-
-  final implicit def blockerExecute[F[_]](implicit
-      cs: ContextShift[F],
-      blocker: Blocker,
-      F: Async[F]
-  ): BlockExec[F] = makeExecute[Scoped.Blocking, F](blocker.blockingContext)
+  final implicit def blockerExecute[F[_]]: BlockExec[F] =
+    macro Interop.delegate[Execute[F], F, { val `tofu.interop.CE2Kernel.blockerExecute`: Unit }]
 }
 
-object Execute {
-  def apply[F[_]](implicit F: Execute[F]): F.type = F
-}
+object Execute extends EffectComp[Execute]
 
-object Blocks {
-  def apply[F[_]](implicit F: Blocks[F]): F.type = F
-}
+object Blocks extends EffectComp[Blocks]
 
-object BlockExec {
-  def apply[F[_]](implicit F: BlockExec[F]): F.type = F
-}
+object BlockExec extends EffectComp[BlockExec]
 
-object Calculates {
-  def apply[F[_]](implicit F: Calculates[F]): F.type = F
-}
+object Calculates extends EffectComp[Calculates]
 
-object CalcExec {
-  def apply[F[_]](implicit F: CalcExec[F]): F.type = F
-}
+object CalcExec extends EffectComp[CalcExec]
