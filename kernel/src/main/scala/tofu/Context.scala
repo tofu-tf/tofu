@@ -8,6 +8,7 @@ import tofu.syntax.funk._
 import cats.Monad
 import tofu.kernel.types._
 import cats.arrow.FunctionK
+import tofu.internal.ContextBase
 import tofu.syntax.monadic._
 import tofu.internal.carriers.UnliftEffect
 
@@ -30,6 +31,7 @@ import tofu.internal.carriers.UnliftEffect
   * so when you have `MyCtx(3)`
   * the call of `contextualConsolling("Hi!")` prints `Hi! (Also MyCtx(3))`
   */
+@deprecated("Migrate to With* typeclasses", "0.10.3")
 trait Context[F[_]] extends ContextBase {
   def functor: Functor[F]
 
@@ -66,6 +68,7 @@ trait Context[F[_]] extends ContextBase {
 }
 
 /** Companion object for [[Context]] */
+@deprecated("Migrate to With* typeclasses", "0.10.3")
 object Context {
   def apply[F[_]](implicit ctx: Context[F]): HasContext[F, ctx.Ctx] = ctx
 
@@ -144,32 +147,12 @@ object Context {
   }
 }
 
-final class WithContextContainsInstance[F[_], A, B](implicit wc: WithContext[F, A], lens: A Contains B)
-    extends WithContext[F, B] {
-  def functor: Functor[F] = wc.functor
-  def context: F[B]       = wc.extract(lens).context
-}
 
-/** Synonym for [[Context]] with explicit C as Ctx for better type inference
-  *
-  * There is also a nice type alias: {{{
-  * import tofu.In
-  *
-  * val fHasMyCtx: MyCtx In F = ???
-  * }}}
-  */
-trait WithContext[F[_], C] extends Context[F] {
-  override type Ctx = C
-}
-
-/** Companion object for [[WithContext]] */
-object WithContext {
-  def apply[F[_], C](implicit ctx: WithContext[F, C]): WithContext[F, C] = ctx
-}
 
 /** Allows to run some computation with notion of altered context
   * consider using `WithLocal` for better type inference
   */
+@deprecated("Migrate to With* typeclasses", "0.10.3")
 trait Local[F[_]] extends Context[F] {
 
   /** Alters context for computation
@@ -207,19 +190,16 @@ trait Local[F[_]] extends Context[F] {
   def subcontext[A](contains: Ctx Contains A): WithLocal[F, A] = new LocalContainsInstance[F, Ctx, A](this, contains)
 }
 
+@deprecated("Migrate to With* typeclasses", "0.10.3")
 object Local {
   def apply[F[_]](implicit ctx: Local[F]): HasLocal[F, ctx.Ctx] = ctx
 
   type Aux[F[_], C] = HasLocal[F, C]
 }
 
-/** Synonym for [[Local]] with explicit C as Ctx for better type inference */
-trait WithLocal[F[_], C] extends Local[F] with WithContext[F, C]
 
-/** Companion object for [[WithLocal]] */
-object WithLocal {
-  def apply[F[_], C](implicit ctx: WithLocal[F, C]): WithLocal[F, C] = ctx
-}
+
+
 
 /** Allows to evaluate contextual computation with some context
   *
@@ -228,6 +208,7 @@ object WithLocal {
   *
   * @tparam F context-aware effect e.g.`ReaderT[Lower, Ctx, *]`
   */
+@deprecated("Migrate to With* typeclasses", "0.10.3")
 trait Provide[F[_]] extends ContextBase {
   type Ctx
 
@@ -300,32 +281,19 @@ trait Provide[F[_]] extends ContextBase {
 }
 
 /** Companion object for [[Provide]] */
+@deprecated("Migrate to With* typeclasses", "0.10.3")
 object Provide {
   def apply[F[_]](implicit p: Provide[F]): HasProvide[F, p.Lower, p.Ctx] = p.self
 
   type Aux[F[_], G[_], C] = HasProvide[F, G, C]
 }
 
-/** Synonym for [[Provide]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
-  *
-  * Can be seen as transformation `F[*] = C => G[*]`
-  */
-trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
-  override type Lower[A] = G[A]
-  override type Ctx      = C
-
-  def self = this
-}
-
-/** Companion object for [[WithProvide]] */
-object WithProvide {
-  def apply[F[_], G[_], C](implicit p: WithProvide[F, G, C]): WithProvide[F, G, C] = p
-}
 
 /** Combination of [[Local]] and [[Provide]]
   *
   * @tparam F context-aware effect e.g.`ReaderT[Lower, Ctx, *]`
   */
+@deprecated("Migrate to With* typeclasses", "0.10.3")
 trait RunContext[F[_]] extends Local[F] with Provide[F] {
 
   /** Allows to convert some context-unaware computation into contextual one.
@@ -360,57 +328,13 @@ trait RunContext[F[_]] extends Local[F] with Provide[F] {
 }
 
 /** Companion object for [[RunContext]] */
+@deprecated("Migrate to With* typeclasses", "0.10.3")
 object RunContext {
   def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx.self
 
   type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
 }
 
-/** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
-  *
-  * Can be seen as transformation `F[*] = C => G[*]`
-  */
-trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] with RunContext[F] with Unlift[G, F] {
-  override type Ctx = C
-  override def self = this
-}
-
-/** Companion object for [[WithRun]] */
-object WithRun {
-  def apply[F[_], G[_], C](implicit ctx: WithRun[F, G, C]): WithRun[F, G, C] = ctx
-}
-
-/** Common base for instances */
-trait ContextBase
-
-object ContextBase extends ContextBaseInstances1 {
-  implicit def unliftIdentity[F[_]: Applicative]: Unlift[F, F] = new Unlift[F, F] {
-    def lift[A](fa: F[A]): F[A] = fa
-    def unlift: F[F ~> F]       = FunctionK.id[F].pure[F]
-  }
-
-  final implicit def readerTContext[F[_]: Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
-    new WithRun[ReaderT[F, C, *], F, C] {
-      def lift[A](fa: F[A]): ReaderT[F, C, A] = ReaderT.liftF(fa)
-
-      def runContext[A](fa: ReaderT[F, C, A])(ctx: C): F[A] = fa.run(ctx)
-
-      def local[A](fa: ReaderT[F, C, A])(project: C => C): ReaderT[F, C, A] = fa.local(project)
-
-      val functor: Functor[ReaderT[F, C, *]] = Functor[ReaderT[F, C, *]]
-      val context: ReaderT[F, C, C]          = ReaderT.ask[F, C]
-    }
-}
-
-trait ContextBaseInstances1 extends ContextBaseInstances2 {
-  final implicit def unliftReaderCompose[F[_]: Monad, G[_], R](implicit FG: Unlift[G, F]): Unlift[G, ReaderT[F, R, *]] =
-    FG.andThen(ContextBase.readerTContext[F, R])
-}
-
-trait ContextBaseInstances2 {
-  final implicit def unliftIOEffect[F[_], G[_]](implicit carrier: UnliftEffect[F, G]): Unlift[F, G] =
-    carrier.value
-}
 
 private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F HasContext C1, extract: C1 Extract C2)
     extends WithContext[F, C2] {
@@ -443,18 +367,3 @@ private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](
   def lift[A](ga: G[A]): F[A] = ctx.lift(ga)
 }
 
-object HasContext {
-  def apply[F[_], C](implicit hc: HasContext[F, C]): HasContext[F, C] = hc
-}
-
-object HasLocal {
-  def apply[F[_], C](implicit hl: HasLocal[F, C]): HasLocal[F, C] = hl
-}
-
-object HasProvide {
-  def apply[F[_], G[_], C](implicit hp: HasProvide[F, G, C]): HasProvide[F, G, C] = hp
-}
-
-object HasContextRun {
-  def apply[F[_], G[_], C](implicit hcr: HasContextRun[F, G, C]): HasContextRun[F, G, C] = hcr
-}

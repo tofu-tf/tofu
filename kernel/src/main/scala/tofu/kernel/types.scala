@@ -9,12 +9,16 @@ object types extends KernelTypes
 trait KernelTypes extends Any {
   type In[C, F[_]] = WithContext[F, C]
 
+  @deprecated("Use WithContext instead", "0.10.3")
   type HasContext[F[_], C] = Context[F] { type Ctx = C }
 
+  @deprecated("Use WithLocal instead", "0.10.3")
   type HasLocal[F[_], C] = Local[F] { type Ctx = C }
 
+  @deprecated("Use WithProvide instead", "0.10.3")
   type HasProvide[F[_], G[_], C] = WithProvide[F, G, C]
 
+  @deprecated("Use WithRun instead", "0.10.3")
   type HasContextRun[F[_], G[_], C] = WithRun[F, G, C]
 
   type AnyK[_] = Any
