@@ -1,16 +1,10 @@
 package tofu
 
-import cats.data.ReaderT
 import cats.{Applicative, FlatMap, Functor, ~>}
-import tofu.lift.{Lift, Unlift}
+import tofu.internal.ContextBase
+import tofu.kernel.types._
 import tofu.optics.{Contains, Equivalent, Extract}
 import tofu.syntax.funk._
-import cats.Monad
-import tofu.kernel.types._
-import cats.arrow.FunctionK
-import tofu.internal.ContextBase
-import tofu.syntax.monadic._
-import tofu.internal.carriers.UnliftEffect
 
 /** Declares that [[F]] can provide value of type  Ctx
   *
