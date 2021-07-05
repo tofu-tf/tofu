@@ -1,16 +1,10 @@
 package tofu
 
-import cats.data.ReaderT
 import cats.{Applicative, FlatMap, Functor, ~>}
-import tofu.lift.{Lift, Unlift}
+import tofu.internal.ContextBase
+import tofu.kernel.types._
 import tofu.optics.{Contains, Equivalent, Extract}
 import tofu.syntax.funk._
-import cats.Monad
-import tofu.kernel.types._
-import cats.arrow.FunctionK
-import tofu.internal.ContextBase
-import tofu.syntax.monadic._
-import tofu.internal.carriers.UnliftEffect
 
 /** Declares that [[F]] can provide value of type  Ctx
   *
@@ -64,14 +58,10 @@ trait Context[F[_]] extends ContextBase { self =>
     *
     * @param extract lens that can extract value of type `A` from `Ctx`
     */
-  def extract[A](extract: Extract[Ctx, A]): WithContext[F, A] = {
-    val withContext: WithContext[F, Ctx] = new WithContext[F, Ctx] {
-      override def functor: Functor[F] = self.functor
+  def extract[A](extract: Extract[Ctx, A]): WithContext[F, A] =
+    new ContextExtractInstance[F, Ctx, A](asWithContext, extract)
 
-      override def context: F[Ctx] = self.context
-    }
-    new ContextExtractInstance[F, Ctx, A](withContext, extract)
-  }
+  private[tofu] def asWithContext: WithContext[F, Ctx]
 }
 
 /** Companion object for [[Context]] */
@@ -165,13 +155,16 @@ trait Local[F[_]] extends Context[F] { self =>
     *
     * @param contains lens that can extract from `Ctx` or set some value of type `A`
     */
-  def subcontext[A](contains: Ctx Contains A): WithLocal[F, A] = {
-    val withLocal: WithLocal[F, Ctx] = new WithLocal[F, Ctx] {
+  def subcontext[A](contains: Ctx Contains A): WithLocal[F, A] = new LocalContainsInstance[F, Ctx, A](asWithLocal, contains)
+
+  private[tofu] def asWithLocal: WithLocal[F, Ctx] = {
+    new WithLocal[F, Ctx] {
       override def context: F[Ctx] = self.context
-      override def functor: cats.Functor[F] = self.functor
-      override def local[A](fa: F[A])(project: Ctx => Ctx): F[A] = self.local(fa)(project)
+
+      override def functor: Functor[F] = self.functor
+
+      override def local[B](fa: F[B])(project: Ctx => Ctx): F[B] = self.local(fa)(project)
     }
-    new LocalContainsInstance[F, Ctx, A](withLocal, contains)
   }
 }
 
@@ -305,6 +298,7 @@ trait RunContext[F[_]] extends Local[F] with Provide[F] {
     */
   def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, Lower, A] =
     new RunContextEquivalentInstance[F, Lower, Ctx, A](self, eq)
+
 }
 
 /** Companion object for [[RunContext]] */

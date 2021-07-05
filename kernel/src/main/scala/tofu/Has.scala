@@ -1,11 +1,6 @@
 package tofu
 
-import cats.Monad
-import cats.data.ReaderT
-import tofu.internal.ContextBase
-import tofu.internal.carriers.UnliftEffect
 import tofu.kernel.types.{HasContext, HasContextRun, HasLocal, HasProvide}
-import tofu.lift.Unlift
 
 @deprecated("Use WithContext instead", "0.10.3")
 object HasContext {
