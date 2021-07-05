@@ -7,7 +7,7 @@ import tofu.lift.{Rebase, Unlift}
 import tofu.optics.Contains
 import tofu.syntax.funk.{funK, funKFrom}
 import tofu.syntax.monadic._
-import tofu.{HasContextRun, WithLocal}
+import tofu.{HasContextRun, WithLocal, WithRun}
 
 /** a ReaderT analog, allowing to have context referring resulting type
   *  for instance you can define
@@ -146,7 +146,7 @@ trait ContextTInstancesR extends ContextTInstancesS { self: ContextTInstances =>
 
 trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
   final implicit def runContextUnsafe[F[+_]: Applicative, C[_[_]]]
-      : HasContextRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] =
+      : WithRun[ContextT[F, C, *], F, C[ContextT[F, C, *]]] =
     new ContextTRunContextUnsafe[F, C]
 
 }

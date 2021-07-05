@@ -1,8 +1,6 @@
 package tofu
 
 import cats.{Applicative, FlatMap, Functor}
-import tofu.internal.ContextBase
-import tofu.kernel.types.HasContext
 import tofu.optics.{Contains, Extract}
 
 /** Synonym for [[Context]] with explicit C as Ctx for better type inference
@@ -44,6 +42,7 @@ trait WithContext[F[_], C] extends Context[F] {
   override def extract[A](extract: Extract[Ctx, A]): WithContext[F, A] =
     new ContextExtractInstance[F, Ctx, A](this, extract)
 
+  override def asWithContext: WithContext[F, C] = this
 }
 
 /** Companion object for [[WithContext]] */

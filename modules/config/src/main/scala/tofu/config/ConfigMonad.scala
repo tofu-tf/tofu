@@ -18,7 +18,7 @@ trait ConfigMonad[F[_]] {
   implicit def monad: Monad[F]
   implicit def paralleled: Parallel[F]
   implicit def config: Raise[F, ConfigError]
-  implicit def path: HasLocal[F, Path]
+  implicit def path: WithLocal[F, Path]
   implicit def restore: Restore[F]
 
   def error[A](err: ConfigError): F[A] = config.raise(err)
@@ -51,7 +51,7 @@ object ConfigMonad {
       val config     = FE
       val paralleled = Parallel.identity[F]
       val restore    = FR
-      val path       = FL
+      val path       = FL.asWithLocal
     }
 
   def fromParallelAndErrors[F[_]](implicit
@@ -64,7 +64,7 @@ object ConfigMonad {
       val monad      = F
       val paralleled = FP
       val config     = FE
-      val path       = FL
+      val path       = FL.asWithLocal
       val restore    = FE
     }
 
@@ -96,14 +96,14 @@ object ConfigTContext {
   class ConfigTConfigMonad[F[_]: Monad](implicit FP: ParallelReader[F], FR: Errors[F, Fail.type])
       extends ConfigMonad[ConfigT[F, *]] {
 
-    val monad: Monad[ConfigT[F, *]]         = Monad[ConfigT[F, *]]
-    val paralleled: Parallel[ConfigT[F, *]] = FP.paralleled
-    val path: HasLocal[ConfigT[F, *], Path] = Local[ConfigT[F, *]].subcontext(contextPath[F])
-    val config: ConfigRaise[ConfigT[F, *]]  = new ConfigRaise[ConfigT[F, *]] {
+    val monad: Monad[ConfigT[F, *]]          = Monad[ConfigT[F, *]]
+    val paralleled: Parallel[ConfigT[F, *]]  = FP.paralleled
+    val path: WithLocal[ConfigT[F, *], Path] = Local[ConfigT[F, *]].subcontext(contextPath[F]).asWithLocal
+    val config: ConfigRaise[ConfigT[F, *]]   = new ConfigRaise[ConfigT[F, *]] {
       def raise[A](err: ConfigError): ConfigT[F, A] =
         ReaderT(ctx => ctx.ref.update(_ :+ ConfigParseMessage(ctx.path, err)) *> FR.raise(Fail))
     }
-    val restore: Restore[ConfigT[F, *]]     = new Restore[ConfigT[F, *]] {
+    val restore: Restore[ConfigT[F, *]]      = new Restore[ConfigT[F, *]] {
       def restoreWith[A](fa: ConfigT[F, A])(ra: => ConfigT[F, A]): ConfigT[F, A] =
         ReaderT(ctx => FR.restoreWith(fa.run(ctx))(ra.run(ctx)))
       def restore[A](fa: ConfigT[F, A]): ConfigT[F, Option[A]]                   = ReaderT(ctx => FR.restore(fa.run(ctx)))

@@ -21,7 +21,9 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       fctx: HasContextRun[F, G, R]
   ): WithRun[Stream[F, *], Stream[G, *], R] =
     new FS2RunContext[F, G, R] {
-      override val F: HasContextRun[F, G, R] = fctx
+      override val F: WithRun[F, G, R] = fctx.self
+
+      override implicit def WP: WithProvide[F, G, R] = fctx.self
     }
 
   implicit def fs2LiftInstance[F[_]]: Lift[F, Stream[F, *]] =
@@ -93,17 +95,17 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
 
 private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
   final implicit def fs2StreamLocal[F[_], R](implicit fctx: F HasLocal R): WithLocal[Stream[F, *], R] =
-    new FS2Local[F, R] { override val F: F HasLocal R = fctx }
+    new FS2Local[F, R] { override val F: F WithLocal R = fctx.asWithLocal }
 
   final implicit def fs2StreamProvide[F[_], G[_], R](implicit
-      fctx: HasProvide[F, G, R]
+      fctx: WithProvide[F, G, R]
   ): WithProvide[Stream[F, *], Stream[G, *], R]                                                       =
-    new FS2Provide[F, G, R] { override val F: HasProvide[F, G, R] = fctx }
+    new FS2Provide[F, G, R] { override val WP: WithProvide[F, G, R] = fctx }
 }
 
 private[fs2Instances] trait Fs2Instances3 {
   final implicit def fs2StreamContext[F[_], R](implicit fctx: F HasContext R): WithContext[Stream[F, *], R] =
-    new FS2Context[F, R] { override val F: F HasContext R = fctx }
+    new FS2Context[F, R] { override val F: F WithContext R = fctx.asWithContext }
 }
 
 class FS2StreamHKInstance[A] extends Embed[Stream[*[_], A]] with FunctorK[Stream[*[_], A]] {
@@ -112,26 +114,26 @@ class FS2StreamHKInstance[A] extends Embed[Stream[*[_], A]] with FunctorK[Stream
 }
 
 trait FS2Context[F[_], R] extends WithContext[Stream[F, *], R] {
-  implicit def F: F HasContext R
+  implicit def F: F WithContext R
 
   val functor: Functor[Stream[F, *]] = implicitly
   def context: Stream[F, R]          = Stream.eval(F.context)
 }
 
 trait FS2Local[F[_], R] extends FS2Context[F, R] with WithLocal[Stream[F, *], R] {
-  implicit def F: F HasLocal R
+  implicit def F: F WithLocal R
 
   def local[A](fa: Stream[F, A])(project: R => R): Stream[F, A] = fa.translate(funKFrom[F](F.local(_)(project)))
 }
 
 trait FS2Provide[F[_], G[_], R] extends WithProvide[Stream[F, *], Stream[G, *], R] {
-  implicit def F: HasProvide[F, G, R]
+  implicit def WP: WithProvide[F, G, R]
 
-  def runContext[A](fa: Stream[F, A])(ctx: R): Stream[G, A] = fa.translate(funKFrom[F](F.runContext(_)(ctx)))
-  def lift[A](fa: Stream[G, A]): Stream[F, A]               = fa.translate(funKFrom[G](F.lift(_)))
+  def runContext[A](fa: Stream[F, A])(ctx: R): Stream[G, A] = fa.translate(funKFrom[F](WP.runContext(_)(ctx)))
+  def lift[A](fa: Stream[G, A]): Stream[F, A]               = fa.translate(funKFrom[G](WP.lift(_)))
 }
 
 trait FS2RunContext[F[_], G[_], R]
     extends FS2Local[F, R] with FS2Provide[F, G, R] with WithRun[Stream[F, *], Stream[G, *], R] {
-  implicit def F: HasContextRun[F, G, R]
+  implicit def F: WithRun[F, G, R]
 }
