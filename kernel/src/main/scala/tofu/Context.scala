@@ -32,7 +32,7 @@ import tofu.internal.carriers.UnliftEffect
   * the call of `contextualConsolling("Hi!")` prints `Hi! (Also MyCtx(3))`
   */
 @deprecated("Migrate to With* typeclasses", "0.10.3")
-trait Context[F[_]] extends ContextBase {
+trait Context[F[_]] extends ContextBase { self =>
   def functor: Functor[F]
 
   type Ctx
@@ -64,7 +64,14 @@ trait Context[F[_]] extends ContextBase {
     *
     * @param extract lens that can extract value of type `A` from `Ctx`
     */
-  def extract[A](extract: Extract[Ctx, A]): WithContext[F, A] = new ContextExtractInstance[F, Ctx, A](this, extract)
+  def extract[A](extract: Extract[Ctx, A]): WithContext[F, A] = {
+    val withContext: WithContext[F, Ctx] = new WithContext[F, Ctx] {
+      override def functor: Functor[F] = self.functor
+
+      override def context: F[Ctx] = self.context
+    }
+    new ContextExtractInstance[F, Ctx, A](withContext, extract)
+  }
 }
 
 /** Companion object for [[Context]] */
@@ -89,10 +96,7 @@ object Context {
     *   }
     * }}}
     */
-  def const[F[_]: Applicative, C](c: C): WithContext[F, C] = new WithContext[F, C] {
-    val functor: Functor[F] = Functor[F]
-    val context: F[C]       = Applicative[F].pure(c)
-  }
+  def const[F[_]: Applicative, C](c: C): WithContext[F, C] = WithContext.const(c)
 
   /** Same as const but context is effectual here
     *
@@ -107,10 +111,7 @@ object Context {
     *     } yield ()
     * }}}
     */
-  def make[F[_]: Functor, A](fa: F[A]): WithContext[F, A] = new WithContext[F, A] {
-    val functor: Functor[F] = implicitly
-    val context: F[A]       = fa
-  }
+  def make[F[_]: Functor, A](fa: F[A]): WithContext[F, A] = WithContext.make(fa)
 
   /** A mix-in for supplying environment data type companions with useful things
     *
@@ -121,39 +122,14 @@ object Context {
     * object MyContext extends Context.Companion[MyContext]
     * }}}
     */
-  trait Companion[C] extends ContextInstances[C] {
-
-    type Has[F[_]] = WithContext[F, C]
-
-    implicit def promoteContextStructure[F[_], A](implicit
-        withContext: WithContext[F, C],
-        field: C Contains A
-    ): WithContextContainsInstance[F, C, A] =
-      new WithContextContainsInstance[F, C, A]
-
-    /** Access [[C]] in [[F]].
-      */
-    final def access[F[_]](implicit has: Has[F]): F[C] =
-      has.context
-  }
-
-  trait ContextInstances[C] {
-
-    implicit def promoteLocalStructure[F[_], A](implicit
-        context: WithLocal[F, C],
-        field: C Contains A
-    ): WithLocal[F, A] =
-      context.subcontext(field)
-  }
+  trait Companion[C] extends WithContext.Companion[C]
 }
-
-
 
 /** Allows to run some computation with notion of altered context
   * consider using `WithLocal` for better type inference
   */
 @deprecated("Migrate to With* typeclasses", "0.10.3")
-trait Local[F[_]] extends Context[F] {
+trait Local[F[_]] extends Context[F] { self =>
 
   /** Alters context for computation
     *
@@ -183,11 +159,20 @@ trait Local[F[_]] extends Context[F] {
     */
   def local[A](fa: F[A])(project: Ctx => Ctx): F[A]
 
+
+
   /** Allows to focus [[Local]] on inner parts of its context with lens.
     *
     * @param contains lens that can extract from `Ctx` or set some value of type `A`
     */
-  def subcontext[A](contains: Ctx Contains A): WithLocal[F, A] = new LocalContainsInstance[F, Ctx, A](this, contains)
+  def subcontext[A](contains: Ctx Contains A): WithLocal[F, A] = {
+    val withLocal: WithLocal[F, Ctx] = new WithLocal[F, Ctx] {
+      override def context: F[Ctx] = self.context
+      override def functor: cats.Functor[F] = self.functor
+      override def local[A](fa: F[A])(project: Ctx => Ctx): F[A] = self.local(fa)(project)
+    }
+    new LocalContainsInstance[F, Ctx, A](withLocal, contains)
+  }
 }
 
 @deprecated("Migrate to With* typeclasses", "0.10.3")
@@ -196,10 +181,6 @@ object Local {
 
   type Aux[F[_], C] = HasLocal[F, C]
 }
-
-
-
-
 
 /** Allows to evaluate contextual computation with some context
   *
@@ -288,7 +269,6 @@ object Provide {
   type Aux[F[_], G[_], C] = HasProvide[F, G, C]
 }
 
-
 /** Combination of [[Local]] and [[Provide]]
   *
   * @tparam F context-aware effect e.g.`ReaderT[Lower, Ctx, *]`
@@ -321,7 +301,7 @@ trait RunContext[F[_]] extends Local[F] with Provide[F] {
 
   /** Allows to focus [[Provide]] on inner parts of its context with equivalence lens.
     *
-    * @param eq lens that can convert from `Ctx` value of type `A`
+    * @param eq lens that can convert from `Ctx` to `A`
     */
   def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, Lower, A] =
     new RunContextEquivalentInstance[F, Lower, Ctx, A](self, eq)
@@ -333,37 +313,5 @@ object RunContext {
   def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx.self
 
   type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
-}
-
-
-private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F HasContext C1, extract: C1 Extract C2)
-    extends WithContext[F, C2] {
-  def functor: Functor[F] = ctx.functor
-
-  def context: F[C2] = functor.map(ctx.context)(extract.extract)
-}
-
-private[tofu] class LocalContainsInstance[F[_], C1, C2](ctx: F HasLocal C1, contains: C1 Contains C2)
-    extends ContextExtractInstance[F, C1, C2](ctx, contains) with WithLocal[F, C2] {
-  def local[A](fa: F[A])(project: C2 => C2): F[A] = ctx.local(fa)(contains.update(_, project))
-}
-
-private[tofu] class ProvideExtractInstance[F[_], G[_], C1, C2](
-    ctx: HasProvide[F, G, C1],
-    extract: C2 Extract C1
-) extends WithProvide[F, G, C2] {
-  def runContext[A](fa: F[A])(c: Ctx): G[A] =
-    ctx.runContext(fa)(extract.extract(c))
-
-  def lift[A](ga: G[A]): F[A] = ctx.lift(ga)
-}
-
-private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](
-    ctx: HasContextRun[F, G, C1],
-    equivalent: C1 Equivalent C2
-) extends LocalContainsInstance[F, C1, C2](ctx, equivalent) with WithRun[F, G, C2] {
-  def runContext[A](fa: F[A])(c: C2): G[A] = ctx.runContext(fa)(equivalent.upcast(c))
-
-  def lift[A](ga: G[A]): F[A] = ctx.lift(ga)
 }
 
