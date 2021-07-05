@@ -149,6 +149,7 @@ trait Local[F[_]] extends Context[F] { self =>
     */
   def local[A](fa: F[A])(project: Ctx => Ctx): F[A]
 
+
   /** Allows to focus [[Local]] on inner parts of its context with lens.
     *
     * @param contains lens that can extract from `Ctx` or set some value of type `A`
@@ -306,35 +307,4 @@ object RunContext {
   def apply[F[_]](implicit ctx: RunContext[F]): HasContextRun[F, ctx.Lower, ctx.Ctx] = ctx.self
 
   type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
-}
-
-private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F HasContext C1, extract: C1 Extract C2)
-    extends WithContext[F, C2] {
-  def functor: Functor[F] = ctx.functor
-
-  def context: F[C2] = functor.map(ctx.context)(extract.extract)
-}
-
-private[tofu] class LocalContainsInstance[F[_], C1, C2](ctx: F HasLocal C1, contains: C1 Contains C2)
-    extends ContextExtractInstance[F, C1, C2](ctx, contains) with WithLocal[F, C2] {
-  def local[A](fa: F[A])(project: C2 => C2): F[A] = ctx.local(fa)(contains.update(_, project))
-}
-
-private[tofu] class ProvideExtractInstance[F[_], G[_], C1, C2](
-    ctx: HasProvide[F, G, C1],
-    extract: C2 Extract C1
-) extends WithProvide[F, G, C2] {
-  def runContext[A](fa: F[A])(c: Ctx): G[A] =
-    ctx.runContext(fa)(extract.extract(c))
-
-  def lift[A](ga: G[A]): F[A] = ctx.lift(ga)
-}
-
-private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](
-    ctx: HasContextRun[F, G, C1],
-    equivalent: C1 Equivalent C2
-) extends LocalContainsInstance[F, C1, C2](ctx, equivalent) with WithRun[F, G, C2] {
-  def runContext[A](fa: F[A])(c: C2): G[A] = ctx.runContext(fa)(equivalent.upcast(c))
-
-  def lift[A](ga: G[A]): F[A] = ctx.lift(ga)
 }
