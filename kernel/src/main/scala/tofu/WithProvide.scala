@@ -1,7 +1,6 @@
 package tofu
 
 import cats.~>
-import tofu.kernel.types.HasProvide
 import tofu.lift.Lift
 import tofu.optics.Extract
 import tofu.syntax.funk.funK

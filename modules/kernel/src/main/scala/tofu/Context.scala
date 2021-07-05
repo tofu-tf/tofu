@@ -149,7 +149,6 @@ trait Local[F[_]] extends Context[F] { self =>
     */
   def local[A](fa: F[A])(project: Ctx => Ctx): F[A]
 
-
   /** Allows to focus [[Local]] on inner parts of its context with lens.
     *
     * @param contains lens that can extract from `Ctx` or set some value of type `A`
