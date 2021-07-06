@@ -7,7 +7,7 @@ import tofu.lift.{Rebase, Unlift}
 import tofu.optics.Contains
 import tofu.syntax.funk.{funK, funKFrom}
 import tofu.syntax.monadic._
-import tofu.{HasContextRun, WithLocal, WithRun}
+import tofu.{WithLocal, WithRun}
 
 /** a ReaderT analog, allowing to have context referring resulting type
   *  for instance you can define
