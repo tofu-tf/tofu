@@ -19,6 +19,7 @@ lazy val defaultSettings = Seq(
   setMinorVersion,
   setModuleName,
   defaultScalacOptions,
+  Test / scalacOptions += "-Wconf:cat=deprecation:info,any:wv",
   scalacWarningConfig,
   libraryDependencies ++= Seq(
     compilerPlugin(kindProjector),
