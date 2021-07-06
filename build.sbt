@@ -19,7 +19,6 @@ lazy val defaultSettings = Seq(
   setMinorVersion,
   setModuleName,
   defaultScalacOptions,
-  Test / scalacOptions += "-Wconf:cat=deprecation:info,any:wv",
   scalacWarningConfig,
   libraryDependencies ++= Seq(
     compilerPlugin(kindProjector),
@@ -347,9 +346,11 @@ lazy val scalacWarningConfig = scalacOptions += {
   // }.mkString(",")
 
   // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
+  val contextDeprecationInfo = "cat=deprecation&msg=^(.*((Has)|(With)).*)$:info"
   val verboseWarnings = "any:wv"
+  
 
-  s"-Wconf:$verboseWarnings"
+  s"-Wconf:$contextDeprecationInfo,$verboseWarnings"
 }
 
 lazy val macros = Seq(
