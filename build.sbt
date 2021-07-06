@@ -90,7 +90,7 @@ lazy val loggingStr = project
       catsTagless
     ),
   )
-  .dependsOn(core, concurrent, data)
+  .dependsOn(core, concurrent)
 
 lazy val loggingDer = project
   .in(file("logging/derivation"))
@@ -163,12 +163,12 @@ lazy val observable = project.settings(
 )
 
 lazy val concurrent =
-  project dependsOn (core, data) settings (
+  project dependsOn (core) settings (
     defaultSettings,
     libraryDependencies ++= Seq(catsEffect, catsTagless),
   )
 
-lazy val config = project dependsOn (core, data, opticsCore, concurrent) settings (
+lazy val config = project dependsOn (core, opticsCore, concurrent) settings (
   defaultSettings,
   libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo),
 )
@@ -209,11 +209,6 @@ lazy val enums = project
     libraryDependencies ++= Seq(enumeratum)
   )
 
-lazy val data =
-  project
-    .settings(defaultSettings, libraryDependencies ++= Seq(catsFree))
-    .dependsOn(core, opticsCore)
-
 lazy val derivation =
   project
     .settings(
@@ -221,7 +216,7 @@ lazy val derivation =
       libraryDependencies ++= Seq(magnolia, derevo, catsTagless),
       publishName := "derivation",
     )
-    .dependsOn(data)
+    .dependsOn(core)
 
 lazy val zioCore =
   project
@@ -283,7 +278,6 @@ lazy val coreModules =
     env,
     concurrent,
     opticsCore,
-    data,
     streams,
     coreCatsMtlInterop
   )
