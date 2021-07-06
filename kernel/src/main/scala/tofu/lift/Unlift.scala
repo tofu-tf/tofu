@@ -8,6 +8,7 @@ import syntax.funk._
 import tofu.optics.Contains
 import tofu.syntax.monadic._
 import kernel.types._
+import tofu.internal.ContextBase
 
 trait Lift[F[_], G[_]] {
   def lift[A](fa: F[A]): G[A]
