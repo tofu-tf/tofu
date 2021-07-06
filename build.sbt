@@ -14,7 +14,6 @@ lazy val defaultSettings = Seq(
   crossScalaVersions := Vector(Version.scala212, Version.scala213),
   setMinorVersion,
   defaultScalacOptions,
-  Test / scalacOptions += "-Wconf:cat=deprecation:info,any:wv",
   scalacWarningConfig,
   Compile / doc / scalacOptions -= "-Xfatal-warnings",
   libraryDependencies ++= Seq(
