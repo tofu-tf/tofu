@@ -175,6 +175,14 @@ object Local {
   type Aux[F[_], C] = HasLocal[F, C]
 }
 
+/** Synonym for [[Local]] with explicit C as Ctx for better type inference */
+trait WithLocal[F[_], C] extends Local[F] with WithContext[F, C]
+
+/** Companion object for [[WithLocal]] */
+object WithLocal {
+  def apply[F[_], C](implicit ctx: WithLocal[F, C]): WithLocal[F, C] = ctx
+}
+
 /** Allows to evaluate contextual computation with some context
   *
   * The main use case for it is to obtain some context `Lower[Ctx]`,
