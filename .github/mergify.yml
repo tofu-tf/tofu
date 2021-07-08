@@ -1,0 +1,59 @@
+pull_request_rules:
+  - name: request reviews and label scala-steward's PRs
+    conditions:
+      - author=scala-steward
+    actions:
+      request_reviews:
+        users: [Odomontois, catostrophe]
+      label:
+        add: [dependency-update]
+
+  - name: automatically merge scala-steward's PRs affecting project plugins
+    conditions:
+      - author=scala-steward
+      - status-success~=Test \(ubuntu-latest, 2\.12\.\d+, adopt@1\.8\)
+      - status-success~=Test \(ubuntu-latest, 2\.12\.\d+, adopt@1\.11\)
+      - status-success~=Test \(ubuntu-latest, 2\.13\.\d+, adopt@1\.8\)
+      - status-success~=Test \(ubuntu-latest, 2\.13\.\d+, adopt@1\.11\)
+      - "#files=1"
+      - files=project/plugins.sbt
+    actions:
+      merge:
+        method: merge
+
+  - name: automatically merge scala-steward's PRs affecting project build properties
+    conditions:
+      - author=scala-steward
+      - status-success~=Test \(ubuntu-latest, 2\.12\.\d+, adopt@1\.8\)
+      - status-success~=Test \(ubuntu-latest, 2\.12\.\d+, adopt@1\.11\)
+      - status-success~=Test \(ubuntu-latest, 2\.13\.\d+, adopt@1\.8\)
+      - status-success~=Test \(ubuntu-latest, 2\.13\.\d+, adopt@1\.11\)
+      - "#files=1"
+      - files=project/build.properties
+    actions:
+      merge:
+        method: merge
+
+  - name: automatically merge scala-steward's PRs updating semver-patch versions
+    conditions:
+      - author=scala-steward
+      - status-success~=Test \(ubuntu-latest, 2\.12\.\d+, adopt@1\.8\)
+      - status-success~=Test \(ubuntu-latest, 2\.12\.\d+, adopt@1\.11\)
+      - status-success~=Test \(ubuntu-latest, 2\.13\.\d+, adopt@1\.8\)
+      - status-success~=Test \(ubuntu-latest, 2\.13\.\d+, adopt@1\.11\)
+      - body~=labels:.*semver-patch
+    actions:
+      merge:
+        method: merge
+
+  - name: automatically merge other scala-steward's PRs reviewed by 1 maintainer
+    conditions:
+      - author=scala-steward
+      - status-success~=Test \(ubuntu-latest, 2\.12\.\d+, adopt@1\.8\)
+      - status-success~=Test \(ubuntu-latest, 2\.12\.\d+, adopt@1\.11\)
+      - status-success~=Test \(ubuntu-latest, 2\.13\.\d+, adopt@1\.8\)
+      - status-success~=Test \(ubuntu-latest, 2\.13\.\d+, adopt@1\.11\)
+      - "#approved-reviews-by>=1"
+    actions:
+      merge:
+        method: merge
