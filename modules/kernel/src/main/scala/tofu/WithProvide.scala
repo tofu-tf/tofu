@@ -8,7 +8,7 @@ import tofu.lift.Lift
   */
 trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
   override type Lower[A] = G[A]
-  override type Ctx = C
+  override type Ctx      = C
 
   def self = this
 }

@@ -5,7 +5,6 @@ import tofu._
 
 import tofu.kernel.types._
 
-
 object context {
   def context[F[_]](implicit ctx: Context[F]): F[ctx.Ctx] = ctx.context
 

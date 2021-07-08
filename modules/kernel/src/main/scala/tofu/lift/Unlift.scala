@@ -102,5 +102,3 @@ object Unlift {
       wrF.ask(a => funK(fa => wrG.askF(b => wrG.lift(wrF.runContext(fa)(lens.set(a, b))))))
   }
 }
-
-

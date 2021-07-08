@@ -21,5 +21,3 @@ object HasProvide {
 object HasContextRun {
   def apply[F[_], G[_], C](implicit hcr: HasContextRun[F, G, C]): HasContextRun[F, G, C] = hcr
 }
-
-

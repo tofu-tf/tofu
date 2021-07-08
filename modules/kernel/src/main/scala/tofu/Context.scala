@@ -141,8 +141,6 @@ object Context {
   }
 }
 
-
-
 /** Allows to run some computation with notion of altered context
   * consider using `WithLocal` for better type inference
   */
@@ -190,10 +188,6 @@ object Local {
 
   type Aux[F[_], C] = HasLocal[F, C]
 }
-
-
-
-
 
 /** Allows to evaluate contextual computation with some context
   *
@@ -282,7 +276,6 @@ object Provide {
   type Aux[F[_], G[_], C] = HasProvide[F, G, C]
 }
 
-
 /** Combination of [[Local]] and [[Provide]]
   *
   * @tparam F context-aware effect e.g.`ReaderT[Lower, Ctx, *]`
@@ -329,7 +322,6 @@ object RunContext {
   type Aux[F[_], G[_], C] = HasContextRun[F, G, C]
 }
 
-
 private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F HasContext C1, extract: C1 Extract C2)
     extends WithContext[F, C2] {
   def functor: Functor[F] = ctx.functor
@@ -360,4 +352,3 @@ private[tofu] class RunContextEquivalentInstance[F[_], G[_], C1, C2](
 
   def lift[A](ga: G[A]): F[A] = ctx.lift(ga)
 }
-

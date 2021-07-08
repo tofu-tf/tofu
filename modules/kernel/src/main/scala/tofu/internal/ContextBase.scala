@@ -1,6 +1,5 @@
 package tofu.internal
 
-
 import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.{Applicative, Functor, Monad, ~>}
@@ -13,16 +12,15 @@ import tofu.syntax.monadic._
 trait ContextBase
 
 object ContextBase extends ContextBaseInstances1 {
-  implicit def unliftIdentity[F[_] : Applicative]: Unlift[F, F] = new Unlift[F, F] {
+  implicit def unliftIdentity[F[_]: Applicative]: Unlift[F, F] = new Unlift[F, F] {
     def lift[A](fa: F[A]): F[A] = fa
 
     def unlift: F[F ~> F] = FunctionK.id[F].pure[F]
   }
 
-
 }
-trait ContextBaseInstances1 extends ContextBaseInstances2{
-  final implicit def readerTContext[F[_] : Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
+trait ContextBaseInstances1 extends ContextBaseInstances2 {
+  final implicit def readerTContext[F[_]: Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
     new WithRun[ReaderT[F, C, *], F, C] {
       def lift[A](fa: F[A]): ReaderT[F, C, A] = ReaderT.liftF(fa)
 
@@ -31,7 +29,7 @@ trait ContextBaseInstances1 extends ContextBaseInstances2{
       def local[A](fa: ReaderT[F, C, A])(project: C => C): ReaderT[F, C, A] = fa.local(project)
 
       val functor: Functor[ReaderT[F, C, *]] = Functor[ReaderT[F, C, *]]
-      val context: ReaderT[F, C, C] = ReaderT.ask[F, C]
+      val context: ReaderT[F, C, C]          = ReaderT.ask[F, C]
     }
 }
 
@@ -44,4 +42,3 @@ trait ContextBaseInstances3 {
   final implicit def unliftIOEffect[F[_], G[_]](implicit carrier: UnliftEffect[F, G]): Unlift[F, G] =
     carrier.value
 }
-

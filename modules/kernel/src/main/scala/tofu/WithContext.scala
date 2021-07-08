@@ -21,7 +21,7 @@ object WithContext {
 }
 
 final class WithContextContainsInstance[F[_], A, B](implicit wc: WithContext[F, A], lens: A Contains B)
-  extends WithContext[F, B] {
+    extends WithContext[F, B] {
   def functor: Functor[F] = wc.functor
   def context: F[B]       = wc.extract(lens).context
 }
