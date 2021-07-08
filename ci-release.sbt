@@ -41,13 +41,16 @@ ThisBuild / developers := List(
   Developer("oskin1", "Ilya Oskin", "ilya.arcadich@gmail.com", url("https://github.com/oskin1")),
 )
 
+ThisBuild / organization := "tf.tofu"
+ThisBuild / organizationName := "Tofu"
+
 ThisBuild / homepage := Some(url("https://github.com/tofu-tf/tofu"))
 
 ThisBuild / description := "Opinionated set of tools for functional programming in Scala"
 
 ThisBuild / scmInfo := Some(
   ScmInfo(
-    url("https://github.com/TinkoffCreditSystems/tofu"),
-    "git@github.com:TinkoffCreditSystems/tofu.git"
+    url("https://github.com/tofu-tf/tofu"),
+    "git@github.com:tofu-tf/tofu.git"
   )
 )
