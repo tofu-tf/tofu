@@ -41,7 +41,7 @@ lazy val kernel = project
   )
 
 lazy val kernelCE2Interop = project
-  .in(file("kernelCE2Interop"))
+  .in(file("modules/kernelCE2Interop"))
   .dependsOn(kernel)
   .settings(
     defaultSettings,
@@ -50,7 +50,7 @@ lazy val kernelCE2Interop = project
   )
 
 lazy val core = project
-  .in(file("core"))
+  .in(file("modules/core"))
   .dependsOn(kernel, kernelCE2Interop)
   .settings(
     defaultSettings,
@@ -285,6 +285,8 @@ lazy val streams = project
 lazy val coreModules =
   Vector(
     higherKindCore,
+    kernel,
+    kernelCE2Interop,
     core,
     opticsMacro,
     memo,
@@ -355,7 +357,7 @@ lazy val scalacWarningConfig = scalacOptions += {
   // }.mkString(",")
 
   // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
-  val contextDeprecationInfo = "cat=deprecation&msg=^(.*((Has)|(With)).*)$:info"
+  val contextDeprecationInfo = "cat=deprecation&msg=^(.*((Has)|(With)).*)$:silent"
   val verboseWarnings        = "any:wv"
 
   s"-Wconf:$contextDeprecationInfo,$verboseWarnings"

@@ -19,6 +19,9 @@ object ContextBase extends ContextBaseInstances1 {
     def unlift: F[F ~> F] = FunctionK.id[F].pure[F]
   }
 
+
+}
+trait ContextBaseInstances1 extends ContextBaseInstances2{
   final implicit def readerTContext[F[_] : Applicative, C]: WithRun[ReaderT[F, C, *], F, C] =
     new WithRun[ReaderT[F, C, *], F, C] {
       def lift[A](fa: F[A]): ReaderT[F, C, A] = ReaderT.liftF(fa)
@@ -31,12 +34,14 @@ object ContextBase extends ContextBaseInstances1 {
       val context: ReaderT[F, C, C] = ReaderT.ask[F, C]
     }
 }
-trait ContextBaseInstances1 extends ContextBaseInstances2 {
+
+trait ContextBaseInstances2 extends ContextBaseInstances3 {
   final implicit def unliftReaderCompose[F[_]: Monad, G[_], R](implicit FG: Unlift[G, F]): Unlift[G, ReaderT[F, R, *]] =
     FG.andThen(ContextBase.readerTContext[F, R])
 }
 
-trait ContextBaseInstances2 {
+trait ContextBaseInstances3 {
   final implicit def unliftIOEffect[F[_], G[_]](implicit carrier: UnliftEffect[F, G]): Unlift[F, G] =
     carrier.value
 }
+
