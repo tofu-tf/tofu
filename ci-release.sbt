@@ -1,9 +1,10 @@
 ThisBuild / scalaVersion := Dependencies.Version.scala213
 
-ThisBuild / crossScalaVersions := Seq(
+ThisBuild / crossScalaVersions := Vector(
   Dependencies.Version.scala213,
   Dependencies.Version.scala212
 )
+
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
 
 ThisBuild / githubWorkflowPublishTargetBranches := Seq(
