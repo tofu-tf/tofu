@@ -328,7 +328,7 @@ lazy val tofu = project
     libraryDependencies += "tf.tofu" %% "derevo-cats-tagless" % Version.derevo,
     libraryDependencies += catsEffect,
   )
-  .aggregate((coreModules ++ commonModules).map(x => x: ProjectReference): _*)
+  .aggregate((coreModules ++ commonModules :+ docs).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
 lazy val defaultScalacOptions = scalacOptions := {
