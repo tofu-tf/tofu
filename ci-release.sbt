@@ -55,3 +55,11 @@ ThisBuild / scmInfo := Some(
     "git@github.com:tofu-tf/tofu.git"
   )
 )
+
+ThisBuild / githubWorkflowBuildPostamble += WorkflowStep.Sbt(
+  name = Some("Generate docs"),
+  commands = List("docs/mdoc"),
+  cond = Some("startsWith(matrix.scala, '2.13')")
+)
+
+ThisBuild / githubWorkflowEnv += "CI" -> "true"
