@@ -8,6 +8,7 @@ updates:
       - "Odomontois"
       - "catostrophe"
       - "oskin1"
+      - "danslapman"
       - "funfunfine"
     labels:
       - "dependency-update"
