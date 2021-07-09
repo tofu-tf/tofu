@@ -1,5 +1,6 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
+import sbt.ModuleID
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -73,6 +74,7 @@ lazy val memo = project
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(catsCore, catsEffect),
+    name := "tofu-memo"
   )
 
 lazy val loggingStr = project
@@ -154,28 +156,38 @@ lazy val logging = project
   .in(file("modules/logging"))
   .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
   .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
-  .settings(defaultSettings)
+  .settings(
+    defaultSettings,
+    name := "tofu-logging"
+  )
 
 lazy val env = project
   .in(file("modules/env"))
   .dependsOn(core, memo)
-  .settings(defaultSettings, libraryDependencies ++= Seq(catsCore, catsEffect, monix))
+  .settings(
+    defaultSettings,
+    libraryDependencies ++= Seq(catsCore, catsEffect, monix),
+    name := "tofu-env"
+  )
 
 lazy val observable = project
   .in(file("modules/observable"))
   .settings(
     defaultSettings,
     libraryDependencies ++= Vector(monix, catsEffect),
-    libraryDependencies += scalatest
+    libraryDependencies += scalatest,
+    name := "tofu-observable",
   )
 
 lazy val concurrent =
   project
     .in(file("modules/concurrent"))
-    .dependsOn(core)
+    .dependsOn(core, derivation % "compile->test", opticsMacro % "compile->test")
     .settings(
       defaultSettings,
       libraryDependencies ++= Seq(catsEffect, catsTagless),
+      libraryDependencies ++= Seq(simulacrum, derevoTagless).map(_ % Test),
+      name := "tofu-concurrent",
     )
 
 lazy val config = project
@@ -184,6 +196,7 @@ lazy val config = project
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo),
+    name := "tofu-config",
   )
 
 lazy val opticsCore = project
@@ -220,7 +233,8 @@ lazy val enums = project
   .dependsOn(loggingStr)
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(enumeratum)
+    libraryDependencies ++= Seq(enumeratum),
+    name := "tofu-enums",
   )
 
 lazy val derivation =
@@ -271,7 +285,8 @@ lazy val doobie  = project
   .in(file("modules/doobie"))
   .settings(
     libraryDependencies ++= List(doobieCore, derevo, monix % Test),
-    defaultSettings
+    defaultSettings,
+    name := "tofu-doobie",
   )
   .dependsOn(core, derivation, env % Test, zioInterop % Test)
 
@@ -279,7 +294,8 @@ lazy val streams = project
   .in(file("modules/streams"))
   .settings(
     libraryDependencies ++= List(fs2 % Test),
-    defaultSettings
+    defaultSettings,
+    name := "tofu-streams",
   )
   .dependsOn(core)
 
@@ -323,11 +339,9 @@ lazy val docs = project // new documentation project
 
 lazy val tofu = project
   .in(file("."))
-  .settings(defaultSettings)
   .settings(
-    name := "tofu",
-    libraryDependencies += "tf.tofu" %% "derevo-cats-tagless" % Version.derevo,
-    libraryDependencies += catsEffect,
+    defaultSettings,
+    name := "tofu"
   )
   .aggregate((coreModules ++ commonModules :+ docs).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
