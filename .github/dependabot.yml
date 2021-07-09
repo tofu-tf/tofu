@@ -3,4 +3,12 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    reviewers:
+      - "Odomontois"
+      - "catostrophe"
+      - "oskin1"
+      - "danslapman"
+      - "funfunfine"
+    labels:
+      - "dependency-update"
