@@ -14,6 +14,7 @@ lazy val defaultSettings = Seq(
   setMinorVersion,
   defaultScalacOptions,
   scalacWarningConfig,
+  Compile / doc / scalacOptions -= "-Xfatal-warnings",
   libraryDependencies ++= Seq(
     compilerPlugin(kindProjector),
     compilerPlugin(betterMonadicFor),
