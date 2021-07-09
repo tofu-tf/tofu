@@ -44,6 +44,11 @@ trait Configurable[A] extends ConfigArr[ConfigItem, A] { self =>
       self(cfg).flatMap(f[F](_))
   }
 
+  def mapE[B](f: A => Either[ConfigError, B]): Configurable[B] = new Configurable[B] {
+    def apply[F[_]: ConfigMonad](item: ConfigItem[F]): F[B] =
+      self[F](item).flatMap(a => f(a).toRaise[F])
+  }
+
   def flatMake[B] =
     ConfigArr.Builder[λ[`f[_]` => A], B, Configurable[B]](f =>
       new Configurable[B] {
@@ -73,6 +78,8 @@ object Configurable extends BaseGetters with MagnoliaDerivation {
 
   def apply[A](implicit cfg: Configurable[A]): Configurable[A] = cfg
 
+  def pure[A](a: A): Configurable[A] = Configurable.make(F => _ => F.pure(a))
+
   def parse[F[_]: ConfigMonad, A](item: ConfigItem[F])(implicit cfg: Configurable[A]): F[A] = cfg(item)
 
   def make[A] = ConfigArr.Builder[ConfigItem, A, Configurable[A]] { f =>
@@ -82,6 +89,7 @@ object Configurable extends BaseGetters with MagnoliaDerivation {
   def requireSimple[A](vtype: ValueTypeSimple[A]): Configurable[A] =
     make(F => {
       case vtype(a)            => F.pure(a)
+      case ConfigItem.Str(s)   => vtype.fromString(s).fold(F.error[A](BadString(s, vtype.toString())))(F.pure)
       case Null                => F.error(NotFound)
       case item: ConfigItem[_] => F.error(BadType(List(vtype), item.valueType))
     })

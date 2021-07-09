@@ -54,15 +54,31 @@ object ConfigItem {
   type StreamC[f[_]]     = Flux.Stream[f, ConfigItem[f]]
   type SimpleC[f[_], A]  = A
 
-  sealed trait ValueTypeSimple[A]  extends ValueType[SimpleC[*[_], A]]
+  sealed trait ValueTypeSimple[A]  extends ValueType[SimpleC[*[_], A]] {
+    def fromString(s: String): Option[A]
+  }
   sealed trait ValueTypeIndexed[I] extends ValueType[IndexedC[*[_], I]]
   sealed trait ValueTypeStream     extends ValueType[StreamC]
 
   object ValueType {
-    case object Null extends ValueTypeSimple[Unit]
-    case object Bool extends ValueTypeSimple[Boolean]
-    case object Num  extends ValueTypeSimple[BigDecimal]
-    case object Str  extends ValueTypeSimple[String]
+    case object Null extends ValueTypeSimple[Unit]       {
+      def fromString(s: String): Option[Unit] = Some(())
+
+    }
+    case object Bool extends ValueTypeSimple[Boolean]    {
+      def fromString(s: String): Option[Boolean] = s.toLowerCase() match {
+        case "true" | "ok" | "yes" | "+" => Some(true)
+        case "false" | "" | "no" | "-"   => Some(false)
+        case _                           => None
+      }
+    }
+    case object Num  extends ValueTypeSimple[BigDecimal] {
+      def fromString(s: String): Option[BigDecimal] = try Some(BigDecimal(s))
+      catch { case _: NumberFormatException => None }
+    }
+    case object Str  extends ValueTypeSimple[String]     {
+      def fromString(s: String): Option[String] = Some(s)
+    }
 
     case object Stream extends ValueTypeStream
     case object Array  extends ValueTypeIndexed[Int]
