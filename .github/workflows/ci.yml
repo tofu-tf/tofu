@@ -16,6 +16,7 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CI: true
 
 jobs:
   build:
@@ -57,6 +58,10 @@ jobs:
 
       - name: Build project
         run: sbt --client '++${{ matrix.scala }}; test'
+
+      - name: Generate docs
+        if: startsWith(matrix.scala, '2.13')
+        run: sbt --client '++${{ matrix.scala }}; docs/mdoc'
 
       - name: Compress target directories
         run: tar cf targets.tar modules/logging/interop/shapeless/target modules/kernel/target modules/logging/target modules/concurrent/target modules/logging/layout/target modules/logging/util/target modules/optics/core/target modules/kernelCE2Interop/target modules/doobie/target modules/zio/target tofu-docs/target modules/zio/logging/target modules/config/target modules/optics/macro/target modules/zio/core/target modules/streams/target modules/logging/structured/target modules/logging/interop/log4cats/target modules/enums/target target modules/fs2/target modules/logging/derivation/target modules/logging/interop/refined/target modules/higherKindCore/target modules/derivation/target modules/core/target modules/observable/target modules/core/interop/cats-mtl/target modules/optics/interop/target modules/memo/target modules/env/target project/target
