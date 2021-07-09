@@ -1,27 +1,18 @@
-name-template: '$NEXT_PATCH_VERSION'
-tag-template: '$NEXT_PATCH_VERSION'
+name-template: 'Tofu $NEXT_MINOR_VERSION'
+tag-template: 'v$NEXT_MINOR_VERSION'
 categories:
-  - title: "Documentation"
-    labels:
-      - 'documentation'
-  - title: 'Features'
+  - title: '🚀 Features'
     labels:
       - 'feature'
       - 'enhancement'
-  - title: 'Fixes'
+  - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
       - 'bugfix'
       - 'bug'
-      - 'invalid'
-  - title: "Documentation"
-    labels:
-      - 'docs'
-      - 'documentation'
-  - title: 'Maintenance'
+  - title: '🧰 Maintenance'
     labels:
       - 'chore'
-      - 'dependencies'
       - 'dependency-update'
 exclude-labels:
   - 'skip-changelog'
