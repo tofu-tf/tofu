@@ -3,7 +3,7 @@ package transactor
 
 import cats.data.{Kleisli, ReaderT}
 import cats.effect.Resource
-import cats.{Defer, ~>}
+import cats.{Defer, Monad, ~>}
 import doobie.{ConnectionIO, Transactor}
 import fs2.Stream
 import tofu.lift.Lift
@@ -88,28 +88,34 @@ object Txr {
       }
   }
 
-  /** Creates a contextual facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` given `G WithContext R`
+  /** Creates a contextual facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` given `G HasContext R`
     * with `ConnectionRIO[R, *]` as the database effect.
     */
-  @deprecated("Use `continuational` as a better alternative", since = "0.11.0")
-  def contextual[F[_], R](t: Transactor[F])(implicit F: BracketThrow[F], C: F WithContext R): Txr.Contextual[F, R] =
-    new Txr[F] {
-      type DB[x] = ConnectionRIO[R, x]
+  @deprecated("Use `Transactor.mapK` and `Txr.continuational` as a better alternative", since = "0.11.0")
+  def contextual[G[_]]: ContextualPA[G] = new ContextualPA[G]
 
-      val trans: ConnectionRIO[R, *] ~> F    = liftTrans(t.trans)
-      val rawTrans: ConnectionRIO[R, *] ~> F = liftTrans(t.rawTrans)
+  private[transactor] final class ContextualPA[G[_]](private val dummy: Boolean = true) extends AnyVal {
+    def apply[F[_]: BracketThrow, R](
+        t: Transactor[F]
+    )(implicit L: Lift[F, G], G: Monad[G], C: G WithContext R): Txr.Contextual[G, R] =
+      new Txr[G] {
+        type DB[x] = ConnectionRIO[R, x]
 
-      private def liftTrans(fk: ConnectionIO ~> F): ConnectionRIO[R, *] ~> F =
-        funK(crio => C.askF(ctx => fk(crio.run(ctx))))
+        def trans: ConnectionRIO[R, *] ~> G    = liftTrans(t.trans)
+        def rawTrans: ConnectionRIO[R, *] ~> G = liftTrans(t.rawTrans)
 
-      val transP: Stream[ConnectionRIO[R, *], *] ~> Stream[F, *]    = liftTransPK(t.transPK)
-      val rawTransP: Stream[ConnectionRIO[R, *], *] ~> Stream[F, *] = liftTransPK(t.rawTransPK)
+        private def liftTrans(fk: ConnectionIO ~> F): ConnectionRIO[R, *] ~> G =
+          funK(crio => C.askF(ctx => L.lift(fk(crio.run(ctx)))))
 
-      private def liftTransPK(
-          fk: Stream[ConnectionRIO[R, *], *] ~> Stream[ReaderT[F, R, *], *]
-      ): Stream[ConnectionRIO[R, *], *] ~> Stream[F, *] =
-        funK(s => fk(s).translate(funKFrom[ReaderT[F, R, *]](rio => C.askF(ctx => rio.run(ctx)))))
-    }
+        def transP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *]    = liftTransPK(t.transPK)
+        def rawTransP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *] = liftTransPK(t.rawTransPK)
+
+        private def liftTransPK(
+            fk: Stream[ConnectionRIO[R, *], *] ~> Stream[ReaderT[F, R, *], *]
+        ): Stream[ConnectionRIO[R, *], *] ~> Stream[G, *] =
+          funK(s => fk(s).translate(funKFrom[ReaderT[F, R, *]](rio => C.askF(ctx => L.lift(rio.run(ctx))))))
+      }
+  }
 
   /** Creates a facade that uses `ConnectionCIO` as the database effect.
     */
