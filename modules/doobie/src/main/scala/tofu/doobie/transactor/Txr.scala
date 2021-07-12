@@ -57,11 +57,11 @@ object Txr {
     new Txr[F] {
       type DB[x] = ConnectionIO[x]
 
-      def trans: ConnectionIO ~> F    = t.trans
-      def rawTrans: ConnectionIO ~> F = t.rawTrans
+      val trans: ConnectionIO ~> F    = t.trans
+      val rawTrans: ConnectionIO ~> F = t.rawTrans
 
-      def transP: Stream[ConnectionIO, *] ~> Stream[F, *]    = t.transP
-      def rawTransP: Stream[ConnectionIO, *] ~> Stream[F, *] = t.rawTransP
+      val transP: Stream[ConnectionIO, *] ~> Stream[F, *]    = t.transP
+      val rawTransP: Stream[ConnectionIO, *] ~> Stream[F, *] = t.rawTransP
     }
 
   /** Creates a facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` with `ConnectionIO` as the database
@@ -101,14 +101,14 @@ object Txr {
       new Txr[G] {
         type DB[x] = ConnectionRIO[R, x]
 
-        def trans: ConnectionRIO[R, *] ~> G    = liftTrans(t.trans)
-        def rawTrans: ConnectionRIO[R, *] ~> G = liftTrans(t.rawTrans)
+        val trans: ConnectionRIO[R, *] ~> G    = liftTrans(t.trans)
+        val rawTrans: ConnectionRIO[R, *] ~> G = liftTrans(t.rawTrans)
 
         private def liftTrans(fk: ConnectionIO ~> F): ConnectionRIO[R, *] ~> G =
           funK(crio => C.askF(ctx => L.lift(fk(crio.run(ctx)))))
 
-        def transP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *]    = liftTransPK(t.transPK)
-        def rawTransP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *] = liftTransPK(t.rawTransPK)
+        val transP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *]    = liftTransPK(t.transPK)
+        val rawTransP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *] = liftTransPK(t.rawTransPK)
 
         private def liftTransPK(
             fk: Stream[ConnectionRIO[R, *], *] ~> Stream[ReaderT[F, R, *], *]
