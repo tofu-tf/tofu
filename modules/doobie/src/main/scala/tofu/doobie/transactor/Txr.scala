@@ -8,7 +8,7 @@ import doobie.{ConnectionIO, Transactor}
 import fs2.Stream
 import tofu.lift.Lift
 import tofu.syntax.funk._
-import tofu.syntax.monadic.TofuApplicativeBooleanOps
+import tofu.syntax.monadic._
 import tofu.{BracketThrow, WithContext}
 
 /** A simple facade for [[doobie.Transactor]] that holds an inner database effect type `DB[_]` and provides
