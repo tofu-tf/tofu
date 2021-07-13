@@ -25,10 +25,17 @@ class ConfigSuite extends AnyFlatSpec with Matchers {
     )
   }
 
+  it should "parse primitive types from strings" in {
+    tryParse[Foe]("foe2") shouldBe Foe(
+      name = ".tmp",
+      hp = 2000.toShort.some,
+    )
+  }
+
   it should "fail to parse incorrect types" in {
-    fallenParse[Foe]("foe2") shouldBe Right(
+    fallenParse[Foe]("foe3") shouldBe Right(
       Vector(
-        ConfigParseMessage(Vector(Prop("hp")), BadType(List(ValueType.Num), ValueType.Str))
+        ConfigParseMessage(Vector(Prop("hp")), BadType(List(ValueType.Num), ValueType.Bool))
       )
     )
   }
