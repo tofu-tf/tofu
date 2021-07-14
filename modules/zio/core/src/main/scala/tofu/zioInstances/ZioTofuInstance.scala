@@ -161,6 +161,21 @@ final class ZioTofuUnliftHasInstance[R <: Has[_], R1 <: Has[_], E, C: Tag](impli
   override def lift[A](fa: ZIO[R, E, A]): ZIO[R1, E, A] = fa.provideSome(ev1)
 }
 
+class ZioTofuUnliftManyInstance[R <: Has[_], E, R1 <: Has[_]: Tag]
+    extends WithRun[ZIO[R with R1, E, *], ZIO[R, E, *], R1] {
+  override def functor: Functor[ZIO[R with R1, E, *]] = zio.interop.catz.monadErrorInstance
+
+  override def runContext[A](fa: ZIO[R with R1, E, A])(ctx: R1): ZIO[R, E, A] =
+    fa.provideSome((_: R) union [R1] ctx)
+
+  override def context: ZIO[R with R1, E, R1] = ZIO.environment
+
+  override def local[A](fa: ZIO[R with R1, E, A])(project: R1 => R1): ZIO[R with R1, E, A] =
+    fa.provideSome(r => r unionAll [R1] project(r))
+
+  override def lift[A](fa: ZIO[R, E, A]): ZIO[R with R1, E, A] = fa
+}
+
 class ZioTofuBlockingInstance[R <: Blocking, E] extends BlockExec[ZIO[R, E, *]] {
   def runScoped[A](fa: ZIO[R, E, A]): ZIO[R, E, A] = blocking(fa)
 
