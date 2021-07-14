@@ -1,10 +1,10 @@
 package tofu.higherKind.derived
 import cats.FlatMap
-import tofu.HasContext
 import tofu.bi.TwinContext
 import tofu.control.Bind
 import tofu.higherKind.Embed
 import tofu.higherKind.bi.EmbedBK
+import tofu.kernel.types.HasContext
 
 /** simple mixin for typeclass companion
   * to add contextual embedded instance

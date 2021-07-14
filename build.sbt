@@ -66,7 +66,7 @@ lazy val coreCatsMtlInterop = project
     name := "tofu-core-cats-mtl",
     libraryDependencies += catsMtl
   )
-  .dependsOn(core)
+  .dependsOn(kernel)
 
 lazy val memo = project
   .in(file("modules/memo"))
@@ -245,7 +245,7 @@ lazy val derivation =
       libraryDependencies ++= Seq(magnolia, derevo, catsTagless),
       name := "tofu-derivation",
     )
-    .dependsOn(core)
+    .dependsOn(kernel)
 
 lazy val zioCore =
   project
@@ -297,7 +297,7 @@ lazy val streams = project
     defaultSettings,
     name := "tofu-streams",
   )
-  .dependsOn(core)
+  .dependsOn(kernel)
 
 lazy val coreModules =
   Vector(
