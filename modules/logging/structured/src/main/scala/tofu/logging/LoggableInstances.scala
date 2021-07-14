@@ -125,6 +125,12 @@ class LoggableInstances {
         val arr = ta.foldLeft(mutable.Buffer.newBuilder[A])(_ += _).result()
         v.list(arr.size)((v, idx) => A.putValue(arr(idx), v))
       }
+
+      override def putMaskedValue[I, V, R, S](ta: T[A], v: V)(f: String => String)(implicit r: LogRenderer[I, V, R, S]): S = {
+        val arr = ta.foldLeft(mutable.Buffer.newBuilder[A])(_ += _).result()
+        v.list(arr.size)((v, idx) => A.putMaskedValue(arr(idx), v)(f))
+      }
+
       def logShow(a: T[A]): String = {
         implicit val show: Show[A] = A.showInstance
         a.mkString_("[", ",", "]")

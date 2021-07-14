@@ -46,6 +46,12 @@ class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
     ) shouldBe """{"foos":[],"ys":[],"zs":[["one","two"],["three"]]}"""
   }
 
+  it should "respect masking" in {
+    json(
+      Jak("one", 4567, 3.123456, List(1.234, 5.678))
+    ) shouldBe """{"one":"...","two":"4###","three":"3.######","four":["1.###","5.###"]}"""
+  }
+
 }
 
 object DerivedLoggableSuite {
@@ -57,6 +63,14 @@ object DerivedLoggableSuite {
       @hidden foo1: Option[Foo] = None,
       @unembed foo2: Option[Foo] = None,
       foo3: Option[Foo] = None
+  )
+
+  @derive(loggable)
+  final case class Jak(
+      @masked(MaskMode.Erase) one: String,
+      @masked(MaskMode.ForLength(1)) two: Long,
+      @masked(MaskMode.Regexp("\\d*\\.(\\d*)".r)) three: Double,
+      @masked(MaskMode.Regexp("-?\\d*\\.(\\d*)".r)) four: List[Double],
   )
 
   @derive(loggable)

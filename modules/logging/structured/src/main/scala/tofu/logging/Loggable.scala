@@ -10,6 +10,7 @@ import tofu.logging.Loggable.Base
 import tofu.logging.impl._
 import tofu.syntax.logRenderer._
 import tofu.internal.DataComp
+import scala.annotation.unused
 
 /** Typeclass for adding custom log values to message
   */
@@ -54,9 +55,19 @@ object Loggable extends LoggableInstances with DataComp[Loggable] {
     /** put single logging field value */
     def putValue[I, V, R, S](a: A, v: V)(implicit r: LogRenderer[I, V, R, S]): S
 
+    /** put single logging field value if it's convertible to string, hide it otherwise */
+    def putMaskedValue[I, V, R, S](@unused a: A, v: V)(@unused f: String => String)(implicit
+        r: LogRenderer[I, V, R, S]
+    ): S = r.zero(v)
+
     /** put single logging field value in the field with supplied name */
     def putField[I, V, R, S](a: A, name: String, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
       r.sub(name, i)(putValue(a, _))
+
+    /** put single logging field value in the field with supplied name if it's convertible to string, hide it otherwise */
+    def putMaskedField[I, V, R, S](@unused a: A, @unused name: String, i: I)(@unused f: String => String)(implicit
+        r: LogRenderer[I, V, R, S]
+    ): R = r.sub(name, i)(putMaskedValue(a, _)(f))
 
     /** add list of custom fields for value
       *
@@ -176,4 +187,11 @@ trait SingleValueLoggable[@specialized A] extends Loggable[A] with SubLoggable[A
 
   override def putValue[I, V, R, M](a: A, v: V)(implicit r: LogRenderer[I, V, R, M]): M =
     r.putValue(logValue(a), v)
+
+  override def putMaskedValue[I, V, R, S](a: A, v: V)(f: String => String)(implicit r: LogRenderer[I, V, R, S]): S =
+    r.putString(f(a.toString), v)
+
+  override def putMaskedField[I, V, R, S](a: A, name: String, i: I)(f: String => String)(implicit
+      receiver: LogRenderer[I, V, R, S]
+  ): R = receiver.addString(name, f(a.toString), i)
 }

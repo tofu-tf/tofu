@@ -29,7 +29,9 @@ object loggable extends Derivation[Loggable] with NewTypeDerivation[Loggable] {
             case _ if annotations.contains(unembed()) =>
               receiver.combine(acc, typeclass.fields(value, input))
             case _                                    =>
-              receiver.combine(acc, typeclass.putField(value, label, input))
+              annotations.collectFirst { case masked(mode) =>
+                receiver.combine(acc, typeclass.putMaskedField(value, label, input)(masking.string(_, mode)))
+              }.getOrElse(receiver.combine(acc, typeclass.putField(value, label, input)))
           }
         }
 
