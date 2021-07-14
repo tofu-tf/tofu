@@ -10,9 +10,6 @@ object implicits extends DoobieImplicits1
 private[instances] trait DoobieImplicits1 extends DoobieImplicits2 {
   @inline final implicit def liftToConnectionIOViaIOImplicit[F[_]: Lift[*[_], IO]]: LiftToConnectionIOViaIO[F] =
     liftToConnectionIOViaIO
-
-  @inline final implicit def liftConnectionIOToConnectionCIOImplicit[F[_]]: LiftConnectionIOToConnectionCIO[F] =
-    liftConnectionIOToConnectionCIO
 }
 
 private[instances] trait DoobieImplicits2 extends DoobieImplicits3 {

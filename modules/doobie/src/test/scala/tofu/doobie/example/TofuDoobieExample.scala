@@ -14,7 +14,6 @@ import tofu.common.Console
 import tofu.doobie.LiftConnectionIO
 import tofu.doobie.example.Logging.ops._
 import tofu.doobie.example.Tracing.ops._
-import tofu.doobie.instances.implicits._
 import tofu.doobie.log.{EmbeddableLogHandler, LogHandlerF}
 import tofu.doobie.transactor.Txr
 import tofu.env.Env
@@ -63,7 +62,6 @@ object Tracing {
 
 // Model
 final case class Person(id: Long, name: String, deptId: Long)
-
 final case class Dept(id: Long, name: String)
 // create table department(id numeric primary key, name varchar);
 // create table person(id numeric primary key, name varchar, dept_id numeric references department(id));
@@ -72,7 +70,6 @@ final case class Dept(id: Long, name: String)
 @derive(representableK)
 trait PersonSql[F[_]] {
   def create(person: Person): F[Unit]
-
   def read(id: Long): F[Option[Person]]
 }
 
@@ -84,9 +81,8 @@ object PersonSql {
   }
 
   final class Impl(implicit lh: LogHandler) extends PersonSql[ConnectionIO] {
-    def create(p: Person): ConnectionIO[Unit] =
+    def create(p: Person): ConnectionIO[Unit]        =
       sql"insert into person values(${p.id}, ${p.name}, ${p.deptId})".update.run.void
-
     def read(id: Long): ConnectionIO[Option[Person]] =
       sql"select id, name, dept_id from person where id = $id"
         .query[Person]
@@ -94,14 +90,12 @@ object PersonSql {
   }
 
   final class LoggingMid[DB[_]: Apply: Logging] extends PersonSql[Mid[DB, *]] {
-    def create(person: Person): Mid[DB, Unit] = info("create person") *> _
-
+    def create(person: Person): Mid[DB, Unit]   = info("create person") *> _
     def read(id: Long): Mid[DB, Option[Person]] = info("read person") *> _
   }
 
   final class TracingMid[DB[_]: Tracing] extends PersonSql[Mid[DB, *]] {
-    def create(person: Person): Mid[DB, Unit] = _.traced("person-sql-create")
-
+    def create(person: Person): Mid[DB, Unit]   = _.traced("person-sql-create")
     def read(id: Long): Mid[DB, Option[Person]] = _.traced("person-sql-read")
   }
 }
@@ -110,7 +104,6 @@ object PersonSql {
 @derive(representableK)
 trait DeptSql[F[_]] {
   def create(dept: Dept): F[Unit]
-
   def read(id: Long): F[Option[Dept]]
 }
 
@@ -122,9 +115,8 @@ object DeptSql {
   }
 
   final class Impl(implicit lh: LogHandler) extends DeptSql[ConnectionIO] {
-    def create(d: Dept): ConnectionIO[Unit] =
+    def create(d: Dept): ConnectionIO[Unit]        =
       sql"insert into department values(${d.id}, ${d.name})".update.run.void
-
     def read(id: Long): ConnectionIO[Option[Dept]] =
       sql"select id, name from department where id = $id"
         .query[Dept]
@@ -132,14 +124,12 @@ object DeptSql {
   }
 
   final class LoggingMid[DB[_]: Apply: Logging] extends DeptSql[Mid[DB, *]] {
-    def create(dept: Dept): Mid[DB, Unit] = info("create department") *> _
-
+    def create(dept: Dept): Mid[DB, Unit]     = info("create department") *> _
     def read(id: Long): Mid[DB, Option[Dept]] = info("read department") *> _
   }
 
   final class TracingMid[DB[_]: Tracing] extends DeptSql[Mid[DB, *]] {
-    def create(dept: Dept): Mid[DB, Unit] = _.traced("dept-sql-create")
-
+    def create(dept: Dept): Mid[DB, Unit]     = _.traced("dept-sql-create")
     def read(id: Long): Mid[DB, Option[Dept]] = _.traced("dept-sql-read")
   }
 }

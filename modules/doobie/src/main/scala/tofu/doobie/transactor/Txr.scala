@@ -67,7 +67,7 @@ object Txr {
   /** Creates a facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` with `ConnectionIO` as the database
     * effect.
     */
-  @deprecated("Use `Transactor.mapK` and `Txr.plain` instead", since = "0.11.0")
+  @deprecated("Use `Transactor.mapK` and `Txr.plain` instead", since = "0.10.3")
   def lifted[G[_]]: LiftedPA[G] = new LiftedPA[G]
 
   private[transactor] final class LiftedPA[G[_]](private val dummy: Boolean = true) extends AnyVal {
@@ -91,7 +91,7 @@ object Txr {
   /** Creates a contextual facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` given `G HasContext R`
     * with `ConnectionRIO[R, *]` as the database effect.
     */
-  @deprecated("Use `Transactor.mapK` and `Txr.continuational` as a better alternative", since = "0.11.0")
+  @deprecated("Use `Transactor.mapK` and `Txr.continuational` as a better alternative", since = "0.10.3")
   def contextual[G[_]]: ContextualPA[G] = new ContextualPA[G]
 
   private[transactor] final class ContextualPA[G[_]](private val dummy: Boolean = true) extends AnyVal {
@@ -129,9 +129,11 @@ object Txr {
       val transP: Stream[ConnectionCIO[F, *], *] ~> Stream[F, *]    = makeTransP(true)
       val rawTransP: Stream[ConnectionCIO[F, *], *] ~> Stream[F, *] = makeTransP(false)
 
-      private def interpret(withStrategy: Boolean): Resource[F, ConnectionIO ~> F] = for {
+      private def interpret(withStrategy: Boolean): Resource[F, ConnectionCIO.Cont[F]] = for {
         c <- t.connect(t.kernel)
-        f  = funKFrom[ConnectionIO](_.foldMap(t.interpret).run(c))
+        f  = new ConnectionCIO.Cont[F] {
+               def apply[A](ca: ConnectionIO[A]): F[A] = ca.foldMap(t.interpret).run(c)
+             }
         _ <- withStrategy.when_(t.strategy.resource.mapK(f))
       } yield f
 
@@ -140,7 +142,9 @@ object Txr {
 
       private def makeTransP(withStrategy: Boolean): Stream[ConnectionCIO[F, *], *] ~> Stream[F, *] =
         funK(s =>
-          Stream.resource(interpret(withStrategy)).flatMap(fk => s.translate(Kleisli.applyK[F, ConnectionIO ~> F](fk)))
+          Stream
+            .resource(interpret(withStrategy))
+            .flatMap(fk => s.translate(Kleisli.applyK[F, ConnectionCIO.Cont[F]](fk)))
         )
     }
 
