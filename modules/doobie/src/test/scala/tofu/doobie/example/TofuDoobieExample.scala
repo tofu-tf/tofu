@@ -141,13 +141,13 @@ trait PersonStorage[F[_]] {
 }
 
 object PersonStorage {
-  def make[F[_]: Apply: Logging: Tracing, DB[_]: Monad: Txr.Aux[F, *[_]]](
+  def make[F[_]: Apply: Logging: Tracing, DB[_]: Monad: Txr[F, *[_]]](
       persSql: PersonSql[DB],
       deptSql: DeptSql[DB]
   ): PersonStorage[F] = {
     val aspects = NonEmptyList.of(new TracingMid[F], new LoggingMid[F]).reduce
     val impl    = new Impl[DB](persSql, deptSql): PersonStorage[DB]
-    val tx      = Txr.Aux[F, DB].trans
+    val tx      = Txr[F, DB].trans
     aspects attach impl.mapK(tx)
   }
 
@@ -183,7 +183,7 @@ object TofuDoobieExample extends TaskApp {
     implicit val txr = Txr.continuational(transactor.mapK(WR.liftF))
 
     def initStorage[
-        DB[_]: Txr.Aux[F, *[_]]: Monad: Console: LiftConnectionIO: WithLocal[*[_], Ctx]: UnliftIO
+        DB[_]: Txr[F, *[_]]: Monad: Console: LiftConnectionIO: WithLocal[*[_], Ctx]: UnliftIO
     ]: PersonStorage[F] = {
       implicit val loggingDB = Logging.make[DB]
       implicit val tracingDB = Tracing.make[DB]

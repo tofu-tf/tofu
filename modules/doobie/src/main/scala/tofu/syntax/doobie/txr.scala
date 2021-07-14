@@ -9,11 +9,11 @@ private[doobie] trait TxrSyntax {
 }
 
 private[doobie] final class TxrOps[DB[_], A](private val dba: DB[A]) extends AnyVal {
-  def trans[F[_]](implicit txr: Txr.Aux[F, DB]): F[A]    = txr.trans(dba)
-  def rawTrans[F[_]](implicit txr: Txr.Aux[F, DB]): F[A] = txr.rawTrans(dba)
+  def trans[F[_]](implicit txr: Txr[F, DB]): F[A]    = txr.trans(dba)
+  def rawTrans[F[_]](implicit txr: Txr[F, DB]): F[A] = txr.rawTrans(dba)
 }
 
 private[doobie] final class TxrStreamOps[DB[_], A](private val sdba: Stream[DB, A]) {
-  def trans[F[_]](implicit txr: Txr.Aux[F, DB]): Stream[F, A]    = txr.transP(sdba)
-  def rawTrans[F[_]](implicit txr: Txr.Aux[F, DB]): Stream[F, A] = txr.rawTransP(sdba)
+  def trans[F[_]](implicit txr: Txr[F, DB]): Stream[F, A]    = txr.transP(sdba)
+  def rawTrans[F[_]](implicit txr: Txr[F, DB]): Stream[F, A] = txr.rawTransP(sdba)
 }
