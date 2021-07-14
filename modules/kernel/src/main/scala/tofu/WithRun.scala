@@ -39,8 +39,7 @@ trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] w
     */
   override def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, G, A] =
     new RunContextEquivalentInstance[F, G, Ctx, A](this, eq)
-  override def self: WithRun[F, G, C] = this
-
+  override def self: WithRun[F, G, C]                                     = this
 
 }
 
