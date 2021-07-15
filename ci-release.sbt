@@ -31,7 +31,7 @@ ThisBuild / githubWorkflowPublish := Seq(
     )
   )
 )
-ThisBuild / versionScheme := Some("early-semver")
+ThisBuild / versionScheme := Some("semver-spec")
 
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
