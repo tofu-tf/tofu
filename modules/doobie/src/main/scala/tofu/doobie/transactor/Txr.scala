@@ -1,32 +1,31 @@
 package tofu.doobie
 package transactor
 
-import cats.data.ReaderT
-import cats.{Monad, ~>}
+import cats.data.{Kleisli, ReaderT}
+import cats.effect.Resource
+import cats.{Defer, Monad, ~>}
 import doobie.{ConnectionIO, Transactor}
 import fs2.Stream
 import tofu.lift.Lift
 import tofu.syntax.funk._
-import tofu.{BracketThrow, HasContext}
+import tofu.syntax.monadic._
+import tofu.{BracketThrow, WithContext}
+
+import scala.annotation.nowarn
 
 /** A simple facade for [[doobie.Transactor]] that holds an inner database effect type `DB[_]` and provides
   * natural transformations from this effect to the target effect `F[_]`.
   *
   * The motivation for using this facade instead of `Transactor` is to:
-  * 1) initialize all its natural transformations early and remove the need for additional constraints
-  *    on `F[_]` later (e.g. `Bracket`);
-  * 2) be able to use another `DB[_]` effect besides `ConnectionIO` and build a layer of transactional logic
-  *    with it.
   *
-  * N.B. The only extended DB effect provided below is `ConnectionRIO`. There are intentionally no effects
-  * based on `EitherT` to provide a separate error channel for business-errors. This is due to the (bad) design
-  * of Cats Effect. Doobie uses `Throwable`-bounded [[cats.effect.Resource]] and [[fs2.Stream]] under the hood
-  * for applying a [[doobie.util.transactor.Strategy]], and throwing an error through `EitherT`'s left channel
-  * does not lead to the proper `ExitCase` of a bracket. All errors on the DB layer must be thrown and handled
-  * via the `Throwable` channel of `ConnectionIO`.
+  *   - initialize all its natural transformations early and remove the need for additional constraints
+  *     on `F[_]` later (e.g. `Bracket`);
+  *
+  *   - be able to use another `DB[_]` effect besides `ConnectionIO` and build a layer of transactional logic
+  *     with it.
   */
-trait Txr[F[_]] {
-  type DB[_]
+trait Txr[F[_], DB0[_]] {
+  type DB[x] >: DB0[x] <: DB0[x]
 
   /** Interprets `DB` into `F`, applying the transactional strategy. */
   def trans: DB ~> F
@@ -42,46 +41,84 @@ trait Txr[F[_]] {
 }
 
 object Txr {
-  type Aux[F[_], DB0[_]]     = Txr[F] { type DB[x] >: DB0[x] <: DB0[x] }
-  type Plain[F[_]]           = Aux[F, ConnectionIO]
-  type Lifted[F[_]]          = Aux[F, ConnectionIO]
-  type Contextual[F[_], Ctx] = Aux[F, ConnectionRIO[Ctx, *]]
+  type Plain[F[_]]          = Txr[F, ConnectionIO]
+  type Continuational[F[_]] = Txr[F, ConnectionCIO[F, *]]
 
-  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB]                      = ev
-  def Plain[F[_]](implicit ev: Plain[F]): Plain[F]                               = ev
-  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F]                            = ev
-  def Contextual[F[_], Ctx](implicit ev: Contextual[F, Ctx]): Contextual[F, Ctx] = ev
+  def apply[F[_], DB[_]](implicit ev: Txr[F, DB]): Txr[F, DB]                 = ev
+  def Plain[F[_]](implicit ev: Plain[F]): Plain[F]                            = ev
+  def Continuational[F[_]](implicit ev: Continuational[F]): Continuational[F] = ev
 
   /** Creates a plain facade that preserves the effect of `Transactor` with `ConnectionIO` as the database effect.
     */
   def plain[F[_]: BracketThrow](t: Transactor[F]): Txr.Plain[F] =
-    new Txr[F] {
-      type DB[x] = ConnectionIO[x]
+    new Txr.Plain[F] {
+      val trans: ConnectionIO ~> F    = t.trans
+      val rawTrans: ConnectionIO ~> F = t.rawTrans
 
-      def trans: ConnectionIO ~> F    = t.trans
-      def rawTrans: ConnectionIO ~> F = t.rawTrans
-
-      def transP: Stream[ConnectionIO, *] ~> Stream[F, *]    = t.transP
-      def rawTransP: Stream[ConnectionIO, *] ~> Stream[F, *] = t.rawTransP
+      val transP: Stream[ConnectionIO, *] ~> Stream[F, *]    = t.transP
+      val rawTransP: Stream[ConnectionIO, *] ~> Stream[F, *] = t.rawTransP
     }
+
+  /** Creates a facade that uses `ConnectionCIO` as the database effect.
+    */
+  def continuational[F[_]: BracketThrow: Defer](t: Transactor[F]): Txr.Continuational[F] =
+    new Txr.Continuational[F] {
+      val trans: ConnectionCIO[F, *] ~> F    = makeTrans(true)
+      val rawTrans: ConnectionCIO[F, *] ~> F = makeTrans(false)
+
+      val transP: Stream[ConnectionCIO[F, *], *] ~> Stream[F, *]    = makeTransP(true)
+      val rawTransP: Stream[ConnectionCIO[F, *], *] ~> Stream[F, *] = makeTransP(false)
+
+      private def interpret(withStrategy: Boolean): Resource[F, ConnectionCIO.Cont[F]] = for {
+        c <- t.connect(t.kernel)
+        f  = new ConnectionCIO.Cont[F] {
+               def apply[A](ca: ConnectionIO[A]): F[A] = ca.foldMap(t.interpret).run(c)
+             }
+        _ <- withStrategy.when_(t.strategy.resource.mapK(f))
+      } yield f
+
+      private def makeTrans(withStrategy: Boolean): ConnectionCIO[F, *] ~> F =
+        funK(ccio => interpret(withStrategy).use(ccio.run))
+
+      private def makeTransP(withStrategy: Boolean): Stream[ConnectionCIO[F, *], *] ~> Stream[F, *] =
+        funK(s =>
+          Stream
+            .resource(interpret(withStrategy))
+            .flatMap(fk => s.translate(Kleisli.applyK[F, ConnectionCIO.Cont[F]](fk)))
+        )
+    }
+
+  @deprecated("Use `Txr[F, DB]` instead", since = "0.10.3")
+  type Aux[F[_], DB[_]]      = Txr[F, DB]
+  @deprecated("Use `Transactor.mapK` and `Txr.Plain[F]` instead", since = "0.10.3")
+  type Lifted[F[_]]          = Txr[F, ConnectionIO]
+  @deprecated("Use `Transactor.mapK` and `Txr.Continuational[F]` instead", since = "0.10.3")
+  type Contextual[F[_], Ctx] = Txr[F, ConnectionRIO[Ctx, *]]
+
+  @deprecated("Use `Txr[F, DB]` instead", since = "0.10.3")
+  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB]                      = ev
+  @deprecated("Use `Transactor.mapK` and `Txr.plain` instead", since = "0.10.3")
+  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F]                            = ev
+  @deprecated("Use `Transactor.mapK` and `Txr.continuational` as a better alternative", since = "0.10.3")
+  def Contextual[F[_], Ctx](implicit ev: Contextual[F, Ctx]): Contextual[F, Ctx] = ev
 
   /** Creates a facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` with `ConnectionIO` as the database
     * effect.
     */
+  @deprecated("Use `Transactor.mapK` and `Txr.plain` instead", since = "0.10.3")
   def lifted[G[_]]: LiftedPA[G] = new LiftedPA[G]
 
+  @nowarn("cat=deprecation")
   private[transactor] final class LiftedPA[G[_]](private val dummy: Boolean = true) extends AnyVal {
     def apply[F[_]: BracketThrow](t: Transactor[F])(implicit L: Lift[F, G]): Txr.Lifted[G] =
-      new Txr[G] {
-        type DB[x] = ConnectionIO[x]
-
-        def trans: ConnectionIO ~> G    = liftTrans(t.trans)
-        def rawTrans: ConnectionIO ~> G = liftTrans(t.rawTrans)
+      new Txr.Lifted[G] {
+        val trans: ConnectionIO ~> G    = liftTrans(t.trans)
+        val rawTrans: ConnectionIO ~> G = liftTrans(t.rawTrans)
 
         private def liftTrans(fk: ConnectionIO ~> F): ConnectionIO ~> G = fk andThen L.liftF
 
-        def transP: Stream[ConnectionIO, *] ~> Stream[G, *]    = liftTransP(t.transP)
-        def rawTransP: Stream[ConnectionIO, *] ~> Stream[G, *] = liftTransP(t.rawTransP)
+        val transP: Stream[ConnectionIO, *] ~> Stream[G, *]    = liftTransP(t.transP)
+        val rawTransP: Stream[ConnectionIO, *] ~> Stream[G, *] = liftTransP(t.rawTransP)
 
         private def liftTransP(fk: Stream[ConnectionIO, *] ~> Stream[F, *]): Stream[ConnectionIO, *] ~> Stream[G, *] =
           funK(s => fk(s).translate(L.liftF))
@@ -91,23 +128,23 @@ object Txr {
   /** Creates a contextual facade that lifts the effect of `Transactor` from `F[_]` to `G[_]` given `G HasContext R`
     * with `ConnectionRIO[R, *]` as the database effect.
     */
+  @deprecated("Use `Transactor.mapK` and `Txr.continuational` as a better alternative", since = "0.10.3")
   def contextual[G[_]]: ContextualPA[G] = new ContextualPA[G]
 
+  @nowarn("cat=deprecation")
   private[transactor] final class ContextualPA[G[_]](private val dummy: Boolean = true) extends AnyVal {
     def apply[F[_]: BracketThrow, R](
         t: Transactor[F]
-    )(implicit L: Lift[F, G], G: Monad[G], C: G HasContext R): Txr.Contextual[G, R] =
-      new Txr[G] {
-        type DB[x] = ConnectionRIO[R, x]
-
-        def trans: ConnectionRIO[R, *] ~> G    = liftTrans(t.trans)
-        def rawTrans: ConnectionRIO[R, *] ~> G = liftTrans(t.rawTrans)
+    )(implicit L: Lift[F, G], G: Monad[G], C: G WithContext R): Txr.Contextual[G, R] =
+      new Txr.Contextual[G, R] {
+        val trans: ConnectionRIO[R, *] ~> G    = liftTrans(t.trans)
+        val rawTrans: ConnectionRIO[R, *] ~> G = liftTrans(t.rawTrans)
 
         private def liftTrans(fk: ConnectionIO ~> F): ConnectionRIO[R, *] ~> G =
           funK(crio => C.askF(ctx => L.lift(fk(crio.run(ctx)))))
 
-        def transP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *]    = liftTransPK(t.transPK)
-        def rawTransP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *] = liftTransPK(t.rawTransPK)
+        val transP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *]    = liftTransPK(t.transPK)
+        val rawTransP: Stream[ConnectionRIO[R, *], *] ~> Stream[G, *] = liftTransPK(t.rawTransPK)
 
         private def liftTransPK(
             fk: Stream[ConnectionRIO[R, *], *] ~> Stream[ReaderT[F, R, *], *]

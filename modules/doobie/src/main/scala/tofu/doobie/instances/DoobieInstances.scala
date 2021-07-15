@@ -6,7 +6,7 @@ import cats.effect.syntax.effect._
 import cats.effect.syntax.syncEffect._
 import doobie.ConnectionIO
 import doobie.free.connection.AsyncConnectionIO
-import tofu.HasProvide
+import tofu.WithProvide
 import tofu.doobie.ConnectionRIO
 import tofu.lift.Lift
 
@@ -22,7 +22,7 @@ private[instances] trait DoobieInstances {
     new LiftToConnectionRIO
 
   final def liftProvideToConnectionRIO[F[_], G[_], R](implicit
-      HP: HasProvide[G, F, R],
+      WP: WithProvide[G, F, R],
       L: Lift[F, ConnectionIO]
   ): LiftProvideToConnectionRIO[F, G, R] = new LiftProvideToConnectionRIO
 }
@@ -43,7 +43,7 @@ final class LiftToConnectionRIO[F[_], R](implicit L: Lift[F, ConnectionIO]) exte
   def lift[A](fa: F[A]): ConnectionRIO[R, A] = ReaderT.liftF(L.lift(fa))
 }
 
-final class LiftProvideToConnectionRIO[F[_], G[_], R](implicit HP: HasProvide[G, F, R], L: Lift[F, ConnectionIO])
+final class LiftProvideToConnectionRIO[F[_], G[_], R](implicit WP: WithProvide[G, F, R], L: Lift[F, ConnectionIO])
     extends Lift[G, ConnectionRIO[R, *]] {
-  def lift[A](fa: G[A]): ConnectionRIO[R, A] = ReaderT(ctx => L.lift(HP.runContext(fa)(ctx)))
+  def lift[A](fa: G[A]): ConnectionRIO[R, A] = ReaderT(ctx => L.lift(WP.runContext(fa)(ctx)))
 }

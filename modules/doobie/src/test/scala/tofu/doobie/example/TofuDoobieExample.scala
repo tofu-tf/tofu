@@ -1,7 +1,7 @@
 package tofu.doobie.example
 
 import cats.data.NonEmptyList
-import cats.effect.{ContextShift, Effect, ExitCode}
+import cats.effect.{ContextShift, Effect, ExitCode, Sync}
 import cats.instances.string._
 import cats.tagless.syntax.functorK._
 import cats.{Apply, FlatMap, Monad}
@@ -14,18 +14,16 @@ import tofu.common.Console
 import tofu.doobie.LiftConnectionIO
 import tofu.doobie.example.Logging.ops._
 import tofu.doobie.example.Tracing.ops._
-import tofu.doobie.instances.implicits._
 import tofu.doobie.log.{EmbeddableLogHandler, LogHandlerF}
 import tofu.doobie.transactor.Txr
 import tofu.env.Env
 import tofu.higherKind.Mid
 import tofu.higherKind.derived.representableK
-import tofu.lift.{Lift, UnliftIO}
+import tofu.lift.UnliftIO
 import tofu.syntax.console._
 import tofu.syntax.context._
-import tofu.syntax.lift._
 import tofu.syntax.monadic._
-import tofu.{HasContext, HasLocal, WithRun}
+import tofu.{WithContext, WithLocal, WithRun}
 
 // Simple context
 final case class Ctx(traceId: String)
@@ -34,9 +32,11 @@ final case class Ctx(traceId: String)
 trait Logging[F[_]] {
   def info(msg: String): F[Unit]
 }
-object Logging      {
-  def make[F[_]: FlatMap: Console: HasContext[*[_], Ctx]]: Logging[F] =
+
+object Logging {
+  def make[F[_]: FlatMap: Console: WithContext[*[_], Ctx]]: Logging[F] =
     msg => askF[F]((ctx: Ctx) => puts"[Logging][traceId=${ctx.traceId}] $msg")
+
   object ops {
     def info[F[_]](msg: String)(implicit F: Logging[F]): F[Unit] = F.info(msg)
   }
@@ -46,11 +46,13 @@ object Logging      {
 trait Tracing[F[_]] {
   def traced[A](opName: String)(fa: F[A]): F[A]
 }
-object Tracing      {
-  def make[F[_]: FlatMap: Console: HasLocal[*[_], Ctx]]: Tracing[F] = new Tracing[F] {
+
+object Tracing {
+  def make[F[_]: FlatMap: Console: WithLocal[*[_], Ctx]]: Tracing[F] = new Tracing[F] {
     def traced[A](opName: String)(fa: F[A]): F[A] =
       askF[F]((ctx: Ctx) => puts"[Tracing][traceId=${ctx.traceId}] $opName" *> fa)
   }
+
   object ops {
     implicit class TracingOps[F[_], A](private val fa: F[A]) extends AnyVal {
       def traced(opName: String)(implicit F: Tracing[F]): F[A] = F.traced(opName)(fa)
@@ -79,9 +81,8 @@ object PersonSql {
   }
 
   final class Impl(implicit lh: LogHandler) extends PersonSql[ConnectionIO] {
-    def create(p: Person): ConnectionIO[Unit] =
+    def create(p: Person): ConnectionIO[Unit]        =
       sql"insert into person values(${p.id}, ${p.name}, ${p.deptId})".update.run.void
-
     def read(id: Long): ConnectionIO[Option[Person]] =
       sql"select id, name, dept_id from person where id = $id"
         .query[Person]
@@ -114,9 +115,8 @@ object DeptSql {
   }
 
   final class Impl(implicit lh: LogHandler) extends DeptSql[ConnectionIO] {
-    def create(d: Dept): ConnectionIO[Unit] =
+    def create(d: Dept): ConnectionIO[Unit]        =
       sql"insert into department values(${d.id}, ${d.name})".update.run.void
-
     def read(id: Long): ConnectionIO[Option[Dept]] =
       sql"select id, name from department where id = $id"
         .query[Dept]
@@ -141,13 +141,13 @@ trait PersonStorage[F[_]] {
 }
 
 object PersonStorage {
-  def make[F[_]: Apply: Logging: Tracing, DB[_]: Monad: Txr.Aux[F, *[_]]](
+  def make[F[_]: Apply: Logging: Tracing, DB[_]: Monad: Txr[F, *[_]]](
       persSql: PersonSql[DB],
       deptSql: DeptSql[DB]
   ): PersonStorage[F] = {
     val aspects = NonEmptyList.of(new TracingMid[F], new LoggingMid[F]).reduce
     val impl    = new Impl[DB](persSql, deptSql): PersonStorage[DB]
-    val tx      = Txr.Aux[F, DB].trans
+    val tx      = Txr[F, DB].trans
     aspects attach impl.mapK(tx)
   }
 
@@ -169,7 +169,7 @@ object TofuDoobieExample extends TaskApp {
   def run(args: List[String]): Task[ExitCode] =
     runF[Task, Env[Ctx, *]].as(ExitCode.Success)
 
-  def runF[I[_]: Effect: ContextShift, F[_]: Monad: Console: UnliftIO](implicit WR: WithRun[F, I, Ctx]): I[Unit] = {
+  def runF[I[_]: Effect: ContextShift, F[_]: Sync: UnliftIO](implicit WR: WithRun[F, I, Ctx]): I[Unit] = {
     // Simplified wiring below
     implicit val loggingF = Logging.make[F]
     implicit val tracingF = Tracing.make[F]
@@ -180,15 +180,16 @@ object TofuDoobieExample extends TaskApp {
       user = "postgres",
       pass = "secret"
     )
-    implicit val txr = Txr.contextual[F](transactor)
+    implicit val txr = Txr.continuational(transactor.mapK(WR.liftF))
 
-    def initStorage[DB[_]: Txr.Aux[F, *[_]]: Monad: Console: LiftConnectionIO: Lift[F, *[_]]: HasLocal[*[_], Ctx]]
-        : PersonStorage[F] = {
+    def initStorage[
+        DB[_]: Txr[F, *[_]]: Monad: Console: LiftConnectionIO: WithLocal[*[_], Ctx]: UnliftIO
+    ]: PersonStorage[F] = {
       implicit val loggingDB = Logging.make[DB]
       implicit val tracingDB = Tracing.make[DB]
 
-      val lhf          = LogHandlerF(ev => loggingF.info(s"SQL event: $ev"))
-      implicit val elh = EmbeddableLogHandler.async(lhf).lift[DB]
+      val lhf          = LogHandlerF(ev => loggingDB.info(s"SQL event: $ev"))
+      implicit val elh = EmbeddableLogHandler.sync(lhf)
 
       val personSql = PersonSql.make[DB]
       val deptSql   = DeptSql.make[DB]
