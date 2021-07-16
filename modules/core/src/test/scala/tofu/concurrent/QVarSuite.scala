@@ -20,7 +20,7 @@ class QVarSuite extends AnyFunSuite {
   implicit val iocs = IO.contextShift(ExecutionContext.global)
 
   test("check IO has QVar") {
-    assert(MakeQVar[IO, ReaderT[IO, Unit, *]].of(1).flatMap(qvarProg(_).run(())).unsafeRunSync() == (1, 2))
+    assert(MakeQVar[IO, ReaderT[IO, Unit, *]].of(1).flatMap(qvarProg(_).run(())).unsafeRunSync() === (1 -> 2))
   }
 
   def qvarProg[F[_]: Monad](q: QVar[F, Int]) = for {
