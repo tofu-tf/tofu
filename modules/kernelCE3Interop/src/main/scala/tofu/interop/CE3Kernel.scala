@@ -1,21 +1,21 @@
 package tofu.interop
 
-import cats.effect.kernel.{GenTemporal, MonadCancel, Outcome}
-import cats.effect.std.Dispatcher
+import cats.Functor
+import cats.effect.kernel._
+import cats.effect.std.{Dispatcher, Queue}
 import cats.effect.unsafe.IORuntime
-import cats.effect.{Async, IO, Sync}
-import tofu.{WithContext}
+import cats.effect.{Async, Fiber, IO, Sync}
+import tofu.concurrent.{Atom, QVar}
 import tofu.internal.NonTofu
-import tofu.internal.carriers.{DelayCarrier3, FinallyCarrier3, TimeoutCE3Carrier, UnliftCarrier3}
+import tofu.internal.carriers._
+import tofu.lift.Lift
+import tofu.syntax.monadic._
+import tofu.{Scoped, WithContext}
 
+import java.util.concurrent.TimeUnit
 import scala.annotation.unused
 import scala.concurrent.duration.FiniteDuration
-import cats.effect.kernel.GenConcurrent
-import tofu.internal.carriers.FibersCarrier3
-import cats.effect.Fiber
-import scala.concurrent.ExecutionContext
-import tofu.ScopedExecute
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object CE3Kernel {
   def delayViaSync[K[_]](implicit KS: Sync[K]): DelayCarrier3[K] =
@@ -68,14 +68,54 @@ object CE3Kernel {
 
   final def makeExecute[Tag, F[_]](
       ec: ExecutionContext
-  )(implicit F: Async[F]): ScopedExecute[Tag, F] =
-    new ScopedExecute[Tag, F] {
+  )(implicit F: Async[F]): ScopedCarrier3[Tag, F] =
+    new ScopedCarrier3[Tag, F] {
       def runScoped[A](fa: F[A]): F[A] = F.evalOn(fa, ec)
 
       def executionContext: F[ExecutionContext] = F.pure(ec)
 
       def deferFutureAction[A](f: ExecutionContext => Future[A]): F[A] =
         F.fromFuture(runScoped(F.delay(f(ec))))
+    }
+
+  final def asyncExecute[F[_]](implicit
+      ec: ExecutionContext,
+      F: Async[F]
+  ): ScopedCarrier3[Scoped.Main, F] = makeExecute[Scoped.Main, F](ec)
+
+  final def blockerExecute[F[_]](implicit
+      blocker: Blocker[F],
+      F: Async[F]
+  ): ScopedCarrier3[Scoped.Blocking, F] = makeExecute[Scoped.Blocking, F](blocker.ec)
+
+  final def atomBySync[I[_]: Sync, F[_]: Sync]: MkAtomCE3Carrier[I, F] =
+    new MkAtomCE3Carrier[I, F] {
+      def atom[A](a: A): I[Atom[F, A]] = Ref.in[I, F, A](a).map(AtomByRef(_))
+    }
+
+  final def qvarByConcurrent[I[_]: Async, F[_]: Sync](implicit
+      IF: Lift[I, F]
+  ): MkQVarCE3Carrier[I, F] =
+    new MkQVarCE3Carrier[I, F] {
+      private def qvarOpt[A](opt: Option[A]): I[QVar[F, A]] = for {
+        qi  <- Queue.synchronous[I, A]
+        ref <- Ref.in[I, F, Option[A]](opt)
+      } yield QVarQRef(qi.mapK(IF.liftF), ref)
+
+      def qvarOf[A](a: A): I[QVar[F, A]] = qvarOpt(Some(a))
+      def qvarEmpty[A]: I[QVar[F, A]]    = qvarOpt(None)
+    }
+
+  final def clock[F[_]: Functor](implicit C: cats.effect.Clock[F]): ClockCE3Carrier[F] =
+    new ClockCE3Carrier[F] {
+      def realTime(unit: TimeUnit): F[Long] = C.realTime.map(d => TimeUnit.MILLISECONDS.convert(d.toMillis, unit))
+
+      def nanos: F[Long] = C.monotonic.map(_.toNanos)
+    }
+
+  final def sleep[F[_]](implicit T: GenTemporal[F, _]): SleepCE3Carrier[F] =
+    new SleepCE3Carrier[F] {
+      def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
     }
 
 }
