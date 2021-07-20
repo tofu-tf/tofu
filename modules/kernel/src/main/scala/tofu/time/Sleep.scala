@@ -12,7 +12,7 @@ trait Sleep[F[_]] {
   def sleep(duration: FiniteDuration): F[Unit]
 }
 
-object Sleep       extends EffectComp[Sleep] with SleepInterop
+object Sleep extends EffectComp[Sleep] with SleepInterop
 
 trait SleepInterop extends SleepInterop1 {
   implicit def ce3Interop[F[_]](implicit sleep: SleepCE3Carrier[F]): Sleep[F] = sleep
