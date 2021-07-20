@@ -4,12 +4,10 @@ package interop
 import cats.effect.concurrent.{MVar, Ref}
 import cats.effect.{Async, Blocker, Bracket, Concurrent, ContextShift, Effect, ExitCase, Fiber, IO, Sync, Timer}
 import cats.{Id, ~>}
-import tofu.Delay
 import tofu.compat.unused
 import tofu.concurrent.{Atom, QVar}
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
-import tofu.kernel.types._
 import tofu.syntax.monadic._
 
 import scala.concurrent.duration.FiniteDuration
@@ -20,8 +18,8 @@ object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search
   type CEExit[E, A] >: ExitCase[E] <: ExitCase[E]
 
-  def delayViaSync[K[_]](implicit KS: Sync[K]): Delay[K] =
-    new Delay[K] {
+  def delayViaSync[K[_]](implicit KS: Sync[K]): DelayCarrier2[K] =
+    new DelayCarrier2[K] {
       def delay[A](a: => A): K[A] = KS.delay(a)
     }
 
@@ -39,8 +37,8 @@ object CE2Kernel {
 
   final implicit def finallyFromBracket[F[_], E](implicit
       F: Bracket[F, E]
-  ): FinallyCarrier.Aux[F, E, CEExit[E, *]] =
-    new FinallyCarrier.Impl[F, E, CEExit[E, *]] {
+  ): FinallyCarrier2.Aux[F, E, CEExit[E, *]] =
+    new FinallyCarrier2.Impl[F, E, CEExit[E, *]] {
       def finallyCase[A, B, C](init: F[A])(action: A => F[B])(release: (A, CEExit[E, B]) => F[C]): F[B] =
         F.bracketCase(init)(action) { case (a, exit) =>
           F.void(release(a, exit))
@@ -52,11 +50,11 @@ object CE2Kernel {
         }
     }
 
-  final implicit def startFromConcurrent[F[_]](implicit
+  final def startFromConcurrent[F[_]](implicit
       F: Concurrent[F],
       @unused _nonTofu: NonTofu[F]
-  ): FibersCarrier.Aux[F, Id, Fiber[F, *]] =
-    new FibersCarrier.Impl[F, Id, Fiber[F, *]] {
+  ): FibersCarrier2.Aux[F, Id, Fiber[F, *]] =
+    new FibersCarrier2.Impl[F, Id, Fiber[F, *]] {
       def start[A](fa: F[A]): F[Fiber[F, A]]                                                = F.start(fa)
       def fireAndForget[A](fa: F[A]): F[Unit]                                               = F.void(start(fa))
       def racePair[A, B](fa: F[A], fb: F[B]): F[Either[(A, Fiber[F, B]), (Fiber[F, A], B)]] = F.racePair(fa, fb)
@@ -66,8 +64,8 @@ object CE2Kernel {
 
   final def makeExecute[Tag, F[_]](
       ec: ExecutionContext
-  )(implicit cs: ContextShift[F], F: Async[F]): ScopedExecute[Tag, F] =
-    new ScopedExecute[Tag, F] {
+  )(implicit cs: ContextShift[F], F: Async[F]): ScopedCarrier2[Tag, F] =
+    new ScopedCarrier2[Tag, F] {
       def runScoped[A](fa: F[A]): F[A] = cs.evalOn(ec)(fa)
 
       def executionContext: F[ExecutionContext] = ec.pure[F]
@@ -80,13 +78,13 @@ object CE2Kernel {
       ec: ExecutionContext,
       cs: ContextShift[F],
       F: Async[F]
-  ): Execute[F] = makeExecute[Scoped.Main, F](ec)
+  ): ScopedCarrier2[Scoped.Main, F] = makeExecute[Scoped.Main, F](ec)
 
   final def blockerExecute[F[_]](implicit
       cs: ContextShift[F],
       blocker: Blocker,
       F: Async[F]
-  ): BlockExec[F] = makeExecute[Scoped.Blocking, F](blocker.blockingContext)
+  ): ScopedCarrier2[Scoped.Blocking, F] = makeExecute[Scoped.Blocking, F](blocker.blockingContext)
 
   final def atomBySync[I[_]: Sync, F[_]: Sync]: MkAtomCE2Carrier[I, F] =
     new MkAtomCE2Carrier[I, F] {

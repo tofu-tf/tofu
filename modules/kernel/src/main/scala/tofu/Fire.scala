@@ -2,15 +2,23 @@ package tofu
 
 import scala.util.Either
 import tofu.internal.{EffectComp, Effect3Comp}
-import tofu.internal.carriers.FibersCarrier
+import tofu.internal.carriers.FibersCarrier2
+import cats.MonadError
+import tofu.internal.carriers.FibersCarrier3
+import scala.annotation.unused
 
 trait Fire[F[_]] {
   def fireAndForget[A](fa: F[A]): F[Unit]
 }
 
 object Fire extends EffectComp[Fire] {
-  final implicit def byCarrier[F[_], Ex[_], Fib[_]](implicit
-      carrier: FibersCarrier.Aux[F, Ex, Fib]
+  final implicit def byCarrier2[F[_], Ex[_], Fib[_]](implicit
+      carrier: FibersCarrier2.Aux[F, Ex, Fib]
+  ): Fibers[F, Ex, Fib] = carrier.content
+
+  final implicit def byCarrier3[F[_], E, Ex[_], Fib[_]](implicit
+      @unused FE: MonadError[F, E],
+      carrier: FibersCarrier3.Aux[F, E, Ex, Fib]
   ): Fibers[F, Ex, Fib] = carrier.content
 }
 

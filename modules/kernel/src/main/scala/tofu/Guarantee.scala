@@ -3,7 +3,7 @@ package tofu
 import cats.MonadError
 import scala.annotation.unused
 import tofu.internal.{EffectComp, Effect2Comp}
-import tofu.internal.carriers.FinallyCarrier
+import tofu.internal.carriers.FinallyCarrier2
 
 /** Bracket-like typeclass allowing to understand if operation was succeed
   * @tparam F effect process
@@ -21,7 +21,7 @@ trait Guarantee[F[_]] {
 object Guarantee extends EffectComp[Guarantee] {
   final implicit def fromBracket[F[_], E, Exit[_]](implicit
       @unused ev1: MonadError[F, E],
-      carrier: FinallyCarrier.Aux[F, E, Exit]
+      carrier: FinallyCarrier2.Aux[F, E, Exit]
   ): Finally[F, Exit] =
     carrier.content
 }

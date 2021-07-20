@@ -1,7 +1,7 @@
 package tofu
 
 import tofu.internal.EffectComp
-import tofu.internal.Interop
+import tofu.internal.carriers.{DelayCarrier2, DelayCarrier3}
 
 trait Delay[F[_]] {
   def delay[A](a: => A): F[A]
@@ -13,6 +13,6 @@ object Delay extends CatsDelay with EffectComp[Delay] {
 }
 
 class CatsDelay {
-  implicit def byCatsSync[F[_]]: Delay[F] =
-    macro Interop.delegate[Delay[F], F, { val `tofu.interop.CE2Kernel.delayViaSync`: Unit }]
+  final implicit def interop2[F[_]](implicit carrier: DelayCarrier2[F]): Delay[F] = carrier
+  final implicit def interop3[F[_]](implicit carrier: DelayCarrier3[F]): Delay[F] = carrier
 }
