@@ -1,4 +1,4 @@
-package tofu
+package tofu.time
 
 import cats.data.ReaderT
 import cats.effect.{Concurrent, IO, Timer}
