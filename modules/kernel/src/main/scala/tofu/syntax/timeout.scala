@@ -1,7 +1,7 @@
 package tofu.syntax
 
 import cats.Applicative
-import tofu.Timeout
+import tofu.time.Timeout
 import raise.FindRaise
 
 import scala.concurrent.duration.FiniteDuration
