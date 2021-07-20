@@ -14,6 +14,7 @@ import tofu.syntax.monadic._
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
+import java.util.concurrent.TimeUnit
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search
@@ -30,10 +31,11 @@ object CE2Kernel {
       def unlift: K[K ~> IO]       = Effect.toIOK[K].pure[K]
     }
 
-  def concurrentTimeout[F[_]: Concurrent: Timer](implicit @unused nonTofu: NonTofu[F]): Timeout[F] = new Timeout[F] {
-    override def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A] =
-      Concurrent.timeoutTo(fa, after, fallback)
-  }
+  def timeout[F[_]: Concurrent: Timer](implicit @unused nonTofu: NonTofu[F]): TimeoutCE2Carrier[F] =
+    new TimeoutCE2Carrier[F] {
+      override def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A] =
+        Concurrent.timeoutTo(fa, after, fallback)
+    }
 
   final implicit def finallyFromBracket[F[_], E](implicit
       F: Bracket[F, E]
@@ -97,4 +99,15 @@ object CE2Kernel {
       def qvarEmpty[A]: I[QVar[F, A]]    = MVar.emptyIn[I, F, A].map(QVarByMVar(_))
     }
 
+  final def clock[F[_]](implicit C: cats.effect.Clock[F]): ClockCE2Carrier[F] =
+    new ClockCE2Carrier[F] {
+      def realTime(unit: TimeUnit): F[Long] = C.realTime(unit)
+
+      def nanos: F[Long] = C.monotonic(TimeUnit.NANOSECONDS)
+    }
+
+  final def sleep[F[_]](implicit T: cats.effect.Timer[F]): SleepCE2Carrier[F] =
+    new SleepCE2Carrier[F] {
+      def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
+    }
 }
