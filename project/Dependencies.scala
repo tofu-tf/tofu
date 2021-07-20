@@ -16,7 +16,9 @@ object Dependencies {
 
     val cats = "2.6.1"
 
-    val catsEffect = "2.5.1"
+    val catsEffect2 = "2.5.1"
+
+    val catsEffect3 = "3.1.1"
 
     val catsMtl = "1.2.1"
 
@@ -78,7 +80,8 @@ object Dependencies {
   val catsMtl          = "org.typelevel"              %% "cats-mtl"                % Version.catsMtl
   val monocle          = "com.github.julien-truffaut" %% "monocle-core"            % Version.monocle excludeAll (noCatsCore: _*)
   val alleycats        = "org.typelevel"              %% "alleycats-core"          % Version.cats
-  val catsEffect       = "org.typelevel"              %% "cats-effect"             % Version.catsEffect
+  val catsEffect2      = "org.typelevel"              %% "cats-effect"             % Version.catsEffect2
+  val catsEffect3      = "org.typelevel"              %% "cats-effect"             % Version.catsEffect3
   val monix            = "io.monix"                   %% "monix"                   % Version.monix excludeAll (noCatsEffect: _*)
   val logback          = "ch.qos.logback"              % "logback-classic"         % Version.logback
   val slf4j            = "org.slf4j"                   % "slf4j-api"               % Version.slf4j     % Provided

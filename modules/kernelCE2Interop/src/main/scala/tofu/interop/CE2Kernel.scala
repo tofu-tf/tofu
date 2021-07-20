@@ -24,8 +24,8 @@ object CE2Kernel {
       def delay[A](a: => A): K[A] = KS.delay(a)
     }
 
-  def unliftEffect[K[_]](implicit KE: Effect[K]): UnliftCarrier[IO, K] =
-    new UnliftCarrier[IO, K] {
+  def unliftEffect[K[_]](implicit KE: Effect[K]): UnliftCarrier2[IO, K] =
+    new UnliftCarrier2[IO, K] {
       def lift[A](fa: IO[A]): K[A] = Effect[K].liftIO(fa)
       def unlift: K[K ~> IO]       = Effect.toIOK[K].pure[K]
     }
