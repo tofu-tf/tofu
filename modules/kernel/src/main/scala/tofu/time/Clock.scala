@@ -1,10 +1,9 @@
-package tofu
+package tofu.time
 
 import tofu.internal.EffectComp
 import tofu.internal.carriers._
 
 import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.FiniteDuration
 
 trait Clock[F[_]] {
 
@@ -27,41 +26,10 @@ trait Clock[F[_]] {
 
 object Clock extends EffectComp[Clock] with ClockInterop
 
-trait Sleep[F[_]] {
-
-  /** Pauses execution for desired duration
-    */
-  def sleep(duration: FiniteDuration): F[Unit]
-}
-
-object Sleep extends EffectComp[Sleep] with SleepInterop
-
-trait Timeout[F[_]] {
-  def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A]
-}
-
-object Timeout extends TimeoutInterop with EffectComp[Timeout]
-
 trait ClockInterop extends ClockInterop1 {
   implicit def ce3Interop[F[_]](implicit clock: ClockCE3Carrier[F]): Clock[F] = clock
 }
 
 trait ClockInterop1 {
   implicit def ce2Interop[F[_]](implicit clock: ClockCE2Carrier[F]): Clock[F] = clock
-}
-
-trait SleepInterop extends SleepInterop1 {
-  implicit def ce3Interop[F[_]](implicit sleep: SleepCE3Carrier[F]): Sleep[F] = sleep
-}
-
-trait SleepInterop1 {
-  implicit def ce2Interop[F[_]](implicit sleep: SleepCE2Carrier[F]): Sleep[F] = sleep
-}
-
-trait TimeoutInterop extends TimeoutInterop1 {
-  implicit def ce3Interop[F[_]](implicit timeout: TimeoutCE3Carrier[F]): Timeout[F] = timeout
-}
-
-trait TimeoutInterop1 {
-  implicit def ce2Interop[F[_]](implicit timeout: TimeoutCE2Carrier[F]): Timeout[F] = timeout
 }

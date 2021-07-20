@@ -1,8 +1,8 @@
 package tofu.internal
 package carriers
 
-import tofu.{Clock, Sleep}
-import tofu.Timeout
+import tofu.time.{Clock, Sleep}
+import tofu.time.Timeout
 
 trait ClockCE2Carrier[F[_]] extends Clock[F]
 
