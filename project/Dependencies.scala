@@ -32,7 +32,7 @@ object Dependencies {
 
     val fs2 = "2.5.9"
 
-    val logback = "1.2.3"
+    val logback = "1.2.4"
 
     val monix = "3.4.0"
 
@@ -48,7 +48,7 @@ object Dependencies {
 
     val shapeless = "2.3.7"
 
-    val refined = "0.9.26"
+    val refined = "0.9.27"
 
     val doobie = "0.13.4"
 
