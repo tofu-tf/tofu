@@ -1,9 +1,11 @@
-package tofu
-package fs2Instances
+package tofu.fs2
+
 import _root_.fs2._
-import cats.effect.{Concurrent, ExitCase, Sync, Timer}
+import cats.effect.kernel.Resource
+import cats.effect.{Concurrent, Sync, Temporal => ceTemporal}
 import cats.tagless.FunctorK
 import cats.{FlatMap, Functor, ~>}
+import tofu._
 import tofu.higherKind.Embed
 import tofu.lift.Lift
 import tofu.streams._
@@ -11,7 +13,7 @@ import tofu.syntax.funk._
 
 import scala.concurrent.duration.FiniteDuration
 
-private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
+private[tofu] trait Fs2Instances1 extends Fs2Instances2 {
   private[this] val fs2HKInstanceAny = new FS2StreamHKInstance[Any]
 
   final implicit def fs2StreamHKInstance[A]: FS2StreamHKInstance[A] =
@@ -62,7 +64,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
         ffa.parJoin(maxConcurrent)
     }
 
-  implicit def fs2PaceInstance[F[_]: Timer]: Pace[Stream[F, *]] =
+  implicit def fs2PaceInstance[F[_]: ceTemporal]: Pace[Stream[F, *]] =
     new Pace[Stream[F, *]] {
 
       override def throttled[A](fa: Stream[F, A])(rate: FiniteDuration): Stream[F, A] = fa.metered(rate)
@@ -70,15 +72,15 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override def delay[A](fa: Stream[F, A])(d: FiniteDuration): Stream[F, A] = fa.delayBy(d)
     }
 
-  implicit def fs2TemporalInstance[F[_]: Timer: Concurrent]: Temporal[Stream[F, *], Chunk] =
+  implicit def fs2TemporalInstance[F[_]: ceTemporal: Concurrent]: Temporal[Stream[F, *], Chunk] =
     new Temporal[Stream[F, *], Chunk] {
       override def groupWithin[A](fa: Stream[F, A])(n: Int, d: FiniteDuration): Stream[F, Chunk[A]] =
         fa.groupWithin(n, d)
     }
 
-  implicit def fs2RegionThrowInstance[F[_]]: Region[Stream[F, *], F, ExitCase[Throwable]] =
-    new Region[Stream[F, *], F, ExitCase[Throwable]] {
-      override def regionCase[R](open: F[R])(close: (R, ExitCase[Throwable]) => F[Unit]): Stream[F, R] =
+  implicit def fs2RegionThrowInstance[F[_]]: Region[Stream[F, *], F, Resource.ExitCase] =
+    new Region[Stream[F, *], F, Resource.ExitCase] {
+      override def regionCase[R](open: F[R])(close: (R, Resource.ExitCase) => F[Unit]): Stream[F, R] =
         Stream.bracketCase(open)(close)
     }
 
@@ -86,14 +88,14 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
     new Broadcast[Stream[F, *]] {
 
       override def broadcast[A](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, Unit]*): Stream[F, Unit] =
-        fa.broadcastTo(processors: _*)
+        fa.broadcastThrough(processors: _*)
 
       override def broadcastThrough[A, B](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, B]*): Stream[F, B] =
         fa.broadcastThrough(processors: _*)
     }
 }
 
-private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
+private[tofu] trait Fs2Instances2 extends Fs2Instances3 {
   final implicit def fs2StreamLocal[F[_], R](implicit fctx: F HasLocal R): WithLocal[Stream[F, *], R] =
     new FS2Local[F, R] { override val F: F WithLocal R = fctx.asWithLocal }
 
@@ -103,7 +105,7 @@ private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
     new FS2Provide[F, G, R] { override val WP: WithProvide[F, G, R] = fctx }
 }
 
-private[fs2Instances] trait Fs2Instances3 {
+private[tofu] trait Fs2Instances3 {
   final implicit def fs2StreamContext[F[_], R](implicit fctx: F HasContext R): WithContext[Stream[F, *], R] =
     new FS2Context[F, R] { override val F: F WithContext R = fctx.asWithContext }
 }

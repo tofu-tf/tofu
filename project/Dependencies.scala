@@ -16,7 +16,7 @@ object Dependencies {
 
     val cats = "2.6.1"
 
-    val catsEffect = "2.5.1"
+    val catsEffect = "3.1.1"
 
     val catsMtl = "1.2.1"
 
@@ -30,7 +30,7 @@ object Dependencies {
 
     val slf4j = "1.7.31"
 
-    val fs2 = "2.5.9"
+    val fs2 = "3.0.6"
 
     val logback = "1.2.3"
 
@@ -44,13 +44,13 @@ object Dependencies {
 
     val zio = "1.0.9"
 
-    val zioCats = "2.5.1.0"
+    val zioCats = "3.1.1.0"
 
     val shapeless = "2.3.7"
 
     val refined = "0.9.26"
 
-    val doobie = "0.13.4"
+    val doobie = "1.0.0-M5"
 
     // Compile time only
     val macroParadise = "2.1.1"
