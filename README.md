@@ -22,8 +22,9 @@ libraryDependencies += "tf.tofu" %% "tofu" % "latest version in badge"
 Of course, you can also specify an exact list of `tofu` modules that you want to add to your dependencies (used in place
 of `"tofu"`):
 
+* `tofu-kernel` for core independent utils
+  * `tofu-kernel-cats-mtl` for interop between `tofu-core` and [Cats MTL](https://github.com/typelevel/cats-mtl)
 * `tofu-core` for core utils
-  * `tofu-core-cats-mtl` for interop between `tofu-core` and [Cats MTL](https://github.com/typelevel/cats-mtl)
 * `tofu-core-higher-kind` for higher kinded utils
 * `tofu-concurrent` for concurrent utils
 * `tofu-config` for config utils
