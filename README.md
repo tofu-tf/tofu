@@ -23,7 +23,7 @@ Of course, you can also specify an exact list of `tofu` modules that you want to
 of `"tofu"`):
 
 * `tofu-kernel` for core independent utils
-  * `tofu-kernel-cats-mtl` for interop between `tofu-core` and [Cats MTL](https://github.com/typelevel/cats-mtl)
+  * `tofu-kernel-cats-mtl` for interop between `tofu-kernel` and [Cats MTL](https://github.com/typelevel/cats-mtl)
 * `tofu-core` for core utils
 * `tofu-core-higher-kind` for higher kinded utils
 * `tofu-concurrent` for concurrent utils
