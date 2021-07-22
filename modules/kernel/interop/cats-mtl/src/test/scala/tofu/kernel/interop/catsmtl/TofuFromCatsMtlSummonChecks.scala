@@ -1,7 +1,7 @@
-package tofu.core.interop.catsmtl
+package tofu.kernel.interop.catsmtl
 
 import cats.mtl.{Ask, Local, Handle => MHandle, Raise => MRaise}
-import tofu.core.interop.catsmtl.tofuimplicits._
+import tofuimplicits._
 import tofu._
 
 object TofuFromCatsMtlSummonChecks {

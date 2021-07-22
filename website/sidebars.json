@@ -21,7 +21,7 @@
         "ids": [
           "env",
           "hascontext",
-          "corecatsmtlinterop"
+          "kernelcatsmtlinterop"
         ]
       },
       {

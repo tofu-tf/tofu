@@ -1,4 +1,4 @@
-package tofu.core.interop.catsmtl
+package tofu.kernel.interop.catsmtl
 
 import cats.{Applicative, Functor}
 import cats.mtl.{Ask, Local, Handle => MHandle, Raise => MRaise}

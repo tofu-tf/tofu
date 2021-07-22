@@ -1,11 +1,11 @@
 ---
-id: corecatsmtlinterop
+id: kernelcatsmtlinterop
 title: Cats MTL interop
 ---
 
 ## Core: Interop with cats MTL library
 
-Obviously, this is a module inside `TOFU` for interop between some [Cats MTL](https://github.com/typelevel/cats-mtl) typeclasses and `tofu-core`
+Obviously, this is a module inside `TOFU` for interop between some [Cats MTL](https://github.com/typelevel/cats-mtl) typeclasses and `tofu-kernel`
 
 For example, you have an external code using `Cats MTL` like this:
 
@@ -44,13 +44,13 @@ Usually programmers write your own implicits conversions, but `TOFU` could provi
 
 ### Install
 For installation interop, add dependency into your project: 
-`"tf.tofu" %% "tofu-core-cats-mtl" % tofu-version`
+`"tf.tofu" %% "tofu-kernel-cats-mtl" % tofu-version`
 
 This library provides three modules with conversions:
 import it into your code files:
- * From `Cats MTL` instances to `TOFU` instances: `import tofu.core.interop.catsmtl.tofuimplicits._`
- * From `TOFU` instances to `Cats MTL` instances: `import tofu.core.interop.catsmtl.mtlimplicits._`
- * Explicit conversions between `Cats MTL` and `TOFU` instances: `import tofu.core.interop.catsmtl.instances._`
+ * From `Cats MTL` instances to `TOFU` instances: `import tofu.kernel.interop.catsmtl.tofuimplicits._`
+ * From `TOFU` instances to `Cats MTL` instances: `import tofu.kernel.interop.catsmtl.mtlimplicits._`
+ * Explicit conversions between `Cats MTL` and `TOFU` instances: `import tofu.kernel.interop.catsmtl.instances._`
 
 ### Conversions
 
