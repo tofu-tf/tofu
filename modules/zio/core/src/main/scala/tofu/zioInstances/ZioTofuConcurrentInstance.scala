@@ -3,7 +3,7 @@ import cats.effect.concurrent.Deferred
 import tofu.concurrent._
 import tofu.zioInstances.ZIODaemon.exitMap
 import zio.{Exit => _, _}
-import tofu.concurrent.impl.QVarQueue
+import tofu.concurrent.impl.QVarSM
 
 abstract class ZioTofuConcurrentInstance[R1, E1, R, E]
     extends MakeConcurrent[ZIO[R1, E1, *], ZIO[R, E, *]] with Daemonic[ZIO[R, E, *], Cause[E]]
@@ -13,10 +13,7 @@ class ZioTofuConcurrentInstanceUIO[R, E] extends ZioTofuConcurrentInstance[Any, 
     Promise.make[E, A].map(ZioDeferred(_))
 
   private def makeQVar[A](opt: Option[A]): ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]] =
-    for {
-      q <- Queue.bounded[A](0)
-      r <- Ref.make[QVarQueue.State[A, zio.Promise[Nothing, *]]](QVarQueue.fromOption(opt))
-    } yield ZioQVar(q, r)
+    for (r <- Ref.make[QVarSM.State[A, zio.Promise[Nothing, A]]](QVarSM.fromOption(opt))) yield ZioQVar(r)
   def qvarOf[A](a: A): ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]]                     = makeQVar(Some(a))
 
   def qvarEmpty[A]: ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]] = makeQVar(None)
@@ -46,39 +43,16 @@ final case class ZioAtom[R, E, A](r: zio.Ref[A]) extends Atom[ZIO[R, E, *], A] {
 }
 
 import zio.interop.catz.monadErrorInstance
-final case class ZioQVar[R, E, A](q: zio.Queue[A], ref: zio.Ref[QVarQueue.State[A, zio.Promise[Nothing, *]]])
-    extends QVarQueue[ZIO[R, E, *], A, zio.Promise[Nothing, *]] {
+final case class ZioQVar[R, E, A](ref: zio.Ref[QVarSM.State[A, zio.Promise[Nothing, A]]])
+    extends QVarSM[ZIO[R, E, *], A, zio.Promise[Nothing, A]] {
+  protected def get: ZIO[R, E, S]                          = ref.get
+  protected def newPromise: ZIO[R, E, Promise[Nothing, A]] = Promise.make
 
-  protected def get: ZIO[R, E, S]                             = ref.get
-  protected def newPromise[X]: ZIO[R, E, Promise[Nothing, X]] = Promise.make
+  protected def complete(x: A, p: Promise[Nothing, A]): ZIO[R, E, Unit] = p.complete(UIO.succeed(x)).unit
 
-  protected def complete[X](x: X, p: Promise[Nothing, X]): ZIO[R, E, Unit] = p.complete(UIO.succeed(x)).unit
-
-  protected def await[X](p: Promise[Nothing, X]): ZIO[R, E, X] = p.await
-
-  protected def modifyUncancelableF[X](f: S => (Boolean, S, ZIO[R, E, X])): ZIO[R, E, X] = {
-    val chain = ref.modify(s =>
-      f(s) match {
-        case (true, s, next)  => (next.map(UIO.succeed(_)), s)
-        case (false, s, next) => (ZIO.succeed(next), s)
-      }
-    )
-
-    chain.flatten.uninterruptible.flatten
-  }
-
-  protected def modifyF[X](f: S => (S, ZIO[R, E, X])): ZIO[R, E, X] = ref.modify(s => f(s).swap).flatten
-
-  protected def set(s: S): ZIO[R, E, Unit] = ref.set(s)
-
-  protected def offer(a: A): ZIO[R, E, Unit] = q.offer(a).unit
-
-  protected def qtake: ZIO[R, E, A] = q.take
-
-  protected def poll: ZIO[R, E, Option[A]] = q.poll
-
-  protected def uncancellable[X](fx: ZIO[R, E, X]): ZIO[R, E, X] = fx.uninterruptible
-
+  protected def await(p: Promise[Nothing, A]): ZIO[R, E, A]         = p.await
+  protected def modifyF[X](f: S => (S, ZIO[R, E, X])): ZIO[R, E, X] = ref.modify(f(_).swap).flatten
+  protected def set(s: S): ZIO[R, E, Unit]                          = ref.set(s)
 }
 
 final case class ZioGatekeeper[R, E](r: zio.Semaphore, size: Long) extends Gatekeeper[ZIO[R, E, *], Long] {
