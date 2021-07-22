@@ -82,9 +82,9 @@ trait ContextBaseInstances5 extends ContextBaseInstances6 {
 }
 
 trait ContextBaseInstances6 {
-  final implicit def unliftEffect2[F[_], G[_]](implicit carrier: UnliftCarrier2[F, G]): Unlift[F, G] =
+  final implicit def unliftEffectCE2[F[_], G[_]](implicit carrier: UnliftCarrier2[F, G]): Unlift[F, G] =
     carrier
 
-  final implicit def unliftEffect3[F[_], G[_]](implicit carrier: UnliftCarrier3[F, G]): Unlift[F, G] =
+  final implicit def unliftEffectCE3[F[_], G[_]](implicit carrier: UnliftCarrier3[F, G]): Unlift[F, G] =
     carrier
 }

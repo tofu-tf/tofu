@@ -21,13 +21,13 @@ final case class QVarQRef[F[_], A](puts: Queue[F, A], ref: Ref[F, Option[A]])(im
       case None    => (None, puts.take)
     }.flatten
 
-  // failure trajectory 
-  //   | state   | Process A     | Process B          | 
+  // failure trajectory
+  //   | state   | Process A     | Process B          |
   //   | --------+---------------+--------------------|
-  //   | None    |read: ref.get  |                    | 
+  //   | None    |read: ref.get  |                    |
   //   | None    |               |  put:ref.modify(1) |
   //   | Some(1) |read: puts.take|                    |
-  //   | Some(1) |!!!waiting !!! |                    | 
+  //   | Some(1) |!!!waiting !!! |                    |
   override def read: F[A] = ref.get.flatMap {
     case None    => puts.take.flatTap(puts.offer)
     case Some(a) => F.pure(a)

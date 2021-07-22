@@ -137,7 +137,7 @@ lazy val loggingUtil = project
   .settings(
     defaultSettings,
     name := "tofu-logging-util",
-    libraryDependencies ++= Vector(slf4j, catsEffect),
+    libraryDependencies ++= Vector(slf4j, catsEffect2),
   )
   .dependsOn(loggingStr)
 
@@ -320,9 +320,7 @@ lazy val coreModules =
     higherKindCore,
     kernel,
     kernelCE2Interop,
-    kernelCE3Interop,
     core,
-    core3,
     opticsMacro,
     memo,
     derivation,
@@ -333,11 +331,16 @@ lazy val coreModules =
     coreCatsMtlInterop
   )
 
+lazy val ce3CoreModules = Vector(
+  kernelCE3Interop,
+  core3,
+)
+
 lazy val commonModules =
   Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)
 
-lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
-lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
+lazy val allModuleRefs  = (coreModules ++ commonModules).map(x => x: ProjectReference)
+lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
 
 lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
@@ -352,7 +355,7 @@ lazy val docs = project // new documentation project
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
     docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
-  .dependsOn(allModuleDeps: _*)
+  .dependsOn(mainModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
 lazy val tofu = project
@@ -361,7 +364,7 @@ lazy val tofu = project
     defaultSettings,
     name := "tofu"
   )
-  .aggregate((coreModules ++ commonModules :+ docs).map(x => x: ProjectReference): _*)
+  .aggregate((coreModules ++ commonModules ++ ce3CoreModules :+ docs).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
 lazy val defaultScalacOptions = scalacOptions := {

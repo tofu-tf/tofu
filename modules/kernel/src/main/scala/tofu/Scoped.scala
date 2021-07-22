@@ -91,14 +91,21 @@ trait ScopedExecute[Tag, F[_]] extends Scoped[Tag, F] {
 }
 
 trait ScopedInstances {
-  final def makeExecute[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
+
+  /** make ScopedExecute instance with given tag using cats-effect2
+    * hidden implicits are: Async[F], ContextShift[F]
+    */
+  final def makeExecuteCE2[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
     macro Interop.delegate1p1[Execute[F], Tag, F, { val `tofu.interop.CE2Kernel.makeExecute`: Unit }]
 
-  final def makeExecute3[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
+  /** make ScopedExecute instance with given tag using cats-effect3
+    * hidden implicit is Async[F]
+    */
+  final def makeExecuteCE3[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
     macro Interop.delegate1p1[Execute[F], Tag, F, { val `tofu.interop.CE3Kernel.makeExecute`: Unit }]
 
-  final implicit def interop2[Tag, F[_]](implicit carrier: ScopedCarrier2[Tag, F]): ScopedExecute[Tag, F] = carrier
-  final implicit def interop3[Tag, F[_]](implicit carrier: ScopedCarrier3[Tag, F]): ScopedExecute[Tag, F] = carrier
+  final implicit def interopCE2[Tag, F[_]](implicit carrier: ScopedCarrier2[Tag, F]): ScopedExecute[Tag, F] = carrier
+  final implicit def interopCE3[Tag, F[_]](implicit carrier: ScopedCarrier3[Tag, F]): ScopedExecute[Tag, F] = carrier
 }
 
 object Execute extends EffectComp[Execute]

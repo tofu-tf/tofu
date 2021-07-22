@@ -13,6 +13,6 @@ object Delay extends CatsDelay with EffectComp[Delay] {
 }
 
 class CatsDelay {
-  final implicit def interop2[F[_]](implicit carrier: DelayCarrier2[F]): Delay[F] = carrier
-  final implicit def interop3[F[_]](implicit carrier: DelayCarrier3[F]): Delay[F] = carrier
+  final implicit def interopCE2[F[_]](implicit carrier: DelayCarrier2[F]): Delay[F] = carrier
+  final implicit def interopCE3[F[_]](implicit carrier: DelayCarrier3[F]): Delay[F] = carrier
 }
