@@ -1,6 +1,7 @@
 package tofu.syntax
 import cats.syntax._
 import cats.{Applicative, Apply, FlatMap, Functor, Monad, Semigroupal}
+import cats.Defer
 
 object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadSyntax {
   def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit
@@ -51,6 +52,10 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def map2[B, Z](fb: F[B])(f: (C, B) => Z)(implicit F: Apply[F]): F[Z]                           = F.map2(fa, fb)(f)
     def map2Eval[B, Z](fb: cats.Eval[F[B]])(f: (C, B) => Z)(implicit F: Apply[F]): cats.Eval[F[Z]] =
       F.map2Eval(fa, fb)(f)
+
+    def replicate_(count: Long)(implicit F: Applicative[F], FD: Defer[F]): F[Unit] =
+      if (count <= 0) unit[F]
+      else productR(FD.defer(replicate_(count - 1)))
   }
 
   implicit final class TofuFlatMapOps[F[_], C](private val fa: F[C]) extends AnyVal {
