@@ -7,8 +7,26 @@ import cats.data.State
 import cats.data.StateT
 import cats.Monad
 import cats.free.Free
-object collections extends FoldableSyntax with TraverseSyntax with TraverseFilterSyntax with FunctorFilterSyntax {
+import cats.FlatMap
+object collections extends FoldableSyntax with TraverseFilterSyntax with FunctorFilterSyntax with TofuTraverseSyntax {
+
   final implicit class TofuCollectionsSyntax[F[_], A](private val fa: F[A]) extends AnyVal {
+    def traverse[G[_]: Applicative, B](f: A => G[B])(implicit FT: Traverse[F]): G[F[B]] =
+      FT.traverse[G, A, B](fa)(f)
+
+    def traverseTap[G[_]: Applicative, B](f: A => G[B])(implicit FT: Traverse[F]): G[F[A]] =
+      FT.traverseTap[G, A, B](fa)(f)
+
+    def flatTraverse[G[_]: Applicative, B](f: A => G[F[B]])(implicit F: FlatMap[F], FT: Traverse[F]): G[F[B]] =
+      FT.flatTraverse[G, A, B](fa)(f)
+
+    def mapWithIndex[B](f: (A, Int) => B)(FT: Traverse[F]): F[B] =
+      FT.mapWithIndex[A, B](fa)(f)
+
+    def traverseWithIndexM[G[_]: Monad, B](f: (A, Int) => G[B])(implicit FT: Traverse[F]): G[F[B]] =
+      FT.traverseWithIndexM[G, A, B](fa)(f)
+
+    def zipWithIndex(FT: Traverse[F]): F[(A, Int)] = FT.zipWithIndex[A](fa)
 
     /** a combination of map and scanLeft
       * it applies a function to each element of a structure,
@@ -50,6 +68,19 @@ object collections extends FoldableSyntax with TraverseSyntax with TraverseFilte
     def mapAccumF_[G[_]: Monad, B, C](fa: F[A], start: B)(step: (B, A) => G[(B, C)])(implicit
         F: Traverse[F]
     ): G[F[C]] = mapAccumF(fa, start)(step).map(_._2)
+  }
+
+  final implicit class TofuSequenceOps[G[_], T[_], A](private val fta: T[G[A]]) extends AnyVal {
+    def sequence(implicit G: Applicative[G], T: Traverse[T]): G[T[A]] =
+      T.sequence[G, A](fta)
+  }
+
+  final implicit class TofuFlatSequenceOps[G[_], T[_], A](private val fta: T[G[T[A]]]) extends AnyVal {
+    def flatSequence(implicit
+        G: Applicative[G],
+        T: Traverse[T],
+        TF: FlatMap[T],
+    ): G[T[A]] = T.flatSequence[G, A](fta)
   }
 }
 
