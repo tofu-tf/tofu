@@ -76,11 +76,11 @@ lazy val core3 = project
     name := "tofu-core-ce3",
   )
 
-lazy val coreCatsMtlInterop = project
-  .in(file("modules/core/interop/cats-mtl"))
+lazy val kernelCatsMtlInterop = project
+  .in(file("modules/kernel/interop/cats-mtl"))
   .settings(
     defaultSettings,
-    name := "tofu-core-cats-mtl",
+    name := "tofu-kernel-cats-mtl",
     libraryDependencies += catsMtl
   )
   .dependsOn(kernel)
@@ -328,7 +328,7 @@ lazy val coreModules =
     concurrent,
     opticsCore,
     streams,
-    coreCatsMtlInterop
+    kernelCatsMtlInterop
   )
 
 lazy val ce3CoreModules = Vector(
