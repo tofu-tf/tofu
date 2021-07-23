@@ -4,7 +4,6 @@ import tofu.concurrent._
 import tofu.zioInstances.ZIODaemon.exitMap
 import zio.{Exit => _, _}
 import tofu.concurrent.impl.QVarSM
-import scala.annotation.unused
 
 abstract class ZioTofuConcurrentInstance[R1, E1, R, E]
     extends MakeConcurrent[ZIO[R1, E1, *], ZIO[R, E, *]] with Daemonic[ZIO[R, E, *], Cause[E]]
@@ -14,7 +13,7 @@ class ZioTofuConcurrentInstanceUIO[R, E] extends ZioTofuConcurrentInstance[Any, 
     Promise.make[E, A].map(ZioDeferred(_))
 
   private def makeQVar[A](opt: Option[A]): ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]] =
-    for (r <- Ref.make[QVarSM.State[A, zio.Promise[Unit, A]]](QVarSM.fromOption(opt))) yield ZioQVar(r)
+    for (r <- Ref.make[QVarSM.State[A, zio.Promise[Nothing, A]]](QVarSM.fromOption(opt))) yield ZioQVar(r)
   def qvarOf[A](a: A): ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]]                     = makeQVar(Some(a))
 
   def qvarEmpty[A]: ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]] = makeQVar(None)
@@ -44,18 +43,14 @@ final case class ZioAtom[R, E, A](r: zio.Ref[A]) extends Atom[ZIO[R, E, *], A] {
 }
 
 import zio.interop.catz.monadErrorInstance
-final case class ZioQVar[R, E, A](ref: zio.Ref[QVarSM.State[A, zio.Promise[Unit, A]]])
-    extends QVarSM[ZIO[R, E, *], A, zio.Promise[Unit, A]] {
+final case class ZioQVar[R, E, A](ref: zio.Ref[QVarSM.State[A, zio.Promise[Nothing, A]]])
+    extends QVarSM[ZIO[R, E, *], A, zio.Promise[Nothing, A]] {
+  protected def get: ZIO[R, E, S]                          = ref.get
+  protected def newPromise: ZIO[R, E, Promise[Nothing, A]] = Promise.make
 
-  private def exception(@unused u: Unit)                = new IllegalStateException("promise is interrupted")
-  protected def get: ZIO[R, E, S]                       = ref.get
-  protected def newPromise: ZIO[R, E, Promise[Unit, A]] = Promise.make
+  protected def complete(x: A, p: Promise[Nothing, A]): ZIO[R, E, Unit] = p.complete(UIO.succeed(x)).unit
 
-  protected def complete(x: A, p: Promise[Unit, A]): ZIO[R, E, Boolean] = p.completeWith(UIO.succeed(x))
-
-  protected def awaitOrCancel(p: Promise[Unit, A]): ZIO[R, E, A] = p.await.onInterrupt(p.fail(())).orDieWith(exception)
-
-  protected def await(p: Promise[Unit, A]): ZIO[R, E, A]            = p.await.orDieWith(exception)
+  protected def await(p: Promise[Nothing, A]): ZIO[R, E, A]         = p.await
   protected def modifyF[X](f: S => (S, ZIO[R, E, X])): ZIO[R, E, X] = ref.modify(f(_).swap).flatten
   protected def set(s: S): ZIO[R, E, Unit]                          = ref.set(s)
 }
