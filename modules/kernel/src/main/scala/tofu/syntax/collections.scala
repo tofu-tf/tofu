@@ -19,41 +19,49 @@ object collections
       * passing an accumulating parameter from left to right,
       * and returning a final value of this accumulator together with the new structure.
       */
-    def mapAccumL[B, C](fa: F[A], start: B)(step: (B, A) => (B, C))(implicit F: Traverse[F]): (B, F[C]) =
+    def mapAccumL[B, C](start: B)(step: (B, A) => (B, C))(implicit F: Traverse[F]): (B, F[C]) =
       F.traverse(fa)(a => State((b: B) => step(b, a))).run(start).value
 
     /** like mapAccumL, but drop the final state
       */
-    def mapAccumL_[B, C](fa: F[A], start: B)(step: (B, A) => (B, C))(implicit F: Traverse[F]): F[C] =
-      mapAccumL(fa, start)(step)._2
+    def mapAccumL_[B, C](start: B)(step: (B, A) => (B, C))(implicit F: Traverse[F]): F[C] =
+      mapAccumL(start)(step)._2
+
+    /** accumulate values, producing intermediate results
+      * initial value will possess a first item place in traverse order
+      * final value is returned as a separate value
+      */
+    def scanL[B](start: B)(step: (B, A) => B)(implicit F: Traverse[F]): (B, F[B]) =
+      mapAccumL(start)((b, a) => (b, step(b, a)))
 
     /** like [[mapAccumL]] but also combines monadic effects of `G`
       * stack-safety relies on a stack safety of G
       */
-    def mapAccumM[G[_]: Monad, B, C](fa: F[A], start: B)(step: (B, A) => G[(B, C)])(implicit
-        F: Traverse[F]
-    ): G[(B, F[C])] =
+    def mapAccumM[G[_]: Monad, B, C](start: B)(step: (B, A) => G[(B, C)])(implicit F: Traverse[F]): G[(B, F[C])] =
       F.traverse(fa)(a => StateT((b: B) => step(b, a))).run(start)
 
     /** like [[mapAccumM]] but drop the final state
       */
-    def mapAccumM_[G[_]: Monad, B, C](fa: F[A], start: B)(step: (B, A) => G[(B, C)])(implicit
-        F: Traverse[F]
-    ): G[F[C]] = mapAccumM(fa, start)(step).map(_._2)
+    def mapAccumM_[G[_]: Monad, B, C](start: B)(step: (B, A) => G[(B, C)])(implicit F: Traverse[F]): G[F[C]] =
+      mapAccumM(start)(step).map(_._2)
 
     /** like [[mapAccumL]] but also combines monadic effects of `G`
       * stack-safety guaranteed via Free
       */
-    def mapAccumF[G[_]: Monad, B, C](fa: F[A], start: B)(step: (B, A) => G[(B, C)])(implicit
-        F: Traverse[F]
-    ): G[(B, F[C])] =
+    def mapAccumF[G[_]: Monad, B, C](start: B)(step: (B, A) => G[(B, C)])(implicit F: Traverse[F]): G[(B, F[C])] =
       F.traverse(fa)(a => StateT((b: B) => Free.liftF(step(b, a)))).run(start).runTailRec
 
     /** like [[mapAccumF]] but drop the final state
       */
-    def mapAccumF_[G[_]: Monad, B, C](fa: F[A], start: B)(step: (B, A) => G[(B, C)])(implicit
-        F: Traverse[F]
-    ): G[F[C]] = mapAccumF(fa, start)(step).map(_._2)
+    def mapAccumF_[G[_]: Monad, B, C](start: B)(step: (B, A) => G[(B, C)])(implicit F: Traverse[F]): G[F[C]] =
+      mapAccumF(start)(step).map(_._2)
+
+    /** accumulate values effectfully, producing intermediate results
+      * initial value will possess a first item place in traverse order
+      * final value is returned as a separate value
+      */
+    def scanF[G[_]: Monad, B](start: B)(step: (B, A) => G[B])(implicit F: Traverse[F]): G[(B, F[B])] =
+      mapAccumF(start)((b, a) => step(b, a).tupleLeft(b))
   }
 
   final implicit class TofuSequenceOps[G[_], T[_], A](private val fta: T[G[A]]) extends AnyVal {
