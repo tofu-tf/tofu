@@ -13,6 +13,8 @@
 
 ## see [the docs on the microsite](https://docs.tofu.tf)
 
+## see the [examples in the `examples` directory](https://github.com/tofu-tf/tofu/tree/master/examples)
+
 To use the whole utils pack just add to your `build.sbt`: 
 
 ```scala
