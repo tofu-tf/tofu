@@ -280,7 +280,7 @@ lazy val fs2Interop = project
   )
   .dependsOn(concurrent, streams)
 
-lazy val doobie  = project
+lazy val doobie   = project
   .in(file("modules/doobie"))
   .settings(
     libraryDependencies ++= List(doobieCore, derevo, monix % Test),
@@ -289,7 +289,7 @@ lazy val doobie  = project
   )
   .dependsOn(core, derivation, env % Test, zioInterop % Test)
 
-lazy val examples  = project
+lazy val examples = project
   .in(file("examples"))
   .settings(
     libraryDependencies ++= List(doobieCore, derevo, monix),
@@ -297,7 +297,6 @@ lazy val examples  = project
     name := "tofu-examples",
   )
   .dependsOn(core, doobie, derivation, env, zioInterop, loggingDer)
-
 
 lazy val streams = project
   .in(file("modules/streams"))
