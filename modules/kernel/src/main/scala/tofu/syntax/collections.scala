@@ -8,9 +8,26 @@ import cats.data.StateT
 import cats.Monad
 import cats.free.Free
 import cats.FlatMap
-object collections
-    extends FoldableSyntax with TraverseSyntax with TraverseFilterSyntax with FunctorFilterSyntax
-    with TofuTraverseSyntax {
+object collections extends FoldableSyntax with TraverseFilterSyntax with FunctorFilterSyntax with TofuTraverseSyntax {
+
+  final implicit class CatsTraverseSyntax[F[_], A](private val self: F[A]) extends AnyVal {
+    def traverse[G[_]: Applicative, B](f: A => G[B])(implicit FT: Traverse[F]): G[F[B]] =
+      FT.traverse[G, A, B](self)(f)
+
+    def traverseTap[G[_]: Applicative, B](f: A => G[B])(implicit FT: Traverse[F]): G[F[A]] =
+      FT.traverseTap[G, A, B](self)(f)
+
+    def flatTraverse[G[_]: Applicative, B](f: A => G[F[B]])(implicit F: FlatMap[F], FT: Traverse[F]): G[F[B]] =
+      FT.flatTraverse[G, A, B](self)(f)
+
+    def mapWithIndex[B](f: (A, Int) => B)(implicit FT: Traverse[F]): F[B] =
+      FT.mapWithIndex[A, B](self)(f)
+
+    def traverseWithIndexM[G[_]: Monad, B](f: (A, Int) => G[B])(implicit FT: Traverse[F]): G[F[B]] =
+      FT.traverseWithIndexM[G, A, B](self)(f)
+
+    def zipWithIndex(implicit FT: Traverse[F]): F[(A, Int)] = FT.zipWithIndex[A](self)
+  }
 
   final implicit class TofuCollectionsSyntax[F[_], A](private val fa: F[A]) extends AnyVal {
 
