@@ -1,35 +1,26 @@
 package tofu.interop
 
-import cats.Monad
 import cats.effect.kernel.Ref
-import cats.effect.std.Queue
-import tofu.concurrent.QVar
 import tofu.syntax.monadic._
+import tofu.concurrent.impl.QVarSM
+import cats.effect.kernel.Deferred
+import cats.effect.kernel.GenConcurrent
 
 //this implementation is really questionable
-final case class QVarQRef[F[_], A](puts: Queue[F, A], ref: Ref[F, Option[A]])(implicit F: Monad[F]) extends QVar[F, A] {
-  override def isEmpty: F[Boolean] = ref.get.map(_.isEmpty)
-  override def put(a: A): F[Unit]  =
-    ref.modify {
-      case s @ Some(_) => (s, puts.offer(a))
-      case None        => (Some(a), F.unit)
-    }.flatten
+final class QVarCE3[F[_], A](ref: Ref[F, QVarSM.State[A, Deferred[F, A]]])(implicit F: GenConcurrent[F, _])
+    extends QVarSM[F, A, Deferred[F, A]] {
+  protected def newPromise: F[Deferred[F, A]] = Deferred[F, A]
 
-  override def take: F[A] =
-    ref.modify {
-      case Some(a) => (None, F.pure(a))
-      case None    => (None, puts.take)
-    }.flatten
+  protected def complete(x: A, promise: Deferred[F, A]): F[Unit] = promise.complete(x).void
 
-  // failure trajectory
-  //   | state   | Process A     | Process B          |
-  //   | --------+---------------+--------------------|
-  //   | None    |read: ref.get  |                    |
-  //   | None    |               |  put:ref.modify(1) |
-  //   | Some(1) |read: puts.take|                    |
-  //   | Some(1) |!!!waiting !!! |                    |
-  override def read: F[A] = ref.get.flatMap {
-    case None    => puts.take.flatTap(puts.offer)
-    case Some(a) => F.pure(a)
-  }
+  protected def await(p: Deferred[F, A]): F[A] = p.get
+
+  protected def modifyF[X](f: S => (S, F[X])): F[X] = ref.modify(f).flatten
+
+  protected def get: F[S] = ref.get
+
+  protected def set(s: S): F[Unit] = ref.set(s)
+
+  protected def onCancel(fa: F[A], fc: => F[Unit]): F[A] = F.onCancel(fa, fc)
+
 }

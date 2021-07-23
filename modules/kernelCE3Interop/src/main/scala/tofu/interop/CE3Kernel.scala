@@ -2,13 +2,13 @@ package tofu.interop
 
 import cats.Functor
 import cats.effect.kernel._
-import cats.effect.std.{Dispatcher, Queue}
+import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
 import cats.effect.{Async, Fiber, IO, Sync}
+import tofu.concurrent.impl.QVarSM
 import tofu.concurrent.{Atom, QVar}
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
-import tofu.lift.Lift
 import tofu.syntax.monadic._
 import tofu.{Scoped, WithContext}
 
@@ -93,14 +93,11 @@ object CE3Kernel {
       def atom[A](a: A): I[Atom[F, A]] = Ref.in[I, F, A](a).map(AtomByRef(_))
     }
 
-  final def qvarByConcurrent[I[_]: Async, F[_]: Sync](implicit
-      IF: Lift[I, F]
-  ): MkQVarCE3Carrier[I, F] =
+  final def qvarByConcurrent[I[_]: Sync, F[_]: Async]: MkQVarCE3Carrier[I, F] =
     new MkQVarCE3Carrier[I, F] {
       private def qvarOpt[A](opt: Option[A]): I[QVar[F, A]] = for {
-        qi  <- Queue.synchronous[I, A]
-        ref <- Ref.in[I, F, Option[A]](opt)
-      } yield QVarQRef(qi.mapK(IF.liftF), ref)
+        ref <- Ref.in[I, F, QVarSM.State[A, Deferred[F, A]]](QVarSM.fromOption(opt))
+      } yield new QVarCE3[F, A](ref)
 
       def qvarOf[A](a: A): I[QVar[F, A]] = qvarOpt(Some(a))
       def qvarEmpty[A]: I[QVar[F, A]]    = qvarOpt(None)
