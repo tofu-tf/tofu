@@ -28,8 +28,8 @@ object collections
       mapAccumL(start)(step)._2
 
     /** accumulate values, producing intermediate results
-      * initial value will possess a first item place in traverse order
-      * final value is returned as a separate value
+      * initial state will posess a first item place in the traverse order
+      * final state is returned as a separate result
       */
     def scanL[B](start: B)(step: (B, A) => B)(implicit F: Traverse[F]): (B, F[B]) =
       mapAccumL(start)((b, a) => (b, step(b, a)))
@@ -57,8 +57,8 @@ object collections
       mapAccumF(start)(step).map(_._2)
 
     /** accumulate values effectfully, producing intermediate results
-      * initial value will possess a first item place in traverse order
-      * final value is returned as a separate value
+      * initial state will posess a first item place in the traverse order
+      * final state is returned as a separate result
       */
     def scanF[G[_]: Monad, B](start: B)(step: (B, A) => G[B])(implicit F: Traverse[F]): G[(B, F[B])] =
       mapAccumF(start)((b, a) => step(b, a).tupleLeft(b))
