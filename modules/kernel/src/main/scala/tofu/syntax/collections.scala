@@ -1,14 +1,15 @@
 package tofu.syntax
 
-import cats.syntax._
-import cats.{Applicative, Traverse, TraverseFilter}
-import cats.syntax.functor._
-import cats.data.State
-import cats.data.StateT
-import cats.Monad
+import cats.data.{State, StateT}
 import cats.free.Free
-import cats.FlatMap
-object collections extends FoldableSyntax with TraverseFilterSyntax with FunctorFilterSyntax with TofuTraverseSyntax {
+import cats.syntax._
+import cats.syntax.functor._
+import cats.{Applicative, FlatMap, Foldable, Monad, Traverse, TraverseFilter}
+import tofu.internal.FoldableStream
+
+object collections
+    extends FoldableSyntax with TraverseFilterSyntax with FunctorFilterSyntax with TofuTraverseSyntax
+    with TofuFoldableSyntax {
 
   final implicit class CatsTraverseSyntax[F[_], A](private val self: F[A]) extends AnyVal {
     def traverse[G[_]: Applicative, B](f: A => G[B])(implicit FT: Traverse[F]): G[F[B]] =
@@ -102,10 +103,46 @@ trait TofuTraverseSyntax {
   final implicit def tofuTraverseSyntax[F[_], A](ta: F[A]): TraverseOps[F, A] = new TraverseOps[F, A](ta)
 }
 
+@deprecated("use tofu.syntax.collections", since = "0.11.0")
+object foldable extends TofuFoldableSyntax
+
 final class TraverseOps[F[_], A](private val ta: F[A]) extends AnyVal {
   def traverseKey[G[_]: Applicative, B](f: A => G[B])(implicit T: Traverse[F]): G[F[(A, B)]] =
     T.traverse(ta)(a => f(a).map((a, _)))
 
   def traverseKeyFilter[G[_]: Applicative, B](f: A => G[Option[B]])(implicit TF: TraverseFilter[F]): G[F[(A, B)]] =
     TF.traverseFilter(ta)(a => f(a).map(_.map((a, _))))
+}
+
+trait TofuFoldableSyntax {
+  final implicit def tofuFoldableSyntax[F[_], A](ta: F[A]): TofuFoldableOps[F, A] = new TofuFoldableOps[F, A](ta)
+}
+
+final class TofuFoldableOps[F[_], A](private val fa: F[A]) extends AnyVal {
+
+  /** Applies monadic transfomation, feeding source collection,
+    * until operation results in None or collection is consumed
+    *
+    * @param initial initial state
+    * @param f state transformation, None would not be continued
+    * @return final achieved state or initial
+    */
+  def foldWhileM[G[_], S](initial: S)(f: (S, A) => G[Option[S]])(implicit F: Foldable[F], G: Monad[G]): G[S] =
+    G.tailRecM((initial, FoldableStream.from(fa))) {
+      case (s, FoldableStream.Empty)      => G.pure(Right(s))
+      case (s, FoldableStream.Cons(h, t)) =>
+        G.map(f(s, h)) {
+          case None     => Right(s)
+          case Some(s1) => Left((s1, t.value))
+        }
+    }
+
+  /** transforms each element to another type using monadic transformation
+    * until it resutls in None
+    *
+    * @param f element transformation, None would not be continued
+    * @return a collection of transformed elements
+    */
+  def takeWhileM[G[_], B](f: A => G[Option[B]])(implicit F: Foldable[F], G: Monad[G]): G[List[B]] =
+    G.map(foldWhileM(List.empty[B])((acc, a) => G.map(f(a))(_.map(acc.::))))(_.reverse)
 }
