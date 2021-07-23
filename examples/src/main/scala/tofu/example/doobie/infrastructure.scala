@@ -1,4 +1,4 @@
-package tofu.doobie.example
+package tofu.example.doobie
 
 import cats.FlatMap
 import tofu.common.Console

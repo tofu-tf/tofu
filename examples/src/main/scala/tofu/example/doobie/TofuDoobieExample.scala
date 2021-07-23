@@ -1,4 +1,4 @@
-package tofu.doobie.example
+package tofu.example.doobie
 
 import cats.data.NonEmptyList
 import cats.effect.{ContextShift, Effect, ExitCode, Sync}
@@ -9,8 +9,8 @@ import doobie._
 import monix.eval.{Task, TaskApp}
 import tofu.common.Console
 import tofu.doobie.LiftConnectionIO
-import tofu.doobie.example.Logging.ops._
-import tofu.doobie.example.Tracing.ops._
+import Logging.ops._
+import Tracing.ops._
 import tofu.doobie.log.{EmbeddableLogHandler, LogHandlerF}
 import tofu.doobie.transactor.Txr
 import tofu.env.Env

@@ -19,7 +19,7 @@ The `Console[F]` does three things:
 * lets you write to standard output in `F`
 * lets you write to error output in `F`
 
-Let's demonstrate it with simple example.
+Let's demonstrate it with simple tofu.example.
 Suppose we are writing a subset of unix `cat` program that can echo its input to output.
 
 ```scala

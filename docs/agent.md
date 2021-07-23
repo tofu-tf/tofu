@@ -86,7 +86,7 @@ import cats.syntax.flatMap._
 import tofu.common.Console
 import tofu.concurrent.Agents
   
-   def example[F[_]: Agents: Sync: Monad: Console]: F[Unit] =
+   def tofu.example[F[_]: Agents: Sync: Monad: Console]: F[Unit] =
         for {
           _ <- Monad[F].unit
           agent <- Agents[F].of(42)
@@ -105,7 +105,7 @@ import tofu.common.Console
 import tofu.concurrent.{Agents, MakeAgent, MakeRef, MakeSemaphore, Refs, Semaphores}
 import tofu.Fire
  
-  def example[F[_]: Agents: Fire: Monad: Console: Sync: Refs: Semaphores](
+  def tofu.example[F[_]: Agents: Fire: Monad: Console: Sync: Refs: Semaphores](
       implicit
       refs: MakeRef[Option, F],
       sems: MakeSemaphore[Option, F]

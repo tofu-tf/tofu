@@ -12,7 +12,7 @@ or as a standalone dependency
 Env is a powerful monad, but what if you're sure that you don't need it?
 You can still use convenient Tofu concepts to work with your own Environment (`Context`).  
 
-### Usage example and a short use case description  
+### Usage tofu.example and a short use case description  
 
 The short story long, it is possible to use `ReaderT`:
  
@@ -39,7 +39,7 @@ program[ReaderT[Option, MyEnv, *]].run(MyEnv(User(0, "Tofu"))) //> Some(Tofu): O
 
 ```
 
-A bit more complicated example, that shows lenses usage only in the functions that require them:
+A bit more complicated tofu.example, that shows lenses usage only in the functions that require them:
 
 ```scala:reset
 import cats._

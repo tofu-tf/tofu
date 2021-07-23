@@ -87,7 +87,7 @@ For more information about blog posts, click [here](https://docusaurus.io/docs/e
 
 ## Adding a new docs page to an existing sidebar
 
-1. Create the doc as a new markdown file in `/docs`, example `docs/newly-created-doc.md`:
+1. Create the doc as a new markdown file in `/docs`, tofu.example `docs/newly-created-doc.md`:
 
 ```md
 ---

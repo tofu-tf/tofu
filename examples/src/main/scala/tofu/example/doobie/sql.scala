@@ -1,4 +1,4 @@
-package tofu.doobie.example
+package tofu.example.doobie
 
 import cats.data.NonEmptyList
 import cats.{Apply, Monad}
@@ -6,12 +6,12 @@ import derevo.derive
 import doobie.ConnectionIO
 import doobie.util.log.LogHandler
 import tofu.doobie.LiftConnectionIO
-import tofu.doobie.example.Logging.ops.info
+import Logging.ops.info
 import tofu.doobie.log.EmbeddableLogHandler
 import tofu.higherKind.Mid
 import tofu.higherKind.derived.representableK
 import doobie.implicits._
-import tofu.doobie.example.Tracing.ops._
+import Tracing.ops._
 import tofu.syntax.monadic._
 
 // create table department(id numeric primary key, name varchar);

@@ -15,7 +15,7 @@ trait ContextEmbed[U[f[_]]] {
 }
 
 /** mixin for something related to your monad
-  * for example context datatype companion
+  * for tofu.example context datatype companion
   */
 trait EmbeddedInstances[F[_]] {
   final implicit def contextEmbed[U[_[_]]](implicit FH: F HasContext U[F], UE: Embed[U], F: FlatMap[F]): U[F] =
@@ -31,7 +31,7 @@ trait ContextBiEmbed[U[f[_, _]]] {
 }
 
 /** mixin for something related to your monad
-  * for example context datatype companion
+  * for tofu.example context datatype companion
   */
 trait BiEmbeddedInstances[F[+_, +_]] {
   final implicit def contextEmbed[U[f[_, _]]](implicit FH: F TwinContext U[F], UE: EmbedBK[U], F: Bind[F]): U[F] =

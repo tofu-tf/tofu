@@ -7,7 +7,7 @@ title: Cats MTL interop
 
 Obviously, this is a module inside `TOFU` for interop between some [Cats MTL](https://github.com/typelevel/cats-mtl) typeclasses and `tofu-kernel`
 
-For example, you have an external code using `Cats MTL` like this:
+For tofu.example, you have an external code using `Cats MTL` like this:
 
 ```scala
 import cats.mtl.Ask

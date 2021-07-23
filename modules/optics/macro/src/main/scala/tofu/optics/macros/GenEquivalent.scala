@@ -18,7 +18,7 @@ object GenEquivalent {
     * Case classes with 0 fields will correspond with `Unit`, 1 with the field type, 2 or more with
     * a tuple of all field types in the same order as the fields themselves.
     *
-    * Case classes with multiple parameter-lists (example: `case class X(…)(…)`) are rejected.
+    * Case classes with multiple parameter-lists (tofu.example: `case class X(…)(…)`) are rejected.
     */
   def fields[S]: Equivalent[S, _] = macro GenEquivalentImplW.genEquiv_fields_impl[S]
 }

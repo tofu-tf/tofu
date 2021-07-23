@@ -17,7 +17,7 @@ trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
     *
     * One can treat F as function of type `Ctx => Lower[A]` so this method applies it to `ctx`.
     *
-    * @example
+    * @tofu.example
     * Example of usage is to hide sensitive information across a part of service {{{
     *   import tofu.syntax.context._
     *
@@ -43,7 +43,7 @@ trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
 
   /** Same as [[runContext]] but higher-kinded.
     *
-    * @example {{{
+    * @tofu.example {{{
     *   trait ProcessHandler[G[_]] {
     *     def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ???
     *     //...other methods

@@ -128,7 +128,7 @@ trait MakeSerialAgent[I[_], F[_]] {
   * import tofu.concurrent.SerialAgents
   * import tofu.common.Console
   *
-  * def example[F[_]: Agents: Sync: Monad: Console]: F[unit] =
+  * def tofu.example[F[_]: Agents: Sync: Monad: Console]: F[unit] =
   *      for {
   *        _ <- Monad[F].unit
   *        serialAgent <- SerialAgents[f].of(42)
@@ -155,7 +155,7 @@ object SerialAgents {
   * import tofu.concurrent.{SerialAgents, MakeSerialAgent, MakeRef, MakeSemaphore, Refs, Semaphores}
   * import tofu.common.Console
   *
-  * def example[F[_]: SerialAgents: Monad: Console: Sync: Refs: Semaphores](
+  * def tofu.example[F[_]: SerialAgents: Monad: Console: Sync: Refs: Semaphores](
   *     implicit
   *     refs: MakeRef[Option, F],
   *     sems: MakeSemaphore[Option, F]

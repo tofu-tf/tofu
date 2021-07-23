@@ -7,7 +7,7 @@ trait WithLocal[F[_], C] extends Local[F] with WithContext[F, C] {
 
   /** Alters context for computation
     *
-    * @example
+    * @tofu.example
     * Example of usage is to hide sensitive information {{{
     *   case class UserContext(
     *       id: String,

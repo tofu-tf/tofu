@@ -289,6 +289,16 @@ lazy val doobie  = project
   )
   .dependsOn(core, derivation, env % Test, zioInterop % Test)
 
+lazy val examples  = project
+  .in(file("examples"))
+  .settings(
+    libraryDependencies ++= List(doobieCore, derevo, monix),
+    defaultSettings,
+    name := "tofu-examples",
+  )
+  .dependsOn(core, doobie, derivation, env, zioInterop, loggingDer)
+
+
 lazy val streams = project
   .in(file("modules/streams"))
   .settings(

@@ -124,7 +124,7 @@ def parseCfg[F[_]: Refs: MonadThrow: ParallelReader,
 
 ## Custom types
 Sometimes one needs to define custom ways to parse values from a config.
-For example, we might want to provide a convenient syntax for request limits:
+For tofu.example, we might want to provide a convenient syntax for request limits:
 ```
 {
   "endpointA": "10 per 1 second",
@@ -167,6 +167,6 @@ println(syncParseConfig[Limits](ConfigFactory.parseResources("limits.conf")))
 ## Custom config sources
 In order to provide a way to parse config from a custom source, one needs to provide a 
 mapping from that source's types into `tofu.config.ConfigItem`.
-For an example, please refer to the [`typesafe integration`](https://github.com/tofu-tf/tofu/blob/master/config/src/main/scala/tofu/config/typesafe.scala#L21).
+For an tofu.example, please refer to the [`typesafe integration`](https://github.com/tofu-tf/tofu/blob/master/config/src/main/scala/tofu/config/typesafe.scala#L21).
 
 
