@@ -2,13 +2,10 @@ package tofu.doobie.example
 
 import cats.data.NonEmptyList
 import cats.effect.{ContextShift, Effect, ExitCode, Sync}
-import cats.instances.string._
 import cats.tagless.syntax.functorK._
-import cats.{Apply, FlatMap, Monad}
+import cats.{Apply, Monad}
 import derevo.derive
 import doobie._
-import doobie.implicits._
-import doobie.util.log.LogHandler
 import monix.eval.{Task, TaskApp}
 import tofu.common.Console
 import tofu.doobie.LiftConnectionIO
@@ -20,121 +17,10 @@ import tofu.env.Env
 import tofu.higherKind.Mid
 import tofu.higherKind.derived.representableK
 import tofu.lift.UnliftIO
-import tofu.syntax.console._
-import tofu.syntax.context._
 import tofu.syntax.monadic._
-import tofu.{WithContext, WithLocal, WithRun}
+import tofu.{ WithLocal, WithRun}
 
-// Simple context
-final case class Ctx(traceId: String)
 
-// Naive context-aware logging
-trait Logging[F[_]] {
-  def info(msg: String): F[Unit]
-}
-
-object Logging {
-  def make[F[_]: FlatMap: Console: WithContext[*[_], Ctx]]: Logging[F] =
-    msg => askF[F]((ctx: Ctx) => puts"[Logging][traceId=${ctx.traceId}] $msg")
-
-  object ops {
-    def info[F[_]](msg: String)(implicit F: Logging[F]): F[Unit] = F.info(msg)
-  }
-}
-
-// Naive context-aware tracing
-trait Tracing[F[_]] {
-  def traced[A](opName: String)(fa: F[A]): F[A]
-}
-
-object Tracing {
-  def make[F[_]: FlatMap: Console: WithLocal[*[_], Ctx]]: Tracing[F] = new Tracing[F] {
-    def traced[A](opName: String)(fa: F[A]): F[A] =
-      askF[F]((ctx: Ctx) => puts"[Tracing][traceId=${ctx.traceId}] $opName" *> fa)
-  }
-
-  object ops {
-    implicit class TracingOps[F[_], A](private val fa: F[A]) extends AnyVal {
-      def traced(opName: String)(implicit F: Tracing[F]): F[A] = F.traced(opName)(fa)
-    }
-  }
-}
-
-// Model
-final case class Person(id: Long, name: String, deptId: Long)
-final case class Dept(id: Long, name: String)
-// create table department(id numeric primary key, name varchar);
-// create table person(id numeric primary key, name varchar, dept_id numeric references department(id));
-
-// Person SQL algebra
-@derive(representableK)
-trait PersonSql[F[_]] {
-  def create(person: Person): F[Unit]
-  def read(id: Long): F[Option[Person]]
-}
-
-object PersonSql {
-  def make[DB[_]: Monad: LiftConnectionIO: Logging: Tracing: EmbeddableLogHandler]: PersonSql[DB] = {
-    val aspects = NonEmptyList.of(new TracingMid[DB], new LoggingMid[DB]).reduce
-    val impl    = EmbeddableLogHandler[DB].embedLift(implicit lh => new Impl)
-    aspects attach impl
-  }
-
-  final class Impl(implicit lh: LogHandler) extends PersonSql[ConnectionIO] {
-    def create(p: Person): ConnectionIO[Unit]        =
-      sql"insert into person values(${p.id}, ${p.name}, ${p.deptId})".update.run.void
-    def read(id: Long): ConnectionIO[Option[Person]] =
-      sql"select id, name, dept_id from person where id = $id"
-        .query[Person]
-        .option
-  }
-
-  final class LoggingMid[DB[_]: Apply: Logging] extends PersonSql[Mid[DB, *]] {
-    def create(person: Person): Mid[DB, Unit]   = info("create person") *> _
-    def read(id: Long): Mid[DB, Option[Person]] = info("read person") *> _
-  }
-
-  final class TracingMid[DB[_]: Tracing] extends PersonSql[Mid[DB, *]] {
-    def create(person: Person): Mid[DB, Unit]   = _.traced("person-sql-create")
-    def read(id: Long): Mid[DB, Option[Person]] = _.traced("person-sql-read")
-  }
-}
-
-// Department SQL algebra
-@derive(representableK)
-trait DeptSql[F[_]] {
-  def create(dept: Dept): F[Unit]
-  def read(id: Long): F[Option[Dept]]
-}
-
-object DeptSql {
-  def make[DB[_]: Monad: LiftConnectionIO: Logging: Tracing: EmbeddableLogHandler]: DeptSql[DB] = {
-    val aspects = NonEmptyList.of(new TracingMid[DB], new LoggingMid[DB]).reduce
-    val impl    = EmbeddableLogHandler[DB].embedLift(implicit lh => new Impl)
-    aspects attach impl
-  }
-
-  final class Impl(implicit lh: LogHandler) extends DeptSql[ConnectionIO] {
-    def create(d: Dept): ConnectionIO[Unit]        =
-      sql"insert into department values(${d.id}, ${d.name})".update.run.void
-    def read(id: Long): ConnectionIO[Option[Dept]] =
-      sql"select id, name from department where id = $id"
-        .query[Dept]
-        .option
-  }
-
-  final class LoggingMid[DB[_]: Apply: Logging] extends DeptSql[Mid[DB, *]] {
-    def create(dept: Dept): Mid[DB, Unit]     = info("create department") *> _
-    def read(id: Long): Mid[DB, Option[Dept]] = info("read department") *> _
-  }
-
-  final class TracingMid[DB[_]: Tracing] extends DeptSql[Mid[DB, *]] {
-    def create(dept: Dept): Mid[DB, Unit]     = _.traced("dept-sql-create")
-    def read(id: Long): Mid[DB, Option[Dept]] = _.traced("dept-sql-read")
-  }
-}
-
-// Storage algebra encapsulates database transactional logic
 @derive(representableK)
 trait PersonStorage[F[_]] {
   def store(person: Person, dept: Dept): F[Unit]
