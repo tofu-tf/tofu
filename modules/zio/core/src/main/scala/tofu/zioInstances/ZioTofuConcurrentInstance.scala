@@ -45,14 +45,16 @@ final case class ZioAtom[R, E, A](r: zio.Ref[A]) extends Atom[ZIO[R, E, *], A] {
 import zio.interop.catz.monadErrorInstance
 final case class ZioQVar[R, E, A](ref: zio.Ref[QVarSM.State[A, zio.Promise[Nothing, A]]])
     extends QVarSM[ZIO[R, E, *], A, zio.Promise[Nothing, A]] {
-  protected def get: ZIO[R, E, S]                          = ref.get
-  protected def newPromise: ZIO[R, E, Promise[Nothing, A]] = Promise.make
+  override protected def get: ZIO[R, E, S]                          = ref.get
+  override protected def newPromise: ZIO[R, E, Promise[Nothing, A]] = Promise.make
 
-  protected def complete(x: A, p: Promise[Nothing, A]): ZIO[R, E, Unit] = p.complete(UIO.succeed(x)).unit
+  override protected def complete(x: A, p: Promise[Nothing, A]): ZIO[R, E, Unit] = p.complete(UIO.succeed(x)).unit
 
-  protected def await(p: Promise[Nothing, A]): ZIO[R, E, A]         = p.await
-  protected def modifyF[X](f: S => (S, ZIO[R, E, X])): ZIO[R, E, X] = ref.modify(f(_).swap).flatten
-  protected def set(s: S): ZIO[R, E, Unit]                          = ref.set(s)
+  override protected def await(p: Promise[Nothing, A]): ZIO[R, E, A]         = p.await
+  override protected def modifyF[X](f: S => (S, ZIO[R, E, X])): ZIO[R, E, X] = ref.modify(f(_).swap).flatten
+  override protected def set(s: S): ZIO[R, E, Unit]                          = ref.set(s)
+
+  override protected def onCancel(fa: ZIO[R, E, A], fc: => ZIO[R, E, Unit]): ZIO[R, E, A] = fa.onInterrupt(fc.ignore)
 }
 
 final case class ZioGatekeeper[R, E](r: zio.Semaphore, size: Long) extends Gatekeeper[ZIO[R, E, *], Long] {
