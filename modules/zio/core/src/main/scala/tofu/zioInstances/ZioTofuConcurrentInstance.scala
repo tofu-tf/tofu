@@ -3,6 +3,7 @@ import cats.effect.concurrent.Deferred
 import tofu.concurrent._
 import tofu.zioInstances.ZIODaemon.exitMap
 import zio.{Exit => _, _}
+import tofu.concurrent.impl.QVarSM
 
 abstract class ZioTofuConcurrentInstance[R1, E1, R, E]
     extends MakeConcurrent[ZIO[R1, E1, *], ZIO[R, E, *]] with Daemonic[ZIO[R, E, *], Cause[E]]
@@ -11,11 +12,11 @@ class ZioTofuConcurrentInstanceUIO[R, E] extends ZioTofuConcurrentInstance[Any, 
   def deferred[A]: UIO[Deferred[ZIO[R, E, *], A]] =
     Promise.make[E, A].map(ZioDeferred(_))
 
-  def qvarOf[A](a: A): ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]] =
-    Queue.bounded[A](1).tap(_.offer(a)).map(ZioQVar(_))
+  private def makeQVar[A](opt: Option[A]): ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]] =
+    for (r <- Ref.make[QVarSM.State[A, zio.Promise[Nothing, A]]](QVarSM.fromOption(opt))) yield ZioQVar(r)
+  def qvarOf[A](a: A): ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]]                     = makeQVar(Some(a))
 
-  def qvarEmpty[A]: ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]] =
-    Queue.bounded[A](1).map(ZioQVar(_))
+  def qvarEmpty[A]: ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]] = makeQVar(None)
 
   def gatekeeper(available: Long): ZIO[Any, Nothing, Gatekeeper[ZIO[R, E, *], Long]] =
     Semaphore.make(available).map(ZioGatekeeper(_, available))
@@ -41,11 +42,19 @@ final case class ZioAtom[R, E, A](r: zio.Ref[A]) extends Atom[ZIO[R, E, *], A] {
   def modify[B](f: A => (A, B)): ZIO[R, E, B] = r.modify(f(_).swap)
 }
 
-final case class ZioQVar[R, E, A](r: zio.Queue[A]) extends QVar[ZIO[R, E, *], A] {
-  def isEmpty: ZIO[R, E, Boolean] = r.size.map(_ == 0)
-  def put(a: A): ZIO[R, E, Unit]  = r.offer(a).unit
-  def take: ZIO[R, E, A]          = r.take
-  def read: ZIO[R, E, A]          = r.poll.some.orElse(r.take.tap(r.offer).uninterruptible)
+import zio.interop.catz.monadErrorInstance
+final case class ZioQVar[R, E, A](ref: zio.Ref[QVarSM.State[A, zio.Promise[Nothing, A]]])
+    extends QVarSM[ZIO[R, E, *], A, zio.Promise[Nothing, A]] {
+  override protected def get: ZIO[R, E, S]                          = ref.get
+  override protected def newPromise: ZIO[R, E, Promise[Nothing, A]] = Promise.make
+
+  override protected def complete(x: A, p: Promise[Nothing, A]): ZIO[R, E, Unit] = p.complete(UIO.succeed(x)).unit
+
+  override protected def await(p: Promise[Nothing, A]): ZIO[R, E, A]         = p.await
+  override protected def modifyF[X](f: S => (S, ZIO[R, E, X])): ZIO[R, E, X] = ref.modify(f(_).swap).flatten
+  override protected def set(s: S): ZIO[R, E, Unit]                          = ref.set(s)
+
+  override protected def onCancel(fa: ZIO[R, E, A], fc: => ZIO[R, E, Unit]): ZIO[R, E, A] = fa.onInterrupt(fc.ignore)
 }
 
 final case class ZioGatekeeper[R, E](r: zio.Semaphore, size: Long) extends Gatekeeper[ZIO[R, E, *], Long] {
