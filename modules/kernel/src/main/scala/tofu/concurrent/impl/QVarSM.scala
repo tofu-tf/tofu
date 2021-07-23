@@ -3,14 +3,16 @@ package tofu.concurrent.impl
 import cats.Monad
 import tofu.concurrent.QVar
 import tofu.syntax.monadic._
+import tofu.syntax.selective._
 
 abstract class QVarSM[F[_]: Monad, A, P] extends QVar[F, A] {
   import QVarSM._
 
   protected type S = State[A, P]
   protected def newPromise: F[P]
-  protected def complete(x: A, promise: P): F[Unit]
+  protected def complete(x: A, promise: P): F[Boolean]
   protected def await(p: P): F[A]
+  protected def awaitOrCancel(p: P): F[A]
   protected def modifyF[X](f: S => (S, F[X])): F[X]
   protected def get: F[S]
   protected def set(s: S): F[Unit]
@@ -22,7 +24,7 @@ abstract class QVarSM[F[_]: Monad, A, P] extends QVar[F, A] {
 
   override def put(a: A): F[Unit] = modifyF {
     case Contains(v) => (Contains(a +: v), unit[F])
-    case s: Await[P] => (putNext(s, a), complete(a, s.promise))
+    case s: Await[P] => (putNext(s, a), complete(a, s.promise).unlesss_(put(a)))
   }
 
   private[this] def putNext(s: Await[P], a: A) = s match {
@@ -52,9 +54,9 @@ abstract class QVarSM[F[_]: Monad, A, P] extends QVar[F, A] {
 
   private[this] def retryTake(promise: P): F[A] = modifyF {
     case Contains(a +: rest) => (Contains(rest), a.pure[F])
-    case Contains(_)         => (AwaitTake(promise), await(promise))
+    case Contains(_)         => (AwaitTake(promise), awaitOrCancel(promise))
     case AwaitRead(p)        => (AwaitTake(p), await(p))
-    case AwaitTake(p, rest)  => (AwaitTake(p, rest :+ promise), await(promise))
+    case AwaitTake(p, rest)  => (AwaitTake(p, rest :+ promise), awaitOrCancel(promise))
   }
 }
 
