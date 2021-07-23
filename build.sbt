@@ -295,6 +295,7 @@ lazy val examples = project
     libraryDependencies ++= List(doobieCore, derevo, monix),
     defaultSettings,
     name := "tofu-examples",
+    noPublishSettings,
   )
   .dependsOn(core, doobie, derivation, env, zioInterop, loggingDer)
 
