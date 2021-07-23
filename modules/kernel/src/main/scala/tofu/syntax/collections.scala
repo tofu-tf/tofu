@@ -8,9 +8,12 @@ import cats.data.StateT
 import cats.Monad
 import cats.free.Free
 import cats.FlatMap
-object collections extends FoldableSyntax with TraverseSyntax with TraverseFilterSyntax with FunctorFilterSyntax with TofuTraverseSyntax {
+object collections
+    extends FoldableSyntax with TraverseSyntax with TraverseFilterSyntax with FunctorFilterSyntax
+    with TofuTraverseSyntax {
 
   final implicit class TofuCollectionsSyntax[F[_], A](private val fa: F[A]) extends AnyVal {
+
     /** a combination of map and scanLeft
       * it applies a function to each element of a structure,
       * passing an accumulating parameter from left to right,
