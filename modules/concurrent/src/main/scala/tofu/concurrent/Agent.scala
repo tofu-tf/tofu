@@ -65,7 +65,7 @@ trait MakeAgent[I[_], F[_]] {
   * import tofu.concurrent.Agents
   * import tofu.common.Console
   *
-  * def tofu.example[F[_]: Agents: Sync: Monad: Console]: F[Unit] =
+  * def example[F[_]: Agents: Sync: Monad: Console]: F[Unit] =
   *      for {
   *        _ <- Monad[F].unit
   *        agent <- Agents[F].of(42)
@@ -91,7 +91,7 @@ object Agents {
   * import tofu.concurrent.{Agents, MakeAgent, MakeRef, MakeSemaphore, Refs, Semaphores}
   * import tofu.common.Console
   *
-  * def tofu.example[F[_]: Agents: Fire: Monad: Console: Sync: Refs: Semaphores](
+  * def example[F[_]: Agents: Fire: Monad: Console: Sync: Refs: Semaphores](
   *     implicit
   *     refs: MakeRef[Option, F],
   *     sems: MakeSemaphore[Option, F]

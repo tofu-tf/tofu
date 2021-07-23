@@ -14,7 +14,7 @@ trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] w
 
   /** Allows to convert some context-unaware computation into contextual one.
     *
-    * @tofu.example {{{
+    * @example {{{
     *   trait ProcessHandler[G[_]] {
     *     def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ???
     *     //...other methods

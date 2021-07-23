@@ -12,7 +12,7 @@ import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
 /** Env is a monad, allowing composition of functions that are context(environment)-aware.
-  * For tofu.example, you may have several functions that depend on some common environment/runtime.
+  * For example, you may have several functions that depend on some common environment/runtime.
   * Env provides a way to compose such functions, allowing access to this environment in a monadic way.
   * It is possible to override context locally for concrete functions that you may want to use with another context.
   * Under the hood, Env is just a function `E => Task[A]`.
@@ -173,7 +173,7 @@ sealed trait Env[E, +A] {
 
   /** Times the Env execution, returning its duration and the computed value in case of success.
     * Delegates to underlying [[monix.eval.Task.timed]].
-    * Usage tofu.example:
+    * Usage example:
     * {{{
     *   for {
     *     r <- Env.delay(1 + 1).timed

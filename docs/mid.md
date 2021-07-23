@@ -21,7 +21,7 @@ Often `F` presented like some `IO`, reader, or any transformer
 
 But signature doesn't oblige to be strict. Moreover, there is no necessity to use a functor
 
-Let's start with an tofu.example
+Let's start with an example
 ```scala
 type Pre[F[_], A] = F[Unit]
 ``` 
@@ -81,7 +81,7 @@ So plugin application is just the process of applying the function to the result
 
 ## Example
 
-Example `representableK` can be found in the [source](https://github.com/tofu-tf/tofu/blob/master/doobie/src/test/scala/tofu/doobie/tofu.example/TofuDoobieExample.scala)
+Example `representableK` can be found in the [source](https://github.com/tofu-tf/tofu/blob/master/doobie/src/test/scala/tofu/doobie/example/TofuDoobieExample.scala)
 
 Example `applyK` for authorship of https://t.me/ppressives
 

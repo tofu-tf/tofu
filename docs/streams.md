@@ -24,7 +24,7 @@ def names[F[_]: Emits]: F[String] = {
 ### Evals
 
 `Evals` allows you to evaluate some other effect inside a streaming effect.
-In the tofu.example below `Stream[IO, *]` can be put in place of `F[_]` and `IO` in place of `G[_]`. 
+In the example below `Stream[IO, *]` can be put in place of `F[_]` and `IO` in place of `G[_]`. 
 
 ```scala
 import cats.Monad
@@ -75,7 +75,7 @@ def batchProcess[
 ### Temporal
 
 `Temporal` is capable of taking temporal slices of a stream.
-Consider a modified version of `batchProcess` from the previous tofu.example for `Chunks` 
+Consider a modified version of `batchProcess` from the previous example for `Chunks` 
 working with chunks either accumulated withing 5 seconds or reached the size of 1000 elements:
 
 ```scala
@@ -104,7 +104,7 @@ def batchProcess[
 ### Merge
 
 `Merge` allows you to interleave two input streams non-deterministically:
-In the tofu.example below we want `printFakeOfTrue` to continually print either fake or true facts pulled from
+In the example below we want `printFakeOfTrue` to continually print either fake or true facts pulled from
 two different sources respectively:
 
 ```scala
@@ -131,7 +131,7 @@ def printFakeOfTrue[F[_]: Merge: Evals[*[_], G], G[_]: Console](
 
 `ParFlatten` allows you to run multiple streams inside an outer stream simultaneously merging
 their outputs into a single stream non-deterministically.
-In the tofu.example below we want to run multiple processes concurrently:
+In the example below we want to run multiple processes concurrently:
 
 ```scala
 import cats.instances.list._
@@ -154,7 +154,7 @@ def readDataFromAllSensors[F[_]: ParFlatten: Emits](sensors: List[Sensor[F]]): F
 ### Region
 
 `Region` is responsible for managing resources withing a stream.
-In the following tofu.example let's imagine we want `ping` to acquire connection and then send "PING" 
+In the following example let's imagine we want `ping` to acquire connection and then send "PING" 
 message continually until it is interrupted.
 
 ```scala
@@ -188,7 +188,7 @@ def ping[
 ### Pace
 
 `Pace` lets you regulate the pace of a stream.
-Looking at the `ping` implementation from the previous tofu.example you might have 
+Looking at the `ping` implementation from the previous example you might have 
 admitted that we don't need to send pings at the maximum possible rate. 
 Let's throttle it down to 1 ping at 10 seconds:
 

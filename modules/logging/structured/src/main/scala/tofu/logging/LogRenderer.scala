@@ -14,7 +14,7 @@ import scala.{specialized => sp}
   * could serve as weak form of JSON building
   * I and V could be the same type: prefix, mutable builder, etc
   * distinction is added to guide Loggable implementation
-  * for tofu.example, to work with unsafe builders like Tethys Writer
+  * for example, to work with unsafe builders like Tethys Writer
   *
   * it would be great if we could use unique types `I` and `V` for each subcontext
   * this would require however polymorphic lambdas everywhere, so we are praise for

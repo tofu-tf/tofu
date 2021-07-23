@@ -14,7 +14,7 @@ import tofu.syntax.funk._
   *
   * This can be seen as global value for your Application or for a part of it.
   *
-  * @tofu.example
+  * @example
   * One common use of this is to make contextual logging:
   * {{{
   *     import tofu.syntax.console._
@@ -35,7 +35,7 @@ trait Context[F[_]] extends ContextBase { self =>
 
   /** Returns context modified by pure function `f`.
     *
-    * For tofu.example one can use it like that:
+    * For example one can use it like that:
     * {{{
     *   Context[F].ask(myCtx => myCtx.toString)
     * }}}
@@ -76,7 +76,7 @@ object Context {
     * Allows to put some value into context of F
     * even when F itself does not have any way to store it
     *
-    * @tofu.example {{{
+    * @example {{{
     *   case class MyCtx(id: Int)
     *
     *   val program: Option[String] = {
@@ -90,7 +90,7 @@ object Context {
 
   /** Same as const but context is effectual here
     *
-    * @tofu.example {{{
+    * @example {{{
     *   def handleRequest[F[_]: Monad: *[_] WithContext TraceId](httpRequest: Request) = ???
     *
     *   def myProgram[F[_]: Monad] =
@@ -105,7 +105,7 @@ object Context {
 
   /** A mix-in for supplying environment data type companions with useful things
     *
-    * @tofu.example {{{
+    * @example {{{
     * @ClassyOptics
     * case class MyContext(id: Int, date: String)
     *
@@ -123,7 +123,7 @@ trait Local[F[_]] extends Context[F] { self =>
 
   /** Alters context for computation
     *
-    * @tofu.example
+    * @example
     * Example of usage is to hide sensitive information {{{
     *   case class UserContext(
     *       id: String,
@@ -192,7 +192,7 @@ trait Provide[F[_]] extends ContextBase {
     *
     * One can treat F as function of type `Ctx => Lower[A]` so this method applies it to `ctx`.
     *
-    * @tofu.example
+    * @example
     * Example of usage is to hide sensitive information across a part of service {{{
     *   import tofu.syntax.context._
     *
@@ -218,7 +218,7 @@ trait Provide[F[_]] extends ContextBase {
 
   /** Same as [[runContext]] but higher-kinded.
     *
-    * @tofu.example {{{
+    * @example {{{
     *   trait ProcessHandler[G[_]] {
     *     def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ???
     *     //...other methods
@@ -270,7 +270,7 @@ trait RunContext[F[_]] extends Local[F] with Provide[F] {
 
   /** Allows to convert some context-unaware computation into contextual one.
     *
-    * @tofu.example {{{
+    * @example {{{
     *   trait ProcessHandler[G[_]] {
     *     def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ???
     *     //...other methods

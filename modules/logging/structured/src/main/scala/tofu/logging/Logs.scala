@@ -32,7 +32,7 @@ import tofu.concurrent.MakeQVar
   * However it's not uncommon to use different [[Logs]] for different parts of program.
   *
   * Sample usage would be:
-  * @tofu.example {{{
+  * @example {{{
   *   val logs: Logs[F, F] = Logs.sync[F, F]
   *
   *   def program[F[_]: Sync] =

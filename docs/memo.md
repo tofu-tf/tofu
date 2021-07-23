@@ -111,7 +111,7 @@ def f[F[_]: Console: Refs: Clock: Timer: Monad](ttl : FiniteDuration) =
 
 f[Task](10.seconds).runSyncUnsafe()
 ```
-There is a pitfall with TTL. Cached value keeps time of access to cache and not time when the effect completes. Just keep it in mind. Modification of the last tofu.example 
+There is a pitfall with TTL. Cached value keeps time of access to cache and not time when the effect completes. Just keep it in mind. Modification of the last example 
 ```scala
 def longEffect[F[_]: Console: Monad: Timer]: Int => F[String] =
   x =>

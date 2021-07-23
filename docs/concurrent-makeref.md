@@ -66,7 +66,7 @@ object MakeRef {
 
 ### Ref creation
 You can use object `MakeRef` that can produce values of type `I[Ref[F]]` (where `I` and `F` can be two different effects) and initialize it with , 
-for tofu.example:  
+for example:  
 
 ```scala
 import cats.effect.IO

@@ -11,7 +11,7 @@ or as a standalone dependency:
 ## What is Env, once again?
 
 Env is a monad, allowing composition of functions that are context(environment)-aware.  
-For tofu.example, you may have several functions that depend on some common environment/runtime.  
+For example, you may have several functions that depend on some common environment/runtime.  
 Env provides a nice and convenient way to compose such functions, allowing access to this environment in a monadic way.
 
 ## Features  
@@ -58,8 +58,8 @@ Env plays well with Cats and Cats-Effect, providing instances for most of typecl
 except `Effect` and `ConcurrentEffect` (which allow starting computation at any place, so it contradicts Env, which requires context being passed).
 
 
-## Complete tofu.example
-Below is a complete tofu.example of how Env can be used to pass some environment to computations, use it through the code
+## Complete example
+Below is a complete example of how Env can be used to pass some environment to computations, use it through the code
 ```scala
 import monix.eval.Task
 import scala.concurrent.duration._

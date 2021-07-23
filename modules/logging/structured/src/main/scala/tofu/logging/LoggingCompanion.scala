@@ -11,7 +11,7 @@ import tofu.syntax.monoidalK._
 
 /** Mix-in trait that supposed to be extended by companion of service
   *
-  * @tofu.example {{{
+  * @example {{{
   * class FooService[F[_] : FooService.Log]
   * object FooService extends LoggingCompanion[FooService]
   * }}}

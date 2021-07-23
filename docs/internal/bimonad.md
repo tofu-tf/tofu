@@ -63,7 +63,7 @@ trait Functor[F[_]]{
 ```
 properties are assumed for implementations
 
-there are some other interesting functors, for tofu.example
+there are some other interesting functors, for example
 ```scala
 trait Invariant[F[_]]{
     def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B]

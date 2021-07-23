@@ -16,7 +16,7 @@ trait WithContext[F[_], C] extends Context[F] {
 
   /** Returns context modified by pure function `f`.
     *
-    * For tofu.example one can use it like that:
+    * For example one can use it like that:
     * {{{
     *   Context[F].ask(myCtx => myCtx.toString)
     * }}}
@@ -54,7 +54,7 @@ object WithContext {
     * Allows to put some value into context of F
     * even when F itself does not have any way to store it
     *
-    * @tofu.example {{{
+    * @example {{{
     *   case class MyCtx(id: Int)
     *
     *   val program: Option[String] = {
@@ -71,7 +71,7 @@ object WithContext {
 
   /** Same as const but context is effectual here
     *
-    * @tofu.example {{{
+    * @example {{{
     *   def handleRequest[F[_]: Monad: *[_] WithContext TraceId](httpRequest: Request) = ???
     *
     *   def myProgram[F[_]: Monad] =
@@ -89,7 +89,7 @@ object WithContext {
 
   /** A mix-in for supplying environment data type companions with useful things
     *
-    * @tofu.example {{{
+    * @example {{{
     * @ClassyOptics
     * case class MyContext(id: Int, date: String)
     *
