@@ -297,7 +297,7 @@ lazy val examples = project
     name := "tofu-examples",
     noPublishSettings,
   )
-  .dependsOn(core, doobie, derivation, env, zioInterop, loggingDer)
+  .dependsOn(allModuleDeps: _*)
 
 lazy val streams = project
   .in(file("modules/streams"))
@@ -352,7 +352,7 @@ lazy val tofu = project
     defaultSettings,
     name := "tofu"
   )
-  .aggregate((coreModules ++ commonModules :+ docs).map(x => x: ProjectReference): _*)
+  .aggregate((coreModules ++ commonModules :+ docs :+ examples).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
 lazy val defaultScalacOptions = scalacOptions := {
