@@ -18,8 +18,7 @@ import tofu.higherKind.Mid
 import tofu.higherKind.derived.representableK
 import tofu.lift.UnliftIO
 import tofu.syntax.monadic._
-import tofu.{ WithLocal, WithRun}
-
+import tofu.{WithLocal, WithRun}
 
 @derive(representableK)
 trait PersonStorage[F[_]] {
