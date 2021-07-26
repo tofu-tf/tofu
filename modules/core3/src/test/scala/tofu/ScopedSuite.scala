@@ -14,7 +14,7 @@ class ScopedSuite {
       ec: ExecutionContext,
       block: Blocker[F]
   ): F[List[A]] = {
-    implicit val exec: CalcExec[F] = Scoped.makeExecuteCE2(calcEc)
+    implicit val exec: CalcExec[F] = Scoped.makeExecuteCE3(calcEc)
 
     for {
       // test for Blocks[F] derivation
