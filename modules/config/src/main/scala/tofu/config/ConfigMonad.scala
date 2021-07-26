@@ -69,11 +69,11 @@ object ConfigMonad {
     }
 
   object promote {
-    implicit def monadByConfig[F[_]](implicit F: ConfigMonad[F]): Monad[F]          = F.monad
-    implicit def errorsByConfig[F[_]](implicit F: ConfigMonad[F]): ConfigRaise[F]   = F.config
-    implicit def paralleledByConfig[F[_]](implicit F: ConfigMonad[F]): Parallel[F]  = F.paralleled
-    implicit def localByConfig[F[_]](implicit F: ConfigMonad[F]): HasLocal[F, Path] = F.path
-    implicit def restoreByConfig[F[_]](implicit F: ConfigMonad[F]): Restore[F]      = F.restore
+    implicit def monadByConfig[F[_]](implicit F: ConfigMonad[F]): Monad[F]           = F.monad
+    implicit def errorsByConfig[F[_]](implicit F: ConfigMonad[F]): ConfigRaise[F]    = F.config
+    implicit def paralleledByConfig[F[_]](implicit F: ConfigMonad[F]): Parallel[F]   = F.paralleled
+    implicit def localByConfig[F[_]](implicit F: ConfigMonad[F]): WithLocal[F, Path] = F.path
+    implicit def restoreByConfig[F[_]](implicit F: ConfigMonad[F]): Restore[F]       = F.restore
   }
 }
 
