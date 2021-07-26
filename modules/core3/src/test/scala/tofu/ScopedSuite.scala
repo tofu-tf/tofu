@@ -1,21 +1,20 @@
 package tofu
 
-import cats.effect.ContextShift
 import cats.effect.Async
 import scala.concurrent.ExecutionContext
-import cats.effect.Blocker
 import tofu.syntax.scoped._
 import tofu.syntax.monadic._
 import scala.annotation.nowarn
 import scala.concurrent.Future
+import tofu.interop.Blocker
 
 class ScopedSuite {
   @nowarn("msg=parameter value")
-  def doSomething[F[_]: ContextShift: Async, A](fa: F[A], ea: => A)(calcEc: ExecutionContext)(implicit
+  def doSomething[F[_]: Async, A](fa: F[A], ea: => A)(calcEc: ExecutionContext)(implicit
       ec: ExecutionContext,
-      block: Blocker
+      block: Blocker[F]
   ): F[List[A]] = {
-    implicit val exec: CalcExec[F] = Scoped.makeExecuteCE2(calcEc)
+    implicit val exec: CalcExec[F] = Scoped.makeExecuteCE3(calcEc)
 
     for {
       // test for Blocks[F] derivation

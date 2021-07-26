@@ -48,7 +48,7 @@ lazy val kernelCE2Interop = project
   .settings(
     defaultSettings,
     name := "tofu-kernel-ce2-interop",
-    libraryDependencies += catsEffect
+    libraryDependencies += catsEffect2
   )
 
 lazy val core = project
@@ -56,7 +56,24 @@ lazy val core = project
   .dependsOn(kernel, kernelCE2Interop)
   .settings(
     defaultSettings,
-    name := "tofu-core",
+    name := "tofu-core-ce2",
+  )
+
+lazy val kernelCE3Interop = project
+  .in(file("modules/kernelCE3Interop"))
+  .dependsOn(kernel)
+  .settings(
+    defaultSettings,
+    name := "tofu-kernel-ce3-interop",
+    libraryDependencies += catsEffect3
+  )
+
+lazy val core3 = project
+  .in(file("modules/core3"))
+  .dependsOn(kernel, kernelCE3Interop)
+  .settings(
+    defaultSettings,
+    name := "tofu-core-ce3",
   )
 
 lazy val kernelCatsMtlInterop = project
@@ -73,7 +90,7 @@ lazy val memo = project
   .dependsOn(core, concurrent)
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(catsCore, catsEffect),
+    libraryDependencies ++= Seq(catsCore, catsEffect2),
     name := "tofu-memo"
   )
 
@@ -120,7 +137,7 @@ lazy val loggingUtil = project
   .settings(
     defaultSettings,
     name := "tofu-logging-util",
-    libraryDependencies ++= Vector(slf4j, catsEffect),
+    libraryDependencies ++= Vector(slf4j, catsEffect2),
   )
   .dependsOn(loggingStr)
 
@@ -165,7 +182,7 @@ lazy val env = project
   .dependsOn(core, memo)
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(catsCore, catsEffect, monix),
+    libraryDependencies ++= Seq(catsCore, catsEffect2, monix),
     name := "tofu-env"
   )
 
@@ -173,7 +190,7 @@ lazy val observable = project
   .in(file("modules/observable"))
   .settings(
     defaultSettings,
-    libraryDependencies ++= Vector(monix, catsEffect),
+    libraryDependencies ++= Vector(monix, catsEffect2),
     libraryDependencies += scalatest,
     name := "tofu-observable",
   )
@@ -184,7 +201,7 @@ lazy val concurrent =
     .dependsOn(core, derivation % "compile->test", opticsMacro % "compile->test")
     .settings(
       defaultSettings,
-      libraryDependencies ++= Seq(catsEffect, catsTagless),
+      libraryDependencies ++= Seq(catsEffect2, catsTagless),
       libraryDependencies ++= Seq(simulacrum, derevoTagless).map(_ % Test),
       name := "tofu-concurrent",
     )
@@ -314,11 +331,16 @@ lazy val coreModules =
     kernelCatsMtlInterop
   )
 
+lazy val ce3CoreModules = Vector(
+  kernelCE3Interop,
+  core3,
+)
+
 lazy val commonModules =
   Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)
 
-lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
-lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
+lazy val allModuleRefs  = (coreModules ++ commonModules).map(x => x: ProjectReference)
+lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
 
 lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
@@ -333,7 +355,7 @@ lazy val docs = project // new documentation project
     docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
     docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
-  .dependsOn(allModuleDeps: _*)
+  .dependsOn(mainModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
 lazy val tofu = project
@@ -342,7 +364,7 @@ lazy val tofu = project
     defaultSettings,
     name := "tofu"
   )
-  .aggregate((coreModules ++ commonModules :+ docs).map(x => x: ProjectReference): _*)
+  .aggregate((coreModules ++ commonModules ++ ce3CoreModules :+ docs).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
 lazy val defaultScalacOptions = scalacOptions := {
