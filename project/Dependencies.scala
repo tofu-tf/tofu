@@ -103,6 +103,7 @@ object Dependencies {
   val shapeless        = "com.chuusai"                %% "shapeless"               % Version.shapeless
   val refined          = "eu.timepit"                 %% "refined"                 % Version.refined
   val doobieCore       = "org.tpolecat"               %% "doobie-core"             % Version.doobie
+  val doobieH2         = "org.tpolecat"               %% "doobie-h2"               % Version.doobie
   val collectionCompat = "org.scala-lang.modules"     %% "scala-collection-compat" % Version.collectionCompat
   val log4Cats         = "org.typelevel"              %% "log4cats-core"           % Version.log4Cats
 

@@ -116,10 +116,8 @@ object TofuDoobieExample extends IOApp.Simple {
     implicit val loggingF = Logs.contextual[F, Ctx]
 
     val transactor   = Transactor.fromDriverManager[I](
-      driver = "org.postgresql.Driver",
-      url = "jdbc:postgresql://localhost:5432/test",
-      user = "postgres",
-      pass = "secret"
+      driver = "org.h2.Driver",
+      url = "jdbc:h2:./test"
     )
     implicit val txr = Txr.continuational(transactor.mapK(Lift.trans[I, F]))
 

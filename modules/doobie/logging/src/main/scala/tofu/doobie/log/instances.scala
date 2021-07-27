@@ -13,8 +13,9 @@ object instances {
       s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n" + indent)
 
     private def loggedArgs(args: List[Any]): LoggedValue =
-      args.collect { case x: LoggedValue =>
-        x
+      args.map {
+        case x: LoggedValue => x
+        case _              => "...": LoggedValue // erase if passed to simple interpolator
       }
 
     def logShow(ev: LogEvent): String = ev match {
@@ -26,23 +27,21 @@ object instances {
            | arguments = ${loggedArgs(a)}
            |   elapsed = ${e1.toMillis} ms exec + ${e2.toMillis} ms processing (${(e1 + e2).toMillis} ms total)
           """.stripMargin
-      case ProcessingFailure(s, a, e1, e2, t) =>
+      case ProcessingFailure(s, a, e1, e2, _) =>
         s"""Failed Resultset Processing:
            |
            |  ${multiline(s)}
            |
            | arguments = ${loggedArgs(a)}
            |   elapsed = ${e1.toMillis} ms exec + ${e2.toMillis} ms processing (failed) (${(e1 + e2).toMillis} ms total)
-           |   failure = ${t.getMessage}
           """.stripMargin
-      case ExecFailure(s, a, e1, t)           =>
+      case ExecFailure(s, a, e1, _)           =>
         s"""Failed Statement Execution:
            |
            |  ${multiline(s)}
            |
            | arguments = ${loggedArgs(a)}
            |   elapsed = ${e1.toMillis} ms exec (failed)
-           |   failure = ${t.getMessage}
           """.stripMargin
     }
 
