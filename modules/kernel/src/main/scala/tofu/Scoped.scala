@@ -7,6 +7,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import tofu.internal.EffectComp
 import tofu.internal.Interop
 import tofu.kernel.types._
+import tofu.internal.carriers.ScopedCarrier2
+import tofu.internal.carriers.ScopedCarrier3
 
 /** can be used for scoped transformations
   * @tparam Tag arbitrary type tag f  type Execute[F[_]] = ScopedExecute[Scoped.Main, F]
@@ -89,14 +91,21 @@ trait ScopedExecute[Tag, F[_]] extends Scoped[Tag, F] {
 }
 
 trait ScopedInstances {
-  final def makeExecute[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
+
+  /** make ScopedExecute instance with given tag using cats-effect2
+    * hidden implicits are: Async[F], ContextShift[F]
+    */
+  final def makeExecuteCE2[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
     macro Interop.delegate1p1[Execute[F], Tag, F, { val `tofu.interop.CE2Kernel.makeExecute`: Unit }]
 
-  final implicit def asyncExecute[F[_]]: Execute[F] =
-    macro Interop.delegate[Execute[F], F, { val `tofu.interop.CE2Kernel.asyncExecute`: Unit }]
+  /** make ScopedExecute instance with given tag using cats-effect3
+    * hidden implicit is Async[F]
+    */
+  final def makeExecuteCE3[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
+    macro Interop.delegate1p1[Execute[F], Tag, F, { val `tofu.interop.CE3Kernel.makeExecute`: Unit }]
 
-  final implicit def blockerExecute[F[_]]: BlockExec[F] =
-    macro Interop.delegate[Execute[F], F, { val `tofu.interop.CE2Kernel.blockerExecute`: Unit }]
+  final implicit def interopCE2[Tag, F[_]](implicit carrier: ScopedCarrier2[Tag, F]): ScopedExecute[Tag, F] = carrier
+  final implicit def interopCE3[Tag, F[_]](implicit carrier: ScopedCarrier3[Tag, F]): ScopedExecute[Tag, F] = carrier
 }
 
 object Execute extends EffectComp[Execute]
