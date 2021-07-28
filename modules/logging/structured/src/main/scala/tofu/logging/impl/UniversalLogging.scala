@@ -72,9 +72,7 @@ class UniversalContextLogging[F[_]](name: String, fctx: (LoggedValue => Unit) =>
     }
 }
 
-class UniversalLogs[F[_]: Delay] extends Logs.Universal[F] {
-  override def byName(name: String): Logging[F] = new UniversalLogging[F](name)
-}
+
 
 class UniversalContextLogs[F[_]: FlatMap, C: Loggable](implicit FC: F WithContext C, FD: Delay[F])
     extends Logs.Universal[F] {

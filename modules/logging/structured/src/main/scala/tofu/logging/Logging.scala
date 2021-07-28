@@ -1,17 +1,16 @@
 package tofu.logging
 
 import scala.reflect.ClassTag
-
 import cats.kernel.Monoid
-import cats.{Applicative, Apply, FlatMap}
+import cats.{Applicative, Apply, FlatMap, Id}
 import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.compat.unused
 import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.logging.Logging.{Debug, Error, Info, Level, Trace, Warn}
-import tofu.logging.impl.EmbedLogging
+import tofu.logging.impl.{EmbedLogging, UniversalContextLogs, UniversalLogging}
 import tofu.syntax.monadic._
 import tofu.syntax.monoidalK._
-import tofu.{Init, higherKind}
+import tofu.{Delay, Init, WithContext, higherKind}
 
 /** Typeclass equivalent of Logger.
   * May contain specified some Logger instance
@@ -102,6 +101,24 @@ trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
 
 object Logging {
 
+  type Make[F[_]] = Logs[Id, F]
+
+  object make {
+    def plain[F[_]: Delay]: Logging.Make[F] = new UniversalLogging[F](_)
+
+    def contextual[F[_]: FlatMap: Delay, C: Loggable](implicit FC: F WithContext C): Logging.Make[F] =
+      new UniversalContextLogs[F, C]
+
+  }
+
+  sealed trait Level
+
+  case object Trace extends Level
+  case object Debug extends Level
+  case object Info  extends Level
+  case object Warn  extends Level
+  case object Error extends Level
+
   def mid: LoggingMidFunctions.type = LoggingMidFunctions
 
   type ForService[F[_], Svc] <: Logging[F]
@@ -118,9 +135,6 @@ object Logging {
   def combine[F[_]: Apply](first: Logging[F], second: Logging[F]): Logging[F] =
     first.zipWithK(second)(Function2K[F, F, F](_ *> _))
 
-  private[logging] def loggerForService[S](implicit ct: ClassTag[S]): Logger =
-    LoggerFactory.getLogger(ct.runtimeClass)
-
   def flatten[F[_]: FlatMap](underlying: F[Logging[F]]): Logging[F] = new EmbedLogging[F](underlying)
 
   implicit val loggingRepresentable: RepresentableK[Logging] = higherKind.derived.genRepresentableK[Logging]
@@ -130,14 +144,6 @@ object Logging {
     def combine(x: Logging[F], y: Logging[F]): Logging[F] = Logging.combine(x, y)
   }
 
-  /** Log level */
-  sealed trait Level
-
-  case object Trace extends Level
-  case object Debug extends Level
-  case object Info  extends Level
-  case object Warn  extends Level
-  case object Error extends Level
 }
 
 private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {
