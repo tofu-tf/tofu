@@ -59,9 +59,43 @@ class LoggingSuite extends AnyFlatSpec {
     )
   }
 
+  it should "add throwable" in {
+    assert(
+      exprs.logCause.execEmpty(Pasque(42)) === Vector(
+        LogEntry(
+          Logging.Error,
+          "runtime exception",
+          Json.obj(
+            "stacktrace" -> Json.fromString("java.lang.RuntimeException: ya oshibka\n\tat test1.test2(test3:1337)\n"),
+            "chaluta"    -> Json.fromLong(42),
+          )
+        )
+      )
+    )
+  }
+
+  it should "add throwable and more values" in {
+    assert(
+      exprs.logCauseWith.execEmpty(Pasque(42)) === Vector(
+        LogEntry(
+          Logging.Error,
+          "runtime exception 2",
+          Json.obj(
+            "stacktrace" -> Json.fromString("java.lang.RuntimeException: ya oshibka\n\tat test1.test2(test3:1337)\n"),
+            "chaluta"    -> Json.fromLong(42),
+            "why"        -> Json.fromString("kek")
+          )
+        )
+      )
+    )
+  }
+
 }
 
 object LoggingSuite {
+
+  val exception = new RuntimeException("ya oshibka")
+  exception.setStackTrace(Array(new StackTraceElement("test1", "test2", "test3", 1337)))
 
   class Exprs[F[_]: ServiceLogging[*[_], LoggingSuite]] {
 
@@ -70,6 +104,10 @@ object LoggingSuite {
     val myLetro: F[Unit] = debug"letro is ${Letro("chankura")}"
 
     val myLetroAnd: F[Unit] = debugWith"letro is ${Letro("chankura")}" ("nokoma" -> 4, "jakko" -> "ksa")
+
+    val logCause: F[Unit] = errorCause"runtime exception" (exception)
+
+    val logCauseWith: F[Unit] = errorCauseWith"runtime exception 2" (exception)("why" -> "kek")
   }
 
   case class LogEntry(level: Logging.Level, message: String, obj: Json)
