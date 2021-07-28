@@ -66,6 +66,8 @@ object Dependencies {
     val collectionCompat = "2.5.0"
 
     val log4Cats = "1.3.1"
+
+    val groovy = "3.0.8"
   }
 
   val noCatsCore       =
@@ -106,6 +108,7 @@ object Dependencies {
   val doobieH2         = "org.tpolecat"               %% "doobie-h2"               % Version.doobie
   val collectionCompat = "org.scala-lang.modules"     %% "scala-collection-compat" % Version.collectionCompat
   val log4Cats         = "org.typelevel"              %% "log4cats-core"           % Version.log4Cats
+  val groovy           = "org.codehaus.groovy"         % "groovy"                  % Version.groovy
 
   // Compile-time only
   val macroParadise    = "org.scalamacros" % "paradise"           % Version.macroParadise cross CrossVersion.patch
