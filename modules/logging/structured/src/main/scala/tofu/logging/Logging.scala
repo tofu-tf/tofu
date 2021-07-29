@@ -103,7 +103,9 @@ object Logging {
 
   type Make[F[_]] = Logs[Id, F]
 
-  object make {
+  object Make {
+    def apply[F[_]: Logging.Make]: Logging.Make[F] = implicitly
+
     def plain[F[_]: Delay]: Logging.Make[F] = new UniversalLogging[F](_)
 
     def contextual[F[_]: FlatMap: Delay, C: Loggable](implicit FC: F WithContext C): Logging.Make[F] =
