@@ -1,3 +1,5 @@
+---
+---
 # Kind numbers
 
 Naming kinds is hard. Suppose you have `Function1[A, B] = A => B` and `FunctionK[F[_], G[_]] = [A] => F[A] => G[A]`

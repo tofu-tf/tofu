@@ -6,9 +6,9 @@
     ],
     "Documentation": [
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Core",
-        "ids": [
+        "items": [
           "errors",
           "fork",
           "timeout",
@@ -16,40 +16,40 @@
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Contextual",
-        "ids": [
+        "items": [
           "env",
           "hascontext",
           "corecatsmtlinterop"
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Concurrent",
-        "ids": [
+        "items": [
           "agent",
           "concurrent-makeref"
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Higher-Kind",
-        "ids": [
+        "items": [
           "mid"
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Optics",
-        "ids": [
+        "items": [
           "optics"
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Utilities",
-        "ids": [
+        "items": [
           "config",
           "console",
           "logging",
@@ -57,9 +57,9 @@
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Streams",
-        "ids": [
+        "items": [
           "streams"
         ]
       }

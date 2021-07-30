@@ -1,5 +1,5 @@
 ---
-id: logging 
+id: logging
 title: Logging
 ---
 

@@ -1,3 +1,5 @@
+---
+---
 # Kind numbers with variance support
 
 Naming kinds is hard. Especially with variance
