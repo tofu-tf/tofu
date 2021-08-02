@@ -17,6 +17,17 @@
       },
       {
         "type": "subcategory",
+        "label": "Logging",
+        "ids": [
+          "tofu.logging.home",
+          "tofu.logging.recipes",
+          "tofu.logging.main.entities",
+          "tofu.logging.key-features",
+          "tofu.logging.syntax"
+        ]
+      },
+      {
+        "type": "subcategory",
         "label": "Contextual",
         "ids": [
           "env",
@@ -52,7 +63,6 @@
         "ids": [
           "config",
           "console",
-          "logging",
           "memo"
         ]
       },

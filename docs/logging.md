@@ -2,7 +2,8 @@
 id: logging 
 title: Logging
 ---
-
+#
+This page is obsolete. Head on to the [new docs on logging](logging/home-page.md).
 ## Installation
 
 Logging are available as a separate project
