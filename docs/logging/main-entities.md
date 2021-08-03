@@ -68,8 +68,13 @@ operations of this trait are effectual:
 ```scala
 trait Logs[I[_], F[_]]{
   def byName(name: String): I[Logging[F]]
+  def forService[Svc]: I[Logging[F]]
+  //...
 }
 ```
+The name method parameter (or type tag for `Svc` type parameter) is used in the underlying logger and then displayed in the log messages.
+
+
 ### Logging.Make
 Nevertheless, some Logging instances can be created safely with no side effects, so one could use `Logging.Make`
 which creates plain `Logging[F]`. It uses the default backend by `Slf4j` and `Delay` typeclass. (todo: Link to doc about delay).
