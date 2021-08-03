@@ -16,7 +16,7 @@ object Dependencies {
 
     val cats = "2.6.1"
 
-    val catsEffect2 = "2.5.1"
+    val catsEffect2 = "2.5.2"
 
     val catsEffect3 = "3.1.1"
 
@@ -44,7 +44,7 @@ object Dependencies {
 
     val typesafeConfig = "1.4.1"
 
-    val zio = "1.0.9"
+    val zio = "1.0.10"
 
     val zioCats = "2.5.1.0"
 
