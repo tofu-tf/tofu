@@ -13,8 +13,6 @@ There are basic methods:
 - `warn"This is WARN message`
 - `debug"This is DEBUG message`
 - `trace"This is TRACE message`
-- `trace"This is TRACE message`
 
 And there are methods with errors:
 - //todo blabla
-
