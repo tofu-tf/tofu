@@ -77,4 +77,4 @@ The name method parameter (or type tag for `Svc` type parameter) is used in the 
 
 ### Logging.Make
 Nevertheless, some Logging instances can be created safely with no side effects, so one could use `Logging.Make`
-which creates plain `Logging[F]`. It uses the default backend by `Slf4j` and `Delay` typeclass. (todo: Link to doc about delay).
+which creates plain `Logging[F]`. It uses the default backend by `Slf4j` and `Delay` typeclass.

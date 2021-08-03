@@ -92,5 +92,5 @@ and if we run `ioService.sayHello` the message will be clean:
 
 ## What's next
 
-- You can read about core concepts at (./logging/main-entities.md)
-- You can see the recipes and discover what you need to use `logging` at (./logging/recipes.md)
+- You can read about core concepts [here](./main-entities.md)
+- You can see the recipes and discover what you need to use `logging` [here](recipes/recipes.md)
