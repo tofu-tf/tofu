@@ -94,6 +94,16 @@ class EnvBioSuite extends AnyFlatSpec with Matchers {
       .runSyncUnsafe(Duration.Inf) shouldBe Left("Err2")
   }
 
+  it should "preserve the success type of the initial computation" in {
+    """
+    def logError[R, E, A](computation: EnvBio[R, E, A]): EnvBio[R, E, A] = {
+      computation.tapError { e =>
+        EnvBio.delayTotal(println(e))
+      }
+    }
+    """ should compile
+  }
+
   "tapHandle" should "effectfully peek at error without changing original error" in {
     EnvBio.raiseError("Err1").tapHandle(_ => EnvBio.pure(1)).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(1)
   }
