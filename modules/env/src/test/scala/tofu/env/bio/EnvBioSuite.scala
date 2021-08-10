@@ -108,7 +108,7 @@ class EnvBioSuite extends AnyFlatSpec with Matchers {
     EnvBio.raiseError("Err1").tapHandle(_ => EnvBio.pure(1)).run(()).runSyncUnsafe(Duration.Inf) shouldBe Right(1)
   }
 
-  it should "return new error if effectful computation fails" in {
+  it should "return original error if effectful computation fails" in {
     EnvBio
       .raiseError("Err1")
       .tapHandle(_ => EnvBio.raiseError("Err2"))
