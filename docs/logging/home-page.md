@@ -22,22 +22,19 @@ For ZIO users the following is enough:
 libraryDependencies += "tf.tofu" %% "tofu-logging-zio" % "<latest version in the badge in README>"
 ```
 
-## How to use
-
-The usage of logging is described as a set of recipes, suitable for many cases.
-Check it out [here](recipes/recipes.md).
-
 ## Quick demo
 
 ```scala
+type CardNumber = String //could be a newtype
+
 @derive(loggable)
 case class Client(name: String, @hidden cardNumber: CardNumber, id: UUID)
 
-def processPayment(client: Client, amount: Long) =
+def processPayment(client: Client, amount: Long): IO[Result] =
   for {
     _ <- info"Processing payment for $client"
     _ <- warn"Amount $amount is lower than zero!".whenA(amount < 0)
-    result <- depService.processData(client, amount, "USD")
+    result <- processData(client, amount, "USD")
                         .onError(errorCause"Got error on processing payment for $client"(_))
   } yield result
 ```
@@ -46,6 +43,7 @@ def processPayment(client: Client, amount: Long) =
 - Discover [the key features](./key-features.md)
 - Get to know [the core concepts](./main-entities.md)
 - Learn how to use [the syntax](./syntax.md)
+- Find a way to use `logging` suitable for you in the [recipes](recipes/recipes.md)
 - Check out [the examples](https://github.com/tofu-tf/tofu/tree/better-doobie-example/examples)
 
 ## Old documentation

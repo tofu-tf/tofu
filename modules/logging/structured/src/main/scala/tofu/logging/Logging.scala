@@ -16,6 +16,7 @@ import tofu.{Delay, Init, WithContext, higherKind}
   * May contain specified some Logger instance
   * or try to read it from the context
   */
+@deprecated("Use Logging[F] instead", since = "0.10.4")
 trait LoggingBase[F[_]] {
 
   /** push new message to log, level will be automatically checked

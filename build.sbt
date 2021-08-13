@@ -393,7 +393,7 @@ lazy val scalacWarningConfig = scalacOptions += {
   // }.mkString(",")
 
   // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
-  val contextDeprecationInfo = "cat=deprecation&msg=^(.*((Has)|(With)).*)$:silent"
+  val contextDeprecationInfo = "cat=deprecation&msg=^(.*((Has)|(With)|(Logging)).*)$:silent"
   val verboseWarnings        = "any:wv"
 
   s"-Wconf:$contextDeprecationInfo,$verboseWarnings"
