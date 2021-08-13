@@ -25,12 +25,17 @@ libraryDependencies += "tf.tofu" %% "tofu-logging-zio" % "<latest version in the
 ## Quick demo
 
 ```scala
+import tofu.syntax.logging._
+import tofu.logging.Logging
+import derevo.derive
+import tofu.logging.derivation.loggable
+
 type CardNumber = String //could be a newtype
 
 @derive(loggable)
 case class Client(name: String, @hidden cardNumber: CardNumber, id: UUID)
 
-def processPayment(client: Client, amount: Long): IO[Result] =
+def processPayment[F[_]: Monad: Logging](client: Client, amount: Long): F[Result] =
   for {
     _ <- info"Processing payment for $client"
     _ <- warn"Amount $amount is lower than zero!".whenA(amount < 0)
