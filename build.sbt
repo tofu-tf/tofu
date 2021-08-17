@@ -297,14 +297,33 @@ lazy val fs2Interop = project
   )
   .dependsOn(concurrent, streams)
 
-lazy val doobie  = project
-  .in(file("modules/doobie"))
+lazy val doobie        = project
+  .in(file("modules/doobie/core"))
   .settings(
     libraryDependencies ++= List(doobieCore, derevo, monix % Test),
     defaultSettings,
     name := "tofu-doobie",
   )
   .dependsOn(core, derivation, env % Test, zioInterop % Test)
+
+lazy val doobieLogging = project
+  .in(file("modules/doobie/logging"))
+  .settings(
+    libraryDependencies ++= List(doobieCore),
+    defaultSettings,
+    name := "tofu-doobie-logging",
+  )
+  .dependsOn(doobie, loggingStr)
+
+lazy val examples = project
+  .in(file("examples"))
+  .settings(
+    libraryDependencies ++= List(doobieCore, doobieH2, derevo, monix, groovy),
+    defaultSettings,
+    name := "tofu-examples",
+    noPublishSettings,
+  )
+  .dependsOn(mainModuleDeps: _*)
 
 lazy val streams = project
   .in(file("modules/streams"))
@@ -337,7 +356,7 @@ lazy val ce3CoreModules = Vector(
 )
 
 lazy val commonModules =
-  Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)
+  Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie, doobieLogging)
 
 lazy val allModuleRefs  = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
@@ -364,7 +383,7 @@ lazy val tofu = project
     defaultSettings,
     name := "tofu"
   )
-  .aggregate((coreModules ++ commonModules ++ ce3CoreModules :+ docs).map(x => x: ProjectReference): _*)
+  .aggregate((coreModules ++ commonModules ++ ce3CoreModules :+ docs :+ examples).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
 lazy val defaultScalacOptions = scalacOptions := {
