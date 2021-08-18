@@ -20,26 +20,26 @@ object Agent {
   type Make[F[_]] = MakeAgent[F, F]
 
   /** A helper for creating instances of [[tofu.concurrent.Agent]] that use same effect during construction and work.
-   * If you want to use different effect to construct `Agent` use [[tofu.concurrent.MakeAgent]]
-   *
-   * Sample usage:
-   * {{{
-   * import cats.Monad
-   * import cats.implicits._
-   * import cats.syntax.flatMap._
-   * import cats.effect.Sync
-   * import tofu.concurrent.Agents
-   * import tofu.common.Console
-   *
-   * def example[F[_]: Agents: Sync: Monad: Console]: F[Unit] =
-   *      for {
-   *        _ <- Monad[F].unit
-   *        agent <- Agents[F].of(42)
-   *        newValue <- agent.updateM(a => Console[F].putStrLn(s"current value is $a") *> Monad[F].pure(a + 27))
-   *        _ <- Console[F].putStrLn(s"new value is $newValue") // new value is 69
-   *      } yield ()
-   * }}}
-   */
+    * If you want to use different effect to construct `Agent` use [[tofu.concurrent.MakeAgent]]
+    *
+    * Sample usage:
+    * {{{
+    * import cats.Monad
+    * import cats.implicits._
+    * import cats.syntax.flatMap._
+    * import cats.effect.Sync
+    * import tofu.concurrent.Agents
+    * import tofu.common.Console
+    *
+    * def example[F[_]: Agents: Sync: Monad: Console]: F[Unit] =
+    *      for {
+    *        _ <- Monad[F].unit
+    *        agent <- Agents[F].of(42)
+    *        newValue <- agent.updateM(a => Console[F].putStrLn(s"current value is $a") *> Monad[F].pure(a + 27))
+    *        _ <- Console[F].putStrLn(s"new value is $newValue") // new value is 69
+    *      } yield ()
+    * }}}
+    */
   def Make[F[_]](implicit makeAgent: Make[F]): MakeAgent.Applier[F, F] = new MakeAgent.Applier[F, F](makeAgent)
 }
 

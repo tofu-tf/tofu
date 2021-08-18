@@ -10,8 +10,8 @@ import tofu.syntax.fire._
 import tofu.syntax.liftKernel._
 
 /** Default implementation of [[tofu.concurrent.Agent]]
- * that consists of [[cats.effect.concurrent.Ref]] and [[cats.effect.concurrent.Semaphore]]
- */
+  * that consists of [[cats.effect.concurrent.Ref]] and [[cats.effect.concurrent.Semaphore]]
+  */
 final case class SemRef[F[_]: Monad: Fire, A](ref: Ref[F, A], sem: Semaphore[F]) extends Agent[F, A] {
   def get: F[A]                                                          = ref.get
   def updateM(f: A => F[A]): F[A]                                        = sem.withPermit(ref.get >>= (f(_) flatTap ref.set))
@@ -24,10 +24,9 @@ final case class SemRef[F[_]: Monad: Fire, A](ref: Ref[F, A], sem: Semaphore[F])
     modifyM(a => if (f.isDefinedAt(a)) f(a) else (default, a).pure[F])
 }
 
-
 /** Default implementation of [[tofu.concurrent.SerialAgent]]
- * that consists of [[cats.effect.concurrent.Ref]] and [[cats.effect.concurrent.Semaphore]]
- */
+  * that consists of [[cats.effect.concurrent.Ref]] and [[cats.effect.concurrent.Semaphore]]
+  */
 final case class SerialSemRef[F[_]: Monad, A](ref: Ref[F, A], sem: Semaphore[F]) extends SerialAgent[F, A] {
   def get: F[A]                                                          = ref.get
   def updateM(f: A => F[A]): F[A]                                        = sem.withPermit(ref.get >>= (f(_) flatTap ref.set))
@@ -39,13 +38,12 @@ final case class SerialSemRef[F[_]: Monad, A](ref: Ref[F, A], sem: Semaphore[F])
     modifyM(a => if (f.isDefinedAt(a)) f(a) else (default, a).pure[F])
 }
 
-
 /** If instances of [[cats.effect.concurrent.Ref]] and [[cats.effect.concurrent.Semaphore]] can not be created
- * for some `G[_]`, but can be created for some `F[_]`, for which an instance of [[tofu.lift.Lift]] `Lift[F, G]` is present,
- * this implementation can be used
- */
+  * for some `G[_]`, but can be created for some `F[_]`, for which an instance of [[tofu.lift.Lift]] `Lift[F, G]` is present,
+  * this implementation can be used
+  */
 final case class UnderlyingSemRef[F[_]: Functor, G[_]: Monad: Lift[F, *[_]], A](ref: Ref[F, A], sem: Semaphore[F])
-  extends SerialAgent[G, A] {
+    extends SerialAgent[G, A] {
   override def get: G[A] = ref.get.lift[G]
 
   override def updateM(f: A => G[A]): G[A] =
