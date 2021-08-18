@@ -72,7 +72,7 @@ abstract class EnvBio[-R, +E, +A] {
   def mapError[E1](f: E => E1): EnvBio[R, E1, A] =
     onErrorHandleWith(e => EnvBio.raiseError(f(e)))
 
-  def tapError[R1 <: R, E1 >: E, A1 >: A](f: E => EnvBio[R1, E1, A1]): EnvBio[R1, E1, A1] =
+  def tapError[R1 <: R, E1 >: E](f: E => EnvBio[R1, E1, Any]): EnvBio[R1, E1, A] =
     onErrorHandleWith(e => f(e) >> EnvBio.raiseError(e))
 
   def tapHandle[R1 <: R, E1, A1 >: A](f: E => EnvBio[R1, E1, A1]): EnvBio[R1, E, A1] =
