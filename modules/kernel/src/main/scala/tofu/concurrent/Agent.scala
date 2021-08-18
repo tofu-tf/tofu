@@ -1,6 +1,6 @@
 package tofu.concurrent
 
-import tofu.internal.carriers.MkAgentCE2Carrier
+import tofu.internal.carriers.{MkAgentCE2Carrier, MkAgentCE3Carrier}
 
 /** A mutable atomic reference augmented with effectual operations.
   * Can be thought as TF version of zio.RefM
@@ -89,7 +89,7 @@ object Agents {
   *   } yield ()
   * }}}
   */
-object MakeAgent {
+object MakeAgent extends MakeAgentInstances {
   def apply[I[_], F[_]](implicit mkAgent: MakeAgent[I, F]): Applier[I, F] = new Applier[I, F](mkAgent)
 
   /** Partially-applied creation of Agent for better type inference */
@@ -97,6 +97,11 @@ object MakeAgent {
     def of[A](a: A): I[Agent[F, A]] = mkAgent.agentOf(a)
   }
 
+  final implicit def interopCE3[I[_], F[_]](implicit carrier: MkAgentCE3Carrier[I, F]): MakeAgent[I, F] = carrier
+
+}
+
+trait MakeAgentInstances {
   final implicit def interopCE2[I[_], F[_]](implicit carrier: MkAgentCE2Carrier[I, F]): MakeAgent[I, F] = carrier
 
 }

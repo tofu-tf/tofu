@@ -2,7 +2,7 @@ package tofu.concurrent
 
 import cats.{FlatMap, Functor, Monad}
 import tofu.concurrent.SerialAgent.Make
-import tofu.internal.carriers.{MkAgentCE2Carrier, MkSerialAgentCE2Carrier}
+import tofu.internal.carriers.{MkAgentCE2Carrier, MkSerialAgentCE2Carrier, MkSerialAgentCE3Carrier}
 import tofu.lift.Lift
 
 /**  A less powerful version of [[tofu.concurrent.Agent]].
@@ -93,7 +93,7 @@ trait MakeSerialAgent[I[_], F[_]] {
     */
   def serialAgentOf[A](a: A): I[SerialAgent[F, A]]
 }
-@deprecated("Use SerialAgent.Make", since="0.11.0")
+@deprecated("Use SerialAgent.Make", since = "0.11.0")
 object SerialAgents {
   def apply[F[_]](implicit makeSerialAgent: SerialAgents[F]): MakeSerialAgent.SerialApplier[F, F] =
     new MakeSerialAgent.SerialApplier[F, F](makeSerialAgent)
@@ -125,7 +125,7 @@ object SerialAgents {
   *   } yield ()
   * }}}
   */
-object MakeSerialAgent extends MakeSerialAgentInstances0 {
+object MakeSerialAgent extends MakeSerialAgentInstances {
 
   def apply[I[_], F[_]](implicit mkSerialAgent: MakeSerialAgent[I, F]): SerialApplier[I, F] =
     new SerialApplier[I, F](mkSerialAgent)
@@ -134,12 +134,13 @@ object MakeSerialAgent extends MakeSerialAgentInstances0 {
     def of[A](a: A): I[SerialAgent[F, A]] = mkSerialAgent.serialAgentOf(a)
   }
 
-  final implicit def interopCE2[I[_], F[_]](implicit carrier: MkSerialAgentCE2Carrier[I, F]): MakeSerialAgent[I, F] = carrier
-
+  final implicit def interopCE3[I[_], F[_]](implicit carrier: MkSerialAgentCE3Carrier[I, F]): MakeSerialAgent[I, F] =
+    carrier
 
 }
 
-private[concurrent] trait MakeSerialAgentInstances0 {
-  final implicit def interopCE2UnderlyingLifted[I[_], F[_]](implicit carrier: MkSerialAgentCE2Carrier[I, F]): MakeSerialAgent[I, F] = carrier
+trait MakeSerialAgentInstances {
+  final implicit def interopCE2[I[_], F[_]](implicit carrier: MkSerialAgentCE2Carrier[I, F]): MakeSerialAgent[I, F] =
+    carrier
 
 }
