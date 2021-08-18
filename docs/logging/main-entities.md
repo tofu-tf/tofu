@@ -16,6 +16,7 @@ Loggable instances could be derived automatically using `derevo`:
 
 ```scala
 import tofu.logging.derivation._
+import derevo.derive
 
 @derive(loggable)
 case class Data(id: Long, weight: Int, name: String)
@@ -29,6 +30,8 @@ When the message is logged, the fields of `Data` will be put into the result (e.
 This derivation can be configured with annotations `hidden`, `masked` and `unembed`:
 ```scala
 import tofu.logging.derivation._
+import derevo.derive
+
 @derive(loggable)
 case class ClientData(name: String, surname: String)
 
