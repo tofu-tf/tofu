@@ -1,9 +1,6 @@
 package tofu.concurrent
 
-import cats.{FlatMap, Functor, Monad}
-import tofu.concurrent.SerialAgent.Make
-import tofu.internal.carriers.{MkAgentCE2Carrier, MkSerialAgentCE2Carrier, MkSerialAgentCE3Carrier}
-import tofu.lift.Lift
+import tofu.internal.carriers.{MkSerialAgentCE2Carrier, MkSerialAgentCE3Carrier}
 
 /**  A less powerful version of [[tofu.concurrent.Agent]].
   *  It does not have the `fireUpdateM` method and thus can be created for greater variety of `F`
