@@ -1,12 +1,12 @@
 package tofu.interop
 
-import cats.{Functor, Monad}
 import cats.effect.kernel._
-import cats.effect.std.{Dispatcher, Semaphore}
+import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
-import cats.effect.{Async, Concurrent, Fiber, IO, Sync}
+import cats.effect.{Async, Fiber, IO, Sync}
+import cats.{Functor, Monad}
 import tofu.concurrent.impl.QVarSM
-import tofu.concurrent.{Agent, Atom, MakeAgent, MakeSerialAgent, QVar, SerialAgent}
+import tofu.concurrent._
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
 import tofu.lift.Lift
@@ -116,37 +116,41 @@ object CE3Kernel {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
     }
 
-  final def agentByRefAndSemaphore[I[_]: Sync, F[_]: Async](implicit F: Concurrent[F]): MakeAgent[I, F] = {
-    implicit val fire: Fire[F] = new Fire[F] {
-      override def fireAndForget[A](fa: F[A]): F[Unit] = F.void(F.start(fa))
-    }
+  final def agentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow: Fire](implicit
+      makeRef: MakeRef[I, F],
+      makeSemaphore: MakeSemaphore[I, F]
+  ): MakeAgent[I, F] = {
     new MakeAgent[I, F] {
       def agentOf[A](a: A): I[Agent[F, A]] =
         for {
-          ref <- Ref.in[I, F, A](a)
-          sem <- Semaphore.in[I, F](1)
+          ref <- makeRef.refOf(a)
+          sem <- makeSemaphore.semaphore(1)
         } yield SemRef(ref, sem)
     }
   }
 
-  final def serialAgentByRefAndSemaphore[I[_]: Sync, F[_]](implicit F: Async[F]): MakeSerialAgent[I, F] =
+  final def serialAgentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow](implicit
+      makeRef: MakeRef[I, F],
+      makeSemaphore: MakeSemaphore[I, F]
+  ): MakeSerialAgent[I, F] =
     new MakeSerialAgent[I, F] {
       override def serialAgentOf[A](a: A): I[SerialAgent[F, A]] =
         for {
-          ref <- Ref.in[I, F, A](a)
-          sem <- Semaphore.in[I, F](1)
+          ref <- makeRef.refOf(a)
+          sem <- makeSemaphore.semaphore(1)
         } yield SerialSemRef(ref, sem)
     }
 
-  final def underlyingSerialAgentByRefAndSemaphore[I[_]: Sync, F[_], G[_]: Monad](implicit
-      F: Async[F],
+  final def underlyingSerialAgentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow, G[_]: Monad](implicit
+      makeRef: MakeRef[I, F],
+      makeSemaphore: MakeSemaphore[I, F],
       lift: Lift[F, G]
   ): MakeSerialAgent[I, G] =
     new MakeSerialAgent[I, G] {
       override def serialAgentOf[A](a: A): I[SerialAgent[G, A]] =
         for {
-          ref <- Ref.in[I, F, A](a)
-          sem <- Semaphore.in[I, F](1)
+          ref <- makeRef.refOf(a)
+          sem <- makeSemaphore.semaphore(1)
         } yield UnderlyingSemRef[F, G, A](ref, sem)
     }
 }
