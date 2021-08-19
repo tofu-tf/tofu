@@ -319,6 +319,7 @@ lazy val examples = project
   .in(file("examples"))
   .settings(
     libraryDependencies ++= List(doobieCore, doobieH2, derevo, monix, groovy),
+    libraryDependencies ++= http4s,
     defaultSettings,
     name := "tofu-examples",
     noPublishSettings,
