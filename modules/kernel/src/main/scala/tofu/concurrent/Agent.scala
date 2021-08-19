@@ -60,7 +60,7 @@ trait MakeAgent[I[_], F[_]] {
 
 @deprecated("Use Agent.Make", since = "0.11.0")
 object Agents {
-  def apply[F[_]](implicit agents: Agents[F]): MakeAgent.Applier[F, F] = new MakeAgent.Applier[F, F](agents)
+  def apply[F[_]](implicit agents: Agent.Make[F]): MakeAgent.Applier[F, F] = new MakeAgent.Applier[F, F](agents)
 }
 
 /** A helper for creating instances of [[tofu.concurrent.Agent]] that use different effects during construction and work.
