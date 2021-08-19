@@ -1,10 +1,8 @@
 package tofu
 
-/** a collection of classic monomorphic optics
-  * based on http://hackage.haskell.org/package/lens
-  * and http://julien-truffaut.github.io/Monocle/
-  * using names readable for user unfamiliar with then
-  * capable for using as implicit evidences in effect transmogrification
+/** a collection of classic monomorphic optics based on http://hackage.haskell.org/package/lens and
+  * http://julien-truffaut.github.io/Monocle/ using names readable for user unfamiliar with then capable for using as
+  * implicit evidences in effect transmogrification
   *
   * see hierarchy here: https://wiki.tcsbank.ru/display/API/optics
   */
@@ -24,8 +22,7 @@ package object optics {
   type Update[A, B]     = PUpdate[A, A, B, B]
   type Zipping[A, B]    = PZipping[A, A, B, B]
 
-  /** label provider for instance discrimination
-    * like Contains[A, B] with Label["first"]
+  /** label provider for instance discrimination like Contains[A, B] with Label["first"]
     */
   type Label[label] = Any {
     type Label = label

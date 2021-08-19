@@ -5,7 +5,8 @@ import tofu.lift.Unlift
 import tofu.optics.Equivalent
 import tofu.syntax.funk.funK
 
-/** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
+/** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type
+  * inference
   *
   * Can be seen as transformation `F[*] = C => G[*]`
   */
@@ -14,28 +15,24 @@ trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] w
 
   /** Allows to convert some context-unaware computation into contextual one.
     *
-    * @example {{{
-    *   trait ProcessHandler[G[_]] {
-    *     def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ???
-    *     //...other methods
-    *   }
+    * @example
+    *   {{{ trait ProcessHandler[G[_]] { def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ??? //...other methods }
     *
-    *   type WithMyContext[F[_], A] = ReaderT[F, MyCtx, A]
+    * type WithMyContext[F[_], A] = ReaderT[F, MyCtx, A]
     *
-    *   val processHandler: ProcessHandler[IO WithMyContext *] = ???
+    * val processHandler: ProcessHandler[IO WithMyContext *] = ???
     *
-    *   val contextualHandler: IO WithMyContext ProcessHandler[IO] =
-    *     processHandler.mapK(
-    *       WithRun[WithMyContext[IO, *], IO, MyCtx].unlift.map(fk => processHandler.mapK(fk))
-    *     ) //now it is able to process MyCtx but is wrapped in IO WithMyContext *
-    * }}}
+    * val contextualHandler: IO WithMyContext ProcessHandler[IO] = processHandler.mapK( WithRun[WithMyContext[IO, *],
+    * IO, MyCtx].unlift.map(fk => processHandler.mapK(fk)) ) //now it is able to process MyCtx but is wrapped in IO
+    * WithMyContext * }}}
     * @return
     */
   override def unlift: F[F ~> G] = ask(ctx => funK(runContext(_)(ctx)))
 
   /** Allows to focus [[Provide]] on inner parts of its context with equivalence lens.
     *
-    * @param eq lens that can convert from `Ctx` value of type `A`
+    * @param eq
+    *   lens that can convert from `Ctx` value of type `A`
     */
   override def runEquivalent[A](eq: Equivalent[Ctx, A]): WithRun[F, G, A] =
     new RunContextEquivalentInstance[F, G, Ctx, A](this, eq)

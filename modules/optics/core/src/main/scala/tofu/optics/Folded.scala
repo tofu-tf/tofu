@@ -6,8 +6,7 @@ import cats.syntax.monoid._
 import cats.{Applicative, Foldable, Monoid}
 import tofu.optics.data._
 
-/** S has some or none occurrences of A
-  * and can collect them
+/** S has some or none occurrences of A and can collect them
   */
 trait PFolded[-S, +T, +A, -B] extends PBase[PFolded, S, T, A, B] { self =>
   def foldMap[X: Monoid](s: S)(f: A => X): X

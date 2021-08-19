@@ -5,15 +5,16 @@ import tofu.Fire
 import tofu.syntax.fire._
 import tofu.syntax.monadic._
 
-/** A mutable atomic reference augmented with effectful operations.
-  * Can be thought as TF version of zio.RefM
+/** A mutable atomic reference augmented with effectful operations. Can be thought as TF version of zio.RefM
   */
 trait Agent[F[_], A] extends SerialAgent[F, A] {
 
   /** Enqueue transformation, return immediately.
     *
-    * @param f function to atomically modify the `Agent`
-    * @return `F[Unit]`
+    * @param f
+    *   function to atomically modify the `Agent`
+    * @return
+    *   `F[Unit]`
     */
   def fireUpdateM(f: A => F[A]): F[Unit]
 
@@ -22,8 +23,8 @@ trait Agent[F[_], A] extends SerialAgent[F, A] {
 object Agent {
 //  private[this] val representableAny: RepresentableK[Agent[*[_], Any]] = derived.genRepresentableK[Agent[*[_], Any]]
 
-  /** Default implementation of [[tofu.concurrent.Agent]]
-    * that consists of [[cats.effect.concurrent.Ref]] and [[cats.effect.concurrent.Semaphore]]
+  /** Default implementation of [[tofu.concurrent.Agent]] that consists of [[cats.effect.concurrent.Ref]] and
+    * [[cats.effect.concurrent.Semaphore]]
     */
   final case class SemRef[F[_]: Monad: Fire, A](ref: Ref[F, A], sem: Semaphore[F]) extends Agent[F, A] {
     def get: F[A]                                                          = ref.get
@@ -40,21 +41,25 @@ object Agent {
 
 /** A creator of [[tofu.concurrent.Agent]] that supports effectful construction.
   *
-  * @tparam I effect for creation of agent
-  * @tparam F effect on which agent will be run
+  * @tparam I
+  *   effect for creation of agent
+  * @tparam F
+  *   effect on which agent will be run
   */
 trait MakeAgent[I[_], F[_]] {
 
   /** Creates instance of [[tofu.concurrent.Agent]] with given value
     *
-    * @param a value to be contained in `Agent`
-    * @return `I[Agent[F, A]]`
+    * @param a
+    *   value to be contained in `Agent`
+    * @return
+    *   `I[Agent[F, A]]`
     */
   def agentOf[A](a: A): I[Agent[F, A]]
 }
 
-/** A helper for creating instances of [[tofu.concurrent.Agent]] that use same effect during construction and work.
-  * If you want to use different effect to construct `Agent` use [[tofu.concurrent.MakeAgent]]
+/** A helper for creating instances of [[tofu.concurrent.Agent]] that use same effect during construction and work. If
+  * you want to use different effect to construct `Agent` use [[tofu.concurrent.MakeAgent]]
   *
   * Sample usage:
   * {{{
@@ -66,20 +71,20 @@ trait MakeAgent[I[_], F[_]] {
   * import tofu.common.Console
   *
   * def example[F[_]: Agents: Sync: Monad: Console]: F[Unit] =
-  *      for {
-  *        _ <- Monad[F].unit
-  *        agent <- Agents[F].of(42)
-  *        newValue <- agent.updateM(a => Console[F].putStrLn(s"current value is $a") *> Monad[F].pure(a + 27))
-  *        _ <- Console[F].putStrLn(s"new value is $newValue") // new value is 69
-  *      } yield ()
+  *       for {
+  *         _ <- Monad[F].unit
+  *         agent <- Agents[F].of(42)
+  *         newValue <- agent.updateM(a => Console[F].putStrLn(s"current value is $a") *> Monad[F].pure(a + 27))
+  *         _ <- Console[F].putStrLn(s"new value is $newValue") // new value is 69
+  *       } yield ()
   * }}}
   */
 object Agents {
   def apply[F[_]](implicit agents: Agents[F]): MakeAgent.Applier[F, F] = new MakeAgent.Applier[F, F](agents)
 }
 
-/** A helper for creating instances of [[tofu.concurrent.Agent]] that use different effects during construction and work.
-  * If you want to use same effect to construct and run `Agent` use [[tofu.concurrent.Agents]]
+/** A helper for creating instances of [[tofu.concurrent.Agent]] that use different effects during construction and
+  * work. If you want to use same effect to construct and run `Agent` use [[tofu.concurrent.Agents]]
   *
   * Sample usage:
   * {{{

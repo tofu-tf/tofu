@@ -6,10 +6,10 @@ import simulacrum.typeclass
 
 import scala.annotation.nowarn
 
-/** higher order form of monoidal functor
-  * for all F[_], uf: U[F] , zipWith2K(uf, unitK)(Function2K((f, _) => f)) == uf
-  *  for all F[_], uf: U[F] , zipWith2K(unitK, uf)(Function2K((_, f) => f)) == uf
-  * @tparam U - higher order functor
+/** higher order form of monoidal functor for all F[_], uf: U[F] , zipWith2K(uf, unitK)(Function2K((f, _) => f)) == uf
+  * for all F[_], uf: U[F] , zipWith2K(unitK, uf)(Function2K((_, f) => f)) == uf
+  * @tparam U
+  *   - higher order functor
   */
 @typeclass @nowarn("cat=unused-imports")
 trait MonoidalK[U[_[_]]] extends PureK[U] with ApplyK[U] {

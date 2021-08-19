@@ -29,8 +29,8 @@ object Raise extends DataEffectComp[Raise] {
   }
 }
 
-/** Allows to recover after some error in a ${F} transiting to a ${G} as a result.
-  * A `G` can either be the same as a `F` or some "subconstructor" having less errors semantically.
+/** Allows to recover after some error in a ${F} transiting to a ${G} as a result. A `G` can either be the same as a `F`
+  * or some "subconstructor" having less errors semantically.
   */
 @implicitNotFound("""can't understand how to restore from the type ${F} to the subtype ${G} 
 provide an instance of RestoreTo[${F}, ${G}], cats.ApplicativeError[${F}, ...]""")
@@ -46,8 +46,8 @@ trait Restore[F[_]] extends RestoreTo[F, F] {
   def restoreWith[A](fa: F[A])(ra: => F[A]): F[A]
 }
 
-/** Allows to recover after an error of type ${E} in a ${F} transiting to a ${G} as a result.
-  * A `G` can either be the same as a `F` or some "subconstructor" having less errors semantically.
+/** Allows to recover after an error of type ${E} in a ${F} transiting to a ${G} as a result. A `G` can either be the
+  * same as a `F` or some "subconstructor" having less errors semantically.
   */
 @implicitNotFound("""can't understand how to recover from ${E} in the type ${F} to the subtype ${G} 
 provide an instance of HandleTo[${F}, ${G}, ${E}], cats.ApplicativeError[${F}, ${E}]""")
@@ -100,8 +100,8 @@ object Handle extends DataEffectComp[Handle] {
   }
 }
 
-/** Allows to throw and handle errors of type ${E} in a ${F} transiting to a ${G} when recovering.
-  * A `G` can either be the same as `F` or some "subconstructor" having less errors semantically.
+/** Allows to throw and handle errors of type ${E} in a ${F} transiting to a ${G} when recovering. A `G` can either be
+  * the same as `F` or some "subconstructor" having less errors semantically.
   */
 @implicitNotFound("""can't understand how to deal with errors ${E} in the type ${F} with the subtype ${G}
 provide an instance of ErrorsTo[${F}, ${G}, ${E}], cats.ApplicativeError[${F}, ${E}] or Contains[..., ${E}]""")

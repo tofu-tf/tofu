@@ -5,8 +5,7 @@ import cats.arrow._
 import cats.instances.function._
 import tofu.optics.data._
 
-/** aka Iso
-  * S and B share same information
+/** aka Iso S and B share same information
   */
 trait PEquivalent[-S, +T, +A, -B]
     extends PSubset[S, T, A, B] with PContains[S, T, A, B] with PBase[PEquivalent, S, T, A, B]
