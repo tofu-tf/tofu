@@ -318,7 +318,7 @@ lazy val doobieLogging = project
 lazy val examples = project
   .in(file("examples"))
   .settings(
-    libraryDependencies ++= List(doobieCore, doobieH2, derevo, monix, groovy),
+    libraryDependencies ++= List(doobieCore, doobieH2, derevo, monix, groovy, derevoCirce),
     libraryDependencies ++= http4s,
     defaultSettings,
     name := "tofu-examples",
