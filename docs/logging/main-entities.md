@@ -42,9 +42,17 @@ case class Payment(id: Long, @masked(MaskMode.Erase) cardNumber: String, @unembe
 A message `info"This is $payment"` would look like that:
 ```json
 {
-  "message": "This is Payment",
-  "payment.id": 434324,
-  "to": "do"
+  "@timestamp":"2021-08-20T17:13:39.787Z",
+  "loggerName":"some-logger",
+  "threadName":"ioapp-compute-0",
+  "level":"INFO",
+  "message":"This is Payment: Payment{id=3234,cardNumber=...,name=ClientData{name=foo,surname=bar}}",
+  "id":3234,
+  "cardNumber":"...",
+  "name":{
+    "name":"anton",
+    "surname":"surnon"
+  }
 }
 ```
 
