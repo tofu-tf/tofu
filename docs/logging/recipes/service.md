@@ -22,7 +22,7 @@ class MyService[F[_]: Monad: MyService.Log](someDependency: DependencyService){
 object MyService extends LoggingCompanion[MyService]
 ```
 
-The line `object MyService extends LoggingCompanion[MyService]` mixes into the companion object type Log, 
+The line `object MyService extends LoggingCompanion[MyService]` mixes in type Log to the companion, 
 which is just alias for [`ServiceLogging[F, MyService]`](../main-entities.md#logging).
 
 This type carries information about which class it is supposed to be used for, 

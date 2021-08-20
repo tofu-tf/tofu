@@ -4,9 +4,9 @@ title: Tofu Logging recipes
 ---
 
 ## Simple logging
-All you need to do to start using logging in its simplest form is the following:
+All you need to do to start using logging in its simplest (and kinda boilerplate-y) form is the following:
 - add Logging.Make as parameter to your service — that will describe the capability to create `Logging`s;
-- create logging instance with method `Logging.make.plain[F]`
+- create logging instance with method `Logging.Make[F].forService`.
 
 That's it!
 

@@ -11,7 +11,7 @@ Here is the list of ways how one can use `tofu.logging`
 For any of the recipes you are going to need three things:
 - ensure all the data types which you want to log have instances of [Loggable typeclass](../main-entities.md#typeclass-loggablea);
 - import syntax: `import tofu.syntax.logging._`
-- provide correct logback.xml (except when you are using `tofu.logging` with your own implementation) — you can find example [here](https://github.com/tofu-tf/tofu/tree/better-doobie-example/examples).
+- provide correct logback configuration (except when you are using `tofu.logging` with your own implementation) — you can find example [here](https://github.com/tofu-tf/tofu/tree/examples/src/main/resources/logback.groovy).
 
 Recipes are:
 

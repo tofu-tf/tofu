@@ -64,7 +64,7 @@ It has a tagged version `ServiceLogging[F, Service]` which can be used for some 
 
 ## Logs
 
-Trait `Logs[I, F]` is a factory of the `Logging[F]` instances.
+Trait `Logs[I, F]` is a factory of the `Logging[F]` instances which decides how created Logging will behave.
 
 As the creation of arbitrary logging instance could potentially have some side effects,
 operations of this trait are effectual: 

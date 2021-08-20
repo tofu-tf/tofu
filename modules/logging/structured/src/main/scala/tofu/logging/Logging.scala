@@ -88,7 +88,7 @@ object ServiceLogging {
   final implicit def serviceLoggingRepresentable[Svc]: RepresentableK[ServiceLogging[*[_], Svc]] =
     representableAny.asInstanceOf[RepresentableK[ServiceLogging[*[_], Svc]]]
 
-  final implicit def byUniversal[F[_], Svc: ClassTag](implicit unilogs: Logs.Universal[F]): ServiceLogging[F, Svc] =
+  final implicit def byUniversal[F[_], Svc: ClassTag](implicit unilogs: Logging.Make[F]): ServiceLogging[F, Svc] =
     unilogs.service[Svc]
 }
 
@@ -114,6 +114,9 @@ object Logging {
       new UniversalContextLogs[F, C]
 
   }
+
+
+  type Companion[U[_[_]]] = LoggingCompanion[U]
 
   sealed trait Level
 
