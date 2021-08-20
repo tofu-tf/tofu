@@ -60,7 +60,7 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
 
 object Logs extends LogsInstances with LogsInstances0 {
 
-  @deprecated("Use Logging.Make[F]", since="0.10.4")
+  @deprecated("Use Logging.Make[F]", since = "0.10.4")
   type Universal[F[_]]        = Logs[Id, F]
   type Safe[I[_], F[_, _]]    = Logs[I, F[Nothing, *]]
   type SafeUniversal[F[_, _]] = Logs[Id, F[Nothing, *]]
@@ -73,10 +73,10 @@ object Logs extends LogsInstances with LogsInstances0 {
   def sync[I[_]: Delay, F[_]: Delay: Monad]: Logs[I, F] = new Logs[I, F] {
     def byName(name: String): I[Logging[F]] = Delay[I].delay(new SyncLogging[F](LoggerFactory.getLogger(name)))
   }
-  @deprecated("Use Logging.Make[F].plain", since="0.10.4")
-  def universal[F[_]: Delay]: Logs.Universal[F] = new UniversalLogging[F](_)
+  @deprecated("Use Logging.Make[F].plain", since = "0.10.4")
+  def universal[F[_]: Delay]: Logs.Universal[F]         = new UniversalLogging[F](_)
 
-  @deprecated("Use Logging.Make[F].contextual", since="0.10.4")
+  @deprecated("Use Logging.Make[F].contextual", since = "0.10.4")
   def contextual[F[_]: FlatMap: Delay, C: Loggable](implicit FC: F WithContext C): Logs.Universal[F] =
     new UniversalContextLogs[F, C]
 
@@ -150,6 +150,7 @@ object Logs extends LogsInstances with LogsInstances0 {
     def apply[X: ClassTag](f: Logging[F] => I[X])(implicit logs: Logs[I, F], I: FlatMap[I]): I[X] =
       logs.forService[X].flatMap(f)
   }
+
   /** Set of useful syntax stuff for Logs */
   implicit def ops[I[_], F[_]](logs: Logs[I, F]) = new LogsInvariantSyntax.LogsOps[I, F](logs)
 }

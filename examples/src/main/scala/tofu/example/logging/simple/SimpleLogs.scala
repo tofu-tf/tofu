@@ -34,7 +34,10 @@ trait CargoService[F[_]] {
 }
 
 object CargoService {
-  def make[F[_]: MonadThrow: Logging.Make](movingCompany: MovingCompany[F], warehouse: Warehouse[F]): CargoService[F] = {
+  def make[F[_]: MonadThrow: Logging.Make](
+      movingCompany: MovingCompany[F],
+      warehouse: Warehouse[F]
+  ): CargoService[F] = {
     implicit val logging: Logging[F] = Logging.Make[F].forService[CargoService[F]]
 
     val serviceAddress = Destination("Cargo Street 51", "New Servexico")
@@ -134,8 +137,8 @@ object CargoApp extends IOApp {
   type TracedIO[A] = ReaderT[IO, Trace, A]
 
   implicit val logMakeTraced: Logging.Make[TracedIO] = Logging.Make.contextual[TracedIO, Trace]
-  implicit val logMake: Logging.Make[IO] = Logging.Make.plain[IO]
-  implicit val appLogger = logMake.byName("CargoApp")
+  implicit val logMake: Logging.Make[IO]             = Logging.Make.plain[IO]
+  implicit val appLogger                             = logMake.byName("CargoApp")
 
   val endpoints = Endpoints.cargoEndpoints[IO, TracedIO](
     CargoService.make(MovingCompany.make[TracedIO], Warehouse.makeSmall[TracedIO])

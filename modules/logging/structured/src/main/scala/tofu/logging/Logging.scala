@@ -115,7 +115,6 @@ object Logging {
 
   }
 
-
   type Companion[U[_[_]]] = LoggingCompanion[U]
 
   sealed trait Level

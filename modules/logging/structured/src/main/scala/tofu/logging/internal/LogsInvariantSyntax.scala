@@ -6,7 +6,7 @@ import tofu.concurrent.{MakeQVar, QVars}
 import tofu.higherKind.{Mid, Post, Pre}
 import tofu.lift.Lift
 import tofu.logging.impl.{CachedLogs, UniversalEmbedLogs}
-import tofu.logging.{ Logging, Logs}
+import tofu.logging.{Logging, Logs}
 
 import scala.reflect.ClassTag
 import tofu.syntax.monadic._
@@ -48,17 +48,17 @@ object LogsInvariantSyntax {
 
 class LogWares[U[_[_]], I[_], F[_]](private val made: I[Logging[F]]) extends AnyVal {
   final def pre(
-                 make: Logging[F] => U[Pre.Unwrap[F, *]]
-               )(implicit I: Functor[I]): I[U[Pre[F, *]]] =
+      make: Logging[F] => U[Pre.Unwrap[F, *]]
+  )(implicit I: Functor[I]): I[U[Pre[F, *]]] =
     made.map(logging => Pre.wrap(make(logging)))
 
   final def post(
-                  make: Logging[F] => U[Post[F, *]]
-                )(implicit I: Functor[I]): I[U[Post[F, *]]] =
+      make: Logging[F] => U[Post[F, *]]
+  )(implicit I: Functor[I]): I[U[Post[F, *]]] =
     made.map(logging => make(logging))
 
   final def mid(
-                 make: Logging[F] => U[Mid[F, *]]
-               )(implicit I: Functor[I]): I[U[Mid[F, *]]] =
+      make: Logging[F] => U[Mid[F, *]]
+  )(implicit I: Functor[I]): I[U[Mid[F, *]]] =
     made.map(logging => make(logging))
 }

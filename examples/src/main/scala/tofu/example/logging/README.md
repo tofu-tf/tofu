@@ -10,4 +10,4 @@ File [cargo-api.http](cargo-api.http) contains example requests.
 
 ## Examples
 - [Simple](simple/SimpleLogs.scala) — create logger as in Slf4j or something alike. Recipe is [here](https://docs.tofu.tf/docs/logging/simple)
-- [Service](service/ServiceLogs.scala) — automatically create loggers, which will use the location information. Recipe is [here](https://docs.tofu.tf/docs/logging/service)
+- [Service](service/ServiceLogs.scala) — automatically create loggers, whic~~~~h will use the location information. Recipe is [here](https://docs.tofu.tf/docs/logging/service)
