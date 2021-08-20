@@ -12,9 +12,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits._
 import org.http4s.server.Router
 import tofu.WithProvide
-import tofu.common.Console
 import tofu.logging.Logging
-import tofu.logging.Logging.Make
 import tofu.logging.derivation.loggable
 import tofu.syntax.context._
 import tofu.syntax.foption._
@@ -92,7 +90,7 @@ object Endpoints {
   @derive(decoder)
   case class DepositRequest(cargo: Cargo, daysAmount: Int)
 
-  def cargoEndpoints[I[_]: Sync, F[_]: Sync](
+  def cargoEndpoints[I[_]: Sync, F[_]](
       cargoService: CargoService[F]
   )(implicit canRun: WithProvide[F, I, Trace]): HttpRoutes[I] = {
     val dsl = Http4sDsl[I]
