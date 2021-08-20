@@ -4,7 +4,7 @@ title: Tofu Logging recipes
 ---
 
 
-## TODO we need clickhouse
+## TODO yet to be implemented
 
 ## Your own specific logs
 
