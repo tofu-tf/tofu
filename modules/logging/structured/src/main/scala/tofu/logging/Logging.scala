@@ -114,6 +114,7 @@ object Logging {
       new UniversalContextLogs[F, C]
 
   }
+
   /** Convenient alias type for LoggingCompanion for easier access. */
   type Companion[U[_[_]]] = LoggingCompanion[U]
 
