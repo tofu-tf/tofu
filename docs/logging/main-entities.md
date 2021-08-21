@@ -53,10 +53,8 @@ A message `info"This is $payment"` would look like that:
   "message": "This is Payment: Payment{id=3234,cardNumber=...,name=ClientData{name=foo,surname=bar}}",
   "id": 3234,
   "cardNumber": "...",
-  "name": {
-    "name": "anton",
-    "surname": "surnon"
-  }
+  "name": "foo",
+  "surname": "bar"
 }
 ```
 
@@ -89,6 +87,7 @@ trait Logs[I[_], F[_]] {
   def forService[Svc]: I[Logging[F]]
   //...
 }
+
 ```
 
 The name method parameter (or type tag for `Svc` type parameter) is used in the underlying logger and then displayed in
