@@ -4,7 +4,7 @@ id: tofu.logging.home title: Tofu Logging
 
 # Welcome to the Tofu Logging Home page
 
-This is a set of tools for logging. Configurable, concise, handy.
+This is a set of tools for logging. Scala-first. Suitable for any style. Configurable, concise, handy.
 
 ## Installation
 

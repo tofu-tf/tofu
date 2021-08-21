@@ -1,16 +1,17 @@
 package tofu.logging.zlogs
 
 import scala.reflect.ClassTag
-
 import izumi.reflect.Tag
 import org.slf4j.LoggerFactory
 import tofu.logging.zlogs.impl.{UIOZLogging, URIOZLoggingImpl}
-import tofu.logging.{Loggable, Logging}
+import tofu.logging.{Loggable, Logging, ServiceLogging}
 import zio.interop.catz._
 import zio.{Has, UIO, ULayer, ZIO, ZLayer}
+
 import scala.annotation.nowarn
 
 object ZLogs {
+
   val uio: ZLogs[Any] = new ZLogs[Any] {
     def byName(name: String): UIO[Logging[UIO]] = UIO.effectTotal(new UIOZLogging(LoggerFactory.getLogger(name)))
   }
