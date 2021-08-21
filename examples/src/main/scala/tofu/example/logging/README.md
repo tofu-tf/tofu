@@ -9,5 +9,6 @@ Just use the `Run` button in your IDE (INTELLIJ Idea or Metals both support it).
 File [cargo-api.http](cargo-api.http) contains example requests.
 
 ## Examples
-- [Simple](simple/SimpleLogs.scala) — create logger as in Slf4j or something alike. Recipe is [here](https://docs.tofu.tf/docs/logging/simple)
-- [Service](service/ServiceLogs.scala) — automatically create loggers, whic~~~~h will use the location information. Recipe is [here](https://docs.tofu.tf/docs/logging/service)
+- [Simple](simple/SimpleLogs.scala) — create logger as in Slf4j or something alike. Recipe is [here](https://docs.tofu.tf/docs/logging/recipes/simple)
+- [Service](service/ServiceLogs.scala) — automatically create loggers, which will use the location information. Recipe is [here](https://docs.tofu.tf/docs/logging/recipes/service)
+- [Auto](auto/AutoLogs.scala) — automatically create log messages, which will log the arguments and the result of every method. Recipe is [here](https://docs.tofu.tf/docs/logging/recipes/auto)

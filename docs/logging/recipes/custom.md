@@ -1,8 +1,6 @@
 ---
-id: tofu.logging.recipes.custom
-title: Tofu Logging recipes
+id: tofu.logging.recipes.custom title: Tofu Logging recipes
 ---
-
 
 ## TODO yet to be implemented
 
@@ -19,6 +17,7 @@ trait ClickhouseClient[F[_]] {
 
   def initTable(name: String): F[Unit]
 }
+
 ```
 
 You'll need to implement only one method to create Logs:

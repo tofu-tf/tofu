@@ -20,6 +20,7 @@ For ZIO users the following is enough:
 
 ```sbt
 libraryDependencies += "tf.tofu" %% "tofu-logging-zio" % "<latest version in the badge in README>"
+
 ```
 
 ## Quick demo
@@ -45,6 +46,7 @@ def processPayment[F[_]: Monad: Logging](client: Client, amount: Long): F[Result
 ```
 
 ## What's next
+
 - Discover [the key features](./key-features.md)
 - Get to know [the core concepts](./main-entities.md)
 - Learn how to use [the syntax](./syntax.md)
@@ -52,4 +54,5 @@ def processPayment[F[_]: Monad: Logging](client: Client, amount: Long): F[Result
 - Check out [the examples](https://github.com/tofu-tf/tofu/tree/better-doobie-example/examples)
 
 ## Old documentation
+
 You can also visit obsolete documentation [here](../logging.md).

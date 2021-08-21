@@ -1,7 +1,7 @@
 ---
 id: tofu.logging.recipes.auto title: Tofu Logging recipes
 ---
-
+## The problem
 Often you see that in well modularized apps log messages are quite the same:
 
 ```scala
@@ -19,6 +19,11 @@ def method(args: Args) = for {
 You can automatically generate log messages stating when the method of some service has been entered and left.
 
 ```scala
+import tofu.higherKind.derived.representableK
+import derevo.derive
+import tofu.logging.derivation._
+import tofu.logging.Logging
+
 @derive(representableK, loggingMid)
 trait MyService[F[_]] {
   def makeThis: F[Unit]
@@ -26,9 +31,9 @@ trait MyService[F[_]] {
   def makeThat(arg1: Int, arg2: String): F[Long]
 }
 
-object MyService extends LoggingCompanion[MyService] {
+object MyService extends Logging.Companion[MyService] {
 
-  def make[F[_] : Logs.Make : Monad]: MyService[F] = {
+  def make[F[_] : Logging.Make : Monad]: MyService[F] = {
     val core = new Impl[F]
     core.attachLogs
   }
@@ -37,10 +42,20 @@ object MyService extends LoggingCompanion[MyService] {
     //implementation
   }
 }
+
 ```
 
 There is also an alternative — loggingMidErr which also logs any error happened during method execution.
 
+## How it works
 
+The idea is based on the [Mid concept](../../mid.md). For every method `def foo(bar: Bar): F[Baz] = impl` it generates
+it's logging compartment, looking close to that:
 
+```scala
+def foo(bar: Bar): F[Baz] = debug"Entering foo with $bar" *> impl <* debug"Exiting foo with $baz"
+```
+
+## Example
+Check out the example [here](https://github.com/tofu-tf/tofu/tree/examples/src/main/scala/tofu.example.logging.auto).
 
