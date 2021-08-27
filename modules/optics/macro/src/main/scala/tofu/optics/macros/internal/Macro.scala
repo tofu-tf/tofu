@@ -12,8 +12,8 @@ private[macros] class MacroImpl(val c: blackbox.Context) {
   def genContains_impl[S: c.WeakTypeTag, A: c.WeakTypeTag](field: c.Expr[S => A]): c.Expr[Contains[S, A]] = {
     import c.universe._
 
-    /** Extractor for member select chains.
-      * e.g.: SelectChain.unapply(a.b.c) == Some("a",Seq(a.type -> "b", a.b.type -> "c"))
+    /** Extractor for member select chains. e.g.: SelectChain.unapply(a.b.c) == Some("a",Seq(a.type -> "b", a.b.type ->
+      * "c"))
       */
     object SelectChain {
       def unapply(tree: Tree): Option[(Name, Seq[(Type, TermName)])] = tree match {

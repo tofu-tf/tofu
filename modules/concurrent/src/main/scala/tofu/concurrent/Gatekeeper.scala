@@ -10,15 +10,14 @@ import tofu.syntax.monadic._
 /** Semaphore-like structure */
 trait Gatekeeper[F[_], A] {
 
-  /** Returns the number of permits currently available.
-    * May be out of date the instant after it is retrieved.
+  /** Returns the number of permits currently available. May be out of date the instant after it is retrieved.
     */
   def available: F[A]
 
   /** Obtains a snapshot of the currently taken.
     *
-    * Like [[available]] when permits are available but returns the number of permits
-    * callers are waiting for when there are no permits available.
+    * Like [[available]] when permits are available but returns the number of permits callers are waiting for when there
+    * are no permits available.
     */
   def taken: F[A]
 

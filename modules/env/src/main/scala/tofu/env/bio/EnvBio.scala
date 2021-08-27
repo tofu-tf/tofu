@@ -86,9 +86,8 @@ abstract class EnvBio[-R, +E, +A] {
   def localPB[R1](f: R1 => EnvBio[Any, Any, R]): EnvBio[R1, E, A] =
     EnvBio.applyFatal(ctx => f(ctx).runF(ctx).flatMap(runF))
 
-  /** Convenient alias for [[localP]] for better type inference.
-    * Creates a new `EnvBio` that uses transformed context `R1`
-    * which is a result of applying given function to current context.
+  /** Convenient alias for [[localP]] for better type inference. Creates a new `EnvBio` that uses transformed context
+    * `R1` which is a result of applying given function to current context.
     */
   def local[R1 <: R](f: R1 => R1): EnvBio[R1, Nothing, A] =
     localP[R1](f)

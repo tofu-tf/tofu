@@ -16,15 +16,20 @@ object bracket extends GuaranteeSyntax {
   implicit final class TofuBracketMVarOps[F[_], A](private val mvar: MVar[F, A]) extends AnyVal {
 
     /** Update value with effectful transformation. In case of error or cancellation value remains unchanged
-      * @param use function to atomically modify value contained in `MVar`
-      * @return `F[A]` modified value contained in `MVar`
+      * @param use
+      *   function to atomically modify value contained in `MVar`
+      * @return
+      *   `F[A]` modified value contained in `MVar`
       */
     def bracketUpdate(use: A => F[A])(implicit FG: Guarantee[F], A: Applicative[F]): F[A] =
       mvar.take.bracketReplace(use)(mvar.put)
 
-    /** Modify value with effectful transformation, calculating result. In case of error or cancellation value remains unchanged
-      * @param use function to atomically modify value contained in `MVar` and produce result
-      * @return `F[B]`
+    /** Modify value with effectful transformation, calculating result. In case of error or cancellation value remains
+      * unchanged
+      * @param use
+      *   function to atomically modify value contained in `MVar` and produce result
+      * @return
+      *   `F[B]`
       */
     def bracketModify[B](use: A => F[(A, B)])(implicit FG: Guarantee[F], A: Applicative[F]): F[B] =
       mvar.take.bracketState(use)(mvar.put)

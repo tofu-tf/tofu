@@ -13,16 +13,15 @@ import tofu.{BracketThrow, WithContext}
 
 import scala.annotation.nowarn
 
-/** A simple facade for [[doobie.Transactor]] that holds an inner database effect type `DB[_]` and provides
-  * natural transformations from this effect to the target effect `F[_]`.
+/** A simple facade for [[doobie.Transactor]] that holds an inner database effect type `DB[_]` and provides natural
+  * transformations from this effect to the target effect `F[_]`.
   *
   * The motivation for using this facade instead of `Transactor` is to:
   *
-  *   - initialize all its natural transformations early and remove the need for additional constraints
-  *     on `F[_]` later (e.g. `Bracket`);
+  *   - initialize all its natural transformations early and remove the need for additional constraints on `F[_]` later
+  *     (e.g. `Bracket`);
   *
-  *   - be able to use another `DB[_]` effect besides `ConnectionIO` and build a layer of transactional logic
-  *     with it.
+  *   - be able to use another `DB[_]` effect besides `ConnectionIO` and build a layer of transactional logic with it.
   */
 trait Txr[F[_], DB0[_]] {
   type DB[x] >: DB0[x] <: DB0[x]

@@ -15,10 +15,11 @@ import tofu.logging.builder.LoggingBiMidBuilder
   *
   * Adds logging around the successful invocation of each method at DEBUG level.
   *
-  * @note Class name is not printed by default.
+  * @note
+  *   Class name is not printed by default.
   *
-  * For customization create an object with the same parents and abstract type member `Result`
-  * and redefine [onEnter] and [onLeave] methods of the `LoggingMidBuilder` trait.
+  * For customization create an object with the same parents and abstract type member `Result` and redefine [onEnter]
+  * and [onLeave] methods of the `LoggingMidBuilder` trait.
   */
 object loggingMid
     extends LoggingMidBuilder.Default with DerivationKN3[LoggingMid.Of] with PassTypeArgs with ParamRequire[Loggable] {
@@ -29,10 +30,11 @@ object loggingMid
 /** Default logging derivation mechanism for unary effect algebras with error reporting.
   *
   * Adds logging around the invocation of each method at DEBUG level and error alert at ERROR level
-  * @note Class name is not printed by default.
+  * @note
+  *   Class name is not printed by default.
   *
-  * For customization create object with the same parents and abstract type member `Result`
-  * and redefine [onEnter], [onLeave] and [onFault] methods of the `LoggingErrMidBuilder` trait.
+  * For customization create object with the same parents and abstract type member `Result` and redefine [onEnter],
+  * [onLeave] and [onFault] methods of the `LoggingErrMidBuilder` trait.
   */
 object loggingMidTry
     extends LoggingErrMidBuilder.DefaultImpl[Throwable] with DerivationKN3[LoggingErrMid.Try] with PassTypeArgs
@@ -44,10 +46,11 @@ object loggingMidTry
 /** Default logging with errors derivation mechanism for binary effect algebras.
   *
   * Adds logging around invocation of each method at DEBUG level and error alert at ERROR level
-  * @note Class name is not printed by default.
+  * @note
+  *   Class name is not printed by default.
   *
-  * For customization create object with the same parents and abstract type member `Result`
-  * and redefine [onEnter], [onLeave] methods of the `LoggingBiMidBuilder` trait.
+  * For customization create object with the same parents and abstract type member `Result` and redefine [onEnter],
+  * [onLeave] methods of the `LoggingBiMidBuilder` trait.
   */
 object loggingBiMid
     extends LoggingBiMidBuilder.Default with DerivationKN11[LoggingBiMid.Of] with PassTypeArgs

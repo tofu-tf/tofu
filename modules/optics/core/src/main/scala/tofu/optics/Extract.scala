@@ -3,10 +3,7 @@ package tofu.optics
 import cats.{Functor, Monoid, Semigroup}
 import tofu.optics.data._
 
-/** aka Getter
-  * A has exactly one B
-  * mere function from A to B
-  * and part of Lens
+/** aka Getter A has exactly one B mere function from A to B and part of Lens
   */
 trait PExtract[-S, +T, +A, -B]
     extends PDowncast[S, T, A, B] with PReduced[S, T, A, B] with PBase[PExtract, S, T, A, B] {
