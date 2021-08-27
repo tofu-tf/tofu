@@ -8,7 +8,7 @@ addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.9")
 
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
 
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.2.22")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.2.23")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.3")
 
