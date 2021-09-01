@@ -6,7 +6,7 @@ import cats.Id
 import com.typesafe.config.{Config, ConfigValue}
 
 import scala.jdk.CollectionConverters._
-import tofu.concurrent.Refs
+import tofu.concurrent.ce2.Refs
 import tofu.syntax.monadic._
 import tofu.syntax.funk._
 import cats.effect.SyncIO
