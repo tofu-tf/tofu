@@ -4,7 +4,7 @@ package config
 import cats.data.ReaderT
 import cats.effect.concurrent.Ref
 import cats.{Monad, Parallel}
-import tofu.concurrent._
+import tofu.concurrent.ce2._
 import tofu.config.ConfigTContext.Fail
 import tofu.optics.Contains
 import tofu.syntax.monadic._
