@@ -2,8 +2,8 @@ package tofu.streams
 
 trait Region[F[_], G[_], +Exit] {
 
-  /** Open some resource `R` acquired by an effect `G`
-    * ensuring it will be released once `F` is completed or interrupted.
+  /** Open some resource `R` acquired by an effect `G` ensuring it will be released once `F` is completed or
+    * interrupted.
     */
   def regionCase[R](open: G[R])(close: (R, Exit) => G[Unit]): F[R]
 

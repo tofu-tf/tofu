@@ -18,51 +18,40 @@ trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
     * One can treat F as function of type `Ctx => Lower[A]` so this method applies it to `ctx`.
     *
     * @example
-    * Example of usage is to hide sensitive information across a part of service {{{
-    *   import tofu.syntax.context._
+    *   Example of usage is to hide sensitive information across a part of service {{{ import tofu.syntax.context._
     *
-    *   case class UserContext(
-    *       id: String,
-    *       phoneNumber: String //very sensitive
-    *   )
-    *   def hidePartOfPhoneNumber: String => String = ???
+    * case class UserContext( id: String, phoneNumber: String //very sensitive ) def hidePartOfPhoneNumber: String =>
+    * String = ???
     *
-    *   def contextualLogInfo[F[_]](message: String)(implicit hasUserContext: UserContext In F): F[Unit] =
-    *     ??? //logs both message AND UserContext
+    * def contextualLogInfo[F[_]](message: String)(implicit hasUserContext: UserContext In F): F[Unit] = ??? //logs both
+    * message AND UserContext
     *
-    *   def program[F[_]: WithRun[*[_], G[_], UserContext], G[_]: Monad] = for {
-    *     user   <- obtainUserSomehow[G]
-    *     logUser = contextualLogInfo[F](s"Successfully obtained user")
-    *     _      <- runContext[F](logUser)(user.toContext) //G[Unit]
-    *   } yield ()
-    * }}}
-    * @param fa Contextual computation
-    * @return Result of running fa and providing it context
+    * def program[F[_]: WithRun[*[_], G[_], UserContext], G[_]: Monad] = for { user <- obtainUserSomehow[G] logUser =
+    * contextualLogInfo[F](s"Successfully obtained user") _ <- runContext[F](logUser)(user.toContext) //G[Unit] } yield
+    * () }}}
+    * @param fa
+    *   Contextual computation
+    * @return
+    *   Result of running fa and providing it context
     */
   override def runContext[A](fa: F[A])(ctx: Ctx): Lower[A]
 
   /** Same as [[runContext]] but higher-kinded.
     *
-    * @example {{{
-    *   trait ProcessHandler[G[_]] {
-    *     def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ???
-    *     //...other methods
-    *   }
-    *   type WithMyContext[F[_], A] = ReaderT[F, MyCtx, A]
-    *   val contextualProcessHandler: ProcessHandler[IO WithMyContext *] = ???
+    * @example
+    *   {{{ trait ProcessHandler[G[_]] { def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ??? //...other methods } type
+    *   WithMyContext[F[_], A] = ReaderT[F, MyCtx, A] val contextualProcessHandler: ProcessHandler[IO WithMyContext *] =
+    *   ???
     *
-    *   val processHandler: ProcessHandler[IO] =
-    *     processHandler.mapK(
-    *       WithProvide[IO WithMyContext *, IO, MyCtx].runContextK
-    *     )
-    * }}}
+    * val processHandler: ProcessHandler[IO] = processHandler.mapK( WithProvide[IO WithMyContext *, IO,
+    * MyCtx].runContextK ) }}}
     */
   override def runContextK(ctx: Ctx): F ~> Lower = funK(runContext(_)(ctx))
 
   /** Converts context-unaware computation into contextual one by ignoring context
     *
-    * One can treat `F[A]` as function of type `Ctx => Lower[A]` so this method
-    * creates  something like `_  => la` which has type `Ctx => Lower[A]`
+    * One can treat `F[A]` as function of type `Ctx => Lower[A]` so this method creates something like `_ => la` which
+    * has type `Ctx => Lower[A]`
     *
     * @return
     */
@@ -70,7 +59,8 @@ trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
 
   /** Allows to focus [[Provide]] on inner parts of its context with lens.
     *
-    * @param extract lens that can extract from `Ctx` value of type `A`
+    * @param extract
+    *   lens that can extract from `Ctx` value of type `A`
     */
   override def runExtract[A](extract: A Extract Ctx): WithProvide[F, Lower, A] =
     new ProvideExtractInstance[F, Lower, Ctx, A](self, extract)

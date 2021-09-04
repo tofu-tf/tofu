@@ -9,8 +9,7 @@ import cats.instances.function._
 import cats.Applicative
 import tofu.compat.uv212
 
-/**  aka Grate
-  *  see https://r6research.livejournal.com/28050.html
+/** aka Grate see https://r6research.livejournal.com/28050.html
   */
 trait PZipping[-S, +T, +A, -B] extends PBase[PZipping, S, T, A, B] with PUpdate[S, T, A, B] with PUpcast[S, T, A, B] {
   def grate(sab: (S => A) => B): T

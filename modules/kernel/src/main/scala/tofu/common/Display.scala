@@ -10,7 +10,8 @@ trait Display[A] extends Show[A] {
 
   /** Represents value as a collection of parts from which it can be shown.
     *
-    * @note Newlines are managed solely by instances of [[Display]].
+    * @note
+    *   Newlines are managed solely by instances of [[Display]].
     */
   def displayBuild(cfg: Display.Config, a: A): Eval[Vector[String]]
 

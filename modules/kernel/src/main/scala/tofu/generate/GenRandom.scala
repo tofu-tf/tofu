@@ -16,9 +16,8 @@ trait GenRandom[F[_]] {
   /** generate random 8-bit number */
   def nextLong: F[Long]
 
-  /** Returns a pseudorandom, uniformly distributed int value between 0
-    *  (inclusive) and the specified value (exclusive), drawn from this
-    *  random number generator's sequence.
+  /** Returns a pseudorandom, uniformly distributed int value between 0 (inclusive) and the specified value (exclusive),
+    * drawn from this random number generator's sequence.
     */
   def nextInt(n: Int): F[Int]
 }

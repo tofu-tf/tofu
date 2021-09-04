@@ -12,22 +12,22 @@ import scala.collection.immutable.Queue
 
 /** A purely functional ReadWriteLock.
   *
-  * It declare that only a single writer at a time can modify the data,
-  * and predefined count of readers can concurrently read the data.
+  * It declare that only a single writer at a time can modify the data, and predefined count of readers can concurrently
+  * read the data.
   *
-  * In other cases, it will be semantically blocked until operation become available.
-  * All those wishing to access the data are serviced in order.
+  * In other cases, it will be semantically blocked until operation become available. All those wishing to access the
+  * data are serviced in order.
   */
 trait ReadWrite[F[_], A] {
 
-  /** Acquires a single reader if there is no writers in queue
-    * and if the max number of readers is not reached.
+  /** Acquires a single reader if there is no writers in queue and if the max number of readers is not reached.
     *
     * Otherwise, it will be semantically blocked until operation become available.
     *
     * WARN! Ignoring release action lead to resource leak. In most cases, `get` is preferable.
     *
-    * @return current value and release action.
+    * @return
+    *   current value and release action.
     */
   def read: F[(A, F[Unit])]
 
@@ -37,28 +37,31 @@ trait ReadWrite[F[_], A] {
     *
     * WARN! Ignoring putAndRelease action lead to resource leak. In most cases, `update` or `set` is preferable.
     *
-    * @return current value and putAndRelease action.
+    * @return
+    *   current value and putAndRelease action.
     */
   def write: F[(A, A => F[Unit])]
 
   /** Like `read`, but does not require explicit release.
     *
-    * @return value snapshot
+    * @return
+    *   value snapshot
     */
   def get: F[A]
 
   /** Like `tryRead`, but does not require explicit release
     *
-    * @return value snapshot wrapped in `Some` or `None` if reading is unavailable.
+    * @return
+    *   value snapshot wrapped in `Some` or `None` if reading is unavailable.
     */
   def tryGet: F[Option[A]]
 
-  /** Acquires a single reader if there is no writers in queue
-    * and if the max number of readers is not reached.
+  /** Acquires a single reader if there is no writers in queue and if the max number of readers is not reached.
     *
     * If not, None will be returned as a result.
     *
-    * @return current value and release action wrapped in `Some` or `None` if reading is unavailable.
+    * @return
+    *   current value and release action wrapped in `Some` or `None` if reading is unavailable.
     */
   def tryRead: F[Option[(A, F[Unit])]]
 
@@ -66,7 +69,8 @@ trait ReadWrite[F[_], A] {
     *
     * Or else, `None` will be returned as a result.
     *
-    * @return current value and putAndRelease action wrapped in `Some` or `None` if writing is unavailable.
+    * @return
+    *   current value and putAndRelease action wrapped in `Some` or `None` if writing is unavailable.
     */
   def tryWrite: F[Option[(A, A => F[Unit])]]
 
@@ -74,7 +78,8 @@ trait ReadWrite[F[_], A] {
     *
     * In scenarios where write operation is unavailable it may semantically blocks until operation successfully made.
     *
-    * @return a task that update state value to `a` on evaluation.
+    * @return
+    *   a task that update state value to `a` on evaluation.
     */
   def set(a: A): F[Unit] = update(_ => a)
 
@@ -82,7 +87,8 @@ trait ReadWrite[F[_], A] {
     *
     * In scenarios where write operation is unavailable it may semantically blocks until operation successfully made.
     *
-    * @return whether or not the update succeeded
+    * @return
+    *   whether or not the update succeeded
     */
   def trySet(a: A): F[Boolean] = tryUpdate(_ => a)
 
@@ -90,13 +96,15 @@ trait ReadWrite[F[_], A] {
     *
     * In scenarios where write operation is unavailable it may semantically blocks until operation successfully made.
     *
-    * @return a task that update state value on evaluation.
+    * @return
+    *   a task that update state value on evaluation.
     */
   def update(f: A => A): F[Unit]
 
   /** Attempts to modify the current value with supplied function, returning `false` if writing is unavailable.
     *
-    * @return whether or not the update succeeded
+    * @return
+    *   whether or not the update succeeded
     */
   def tryUpdate(f: A => A): F[Boolean]
 
@@ -104,9 +112,8 @@ trait ReadWrite[F[_], A] {
     */
   def modify[B](f: A => (A, B)): F[B]
 
-  /** Like `tryUpdate` but allows the update function to return an output value of
-    * type `B`. The returned action completes with `None` if the value is not updated
-    * successfully and `Some(b)` otherwise.
+  /** Like `tryUpdate` but allows the update function to return an output value of type `B`. The returned action
+    * completes with `None` if the value is not updated successfully and `Some(b)` otherwise.
     */
   def tryModify[B](f: A => (A, B)): F[Option[B]]
 }
@@ -286,8 +293,8 @@ object ReadWrite {
         new ConcurrentReadWrite[F, A](_, maxReaders)
       }
 
-  /**  Builds a `ReadWrite` value for data types that are [[cats.effect.Sync]]
-    *  Like [[of]] but initializes state using another effect constructor
+  /** Builds a `ReadWrite` value for data types that are [[cats.effect.Sync]] Like [[of]] but initializes state using
+    * another effect constructor
     */
   def in[F[_]: Sync, G[_]: Concurrent, A](initial: A, maxReaders: Int = Int.MaxValue): F[ReadWrite[G, A]] =
     assertNonNegative[F](maxReaders) *>

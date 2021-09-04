@@ -6,8 +6,7 @@ import cats.syntax.functor._
 import tofu.optics.classes.PChoice
 import tofu.optics.data._
 
-/** aka Lens
-  * S has exactly one A and can update it
+/** aka Lens S has exactly one A and can update it
   */
 trait PContains[-S, +T, +A, -B]
     extends PExtract[S, T, A, B] with PRepeated[S, T, A, B] with PProperty[S, T, A, B]

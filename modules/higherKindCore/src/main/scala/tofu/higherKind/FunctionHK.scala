@@ -1,7 +1,6 @@
 package tofu.higherKind
 
-/** Even more higher kinded function,
-  * a transformation between two higher order type-constructors
+/** Even more higher kinded function, a transformation between two higher order type-constructors
   */
 trait FunctionHK[-U[F[_]], +V[F[_]]] {
   def apply[F[_]](uf: U[F]): V[F]

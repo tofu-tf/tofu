@@ -67,8 +67,7 @@ private[zioInstances] class ZioInstances {
   final def zioTofuUnliftManyInstance[R <: Has[_], E, R1 <: Has[_]: Tag]: ZioTofuUnliftManyInstance[R, E, R1] =
     new ZioTofuUnliftManyInstance[R, E, R1]
 
-  /**  a shortcut for simplifying WithLocal instance definition,
-    *  since zioTofuUnliftHasInstance has trouble to infer R
+  /** a shortcut for simplifying WithLocal instance definition, since zioTofuUnliftHasInstance has trouble to infer R
     * {{{
     *   case class MyContext()
     *   type HasMy = Has[MyContext]

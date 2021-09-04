@@ -13,8 +13,7 @@ import tofu.optics.data._
 
 import scala.reflect.ClassTag
 
-/** aka Prism
-  * any of S could be equivalent to A
+/** aka Prism any of S could be equivalent to A
   */
 trait PSubset[-S, +T, +A, -B]
     extends PUpcast[S, T, A, B] with PDowncast[S, T, A, B] with PItems[S, T, A, B] with PProperty[S, T, A, B]
