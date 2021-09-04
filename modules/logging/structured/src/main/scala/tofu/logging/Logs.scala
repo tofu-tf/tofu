@@ -25,33 +25,27 @@ import tofu.WithContext
 import tofu.logging.impl.UniversalContextLogs
 import tofu.concurrent.MakeQVar
 
-/** A helper for creating instances of [[tofu.logging.Logging]], defining a way these instances will behave while doing logging.
-  * Can create instances either on a by-name basic or a type tag basic.
-  * An instance of [[tofu.logging.Logs]] can be shared between different pieces of code depending
-  * on whether logging behaviour should be shared.
-  * However it's not uncommon to use different [[Logs]] for different parts of program.
+/** A helper for creating instances of [[tofu.logging.Logging]], defining a way these instances will behave while doing
+  * logging. Can create instances either on a by-name basic or a type tag basic. An instance of [[tofu.logging.Logs]]
+  * can be shared between different pieces of code depending on whether logging behaviour should be shared. However it's
+  * not uncommon to use different [[Logs]] for different parts of program.
   *
   * Sample usage would be:
-  * @example {{{
-  *   val logs: Logs[F, F] = Logs.sync[F, F]
+  * @example
+  *   {{{ val logs: Logs[F, F] = Logs.sync[F, F]
   *
-  *   def program[F[_]: Sync] =
-  *     for {
-  *       logging <- logs.byName("my-logger")
-  *       _       <- logging.info("this is a message")
-  *       _       <- logging.info("this is another message")
-  *     } yield ()
-  * }}}
+  * def program[F[_]: Sync] = for { logging <- logs.byName("my-logger") _ <- logging.info("this is a message") _ <-
+  * logging.info("this is another message") } yield () }}}
   */
 trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
 
-  /** Creates an instance of [[tofu.logging.Logging]] with a given arbitrary type tag,
-    * using it as a class to create underlying [[org.slf4j.Logger]] with.
+  /** Creates an instance of [[tofu.logging.Logging]] with a given arbitrary type tag, using it as a class to create
+    * underlying [[org.slf4j.Logger]] with.
     */
   def forService[Svc](implicit Svc: ClassTag[Svc]): I[Logging[F]] = byName(Svc.runtimeClass.getName())
 
-  /** Creates an instance of [[tofu.logging.Logging]] for a given arbitrary string name,
-    * using it to create underlying [[org.slf4j.Logger]] with.
+  /** Creates an instance of [[tofu.logging.Logging]] for a given arbitrary string name, using it to create underlying
+    * [[org.slf4j.Logger]] with.
     */
   def byName(name: String): I[Logging[F]]
 
@@ -106,7 +100,8 @@ object Logs extends LogsInstances0 {
     }
   }
 
-  /** Returns an instance of [[tofu.logging.Logs]] that will produce the same constant [[tofu.logging.Logging]] instances.
+  /** Returns an instance of [[tofu.logging.Logs]] that will produce the same constant [[tofu.logging.Logging]]
+    * instances.
     */
   def const[I[_]: Applicative, F[_]](logging: Logging[F]): Logs[I, F] = new Logs[I, F] {
     def byName(name: String): I[Logging[F]] = logging.pure[I]
@@ -116,9 +111,9 @@ object Logs extends LogsInstances0 {
     */
   def empty[I[_]: Applicative, F[_]: Applicative]: Logs[I, F] = const[I, F](Logging.empty[F])
 
-  /** Combines two instances of [[tofu.logging.Logs]], resulting in a single one that will produce
-    * instances of [[tofu.logging.Logging]] by combining.
-    * Resulting [[tofu.logging.Logging]] instance will call both implementations in order.
+  /** Combines two instances of [[tofu.logging.Logs]], resulting in a single one that will produce instances of
+    * [[tofu.logging.Logging]] by combining. Resulting [[tofu.logging.Logging]] instance will call both implementations
+    * in order.
     */
   def combine[I[_]: Apply, F[_]: Apply](las: Logs[I, F], lbs: Logs[I, F]): Logs[I, F] = new Logs[I, F] {
     def byName(name: String): I[Logging[F]] = las.byName(name).map2(lbs.byName(name))(Logging.combine[F])

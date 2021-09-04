@@ -5,9 +5,8 @@ import cats.{Applicative, Apply, Monoid, MonoidK, Semigroup, SemigroupK, ~>}
 import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
 
-/** Newtype for `[F[_], A] =>> F[Unit]`.
-  * An algebra `U[Pre[F, *]]` is an algebra which translates all actions to `F[Unit]`.
-  * This is useful to represent actions preceding main logic.
+/** Newtype for `[F[_], A] =>> F[Unit]`. An algebra `U[Pre[F, *]]` is an algebra which translates all actions to
+  * `F[Unit]`. This is useful to represent actions preceding main logic.
   */
 object Pre extends PreInstances {
   type T[F[_], A] <: Base with PreTag

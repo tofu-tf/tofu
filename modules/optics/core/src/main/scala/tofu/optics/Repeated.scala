@@ -3,9 +3,7 @@ package tofu.optics
 import cats._
 import tofu.optics.data._
 
-/** aka NonEmptyTraversal
-  * S has some occurrences of A
-  * and can update them using some effect
+/** aka NonEmptyTraversal S has some occurrences of A and can update them using some effect
   */
 trait PRepeated[-S, +T, +A, -B] extends PItems[S, T, A, B] with PReduced[S, T, A, B] with PBase[PRepeated, S, T, A, B] {
   def traverse1[F[+_]: Apply](s: S)(f: A => F[B]): F[T]

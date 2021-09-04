@@ -7,9 +7,7 @@ import tofu.optics.data.Constant
 
 import scala.reflect.{ClassTag, classTag}
 
-/** S could be T or not
-  * partial function from S to T
-  * and part of prism
+/** S could be T or not partial function from S to T and part of prism
   */
 trait PDowncast[-S, +T, +A, -B] extends PFolded[S, T, A, B] with PBase[PDowncast, S, T, A, B] {
   def downcast(s: S): Option[A]

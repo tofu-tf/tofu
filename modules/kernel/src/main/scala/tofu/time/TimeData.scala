@@ -4,8 +4,7 @@ import java.time._
 import cats.Monad
 import scala.annotation.tailrec
 
-/** typeclass for the types describing some time moment information
-  * possibly respecting timezone
+/** typeclass for the types describing some time moment information possibly respecting timezone
   */
 trait TimeData[A] {
 

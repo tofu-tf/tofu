@@ -4,9 +4,8 @@ import cats.~>
 @deprecated("use tofu.syntax.funk._", since = "0.7.2")
 object functionK {
 
-  /** simple constructor of FunctionK
-    * you can use it as makeFunctionK[List, Option](_.headOption)
-    * credits : https://github.com/alexknvl
+  /** simple constructor of FunctionK you can use it as makeFunctionK[List, Option](_.headOption) credits :
+    * https://github.com/alexknvl
     */
   def makeFunctionK[F[_], G[_]](maker: MakeFunctionK[F, G]): F ~> G = maker
 
@@ -24,9 +23,8 @@ object functionK {
 
 object funk {
 
-  /** simple constructor of FunctionK
-    * you can use it as makeFunctionK[List, Option](_.headOption)
-    * credits : https://github.com/alexknvl
+  /** simple constructor of FunctionK you can use it as makeFunctionK[List, Option](_.headOption) credits :
+    * https://github.com/alexknvl
     */
   def makeFunctionK[F[_], G[_]] = new Applied2[F, G](true)
 

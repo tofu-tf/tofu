@@ -15,8 +15,8 @@ object GenEquivalent {
 
   /** Generate an [[Equivalent]] between a case class `S` and its fields.
     *
-    * Case classes with 0 fields will correspond with `Unit`, 1 with the field type, 2 or more with
-    * a tuple of all field types in the same order as the fields themselves.
+    * Case classes with 0 fields will correspond with `Unit`, 1 with the field type, 2 or more with a tuple of all field
+    * types in the same order as the fields themselves.
     *
     * Case classes with multiple parameter-lists (example: `case class X(…)(…)`) are rejected.
     */

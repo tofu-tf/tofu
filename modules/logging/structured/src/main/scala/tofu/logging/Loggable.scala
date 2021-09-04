@@ -64,30 +64,37 @@ object Loggable extends LoggableInstances with DataComp[Loggable] {
     def putField[I, V, R, S](a: A, name: String, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
       r.sub(name, i)(putValue(a, _))
 
-    /** put single logging field value in the field with supplied name if it's convertible to string, hide it otherwise */
+    /** put single logging field value in the field with supplied name if it's convertible to string, hide it otherwise
+      */
     def putMaskedField[I, V, R, S](@unused a: A, @unused name: String, i: I)(@unused f: String => String)(implicit
         r: LogRenderer[I, V, R, S]
     ): R = r.sub(name, i)(putMaskedValue(a, _)(f))
 
     /** add list of custom fields for value
       *
-      * @param a        value for logging
-      * @param addParam side-effectful function, adding custom field to log entry
+      * @param a
+      *   value for logging
+      * @param addParam
+      *   side-effectful function, adding custom field to log entry
       */
     def logVia(a: A, addParam: (String, Any) => Unit): Unit =
       fields(a: A, "")(LogRenderer.prefixed(addParam))
 
     /** display value in log message
       *
-      * @param a value for logging
-      * @return displayed form
+      * @param a
+      *   value for logging
+      * @return
+      *   displayed form
       */
     def logShow(a: A): String
 
     /** Convert value to LoggedValue
       *
-      * @param a value for logging
-      * @return new Logged Value
+      * @param a
+      *   value for logging
+      * @return
+      *   new Logged Value
       */
     def loggedValue(a: A): LoggedValue = new LoggedValue {
       override def logFields[I, V, @sp(Unit) R, @sp M](i: I)(implicit r: LogRenderer[I, V, R, M]): R =
