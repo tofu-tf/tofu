@@ -67,7 +67,7 @@ object Dependencies {
 
     val log4Cats = "1.3.1"
 
-    val groovy = "3.0.8"
+    val groovy = "3.0.9"
   }
 
   val noCatsCore       =
