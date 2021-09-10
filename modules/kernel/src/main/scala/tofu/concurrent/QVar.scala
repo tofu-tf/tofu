@@ -11,44 +11,38 @@ import tofu.internal.carriers.MkQVarCE2Carrier
 /** a middleground between cats.concurrent.MVar and zio.Queue.bounded(1) */
 trait QVar[+F[_], A] {
 
-  /** Returns `true` if the `MVar` is empty and can receive a `put`, or
-    * `false` otherwise.
+  /** Returns `true` if the `MVar` is empty and can receive a `put`, or `false` otherwise.
     *
-    * Note that due to concurrent tasks, logic built in terms of `isEmpty`
-    * is problematic.
+    * Note that due to concurrent tasks, logic built in terms of `isEmpty` is problematic.
     */
   def isEmpty: F[Boolean]
 
-  /** Fills the `MVar` if it is empty, or blocks (asynchronously)
-    * if the `MVar` is full, until the given value is next in
-    * line to be consumed on [[take]].
+  /** Fills the `MVar` if it is empty, or blocks (asynchronously) if the `MVar` is full, until the given value is next
+    * in line to be consumed on [[take]].
     *
     * This operation is atomic.
     *
-    * @return a task that on evaluation will complete when the
-    *         `put` operation succeeds in filling the `MVar`,
-    *         with the given value being next in line to
-    *         be consumed
+    * @return
+    *   a task that on evaluation will complete when the `put` operation succeeds in filling the `MVar`, with the given
+    *   value being next in line to be consumed
     */
   def put(a: A): F[Unit]
 
-  /** Empties the `MVar` if full, returning the contained value,
-    * or blocks (asynchronously) until a value is available.
+  /** Empties the `MVar` if full, returning the contained value, or blocks (asynchronously) until a value is available.
     *
     * This operation is atomic.
     *
-    * @return a task that on evaluation will be completed after
-    *         a value was retrieved
+    * @return
+    *   a task that on evaluation will be completed after a value was retrieved
     */
   def take: F[A]
 
-  /** Tries reading the current value, or blocks (asynchronously)
-    * until there is a value available.
+  /** Tries reading the current value, or blocks (asynchronously) until there is a value available.
     *
     * This operation is atomic.
     *
-    * @return a task that on evaluation will be completed after
-    *         a value has been read
+    * @return
+    *   a task that on evaluation will be completed after a value has been read
     */
   def read: F[A]
 }

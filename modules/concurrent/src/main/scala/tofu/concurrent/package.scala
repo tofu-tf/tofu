@@ -10,11 +10,10 @@ package object concurrent {
   type Stoplight[F[_]] = Gatekeeper[F, Long]
   type Mutex[F[_]]     = Gatekeeper[F, Boolean]
 
-  type Daemon0[F[_]]    = Daemon[F, Throwable, Unit]
-  type Refs[F[_]]       = MakeRef[F, F]
-  type Semaphores[F[_]] = MakeSemaphore[F, F]
-  type MVars[F[_]]      = MakeMVar[F, F]
-  type Deferreds[F[_]]  = MakeDeferred[F, F]
+  type Daemon0[F[_]] = Daemon[F, Throwable, Unit]
+
+  type MVars[F[_]]     = MakeMVar[F, F]
+  type Deferreds[F[_]] = MakeDeferred[F, F]
 
   type Atoms[F[_]]        = MakeAtom[F, F]
   type QVars[F[_]]        = MakeQVar[F, F]
@@ -23,8 +22,6 @@ package object concurrent {
   type Agents[F[_]]       = MakeAgent[F, F]
   type SerialAgents[F[_]] = MakeSerialAgent[F, F]
 
-  def newRef[F[_]: Refs]              = MakeRef[F, F]
-  def newSemaphore[F[_]: Semaphores]  = MakeSemaphore[F, F]
   def newVar[F[_]: MVars]             = MakeMVar[F, F]
   def newDeffered[F[_]: Deferreds, A] = MakeDeferred[F, F, A]
 

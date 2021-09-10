@@ -15,17 +15,14 @@ trait TimeZone[F[_]] {
   /** list of available time zones */
   def available: F[Set[String]]
 
-  /** get ZoneId by full string ID,
-    * checking for availability, probably generating an error
-    * see documentation to `java.time.ZoneId.of`
+  /** get ZoneId by full string ID, checking for availability, probably generating an error see documentation to
+    * `java.time.ZoneId.of`
     */
   def of(zoneId: String): F[ZoneId]
 
-  /** Obtains an instance of {@code ZoneId} wrapping an offset.
-    * <p>
-    * If the prefix is "GMT", "UTC", or "UT" a {@code ZoneId}
-    * with the prefix and the non-zero offset is returned.
-    * If the prefix is empty {@code ""} the {@code ZoneOffset} is returned.
+  /** Obtains an instance of {@code ZoneId} wrapping an offset. <p> If the prefix is "GMT", "UTC", or "UT" a {@code
+    * ZoneId} with the prefix and the non-zero offset is returned. If the prefix is empty {@code ""} the {@code
+    * ZoneOffset} is returned.
     */
   def ofOffset(prefix: String, offset: ZoneOffset): F[ZoneId]
 }

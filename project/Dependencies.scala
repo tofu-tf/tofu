@@ -34,7 +34,7 @@ object Dependencies {
 
     val fs2 = "2.5.9"
 
-    val logback = "1.2.5"
+    val logback = "1.2.6"
 
     val monix = "3.4.0"
 
@@ -44,7 +44,7 @@ object Dependencies {
 
     val typesafeConfig = "1.4.1"
 
-    val zio = "1.0.10"
+    val zio = "1.0.11"
 
     val zioCats = "2.5.1.0"
 
@@ -59,7 +59,7 @@ object Dependencies {
 
     val simulacrum = "1.0.1"
 
-    val kindProjector = "0.13.0"
+    val kindProjector = "0.13.2"
 
     val betterMonadicFor = "0.3.1"
 
@@ -67,7 +67,8 @@ object Dependencies {
 
     val log4Cats = "1.3.1"
 
-    val groovy = "3.0.8"
+    val groovy = "3.0.9"
+
     val http4s = "0.22.1"
   }
 

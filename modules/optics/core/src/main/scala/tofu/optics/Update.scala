@@ -3,8 +3,7 @@ package tofu.optics
 import cats.{Applicative, Functor}
 import tofu.optics.data.Identity
 
-/** aka Setter
-  * can update all occurrences of A in S
+/** aka Setter can update all occurrences of A in S
   */
 trait PUpdate[-S, +T, +A, -B] extends PBase[PUpdate, S, T, A, B] {
   def update(s: S, fb: A => B): T

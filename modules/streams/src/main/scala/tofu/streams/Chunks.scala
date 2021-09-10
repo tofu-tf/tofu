@@ -10,8 +10,7 @@ trait Chunks[F[_], C[_]] {
     */
   def chunks[A](fa: F[A]): F[C[A]]
 
-  /** Returns a stream of chunks of size `n`.
-    * The last chunk that is emitted may have less than `n` elements.
+  /** Returns a stream of chunks of size `n`. The last chunk that is emitted may have less than `n` elements.
     */
   def chunkN[A](fa: F[A])(n: Int): F[C[A]]
 

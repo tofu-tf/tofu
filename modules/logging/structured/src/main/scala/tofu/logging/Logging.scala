@@ -13,19 +13,20 @@ import tofu.{Delay, Init, WithContext, higherKind}
 
 import scala.reflect.ClassTag
 
-/** Typeclass equivalent of Logger.
-  * May contain specified some Logger instance
-  * or try to read it from the context
+/** Typeclass equivalent of Logger. May contain specified some Logger instance or try to read it from the context
   */
 @deprecated("Use Logging[F] instead", since = "0.10.4")
 trait LoggingBase[F[_]] {
 
   /** push new message to log, level will be automatically checked
-    * @param level desired level of logging, message will not be rendered\sent, if logging level
-    *              of current logger is not low enough
-    * @param message composed string with `{}` placeholders for values
-    *                 do not create strings on each call, use constant template string instead
-    * @param values  log parameters , values of types having `Loggable` instance would be converted automatically
+    * @param level
+    *   desired level of logging, message will not be rendered\sent, if logging level of current logger is not low
+    *   enough
+    * @param message
+    *   composed string with `{}` placeholders for values do not create strings on each call, use constant template
+    *   string instead
+    * @param values
+    *   log parameters , values of types having `Loggable` instance would be converted automatically
     */
   def write(level: Level, message: String, values: LoggedValue*): F[Unit]
 
@@ -70,7 +71,8 @@ trait LoggingBase[F[_]] {
 
 /** Logging tagged with some arbitrary tag type.
   *
-  * @note there are no guarantees that `Service` correspond to the type parameter of `Logs.forService` method
+  * @note
+  *   there are no guarantees that `Service` correspond to the type parameter of `Logs.forService` method
   */
 trait ServiceLogging[F[_], Service] extends LoggingBase[F] {
   final def to[Svc2]: ServiceLogging[F, Svc2] = this.asInstanceOf[ServiceLogging[F, Svc2]]
@@ -93,7 +95,8 @@ object ServiceLogging {
 }
 
 /** Typeclass for logging.
-  * @see [[tofu.logging.Logs]] for creating instances of that trait
+  * @see
+  *   [[tofu.logging.Logs]] for creating instances of that trait
   */
 trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
   final def widen[G[a] >: F[a]]: Logging[G] = this.asInstanceOf[Logging[G]]

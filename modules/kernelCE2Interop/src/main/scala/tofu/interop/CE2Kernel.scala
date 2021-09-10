@@ -3,16 +3,17 @@ package interop
 
 import cats.effect.concurrent.{MVar, Ref}
 import cats.effect.{Async, Blocker, Bracket, Concurrent, ContextShift, Effect, ExitCase, Fiber, IO, Sync, Timer}
-import cats.{Id, ~>}
+import cats.{Functor, Id, Monad, ~>}
 import tofu.compat.unused
-import tofu.concurrent.{Atom, QVar}
+import tofu.concurrent._
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
+import tofu.lift.Lift
 import tofu.syntax.monadic._
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
-import java.util.concurrent.TimeUnit
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search
@@ -107,5 +108,43 @@ object CE2Kernel {
   final def sleep[F[_]](implicit T: cats.effect.Timer[F]): SleepCE2Carrier[F] =
     new SleepCE2Carrier[F] {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
+    }
+
+  final def agentByRefAndSemaphore[I[_]: Monad, F[_]: Fire: Monad](implicit
+      makeRef: MakeRef[I, F],
+      makeSemaphore: MakeSemaphore[I, F]
+  ): MakeAgent[I, F] = {
+    new MakeAgent[I, F] {
+      def agentOf[A](a: A): I[Agent[F, A]] =
+        for {
+          ref <- makeRef.refOf(a)
+          sem <- makeSemaphore.semaphore(1)
+        } yield SemRef(ref, sem)
+    }
+  }
+
+  final def serialAgentByRefAndSemaphore[I[_]: Monad, F[_]: Monad](implicit
+      makeRef: MakeRef[I, F],
+      makeSemaphore: MakeSemaphore[I, F]
+  ): MakeSerialAgent[I, F] =
+    new MakeSerialAgent[I, F] {
+      override def serialAgentOf[A](a: A): I[SerialAgent[F, A]] =
+        for {
+          ref <- makeRef.refOf(a)
+          sem <- makeSemaphore.semaphore(1)
+        } yield SerialSemRef(ref, sem)
+    }
+
+  final def underlyingSerialAgentByRefAndSemaphore[I[_]: Sync, F[_]: Functor, G[_]: Monad](implicit
+      makeRef: MakeRef[I, F],
+      makeSemaphore: MakeSemaphore[I, F],
+      lift: Lift[F, G]
+  ): MakeSerialAgent[I, G] =
+    new MakeSerialAgent[I, G] {
+      override def serialAgentOf[A](a: A): I[SerialAgent[G, A]] =
+        for {
+          ref <- makeRef.refOf(a)
+          sem <- makeSemaphore.semaphore(1)
+        } yield UnderlyingSemRef[F, G, A](ref, sem)
     }
 }

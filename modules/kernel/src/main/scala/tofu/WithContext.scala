@@ -5,11 +5,9 @@ import tofu.optics.{Contains, Extract}
 
 /** Synonym for [[Context]] with explicit C as Ctx for better type inference
   *
-  * There is also a nice type alias: {{{
-  * import tofu.In
+  * There is also a nice type alias: {{{ import tofu.In
   *
-  * val fHasMyCtx: MyCtx In F = ???
-  * }}}
+  * val fHasMyCtx: MyCtx In F = ??? }}}
   */
 trait WithContext[F[_], C] extends Context[F] {
   override type Ctx = C
@@ -28,7 +26,8 @@ trait WithContext[F[_], C] extends Context[F] {
     *   ask[F](myCtx => myCtx.toString)
     * }}}
     *
-    * @note It does not affect context itself.
+    * @note
+    *   It does not affect context itself.
     */
   override def ask[A](f: Ctx => A): F[A] = functor.map(context)(f)
 
@@ -37,7 +36,8 @@ trait WithContext[F[_], C] extends Context[F] {
 
   /** Allows to focus context on its inside with lens.
     *
-    * @param extract lens that can extract value of type `A` from `Ctx`
+    * @param extract
+    *   lens that can extract value of type `A` from `Ctx`
     */
   override def extract[A](extract: Extract[Ctx, A]): WithContext[F, A] =
     new ContextExtractInstance[F, Ctx, A](this, extract)
@@ -51,18 +51,14 @@ object WithContext {
 
   /** Creates constant Context of type C in F
     *
-    * Allows to put some value into context of F
-    * even when F itself does not have any way to store it
+    * Allows to put some value into context of F even when F itself does not have any way to store it
     *
-    * @example {{{
-    *   case class MyCtx(id: Int)
+    * @example
+    *   {{{ case class MyCtx(id: Int)
     *
-    *   val program: Option[String] = {
-    *     implicit val ctx = Context.const[Option, MyCtx](MyCtx(3))
+    * val program: Option[String] = { implicit val ctx = Context.const[Option, MyCtx](MyCtx(3))
     *
-    *     Context[Option].ask(ctx => ctx.id.toString)
-    *   }
-    * }}}
+    * Context[Option].ask(ctx => ctx.id.toString) } }}}
     */
   def const[F[_]: Applicative, C](c: C): F WithContext C = new WithContext[F, C] {
     val functor: Functor[F] = Functor[F]
@@ -71,16 +67,11 @@ object WithContext {
 
   /** Same as const but context is effectual here
     *
-    * @example {{{
-    *   def handleRequest[F[_]: Monad: *[_] WithContext TraceId](httpRequest: Request) = ???
+    * @example
+    *   {{{ def handleRequest[F[_]: Monad: *[_] WithContext TraceId](httpRequest: Request) = ???
     *
-    *   def myProgram[F[_]: Monad] =
-    *     for {
-    *       request                                 <- getRequest[F]
-    *       implicit0(ctx: TraceId In F) <- Context.make(genTraceId[F])
-    *       _                                       <- handleRequest[F](request)
-    *     } yield ()
-    * }}}
+    * def myProgram[F[_]: Monad] = for { request <- getRequest[F] implicit0(ctx: TraceId In F) <-
+    * Context.make(genTraceId[F]) _ <- handleRequest[F](request) } yield () }}}
     */
   def make[F[_]: Functor, A](fa: F[A]): WithContext[F, A] = new WithContext[F, A] {
     val functor: Functor[F] = implicitly
@@ -89,9 +80,10 @@ object WithContext {
 
   /** A mix-in for supplying environment data type companions with useful things
     *
-    * @example {{{
+    * @example
+    * {{{
     * @ClassyOptics
-    * case class MyContext(id: Int, date: String)
+    *   case class MyContext(id: Int, date: String)
     *
     * object MyContext extends Context.Companion[MyContext]
     * }}}

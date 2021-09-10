@@ -11,15 +11,14 @@ import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
-/** Env is a monad, allowing composition of functions that are context(environment)-aware.
-  * For example, you may have several functions that depend on some common environment/runtime.
-  * Env provides a way to compose such functions, allowing access to this environment in a monadic way.
-  * It is possible to override context locally for concrete functions that you may want to use with another context.
-  * Under the hood, Env is just a function `E => Task[A]`.
-  * Since it's primary based on Monix task, it mirrors most of its methods and functions, including parallel execution, error handling,
-  * memoization, forking and working with resources.
-  * Env plays well with Cats and Cats-Effect, providing instances for most of typeclasses (see [[tofu.env.EnvInstances]]),
-  * except Effect and ConcurrentEffect (which allow starting computation at any place, so it contradicts Env, which requires context being passed).
+/** Env is a monad, allowing composition of functions that are context(environment)-aware. For example, you may have
+  * several functions that depend on some common environment/runtime. Env provides a way to compose such functions,
+  * allowing access to this environment in a monadic way. It is possible to override context locally for concrete
+  * functions that you may want to use with another context. Under the hood, Env is just a function `E => Task[A]`.
+  * Since it's primary based on Monix task, it mirrors most of its methods and functions, including parallel execution,
+  * error handling, memoization, forking and working with resources. Env plays well with Cats and Cats-Effect, providing
+  * instances for most of typeclasses (see [[tofu.env.EnvInstances]]), except Effect and ConcurrentEffect (which allow
+  * starting computation at any place, so it contradicts Env, which requires context being passed).
   */
 sealed trait Env[E, +A] {
   def run(ctx: E): Task[A]
@@ -171,9 +170,8 @@ sealed trait Env[E, +A] {
   def timeoutTo[B >: A](dur: FiniteDuration, backup: Env[E, B]): Env[E, B]   =
     mapTask2(backup)(_.timeoutTo(dur, _))
 
-  /** Times the Env execution, returning its duration and the computed value in case of success.
-    * Delegates to underlying [[monix.eval.Task.timed]].
-    * Usage example:
+  /** Times the Env execution, returning its duration and the computed value in case of success. Delegates to underlying
+    * [[monix.eval.Task.timed]]. Usage example:
     * {{{
     *   for {
     *     r <- Env.delay(1 + 1).timed

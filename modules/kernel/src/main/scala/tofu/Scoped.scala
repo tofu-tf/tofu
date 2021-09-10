@@ -11,14 +11,15 @@ import tofu.internal.carriers.ScopedCarrier2
 import tofu.internal.carriers.ScopedCarrier3
 
 /** can be used for scoped transformations
-  * @tparam Tag arbitrary type tag f  type Execute[F[_]] = ScopedExecute[Scoped.Main, F]
+  * @tparam Tag
+  *   arbitrary type tag f type Execute[F[_]] = ScopedExecute[Scoped.Main, F]
   *
-  *  type Blocks[F[_]]    = Scoped[Scoped.Blocking, F]
-  *  type BlockExec[F[_]] = ScopedExecute[Scoped.Blocking, F]
+  * type Blocks[F[_]] = Scoped[Scoped.Blocking, F] type BlockExec[F[_]] = ScopedExecute[Scoped.Blocking, F]
   *
-  *  type Calculates[F[_]] = Scoped[Scoped.Calculation, F]
-  *  type CalcExec[F[_]]   = ScopedExecute[Scoped.Calculation, F]or discriminating scopes
-  * @tparam F process type
+  * type Calculates[F[_]] = Scoped[Scoped.Calculation, F] type CalcExec[F[_]] = ScopedExecute[Scoped.Calculation, F]or
+  * discriminating scopes
+  * @tparam F
+  *   process type
   */
 trait Scoped[Tag, F[_]] {
   def runScoped[A](fa: F[A]): F[A]
@@ -47,10 +48,10 @@ object Scoped extends ScopedInstances {
 
   def apply[Tag, F[_]](implicit sc: Scoped[Tag, F]): Scoped[Tag, F] = sc
 
-  /**  a helper for creating new instances of `Scoped`
-    *  {{{
-    *  val instance: Scoped[Tag, F] = Scoped.make[Tag, F](fa => ...)
-    *  }}}
+  /** a helper for creating new instances of `Scoped`
+    * {{{
+    *   val instance: Scoped[Tag, F] = Scoped.make[Tag, F](fa => ...)
+    * }}}
     */
   def make[Tag, F[_]] = new Make[Tag, F]
 
@@ -63,13 +64,9 @@ object Scoped extends ScopedInstances {
     final def runScoped[A](fa: F[A]): F[A] = arbApply(fa.asInstanceOf[F[Arbitrary]]).asInstanceOf[F[A]]
   }
 
-  /** could be used to define scopes with modified environment
-    * {{{
-    * case class MyContext(field: Field, ...)
-    * val newField: Field = ???
-    * type My[+A] = Env[MyContext, A]
-    * type Updated
-    * implicit val myScoped: Scoped[Updated, My] = Scoped.local[MyContext](_.copy(field = newField))}
+  /** could be used to define scopes with modified environment {{{ case class MyContext(field: Field, ...) val newField:
+    * Field = ??? type My[+A] = Env[MyContext, A] type Updated implicit val myScoped: Scoped[Updated, My] =
+    * Scoped.local[MyContext](_.copy(field = newField))}
     */
   def local[C]: Local[C] = new Local
 
@@ -92,14 +89,12 @@ trait ScopedExecute[Tag, F[_]] extends Scoped[Tag, F] {
 
 trait ScopedInstances {
 
-  /** make ScopedExecute instance with given tag using cats-effect2
-    * hidden implicits are: Async[F], ContextShift[F]
+  /** make ScopedExecute instance with given tag using cats-effect2 hidden implicits are: Async[F], ContextShift[F]
     */
   final def makeExecuteCE2[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
     macro Interop.delegate1p1[Execute[F], Tag, F, { val `tofu.interop.CE2Kernel.makeExecute`: Unit }]
 
-  /** make ScopedExecute instance with given tag using cats-effect3
-    * hidden implicit is Async[F]
+  /** make ScopedExecute instance with given tag using cats-effect3 hidden implicit is Async[F]
     */
   final def makeExecuteCE3[Tag, F[_]](p1: ExecutionContext): ScopedExecute[Tag, F] =
     macro Interop.delegate1p1[Execute[F], Tag, F, { val `tofu.interop.CE3Kernel.makeExecute`: Unit }]

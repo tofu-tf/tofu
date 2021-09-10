@@ -6,9 +6,7 @@ import tofu.optics.data._
 import cats.syntax.semigroup._
 import cats.instances.option._
 
-/** aka NonEmptyFold
-  * S has some occurences of A
-  * and can collect then
+/** aka NonEmptyFold S has some occurences of A and can collect then
   */
 trait PReduced[-S, +T, +A, -B] extends PFolded[S, T, A, B] with PBase[PReduced, S, T, A, B] { self =>
   def reduceMap[X: Semigroup](s: S)(f: A => X): X

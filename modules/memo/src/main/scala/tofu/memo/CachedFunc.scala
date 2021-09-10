@@ -6,7 +6,8 @@ import cats.effect.Clock
 import tofu.syntax.monadic._
 import cats.{Functor, Monad}
 import tofu.Guarantee
-import tofu.concurrent.{MVars, MakeMVar, MakeRef, Refs}
+import tofu.concurrent.ce2._
+import tofu.concurrent.{MVars, MakeMVar, MakeRef}
 
 import scala.concurrent.duration.FiniteDuration
 

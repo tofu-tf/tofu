@@ -10,7 +10,7 @@ lazy val setMinorVersion = minorVersion := {
 }
 
 lazy val defaultSettings = Seq(
-  scalaVersion := Version.scala213,
+  scalaVersion       := Version.scala213,
   crossScalaVersions := Vector(Version.scala212, Version.scala213),
   setMinorVersion,
   defaultScalacOptions,
@@ -229,7 +229,7 @@ lazy val opticsInterop = project
   .dependsOn(opticsCore)
   .settings(defaultSettings, libraryDependencies ++= Vector(monocle, catsCore), name := "tofu-optics-interop")
 
-lazy val opticsMacro = project
+lazy val opticsMacro   = project
   .in(file("modules/optics/macro"))
   .dependsOn(opticsCore)
   .settings(
@@ -370,10 +370,10 @@ lazy val docs = project // new documentation project
     macros,
     ScalaUnidoc / unidoc / scalacOptions += "-Ymacro-expand:none",
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*) -- inProjects(opticsMacro),
-    ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
+    ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
-    docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
-    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
+    docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
+    docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
   .dependsOn(mainModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
@@ -429,7 +429,7 @@ lazy val noPublishSettings =
 
 lazy val simulacrumOptions = Seq(
   libraryDependencies += simulacrum % Provided,
-  pomPostProcess := { node =>
+  pomPostProcess                   := { node =>
     import scala.xml.transform.{RewriteRule, RuleTransformer}
 
     new RuleTransformer(new RewriteRule {

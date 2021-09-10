@@ -4,9 +4,7 @@ import alleycats.Pure
 import cats._
 import tofu.optics.data._
 
-/** aka Traversal
-  * S has some or none occurences of A
-  * and can update them using some effect
+/** aka Traversal S has some or none occurences of A and can update them using some effect
   */
 trait PItems[-S, +T, +A, -B] extends PUpdate[S, T, A, B] with PFolded[S, T, A, B] with PBase[PItems, S, T, A, B] {
   def traverse[F[+_]: Applicative](s: S)(f: A => F[B]): F[T]
