@@ -81,11 +81,12 @@ object WithContext {
   /** A mix-in for supplying environment data type companions with useful things
     *
     * @example
-    *   {{{
+    * {{{
     * @ClassyOptics
     *   case class MyContext(id: Int, date: String)
     *
-    * object MyContext extends Context.Companion[MyContext] }}}
+    * object MyContext extends Context.Companion[MyContext]
+    * }}}
     */
   trait Companion[C] extends ContextInstances[C] {
 
