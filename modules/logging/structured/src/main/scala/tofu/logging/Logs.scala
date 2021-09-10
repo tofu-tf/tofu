@@ -39,14 +39,12 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
 
   /** An alternative to [[service]] method for tagless final services.
     *
-    * @example {{{
-    *   trait Service[F[_]]{ ...}
+    * @example
+    *   {{{ trait Service[F[_]]{ ...}
     *
-    *   object Service extends Logging.Companion[Service]
-    *   val logs: Logs.Universal[F] = ???
+    * object Service extends Logging.Companion[Service] val logs: Logs.Universal[F] = ???
     *
-    *   val serviceLog = logs.of[Service] //ServiceLogging[
-    * }}}
+    * val serviceLog = logs.of[Service] //ServiceLogging[ }}}
     */
   final def of[Svc[_[_]]](implicit tag: ClassTag[Svc[Any]]): I[ServiceLogging[F, Svc[Any]]] =
     service[Svc[Any]]
@@ -61,8 +59,8 @@ object Logs extends LogsInstances with LogsInstances0 {
 
   def apply[I[_], F[_]](implicit logs: Logs[I, F]): Logs[I, F] = logs
 
-  /** Returns an instance of [[tofu.logging.Logs]] that requires [[Delay]] to perform logging side-effects.
-    * Has no notion of context.
+  /** Returns an instance of [[tofu.logging.Logs]] that requires [[Delay]] to perform logging side-effects. Has no
+    * notion of context.
     */
   def sync[I[_]: Delay, F[_]: Delay: Monad]: Logs[I, F] = new Logs[I, F] {
     def byName(name: String): I[Logging[F]] = Delay[I].delay(new SyncLogging[F](LoggerFactory.getLogger(name)))
@@ -106,13 +104,11 @@ object Logs extends LogsInstances with LogsInstances0 {
 
   /** Allows to create Logging instance for the service
     *
-    * @example {{{
-    *   class MyService[F[_]](log: MyService.Log[F]) {...}
+    * @example
+    *   {{{ class MyService[F[_]](log: MyService.Log[F]) {...}
     *
-    *   object MyService extends LoggingCompanion[MyService] {
-    *     def make[I[_], F[_]]: I[MyService[F]] = Logs.provide[MyService[F]](new MyService[F](_))
-    *   }
-    * }}}
+    * object MyService extends LoggingCompanion[MyService] { def make[I[_], F[_]]: I[MyService[F]] =
+    * Logs.provide[MyService[F]](new MyService[F](_)) } }}}
     */
   def provide[I[_], F[_]] = new ProvidePA[I, F]
 
@@ -125,19 +121,11 @@ object Logs extends LogsInstances with LogsInstances0 {
     *
     * Same as [[provide]] but with ability to perform monadic actions.
     *
-    * @example {{{
-    *   class MyService[F[_]](ref: Ref[F, Smth], log: MyService.Log[F]) {...}
+    * @example
+    *   {{{ class MyService[F[_]](ref: Ref[F, Smth], log: MyService.Log[F]) {...}
     *
-    *   object MyService extends LoggingCompanion[MyService] {
-    *     def make[I[_], F[_]]: I[MyService[F]] = Logs.provide[MyService[F]]{
-    *       log =>
-    *         for {
-    *           ref <- Ref.make(...)
-    *           ...
-    *           } yield new MyService(ref, log)
-    *     }
-    *   }
-    * }}}
+    * object MyService extends LoggingCompanion[MyService] { def make[I[_], F[_]]: I[MyService[F]] =
+    * Logs.provide[MyService[F]]{ log => for { ref <- Ref.make(...) ... } yield new MyService(ref, log) } } }}}
     */
   def provideM[I[_], F[_]] = new ProvideMPA[I, F]
 
