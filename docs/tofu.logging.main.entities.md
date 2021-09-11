@@ -1,5 +1,6 @@
 ---
-id: tofu.logging.main.entities title: tofu.logging
+id: tofu.logging.main.entities
+title: Core concepts
 ---
 
 # tofu.logging core concepts

@@ -1,5 +1,6 @@
 ---
-id: tofu.logging.key-features title: Tofu Logging
+id: tofu.logging.key-features
+title: Key Features
 ---
 
 # Simple logging for your services
@@ -109,9 +110,9 @@ and if we run `ioService.sayHello` the message will be clean:
 }
 ```
 
-More on that can be found on the dedicated [recipe page](./recipes/context.md).
+More on that can be found on the dedicated [recipe page](tofu.logging.recipes.context.md).
 
 ## What's next
 
-- You can read about core concepts [here](./main-entities.md)
-- You can see the recipes and discover what you need to use `logging` [here](recipes/recipes.md)
+- You can read about core concepts [here](tofu.logging.main.entities.md)
+- You can see the recipes and discover what you need to use `logging` [here](tofu.logging.recipes.md)

@@ -1,5 +1,6 @@
 ---
-id: tofu.logging.home title: Tofu Logging
+id: tofu.logging.home
+title: Home (Start here)
 ---
 
 # Welcome to the Tofu Logging Home page
@@ -47,12 +48,12 @@ def processPayment[F[_]: Monad: Logging](client: Client, amount: Long): F[Result
 
 ## What's next
 
-- Discover [the key features](./key-features.md)
-- Get to know [the core concepts](./main-entities.md)
-- Learn how to use [the syntax](./syntax.md)
-- Find a way to use `logging` suitable for you in the [recipes](recipes/recipes.md)
+- Discover [the key features](tofu.logging.key-features.md)
+- Get to know [the core concepts](tofu.logging.main.entities.md)
+- Learn how to use [the syntax](tofu.logging.syntax.md)
+- Find a way to use `logging` suitable for you in the [recipes](tofu.logging.recipes.md)
 - Check out [the examples](https://github.com/tofu-tf/tofu/tree/better-doobie-example/examples)
 
 ## Old documentation
 
-You can also visit obsolete documentation [here](../logging.md).
+You can also visit obsolete documentation [here](./logging.old.md).

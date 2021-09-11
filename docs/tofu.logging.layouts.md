@@ -1,3 +1,9 @@
+---
+id: tofu.logging.layouts
+title: Logback Layouts
+---
+
+
 # Layouts
 
 Tofu is built upon [Logback](http://logback.qos.ch/) so it needs a custom `logback.xml` file with contexual logging

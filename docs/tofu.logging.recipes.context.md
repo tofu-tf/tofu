@@ -1,5 +1,6 @@
 ---
-id: tofu.logging.recipes.context title: Tofu Logging recipes
+id: tofu.logging.recipes.context
+title: Contextual Logging
 ---
 
 # Working with context
@@ -16,13 +17,13 @@ tofu.logging relies on set of contextual abstractions from tofu:
 - `WithProvide[F[_], G[_], C]` — describes the fact that `G[A]` can be evaluated to `F[A]` with given `C` (like running
   Reader-monad)
 
-More on that can be found in the context [documentation](../../hascontext.md).
+More on that can be found in the context [documentation](hascontext.md).
 
 ## Structure and context
 
 tofu.logging is a structured logging. It means that when you log a message it will be produced as JSON (or other
 structure), not just plain text. This structure has fields in it and the context appears as a set of fields and values.
-See Loggable [documentation](../main-entities.md#typeclass-loggablea) on how to configure that.
+See Loggable [documentation](./tofu.logging.main.entities.md#typeclass-loggablea) on how to configure that.
 
 ```scala
 @derive(loggable)
@@ -59,7 +60,7 @@ rest of the effects have some kind of context.
 
 ## Using created logs
 
-Second step is to use  `Logs` to create `Logging` for your service. Here [service logging recipe](service.md) is used,
+Second step is to use  `Logs` to create `Logging` for your service. Here [service logging recipe](tofu.logging.recipes.service.md) is used,
 but it actually doesn't matter, you can use whatever way you want:
 
 ```scala

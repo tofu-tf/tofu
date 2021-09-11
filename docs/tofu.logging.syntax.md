@@ -1,5 +1,6 @@
 ---
-id: tofu.logging.syntax title: tofu.logging.syntax
+id: tofu.logging.syntax
+title: tofu.syntax.logging
 ---
 
 # tofu.logging.syntax

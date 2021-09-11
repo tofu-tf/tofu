@@ -1,12 +1,13 @@
 ---
-id: tofu.logging.recipes.custom title: Tofu Logging recipes
+id: tofu.logging.recipes.custom
+title: Custom Logging implementation
 ---
 
 ## TODO yet to be implemented
 
 ## Your own specific logs
 
-tofu.logging allows you to use your own backend for logs, e.g. to send them to Clickhouse. To do this you'll need to
+As Logs & Logging are just an interfaces, tofu.logging allows you to use your own backend for logs, e.g. to send them to Clickhouse. To do this you'll need to
 implement `Logs` trait. The rest is still handled by tofu.
 
 Let's say you have this clickhouse client:
