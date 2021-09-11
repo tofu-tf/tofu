@@ -1,5 +1,6 @@
 ---
-id: tofu.logging.recipes.simple title: Tofu Logging recipes
+id: tofu.logging.recipes.simple
+title: The simplest form
 ---
 
 ## Simple logging

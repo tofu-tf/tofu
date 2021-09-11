@@ -1,5 +1,6 @@
 ---
-id: tofu.logging.recipes.auto title: Tofu Logging recipes
+id: tofu.logging.recipes.auto
+title: Logging auto derivation
 ---
 ## The problem
 Often you see that in well modularized apps log messages are quite the same:
@@ -49,7 +50,7 @@ There is also an alternative — loggingMidErr which also logs any error happene
 
 ## How it works
 
-The idea is based on the [Mid concept](../../mid.md). For every method `def foo(bar: Bar): F[Baz] = impl` it generates
+The idea is based on the [Mid concept](mid.md). For every method `def foo(bar: Bar): F[Baz] = impl` it generates
 it's logging compartment, looking close to that:
 
 ```scala

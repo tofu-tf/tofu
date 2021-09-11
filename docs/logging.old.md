@@ -1,9 +1,10 @@
 ---
-id: logging 
+id: logging.old
 title: Logging
 ---
-#
-This page is obsolete. Head on to the [new docs on logging](logging/home-page.md).
+
+# Warning
+This page is obsolete. Head on to the [new docs on logging](./tofu.logging.home.md).
 ## Installation
 
 Logging are available as a separate project
