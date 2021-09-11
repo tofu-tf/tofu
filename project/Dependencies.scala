@@ -68,6 +68,8 @@ object Dependencies {
     val log4Cats = "1.3.1"
 
     val groovy = "3.0.9"
+
+    val http4s = "0.22.1"
   }
 
   val noCatsCore       =
@@ -92,6 +94,7 @@ object Dependencies {
   val circeDerivation  = "io.circe"                   %% "circe-derivation"        % Version.circe excludeAll (noCatsCore: _*)
   val magnolia         = "com.propensive"             %% "magnolia"                % Version.magnolia
   val derevo           = "tf.tofu"                    %% "derevo-core"             % Version.derevo
+  val derevoCirce      = "tf.tofu"                    %% "derevo-circe"            % Version.derevo
   val derevoTagless    = "tf.tofu"                    %% "derevo-cats-tagless"     % Version.derevo
   val enumeratum       = "com.beachape"               %% "enumeratum"              % Version.enumeratum
   val fs2              = "co.fs2"                     %% "fs2-io"                  % Version.fs2
@@ -109,10 +112,13 @@ object Dependencies {
   val collectionCompat = "org.scala-lang.modules"     %% "scala-collection-compat" % Version.collectionCompat
   val log4Cats         = "org.typelevel"              %% "log4cats-core"           % Version.log4Cats
   val groovy           = "org.codehaus.groovy"         % "groovy"                  % Version.groovy
-
+  val http4s           =
+    Seq("org.http4s" %% "http4s-dsl", "org.http4s" %% "http4s-circe", "org.http4s" %% "http4s-blaze-server").map(
+      _ % Version.http4s
+    )
   // Compile-time only
-  val macroParadise    = "org.scalamacros" % "paradise"           % Version.macroParadise cross CrossVersion.patch
-  val kindProjector    = "org.typelevel"  %% "kind-projector"     % Version.kindProjector cross CrossVersion.patch
-  val simulacrum       = "org.typelevel"  %% "simulacrum"         % Version.simulacrum
-  val betterMonadicFor = "com.olegpy"     %% "better-monadic-for" % Version.betterMonadicFor
+  val macroParadise    = "org.scalamacros"             % "paradise"                % Version.macroParadise cross CrossVersion.patch
+  val kindProjector    = "org.typelevel"              %% "kind-projector"          % Version.kindProjector cross CrossVersion.patch
+  val simulacrum       = "org.typelevel"              %% "simulacrum"              % Version.simulacrum
+  val betterMonadicFor = "com.olegpy"                 %% "better-monadic-for"      % Version.betterMonadicFor
 }

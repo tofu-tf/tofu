@@ -1,6 +1,7 @@
 import tofu.logging.logback.ConsoleContextLayout
 import tofu.logging.ELKLayout
 
+//puts messages as plain text
 appender("PLAIN-COLORED", ConsoleAppender) {
     encoder(LayoutWrappingEncoder) {
         layout(ConsoleContextLayout) {
@@ -8,7 +9,7 @@ appender("PLAIN-COLORED", ConsoleAppender) {
         }
     }
 }
-
+//puts messages as JSONs
 appender("STRUCTURED", ConsoleAppender) {
     encoder(LayoutWrappingEncoder) {
         layout(ELKLayout)
