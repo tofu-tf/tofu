@@ -70,7 +70,7 @@
 
 </code></pre>
 <p>The line <code>object MyService extends LoggingCompanion[MyService]</code> mixes in type Log to the companion, which is just alias
-for <a href="../main-entities.md#logging"><code>ServiceLogging[F, MyService]</code></a>.</p>
+for <a href="/docs/tofu.logging.main.entities#logging"><code>ServiceLogging[F, MyService]</code></a>.</p>
 <p>This type carries information about which class it is supposed to be used for, so Scala compiler is able to implicitly
 create from Logs and pass desired <code>ServiceLogging</code> instance.</p>
 <p>And in the wiring of the app, just as in <a href="/docs/tofu.logging.recipes.simple">simple logging</a>:</p>
