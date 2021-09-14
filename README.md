@@ -3,7 +3,7 @@
 # ToFu
 
 [![Build & Release](https://github.com/tofu-tf/tofu/workflows/Scala%20CI/badge.svg)](https://github.com/tofu-tf/tofu/actions?query=workflow%3A%22Scala+CI%22)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core_2.13)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core-ce3_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core_2.13)
 [![Discord Chat](https://img.shields.io/discord/657318688025739283.svg)](https://discord.gg/qPD5GGH)
 [![Scala Steward badge](https://img.shields.io/badge/Scala_Steward-helping-blue.svg?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAQCAMAAAARSr4IAAAAVFBMVEUAAACHjojlOy5NWlrKzcYRKjGFjIbp293YycuLa3pYY2LSqql4f3pCUFTgSjNodYRmcXUsPD/NTTbjRS+2jomhgnzNc223cGvZS0HaSD0XLjbaSjElhIr+AAAAAXRSTlMAQObYZgAAAHlJREFUCNdNyosOwyAIhWHAQS1Vt7a77/3fcxxdmv0xwmckutAR1nkm4ggbyEcg/wWmlGLDAA3oL50xi6fk5ffZ3E2E3QfZDCcCN2YtbEWZt+Drc6u6rlqv7Uk0LdKqqr5rk2UCRXOk0vmQKGfc94nOJyQjouF9H/wCc9gECEYfONoAAAAASUVORK5CYII=)](https://scala-steward.org)
 
@@ -26,7 +26,7 @@ of `"tofu"`):
 
 * `tofu-kernel` for core independent utils
   * `tofu-kernel-cats-mtl` for interop between `tofu-kernel` and [Cats MTL](https://github.com/typelevel/cats-mtl)
-* `tofu-core` for core utils
+* `tofu-core-*` for core utils (replace suffix `*` with `ce2` or `ce3` depends on which cats-effect version you use)
 * `tofu-core-higher-kind` for higher kinded utils
 * `tofu-concurrent` for concurrent utils
 * `tofu-config` for config utils

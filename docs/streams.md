@@ -1,3 +1,7 @@
+--
+id: streams
+title: Streams
+--
 # Streams
 
 Functional streaming effects like `fs2` had become a very handy tool for modeling streaming pipelines. 
