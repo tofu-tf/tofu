@@ -5,8 +5,8 @@ title: HasContext
 ## Installation
 `"tf.tofu" %% "tofu" % tofu-version`  
 or as a standalone dependency 
-`"tf.tofu" %% "tofu-core" % tofu-version`  
-
+`"tf.tofu" %% "tofu-core-*" % tofu-version`
+(replace suffix `*` with `ce2` or `ce3` depends on which cats-effect version you use)
 ## What if you don't need Env
 
 Env is a powerful monad, but what if you're sure that you don't need it?
