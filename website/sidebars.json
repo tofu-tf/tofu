@@ -42,7 +42,7 @@
         "label": "Contextual",
         "ids": [
           "env",
-          "hascontext",
+          "withcontext",
           "kernelcatsmtlinterop"
         ]
       },
