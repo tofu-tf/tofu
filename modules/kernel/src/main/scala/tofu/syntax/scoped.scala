@@ -24,15 +24,27 @@ trait ScopedSyntax {
   def calcDelay[F[_]] = scopedDelay[Scoped.Calculation, F]
 
   /** run process in blocking scope */
-  def blocking[F[_]: Blocks, A](fa: F[A]): F[A] = scoped[Blocking](fa)
+  def blocking[F[_]: Scoped[Scoped.Blocking, *[_]], A](fa: F[A]): F[A] = {
+    implicit val n = ???
+
+    scoped[Blocking](fa)
+  }
 
   /** run process in calculation scope */
-  def calculation[F[_]: Calculates, A](fa: F[A]): F[A] = scoped[Calculation](fa)
+  def calculation[F[_]: Scoped[Scoped.Calculation, *[_]], A](fa: F[A]): F[A] = {
+    implicit val n = ???
+
+    scoped[Calculation](fa)
+  }
 
   /** run process with given execution context */
   def withScopedEc[Tag] = new WithEcApply[Tag]
 
-  def withEc[F[_]: Execute: FlatMap, A](f: ExecutionContext => F[A]): F[A] = withScopedEc[Main](f)
+  def withEc[F[_]: ScopedExecute[Scoped.Main, *[_]]: FlatMap, A](f: ExecutionContext => F[A]): F[A] = {
+    implicit val n = ???
+
+    withScopedEc[Main](f)
+  }
 
   def deferScopedFuture[Tag, F[_]] = new DeferFutureApply[Tag, F]
 

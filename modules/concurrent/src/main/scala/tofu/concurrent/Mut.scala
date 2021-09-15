@@ -30,8 +30,11 @@ object Mut {
   }
 
   private class MVarMut[F[_]: Bracket[*[_], E], E, A](mvar: MVar[F, A]) extends Mut[F, A] {
-    def get: F[A]                  = mvar.read
-    def update(f: A => A): F[Unit] = mvar.take.bracketIncomplete(f andThen mvar.put)(mvar.put)
+    def get: F[A] = mvar.read
+    def update(f: A => A): F[Unit] = {
+      implicit val n = ???
+      mvar.take.bracketIncomplete(f andThen mvar.put)(mvar.put)
+    }
   }
 
   private[Mut] class FocusedMut[F[_], A, B](v: Mut[F, A], focus: Contains[A, B])(implicit F: Functor[F])

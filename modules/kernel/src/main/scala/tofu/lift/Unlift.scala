@@ -17,6 +17,8 @@ trait Lift[F[_], G[_]] {
 }
 
 object Lift extends LiftInstances1 {
+  type AnyKK[_] = Any
+
   def apply[F[_], G[_]](implicit lift: Lift[F, G]): Lift[F, G] = lift
   def trans[F[_], G[_]](implicit lift: Lift[F, G]): F ~> G     = lift.liftF
 
@@ -25,12 +27,12 @@ object Lift extends LiftInstances1 {
       def lift[A](fa: F[A]): G[A] = fk(fa)
     }
 
-  private val liftIdentityAny: Lift[AnyK, AnyK] = new Lift[AnyK, AnyK] {
+  private val liftIdentityAny: Lift[AnyKK, AnyKK] = new Lift[AnyKK, AnyKK] {
     def lift[A](fa: Any): Any = fa
   }
-  implicit def liftIdentity[F[_]]: Lift[F, F]   = liftIdentityAny.asInstanceOf[Lift[F, F]]
+  implicit def liftIdentity[F[_]]: Lift[F, F]     = liftIdentityAny.asInstanceOf[Lift[F, F]]
 
-  private val liftReaderTAny: Lift[AnyK, ReaderT[Any, Any, *]] = {
+  private val liftReaderTAny: Lift[AnyKK, ReaderT[Any, Any, *]] = {
     type RT[a] = ReaderT[Any, Any, a]
     new Lift[Any, RT] {
       def lift[A](fa: Any): RT[A] = ReaderT.liftF(fa)

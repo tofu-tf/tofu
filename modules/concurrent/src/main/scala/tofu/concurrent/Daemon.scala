@@ -195,12 +195,18 @@ object Actor {
       daemon: Daemon[F, E, Void] <- Daemon.repeat(mvar.take >>= receive)
     } yield new LocalActor(mvar, daemon)
 
-  def sync[F[_]: Concurrent, A](receive: A => Unit): F[Actor[F, Throwable, A]] = apply(a => receive(a).pure[F])
+  def sync[F[_]: Concurrent, A](receive: A => Unit): F[Actor[F, Throwable, A]] = {
+    implicit val n = ???
+    apply(a => receive(a).pure[F])
+  }
 
   def syncSupervise[F[_]: Concurrent, A](
       receive: A => Unit
-  )(strategy: Throwable => F[Unit]): F[Actor[F, Throwable, A]] =
+  )(strategy: Throwable => F[Unit]): F[Actor[F, Throwable, A]] = {
+    implicit val n = ???
+
     apply(a => Sync[F].delay(receive(a)).handleErrorWith(strategy))
+  }
 }
 
 final class TofuCanceledJoinException[F[_], A] private[tofu] (val daemon: Daemon[F, Throwable, A])
