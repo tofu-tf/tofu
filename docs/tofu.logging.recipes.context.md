@@ -17,7 +17,7 @@ tofu.logging relies on set of contextual abstractions from tofu:
 - `WithProvide[F[_], G[_], C]` — describes the fact that `G[A]` can be evaluated to `F[A]` with given `C` (like running
   Reader-monad)
 
-More on that can be found in the context [documentation](hascontext.md).
+More on that can be found in the context [documentation](withcontext.md).
 
 ## Structure and context
 
