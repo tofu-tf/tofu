@@ -12,10 +12,11 @@ trait ScopedSyntax {
   import Scoped.{Blocking, Calculation, Main}
   import ScopedSyntax._
 
+  private type Blocks[F[_]]     = kernel.types.Blocks[F]     // avoid import for unidoc
+  private type Calculates[F[_]] = kernel.types.Calculates[F] // avoid import for unidoc
+  private type Execute[F[_]]    = kernel.types.Execute[F]    // avoid import for unidoc
+
   /** run process in scope */
-  private type Blocks[F[_]]     = kernel.types.Blocks[F]     // avoid import
-  private type Calculates[F[_]] = kernel.types.Calculates[F] // avoid import
-  private type Execute[F[_]]    = kernel.types.Execute[F]    // avoid import
   def scoped[Tag] = new ScopedApply[Tag]
 
   /** delay calculation in scope */
