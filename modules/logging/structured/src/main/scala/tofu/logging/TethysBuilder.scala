@@ -6,6 +6,7 @@ import java.io.StringWriter
 import cats.instances.unit._
 import cats.kernel.Monoid
 import tofu.logging.LogRenderer.LogRendererUnit
+import tethys.commons.RawJson
 import tethys.writers.tokens.TokenWriter
 import tofu.compat.unused
 
@@ -112,6 +113,20 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
   }
 }
 
+class TethysBuilderWithCustomFields(customFields: List[(String, RawJson)], prefix: String = "", postfix: String = "")
+    extends TethysBuilder(prefix, postfix) {
+
+  override def predefined(tokenWriter: TokenWriter): Unit = {
+    customFields.foreach { case (key, json) =>
+      tokenWriter.writeFieldName(key)
+      tokenWriter.writeRawJson(json.json)
+    }
+  }
+}
+
 object TethysBuilder extends TethysBuilder("", "") {
   def apply(prefix: String = "", postfix: String = "") = new TethysBuilder(prefix, postfix)
+
+  def withCustomFields(customFields: List[(String, RawJson)], prefix: String = "", postfix: String = "") =
+    new TethysBuilderWithCustomFields(customFields, prefix, postfix)
 }
