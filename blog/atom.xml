@@ -2,8 +2,8 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://docs.tofu.tf/blog</id>
     <title>Tofu Blog</title>
-    <updated>2017-10-29T06:00:00.000Z</updated>
-    <generator>https://github.com/jpmonette/feed</generator>
+    <updated>2017-10-29T06:00:00Z</updated>
+    <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://docs.tofu.tf/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Tofu news and events.</subtitle>
     <logo>https://docs.tofu.tf/img/favicon.ico</logo>
@@ -11,8 +11,9 @@
     <entry>
         <title type="html"><![CDATA[Started docs]]></title>
         <id>https://docs.tofu.tf/blog/2017/10/29/hello-docs.html</id>
-        <link href="https://docs.tofu.tf/blog/2017/10/29/hello-docs.html"/>
-        <updated>2017-10-29T06:00:00.000Z</updated>
+        <link href="https://docs.tofu.tf/blog/2017/10/29/hello-docs.html">
+        </link>
+        <updated>2017-10-29T06:00:00Z</updated>
         <summary type="html"><![CDATA[<p>Starting from today we have docs in tofu.<br> Also checkout the new logo. Spent over 9000h in draw.io</p> ]]></summary>
         <author>
             <name>Oleg Nizhnik</name>
