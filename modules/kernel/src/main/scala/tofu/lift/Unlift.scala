@@ -7,7 +7,6 @@ import cats.{Applicative, FlatMap, Functor, Monad, ~>}
 import syntax.funk._
 import tofu.optics.Contains
 import tofu.syntax.monadic._
-import kernel.types._
 import tofu.internal.ContextBase
 
 trait Lift[F[_], G[_]] {
@@ -17,6 +16,8 @@ trait Lift[F[_], G[_]] {
 }
 
 object Lift extends LiftInstances1 {
+  private type AnyK[A] = Any // avoid import kernel.types, due to unidoc inadeqacy
+
   def apply[F[_], G[_]](implicit lift: Lift[F, G]): Lift[F, G] = lift
   def trans[F[_], G[_]](implicit lift: Lift[F, G]): F ~> G     = lift.liftF
 

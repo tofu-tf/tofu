@@ -27,7 +27,7 @@ final class EmbeddableLogHandler[F[_]](val self: F[LogHandler]) extends AnyVal {
 }
 
 /** `EmbeddableLogHandler[F]` has two main constructors from `LogHandlerF[F]`: `async` and `sync`. Both require
-  * `UnliftIO[F]` and need to perform IO unsafely under the hood due to the impurity of [[doobie.util.log.LogHandler]].
+  * `UnliftIO[F]` and need to perform IO unsafely under the hood due to the impurity of `doobie.util.log.LogHandler`.
   */
 object EmbeddableLogHandler {
   def apply[F[_]](implicit elh: EmbeddableLogHandler[F]): EmbeddableLogHandler[F] = elh
