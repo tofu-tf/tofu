@@ -29,6 +29,13 @@ class ELKLayout extends LayoutBase[ILoggingEvent] {
     updateEventLoggable()
   }
 
+  /** Appends optional static fields which will be merged into you structured json output.
+    *
+    * Usage (inside <layout>): <customFields>{ "a": 1, "b": { "c": true, "d": "great" } }</customFields>
+    *
+    * @param json
+    *   object of static fields with their values.
+    */
   def setCustomFields(json: String) =
     json.jsonAs[List[JsonEntry]] match {
       case Left(value)  => throw new Exception("Invalid json format for 'customFields'. Check your json.", value)

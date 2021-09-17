@@ -19,7 +19,16 @@ Luckily for us, tofu has two special Layouts:
 
 <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-        <layout class="tofu.logging.ELKLayout"/>
+        <layout class="tofu.logging.ELKLayout">
+          <!-- Optional tag for static fields which will be merged into structured json output. -->
+          <customFields>{
+            "a": 1,
+            "b": {
+                "c": true,
+                "d": "great"
+            }
+          }</customFields>
+        </layout>
     </encoder>
 </appender>
   ```
