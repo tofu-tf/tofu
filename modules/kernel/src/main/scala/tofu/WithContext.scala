@@ -98,7 +98,7 @@ object WithContext {
     ): WithContextContainsInstance[F, C, A] =
       new WithContextContainsInstance[F, C, A]
 
-    /** Access [[C]] in [[F]].
+    /** Access context `C` in F.
       */
     final def access[F[_]](implicit has: Has[F]): F[C] =
       has.context
