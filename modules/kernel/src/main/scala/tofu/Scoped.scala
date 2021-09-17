@@ -64,8 +64,8 @@ object Scoped extends ScopedInstances {
     final def runScoped[A](fa: F[A]): F[A] = arbApply(fa.asInstanceOf[F[Arbitrary]]).asInstanceOf[F[A]]
   }
 
-  /** could be used to define scopes with modified environment 
-    * {{{ 
+  /** could be used to define scopes with modified environment
+    * {{{
     * case class MyContext(field: Field, ...) val newField:
     * Field = ??? type My[+A] = Env[MyContext, A] type Updated implicit val myScoped: Scoped[Updated, My] =
     * Scoped.local[MyContext](_.copy(field = newField))
