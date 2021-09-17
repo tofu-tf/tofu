@@ -132,15 +132,6 @@ lazy val loggingLayout = project
   )
   .dependsOn(loggingStr)
 
-lazy val loggingUtil = project
-  .in(file("modules/logging/util"))
-  .settings(
-    defaultSettings,
-    name := "tofu-logging-util",
-    libraryDependencies ++= Vector(slf4j, catsEffect2),
-  )
-  .dependsOn(loggingStr)
-
 lazy val loggingShapeless = project
   .in(file("modules/logging/interop/shapeless"))
   .settings(
@@ -170,8 +161,8 @@ lazy val loggingLog4Cats = project
 
 lazy val logging = project
   .in(file("modules/logging"))
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
-  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .aggregate(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
   .settings(
     defaultSettings,
     name := "tofu-logging"

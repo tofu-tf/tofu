@@ -2,7 +2,7 @@ package tofu.logging.atom
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-import cats.effect.Clock
+import tofu.time.Clock
 import cats.{Applicative, FlatMap}
 import tofu.concurrent.Atom
 import tofu.higherKind.Embed
