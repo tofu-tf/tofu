@@ -34,7 +34,8 @@
           "tofu.logging.recipes.simple",
           "tofu.logging.recipes.service",
           "tofu.logging.recipes.context",
-          "tofu.logging.recipes.auto"
+          "tofu.logging.recipes.auto",
+          "tofu.logging.recipes.zio"
         ]
       },
       {
