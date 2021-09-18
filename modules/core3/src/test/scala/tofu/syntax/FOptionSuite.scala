@@ -340,13 +340,13 @@ class FOptionSuite extends AnyFlatSpec {
 
   "collectF" should "return successful collected" in {
     assert(
-      42.someF[List].collectF(v => List(v + 1)) === List(Some(43))
+      42.someF[List].collectF { case v => List(v + 1) } === List(Some(43))
     )
   }
 
   "collectF" should "return empty collected when empty M" in {
     assert(
-      42.someF[List].collectF(_ => List.empty[Int]) === Nil
+      42.someF[List].collectF { case _ => List.empty[Int] } === Nil
     )
   }
 
@@ -364,7 +364,7 @@ class FOptionSuite extends AnyFlatSpec {
 
   "collectIn" should "return successful collected" in {
     assert(
-      42.someF[List].collectIn(_ + 1) === List(Some(43))
+      42.someF[List].collectIn { case v => v + 1 } === List(Some(43))
     )
   }
 
