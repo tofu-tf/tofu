@@ -6,18 +6,6 @@ import tofu.syntax.either._
 
 class EitherSuite extends AnyWordSpec with Matchers {
 
-  //--Helpers------------------------------------
-
-  implicit class SuiteIdOps[A](id: A) {
-    def asRightS[L]: Option[Either[L, A]] = Some(Right(id))
-
-    def asLeftS[R]: Option[Either[A, R]] = Some(Left(id))
-  }
-
-  def defaultRight: Option[Either[String, Int]] = 4.asRightS[String]
-
-  def defaultLeft: Option[Either[Int, String]] = 4.asLeftS[String]
-
   "TofuEitherAssocLOps#accocL" should {
     "return valid value for Left Left" in {
       Left(Left("foo")).assocL mustBe Left("foo")
