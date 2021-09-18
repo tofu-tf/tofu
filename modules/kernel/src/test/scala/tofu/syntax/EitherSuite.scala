@@ -22,7 +22,7 @@ class EitherSuite extends AnyWordSpec with Matchers {
 
   "TofuEitherAssocROps#accocL" should {
     "return valid value for Right Left" in {
-      Right(Left("foo")).assocR mustBe Left(Left("foo"))
+      Right(Left("foo")).assocR mustBe Left(Right("foo"))
     }
 
     "return valid value for Right Right" in {
