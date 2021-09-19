@@ -23,16 +23,18 @@ trait Guarantee[F[_]] {
   def bracket[A, B, C](init: F[A])(action: A => F[B])(release: (A, Boolean) => F[C]): F[B]
 }
 
-object Guarantee extends EffectComp[Guarantee] {
-  final implicit def interopCE2[F[_], E, Exit[_]](implicit
-      @unused ev1: MonadError[F, E],
-      carrier: FinallyCarrier2.Aux[F, E, Exit]
-  ): Finally[F, Exit] =
-    carrier.content
-
+object Guarantee extends EffectComp[Guarantee] with GuaranteeInstances0 {
   final implicit def interopCE3[F[_], E, Exit[_]](implicit
       @unused ev1: MonadError[F, E],
       carrier: FinallyCarrier3.Aux[F, E, Exit]
+  ): Finally[F, Exit] =
+    carrier.content
+}
+
+private[tofu] trait GuaranteeInstances0 {
+  final implicit def interopCE2[F[_], E, Exit[_]](implicit
+      @unused ev1: MonadError[F, E],
+      carrier: FinallyCarrier2.Aux[F, E, Exit]
   ): Finally[F, Exit] =
     carrier.content
 }
