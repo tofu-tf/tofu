@@ -14,7 +14,17 @@ Add these dependencies into your project:
 ```sbt
 libraryDependencies += "tf.tofu" %% "tofu-logging" % "<latest version in the badge in README>"
 libraryDependencies += "tf.tofu" %% "tofu-logging-derivation" % "<latest version in the badge in README>"
+```
+`logging` requires an instance of the `Delay` typeclass, which can be created by hand, or can be imported from an according package:
 
+Cats Effect 3 users should add the following dependency:
+```sbt
+libraryDependencies += "tf.tofu" %% "tofu-kernel-ce3-interop" % "<latest version in the badge in README>"
+```
+
+and Cats Effect 2 users should add:
+```sbt
+libraryDependencies += "tf.tofu" %% "tofu-kernel-ce2-interop" % "<latest version in the badge in README>"
 ```
 
 For ZIO users the following is enough:
