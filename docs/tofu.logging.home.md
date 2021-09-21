@@ -23,6 +23,7 @@ For ZIO users the following is enough:
 libraryDependencies += "tf.tofu" %% "tofu-logging-zio" % "<latest version in the badge in README>"
 
 ```
+See also [ZIO Logging](./tofu.logging.recipes.zio.md) section.
 
 ## Quick demo
 

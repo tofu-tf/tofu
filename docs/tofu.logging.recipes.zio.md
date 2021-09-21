@@ -116,7 +116,7 @@ Now the output looks like:
 {"@timestamp":"2021-09-19T21:12:18.017Z","loggerName":"BarServiceImpl","threadName":"zio-default-async-4","level":"DEBUG","message":"Got current date 2021-09-20","date":"2021-09-20"}
 ```
 `Loggable.apply[LocalDate]` summons an instance from the global scope, `.named` converts logged object into a single field named `name`.
-There are several methods to create and modify `Loggable` instances, read more in [Loggable example](./logging.old.md#Loggable example).
+There are several methods to create and modify `Loggable` instances, read more in [Loggable](./tofu.logging.loggable.md) section.
 
 ### Context logging
 Let's consider how to log the context along with actual log message. If you have an instance of `Loggable` for your context, 
