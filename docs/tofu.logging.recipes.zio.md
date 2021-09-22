@@ -15,27 +15,31 @@ import tofu.logging.zlogs._
 ```
 This contains some useful stuff:
 
-##### `tofu.logging.Logging` type aliases
+* `tofu.logging.Logging` type aliases\
 These services do logs.
-- `ULogging` — is a type alias for `Logging[UIO]`. Logging methods have no environment like 
-`def info(message: String, values: LoggedValue*): UIO[Unit]`
-- `ZLogging[R]` — is a type alias for `Logging[URIO[R, *]]`. Logging methods require a ZIO environment `R`:
-`def info(message: String, values: LoggedValue*): URIO[R, Unit]`
+  - `ULogging` — is a type alias for `Logging[UIO]`. Logging methods have no environment like 
+  `def info(message: String, values: LoggedValue*): UIO[Unit]`
+  - `ZLogging[R]` — is a type alias for `Logging[URIO[R, *]]`. Logging methods require a ZIO environment `R`:
+  `def info(message: String, values: LoggedValue*): URIO[R, Unit]`
+  
 
-##### `ZLogging.Make`
-Use this instead of `tofu.logging.Loging.Make`. `Make` is a factory creating `Logging` instances with no side effects.
-- `ZLogging.Make` — is a type alias for `Logs[Id, UIO]`, produces plain instances of `ULogging`.
-- `ZLogging.ZMake[R]` — is a type alias for `Logs[Id, URIO[R, *]]`, produces contextual `ZLogging[R]`.
-Read more about logging factory in [core concepts](./tofu.logging.main.entities.md).
+* `ZLogging.Make` type\
+  Use this instead of `tofu.logging.Loging.Make`. `Make` is a factory creating `Logging` instances with no side effects.
+  - `ZLogging.Make` — is a type alias for `Logs[Id, UIO]`, produces plain instances of `ULogging`.
+  - `ZLogging.ZMake[R]` — is a type alias for `Logs[Id, URIO[R, *]]`, produces contextual `ZLogging[R]`.
 
-`ZLogging.Make` object also provides several methods for creating ZIO layers with `Make` instances.
-- `layerPlain` creates layer contains simple implementation of `ZLogging.Make`
-- `layerContextual[R: Loggable]` makes a fabric `ZMake[R]` of contextual `ZLogging[R]` retrieving a context from 
-the ZIO environment of the logging methods
-- `layerPlainWithContext[C: Loggable, ContextService](f: ContextService => UIO[C])` creates layers with an implementation 
-of `ZLogging.Make` encapsulated context inside. Every logging methods will call function `f` on the `ContextService` 
-to get a context which will be added to the logs. The `ContextService` is supposed to be provided at the app creation point 
-via ZLayer environment.
+  Read more about logging factory in [core concepts](./tofu.logging.main.entities.md).
+
+
+* `ZLogging.Make` object\
+Provides several methods for creating ZIO layers with `Make` instances.
+  - `layerPlain` creates layer contains simple implementation of `ZLogging.Make`
+  - `layerContextual[R: Loggable]` makes a fabric `ZMake[R]` of contextual `ZLogging[R]` retrieving a context from 
+  the ZIO environment of the logging methods
+  - `layerPlainWithContext[C: Loggable, ContextService](f: ContextService => UIO[C])` creates layers with an implementation 
+  of `ZLogging.Make` encapsulated context inside. Every logging methods will call function `f` on the `ContextService` 
+  to get a context which will be added to the logs. The `ContextService` is supposed to be provided at the app creation point 
+  via ZLayer environment.
 
 ### Example
 Let's write a simple service, which logs a current date. 
@@ -102,9 +106,11 @@ object Main extends zio.App {
 Thanks to [zio-magic](https://github.com/kitlangton/zio-magic/) we can just list all dependencies in 
 the `injectCustom` method, not design layers manually. Output of the program will be:
 ```json lines
-{"@timestamp":"2021-09-19T21:12:17.746Z","loggerName":"BarServiceImpl","threadName":"zio-default-async-4","level":"INFO","message":"Start program"}
-{"@timestamp":"2021-09-19T21:12:18.017Z","loggerName":"BarServiceImpl","threadName":"zio-default-async-4","level":"DEBUG","message":"Got current date 2021-09-20"}
+{"level":"INFO","message":"Start program"}
+{"level":"DEBUG","message":"Got current date 2021-09-20"}
 ```
+**Note:** for simplicity here and further extra fields (e.g. *timestamp*, *threadName*) were removed.
+
 ### Custom `Loggable`
 Default `Loggable[LocalDate]` is based on `stringValue` instance, hence the date was logged as a plain string, not key-value. 
 What if you want the date to be a separated field in json? Well, you can customize `Loggable`. Add the following line into the `BarServiceImpl`:
@@ -113,7 +119,7 @@ private implicit val customDateLoggable = Loggable[LocalDate].named(name="date")
 ```
 Now the output looks like:
 ```json lines
-{"@timestamp":"2021-09-19T21:12:18.017Z","loggerName":"BarServiceImpl","threadName":"zio-default-async-4","level":"DEBUG","message":"Got current date 2021-09-20","date":"2021-09-20"}
+{"level":"DEBUG","message":"Got current date 2021-09-20","date":"2021-09-20"}
 ```
 `Loggable.apply[LocalDate]` summons an instance from the global scope, `.named` converts logged object into a single field named `name`.
 There are several methods to create and modify `Loggable` instances, read more in [Loggable](./tofu.logging.loggable.md) section.
@@ -128,15 +134,18 @@ import tofu.logging.derivation.loggable
 @derive(loggable)
 final case class Context(requestId: Int)
 ```
-Here we use [Tofu Derevo](https://github.com/tofu-tf/derevo) for automatic derivation `Loggable` instance.
+Here we use [Tofu Derevo](https://github.com/tofu-tf/derevo) for automatic derivation [Loggable](./tofu.logging.loggable.md) instance.
 
-The main idea of this approach is to store your in ZIO [FiberRef](https://zio.dev/docs/datatypes/fiber/fiberref). 
+One possible way to add a context to your logs is to use `layerPlainWithContext` which encapsulates dealing with the context inside
+(otherwise you can use `layerContextual` retrieving the context from a ZIO environment `R`, but we won't cover it here).
+
+The main idea of this approach is to store your context in ZIO [FiberRef](https://zio.dev/docs/datatypes/fiber/fiberref). 
 It provides all the power of State Monad. Unlike Java's `ThreadLocal`, `FiberRef` has copy-on-fork semantic: 
 a child [Fiber](https://zio.dev/docs/datatypes/fiber/fiber/) starts with `FiberRef` values of its parent.
 When the child set a new value of FiberRef, the change is visible only to the child itself. This means if we set `requestId` value to `117`
 (e.g. at the start of the request) and pass the `FiberRef` to a child fiber, it sees the value `117`.
 
-Let's modify Main app.  We have to define context service and use `layerPlainWithContext`. 
+Let's modify Main app.  We have to define a context service and how it provides the context. 
 ```scala
 object Main extends zio.App {
   val contextLayer: ULayer[Has[FiberRef[Context]]] = FiberRef.make(Context(-10)).toLayer
@@ -160,9 +169,9 @@ object Main extends zio.App {
 ```
 Run the program and look at the output:
 ```json lines
-{"@timestamp":"2021-09-20T17:55:10.351Z","loggerName":"BarServiceImpl","threadName":"zio-default-async-10","level":"INFO","message":"Start program","requestId":-10}
-{"@timestamp":"2021-09-20T17:55:10.610Z","loggerName":"BarServiceImpl","threadName":"zio-default-async-10","level":"DEBUG","message":"Got current date 2021-09-20","requestId":-10,"date":"2021-09-20"}
-{"@timestamp":"2021-09-20T17:55:10.614Z","loggerName":"BarServiceImpl","threadName":"zio-default-async-10","level":"INFO","message":"Start program","requestId":117}
-{"@timestamp":"2021-09-20T17:55:10.614Z","loggerName":"BarServiceImpl","threadName":"zio-default-async-10","level":"DEBUG","message":"Got current date 2021-09-20","requestId":117,"date":"2021-09-20"}
+{"level":"INFO","message":"Start program","requestId":-10}
+{"level":"DEBUG","message":"Got current date 2021-09-20","requestId":-10,"date":"2021-09-20"}
+{"level":"INFO","message":"Start program","requestId":117}
+{"level":"DEBUG","message":"Got current date 2021-09-20","requestId":117,"date":"2021-09-20"}
 ```
 As you can see, the context has been added to log messages without any changes to the service calling the logging methods. 

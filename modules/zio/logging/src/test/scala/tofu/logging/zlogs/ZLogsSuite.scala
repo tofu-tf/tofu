@@ -50,8 +50,8 @@ class ZLogsSuite extends AnyFlatSpec with Matchers {
     val ctxServiceLayer: ULayer[Has[CtxService]] =
       FiberRef.make((FooService("abc"), BarService(100))).toLayer
 
-    val logLayer: URLayer[Has[FiberRef[(FooService, BarService)]], Has[ZLogging.Make]] =
-      ZLogging.Make.layerPlainWithContext((ref: CtxService) => ref.get)
+    val logLayer: URLayer[Has[CtxService], Has[ZLogging.Make]] =
+      ZLogging.Make.layerPlainWithContext(_.get)
 
     val program = for {
       logs                       <- ZIO.service[ZLogging.Make]

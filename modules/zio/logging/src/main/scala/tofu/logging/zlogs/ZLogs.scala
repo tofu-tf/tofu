@@ -1,7 +1,7 @@
 package tofu.logging.zlogs
 
 import izumi.reflect.Tag
-import tofu.logging.impl.{ZUniversalContextLogs, ZUniversalLogging}
+import tofu.logging.impl.{ZUniversalContextLogging, ZUniversalLogging}
 import tofu.logging.{Loggable, Logging}
 import zio.interop.catz._
 import zio.{Has, UIO, ULayer, ZIO, ZLayer}
@@ -13,7 +13,7 @@ object ZLogs {
   val uio: ZLogs[Any] = (name: String) => UIO.effectTotal(new ZUniversalLogging(name))
 
   def withContext[R: Loggable]: ZLogs[R] =
-    (name: String) => UIO.effectTotal(new ZUniversalContextLogs[R].byName(name))
+    (name: String) => UIO.effectTotal(new ZUniversalContextLogging(name, ZIO.environment[R]))
 
   val build = new ZioHasBuilder[Any](Loggable.empty)
 

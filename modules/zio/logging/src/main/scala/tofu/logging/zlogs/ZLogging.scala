@@ -1,7 +1,7 @@
 package tofu.logging.zlogs
 
-import tofu.logging.{Loggable, LoggedValue, Logging}
-import tofu.logging.impl.{ZUniversalContextLogging, ZUniversalContextLogs, ZUniversalLogging}
+import tofu.logging.impl.{ZUniversalContextLogging, ZUniversalLogging}
+import tofu.logging.{Loggable, Logging}
 import zio._
 
 object ZLogging {
@@ -20,7 +20,9 @@ object ZLogging {
       * @tparam R
       *   the context, an environment of the logging methods.
       */
-    def layerContextual[R: Loggable: Tag]: ULayer[Has[ZLogging.ZMake[R]]] = ZLayer.succeed(new ZUniversalContextLogs[R])
+    def layerContextual[R: Loggable: Tag]: ULayer[Has[ZLogging.ZMake[R]]] = ZLayer.succeed(
+      new ZUniversalContextLogging(_, ZIO.environment[R])
+    )
 
     /** Creates layer with a helper [[Make]] producing plain `Logging[UIO]` with encapsulated context. You have to
       * provide a way to get the context from the abstract `ContextService`. It would be [[zio.FiberRef]], [[zio.Ref]]
@@ -30,7 +32,7 @@ object ZLogging {
         getContext: ContextService => UIO[Ctx]
     ): URLayer[Has[ContextService], Has[ZLogging.Make]] = {
       ZLayer.fromService { cs: ContextService =>
-        new ZUniversalContextLogging[Any](_, f => getContext(cs).map(f(_)))
+        new ZUniversalContextLogging[Any, Ctx](_, getContext(cs))
       }
     }
   }
