@@ -3,6 +3,7 @@ package tofu.logging.zlogs
 import tofu.logging.impl.{ZUniversalContextLogging, ZUniversalLogging}
 import tofu.logging.{Loggable, Logging}
 import zio._
+import scala.annotation.unused
 
 object ZLogging {
   type ZMake[R] = Logging.Make[URIO[R, *]]
@@ -20,7 +21,7 @@ object ZLogging {
       * @tparam R
       *   the context, an environment of the logging methods.
       */
-    def layerContextual[R: Loggable: Tag]: ULayer[Has[ZLogging.ZMake[R]]] = ZLayer.succeed(
+    def layerContextual[R: Loggable](implicit @unused RT: Tag[R]): ULayer[Has[ZLogging.ZMake[R]]] = ZLayer.succeed(
       new ZUniversalContextLogging(_, ZIO.environment[R])
     )
 
