@@ -63,7 +63,7 @@ trait MakeAgent[I[_], F[_]] {
   def agentOf[A](a: A): I[Agent[F, A]]
 }
 
-@deprecated("Use Agent.Make", since = "0.11.0")
+@deprecated("Use Agent.Make", since = "0.10.4")
 object Agents {
   def apply[F[_]](implicit agents: Agent.Make[F]): MakeAgent.Applier[F, F] = new MakeAgent.Applier[F, F](agents)
 }

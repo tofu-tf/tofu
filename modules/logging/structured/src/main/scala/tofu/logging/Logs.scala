@@ -65,10 +65,10 @@ object Logs extends LogsInstances with LogsInstances0 {
   def sync[I[_]: Delay, F[_]: Delay: Monad]: Logs[I, F] = new Logs[I, F] {
     def byName(name: String): I[Logging[F]] = Delay[I].delay(new SyncLogging[F](LoggerFactory.getLogger(name)))
   }
-  @deprecated("Use Logging.Make[F].plain", since = "0.10.4")
+  @deprecated("Use Logging.Make.plain[F]", since = "0.10.4")
   def universal[F[_]: Delay]: Logs.Universal[F]         = new UniversalLogging[F](_)
 
-  @deprecated("Use Logging.Make[F].contextual", since = "0.10.4")
+  @deprecated("Use Logging.Make.contextual[F]", since = "0.10.4")
   def contextual[F[_]: FlatMap: Delay, C: Loggable](implicit FC: F WithContext C): Logs.Universal[F] =
     new UniversalContextLogs[F, C]
 

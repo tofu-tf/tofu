@@ -16,7 +16,7 @@ object Dependencies {
 
     val cats = "2.6.1"
 
-    val catsEffect2 = "2.5.3"
+    val catsEffect2 = "2.5.4"
 
     val catsEffect3 = "3.1.1"
 
@@ -38,13 +38,13 @@ object Dependencies {
 
     val monix = "3.4.0"
 
-    val scalatest = "3.2.9"
+    val scalatest = "3.2.10"
 
     val magnolia = "0.17.0"
 
     val typesafeConfig = "1.4.1"
 
-    val zio = "1.0.11"
+    val zio = "1.0.12"
 
     val zioCats = "2.5.1.0"
 
@@ -69,7 +69,7 @@ object Dependencies {
 
     val groovy = "3.0.9"
 
-    val http4s = "0.22.4"
+    val http4s = "0.22.5"
   }
 
   val noCatsCore       =

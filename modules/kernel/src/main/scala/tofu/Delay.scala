@@ -12,7 +12,11 @@ object Delay extends CatsDelay with EffectComp[Delay] {
   type Catch[F[_, _]] = Delay[F[Throwable, *]]
 }
 
-class CatsDelay {
-  final implicit def interopCE2[F[_]](implicit carrier: DelayCarrier2[F]): Delay[F] = carrier
+class CatsDelay extends CatsDelayCE2 {
   final implicit def interopCE3[F[_]](implicit carrier: DelayCarrier3[F]): Delay[F] = carrier
+}
+
+class CatsDelayCE2 {
+  final implicit def interopCE2[F[_]](implicit carrier: DelayCarrier2[F]): Delay[F] = carrier
+
 }

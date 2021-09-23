@@ -103,7 +103,7 @@ trait MakeSerialAgent[I[_], F[_]] {
     */
   def serialAgentOf[A](a: A): I[SerialAgent[F, A]]
 }
-@deprecated("Use SerialAgent.Make", since = "0.11.0")
+@deprecated("Use SerialAgent.Make", since = "0.10.4")
 object SerialAgents {
   def apply[F[_]](implicit makeSerialAgent: SerialAgent.Make[F]): MakeSerialAgent.SerialApplier[F, F] =
     new MakeSerialAgent.SerialApplier[F, F](makeSerialAgent)
