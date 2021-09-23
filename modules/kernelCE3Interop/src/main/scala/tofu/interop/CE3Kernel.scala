@@ -119,8 +119,8 @@ object CE3Kernel {
   final def agentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow: Fire](implicit
       makeRef: MakeRef[I, F],
       makeSemaphore: MakeSemaphore[I, F]
-  ): MakeAgent[I, F] = {
-    new MakeAgent[I, F] {
+  ): MkAgentCE3Carrier[I, F] = {
+    new MkAgentCE3Carrier[I, F] {
       def agentOf[A](a: A): I[Agent[F, A]] =
         for {
           ref <- makeRef.refOf(a)
@@ -132,8 +132,8 @@ object CE3Kernel {
   final def serialAgentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow](implicit
       makeRef: MakeRef[I, F],
       makeSemaphore: MakeSemaphore[I, F]
-  ): MakeSerialAgent[I, F] =
-    new MakeSerialAgent[I, F] {
+  ): MkSerialAgentCE3Carrier[I, F] =
+    new MkSerialAgentCE3Carrier[I, F] {
       override def serialAgentOf[A](a: A): I[SerialAgent[F, A]] =
         for {
           ref <- makeRef.refOf(a)
@@ -145,8 +145,8 @@ object CE3Kernel {
       makeRef: MakeRef[I, F],
       makeSemaphore: MakeSemaphore[I, F],
       lift: Lift[F, G]
-  ): MakeSerialAgent[I, G] =
-    new MakeSerialAgent[I, G] {
+  ): MkSerialAgentCE3Carrier[I, G] =
+    new MkSerialAgentCE3Carrier[I, G] {
       override def serialAgentOf[A](a: A): I[SerialAgent[G, A]] =
         for {
           ref <- makeRef.refOf(a)
