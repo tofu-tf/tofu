@@ -54,7 +54,7 @@ class ZLogsSuite extends AnyFlatSpec with Matchers {
     val logLayer: URLayer[Has[CtxService], Has[ZLogging.Make]] =
       ZLogging.Make.layerPlainWithContext(_.get)
 
-    @nowarn("msg=local val .+ is never used")
+    @nowarn("cat=unused-locals")
     val program = for {
       logs                       <- ZIO.service[ZLogging.Make]
       implicit0(logger: ULogging) = logs.byName(Name)
