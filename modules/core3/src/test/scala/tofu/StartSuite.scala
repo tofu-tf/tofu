@@ -6,18 +6,22 @@ import tofu.syntax.start._
 import tofu.syntax.monadic._
 import cats.effect.kernel.Outcome
 import cats.effect.kernel.MonadCancelThrow
+import tofu.concurrent.{MakeAgent, MakeSerialAgent}
 
 object StartSuite {
   def summonInstancesForConcurrent[F[_]: Concurrent] = {
     Fire[F]
     Start[F]
     Race[F]
+    MakeAgent[IO, IO]
   }
 
   def summonInstancesForIO = {
     Fire[IO]
     Start[IO]
     Race[IO]
+    MakeAgent[IO, IO]
+    MakeSerialAgent[IO, IO]
   }
 
   private def withInterrupt[F[_], A](oa: Outcome[F, Throwable, A])(implicit F: MonadCancelThrow[F]): F[A] =
