@@ -127,6 +127,21 @@ class FEitherSuite extends AnyWordSpec with Matchers {
     }
   }
 
+  "EitherFOps#reRaise" should {
+
+    "return self in case of Right" in {
+      implicit def raise[T]: Raise[Option, T] = optionRaise[T]
+
+      defaultRight.reRaise mustBe Some(4)
+    }
+
+    "return None in case of Left" in {
+      implicit def raise[T]: Raise[Option, T] = optionRaise[T]
+
+      defaultLeft.reRaise mustBe None
+    }
+  }
+
   "EitherFOps#assocR" should {
 
     "return valid value in case of Right-Right" in {
@@ -173,6 +188,21 @@ class FEitherSuite extends AnyWordSpec with Matchers {
 
     "return valid valid in case map to None" in {
       defaultRight.mapF(_ => None) mustBe None
+    }
+  }
+
+  "EitherFOps#mapIn" should {
+
+    "return valid value in case of Right" in {
+      defaultRight.mapIn(_ + 1) mustBe Some(Right(5))
+    }
+
+    "return valid value in case of Left" in {
+      defaultLeft.mapIn(_ + 1) mustBe Some(Left(4))
+    }
+
+    "return valid value in case of base None" in {
+      none[Either[String, Int]].mapIn(_ + 1) mustBe None
     }
   }
 
@@ -229,7 +259,30 @@ class FEitherSuite extends AnyWordSpec with Matchers {
     }
 
     "return valid value in case of base None" in {
-      none[Either[String, Int]].flatMapIn(_.asRight) mustBe None
+      none[Either[String, Int]].leftFlatMapIn(_.asRight) mustBe None
+      none[Either[String, Int]].leftFlatMapIn(_.asLeft) mustBe None
+    }
+  }
+
+  "EitherFOps#leftFlatMapF" should {
+
+    "return Left in case of base Left and mapping" in {
+      defaultLeft.leftFlatMapF(i => Some(Left(i + 1))) mustBe Some(Left(5))
+    }
+
+    "return valid value in case of base Left and mapping to Right" in {
+      defaultLeft.leftFlatMapF(i => Some(Right(i.toString))) mustBe Some(Right("4"))
+    }
+
+    "return valid value in case of base Right" in {
+      defaultRight.leftFlatMapF(v => Some(v.asLeft)) mustBe Some(Right(4))
+      defaultRight.leftFlatMapF(_ => None) mustBe Some(Right(4))
+    }
+
+    "return valid value in case of base None" in {
+      none[Either[String, Int]].leftFlatMapF(v => Some(v.asRight)) mustBe None
+      none[Either[String, Int]].leftFlatMapF(v => Some(v.asLeft)) mustBe None
+      none[Either[String, Int]].leftFlatMapF(_ => None) mustBe None
     }
   }
 
@@ -542,6 +595,26 @@ class FEitherSuite extends AnyWordSpec with Matchers {
 
     "return Right" in {
       defaultRight.map(_.map(_.toString)).mergeF mustBe Some("4")
+    }
+  }
+
+  "EitherIdFOps#rightIn" should {
+    "return None" in {
+      none[Int].rightIn[String] mustBe None
+    }
+
+    "return Right" in {
+      4.some.rightIn mustBe Some(Right(4))
+    }
+  }
+
+  "EitherIdFOps#leftIn" should {
+    "return None" in {
+      none[Int].leftIn mustBe None
+    }
+
+    "return Left" in {
+      4.some.leftIn mustBe Some(Left(4))
     }
   }
 
