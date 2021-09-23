@@ -42,7 +42,7 @@ object MkAgentCE2Carrier {
 trait MkAgentCE3Carrier[I[_], F[_]] extends MakeAgent[I, F]
 
 object MkAgentCE3Carrier {
-  final implicit def interopCE2Carrier[I[_], F[_]]: MkAgentCE3Carrier[I, F] =
+  final implicit def interopCE3Carrier[I[_], F[_]]: MkAgentCE3Carrier[I, F] =
     macro Interop
       .delegate2[MkAgentCE3Carrier[I, F], I, F, { val `tofu.interop.CE3Kernel.agentByRefAndSemaphore`: Unit }]
 }
