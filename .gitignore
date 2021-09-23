@@ -14,3 +14,4 @@ website/static/api
 .vscode
 .bsp
 *.db
+.jvmopts
