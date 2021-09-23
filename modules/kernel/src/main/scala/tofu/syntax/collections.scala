@@ -90,14 +90,14 @@ object collections
   }
 }
 
-@deprecated("use tofu.syntax.collections", since = "0.11.0")
+@deprecated("use tofu.syntax.collections", since = "0.10.4")
 object traverse extends TofuTraverseSyntax
 
 trait TofuTraverseSyntax {
   final implicit def tofuTraverseSyntax[F[_], A](ta: F[A]): TraverseOps[F, A] = new TraverseOps[F, A](ta)
 }
 
-@deprecated("use tofu.syntax.collections", since = "0.11.0")
+@deprecated("use tofu.syntax.collections", since = "0.10.4")
 object foldable extends TofuFoldableSyntax
 
 final class TraverseOps[F[_], A](private val ta: F[A]) extends AnyVal {
