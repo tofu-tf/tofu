@@ -13,26 +13,56 @@ import org.slf4j.LoggerFactory
 import tofu.logging.LogTree
 import tofu.logging.derivation.loggable
 import tofu.logging.impl.ContextMarker
+import tofu.logging.zlogs.ZLogsSuite.{BarService, FooService, Name}
 import tofu.syntax.logging._
 import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.console.Console
-import zio.{Has, Runtime, URIO, URLayer, ZLayer}
+import zio._
 
 import scala.jdk.CollectionConverters._
 
 class ZLogsSuite extends AnyFlatSpec with Matchers {
-  import ZLogsSuite.MyLogging
 
-  val expr = debug"hello" *> info"world"
+  "ZLogs contextual" should "log the context" in {
+    import ZLogsSuite.MyLogging
 
-  "ZLogs" should "log the context" in {
+    val expr = debug"hello" *> info"world"
+
     val appender = ZLogsSuite.attachList()
     Runtime.default.unsafeRun(expr.provideLayer(ZLogsSuite.fullLayer))
     val items    = appender.list.asScala
 
     val expected = JsonObject("foo" -> "kojima".asJson, "bar" -> 2.asJson).asJson
 
+    items.map(_.getMarker).collect { case ContextMarker(ctx, _) =>
+      LogTree(ctx)
+    } should ===(List.fill(2)(expected))
+  }
+
+  "ZLogs plain with context" should "log the context" in {
+    type CtxService = FiberRef[(FooService, BarService)]
+
+    implicit val loggableFooAndBar: Loggable[(FooService, BarService)] =
+      Loggable[BarService].contramap[(FooService, BarService)](_._2) +
+        Loggable[FooService].contramap[(FooService, BarService)](_._1)
+
+    val ctxServiceLayer: ULayer[Has[CtxService]] =
+      FiberRef.make((FooService("abc"), BarService(100))).toLayer
+
+    val logLayer: URLayer[Has[CtxService], Has[ZLogging.Make]] =
+      ZLogging.Make.layerPlainWithContext(_.get)
+
+    val program = for {
+      logs                       <- ZIO.service[ZLogging.Make]
+      implicit0(logger: ULogging) = logs.byName(Name)
+      _                          <- info"hello" *> debug"world"
+    } yield ()
+
+    val appender = ZLogsSuite.attachList()
+    Runtime.default.unsafeRun(program.provideLayer(ctxServiceLayer >>> logLayer))
+    val items    = appender.list.asScala
+    val expected = JsonObject("foo" -> "abc".asJson, "bar" -> 100.asJson).asJson
     items.map(_.getMarker).collect { case ContextMarker(ctx, _) =>
       LogTree(ctx)
     } should ===(List.fill(2)(expected))

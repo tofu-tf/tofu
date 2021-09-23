@@ -20,10 +20,10 @@
         "label": "Logging",
         "ids": [
           "tofu.logging.home",
-          "tofu.logging.recipes",
           "tofu.logging.main.entities",
           "tofu.logging.key-features",
           "tofu.logging.syntax",
+          "tofu.logging.loggable",
           "tofu.logging.layouts"
         ]
       },
@@ -31,10 +31,12 @@
         "type": "subcategory",
         "label": "Logging Recipes",
         "ids": [
+          "tofu.logging.recipes",
           "tofu.logging.recipes.simple",
           "tofu.logging.recipes.service",
           "tofu.logging.recipes.context",
-          "tofu.logging.recipes.auto"
+          "tofu.logging.recipes.auto",
+          "tofu.logging.recipes.zio"
         ]
       },
       {
