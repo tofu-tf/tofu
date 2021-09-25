@@ -15,7 +15,7 @@ trait Lift[F[_], G[_]] {
   def liftF: FunctionK[F, G] = funK(lift(_))
 }
 
-object Lift extends LiftInstances1 {
+object Lift                        extends LiftInstances1              {
   private type AnyK[A] = Any // avoid import kernel.types, due to unidoc inadeqacy
 
   def apply[F[_], G[_]](implicit lift: Lift[F, G]): Lift[F, G] = lift
@@ -26,10 +26,10 @@ object Lift extends LiftInstances1 {
       def lift[A](fa: F[A]): G[A] = fk(fa)
     }
 
-  private val liftIdentityAny: Lift[AnyK, AnyK] = new Lift[AnyK, AnyK] {
+  private val liftIdentityAny: Lift[AnyK, AnyK]  = new Lift[AnyK, AnyK] {
     def lift[A](fa: Any): Any = fa
   }
-  implicit def liftIdentity[F[_]]: Lift[F, F]   = liftIdentityAny.asInstanceOf[Lift[F, F]]
+  implicit def liftIdentity[F[_]]: Lift[F, F]    = liftIdentityAny.asInstanceOf[Lift[F, F]]
 
   private val liftReaderTAny: Lift[AnyK, ReaderT[Any, Any, *]] = {
     type RT[a] = ReaderT[Any, Any, a]
@@ -40,7 +40,7 @@ object Lift extends LiftInstances1 {
   implicit def liftReaderT[F[_], R]: Lift[F, ReaderT[F, R, *]] = liftReaderTAny.asInstanceOf[Lift[F, ReaderT[F, R, *]]]
 }
 
-private[lift] trait LiftInstances1 extends LiftInstances2 {
+private[lift] trait LiftInstances1 extends LiftInstances2              {
   implicit def byIso[F[_], G[_]](implicit iso: IsoK[F, G]): Lift[F, G] =
     new Lift[F, G] {
       def lift[A](fa: F[A]): G[A] = iso.to(fa)
@@ -57,7 +57,7 @@ private[lift] trait LiftInstances2 {
 /** Embedded transformation. Can be used instead of a direct F ~> G. Especially useful one is `UnliftIO`, a replacement
   * for the `Effect` typeclass.
   */
-trait Unlift[F[_], G[_]] extends Lift[F, G] with ContextBase { self =>
+trait Unlift[F[_], G[_]]           extends Lift[F, G] with ContextBase { self =>
   def lift[A](fa: F[A]): G[A]
   def unlift: G[G ~> F]
 
@@ -99,7 +99,7 @@ object Unlift {
     override def lift[X](fa: G[X]): F[X] =
       wrF.askF(a => wrF.lift(wrG.runContext(fa)(lens.get(a))))
 
-    override def unlift: F[F ~> G] =
+    override def unlift: F[F ~> G]       =
       wrF.ask(a => funK(fa => wrG.askF(b => wrG.lift(wrF.runContext(fa)(lens.set(a, b))))))
   }
 }

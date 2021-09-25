@@ -114,7 +114,7 @@ object LoggingSuite {
 
   type Run[+A] = ICalc[Pasque, Vector[LogEntry], Nothing, A]
 
-  implicit val logs: Logs.Universal[Run] = new Logs.Universal[Run] {
+  implicit val logs: Logs.Universal[Run]   = new Logs.Universal[Run] {
     def byName(name: String): Logging[Run] =
       (level, message, values) =>
         (Calc.read: Run[Pasque]).flatMap { ctx =>
@@ -127,7 +127,7 @@ object LoggingSuite {
       quasti: String
   )
 
-  implicit val letroLog: Loggable[Letro] = new DictLoggable[Letro] {
+  implicit val letroLog: Loggable[Letro]   = new DictLoggable[Letro] {
     def fields[I, V, R, S](a: Letro, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
       i.addString("quasti", a.quasti)
     def logShow(a: Letro): String                                                  = s"Letro{quasti=${a.quasti}}"

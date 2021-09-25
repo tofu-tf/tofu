@@ -26,9 +26,9 @@ object CalcM extends CalcMInstances {
   def get[S]: CalcM[Nothing, Any, S, S, Nothing, S]           = Get()
   def set[S](s: S): CalcM[Nothing, Any, Any, S, Nothing, S]   = Set(s)
 
-  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, S2]       =
+  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, S2]                                  =
     get[S1].flatMapS(s => set(f(s)))
-  def state[S1, S2, A](f: S1 => (S2, A)): CalcM[Nothing, Any, S1, S2, Nothing, A] =
+  def state[S1, S2, A](f: S1 => (S2, A)): CalcM[Nothing, Any, S1, S2, Nothing, A]                            =
     get[S1].flatMapS { s1 =>
       val (s2, a) = f(s1)
       set(s2) as a
@@ -54,36 +54,36 @@ object CalcM extends CalcMInstances {
       f: F[CalcM[F, R, SI, SO, E, A], CalcM[F, R, SI, SO, E, A]]
   ): CalcM[F, R, SI, SO, E, A] = lift(f).biflatten
 
-  sealed trait CalcMRes[-R, -S1, +S2, +E, +A] extends CalcM[Nothing, R, S1, S2, E, A] {
+  sealed trait CalcMRes[-R, -S1, +S2, +E, +A]            extends CalcM[Nothing, R, S1, S2, E, A]    {
     def submit[X](r: R, s1: S1, cont: Continue[A, E, S2, X]): X
     override def mapK[G[+_, +_]](fk: Nothing FunBK G): CalcM[G, R, S1, S2, E, A] = this
   }
 
-  sealed trait CalcMResStatic[-S1, +S2, +E, +A] extends CalcMRes[Any, S1, S2, E, A] {
+  sealed trait CalcMResStatic[-S1, +S2, +E, +A]          extends CalcMRes[Any, S1, S2, E, A]        {
     override def translate[G[+_, +_], R1](translator: ITranslator[Nothing, G, Any, R1]): CalcM[G, R1, S1, S2, E, A] =
       this
     def translateState[G[+_, +_], ST, R1](
         translator: Translator[Nothing, G, ST, Any, R1]
-    ): CalcM[G, R1, (ST, S1), (ST, S2), E, A]                                                                       = focusSecond
+    ): CalcM[G, R1, (ST, S1), (ST, S2), E, A] = focusSecond
   }
 
-  final case class Pure[S, +A](a: A) extends CalcMResStatic[S, S, Nothing, A]   {
+  final case class Pure[S, +A](a: A)                     extends CalcMResStatic[S, S, Nothing, A]   {
     def submit[X](r: Any, s1: S, submit: Continue[A, Nothing, S, X]): X                                    = submit.success(s1, a)
     override def local[R1](f: R1 => Any): CalcM[Nothing, R1, S, S, Nothing, A]                             = this
     override def dimapState[SI1, SO1](f: SI1 => S, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, Nothing, A] =
       update(g compose f) as_ a
   }
-  final case class Read[S, R]()      extends CalcMRes[R, S, S, Nothing, R]      {
+  final case class Read[S, R]()                          extends CalcMRes[R, S, S, Nothing, R]      {
     def submit[X](r: R, s: S, cont: Continue[R, Nothing, S, X]): X                                                    = cont.success(s, r)
     override def local[R1](f: R1 => R): CalcM[Nothing, R1, S, S, Nothing, R]                                          = Read[S, R1]().map(f)
     override def translate[G[+_, +_], R1](translator: ITranslator[Nothing, G, R, R1]): CalcM[G, R1, S, S, Nothing, R] =
       CalcM.read[S, R1].map(translator.mapRead)
     def translateState[G[+_, +_], ST, R1](
         translator: Translator[Nothing, G, ST, R, R1]
-    ): CalcM[G, R1, (ST, S), (ST, S), Nothing, R]                                                                     =
+    ): CalcM[G, R1, (ST, S), (ST, S), Nothing, R] =
       CalcM.read[S, R1].map(translator.mapRead).focusSecond
   }
-  final case class Get[S]()          extends CalcMResStatic[S, S, Nothing, S]   {
+  final case class Get[S]()                              extends CalcMResStatic[S, S, Nothing, S]   {
     def submit[X](r: Any, s: S, cont: Continue[S, Nothing, S, X]): X                                       = cont.success(s, s)
     override def local[R1](f: R1 => Any): CalcM[Nothing, R1, S, S, Nothing, S]                             = this
     override def dimapState[SI1, SO1](f: SI1 => S, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, Nothing, S] =
@@ -92,13 +92,13 @@ object CalcM extends CalcMInstances {
         (g(s), s)
       }
   }
-  final case class Set[S](s: S)      extends CalcMResStatic[Any, S, Nothing, S] {
+  final case class Set[S](s: S)                          extends CalcMResStatic[Any, S, Nothing, S] {
     def submit[X](r: Any, s1: Any, cont: Continue[S, Nothing, S, X]): X                                      = cont.success(s, s)
     override def local[R1](f: R1 => Any): CalcM[Nothing, R1, Any, S, Nothing, S]                             = this
     override def dimapState[SI1, SO1](f: SI1 => Any, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, Nothing, S] =
       set(g(s)) as_ s
   }
-  final case class Raise[S, E](e: E) extends CalcMResStatic[S, S, E, Nothing]   {
+  final case class Raise[S, E](e: E)                     extends CalcMResStatic[S, S, E, Nothing]   {
     def submit[X](r: Any, s: S, cont: Continue[Nothing, E, S, X]): X                                       = cont.error(s, e)
     override def local[R1](f: R1 => Any): CalcM[Nothing, R1, S, S, E, Nothing]                             = this
     override def dimapState[SI1, SO1](f: SI1 => S, g: S => SO1): CalcM[Nothing, Any, SI1, SO1, E, Nothing] =
@@ -117,7 +117,7 @@ object CalcM extends CalcMInstances {
       Defer(() => runStep().translateState(translator))
   }
 
-  sealed trait ProvideM[+F[+_, +_], R, -S1, +S2, +E, +A] extends CalcM[F, R, S1, S2, E, A] {
+  sealed trait ProvideM[+F[+_, +_], R, -S1, +S2, +E, +A] extends CalcM[F, R, S1, S2, E, A]          {
     type R1
     def r: R1
     def inner: CalcM[F, R1, S1, S2, E, A]
@@ -170,7 +170,7 @@ object CalcM extends CalcMInstances {
     type MidErr   = E1
     type MidVal   = A
 
-    override def mapK[G[+_, +_]](fk: F FunBK G): CalcM[G, R, S1, S3, E2, B] =
+    override def mapK[G[+_, +_]](fk: F FunBK G): CalcM[G, R, S1, S3, E2, B]                                  =
       src.mapK(fk).bind(continue.map(_.mapK(fk)))
 
     override def translate[G[+_, +_], R1](translator: ITranslator[F, G, R, R1]): CalcM[G, R1, S1, S3, E2, B] =

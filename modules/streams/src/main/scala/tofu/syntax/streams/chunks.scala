@@ -9,6 +9,6 @@ private[syntax] final class ChunksOps[F[_], C[_], A](fa: F[A])(implicit ch: Chun
   def mapChunks[B](f: C[A] => C[B]): F[B] = ch.mapChunks(fa)(f)
 }
 
-private[syntax] trait ChunkSyntax {
+private[syntax] trait ChunkSyntax                                                         {
   implicit def toChunkOps[F[_], C[_], A](fa: F[A])(implicit ch: Chunks[F, C]): ChunksOps[F, C, A] = new ChunksOps(fa)
 }

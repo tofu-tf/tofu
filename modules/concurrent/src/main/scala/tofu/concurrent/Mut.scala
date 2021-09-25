@@ -23,7 +23,7 @@ object Mut {
   def ref[F[_], A](ref: Ref[F, A]): Mut[F, A]                                        = new RefMut(ref)
   def mvar[F[_], E, A](mvar: MVar[F, A])(implicit bracket: Bracket[F, E]): Mut[F, A] = new MVarMut(mvar)
 
-  private class RefMut[F[_], A](ref: Ref[F, A]) extends Mut[F, A] {
+  private class RefMut[F[_], A](ref: Ref[F, A])                         extends Mut[F, A] {
     def get: F[A]                   = ref.get
     override def set(a: A): F[Unit] = ref.set(a)
     def update(f: A => A): F[Unit]  = ref.update(f)

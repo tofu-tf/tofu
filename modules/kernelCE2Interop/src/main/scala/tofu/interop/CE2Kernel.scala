@@ -87,25 +87,25 @@ object CE2Kernel {
       F: Async[F]
   ): ScopedCarrier2[Scoped.Blocking, F] = makeExecute[Scoped.Blocking, F](blocker.blockingContext)
 
-  final def atomBySync[I[_]: Sync, F[_]: Sync]: MkAtomCE2Carrier[I, F] =
+  final def atomBySync[I[_]: Sync, F[_]: Sync]: MkAtomCE2Carrier[I, F]                             =
     new MkAtomCE2Carrier[I, F] {
       def atom[A](a: A): I[Atom[F, A]] = Ref.in[I, F, A](a).map(AtomByRef(_))
     }
 
-  final def qvarByConcurrent[I[_]: Sync, F[_]: Concurrent]: MkQVarCE2Carrier[I, F] =
+  final def qvarByConcurrent[I[_]: Sync, F[_]: Concurrent]: MkQVarCE2Carrier[I, F]                 =
     new MkQVarCE2Carrier[I, F] {
       def qvarOf[A](a: A): I[QVar[F, A]] = MVar.in[I, F, A](a).map(QVarByMVar(_))
       def qvarEmpty[A]: I[QVar[F, A]]    = MVar.emptyIn[I, F, A].map(QVarByMVar(_))
     }
 
-  final def clock[F[_]](implicit C: cats.effect.Clock[F]): ClockCE2Carrier[F] =
+  final def clock[F[_]](implicit C: cats.effect.Clock[F]): ClockCE2Carrier[F]                      =
     new ClockCE2Carrier[F] {
       def realTime(unit: TimeUnit): F[Long] = C.realTime(unit)
 
       def nanos: F[Long] = C.monotonic(TimeUnit.NANOSECONDS)
     }
 
-  final def sleep[F[_]](implicit T: cats.effect.Timer[F]): SleepCE2Carrier[F] =
+  final def sleep[F[_]](implicit T: cats.effect.Timer[F]): SleepCE2Carrier[F]                      =
     new SleepCE2Carrier[F] {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
     }

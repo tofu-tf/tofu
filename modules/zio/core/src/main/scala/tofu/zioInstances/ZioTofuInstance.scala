@@ -31,7 +31,7 @@ class ZioTofuInstance[R, E]
     fa.catchSome(CachedMatcher(f))
   final override def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E, A]): ZIO[R, E, A]   = fa.catchAll(f)
 
-  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, *], A]] =
+  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, *], A]]           =
     fa.interruptible.forkDaemon.map(convertFiber)
 
   final def racePair[A, B](
@@ -153,12 +153,12 @@ final class ZioTofuUnliftHasInstance[R <: Has[_], R1 <: Has[_], E, C: Tag](impli
   override def runContext[A](fa: ZIO[R1, E, A])(ctx: C): ZIO[R, E, A] =
     fa.provideSome((_: R) add ctx)
 
-  override def context: ZIO[R1, E, C] = ZIO.access(_.get[C])
+  override def context: ZIO[R1, E, C]                                 = ZIO.access(_.get[C])
 
   override def local[A](fa: ZIO[R1, E, A])(project: C => C): ZIO[R1, E, A] =
     fa.provideSome(r => r add project(r.get[C]))
 
-  override def lift[A](fa: ZIO[R, E, A]): ZIO[R1, E, A] = fa.provideSome(ev1)
+  override def lift[A](fa: ZIO[R, E, A]): ZIO[R1, E, A]                    = fa.provideSome(ev1)
 }
 
 class ZioTofuUnliftManyInstance[R <: Has[_], E, R1 <: Has[_]: Tag]
@@ -168,12 +168,12 @@ class ZioTofuUnliftManyInstance[R <: Has[_], E, R1 <: Has[_]: Tag]
   override def runContext[A](fa: ZIO[R with R1, E, A])(ctx: R1): ZIO[R, E, A] =
     fa.provideSome((_: R) union [R1] ctx)
 
-  override def context: ZIO[R with R1, E, R1] = ZIO.environment
+  override def context: ZIO[R with R1, E, R1]                                 = ZIO.environment
 
   override def local[A](fa: ZIO[R with R1, E, A])(project: R1 => R1): ZIO[R with R1, E, A] =
     fa.provideSome(r => r unionAll [R1] project(r))
 
-  override def lift[A](fa: ZIO[R, E, A]): ZIO[R with R1, E, A] = fa
+  override def lift[A](fa: ZIO[R, E, A]): ZIO[R with R1, E, A]                             = fa
 }
 
 class ZioTofuBlockingInstance[R <: Blocking, E] extends BlockExec[ZIO[R, E, *]] {

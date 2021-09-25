@@ -16,13 +16,13 @@ class Interop(val c: blackbox.Context) {
     q"$exp[..$ts](...$ps)"
   }
 
-  protected def delegateTree[N](ts: Type*)(implicit N: WTT[N]): Tree =
+  protected def delegateTree[N](ts: Type*)(implicit N: WTT[N]): Tree                              =
     delegateParamTree(Nil)(ts)
 
-  private def delegateImpl[R: WTT, N: WTT](ts: Type*): c.Expr[R] =
+  private def delegateImpl[R: WTT, N: WTT](ts: Type*): c.Expr[R]                                  =
     c.Expr[R](delegateTree[N](ts: _*))
 
-  private def delegateParamImpl[R: WTT, N: WTT](ps: Tree*)(ts: Type*): c.Expr[R] =
+  private def delegateParamImpl[R: WTT, N: WTT](ps: Tree*)(ts: Type*): c.Expr[R]                  =
     c.Expr[R](delegateParamTree[N](Seq(ps))(ts))
 
   def delegate[R: WTT, F[_]: WTTU, N: WTT]: c.Expr[R]                      = delegateImpl[R, N](tc[F])

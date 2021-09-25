@@ -18,7 +18,7 @@ object TimeData {
 
   def apply[A](implicit td: TimeData[A]): TimeData[A] = td
 
-  implicit val timeDataMonad: Monad[TimeData] = new Monad[TimeData] {
+  implicit val timeDataMonad: Monad[TimeData]           = new Monad[TimeData] {
     def pure[A](x: A): TimeData[A] = (_, _) => x
 
     override def map[A, B](fa: TimeData[A])(f: A => B): TimeData[B] = fa.map(f)

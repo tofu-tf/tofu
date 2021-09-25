@@ -37,7 +37,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
   def classyPopticsAnnotationMacro(annottees: c.Expr[Any]*): c.Expr[Any] =
     annotationMacro(annottees, poly = true, classy = true)
 
-  def annotationMacro(annottees: Seq[c.Expr[Any]], poly: Boolean, classy: Boolean): c.Expr[Any] = {
+  def annotationMacro(annottees: Seq[c.Expr[Any]], poly: Boolean, classy: Boolean): c.Expr[Any]                 = {
     val LensesTpe = TypeName((poly, classy) match {
       case (false, false) => "Optics"
       case (false, true)  => "ClassyOptics"
@@ -66,7 +66,7 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
     def monolenses(tpname: TypeName, params: List[ValDef], classy: Boolean): List[Tree] = params.flatMap { param =>
       val lensName = TermName(prefix + param.name.decodedName)
 
-      val res =
+      val res                       =
         q"""_root_.tofu.optics.macros.internal.Macro.mkContains[$tpname, $tpname, ${param.tpt}, ${param.tpt}](${param.name.toString})"""
 
       lazy val (resClassy, classyT) = labelClass(param, res)(tq"$tpname", tq"$tpname", param.tpt, param.tpt)
@@ -183,12 +183,12 @@ private[macros] class OpticsImpl(val c: blackbox.Context) {
       List(q"""implicit def $name[$t, ..$tparams](implicit ev: $tpar): $tres = $lens >> ev""")
     } else Nil
 
-  private def isPromote(tree: Tree) = c.typecheck(tree) match {
+  private def isPromote(tree: Tree)                                                                             = c.typecheck(tree) match {
     case q"new $c" => c.symbol == promoteC
     case _         => false
   }
 
-  @unused private def debug(ss: Any*) = c.info(
+  @unused private def debug(ss: Any*)                                                                           = c.info(
     c.enclosingPosition,
     ss map {
       case null => "null"

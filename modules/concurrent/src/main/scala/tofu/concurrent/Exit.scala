@@ -13,13 +13,13 @@ object Exit {
 
   sealed trait Incomplete[+E] extends Exit[E, Nothing]
 
-  case object Canceled                 extends Incomplete[Nothing] {
+  case object Canceled                 extends Incomplete[Nothing]                                      {
     def exitCase = ExitCase.Canceled
   }
-  final case class Error[+E](e: E)     extends Incomplete[E]       {
+  final case class Error[+E](e: E)     extends Incomplete[E]                                            {
     def exitCase = ExitCase.Error(e)
   }
-  final case class Completed[+A](a: A) extends Exit[Nothing, A]    {
+  final case class Completed[+A](a: A) extends Exit[Nothing, A]                                         {
     override def exitCase = ExitCase.Completed
   }
 

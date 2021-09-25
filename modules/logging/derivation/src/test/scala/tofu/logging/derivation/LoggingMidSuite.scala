@@ -39,14 +39,14 @@ object LoggingMidSuite {
   type Eff[+A] = ICalcM[Nothing2T, Any, State, Throwable, A]
 
   def logging(name: String): Logging[Eff] = new Logging[Eff] {
-    private def put(message: String)(logs: Vector[String]) = logs :+ message
+    private def put(message: String)(logs: Vector[String])                            = logs :+ message
     def write(level: Logging.Level, message: String, values: LoggedValue*): Eff[Unit] = {
       val interpolated = MessageFormatter.arrayFormat(message, values.toArray).getMessage()
       CalcM.update(put(s"[$level] <$name> $interpolated")).void.focus(State.logs)
     }
   }
 
-  implicit val logs: Logs.Universal[Eff] = logging
+  implicit val logs: Logs.Universal[Eff]  = logging
 }
 
 class LoggingMidSuite extends AnyFunSuite {

@@ -44,7 +44,7 @@ object ConfigItem {
   }
 
   sealed trait ValueTag
-  sealed trait ValueType[T[_[_]]] extends ValueTag {
+  sealed trait ValueType[T[_[_]]]    extends ValueTag                         {
     def unapply[F[_]](item: ConfigItem[F]): Option[T[F]] =
       if (item.valueType == this) Some(item.value.asInstanceOf[T[F]])
       else None
@@ -60,23 +60,23 @@ object ConfigItem {
   sealed trait ValueTypeIndexed[I] extends ValueType[IndexedC[*[_], I]]
   sealed trait ValueTypeStream     extends ValueType[StreamC]
 
-  object ValueType {
-    case object Null extends ValueTypeSimple[Unit]       {
+  object ValueType                    {
+    case object Null extends ValueTypeSimple[Unit] {
       def fromString(s: String): Option[Unit] = Some(())
 
     }
-    case object Bool extends ValueTypeSimple[Boolean]    {
+    case object Bool   extends ValueTypeSimple[Boolean]    {
       def fromString(s: String): Option[Boolean] = s.toLowerCase() match {
         case "true" | "ok" | "yes" | "+" => Some(true)
         case "false" | "" | "no" | "-"   => Some(false)
         case _                           => None
       }
     }
-    case object Num  extends ValueTypeSimple[BigDecimal] {
+    case object Num    extends ValueTypeSimple[BigDecimal] {
       def fromString(s: String): Option[BigDecimal] = try Some(BigDecimal(s))
       catch { case _: NumberFormatException => None }
     }
-    case object Str  extends ValueTypeSimple[String]     {
+    case object Str    extends ValueTypeSimple[String]     {
       def fromString(s: String): Option[String] = Some(s)
     }
 
@@ -85,17 +85,17 @@ object ConfigItem {
     case object Dict   extends ValueTypeIndexed[String]
   }
 
-  case object Null                        extends SimpleValue[Unit]       {
+  case object Null extends SimpleValue[Unit] {
     def value     = ()
     def valueType = ValueType.Null
   }
-  final case class Bool(value: Boolean)   extends SimpleValue[Boolean]    {
+  final case class Bool(value: Boolean) extends SimpleValue[Boolean] {
     def valueType = ValueType.Bool
   }
   final case class Num(value: BigDecimal) extends SimpleValue[BigDecimal] {
     def valueType = ValueType.Num
   }
-  final case class Str(value: String)     extends SimpleValue[String]     {
+  final case class Str(value: String) extends SimpleValue[String] {
     def valueType = ValueType.Str
   }
 
@@ -138,7 +138,7 @@ object ConfigItem {
       } yield res
   }
 
-  implicit final class IdConfigItemOps(private val item: ConfigItem[Identity]) extends AnyVal {
+  implicit final class IdConfigItemOps(private val item: ConfigItem[Identity])  extends AnyVal {
     def liftF[F[_]](implicit F: Applicative[F]): ConfigItem[F]              =
       item.mapK(new (Id ~> F) { def apply[A](x: A) = F.pure(x) })
     def tryParseF[F[_]: Sync, A: Configurable]: F[(MessageList, Option[A])] = liftF[F].tryParseSync[A]

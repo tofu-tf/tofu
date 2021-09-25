@@ -50,7 +50,7 @@ object loggable extends Derivation[Loggable] with NewTypeDerivation[Loggable] {
     def putValue[I, V, R, M](a: T, v: V)(implicit r: LogRenderer[I, V, R, M]): M =
       ctx.dispatch(a)(sub => sub.typeclass.putValue(sub.cast(a), v))
 
-    def logShow(a: T): String =
+    def logShow(a: T): String                                                                                      =
       ctx.dispatch(a)(sub => sub.typeclass.logShow(sub.cast(a)))
 
     override def putField[I, V, R, M](a: T, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =

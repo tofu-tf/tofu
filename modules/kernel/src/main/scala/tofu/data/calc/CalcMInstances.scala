@@ -9,16 +9,16 @@ import tofu.higherKind.bi.FunBK
 import tofu.syntax.monadic._
 
 trait CalcMInstances extends CalcMInstances1 {
-  final implicit def calcFunctorInstance[F[+_, +_], R, S, E]: CalcMonadInstance[F, R, S, E] =
+  final implicit def calcFunctorInstance[F[+_, +_], R, S, E]: CalcMonadInstance[F, R, S, E]   =
     new CalcMonadInstance[F, R, S, E]
 
-  final implicit def calcBindInstance[F[+_, +_], R, S]: CalcBindInstance[F, R, S] =
+  final implicit def calcBindInstance[F[+_, +_], R, S]: CalcBindInstance[F, R, S]             =
     new CalcBindInstance[F, R, S]
 
   final implicit def calcContextInstance[F[+_, +_], R, S, E]: CalcContextInstance[F, R, S, E] =
     new CalcContextInstance[F, R, S, E]
 
-  final implicit def calcBiContextInstance[F[+_, +_], R, S]: CalcBiContextInstance[F, R, S] =
+  final implicit def calcBiContextInstance[F[+_, +_], R, S]: CalcBiContextInstance[F, R, S]   =
     new CalcBiContextInstance[F, R, S]
 
 }

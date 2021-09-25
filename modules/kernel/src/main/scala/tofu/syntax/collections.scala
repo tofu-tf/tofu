@@ -11,7 +11,7 @@ object collections
     extends FoldableSyntax with TraverseFilterSyntax with FunctorFilterSyntax with TofuTraverseSyntax
     with TofuFoldableSyntax {
 
-  final implicit class CatsTraverseSyntax[F[_], A](private val self: F[A]) extends AnyVal {
+  final implicit class CatsTraverseSyntax[F[_], A](private val self: F[A])  extends AnyVal {
     def traverse[G[_]: Applicative, B](f: A => G[B])(implicit FT: Traverse[F]): G[F[B]] =
       FT.traverse[G, A, B](self)(f)
 
@@ -76,7 +76,7 @@ object collections
       mapAccumF(start)((b, a) => step(b, a).tupleLeft(b))
   }
 
-  final implicit class TofuSequenceOps[G[_], T[_], A](private val fta: T[G[A]]) extends AnyVal {
+  final implicit class TofuSequenceOps[G[_], T[_], A](private val fta: T[G[A]])        extends AnyVal {
     def sequence(implicit G: Applicative[G], T: Traverse[T]): G[T[A]] =
       T.sequence[G, A](fta)
   }

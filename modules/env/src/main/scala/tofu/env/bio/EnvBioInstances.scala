@@ -13,7 +13,7 @@ class EnvBioBifunctorInstance[R]
   override def disclose[E, A](k: FunBK[EnvBio[R, *, *], BiTask] => EnvBio[R, E, A]): EnvBio[R, E, A] =
     EnvBio.context.flatMap((ctx: R) => k(FunBK.apply(bio => bio.run(ctx))))
 
-  override def bifunctor: Bind[EnvBio[R, *, *]] = this
+  override def bifunctor: Bind[EnvBio[R, *, *]]                                                      = this
 
   override def lift[E, A](fa: BiTask[E, A]): EnvBio[R, E, A] = EnvBio.fromTaskEither(fa)
 
@@ -26,7 +26,7 @@ class EnvBioBifunctorInstance[R]
   override def bilocal[E, A](fea: EnvBio[R, E, A])(lproj: Nothing => Nothing, rproj: R => R): EnvBio[R, E, A] =
     fea.local(rproj)
 
-  override def pure[E, A](a: A): EnvBio[R, E, A] = EnvBio.pure(a)
+  override def pure[E, A](a: A): EnvBio[R, E, A]                                                              = EnvBio.pure(a)
 
   override def raise[E, A](e: E): EnvBio[R, E, A] = EnvBio.raiseError(e)
 
@@ -38,7 +38,7 @@ class EnvBioBifunctorInstance[R]
   override def flatMap[E, A, B](fa: EnvBio[R, E, A], f: A => EnvBio[R, E, B]): EnvBio[R, E, B] =
     fa.flatMap(f)
 
-  override def map[E, A, B](fa: EnvBio[R, E, A])(f: A => B): EnvBio[R, E, B] = fa.map(f)
+  override def map[E, A, B](fa: EnvBio[R, E, A])(f: A => B): EnvBio[R, E, B]                   = fa.map(f)
 
   override def mapErr[E, A, X](fa: EnvBio[R, E, A])(f: E => X): EnvBio[R, X, A] = fa.mapError(f)
 

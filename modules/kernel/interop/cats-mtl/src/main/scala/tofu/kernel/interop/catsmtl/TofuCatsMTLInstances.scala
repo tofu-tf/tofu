@@ -21,7 +21,7 @@ private[catsmtl] object TofuCatsMTLInstances {
   }
 
   private[catsmtl] class TofuErrorsInstance[F[_], E](H: MHandle[F, E])
-      extends TofuRaiseInstance[F, E](H) with Errors[F, E] {
+      extends TofuRaiseInstance[F, E](H) with Errors[F, E]          {
     def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A] = H.handleWith(fa)(e => f(e).getOrElse(H.raise[E, A](e)))
     def restore[A](fa: F[A]): F[Option[A]]                     = H.applicative.map(H.attempt(fa))(_.toOption)
     def lift[A](fa: F[A]): F[A]                                = fa

@@ -5,7 +5,7 @@ import tofu.logging.{LoggedValue, Logging}
 import zio._
 
 class ZUniversalLogging(name: String) extends Logging[UIO] {
-  def write(level: Logging.Level, message: String, values: LoggedValue*): UIO[Unit] =
+  def write(level: Logging.Level, message: String, values: LoggedValue*): UIO[Unit]                                =
     ZIO.effectTotal {
       val logger = LoggerFactory.getLogger(name)
       if (UniversalLogging.enabled(level, logger))

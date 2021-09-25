@@ -5,7 +5,7 @@ import tofu.logging.{Loggable, LoggedValue, Logging}
 import zio._
 
 class ZUniversalContextLogging[R, C: Loggable](name: String, ctxLog: URIO[R, C]) extends Logging[URIO[R, *]] {
-  def write(level: Logging.Level, message: String, values: LoggedValue*): URIO[R, Unit] =
+  def write(level: Logging.Level, message: String, values: LoggedValue*): URIO[R, Unit]                                =
     ctxLog.flatMap { ctx =>
       ZIO.effectTotal {
         val logger = LoggerFactory.getLogger(name)

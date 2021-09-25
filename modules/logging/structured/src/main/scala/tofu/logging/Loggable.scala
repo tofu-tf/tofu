@@ -105,14 +105,14 @@ object Loggable extends LoggableInstances with DataComp[Loggable] {
       override def logFields[I, V, @sp(Unit) R, @sp M](i: I)(implicit r: LogRenderer[I, V, R, M]): R =
         fields[I, V, R, M](a, i)
 
-      override def putValue[I, V, R, S](v: V)(implicit r: LogRenderer[I, V, R, S]): S = self.putValue(a, v)
+      override def putValue[I, V, R, S](v: V)(implicit r: LogRenderer[I, V, R, S]): S                = self.putValue(a, v)
 
       override def putField[I, V, R, S](i: I, name: String)(implicit r: LogRenderer[I, V, R, S]): R =
         self.putField(a, name, i)
 
-      override def toString: String  = logShow(a)
-      override def typeName: String  = self.typeName
-      override def shortName: String = self.shortName
+      override def toString: String                                                                 = logShow(a)
+      override def typeName: String                                                                 = self.typeName
+      override def shortName: String                                                                = self.shortName
     }
 
     /** transform input value befor logging */
@@ -206,9 +206,9 @@ trait SingleValueLoggable[@specialized A] extends Loggable[A] with SubLoggable[A
   override def putField[I, V, R, M](a: A, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
     receiver.addField(name, logValue(a), input)
 
-  override def logShow(a: A): String = a.toString
+  override def logShow(a: A): String                                                                             = a.toString
 
-  override def putValue[I, V, R, M](a: A, v: V)(implicit r: LogRenderer[I, V, R, M]): M =
+  override def putValue[I, V, R, M](a: A, v: V)(implicit r: LogRenderer[I, V, R, M]): M                            =
     r.putValue(logValue(a), v)
 
   override def putMaskedValue[I, V, R, S](a: A, v: V)(f: String => String)(implicit r: LogRenderer[I, V, R, S]): S =

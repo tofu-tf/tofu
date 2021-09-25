@@ -83,7 +83,7 @@ object ContextTRebaseSuite {
 
   type RaiseString[F[_]] = Raise[F, String]
 
-  case class AuthImpl[F[_]: Monad: Name: RaiseString](values: F[Set[(String, String)]]) extends Auth[F] {
+  case class AuthImpl[F[_]: Monad: Name: RaiseString](values: F[Set[(String, String)]]) extends Auth[F]       {
     def hasAuth(key: String): F[Boolean] = for {
       name      <- Name[F].getName
       authItems <- values
@@ -92,7 +92,7 @@ object ContextTRebaseSuite {
       hasAuth(key).unlesss_(Name[F].getName.flatTap(name => s"$name hasn't auth for: $key".raise))
   }
 
-  case class HistoryImpl[F[_]: Monad: Auth](state: Atom[F, List[String]]) extends History[F] {
+  case class HistoryImpl[F[_]: Monad: Auth](state: Atom[F, List[String]])               extends History[F]    {
     def readHistory: F[List[String]] = state.get
 
     def putHistory(s: String): F[Unit] = state.update(s :: _)
@@ -112,7 +112,7 @@ object ContextTRebaseSuite {
       auth: Auth[F],
   )
 
-  implicit object rebase extends Rebase[Inner] {
+  implicit object rebase                                                                extends Rebase[Inner] {
     def rebase[F[_], G[_]: FlatMap](uf: Inner[F])(implicit FG: Unlift[F, G]): Inner[G] = Inner[G](
       Rebase[Name].rebase(uf.name),
       Rebase[Auth].rebase(uf.auth)

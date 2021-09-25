@@ -110,16 +110,16 @@ trait BaseGetters { self: Configurable.type =>
       if (check(b)) F.monad.pure(get(b)) else F.error(BadNumber(b, s"bad $name value"))
     }
 
-  implicit val byteConfigurable: Configurable[Byte]     = numConfigurable[Byte](_.isValidByte, _.toByteExact, "byte")
-  implicit val shortConfigurable: Configurable[Short]   = numConfigurable[Short](_.isValidShort, _.toShortExact, "short")
-  implicit val intConfigurable: Configurable[Int]       = numConfigurable(_.isValidInt, _.toIntExact, "integer")
-  implicit val longConfigurable: Configurable[Long]     = numConfigurable(_.isValidLong, _.toLongExact, "integer")
-  implicit val floatConfigurable: Configurable[Float]   = requireSimple(ValueType.Num).map(_.toFloat)
-  implicit val doubleConfigurable: Configurable[Double] = requireSimple(ValueType.Num).map(_.toDouble)
+  implicit val byteConfigurable: Configurable[Byte]                                                                 = numConfigurable[Byte](_.isValidByte, _.toByteExact, "byte")
+  implicit val shortConfigurable: Configurable[Short]                                                               = numConfigurable[Short](_.isValidShort, _.toShortExact, "short")
+  implicit val intConfigurable: Configurable[Int]                                                                   = numConfigurable(_.isValidInt, _.toIntExact, "integer")
+  implicit val longConfigurable: Configurable[Long]                                                                 = numConfigurable(_.isValidLong, _.toLongExact, "integer")
+  implicit val floatConfigurable: Configurable[Float]                                                               = requireSimple(ValueType.Num).map(_.toFloat)
+  implicit val doubleConfigurable: Configurable[Double]                                                             = requireSimple(ValueType.Num).map(_.toDouble)
 
-  implicit val booleanConfigurable: Configurable[Boolean]   = requireSimple(ValueType.Bool)
-  implicit val stringConfigurable: Configurable[String]     = requireSimple(ValueType.Str)
-  implicit val durationConfigurable: Configurable[Duration] =
+  implicit val booleanConfigurable: Configurable[Boolean]               = requireSimple(ValueType.Bool)
+  implicit val stringConfigurable: Configurable[String]                 = requireSimple(ValueType.Str)
+  implicit val durationConfigurable: Configurable[Duration]             =
     requireSimple(ValueType.Str).catching[Duration](Duration(_))(ConfigFunc.apply(F => { case (s, _) =>
       F.error(BadString(s, "bad duration"))
     }))
@@ -132,7 +132,7 @@ trait BaseGetters { self: Configurable.type =>
   implicit val urlConfigurable: Configurable[URL]                       =
     requireSimple(ValueType.Str).catchMake(new URL(_))(F => p => F.error(BadString(p._1, "bad URL")))
 
-  implicit val uriConfigurable: Configurable[URI] =
+  implicit val uriConfigurable: Configurable[URI]                       =
     requireSimple(ValueType.Str).catchMake(new URI(_))(F => p => F.error(BadString(p._1, "bad URI")))
 
   //simple sequence types
@@ -157,13 +157,13 @@ trait BaseGetters { self: Configurable.type =>
       }
     }
 
-  implicit def indexedSeqConfigurable[A: Configurable]: Configurable[IndexedSeq[A]] = vectorConfigurable[A].widen
-  implicit def seqConfigurable[A: Configurable]: Configurable[Seq[A]]               = listConfigurable[A].widen
-  implicit def vectorConfigurable[A: Configurable]: Configurable[Vector[A]]         =
+  implicit def indexedSeqConfigurable[A: Configurable]: Configurable[IndexedSeq[A]]      = vectorConfigurable[A].widen
+  implicit def seqConfigurable[A: Configurable]: Configurable[Seq[A]]                    = listConfigurable[A].widen
+  implicit def vectorConfigurable[A: Configurable]: Configurable[Vector[A]]              =
     monoidConfigurable[A, Vector[A]](Vector[A](_))
-  implicit def listConfigurable[A: Configurable]: Configurable[List[A]]             = monoidConfigurable[A, List[A]](List[A](_))
-  implicit def chainConfigurable[A: Configurable]: Configurable[Chain[A]]           = monoidConfigurable[A, Chain[A]](Chain.one)
-  implicit def mapConfigurable[A: Configurable]: Configurable[Map[String, A]]       =
+  implicit def listConfigurable[A: Configurable]: Configurable[List[A]]                  = monoidConfigurable[A, List[A]](List[A](_))
+  implicit def chainConfigurable[A: Configurable]: Configurable[Chain[A]]                = monoidConfigurable[A, Chain[A]](Chain.one)
+  implicit def mapConfigurable[A: Configurable]: Configurable[Map[String, A]]            =
     new Configurable[Map[String, A]] {
       def apply[F[_]](cfg: ConfigItem[F])(implicit F: ConfigMonad[F]): F[Map[String, A]] = cfg match {
         case ValueType.Dict(get, is) =>
@@ -172,7 +172,7 @@ trait BaseGetters { self: Configurable.type =>
       }
     }
 
-  implicit def option[A: Configurable]: Configurable[Option[A]] =
+  implicit def option[A: Configurable]: Configurable[Option[A]]                          =
     new Configurable[Option[A]] {
       def apply[F[_]: ConfigMonad](cfg: ConfigItem[F]): F[Option[A]] = cfg match {
         case ConfigItem.Null => none[A].pure[F]

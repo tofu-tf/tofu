@@ -30,7 +30,7 @@ object PZipping extends OpticCompanion[PZipping] {
       def grate(suv: (S => U) => V): T = g.grate(sa => f.grate(au => suv(au compose sa)))
     }
 
-  override def delayed[S, T, A, B](o: () => PZipping[S, T, A, B]): PZipping[S, T, A, B] = new PZipping[S, T, A, B] {
+  override def delayed[S, T, A, B](o: () => PZipping[S, T, A, B]): PZipping[S, T, A, B]                          = new PZipping[S, T, A, B] {
     lazy val opt                     = o()
     def grate(sab: (S => A) => B): T = opt.grate(sab)
   }

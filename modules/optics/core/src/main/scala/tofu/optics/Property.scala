@@ -22,7 +22,7 @@ trait PProperty[-S, +T, +A, -B]
   def traject[F[+_]](s: S)(fab: A => F[B])(implicit FP: Pure[F], F: Functor[F]): F[T] =
     narrow(s).fold[F[T]](FP.pure, a => fab(a).map(set(s, _)))
 
-  override def downcast(s: S): Option[A] = narrow(s).toOption
+  override def downcast(s: S): Option[A]                                              = narrow(s).toOption
 
   override def foldMap[X: Monoid](a: S)(f: A => X): X = downcast(a).foldMap(f)
 
@@ -36,14 +36,14 @@ trait PProperty[-S, +T, +A, -B]
         case Right(a) => Right(a)
       }
 
-      override def toString: String = s"$self orElse $other"
+      override def toString: String     = s"$self orElse $other"
     }
 
   /** unsafe transform this property to contains */
   def unsafeTotal: PContains[S, T, A, B] = new PContains[S, T, A, B] {
     def set(s: S, b: B): T = self.set(s, b)
 
-    def extract(s: S): A =
+    def extract(s: S): A            =
       self.narrow(s).getOrElse(throw new NoSuchElementException(s"$self was empty for $s"))
 
     override def toString(): String = s"($self).unsafeTotal"
@@ -93,7 +93,7 @@ object PProperty extends OpticCompanion[PProperty] {
     def narrow(s: S): Either[T, A]                                                               = traj[Either[A, +*]](s)(a => Left(a)).swap
   }
 
-  override def toGeneric[S, T, A, B](o: PProperty[S, T, A, B]): Optic[Context, S, T, A, B]   =
+  override def toGeneric[S, T, A, B](o: PProperty[S, T, A, B]): Optic[Context, S, T, A, B] =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => c.F[B]): S => c.F[T] = s => o.traject(s)(p)(c.pure, c.functor)
     }

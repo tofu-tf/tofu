@@ -24,5 +24,5 @@ object GenUUID {
     val randomUUID: F[UUID] = F.delay(UUID.randomUUID())
   }
 
-  implicit val genUUIDRepresentableK: RepresentableK[GenUUID] = higherKind.derived.genRepresentableK[GenUUID]
+  implicit val genUUIDRepresentableK: RepresentableK[GenUUID]      = higherKind.derived.genRepresentableK[GenUUID]
 }

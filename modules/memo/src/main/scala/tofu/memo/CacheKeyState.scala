@@ -63,7 +63,7 @@ final case class CacheKeyStateMVar[F[_]: Monad: Guarantee, K, A](
     state: MVar[F, Map[K, CacheState[F, A]]],
     factory: CacheVal[A] => F[CacheState[F, A]]
 ) extends CacheKeyState[F, K, A] {
-  override def value(key: K): F[CacheVal[A]] = valueByMap(state.read)(key)
+  override def value(key: K): F[CacheVal[A]]                              = valueByMap(state.read)(key)
   override def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B] = {
     def miss: F[B] =
       op.getPureOrElse(CacheVal.none)(state.bracketModify(freshMap => {
@@ -83,7 +83,7 @@ final case class CacheKeyStateMVar[F[_]: Monad: Guarantee, K, A](
     } yield res
   }
 
-  override def cleanUp(after: Long): F[Long] =
+  override def cleanUp(after: Long): F[Long]                              =
     state.bracketModify { map =>
       for {
         results  <- map.toList.traverse { case (k, v) => v.cleanUp(after).tupleLeft(k) }
@@ -111,7 +111,7 @@ final case class CacheKeyStateRef[F[_]: Monad, K, A](
                        }
     } yield res
 
-  override def cleanUp(after: Long): F[Long] =
+  override def cleanUp(after: Long): F[Long]                              =
     for {
       (map, update) <- state.access
       results       <- map.toList.traverse { case (k, v) => v.cleanUp(after).tupleLeft(k) }

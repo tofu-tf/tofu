@@ -145,7 +145,7 @@ trait Local[F[_]] extends Context[F] { self =>
   def subcontext[A](contains: Ctx Contains A): WithLocal[F, A] =
     new LocalContainsInstance[F, Ctx, A](asWithLocal, contains)
 
-  private[tofu] def asWithLocal: WithLocal[F, Ctx] = {
+  private[tofu] def asWithLocal: WithLocal[F, Ctx]             = {
     new WithLocal[F, Ctx] {
       override def context: F[Ctx] = self.context
 

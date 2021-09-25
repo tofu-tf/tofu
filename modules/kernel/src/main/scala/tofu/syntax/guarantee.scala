@@ -5,7 +5,7 @@ import tofu.syntax.monadic._
 
 object guarantee extends GuaranteeSyntax
 
-trait GuaranteeSyntax extends Any {
+trait GuaranteeSyntax                             extends Any    {
   final implicit def TofuBracketOps[F[_], A](fa: F[A]): TofuBracketOps[F, A] = new TofuBracketOps(fa)
 }
 
@@ -23,7 +23,7 @@ final class TofuBracketOps[F[_], A](val fa: F[A]) extends AnyVal {
     */
   def bracketIncomplete[B, C](
       use: A => F[B]
-  )(release: A => F[C])(implicit F: Applicative[F], FG: Guarantee[F]): F[B]                     =
+  )(release: A => F[C])(implicit F: Applicative[F], FG: Guarantee[F]): F[B] =
     FG.bracket(fa)(use) { case (a, success) => success unless_ release(a) }
 
   /** Apply function to [[fa]] with effectful transformation. [[fa]] is always released
@@ -36,7 +36,7 @@ final class TofuBracketOps[F[_], A](val fa: F[A]) extends AnyVal {
     */
   def bracketAlways[B, C](
       use: A => F[B]
-  )(release: A => F[C])(implicit FG: Guarantee[F]): F[B]                                        =
+  )(release: A => F[C])(implicit FG: Guarantee[F]): F[B] =
     FG.bracket(fa)(use) { case (a, _) => release(a) }
 
   /** Guarantee finalization of [[fa]]. `release` is called in case of error or cancellation
@@ -103,7 +103,7 @@ final class TofuBracketOps[F[_], A](val fa: F[A]) extends AnyVal {
     */
   def bracketState[B, C](
       use: A => F[(A, B)]
-  )(commit: A => F[C])(implicit FG: Guarantee[F], A: Applicative[F]): F[B]                                     =
+  )(commit: A => F[C])(implicit FG: Guarantee[F], A: Applicative[F]): F[B] =
     FG.bracket(FG.bracket(fa)(use) { case (oldA, success) =>
       success unless_ commit(oldA)
     }) { case (newA, b) => commit(newA) as b } { (_, _) => A.unit }

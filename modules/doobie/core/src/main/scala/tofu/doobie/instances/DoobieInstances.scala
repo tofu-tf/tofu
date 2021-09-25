@@ -15,7 +15,7 @@ private[instances] trait DoobieInstances {
 
   final def liftEffectToConnectionIO[F[_]: Effect]: LiftEffectToConnectionIO[F] = new LiftEffectToConnectionIO
 
-  final def liftSyncEffectToConnectionIO[F[_]: SyncEffect]: LiftSyncEffectToConnectionIO[F] =
+  final def liftSyncEffectToConnectionIO[F[_]: SyncEffect]: LiftSyncEffectToConnectionIO[F]            =
     new LiftSyncEffectToConnectionIO
 
   final def liftToConnectionRIO[F[_], R](implicit L: Lift[F, ConnectionIO]): LiftToConnectionRIO[F, R] =

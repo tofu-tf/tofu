@@ -19,11 +19,11 @@ trait PContains[-S, +T, +A, -B]
   def narrow(s: S): Either[T, A]            = Right(extract(s))
   override def update(s: S, fab: A => B): T = set(s, fab(extract(s)))
 
-  def project[F[+_]](s: S)(fab: A => F[B])(implicit F: Functor[F]): F[T] =
+  def project[F[+_]](s: S)(fab: A => F[B])(implicit F: Functor[F]): F[T]             =
     F.map(fab(extract(s)))(set(s, _))
 
-  override def reduceMap[X: Semigroup](s: S)(f: A => X): X             = f(extract(s))
-  def traverse1[F[+_]](a: S)(f: A => F[B])(implicit F: Apply[F]): F[T] =
+  override def reduceMap[X: Semigroup](s: S)(f: A => X): X                           = f(extract(s))
+  def traverse1[F[+_]](a: S)(f: A => F[B])(implicit F: Apply[F]): F[T]               =
     F.map(f(extract(a)))(b => set(a, b))
 
   override def traverse[F[+_]](s: S)(f: A => F[B])(implicit F: Applicative[F]): F[T] = traverse1(s)(f)
@@ -88,7 +88,7 @@ object PContains extends OpticCompanion[PContains] with OpticProduct[PContains] 
     def extract(a: S): A   = proj[Constant[A, +*]](a, identity)(constantFunctor)
   }
 
-  trait Context extends PEquivalent.Context {
+  trait Context                                                                          extends PEquivalent.Context {
     override type P[-x, +y] = x => y
     override def profunctor: PChoice[P] = PChoice[P]
   }
@@ -107,7 +107,7 @@ object PContains extends OpticCompanion[PContains] with OpticProduct[PContains] 
         })(fb)(a)
     }
 
-  implicit final class PContainsOps[S, T, A, B](private val self: PContains[S, T, A, B]) extends AnyVal {
+  implicit final class PContainsOps[S, T, A, B](private val self: PContains[S, T, A, B]) extends AnyVal              {
     def focusState[F[+_]: Functor, R](state: IndexedStateT[F, A, B, R]): IndexedStateT[F, S, T, R] =
       IndexedStateT.applyF[F, S, T, R](
         state.runF.map(afbr => (s: S) => afbr(self.extract(s)).map { case (b, r) => (self.set(s, b), r) })

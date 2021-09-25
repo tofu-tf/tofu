@@ -36,13 +36,13 @@ class ELKLayout extends LayoutBase[ILoggingEvent] {
     * @param json
     *   object of static fields with their values.
     */
-  def setCustomFields(json: String) =
+  def setCustomFields(json: String)                   =
     json.jsonAs[List[JsonEntry]] match {
       case Left(value)  => throw new Exception("Invalid json format for 'customFields'. Check your json.", value)
       case Right(value) => customFields = value
     }
 
-  private def updateEventLoggable(): Unit =
+  private def updateEventLoggable(): Unit             =
     eventLoggable = arguments match {
       case Arguments.Merge         => EventLoggable.merge
       case Arguments.Group         => EventLoggable.group

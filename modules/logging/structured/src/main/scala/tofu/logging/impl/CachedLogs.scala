@@ -31,5 +31,5 @@ class CachedLogs[I[_]: Monad: Guarantee, F[_]](
     })
 
   override def forService[Svc: ClassTag]: I[Logging[F]] = safeGet(tagCache, underlying.forService[Svc], classTag[Svc])
-  def byName(name: String): I[Logging[F]]               = safeGet(nameCache, underlying.byName(name), name)
+  def byName(name: String): I[Logging[F]] = safeGet(nameCache, underlying.byName(name), name)
 }

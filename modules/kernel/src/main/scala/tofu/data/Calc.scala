@@ -31,39 +31,39 @@ object Calc {
 
   def write[S](s: S)(implicit S: Monoid[S]): Calc[Any, S, S, Nothing, Unit] = update(S.combine(_, s))
 
-  sealed trait CalcRes[-R, -S1, +S2, +E, +A]                              extends Calc[R, S1, S2, E, A]               {
+  sealed trait CalcRes[-R, -S1, +S2, +E, +A]                                                           extends Calc[R, S1, S2, E, A]               {
     def submit[X](r: R, s: S1, ke: (S2, E) => X, ka: (S2, A) => X): X
   }
-  final case class Pure[S, +A](a: A)                                      extends CalcRes[Any, S, S, Nothing, A]      {
+  final case class Pure[S, +A](a: A)                                                                   extends CalcRes[Any, S, S, Nothing, A]      {
     def submit[X](r: Any, s: S, ke: (S, Nothing) => X, ka: (S, A) => X): X = ka(s, a)
   }
-  final case class Read[S, R]()                                           extends CalcRes[R, S, S, Nothing, R]        {
+  final case class Read[S, R]()                                                                        extends CalcRes[R, S, S, Nothing, R]        {
     def submit[X](r: R, s: S, ke: (S, Nothing) => X, ka: (S, R) => X): X = ka(s, r)
   }
-  final case class Get[S]()                                               extends CalcRes[Any, S, S, Nothing, S]      {
+  final case class Get[S]()                                                                            extends CalcRes[Any, S, S, Nothing, S]      {
     def submit[X](r: Any, s: S, ke: (S, Nothing) => X, ka: (S, S) => X): X = ka(s, s)
   }
-  final case class Set[S](s: S)                                           extends CalcRes[Any, Any, S, Nothing, Unit] {
+  final case class Set[S](s: S)                                                                        extends CalcRes[Any, Any, S, Nothing, Unit] {
     def submit[X](r: Any, s1: Any, ke: (S, Nothing) => X, ka: (S, Unit) => X): X = ka(s, ())
   }
-  final case class Raise[S, E](e: E)                                      extends CalcRes[Any, S, S, E, Nothing]      {
+  final case class Raise[S, E](e: E)                                                                   extends CalcRes[Any, S, S, E, Nothing]      {
     def submit[X](r: Any, s: S, ke: (S, E) => X, ka: (S, Nothing) => X): X = ke(s, e)
   }
-  final case class Defer[R, S1, S2, E, A](e: () => Calc[R, S1, S2, E, A]) extends Calc[R, S1, S2, E, A]
+  final case class Defer[R, S1, S2, E, A](e: () => Calc[R, S1, S2, E, A])                              extends Calc[R, S1, S2, E, A]
   final case class Cont[R, S1, S2, S3, E1, E2, A, B](
       src: Calc[R, S1, S2, E1, A],
       ksuc: A => Calc[R, S2, S3, E2, B],
       kerr: E1 => Calc[R, S2, S3, E2, B]
-  )                                                                       extends Calc[R, S1, S3, E2, B]              {
+  ) extends Calc[R, S1, S3, E2, B] {
     type MidState = S2
     type MidErr   = E1
   }
 
-  implicit final class invariantOps[R, S1, S2, E, A](private val calc: Calc[R, S1, S2, E, A]) extends AnyVal {
+  implicit final class invariantOps[R, S1, S2, E, A](private val calc: Calc[R, S1, S2, E, A])          extends AnyVal                              {
     def cont[R1 <: R, E2, S3, B](
         f: A => Calc[R1, S2, S3, E2, B],
         h: E => Calc[R1, S2, S3, E2, B]
-    ): Calc[R1, S1, S3, E2, B]                                                                 = Cont(calc, f, h)
+    ): Calc[R1, S1, S3, E2, B] = Cont(calc, f, h)
     def flatMap[R1 <: R, E1 >: E, B](f: A => Calc[R1, S2, S2, E1, B]): Calc[R1, S1, S2, E1, B] = cont(f, raise(_: E))
     def >>=[R1 <: R, E1 >: E, B](f: A => Calc[R1, S2, S2, E1, B])                              = flatMap(f)
     def >>[R1 <: R, E1 >: E, B](c: => Calc[R1, S2, S2, E1, B])                                 = flatMap(_ => c)
@@ -82,11 +82,11 @@ object Calc {
       }
   }
 
-  implicit final class CalcSuccessfullOps[R, S1, S2, A](private val calc: Calc[R, S1, S2, Nothing, A]) extends AnyVal {
+  implicit final class CalcSuccessfullOps[R, S1, S2, A](private val calc: Calc[R, S1, S2, Nothing, A]) extends AnyVal                              {
     def flatMapS[R1 <: R, S3, B, E](f: A => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B] = calc.cont(f, identity)
     def productRS[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]  = flatMapS(_ => r)
     def *>>[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]        = productRS(r)
-    def runSuccess(r: R, init: S1): (S2, A) = {
+    def runSuccess(r: R, init: S1): (S2, A)                                                 = {
       val (s2, res) = calc.run(r, init)
       s2 -> res.merge
     }
@@ -98,7 +98,7 @@ object Calc {
       calc.cont(identity, f)
   }
 
-  implicit final class CalcFixedStateOps[R, S, E, A](private val calc: Calc[R, S, S, E, A]) extends AnyVal {
+  implicit final class CalcFixedStateOps[R, S, E, A](private val calc: Calc[R, S, S, E, A])            extends AnyVal                              {
     def when(b: Boolean): Calc[R, S, S, E, Any]                                = if (b) calc else Calc.unit
     def runEmpty(r: R)(implicit S: Monoid[S]): (S, Either[E, A])               = calc.run(r, S.empty)
     def runUnitEmpty(implicit S: Monoid[S], ev: Unit <:< R): (S, Either[E, A]) = calc.runUnit(S.empty)
@@ -106,7 +106,7 @@ object Calc {
     def execUnitEmpty(implicit S: Monoid[S], ev: Unit <:< R): S                = calc.exec((), S.empty)
   }
 
-  implicit final class CalcFixedStateSuccessOps[R, S, A](private val clc: Calc[R, S, S, Nothing, A]) extends AnyVal {
+  implicit final class CalcFixedStateSuccessOps[R, S, A](private val clc: Calc[R, S, S, Nothing, A])   extends AnyVal                              {
     def calc(r: R, s: S): (S, A) = clc.run(r, s) match { case (a, b) => a -> b.merge }
 
     def calcEmpty(r: R)(implicit S: Monoid[S]): (S, A)               = clc.calc(r, S.empty)
@@ -114,7 +114,7 @@ object Calc {
     def calcUnitEmpty(implicit S: Monoid[S], ev: Unit <:< R): (S, A) = clc.calcUnit(S.empty)
   }
 
-  implicit final class CalcFixedStateUnsuccessOps[R, S, E](private val clc: Calc[R, S, S, E, Nothing]) extends AnyVal {
+  implicit final class CalcFixedStateUnsuccessOps[R, S, E](private val clc: Calc[R, S, S, E, Nothing]) extends AnyVal                              {
     def error(r: R, s: S): (S, E) = clc.run(r, s) match { case (a, b) => a -> b.merge }
 
     def errorEmpty(r: R)(implicit S: Monoid[S])                       = clc.error(r, S.empty)
@@ -122,7 +122,7 @@ object Calc {
     def errorUnitEmpty(implicit S: Monoid[S], ev: Unit <:< R): (S, E) = clc.errorUnit(S.empty)
   }
 
-  implicit class CalcSimpleStateOps[S1, S2, A](private val calc: Calc[Any, S1, S2, Nothing, A]) extends AnyVal {
+  implicit class CalcSimpleStateOps[S1, S2, A](private val calc: Calc[Any, S1, S2, Nothing, A])        extends AnyVal                              {
     final def runSuccessUnit(init: S1): (S2, A) = calc.runSuccess((), init)
 
     def toState: IndexedState[S1, S2, A] = IndexedState(runSuccessUnit)

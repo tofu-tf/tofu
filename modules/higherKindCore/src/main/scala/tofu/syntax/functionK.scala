@@ -32,19 +32,19 @@ object funk {
 
   def funKFrom[F[_]] = new Applied1[F](true)
 
-  final class Applied2[F[_], G[_]](private val __ : Boolean) extends AnyVal {
+  final class Applied2[F[_], G[_]](private val __ : Boolean) extends AnyVal   {
     type Arbitrary
 
     def apply(maker: Maker[F, G, Arbitrary]): F ~> G = maker
   }
 
-  final class Applied1[F[_]](private val __ : Boolean) extends AnyVal {
+  final class Applied1[F[_]](private val __ : Boolean)       extends AnyVal   {
     type Arbitrary
 
     def apply[G[_]](maker: Maker[F, G, Arbitrary]): F ~> G = maker
   }
 
-  abstract class Maker[F[_], G[_], Arbitrary] extends (F ~> G) {
+  abstract class Maker[F[_], G[_], Arbitrary]                extends (F ~> G) {
 
     def applyArbitrary(f: F[Arbitrary]): G[Arbitrary]
 

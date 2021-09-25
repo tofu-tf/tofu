@@ -29,7 +29,7 @@ object PUpdate extends OpticCompanion[PUpdate] {
       def update(s: S, uv: U => V): T = g.update(s, f.update(_, uv))
     }
 
-  override def delayed[S, T, A, B](o: () => PUpdate[S, T, A, B]): PUpdate[S, T, A, B] = new PUpdate[S, T, A, B] {
+  override def delayed[S, T, A, B](o: () => PUpdate[S, T, A, B]): PUpdate[S, T, A, B]                = new PUpdate[S, T, A, B] {
 
     override def update(s: S, fb: A => B): T = opt.update(s, fb)
 

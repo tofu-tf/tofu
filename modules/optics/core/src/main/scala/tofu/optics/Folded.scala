@@ -58,14 +58,14 @@ object PFolded extends OpticCompanion[PFolded] {
 
   trait Context extends PReduced.Context with PItems.Context with PDowncast.Context {
     override def algebra: Monoid[X]
-    def default: X = algebra.empty
+    def default: X                       = algebra.empty
     override val functor: Applicative[F] = {
       implicit val alg = algebra
       Applicative[Constant[X, +*]]
     }
   }
 
-  override def toGeneric[S, T, A, B](o: PFolded[S, T, A, B]): Optic[Context, S, T, A, B]   =
+  override def toGeneric[S, T, A, B](o: PFolded[S, T, A, B]): Optic[Context, S, T, A, B] =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
         s => o.foldMap(s)(a => p(a))(c.algebra)

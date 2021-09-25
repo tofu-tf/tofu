@@ -21,7 +21,7 @@ object Pre extends PreInstances {
 
   def apply[A] = new PreApplier[A](true)
 
-  class PreApplier[A](private val __ : Boolean) extends AnyVal {
+  class PreApplier[A](private val __ : Boolean)                          extends AnyVal {
     def apply[F[_]](fu: F[Unit]): T[F, A] = fu.asInstanceOf[T[F, A]]
   }
 
@@ -51,7 +51,7 @@ class PreInstances extends PreInstances1 {
     new PreAlgebraMonoid[F, U]
 }
 
-class PreInstances1 {
+class PreInstances1                                             {
   implicit def preSemigroupK[F[_]: Apply]: SemigroupK[Pre[F, *]] = new PreSemigroupK[F]
 
   implicit def preAlgebraSemigroup[F[_]: Apply, U[f[_]]: ApplyK]: Semigroup[U[Pre[F, *]]] =

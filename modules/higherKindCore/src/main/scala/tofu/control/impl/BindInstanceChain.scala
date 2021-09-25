@@ -9,7 +9,7 @@ import cats.data.EitherT
 import tofu.syntax.monadic._
 
 trait BindInstanceChain[TC[f[_, _]] >: Bind[f]] {
-  implicit val eitherInstance: TC[Either] = new Bind[Either] {
+  implicit val eitherInstance: TC[Either]                                        = new Bind[Either] {
     import cats.instances.either._
 
     def pure[E, A](a: A): Either[E, A] = Right(a)

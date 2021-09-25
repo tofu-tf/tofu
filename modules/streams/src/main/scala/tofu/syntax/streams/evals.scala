@@ -11,11 +11,11 @@ private[syntax] final class EvalsOps[F[_], G[_], A](private val fa: F[A]) extend
   def evalFilter(f: A => G[Boolean])(implicit evals: Evals[F, G]): F[A]                = evals.evalFilter(fa)(f)
 }
 
-private[syntax] final class EvalPA[F[_]](private val __ : Boolean) extends AnyVal {
+private[syntax] final class EvalPA[F[_]](private val __ : Boolean)        extends AnyVal {
   def apply[G[_], A](ga: G[A])(implicit ev: Evals[F, G]): F[A] = ev.eval(ga)
 }
 
-private[syntax] final class EvalsPA[F[_]](private val __ : Boolean) extends AnyVal {
+private[syntax] final class EvalsPA[F[_]](private val __ : Boolean)       extends AnyVal {
   def apply[G[_], C[_]: Foldable, A](gca: G[C[A]])(implicit ev: Evals[F, G]): F[A] = ev.evals(gca)
 }
 

@@ -11,7 +11,7 @@ import tofu.{WithContext, WithRun}
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.ExecutionContext
 
-trait ContextTInvariant[F[+_], C[_[_]]] extends Invariant[ContextT[F, C, *]] {
+trait ContextTInvariant[F[+_], C[_[_]]]                                      extends Invariant[ContextT[F, C, *]] {
   implicit def F: Invariant[F]
   final override def imap[A, B](fa: ContextT[F, C, A])(f: A => B)(g: B => A): ContextT[F, C, B] = c =>
     F.imap(fa.run(c))(f)(g)
@@ -63,15 +63,15 @@ final class ContextTFunctorI[F[+_], C[_[_]]](implicit val F: Functor[F]) extends
 trait ContextTApply[F[+_], C[+_[_]]]
     extends Apply[ContextT[F, C, *]] with ContextTFunctor[F, C] with ContextTInvariantSemigroupal[F, C] {
   implicit def F: Apply[F]
-  final override def ap[A, B](ff: ContextT[F, C, A => B])(fa: ContextT[F, C, A]): ContextT[F, C, B] =
+  final override def ap[A, B](ff: ContextT[F, C, A => B])(fa: ContextT[F, C, A]): ContextT[F, C, B]                 =
     c => ff.run(c) ap fa.run(c)
 
   final override def map2[A, B, Z](fa: ContextT[F, C, A], fb: ContextT[F, C, B])(f: (A, B) => Z): ContextT[F, C, Z] =
     c => fa.run(c).map2(fb.run(c))(f)
 
-  final override def productR[A, B](fa: ContextT[F, C, A])(fb: ContextT[F, C, B]): ContextT[F, C, B] =
+  final override def productR[A, B](fa: ContextT[F, C, A])(fb: ContextT[F, C, B]): ContextT[F, C, B]                =
     c => fa.run(c).productR(fb.run(c))
-  final override def productL[A, B](fa: ContextT[F, C, A])(fb: ContextT[F, C, B]): ContextT[F, C, A] =
+  final override def productL[A, B](fa: ContextT[F, C, A])(fb: ContextT[F, C, B]): ContextT[F, C, A]                =
     c => fa.run(c).productL(fb.run(c))
 
   final override def ap2[A, B, Z](
@@ -101,16 +101,16 @@ trait ContextTApplicative[F[+_], C[_[_]]]
 
 final class ContextTApplicativeI[F[+_], C[_[_]]](implicit val F: Applicative[F]) extends ContextTApplicative[F, C]
 
-trait ContextTFlatMap[F[+_], C[_[_]]] extends FlatMap[ContextT[F, C, *]] with ContextTApply[F, C] {
+trait ContextTFlatMap[F[+_], C[_[_]]]                                    extends FlatMap[ContextT[F, C, *]] with ContextTApply[F, C] {
   implicit def F: FlatMap[F]
 
-  final override def flatMap[A, B](fa: ContextT[F, C, A])(f: A => ContextT[F, C, B]): ContextT[F, C, B] =
+  final override def flatMap[A, B](fa: ContextT[F, C, A])(f: A => ContextT[F, C, B]): ContextT[F, C, B]        =
     c => fa.run(c).flatMap(f(_).run(c))
 
-  final override def tailRecM[A, B](a: A)(f: A => ContextT[F, C, Either[A, B]]): ContextT[F, C, B] =
+  final override def tailRecM[A, B](a: A)(f: A => ContextT[F, C, Either[A, B]]): ContextT[F, C, B]             =
     c => a.tailRecM(a => f(a).run(c))
 
-  final override def flatten[A](ffa: ContextT[F, C, ContextT[F, C, A]]): ContextT[F, C, A] =
+  final override def flatten[A](ffa: ContextT[F, C, ContextT[F, C, A]]): ContextT[F, C, A]                     =
     c => ffa.run(c).flatMap(_.run(c))
 
   final override def productREval[A, B](fa: ContextT[F, C, A])(fb: Eval[ContextT[F, C, B]]): ContextT[F, C, B] =
@@ -121,7 +121,7 @@ trait ContextTFlatMap[F[+_], C[_[_]]] extends FlatMap[ContextT[F, C, *]] with Co
     c => F.mproduct(fa.run(c))(a => f(a).run(c))
   final override def ifM[B](
       fa: ContextT[F, C, Boolean]
-  )(ifTrue: => ContextT[F, C, B], ifFalse: => ContextT[F, C, B]): ContextT[F, C, B]                            =
+  )(ifTrue: => ContextT[F, C, B], ifFalse: => ContextT[F, C, B]): ContextT[F, C, B] =
     c => F.ifM(fa.run(c))(ifTrue.run(c), ifFalse.run(c))
   final override def flatTap[A, B](fa: ContextT[F, C, A])(f: A => ContextT[F, C, B]): ContextT[F, C, A]        =
     c => F.flatTap(fa.run(c))(a => f(a).run(c))
@@ -141,13 +141,13 @@ trait ContextTMonad[F[+_], C[_[_]]]
 
   final override def whileM[G[_], A](
       p: ContextT[F, C, Boolean]
-  )(body: => ContextT[F, C, A])(implicit G: Alternative[G]): ContextT[F, C, G[A]]                             =
+  )(body: => ContextT[F, C, A])(implicit G: Alternative[G]): ContextT[F, C, G[A]] =
     c => F.whileM(p.run(c))(body.run(c))
   final override def whileM_[A](p: ContextT[F, C, Boolean])(body: => ContextT[F, C, A]): ContextT[F, C, Unit] =
     c => F.whileM_(p.run(c))(body.run(c))
   final override def untilM[G[_], A](
       f: ContextT[F, C, A]
-  )(cond: => ContextT[F, C, Boolean])(implicit G: Alternative[G]): ContextT[F, C, G[A]]                       =
+  )(cond: => ContextT[F, C, Boolean])(implicit G: Alternative[G]): ContextT[F, C, G[A]] =
     c => F.untilM(f.run(c))(cond.run(c))
   final override def untilM_[A](f: ContextT[F, C, A])(cond: => ContextT[F, C, Boolean]): ContextT[F, C, Unit] =
     c => F.untilM_(f.run(c))(cond.run(c))
@@ -172,7 +172,7 @@ trait ContextTApplicativeError[F[+_], C[_[_]], E]
 
 }
 
-trait ContextTSemigroupK[F[+_], C[_[_]]] extends SemigroupK[ContextT[F, C, *]] {
+trait ContextTSemigroupK[F[+_], C[_[_]]]                                       extends SemigroupK[ContextT[F, C, *]] {
   implicit def F: SemigroupK[F]
 
   final override def combineK[A](x: ContextT[F, C, A], y: ContextT[F, C, A]): ContextT[F, C, A] = c =>
@@ -181,7 +181,7 @@ trait ContextTSemigroupK[F[+_], C[_[_]]] extends SemigroupK[ContextT[F, C, *]] {
 
 final class ContextTSemigroupKI[F[+_], C[_[_]]](implicit val F: SemigroupK[F]) extends ContextTSemigroupK[F, C]
 
-trait ContextTMonoidK[F[+_], C[_[_]]] extends MonoidK[ContextT[F, C, *]] with ContextTSemigroupK[F, C] {
+trait ContextTMonoidK[F[+_], C[_[_]]]                                    extends MonoidK[ContextT[F, C, *]] with ContextTSemigroupK[F, C] {
   implicit def F: MonoidK[F]
   private[this] val emptyAny: ContextT[F, C, Any] = _ => F.empty[Any]
 
@@ -197,7 +197,7 @@ trait ContextTAlternative[F[+_], C[_[_]]]
 
 final class ContextTAlternativeI[F[+_], C[_[_]]](implicit val F: Alternative[F]) extends ContextTAlternative[F, C]
 
-trait ContextTCoflatMap[F[+_], C[_[_]]] extends CoflatMap[ContextT[F, C, *]] with ContextTFunctor[F, C] {
+trait ContextTCoflatMap[F[+_], C[_[_]]]                                      extends CoflatMap[ContextT[F, C, *]] with ContextTFunctor[F, C] {
   implicit def F: CoflatMap[F]
 
   def coflatMap[A, B](fa: ContextT[F, C, A])(f: ContextT[F, C, A] => B): ContextT[F, C, B] =
@@ -220,7 +220,7 @@ trait ContextTMonadError[F[+_], C[_[_]], E]
     c => F.rethrow(fa.run(c))
   final override def redeemWith[A, B](
       fa: ContextT[F, C, A]
-  )(recover: E => ContextT[F, C, B], bind: A => ContextT[F, C, B]): ContextT[F, C, B]                              =
+  )(recover: E => ContextT[F, C, B], bind: A => ContextT[F, C, B]): ContextT[F, C, B] =
     c => F.redeemWith(fa.run(c))(e => recover(e).run(c), a => bind(a).run(c))
   final override def adaptError[A](fa: ContextT[F, C, A])(pf: PartialFunction[E, E]): ContextT[F, C, A]            =
     c => F.adaptError(fa.run(c))(pf)
@@ -228,16 +228,16 @@ trait ContextTMonadError[F[+_], C[_[_]], E]
 
 final class ContextTMonadErrorI[F[+_], C[_[_]], E](implicit val F: MonadError[F, E]) extends ContextTMonadError[F, C, E]
 
-trait ContextTBracket[F[+_], C[_[_]], E] extends Bracket[ContextT[F, C, *], E] with ContextTMonadError[F, C, E] {
+trait ContextTBracket[F[+_], C[_[_]], E]                                       extends Bracket[ContextT[F, C, *], E] with ContextTMonadError[F, C, E] {
   implicit def F: Bracket[F, E]
 
   final override def bracketCase[A, B](
       acquire: ContextT[F, C, A]
-  )(use: A => ContextT[F, C, B])(release: (A, ExitCase[E]) => ContextT[F, C, Unit]): ContextT[F, C, B]       =
+  )(use: A => ContextT[F, C, B])(release: (A, ExitCase[E]) => ContextT[F, C, Unit]): ContextT[F, C, B] =
     c => F.bracketCase(acquire.run(c))(a => use(a).run(c))((a, ec) => release(a, ec).run(c))
   final override def bracket[A, B](
       acquire: ContextT[F, C, A]
-  )(use: A => ContextT[F, C, B])(release: A => ContextT[F, C, Unit]): ContextT[F, C, B]                      =
+  )(use: A => ContextT[F, C, B])(release: A => ContextT[F, C, Unit]): ContextT[F, C, B] =
     c => F.bracket(acquire.run(c))(a => use(a).run(c))(a => release(a).run(c))
   final override def uncancelable[A](fa: ContextT[F, C, A]): ContextT[F, C, A]                               =
     c => F.uncancelable(fa.run(c))
@@ -245,7 +245,7 @@ trait ContextTBracket[F[+_], C[_[_]], E] extends Bracket[ContextT[F, C, *], E] w
     c => F.guarantee(fa.run(c))(finalizer.run(c))
   final override def guaranteeCase[A](
       fa: ContextT[F, C, A]
-  )(finalizer: ExitCase[E] => ContextT[F, C, Unit]): ContextT[F, C, A]                                       =
+  )(finalizer: ExitCase[E] => ContextT[F, C, Unit]): ContextT[F, C, A] =
     c => F.guaranteeCase(fa.run(c))(ec => finalizer(ec).run(c))
   final override def onCancel[A](fa: ContextT[F, C, A])(finalizer: ContextT[F, C, Unit]): ContextT[F, C, A]  =
     c => F.onCancel(fa.run(c))(finalizer.run(c))
@@ -253,7 +253,7 @@ trait ContextTBracket[F[+_], C[_[_]], E] extends Bracket[ContextT[F, C, *], E] w
 
 final class ContextTBracketI[F[+_], C[_[_]], E](implicit val F: Bracket[F, E]) extends ContextTBracket[F, C, E]
 
-trait ContextTSync[F[+_], C[_[_]]] extends Sync[ContextT[F, C, *]] with ContextTBracket[F, C, Throwable] {
+trait ContextTSync[F[+_], C[_[_]]]                                 extends Sync[ContextT[F, C, *]] with ContextTBracket[F, C, Throwable] {
   implicit def F: Sync[F]
 
   final override def suspend[A](thunk: => ContextT[F, C, A]): ContextT[F, C, A] = c => F.defer(thunk.run(c))
@@ -279,25 +279,25 @@ trait ContextTAsync[F[+_], C[_[_]]]                                  extends Asy
 }
 final class ContextTAsyncI[F[+_], C[_[_]]](implicit val F: Async[F]) extends ContextTAsync[F, C]
 
-trait ContextTConcurrent[F[+_], C[_[_]]] extends Concurrent[ContextT[F, C, *]] with ContextTAsync[F, C] {
+trait ContextTConcurrent[F[+_], C[_[_]]]                                       extends Concurrent[ContextT[F, C, *]] with ContextTAsync[F, C] {
   implicit def F: Concurrent[F]
-  final override def start[A](fa: ContextT[F, C, A]): ContextT[F, C, Fiber[ContextT[F, C, *], A]] =
+  final override def start[A](fa: ContextT[F, C, A]): ContextT[F, C, Fiber[ContextT[F, C, *], A]]           =
     c => F.start(fa.run(c)).map(_.mapK(ContextT.liftF))
   final override def racePair[A, B](
       fa: ContextT[F, C, A],
       fb: ContextT[F, C, B]
-  ): ContextT[F, C, Either[(A, Fiber[ContextT[F, C, *], B]), (Fiber[ContextT[F, C, *], A], B)]]   =
+  ): ContextT[F, C, Either[(A, Fiber[ContextT[F, C, *], B]), (Fiber[ContextT[F, C, *], A], B)]] =
     c => F.racePair(fa.run(c), fb.run(c)).map(_.bimap(_.map(_.mapK(ContextT.liftF)), _.leftMap(_.mapK(ContextT.liftF))))
 
   final override def race[A, B](fa: ContextT[F, C, A], fb: ContextT[F, C, B]): ContextT[F, C, Either[A, B]] =
     c => F.race(fa.run(c), fb.run(c))
   final override def cancelable[A](
       k: (Either[Throwable, A] => Unit) => CancelToken[ContextT[F, C, *]]
-  ): ContextT[F, C, A]                                                                                      =
+  ): ContextT[F, C, A] =
     c => F.cancelable(cb => k(cb).run(c))
   final override def continual[A, B](
       fa: ContextT[F, C, A]
-  )(f: Either[Throwable, A] => ContextT[F, C, B]): ContextT[F, C, B]                                        =
+  )(f: Either[Throwable, A] => ContextT[F, C, B]): ContextT[F, C, B] =
     c => F.continual(fa.run(c))(e => f(e).run(c))
 }
 
@@ -333,7 +333,7 @@ trait ContextTNonEmptyParallel[G[+_], C[_[_]]] extends NonEmptyParallel[ContextT
   type F[+A]  = ContextT[GF, C, A]
   type GF[+A] = G.F[A @uv]
 
-  override def apply: Apply[F] = {
+  override def apply: Apply[F]                     = {
     implicit val GFapp: Apply[G.F] = G.apply
     new ContextTApplyI[GF, C]
   }
@@ -343,11 +343,11 @@ trait ContextTNonEmptyParallel[G[+_], C[_[_]]] extends NonEmptyParallel[ContextT
     new ContextTFlatMapI[G, C]
   }
 
-  override def sequential: F ~> ContextT[G, C, *] = funKFrom[F](_.imapK(G.sequential)(G.parallel))
-  override def parallel: ContextT[G, C, +*] ~> F  = funKFrom[ContextT[G, C, +*]](_.imapK[GF](G.parallel)(G.sequential))
+  override def sequential: F ~> ContextT[G, C, *]  = funKFrom[F](_.imapK(G.sequential)(G.parallel))
+  override def parallel: ContextT[G, C, +*] ~> F   = funKFrom[ContextT[G, C, +*]](_.imapK[GF](G.parallel)(G.sequential))
 }
 
-trait ContextTParallel[G[+_], C[_[_]]] extends ContextTNonEmptyParallel[G, C] with Parallel[ContextT[G, C, *]] {
+trait ContextTParallel[G[+_], C[_[_]]]                                         extends ContextTNonEmptyParallel[G, C] with Parallel[ContextT[G, C, *]] {
   override val G: Parallel[G]
 
   def applicative: Applicative[F] = {
@@ -380,7 +380,7 @@ final class ContextTParallelI[G[+_], C[_[_]]](implicit val G: Parallel[G], val i
   override val parallel: ContextT[G, C, *] ~> F = super.parallel
 }
 
-final class ContextTContextShift[F[+_], C[_[_]]](implicit cs: ContextShift[F]) extends ContextShift[ContextT[F, C, *]] {
+final class ContextTContextShift[F[+_], C[_[_]]](implicit cs: ContextShift[F]) extends ContextShift[ContextT[F, C, *]]                                 {
   def shift: ContextT[F, C, Unit] = _ => cs.shift
 
   def evalOn[A](ec: ExecutionContext)(fa: ContextT[F, C, A]): ContextT[F, C, A] =

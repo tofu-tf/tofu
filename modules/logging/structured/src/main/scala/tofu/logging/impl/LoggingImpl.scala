@@ -13,7 +13,7 @@ private[tofu] abstract class LoggingImpl[F[_]](logger: Logger) extends Logging[F
   def warnEnabled: Boolean  = logger.isWarnEnabled
   def errorEnabled: Boolean = logger.isErrorEnabled
 
-  override def write(level: Level, message: String, values: LoggedValue*): F[Unit] =
+  override def write(level: Level, message: String, values: LoggedValue*): F[Unit]                        =
     level match {
       case Trace => trace(message, values: _*)
       case Debug => debug(message, values: _*)
@@ -22,7 +22,7 @@ private[tofu] abstract class LoggingImpl[F[_]](logger: Logger) extends Logging[F
       case Error => error(message, values: _*)
     }
 
-  override def writeMarker(level: Level, message: String, marker: Marker, values: LoggedValue*): F[Unit] =
+  override def writeMarker(level: Level, message: String, marker: Marker, values: LoggedValue*): F[Unit]  =
     level match {
       case Trace => traceWithMarker(message, marker, values: _*)
       case Debug => debugWithMarker(message, marker, values: _*)

@@ -160,7 +160,7 @@ object feither {
     def reRaise(implicit R: FindRaise.Aux[L, F], M: Monad[F]): F[R] = FindRaise.unwrap(R).reRaise(e)
   }
 
-  implicit final class EitherIdFOps[A](private val id: A) extends AnyVal {
+  implicit final class EitherIdFOps[A](private val id: A)            extends AnyVal {
     def asRightF[F[_]: Applicative, L]: F[Either[L, A]] = id.asRight[L].pure[F]
 
     def asLeftF[F[_]: Applicative, R]: F[Either[A, R]] = id.asLeft[R].pure[F]
@@ -172,7 +172,7 @@ object feither {
     def leftIn[R](implicit F: Functor[F]): F[Either[A, R]] = fa.map(_.asLeft[R])
   }
 
-  implicit final class EitherFObjectOps(private val o: Either.type) extends AnyVal {
+  implicit final class EitherFObjectOps(private val o: Either.type)  extends AnyVal {
     def condF[F[_], L, R](test: Boolean, r: => F[R], l: => F[L])(implicit F: Functor[F]): F[Either[L, R]] = {
       if (test)
         r.map(_.asRight[L])

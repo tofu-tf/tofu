@@ -42,11 +42,11 @@ trait WithContext[F[_], C] extends Context[F] {
   override def extract[A](extract: Extract[Ctx, A]): WithContext[F, A] =
     new ContextExtractInstance[F, Ctx, A](this, extract)
 
-  override def asWithContext: WithContext[F, C] = this
+  override def asWithContext: WithContext[F, C]                        = this
 }
 
 /** Companion object for [[WithContext]] */
-object WithContext {
+object WithContext             {
   def apply[F[_], C](implicit ctx: WithContext[F, C]): WithContext[F, C] = ctx
 
   /** Creates constant Context of type C in F
@@ -115,7 +115,7 @@ object WithContext {
 }
 
 final class WithContextContainsInstance[F[_], A, B](implicit wc: WithContext[F, A], lens: A Contains B)
-    extends WithContext[F, B] {
+    extends WithContext[F, B]  {
   def functor: Functor[F] = wc.functor
   def context: F[B]       = wc.extract(lens).context
 }

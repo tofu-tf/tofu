@@ -2,7 +2,7 @@ package tofu.syntax.streams
 
 import tofu.streams.Region
 
-private[syntax] final class RegionPA[F[_]](val __ : Boolean) extends AnyVal {
+private[syntax] final class RegionPA[F[_]](val __ : Boolean)     extends AnyVal {
   def apply[G[_], Exit, R](open: G[R])(close: R => G[Unit])(implicit F: Region[F, G, Exit]): F[R] =
     F.region(open)(close)
 }

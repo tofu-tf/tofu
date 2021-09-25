@@ -87,7 +87,7 @@ object logging {
       logging.traceCause(sctx.s(braces(values.size): _*), ex, values :+ add.toMap.loggedValue: _*)
   }
 
-  implicit final class LoggingCauseOps(private val message: String) extends AnyVal {
+  implicit final class LoggingCauseOps(private val message: String)         extends AnyVal {
     def cause[F[_]](ex: Throwable)(implicit logging: LoggingBase[F]): F[Unit] = logging.errorCause(message, ex)
   }
 }
@@ -126,7 +126,7 @@ object logRenderer {
     def putBool(value: Boolean)(implicit r: LogRenderer[I, V, R, M]): M       = r.putBool(value, v)
   }
 
-  implicit final class LogRendererTopContextOps[I, V, R, M](private val i: I) extends AnyVal {
+  implicit final class LogRendererTopContextOps[I, V, R, M](private val i: I)   extends AnyVal {
     def noop(implicit r: LogRenderer[I, V, R, M]): R = r.noop(i)
 
     def sub(name: String)(receive: V => M)(implicit r: LogRenderer[I, V, R, M]): R =

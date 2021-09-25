@@ -79,8 +79,8 @@ object Continue {
       override def error(s: S, e: E)   = CalcM.Pure(e)
     }
 
-  private[this] val swapAny        = swap1[Any, Any, Any]
-  def swap[A, E, S]: Swap[A, E, S] = swapAny.asInstanceOf[Swap[A, E, S]]
+  private[this] val swapAny                       = swap1[Any, Any, Any]
+  def swap[A, E, S]: Swap[A, E, S]                = swapAny.asInstanceOf[Swap[A, E, S]]
 
   type Update[A, E, SI, SO] = Continue[A, E, SI, CalcM[Nothing, Any, Any, SO, E, A]]
   def update[A, E, SI, SO](f: SI => SO): Update[A, E, SI, SO] =
@@ -89,12 +89,12 @@ object Continue {
       override def error(s: SI, e: E)   = CalcM.set(f(s)).swap errorAs_ e
     }
 
-  private[this] def biflatten1[F[+_, +_], R, SI, SO, E, A] =
+  private[this] def biflatten1[F[+_, +_], R, SI, SO, E, A]    =
     new Continue[CalcM[F, R, SI, SO, E, A], CalcM[F, R, SI, SO, E, A], SI, CalcM[F, R, SI, SO, E, A]] {
       def success(s: SI, a: CalcM[F, R, SI, SO, E, A]) = a
       def error(s: SI, e: CalcM[F, R, SI, SO, E, A])   = e
     }
-  private[this] val biflattenAny                           = biflatten1[Nothing, Any, Any, Any, Any, Any]
+  private[this] val biflattenAny                              = biflatten1[Nothing, Any, Any, Any, Any, Any]
 
   def biflatten[F[+_, +_], R, SI, SO, E1, A1, E, A](implicit
       @unused212 evA: A1 <:< CalcM[F, R, SI, SO, E, A],

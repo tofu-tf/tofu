@@ -12,7 +12,7 @@ object instances {
     private def multiline(s: String, indent: String = "  "): String =
       s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n" + indent)
 
-    private def loggedArgs(args: List[Any]): LoggedValue =
+    private def loggedArgs(args: List[Any]): LoggedValue            =
       args.map {
         case x: LoggedValue => x
         case _              => "...": LoggedValue // erase if passed to simple interpolator

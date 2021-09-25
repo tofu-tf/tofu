@@ -54,7 +54,7 @@ class CalcSuite extends AnyFlatSpec {
   }
 
   "bifoldLeft" should "be stack safe" in {
-    val size = 10000
+    val size     = 10000
     val longCalc = {
       (1 to size).foldLeft(CalcM.pure(1): ICalcM[Either, Any, Any, Nothing, Int])((cm, _) =>
         CalcM.lift(Right(cm)).flatMap(x => x)

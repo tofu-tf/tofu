@@ -46,7 +46,7 @@ final case class UnderlyingSemRef[F[_]: Functor, G[_]: Monad: Lift[F, *[_]], A](
     extends SerialAgent[G, A] {
   override def get: G[A] = ref.get.lift[G]
 
-  override def updateM(f: A => G[A]): G[A] =
+  override def updateM(f: A => G[A]): G[A]                                        =
     for {
       _        <- sem.acquire.lift
       oldValue <- get
@@ -55,7 +55,7 @@ final case class UnderlyingSemRef[F[_]: Functor, G[_]: Monad: Lift[F, *[_]], A](
       _        <- sem.release.lift
     } yield newValue
 
-  override def modifyM[B](f: A => G[(B, A)]): G[B] =
+  override def modifyM[B](f: A => G[(B, A)]): G[B]                                =
     for {
       _        <- sem.acquire.lift
       oldValue <- get
@@ -64,7 +64,7 @@ final case class UnderlyingSemRef[F[_]: Functor, G[_]: Monad: Lift[F, *[_]], A](
       _        <- sem.release.lift
     } yield result
 
-  override def updateSomeM(f: PartialFunction[A, G[A]]): G[A] =
+  override def updateSomeM(f: PartialFunction[A, G[A]]): G[A]                     =
     updateM(a => if (f.isDefinedAt(a)) f(a) else a.pure[G])
 
   override def modifySomeM[B](default: B)(f: PartialFunction[A, G[(B, A)]]): G[B] =

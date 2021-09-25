@@ -20,7 +20,7 @@ trait EmbedInstanceChain[TC[u[_[_]]] >: Embed[u]] extends RepresentableKInstance
     def embed[F[_]: FlatMap](ft: F[Free[F, A]]): Free[F, A] = Free.roll(ft)
   }
 
-  private[this] val freeEmbedAny = freeInstance[Any]
+  private[this] val freeEmbedAny                          = freeInstance[Any]
 
   final implicit def freeEmbed[A]: TC[Free[*[_], A]] = freeEmbedAny.asInstanceOf[TC[Free[*[_], A]]]
 

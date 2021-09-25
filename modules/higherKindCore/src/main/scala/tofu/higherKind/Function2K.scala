@@ -22,11 +22,11 @@ object Function2K {
 
   def untupled[F[_], G[_], H[_]](fk: Tuple2K[F, G, *] ~> H): Function2K[F, G, H] = apply((f, g) => fk(Tuple2K(f, g)))
 
-  class Applied[F[_], G[_]](private val __ : Boolean = true) extends AnyVal {
+  class Applied[F[_], G[_]](private val __ : Boolean = true) extends AnyVal              {
     def apply[H[_]](maker: MakeFunctionK[F, G, H]): Function2K[F, G, H] = maker
   }
 
-  abstract class MakeFunctionK[F[_], G[_], H[_]] extends Function2K[F, G, H] {
+  abstract class MakeFunctionK[F[_], G[_], H[_]]             extends Function2K[F, G, H] {
 
     def applyArbitrary(f: F[Arbitrary], g: G[Arbitrary]): H[Arbitrary]
 
@@ -49,7 +49,7 @@ object Function2K {
     ): Function2K[X, Y, Tuple2K[F, G, *]] =
       Function2K((xa, ya) => Tuple2K(af(xa, ya), ag(xa, ya)))
 
-    final override def embed[F[_]: FlatMap](ft: F[Function2K[X, Y, F]]): Function2K[X, Y, F] =
+    final override def embed[F[_]: FlatMap](ft: F[Function2K[X, Y, F]]): Function2K[X, Y, F]      =
       Function2K((xa, ya) => ft.flatMap(_(xa, ya)))
 
     override def zipWith2K[F[_], G[_], H[_]](af: Function2K[X, Y, F], ag: Function2K[X, Y, G])(
@@ -57,7 +57,7 @@ object Function2K {
     ): Function2K[X, Y, H] =
       Function2K((xa, ya) => f2(af(xa, ya), ag(xa, ya)))
 
-    override def pureK[F[_]](p: Point[F]): Function2K[X, Y, F] =
+    override def pureK[F[_]](p: Point[F]): Function2K[X, Y, F]                                    =
       Function2K((_, _) => p.point)
   }
 

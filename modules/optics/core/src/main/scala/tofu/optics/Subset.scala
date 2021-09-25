@@ -82,7 +82,7 @@ object PSubset extends OpticCompanion[PSubset] {
     def profunctor: PChoice[P]
   }
 
-  override def toGeneric[S, T, A, B](o: PSubset[S, T, A, B]): Optic[Context, S, T, A, B] =
+  override def toGeneric[S, T, A, B](o: PSubset[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: c.P[A, c.F[B]]): c.P[S, c.F[T]] =
         o.inject[c.F, c.P](p)(c.pure, c.functor, c.profunctor)
@@ -99,12 +99,12 @@ object PSubset extends OpticCompanion[PSubset] {
       })(pb)
   }
 
-  implicit def subType[A, B <: A: ClassTag]: Subset[A, B] = new ByDowncast[A, B] {
+  implicit def subType[A, B <: A: ClassTag]: Subset[A, B]                                  = new ByDowncast[A, B] {
     def cast(a: A): Option[B] = Some(a).collect { case b: B => b }
     def upcast(b: B): A       = b
   }
 
-  override def delayed[S, T, A, B](o: () => PSubset[S, T, A, B]): PSubset[S, T, A, B] = new PSubset[S, T, A, B] {
+  override def delayed[S, T, A, B](o: () => PSubset[S, T, A, B]): PSubset[S, T, A, B]      = new PSubset[S, T, A, B] {
     lazy val opt        = o()
     def upcast(b: B): T = opt.upcast(b)
 

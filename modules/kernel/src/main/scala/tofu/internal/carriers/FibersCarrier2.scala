@@ -8,7 +8,7 @@ abstract class FibersCarrier2[F[_]] {
   def content: Fibers[F, Exit, Fib]
 }
 
-object FibersCarrier2 {
+object FibersCarrier2                  {
   type Aux[F[_], Ex[_], Fb[_]] = FibersCarrier2[F] { type Exit[a] = Ex[a]; type Fib[a] = Fb[a]; }
 
   trait Impl[F[_], Ex[_], Fb[_]] extends FibersCarrier2[F] with Fibers[F, Ex, Fb] {

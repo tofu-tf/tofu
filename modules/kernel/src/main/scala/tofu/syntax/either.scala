@@ -1,11 +1,11 @@
 package tofu.syntax
 
 object either {
-  implicit final class TofuLeftOps[A, B](private val l: Left[A, B]) extends AnyVal {
+  implicit final class TofuLeftOps[A, B](private val l: Left[A, B])                         extends AnyVal {
     def coerceR[C]: Left[A, C] = l.asInstanceOf[Left[A, C]]
   }
 
-  implicit final class TofuRightOps[A, B](private val l: Right[A, B]) extends AnyVal {
+  implicit final class TofuRightOps[A, B](private val l: Right[A, B])                       extends AnyVal {
     def coerceL[C]: Right[C, B] = l.asInstanceOf[Right[C, B]]
   }
 
@@ -25,7 +25,7 @@ object either {
     }
   }
 
-  implicit final class TofuEitherOps[L, R](private val e: Either[L, R]) extends AnyVal {
+  implicit final class TofuEitherOps[L, R](private val e: Either[L, R])                     extends AnyVal {
     def wideLeft[L1 >: L]: Either[L1, R] = e
 
     def wideRight[R1 >: R]: Either[L, R1] = e

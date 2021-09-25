@@ -38,11 +38,11 @@ trait WithLocal[F[_], C] extends Local[F] with WithContext[F, C] {
   override def subcontext[A](contains: Ctx Contains A): WithLocal[F, A] =
     new LocalContainsInstance[F, Ctx, A](this, contains)
 
-  override private[tofu] def asWithLocal: WithLocal[F, C] = this
+  override private[tofu] def asWithLocal: WithLocal[F, C]               = this
 }
 
 /** Companion object for [[WithLocal]] */
-object WithLocal {
+object WithLocal                                                                   {
   def apply[F[_], C](implicit ctx: WithLocal[F, C]): WithLocal[F, C] = ctx
 }
 

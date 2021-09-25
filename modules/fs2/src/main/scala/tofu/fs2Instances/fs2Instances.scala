@@ -14,7 +14,7 @@ import scala.concurrent.duration.FiniteDuration
 private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   private[this] val fs2HKInstanceAny = new FS2StreamHKInstance[Any]
 
-  final implicit def fs2StreamHKInstance[A]: FS2StreamHKInstance[A] =
+  final implicit def fs2StreamHKInstance[A]: FS2StreamHKInstance[A]                        =
     fs2HKInstanceAny.asInstanceOf[FS2StreamHKInstance[A]]
 
   final implicit def fs2StreamRunContext[F[_], G[_], R](implicit
@@ -26,10 +26,10 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override implicit def WP: WithProvide[F, G, R] = fctx.self
     }
 
-  implicit def fs2LiftInstance[F[_]]: Lift[F, Stream[F, *]] =
+  implicit def fs2LiftInstance[F[_]]: Lift[F, Stream[F, *]]                                =
     Lift.byFunK(funK(Stream.eval(_)))
 
-  implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk] =
+  implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk]                        =
     new Chunks[Stream[F, *], Chunk] {
       override def chunkN[A](fa: Stream[F, A])(n: Int): Stream[F, Chunk[A]] = fa.chunkN(n)
 
@@ -40,12 +40,12 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override def cons[A](fa: Stream[F, A])(c: Chunk[A]): Stream[F, A] = fa.cons(c)
     }
 
-  implicit def fs2MergeInstance[F[_]: Concurrent]: Merge[Stream[F, *]] =
+  implicit def fs2MergeInstance[F[_]: Concurrent]: Merge[Stream[F, *]]                     =
     new Merge[Stream[F, *]] {
       override def merge[A](fa: Stream[F, A])(that: Stream[F, A]): Stream[F, A] = fa merge that
     }
 
-  implicit def fs2CompileInstance[F[_]: Sync]: Compile[Stream[F, *], F] =
+  implicit def fs2CompileInstance[F[_]: Sync]: Compile[Stream[F, *], F]                    =
     new Compile[Stream[F, *], F] {
 
       override def drain[A](fa: Stream[F, A]): F[Unit] = fa.compile.drain
@@ -56,13 +56,13 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
         fa.compile.to(ev)
     }
 
-  implicit def fs2ParFlattenInstance[F[_]: Concurrent]: ParFlatten[Stream[F, *]] =
+  implicit def fs2ParFlattenInstance[F[_]: Concurrent]: ParFlatten[Stream[F, *]]           =
     new ParFlatten[Stream[F, *]] {
       override def parFlatten[A](ffa: Stream[F, Stream[F, A]])(maxConcurrent: Int): Stream[F, A] =
         ffa.parJoin(maxConcurrent)
     }
 
-  implicit def fs2PaceInstance[F[_]: Timer]: Pace[Stream[F, *]] =
+  implicit def fs2PaceInstance[F[_]: Timer]: Pace[Stream[F, *]]                            =
     new Pace[Stream[F, *]] {
 
       override def throttled[A](fa: Stream[F, A])(rate: FiniteDuration): Stream[F, A] = fa.metered(rate)
@@ -76,16 +76,16 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
         fa.groupWithin(n, d)
     }
 
-  implicit def fs2RegionThrowInstance[F[_]]: Region[Stream[F, *], F, ExitCase[Throwable]] =
+  implicit def fs2RegionThrowInstance[F[_]]: Region[Stream[F, *], F, ExitCase[Throwable]]  =
     new Region[Stream[F, *], F, ExitCase[Throwable]] {
       override def regionCase[R](open: F[R])(close: (R, ExitCase[Throwable]) => F[Unit]): Stream[F, R] =
         Stream.bracketCase(open)(close)
     }
 
-  implicit def fs2BroadcastInstances[F[_]: Concurrent]: Broadcast[Stream[F, *]] =
+  implicit def fs2BroadcastInstances[F[_]: Concurrent]: Broadcast[Stream[F, *]]            =
     new Broadcast[Stream[F, *]] {
 
-      override def broadcast[A](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, Unit]*): Stream[F, Unit] =
+      override def broadcast[A](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, Unit]*): Stream[F, Unit]     =
         fa.broadcastTo(processors: _*)
 
       override def broadcastThrough[A, B](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, B]*): Stream[F, B] =
@@ -99,7 +99,7 @@ private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
 
   final implicit def fs2StreamProvide[F[_], G[_], R](implicit
       fctx: WithProvide[F, G, R]
-  ): WithProvide[Stream[F, *], Stream[G, *], R]                                                       =
+  ): WithProvide[Stream[F, *], Stream[G, *], R] =
     new FS2Provide[F, G, R] { override val WP: WithProvide[F, G, R] = fctx }
 }
 

@@ -57,14 +57,14 @@ object CE3Kernel {
       @unused _nonTofu: NonTofu[F]
   ): FibersCarrier3.Aux[F, E, Outcome[F, E, *], Fiber[F, E, *]] =
     new FibersCarrier3.Impl[F, E, Outcome[F, E, *], Fiber[F, E, *]] {
-      def start[A](fa: F[A]): F[Fiber[F, E, A]]                                            = F.start(fa)
-      def fireAndForget[A](fa: F[A]): F[Unit]                                              = F.void(start(fa))
+      def start[A](fa: F[A]): F[Fiber[F, E, A]]           = F.start(fa)
+      def fireAndForget[A](fa: F[A]): F[Unit]             = F.void(start(fa))
       def racePair[A, B](
           fa: F[A],
           fb: F[B]
       ): F[Either[(Outcome[F, E, A], Fiber[F, E, B]), (Fiber[F, E, A], Outcome[F, E, B])]] = F.racePair(fa, fb)
-      def race[A, B](fa: F[A], fb: F[B]): F[Either[A, B]]                                  = F.race(fa, fb)
-      def never[A]: F[A]                                                                   = F.never
+      def race[A, B](fa: F[A], fb: F[B]): F[Either[A, B]] = F.race(fa, fb)
+      def never[A]: F[A]                                  = F.never
     }
 
   final def makeExecute[Tag, F[_]](
@@ -89,12 +89,12 @@ object CE3Kernel {
       F: Async[F]
   ): ScopedCarrier3[Scoped.Blocking, F] = makeExecute[Scoped.Blocking, F](blocker.ec)
 
-  final def atomBySync[I[_]: Sync, F[_]: Sync]: MkAtomCE3Carrier[I, F] =
+  final def atomBySync[I[_]: Sync, F[_]: Sync]: MkAtomCE3Carrier[I, F]                                =
     new MkAtomCE3Carrier[I, F] {
       def atom[A](a: A): I[Atom[F, A]] = Ref.in[I, F, A](a).map(AtomByRef(_))
     }
 
-  final def qvarByConcurrent[I[_]: Sync, F[_]: Async]: MkQVarCE3Carrier[I, F] =
+  final def qvarByConcurrent[I[_]: Sync, F[_]: Async]: MkQVarCE3Carrier[I, F]                         =
     new MkQVarCE3Carrier[I, F] {
       private def qvarOpt[A](opt: Option[A]): I[QVar[F, A]] = for {
         ref <- Ref.in[I, F, QVarSM.State[A, Deferred[F, A]]](QVarSM.fromOption(opt))
@@ -104,14 +104,14 @@ object CE3Kernel {
       def qvarEmpty[A]: I[QVar[F, A]]    = qvarOpt(None)
     }
 
-  final def clock[F[_]: Functor](implicit C: cats.effect.Clock[F]): ClockCE3Carrier[F] =
+  final def clock[F[_]: Functor](implicit C: cats.effect.Clock[F]): ClockCE3Carrier[F]                =
     new ClockCE3Carrier[F] {
       def realTime(unit: TimeUnit): F[Long] = C.realTime.map(d => TimeUnit.MILLISECONDS.convert(d.toMillis, unit))
 
       def nanos: F[Long] = C.monotonic.map(_.toNanos)
     }
 
-  final def sleep[F[_]](implicit T: GenTemporal[F, _]): SleepCE3Carrier[F] =
+  final def sleep[F[_]](implicit T: GenTemporal[F, _]): SleepCE3Carrier[F]                            =
     new SleepCE3Carrier[F] {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
     }

@@ -6,7 +6,7 @@ import cats.Defer
 object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadSyntax {
   def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit
 
-  implicit final class TofuFunctorOps[F[_], A](private val fa: F[A]) extends AnyVal {
+  implicit final class TofuFunctorOps[F[_], A](private val fa: F[A])                     extends AnyVal {
     def map[B](f: A => B)(implicit F: Functor[F]): F[B]           = F.map(fa)(f)
     def fmap[B](f: A => B)(implicit F: Functor[F]): F[B]          = F.fmap(fa)(f)
     def widen[B >: A](implicit F: Functor[F]): F[B]               = F.widen(fa)
@@ -17,16 +17,16 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def tupleRight[B](b: B)(implicit F: Functor[F]): F[(A, B)]    = F.tupleRight(fa, b)
   }
 
-  implicit final class TofuSemigroupalOps[F[_], A](private val fa: F[A]) extends AnyVal {
+  implicit final class TofuSemigroupalOps[F[_], A](private val fa: F[A])                 extends AnyVal {
     def product[B](fb: F[B])(implicit F: Semigroupal[F]): F[(A, B)] = F.product(fa, fb)
   }
 
-  implicit final class TofuApplyFuncOps[F[_], A, B](private val fab: F[A => B]) extends AnyVal {
+  implicit final class TofuApplyFuncOps[F[_], A, B](private val fab: F[A => B])          extends AnyVal {
     def ap(fa: F[A])(implicit F: Apply[F]): F[B]  = F.ap(fab)(fa)
     def <*>(fa: F[A])(implicit F: Apply[F]): F[B] = F.ap(fab)(fa)
   }
 
-  implicit final class TofuApplicativeBooleanOps(private val condition: Boolean) extends AnyVal {
+  implicit final class TofuApplicativeBooleanOps(private val condition: Boolean)         extends AnyVal {
     def when_[F[_], A](fa: => F[A])(implicit F: Applicative[F]): F[Unit] =
       if (condition) F.void(fa) else F.unit
 
@@ -44,7 +44,7 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
     def ap2(fa: F[A], fb: F[B])(implicit F: Apply[F]): F[C] = F.ap2(fab)(fa, fb)
   }
 
-  implicit final class TofuApplyOps[F[_], C](private val fa: F[C]) extends AnyVal {
+  implicit final class TofuApplyOps[F[_], C](private val fa: F[C])                       extends AnyVal {
     def productR[B](fb: F[B])(implicit F: Apply[F]): F[B]                                          = F.productR(fa)(fb)
     def productL[B](fb: F[B])(implicit F: Apply[F]): F[C]                                          = F.productL(fa)(fb)
     def *>[B](fb: F[B])(implicit F: Apply[F]): F[B]                                                = F.productR(fa)(fb)
@@ -58,7 +58,7 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
       else productR(FD.defer(replicate_(count - 1)))
   }
 
-  implicit final class TofuFlatMapOps[F[_], C](private val fa: F[C]) extends AnyVal {
+  implicit final class TofuFlatMapOps[F[_], C](private val fa: F[C])                     extends AnyVal {
     def flatMap[B](f: C => F[B])(implicit F: FlatMap[F]): F[B]             = F.flatMap(fa)(f)
     def productREval[B](fb: cats.Eval[F[B]])(implicit F: FlatMap[F]): F[B] = F.productREval(fa)(fb)
     def productLEval[B](fb: cats.Eval[F[B]])(implicit F: FlatMap[F]): F[C] = F.productLEval(fa)(fb)
@@ -73,7 +73,7 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
       F.flatTap(fa)(a => F.flatTap(fb)(b => f(a, b)))
   }
 
-  implicit final def tofuSyntaxApplyOps[F[_], A](fa: F[A]): ApplyOps[F, A]      = new ApplyOps(fa)
+  implicit final def tofuSyntaxApplyOps[F[_], A](fa: F[A]): ApplyOps[F, A] = new ApplyOps(fa)
   implicit final def tofuSyntaxFlatten[F[_], A](ffa: F[F[A]]): FlattenOps[F, A] = new FlattenOps[F, A](ffa)
   implicit final def tofuSyntaxIfM[F[_]](fa: F[Boolean]): IfMOps[F]             = new IfMOps[F](fa)
   implicit final def tofuSyntaxFlatMapIdOps[A](a: A): FlatMapIdOps[A]           = new FlatMapIdOps[A](a)

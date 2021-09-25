@@ -8,12 +8,12 @@ import tofu.syntax.either._
 import tofu.syntax.monadic._
 
 class SelectiveOverMonad[F[_]](implicit val F: Monad[F]) extends Selective[F] with ApplicativeDelegate[F] {
-  def selectAp[A, B](fe: F[Either[A, B]])(ff: => F[A => B]): F[B] = F.flatMap(fe) {
+  def selectAp[A, B](fe: F[Either[A, B]])(ff: => F[A => B]): F[B]    = F.flatMap(fe) {
     case Left(a)  => F.map(ff)(_(a))
     case Right(b) => F.pure(b)
   }
 
-  override def select[A](fo: F[Option[A]])(fa: => F[A]): F[A] = F.flatMap(fo) {
+  override def select[A](fo: F[Option[A]])(fa: => F[A]): F[A]        = F.flatMap(fo) {
     case None    => fa
     case Some(a) => F.pure(a)
   }
@@ -36,7 +36,7 @@ class SelectiveOverMonad[F[_]](implicit val F: Monad[F]) extends Selective[F] wi
 trait SelectiveWithMap[F[_]] extends Selective[F] {
   def smap[A, B](fa: F[A])(f: A => B): F[B]
 
-  def ap[A, B](ff: F[A => B])(fa: F[A]): F[B] =
+  def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]       =
     selectAp[A, B](smap(fa)(Left(_)))(ff)
 
   override def map[A, B](fa: F[A])(f: A => B): F[B] = smap(fa)(f)

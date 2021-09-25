@@ -13,7 +13,7 @@ private[instances] trait DoobieImplicits1 extends DoobieImplicits2 {
 }
 
 private[instances] trait DoobieImplicits2 extends DoobieImplicits3 {
-  @inline final implicit def liftEffectToConnectionIOImplicit[F[_]: Effect]: LiftEffectToConnectionIO[F] =
+  @inline final implicit def liftEffectToConnectionIOImplicit[F[_]: Effect]: LiftEffectToConnectionIO[F]             =
     liftEffectToConnectionIO
 
   @inline final implicit def liftSyncEffectToConnectionIOImplicit[F[_]: SyncEffect]: LiftSyncEffectToConnectionIO[F] =

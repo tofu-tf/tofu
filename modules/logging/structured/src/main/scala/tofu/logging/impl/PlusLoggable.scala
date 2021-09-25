@@ -11,7 +11,7 @@ class PlusLoggable[A](first: Base[A], second: Loggable.Base[A]) extends Loggable
   def putValue[I, V, R, M](a: A, v: V)(implicit r: LogRenderer[I, V, R, M]): M =
     first.combinedValue(a, v, second)
 
-  override def logShow(a: A): String = {
+  override def logShow(a: A): String                                           = {
     val s = first.logShow(a)
     if (s.nonEmpty) s else second.logShow(a)
   }

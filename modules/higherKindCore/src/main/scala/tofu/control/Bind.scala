@@ -106,7 +106,7 @@ trait TwinMonad[F[_, _]] extends BiMonad[F, F] with Bifunctor[F] { self =>
 
   def rightFlatMap[A, B, C, D](rab: F[A, B])(fl: A => F[C, D], fr: B => F[C, D]): F[C, D] = foldWith(rab)(fl, fr)
 
-  def bifunctor: Bifunctor[F] = new Bifunctor[F] {
+  def bifunctor: Bifunctor[F]              = new Bifunctor[F] {
     def bimap[A, B, C, D](fab: F[A, B])(f: A => C, g: B => D): F[C, D] = self.bimap(fab)(f, g)
   }
 

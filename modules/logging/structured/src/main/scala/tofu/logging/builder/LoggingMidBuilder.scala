@@ -48,7 +48,7 @@ trait LoggingMidBuilder extends Builder[LoggingMid] {
       args += (name -> a)
       this
     }
-    def result: LoggingMid[Res] = new LoggingMid[Res] {
+    def result: LoggingMid[Res]                         = new LoggingMid[Res] {
       private[this] val argSeq                                 = args.toSeq
       def around[F[_]: Monad: LoggingBase](fa: F[Res]): F[Res] =
         onEnter(cls, method, argSeq) *> fa.flatTap(res => onLeave(cls, method, argSeq, res))

@@ -11,11 +11,11 @@ import raise.FindRaise
 object foption {
   def noneF[F[_]: Applicative, A]: F[Option[A]] = none[A].pure[F]
 
-  implicit final class FOptionOps[A](private val a: A) extends AnyVal {
+  implicit final class FOptionOps[A](private val a: A)                       extends AnyVal {
     def someF[F[_]: Applicative]: F[Option[A]] = a.some.pure[F]
   }
 
-  implicit final class TofuFOptionFOps[F[_], A](private val a: F[A]) extends AnyVal {
+  implicit final class TofuFOptionFOps[F[_], A](private val a: F[A])         extends AnyVal {
     def someIn(implicit F: Functor[F]): F[Option[A]] = F.map(a)(Some(_))
   }
 
@@ -112,7 +112,7 @@ object foption {
     def apF[X, Z](f: => F[Option[X]])(implicit F: Monad[F], ev: A <:< (X => Z)): F[Option[Z]] =
       lhs.flatMap(_.flatTraverse(fn => f.map(_.map(fn))))
 
-    def map2F[B, Z](fb: => F[Option[B]])(f: (A, B) => Z)(implicit F: Monad[F]): F[Option[Z]]        =
+    def map2F[B, Z](fb: => F[Option[B]])(f: (A, B) => Z)(implicit F: Monad[F]): F[Option[Z]] =
       productF(fb).map(_.map { case (a, b) => f(a, b) })
 
     def flatMap2F[B, Z](fb: => F[Option[B]])(f: (A, B) => F[Z])(implicit F: Monad[F]): F[Option[Z]] =

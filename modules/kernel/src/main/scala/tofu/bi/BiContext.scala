@@ -175,7 +175,7 @@ trait BiRun[F[+_, +_], G[+_, +_], X, C] extends BiLocal[F, X, C] with BiUnlift[G
       c => lift(runRight(fea)(rproj(c)))
     )
 
-  override def disclose[E, A](k: FunBK[F, G] => F[E, A]): F[E, A] =
+  override def disclose[E, A](k: FunBK[F, G] => F[E, A]): F[E, A]                 =
     bifunctor.foldWith[X, C, E, A](context)(
       x => k(FunBK.apply(runLeft(_)(x))),
       c => k(FunBK.apply(runRight(_)(c)))
@@ -204,7 +204,7 @@ class BiContextExtractInstance[F[+_, +_], X, C, E, A](
 
 class BiLocalSubInstance[F[+_, +_], X, C, E, A](ctx: BiLocal[F, X, C], lcts: Contains[X, E], rcts: Contains[C, A])
     extends BiContextExtractInstance[F, X, C, E, A](ctx, lcts, rcts) with BiLocal[F, E, A] {
-  override def bilocal[E1, A1](fea: F[E1, A1])(lproj: E => E, rproj: A => A): F[E1, A1] =
+  override def bilocal[E1, A1](fea: F[E1, A1])(lproj: E => E, rproj: A => A): F[E1, A1]                            =
     ctx.bilocal(fea)(lcts.update(_, lproj), rcts.update(_, rproj))
 
   override def sub[E1, A1](err: tofu.optics.Contains[E, E1], res: tofu.optics.Contains[A, A1]): BiLocal[F, E1, A1] =

@@ -47,7 +47,7 @@ private[env] class EnvFunctorstance[E]
   //Bracket
   override def bracketCase[A, B](
       acquire: Env[E, A]
-  )(use: A => Env[E, B])(release: (A, ExitCase[Throwable]) => Env[E, Unit]): Env[E, B]                       =
+  )(use: A => Env[E, B])(release: (A, ExitCase[Throwable]) => Env[E, Unit]): Env[E, B] =
     acquire.bracketСase(use)(release)
   override def bracket[A, B](acquire: Env[E, A])(use: A => Env[E, B])(release: A => Env[E, Unit]): Env[E, B] =
     acquire.bracket(use)(release)
@@ -75,7 +75,7 @@ private[env] class EnvFunctorstance[E]
   override def racePair[A, B](
       fa: Env[E, A],
       fb: Env[E, B]
-  ): Env[E, Either[(A, Fiber[Env[E, *], B]), (Fiber[Env[E, *], A], B)]]       =
+  ): Env[E, Either[(A, Fiber[Env[E, *], B]), (Fiber[Env[E, *], A], B)]] =
     Env.racePair(fa, fb)
 
   //Timer

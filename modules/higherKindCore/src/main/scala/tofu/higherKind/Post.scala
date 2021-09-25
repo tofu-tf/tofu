@@ -34,7 +34,7 @@ class PostInstances extends PostInstances1 {
     new PostAlgebraMonoid[F, U]
 }
 
-class PostInstances1 {
+class PostInstances1                                              {
   implicit def postSemigroupK[F[_]: Apply]: SemigroupK[Post[F, *]] = new PostSemigroupK[F]
 
   implicit def postAlgebraSemigroup[F[_]: Apply, U[f[_]]: ApplyK]: Semigroup[U[Post[F, *]]] =

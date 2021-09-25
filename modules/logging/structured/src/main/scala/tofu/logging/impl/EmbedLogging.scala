@@ -7,7 +7,7 @@ import org.slf4j.Marker
 import tofu.syntax.monadic._
 
 class EmbedLogging[F[_]: FlatMap](underlying: F[Logging[F]]) extends Logging[F] {
-  def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit] =
+  def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit]                                 =
     underlying.flatMap(_.write(level, message, values: _*))
 
   override def writeMarker(level: Logging.Level, message: String, marker: Marker, values: LoggedValue*): F[Unit]  =

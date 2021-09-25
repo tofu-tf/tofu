@@ -27,7 +27,7 @@ abstract class QVarSM[F[_]: Monad, A, P] extends QVar[F, A] {
   // offset is an offset of a permanent request index in our pseudo-queue,
   // needed by the take operation, too keep track its position
   // every time put removes a head request it will increment the offset
-  override def put(a: A): F[Unit] = modifyF {
+  override def put(a: A): F[Unit]                                                                             = modifyF {
     case Contains(v, off) => (Contains(a +: v, off), unit[F])
     case Await(reqs, off) => putIter(reqs.toVector, off, a, unit[F])
   }
@@ -40,7 +40,7 @@ abstract class QVarSM[F[_]: Monad, A, P] extends QVar[F, A] {
       case empty @ _                 => (Contains(Vector(a), offset), fa)
     }
 
-  override def read: F[A] = modifyF {
+  override def read: F[A]                                                                                     = modifyF {
     case s @ Contains(a +: _, _)    => (s, a.pure[F])
     case s @ Contains(empty @ _, _) => (s, newPromise >>= retryRead)
     case s: Await[P]                => (s, await(s.reqs.head.promise))
@@ -56,7 +56,7 @@ abstract class QVarSM[F[_]: Monad, A, P] extends QVar[F, A] {
   // on take cancelation we will use our best effort
   // to convert corresponding request to Read,
   // so put will complete it and go forward
-  override def take: F[A] = modifyF {
+  override def take: F[A]                              = modifyF {
     case Contains(a +: rest, _)     => (Contains(rest), a.pure[F])
     case s @ Contains(empty @ _, _) => (s, newPromise >>= retryTake)
     case s @ Await(reqs, off)       =>
@@ -79,7 +79,7 @@ abstract class QVarSM[F[_]: Monad, A, P] extends QVar[F, A] {
       }
   }
 
-  private[this] def update(f: S => S): F[Unit] = modifyF(s => (f(s), unit[F]))
+  private[this] def update(f: S => S): F[Unit]  = modifyF(s => (f(s), unit[F]))
 
   private[this] def revertTake(index: Long): F[Unit] = update {
     case s @ Await(reqs, offset) if offset <= index || reqs.length + offset > index =>

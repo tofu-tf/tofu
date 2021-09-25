@@ -41,7 +41,7 @@ object CargoService extends Logging.Companion[CargoService] {
             .transport(cargo.weight, from, to)
             .orThrow(new Exception(s"Moving company has rejected the cargo $cargo"))
 
-      override def deposit(cargo: Cargo, howLong: Duration): F[Unit] = for {
+      override def deposit(cargo: Cargo, howLong: Duration): F[Unit]                   = for {
         _                <- info"Depositing cargo $cargo"
         isAcceptable     <- warehouse.requestStorage(cargo)
         warehouseAddress <- warehouse.address
@@ -79,7 +79,7 @@ object Warehouse extends Logging.Companion[Warehouse] {
       case Cargo(weight, name)                 => warn"Cargo $name is too heavy with weight $weight".as(false)
     }
 
-    override def address: F[Destination] = Destination("Smallish str. building 4", "Smallfurkt").pure[F]
+    override def address: F[Destination]                  = Destination("Smallish str. building 4", "Smallfurkt").pure[F]
   }
 }
 

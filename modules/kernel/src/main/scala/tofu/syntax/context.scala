@@ -38,7 +38,7 @@ object context {
     def local(project: C => C): F[A] = loc.local(fa)(project)
   }
 
-  implicit final class AltLocalOps[F[_], A](private val fa: F[A]) extends AnyVal {
+  implicit final class AltLocalOps[F[_], A](private val fa: F[A])   extends AnyVal {
     def local_[C](project: C => C)(implicit loc: F WithLocal C): F[A] = loc.local(fa)(project)
   }
 }

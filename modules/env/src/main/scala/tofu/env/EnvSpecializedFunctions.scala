@@ -215,7 +215,7 @@ trait EnvSpecializedFunctions[E] {
       def env: Env[E, A] = fromTask(task)
     }
 
-    implicit class FutureAsEnv[A](future: => Future[A]) {
+    implicit class FutureAsEnv[A](future: => Future[A])    {
       def env: Env[E, A] = deferFuture(future)
     }
   }

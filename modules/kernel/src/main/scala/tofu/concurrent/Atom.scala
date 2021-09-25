@@ -45,7 +45,7 @@ trait Atom[+F[_], A] {
 object Atom {
   implicit def representableKInstance[A]: RepresentableK[Atom[*[_], A]] = derived.genRepresentableK[Atom[*[_], A]]
 
-  final implicit class AtomOps[F[_], A](private val self: Atom[F, A]) extends AnyVal {
+  final implicit class AtomOps[F[_], A](private val self: Atom[F, A])                             extends AnyVal     {
     def focused[B](bInA: A Contains B)(implicit F: Functor[F]): Atom[F, B] = self match {
       case FocusedAtom(v, focus) => FocusedAtom(v, focus >> bInA)
       case _                     => FocusedAtom(self, bInA)

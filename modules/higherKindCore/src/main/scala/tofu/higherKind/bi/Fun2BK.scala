@@ -12,13 +12,13 @@ object Fun2BK {
 
   def apply[F[_, _], G[_, _]] = new Applied[F, G]
 
-  class Applied[F[_, _], G[_, _]](private val __ : Boolean = true) extends AnyVal {
+  class Applied[F[_, _], G[_, _]](private val __ : Boolean = true) extends AnyVal          {
     type A1
     type B1
     def apply[H[_, _]](maker: Maker[F, G, H, A1, B1]): Fun2BK[F, G, H] = maker
   }
 
-  abstract class Maker[F[_, _], G[_, _], H[_, _], A1, B1] extends Fun2BK[F, G, H] {
+  abstract class Maker[F[_, _], G[_, _], H[_, _], A1, B1]          extends Fun2BK[F, G, H] {
     def applyArbitrary(f: F[A1, B1], g: G[A1, B1]): H[A1, B1]
 
     def apply[A, B](fa: F[A, B], ga: G[A, B]): H[A, B] =

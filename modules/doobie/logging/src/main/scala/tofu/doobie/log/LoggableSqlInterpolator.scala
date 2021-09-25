@@ -28,7 +28,7 @@ object LoggableSqlInterpolator {
     implicit def put[A: Put]: Put[LoggableArg[A]] = Put[A].contramap(_.value)
   }
 
-  final case class LoggableSingleFragment(fr: Fragment) extends AnyVal {
+  final case class LoggableSingleFragment(fr: Fragment)                    extends AnyVal      {
     def toSingleFragment: SingleFragment[Nothing] = SingleFragment(fr)
   }
   object LoggableSingleFragment {

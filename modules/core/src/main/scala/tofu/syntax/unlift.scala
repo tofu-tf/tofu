@@ -54,7 +54,7 @@ object unlift {
 
   }
 
-  private[unlift] trait EffectInstance[F[_], G[_]] extends Effect[G] {
+  private[unlift] trait EffectInstance[F[_], G[_]]           extends Effect[G]                                     {
     def toG: F ~> G
     def toF: G ~> F
     implicit def G: Async[G]

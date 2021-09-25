@@ -19,6 +19,6 @@ private[catsmtl] trait TofuInstances2 {
   @inline final implicit def deriveWithContext[F[_], C](implicit A: Ask[F, C]): WithContext[F, C] =
     new TofuCatsMTLInstances.TofuWithContextInstance(A)
 
-  @inline final implicit def deriveTofuRaise[F[_], E](implicit R: MRaise[F, E]): Raise[F, E] =
+  @inline final implicit def deriveTofuRaise[F[_], E](implicit R: MRaise[F, E]): Raise[F, E]      =
     new TofuCatsMTLInstances.TofuRaiseInstance(R)
 }

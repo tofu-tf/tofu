@@ -110,7 +110,7 @@ object FactorizeSuite {
     def conjure[U[f[_, _]], F[_, _]]: U[F] = macro HigherKindedMacros.bifactorizeThis[U]
   }
 
-  class BiBuilder(algCls: Class[_]) {
+  class BiBuilder(algCls: Class[_])                                    {
     def start[Err: ClassTag, Res: ClassTag](name: String): Building =
       Building(
         Map(

@@ -14,7 +14,7 @@ object CacheVal {
   def none[A]: CacheVal[A]                 = None
   def some[A](ts: Long, x: A): CacheVal[A] = Some(ts, x)
 
-  final case class Some[+A](updatedTime: Long, value: A) extends CacheVal[A] {
+  final case class Some[+A](updatedTime: Long, value: A) extends CacheVal[A]       {
     override def valid(after: Long): Boolean          = after <= updatedTime
     override def isEmpty: Boolean                     = false
     override def get: A                               = value
@@ -23,7 +23,7 @@ object CacheVal {
     def fold[B](empty: => B)(some: (Long, A) => B): B = some(updatedTime, value)
   }
 
-  case object None extends CacheVal[Nothing] {
+  case object None                                       extends CacheVal[Nothing] {
     override def valid(after: Long): Boolean                = false
     override def isEmpty: Boolean                           = true
     override def get: Nothing                               = throw new NoSuchElementException

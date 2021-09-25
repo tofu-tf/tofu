@@ -78,7 +78,7 @@ trait ExceptTInstances1 {
       def raiseError[A](e: E): ExceptT[F, E, A] = Embedded(e.asLeftF[F, A])
     }
 
-  implicit def exceptTBind[F[+_]](implicit F: Monad[F]): Bind[ExceptT[F, *, *]] =
+  implicit def exceptTBind[F[+_]](implicit F: Monad[F]): Bind[ExceptT[F, *, *]]              =
     new Bind[ExceptT[F, *, *]] {
       def pure[E, A](a: A): ExceptT[F, E, A] = Embedded(a.asRightF[F, E])
 

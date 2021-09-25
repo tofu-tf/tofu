@@ -22,7 +22,7 @@ sealed trait LogTree {
 }
 
 // pretty much unsafe mutable builder for circe.Json from logs
-object LogTree extends LogBuilder[Json] {
+object LogTree                                   extends LogBuilder[Json] {
   implicit def monoid: Monoid[Output] = Applicative.monoid
 
   type Output = Eval[Unit]
@@ -38,7 +38,7 @@ object LogTree extends LogBuilder[Json] {
     def getList: Eval[List[(String, LogTree)]]       = Eval.always(values.toList)
   }
 
-  final case class LogArr(values: Iterable[LogTree]) extends LogTree
+  final case class LogArr(values: Iterable[LogTree])              extends LogTree
 
   private val newdict = Eval.always(mutable.Map.empty[String, LogTree]).map(new LogDict(_))
   private val newtree = Eval.always(new Value(NullValue))
@@ -76,7 +76,7 @@ object LogTree extends LogBuilder[Json] {
   def make(f: LogDict => Eval[Unit]): Json = buildJson(f).value
 }
 
-sealed trait LogParamValue extends LogTree {
+sealed trait LogParamValue                       extends LogTree          {
   def value: Any
 
   def jsonVal: Json = this match {
@@ -96,7 +96,7 @@ final case class BigIntValue(value: BigInt)      extends LogParamValue
 final case class DecimalValue(value: BigDecimal) extends LogParamValue
 final case class FloatValue(value: Double)       extends LogParamValue
 final case class BoolValue(value: Boolean)       extends LogParamValue
-case object NullValue                            extends LogParamValue {
+case object NullValue                            extends LogParamValue    {
   def value = null
 }
 object LogParamValue {

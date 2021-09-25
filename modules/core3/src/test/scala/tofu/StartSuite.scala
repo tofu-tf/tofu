@@ -16,7 +16,7 @@ object StartSuite {
     MakeAgent[IO, IO]
   }
 
-  def summonInstancesForIO = {
+  def summonInstancesForIO                                                                                = {
     Fire[IO]
     Start[IO]
     Race[IO]

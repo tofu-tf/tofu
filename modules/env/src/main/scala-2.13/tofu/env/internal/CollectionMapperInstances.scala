@@ -2,7 +2,7 @@ package tofu.env.internal
 import scala.collection.IterableOps
 
 private[tofu] class CollectionMapperInstances {
-  private[this] val mapperAny: CollectionMapper[Any, Any, Iterable] =
+  private[this] val mapperAny: CollectionMapper[Any, Any, Iterable]                                =
     new CollectionMapper[Any, Any, Iterable] {
       def map(ca: Iterable[Any], f: Any => Any): Iterable[Any] = ca.map(f)
     }

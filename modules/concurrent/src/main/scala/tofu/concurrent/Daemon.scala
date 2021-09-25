@@ -209,12 +209,12 @@ final class TofuCanceledJoinException[F[_], A] private[tofu] (val daemon: Daemon
 trait DaemonInstances {
   private[this] val representableAny = higherKind.derived.genRepresentableK[Daemon[*[_], Any, Any]]
 
-  final implicit def daemonRepresentable[E, A]: RepresentableK[Daemon[*[_], E, A]] =
+  final implicit def daemonRepresentable[E, A]: RepresentableK[Daemon[*[_], E, A]]                  =
     representableAny.asInstanceOf[RepresentableK[Daemon[*[_], E, A]]]
 
   final implicit def daemonApplicative[F[_], E](implicit F: Monad[F]): Applicative[Daemon[F, E, *]] =
     new ApplicativeZip[Daemon[F, E, *]] {
-      def pure[A](x: A): Daemon[F, E, A] = new Daemon[F, E, A] {
+      def pure[A](x: A): Daemon[F, E, A]                                      = new Daemon[F, E, A] {
         def join: F[A]                  = F.pure(x)
         def cancel: F[Unit]             = F.unit
         def poll: F[Option[Exit[E, A]]] = F.pure(Some(Exit.Completed(x)))

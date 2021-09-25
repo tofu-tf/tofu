@@ -150,7 +150,7 @@ object ReadWrite {
 
     def getState: F[State[F, A]] = state.get
 
-    override def read: F[(A, F[Unit])] =
+    override def read: F[(A, F[Unit])]                                                                         =
       Deferred[F, (A, F[Unit])].bracketCase { d =>
         state.modify {
           case s @ State(q, r, false, _, _, a) if r < maxReaders && q.headOption.forall(!_.isWriter) =>
@@ -163,7 +163,7 @@ object ReadWrite {
         case _                                          => F.unit
       }
 
-    override def write: F[(A, A => F[Unit])] =
+    override def write: F[(A, A => F[Unit])]                                                                   =
       Deferred[F, (A, A => F[Unit])].bracketCase { d =>
         state.modify {
           case s @ State(q, 0, false, _, _, a) if q.isEmpty =>
@@ -176,7 +176,7 @@ object ReadWrite {
         case _                                          => F.unit
       }
 
-    private def dropPrecedingTrashed(state: State[F, A]): State[F, A] =
+    private def dropPrecedingTrashed(state: State[F, A]): State[F, A]                                          =
       state.q match {
         case Reader(d) +: tl if state.trashedReaders(d) =>
           dropPrecedingTrashed(state.copy(q = tl, trashedReaders = state.trashedReaders - d))
@@ -216,7 +216,7 @@ object ReadWrite {
         }
       }.flatten
 
-    private def releaseWrite(newA: A): F[Unit] =
+    private def releaseWrite(newA: A): F[Unit]                                                                 =
       state.modify {
         dropPrecedingTrashed(_) match {
           case state @ State(q, _, _, _, _, _) if q.isEmpty  => state.copy(a = newA, writeLocked = false) -> F.unit
@@ -231,15 +231,15 @@ object ReadWrite {
         }
       }.flatten
 
-    override def get: F[A] = read.flatMap { case (a, release) => release.as(a) }
+    override def get: F[A]                                                                                     = read.flatMap { case (a, release) => release.as(a) }
 
-    override def tryGet: F[Option[A]] =
+    override def tryGet: F[Option[A]]                   =
       tryRead.flatMap {
         case Some((a, release)) => release.as(a.some)
         case _                  => F.pure(none)
       }
 
-    override def tryRead: F[Option[(A, F[Unit])]] =
+    override def tryRead: F[Option[(A, F[Unit])]]       =
       state.modify {
         case s @ State(q, r, false, _, _, a) if r < maxReaders && q.headOption.forall(!_.isWriter) =>
           s.copy(currentReaders = r + 1) -> (a -> releaseRead).some
@@ -252,11 +252,11 @@ object ReadWrite {
         case s                                            => s                          -> none
       }
 
-    override def update(f: A => A): F[Unit] = modify(a => (f(a), ()))
+    override def update(f: A => A): F[Unit]             = modify(a => (f(a), ()))
 
     override def tryUpdate(f: A => A): F[Boolean] = tryModify(a => (f(a), ())).map(_.isDefined)
 
-    override def modify[B](f: A => (A, B)): F[B] =
+    override def modify[B](f: A => (A, B)): F[B]            =
       write.flatMap { case (a, putAndRelease) =>
         val (u, b) = f(a)
         putAndRelease(u).as(b)

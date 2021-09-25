@@ -102,6 +102,6 @@ private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
   def sleep(duration: FiniteDuration): EnvBio[Any, Nothing, Unit] =
     fromTaskTotal(Task.sleep(duration))
 
-  private[this] val anyUnit: EnvBio[Any, Nothing, Unit] = fromTaskTotal(Task.unit)
-  def unit: EnvBio[Any, Nothing, Unit]                  = anyUnit.asInstanceOf[EnvBio[Any, Nothing, Unit]]
+  private[this] val anyUnit: EnvBio[Any, Nothing, Unit]           = fromTaskTotal(Task.unit)
+  def unit: EnvBio[Any, Nothing, Unit]                            = anyUnit.asInstanceOf[EnvBio[Any, Nothing, Unit]]
 }

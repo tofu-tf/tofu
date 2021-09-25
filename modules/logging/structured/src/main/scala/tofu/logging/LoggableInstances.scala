@@ -27,43 +27,43 @@ import java.io.StringWriter
 import java.io.PrintWriter
 
 class LoggableInstances {
-  final implicit val stringValue: Loggable[String] = new SingleValueLoggable[String] {
+  final implicit val stringValue: Loggable[String]            = new SingleValueLoggable[String] {
     def logValue(a: String): LogParamValue = StrValue(a)
     override def putField[I, V, R, M](a: String, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R                                   =
+    ): R =
       receiver.addString(name, a, input)
   }
 
-  final implicit val byteLoggable: Loggable[Byte] = new SingleValueLoggable[Byte] {
+  final implicit val byteLoggable: Loggable[Byte]             = new SingleValueLoggable[Byte] {
     def logValue(a: Byte): LogParamValue                                                                              = IntValue(a.toLong)
     override def putField[I, V, R, M](a: Byte, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
       receiver.addInt(name, a.toLong, input)
   }
 
-  final implicit val shortLoggable: Loggable[Short] = new SingleValueLoggable[Short] {
+  final implicit val shortLoggable: Loggable[Short]           = new SingleValueLoggable[Short] {
     def logValue(a: Short): LogParamValue                                                                              = IntValue(a.toLong)
     override def putField[I, V, R, M](a: Short, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
       receiver.addInt(name, a.toLong, input)
   }
 
-  final implicit val intLoggable: Loggable[Int] = new SingleValueLoggable[Int] {
+  final implicit val intLoggable: Loggable[Int]               = new SingleValueLoggable[Int] {
     def logValue(a: Int): LogParamValue                                                                              = IntValue(a.toLong)
     override def putField[I, V, R, M](a: Int, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
       receiver.addInt(name, a.toLong, input)
   }
 
-  final implicit val longLoggable: Loggable[Long] = new SingleValueLoggable[Long] {
+  final implicit val longLoggable: Loggable[Long]             = new SingleValueLoggable[Long] {
     def logValue(a: Long): LogParamValue                                                                              = IntValue(a)
     override def putField[I, V, R, M](a: Long, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
       receiver.addInt(name, a, input)
   }
 
-  final implicit val bigIngLoggable: Loggable[BigInt] = new SingleValueLoggable[BigInt] {
+  final implicit val bigIngLoggable: Loggable[BigInt]         = new SingleValueLoggable[BigInt] {
     def logValue(a: BigInt): LogParamValue = BigIntValue(a)
     override def putField[I, V, R, M](a: BigInt, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R                                   =
+    ): R =
       receiver.addBigInt(name, a, input)
   }
 
@@ -71,52 +71,52 @@ class LoggableInstances {
     def logValue(a: BigDecimal): LogParamValue = DecimalValue(a)
     override def putField[I, V, R, M](a: BigDecimal, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R                                       =
+    ): R =
       receiver.addDecimal(name, a, input)
   }
 
-  final implicit val floatLoggable: Loggable[Float] = new SingleValueLoggable[Float] {
+  final implicit val floatLoggable: Loggable[Float]           = new SingleValueLoggable[Float] {
     def logValue(a: Float): LogParamValue                                                                              = FloatValue(a.toDouble)
     override def putField[I, V, R, M](a: Float, name: String, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R =
       receiver.addFloat(name, a.toDouble, input)
   }
 
-  final implicit val doubleLoggable: Loggable[Double] = new SingleValueLoggable[Double] {
+  final implicit val doubleLoggable: Loggable[Double]         = new SingleValueLoggable[Double] {
     def logValue(a: Double): LogParamValue = FloatValue(a)
     override def putField[I, V, R, M](a: Double, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R                                   =
+    ): R =
       receiver.addFloat(name, a, input)
   }
 
-  final implicit val booleanLoggable: Loggable[Boolean] = new SingleValueLoggable[Boolean] {
+  final implicit val booleanLoggable: Loggable[Boolean]       = new SingleValueLoggable[Boolean] {
     def logValue(a: Boolean): LogParamValue = BoolValue(a)
     override def putField[I, V, R, M](a: Boolean, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R                                    =
+    ): R =
       receiver.addBool(name, a, input)
   }
 
-  final implicit val unitLoggable: Loggable[Unit] = new SingleValueLoggable[Unit] {
+  final implicit val unitLoggable: Loggable[Unit]             = new SingleValueLoggable[Unit] {
     def logValue(a: Unit): LogParamValue = NullValue
     override def putField[I, V, R, M](a: Unit, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R                                 = receiver.noop(input)
+    ): R = receiver.noop(input)
   }
 
-  final implicit val nothingLoggable: Loggable[Nothing] = unitLoggable.narrow
+  final implicit val nothingLoggable: Loggable[Nothing]       = unitLoggable.narrow
 
-  final implicit val throwableLoggable: Loggable[Throwable] = new Loggable[Throwable] {
+  final implicit val throwableLoggable: Loggable[Throwable]                                 = new Loggable[Throwable] {
     override def fields[I, V, R, S](cause: Throwable, i: I)(implicit r: LogRenderer[I, V, R, S]): R = {
       val strWriter = new StringWriter()
       cause.printStackTrace(new PrintWriter(strWriter))
       r.addString("stacktrace", strWriter.toString, i)
     }
 
-    override def putValue[I, V, R, S](a: Throwable, v: V)(implicit r: LogRenderer[I, V, R, S]): S =
+    override def putValue[I, V, R, S](a: Throwable, v: V)(implicit r: LogRenderer[I, V, R, S]): S   =
       r.putString(a.toString(), v)
 
-    override def logShow(a: Throwable): String = a.toString
+    override def logShow(a: Throwable): String                                                      = a.toString
   }
 
   private[this] def fldLoggable[T[x]: Foldable, A](implicit A: Loggable[A]): Loggable[T[A]] =
@@ -143,12 +143,12 @@ class LoggableInstances {
   final implicit def immutableSeqLoggable[A: Loggable]: Loggable[immutable.Seq[A]]          =
     fldLoggable[Iterable, A].contramap(_.toIterable)
 
-  final implicit def listLoggable[A: Loggable]: Loggable[List[A]]           = fldLoggable[List, A]
-  final implicit def vectorLoggable[A: Loggable]: Loggable[Vector[A]]       = fldLoggable[Vector, A]
-  final implicit def streamLoggable[A: Loggable]: Loggable[LazySeq[A]]      = fldLoggable[LazySeq, A]
-  final implicit def chainLoggable[A: Loggable]: Loggable[Chain[A]]         = fldLoggable[Chain, A]
-  final implicit def setLoggable[A: Loggable]: Loggable[Set[A]]             = fldLoggable[Set, A]
-  final implicit def sortedSetLoggable[A: Loggable]: Loggable[SortedSet[A]] = fldLoggable[SortedSet, A]
+  final implicit def listLoggable[A: Loggable]: Loggable[List[A]]                           = fldLoggable[List, A]
+  final implicit def vectorLoggable[A: Loggable]: Loggable[Vector[A]]                       = fldLoggable[Vector, A]
+  final implicit def streamLoggable[A: Loggable]: Loggable[LazySeq[A]]                      = fldLoggable[LazySeq, A]
+  final implicit def chainLoggable[A: Loggable]: Loggable[Chain[A]]                         = fldLoggable[Chain, A]
+  final implicit def setLoggable[A: Loggable]: Loggable[Set[A]]                             = fldLoggable[Set, A]
+  final implicit def sortedSetLoggable[A: Loggable]: Loggable[SortedSet[A]]                 = fldLoggable[SortedSet, A]
 
   final implicit def nonEmptyListLoggable[A: Loggable]: Loggable[NonEmptyList[A]]     = fldLoggable[NonEmptyList, A]
   final implicit def nonEmptyVectorLoggable[A: Loggable]: Loggable[NonEmptyVector[A]] = fldLoggable[NonEmptyVector, A]
@@ -168,7 +168,7 @@ class LoggableInstances {
   final implicit val sqlTimeLoggable: Loggable[java.sql.Time]           = stringValue.contramap(_.toString)
   final implicit val sqlTimestampLoggable: Loggable[java.sql.Timestamp] = stringValue.contramap(_.toString)
 
-  final implicit def mapLoggable[A](implicit A: Loggable[A]): Loggable[Map[String, A]] =
+  final implicit def mapLoggable[A](implicit A: Loggable[A]): Loggable[Map[String, A]]   =
     new DictLoggable[Map[String, A]] {
       implicit val ashow: Show[A]                                                             = A.showInstance
       def fields[I, V, R, M](a: Map[String, A], i: I)(implicit r: LogRenderer[I, V, R, M]): R =

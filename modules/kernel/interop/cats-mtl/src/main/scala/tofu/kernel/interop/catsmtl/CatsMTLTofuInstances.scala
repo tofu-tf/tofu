@@ -5,7 +5,7 @@ import cats.mtl.{Ask, Local, Handle => MHandle, Raise => MRaise}
 import tofu.{Errors, Raise, WithContext, WithLocal}
 
 private[catsmtl] object CatsMTLTofuInstances {
-  private[catsmtl] class CatsMTLAskInstance[F[_], C](L: WithContext[F, C], A: Applicative[F]) extends Ask[F, C] {
+  private[catsmtl] class CatsMTLAskInstance[F[_], C](L: WithContext[F, C], A: Applicative[F]) extends Ask[F, C]    {
     def applicative: Applicative[F] = A
     def ask[E2 >: C]: F[E2]         = A.widen[C, E2](L.context)
   }
@@ -15,7 +15,7 @@ private[catsmtl] object CatsMTLTofuInstances {
     def local[A](fa: F[A])(f: C => C): F[A] = L.local(fa)(f)
   }
 
-  private[catsmtl] class CatsMTLRaiseInstance[F[_], E](R: Raise[F, E], F: Functor[F]) extends MRaise[F, E] {
+  private[catsmtl] class CatsMTLRaiseInstance[F[_], E](R: Raise[F, E], F: Functor[F])         extends MRaise[F, E] {
     def functor: Functor[F]            = F
     def raise[E2 <: E, A](e: E2): F[A] = R.raise[A](e)
   }

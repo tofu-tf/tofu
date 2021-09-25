@@ -40,7 +40,7 @@ object PRepeated extends OpticCompanion[PRepeated] {
     def functor: Apply[F]
   }
 
-  override def toGeneric[S, T, A, B](o: PRepeated[S, T, A, B]): Optic[Context, S, T, A, B] =
+  override def toGeneric[S, T, A, B](o: PRepeated[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => c.F[B]): S => c.F[T] = a => o.traverse1(a)(p)(c.functor)
     }
@@ -54,7 +54,7 @@ object PRepeated extends OpticCompanion[PRepeated] {
         })(f)(s)
     }
 
-  def toMono[A, B](o: PRepeated[A, A, B, B]): Repeated[A, B] = new Repeated[A, B] {
+  def toMono[A, B](o: PRepeated[A, A, B, B]): Repeated[A, B]                              = new Repeated[A, B] {
     def traverse1[F[+_]: Apply](a: A)(f: B => F[B]): F[A] = o.traverse1(a)(f)
   }
 

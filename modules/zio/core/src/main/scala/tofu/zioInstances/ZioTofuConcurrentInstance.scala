@@ -8,8 +8,8 @@ import tofu.concurrent.impl.QVarSM
 abstract class ZioTofuConcurrentInstance[R1, E1, R, E]
     extends MakeConcurrent[ZIO[R1, E1, *], ZIO[R, E, *]] with Daemonic[ZIO[R, E, *], Cause[E]]
 
-class ZioTofuConcurrentInstanceUIO[R, E] extends ZioTofuConcurrentInstance[Any, Nothing, R, E] {
-  def deferred[A]: UIO[Deferred[ZIO[R, E, *], A]] =
+class ZioTofuConcurrentInstanceUIO[R, E]                    extends ZioTofuConcurrentInstance[Any, Nothing, R, E] {
+  def deferred[A]: UIO[Deferred[ZIO[R, E, *], A]]                                   =
     Promise.make[E, A].map(ZioDeferred(_))
 
   private def makeQVar[A](opt: Option[A]): ZIO[Any, Nothing, QVar[ZIO[R, E, *], A]] =
@@ -29,12 +29,12 @@ class ZioTofuConcurrentInstanceUIO[R, E] extends ZioTofuConcurrentInstance[Any, 
     process.interruptible.forkDaemon.map(ZIODaemon(_))
 }
 
-final case class ZioDeferred[R, E, A](p: zio.Promise[E, A]) extends Deferred[ZIO[R, E, *], A] {
+final case class ZioDeferred[R, E, A](p: zio.Promise[E, A]) extends Deferred[ZIO[R, E, *], A]                     {
   def get: ZIO[R, E, A]               = p.await
   def complete(a: A): ZIO[R, E, Unit] = p.succeed(a).unit
 }
 
-final case class ZioAtom[R, E, A](r: zio.Ref[A]) extends Atom[ZIO[R, E, *], A] {
+final case class ZioAtom[R, E, A](r: zio.Ref[A])            extends Atom[ZIO[R, E, *], A]                         {
   def get: ZIO[R, E, A]                       = r.get
   def set(a: A): ZIO[R, E, Unit]              = r.set(a)
   def getAndSet(a: A): ZIO[R, E, A]           = r.modify(a1 => (a1, a))

@@ -89,10 +89,10 @@ object Handle extends DataEffectComp[Handle] {
   trait ByRecover[F[_], E] extends Handle[F, E] {
     def recWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A]
 
-    def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A] =
+    def tryHandleWith[A](fa: F[A])(f: E => Option[F[A]]): F[A]                                     =
       recWith(fa)(CachedMatcher(f))
 
-    override def recoverWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A] =
+    override def recoverWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A]                      =
       recWith(fa)(pf)
 
     override def recover[A](fa: F[A])(pf: PartialFunction[E, A])(implicit F: Applicative[F]): F[A] =
@@ -164,7 +164,7 @@ class ErrorsBaseInstances2 extends ErrorsBaseInstances3 {
   final implicit def handleDowncast[F[_], E, E1](implicit h: Handle[F, E], prism: Downcast[E, E1]): Handle[F, E1] =
     new FromPrism[F, E, E1, Handle, Downcast] with HandlePrism[F, E, E1]
 
-  final implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1] =
+  final implicit def raiseUpcast[F[_], E, E1](implicit r: Raise[F, E], prism: Upcast[E, E1]): Raise[F, E1]        =
     prism match {
       case GenericSubtypeImpl =>
         r.asInstanceOf[Raise[F, E1]]
@@ -180,9 +180,9 @@ class ErrorsBaseInstances3 {
   final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, *], F, E] =
     new EitherTErrorsTo[F, E]
 
-  final implicit def optionTIntance[F[_]](implicit F: Monad[F]): ErrorsTo[OptionT[F, *], F, Unit] =
+  final implicit def optionTIntance[F[_]](implicit F: Monad[F]): ErrorsTo[OptionT[F, *], F, Unit]    =
     new OptionTErrorsTo[F]
 
-  final implicit def eitherIntance[E]: ErrorsTo[Either[E, *], Id, E] = new EitherErrorsTo[E]
-  final implicit val optionTIntance: ErrorsTo[Option, Id, Unit]      = OptionErrorsTo
+  final implicit def eitherIntance[E]: ErrorsTo[Either[E, *], Id, E]                                 = new EitherErrorsTo[E]
+  final implicit val optionTIntance: ErrorsTo[Option, Id, Unit]                                      = OptionErrorsTo
 }

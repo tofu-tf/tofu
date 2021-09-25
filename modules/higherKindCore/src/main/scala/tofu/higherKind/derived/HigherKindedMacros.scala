@@ -14,7 +14,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
     def tabMethod(retConst: Type): Tree
   }
 
-  trait EmbedParams {
+  trait EmbedParams                                     {
     def embMethod(retConst: Type): Tree
     def join(instance: Symbol, arg: Symbol, lam: Tree): Tree
     def joinEmb(instance: Symbol, arg: Symbol, lam: Tree): Tree
@@ -37,7 +37,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
     }
 
   // copied from the old version of cats.tagless.DeriveMacros
-  private def summon[A: TypeTag](typeArgs: Type*): Tree = {
+  private def summon[A: TypeTag](typeArgs: Type*): Tree                                          = {
     val tpe = appliedType(typeOf[A].typeConstructor, typeArgs: _*)
     c.inferImplicitValue(tpe).orElse(abort(s"could not find implicit value of type $tpe"))
   }
@@ -78,7 +78,7 @@ class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.
       res
   }
 
-  private def embedTemplate(algebra: Type)(impl: EmbedParams): PartialFunction[Type, Tree] = {
+  private def embedTemplate(algebra: Type)(impl: EmbedParams): PartialFunction[Type, Tree]       = {
     case PolyType(List(f), MethodType(List(faf), MethodType(List(fmonad), _))) =>
       def makeMethod(method: Method)(body: List[List[Tree]] => Tree): Method = {
         val params = methodArgs(method, algebra)

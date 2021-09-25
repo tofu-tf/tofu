@@ -119,7 +119,7 @@ object ParallelReader extends LowPriorityParallelReader1 {
 }
 
 trait LowPriorityParallelReader1 extends LowPriorityParallelReader2 {
-  implicit def makeError[F[_], E](implicit F: MonadError[F, E]): ParallelReader[F] =
+  implicit def makeError[F[_], E](implicit F: MonadError[F, E]): ParallelReader[F]  =
     ParallelReader[F](parallelFromError[ConfigT[F, *], E])
 
   private def parallelFromError[M[_], E](implicit F: MonadError[M, E]): Parallel[M] = new Parallel[M] {

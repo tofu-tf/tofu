@@ -11,7 +11,7 @@ object Key {
   final case class Prop(name: String)    extends Key
   final case class Variant(name: String) extends Key
 
-  implicit val show: Show[Key] = {
+  implicit val show: Show[Key]   = {
     case Index(i)      => s"[$i]"
     case Prop(name)    => s"$name"
     case Variant(name) => s"#$name#"

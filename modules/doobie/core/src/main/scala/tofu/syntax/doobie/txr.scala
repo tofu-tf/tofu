@@ -3,7 +3,7 @@ package tofu.syntax.doobie
 import fs2.Stream
 import tofu.doobie.transactor.Txr
 
-private[doobie] trait TxrSyntax {
+private[doobie] trait TxrSyntax                                                     {
   implicit def toTxrOps[DB[_], A](dba: DB[A]): TxrOps[DB, A]                     = new TxrOps(dba)
   implicit def toTxrStreamOps[DB[_], A](dba: Stream[DB, A]): TxrStreamOps[DB, A] = new TxrStreamOps(dba)
 }

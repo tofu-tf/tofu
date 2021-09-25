@@ -18,16 +18,16 @@ trait OpticCompanion[O[-s, +t, +a, -b] >: PSame[s, t, a, b] @uv212] {
 
   def delayed[S, T, A, B](o: () => O[S, T, A, B]): O[S, T, A, B]
 
-  final implicit val category: Category[Mono] = new Category[Mono] {
+  final implicit val category: Category[Mono]                        = new Category[Mono] {
     def id[A]                                                      = PSame.id[A, A]
     def compose[A, B, C](f: Mono[B, C], g: Mono[A, B]): Mono[A, C] = self.compose(f, g)
   }
 
-  final implicit val delayed: Delayed[O] = new Delayed[O] {
+  final implicit val delayed: Delayed[O]                             = new Delayed[O] {
     override def delayed[S, T, A, B](o: () => O[S, T, A, B]): O[S, T, A, B] = self.delayed(o)
   }
 
-  final implicit val category2: Category2[O] = new Category2[O] {
+  final implicit val category2: Category2[O]                         = new Category2[O] {
     def id[A, B]: O[A, B, A, B]                                                      = PSame.id[A, B]
     def compose[S, T, A, B, U, V](f: O[A, B, U, V], g: O[S, T, A, B]): O[S, T, U, V] = self.compose(f, g)
   }
@@ -98,7 +98,7 @@ trait Optic[-Ctx <: OpticContext, -S, +T, +A, -B] {
 
 object Optic {
   type Mono[C <: OpticContext, A, B] = Optic[C, A, A, B, B]
-  def id[Ctx <: OpticContext, S, A]: Optic[Ctx, S, A, S, A] =
+  def id[Ctx <: OpticContext, S, A]: Optic[Ctx, S, A, S, A]                          =
     PSame.toGeneric(PSame.id)
 
   implicit def opticCategoryInstance[Ctx <: OpticContext]: Category[Mono[Ctx, *, *]] =

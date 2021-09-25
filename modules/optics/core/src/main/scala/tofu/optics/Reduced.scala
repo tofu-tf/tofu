@@ -64,7 +64,7 @@ object PReduced extends OpticCompanion[PReduced] {
       def reduceMap[X: Semigroup](s: S)(fux: U => X): X = g.reduceMap(s)(f.reduceMap(_)(fux))
     }
 
-  final implicit def byReducible[F[_], T, A, B](implicit F: Reducible[F]): PReduced[F[A], T, A, B] =
+  final implicit def byReducible[F[_], T, A, B](implicit F: Reducible[F]): PReduced[F[A], T, A, B]      =
     new PReduced[F[A], T, A, B] {
       def reduceMap[X: Semigroup](fa: F[A])(f: A => X): X = F.reduceMap(fa)(f)
     }
@@ -77,7 +77,7 @@ object PReduced extends OpticCompanion[PReduced] {
     }
   }
 
-  override def toGeneric[S, T, A, B](o: PReduced[S, T, A, B]): Optic[Context, S, T, A, B]   =
+  override def toGeneric[S, T, A, B](o: PReduced[S, T, A, B]): Optic[Context, S, T, A, B] =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: A => Constant[c.X, B]): S => Constant[c.X, T] =
         s => o.reduceMap(s)(p)(c.algebra)

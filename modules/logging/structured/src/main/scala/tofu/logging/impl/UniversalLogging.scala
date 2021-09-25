@@ -7,7 +7,7 @@ import tofu.logging.Logging.{Debug, Error, Info, Trace, Warn}
 import tofu.{Delay, WithContext}
 
 object UniversalLogging {
-  private[impl] final def enabled(level: Logging.Level, logger: Logger): Boolean = level match {
+  private[impl] final def enabled(level: Logging.Level, logger: Logger): Boolean                                       = level match {
     case Trace => logger.isTraceEnabled()
     case Debug => logger.isDebugEnabled()
     case Info  => logger.isInfoEnabled()
@@ -41,7 +41,7 @@ object UniversalLogging {
 }
 
 class UniversalLogging[F[_]](name: String)(implicit F: Delay[F]) extends Logging[F] {
-  def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit] =
+  def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit]                                =
     F.delay {
       val logger = LoggerFactory.getLogger(name)
       if (UniversalLogging.enabled(level, logger))
@@ -57,7 +57,7 @@ class UniversalLogging[F[_]](name: String)(implicit F: Delay[F]) extends Logging
 }
 
 class UniversalContextLogging[F[_]](name: String, fctx: (LoggedValue => Unit) => F[Unit]) extends Logging[F] {
-  def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit] =
+  def write(level: Logging.Level, message: String, values: LoggedValue*): F[Unit]                                =
     fctx { ctx =>
       val logger = LoggerFactory.getLogger(name)
       if (UniversalLogging.enabled(level, logger))

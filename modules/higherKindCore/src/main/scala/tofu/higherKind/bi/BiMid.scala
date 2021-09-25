@@ -18,12 +18,12 @@ object BiMid extends BiMidInstances {
   /** when unification fails */
   def attach[U[f[_, _]]: SemigroupalBK, F[_, _]](up: U[BiMid[F, *, *]])(alg: U[F]): U[F] = up.attach(alg)
 
-  implicit final class TofuMidAlgebraSyntax[F[_, _], U[f[_, _]]](private val self: U[BiMid[F, *, *]]) extends AnyVal {
+  implicit final class TofuMidAlgebraSyntax[F[_, _], U[f[_, _]]](private val self: U[BiMid[F, *, *]]) extends AnyVal         {
     def attach(alg: U[F])(implicit U: SemigroupalBK[U]): U[F] =
       U.map2b(alg, self)(Fun2BK.apply((a, b) => b(a)))
   }
 
-  private final case class BiMidCompose[F[_, _], E, A](elems: Vector[BiMid[F, E, A]]) extends BiMid[F, E, A] {
+  private final case class BiMidCompose[F[_, _], E, A](elems: Vector[BiMid[F, E, A]])                 extends BiMid[F, E, A] {
     override def apply(fa: F[E, A]): F[E, A]                   = elems.foldLeft(fa)((x, m) => m(x))
     override def compose(that: BiMid[F, E, A]): BiMid[F, E, A] = that match {
       case BiMidCompose(es) => BiMidCompose(elems ++ es)

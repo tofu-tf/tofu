@@ -63,7 +63,7 @@ object RaiseSuite {
   val e: Either[CrowErr.type, Nothing] = Left(CrowErr)
 
   class Rooster1[G[_]: MonadThrow] {
-    def crow: G[Unit] = {
+    def crow: G[Unit]  = {
       CrowErr.raise
     }
     def crow2: G[Unit] = Option.empty[Unit].orRaise(CrowErr)

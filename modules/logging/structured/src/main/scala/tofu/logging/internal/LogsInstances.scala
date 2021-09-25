@@ -15,18 +15,18 @@ import scala.reflect.ClassTag
 
 trait LogsInstances {
 
-  implicit def logsMonoid[I[_]: Applicative, F[_]: Applicative]: Monoid[Logs[I, F]] = new Monoid[Logs[I, F]] {
+  implicit def logsMonoid[I[_]: Applicative, F[_]: Applicative]: Monoid[Logs[I, F]]       = new Monoid[Logs[I, F]] {
     def empty: Logs[I, F]                                 = Logs.empty[I, F]
     def combine(x: Logs[I, F], y: Logs[I, F]): Logs[I, F] = Logs.combine(x, y)
   }
 
-  private[this] val logs1RepresentableAny: RepresentableK[Logs[*[_], Any]] =
+  private[this] val logs1RepresentableAny: RepresentableK[Logs[*[_], Any]]                =
     higherKind.derived.genRepresentableK[Logs[*[_], Any]]
 
-  implicit def logs1Representable[Y[_]]: RepresentableK[Logs[*[_], Y]] =
+  implicit def logs1Representable[Y[_]]: RepresentableK[Logs[*[_], Y]]                    =
     logs1RepresentableAny.asInstanceOf[RepresentableK[Logs[*[_], Y]]]
 
-  implicit val logs2UniversalRepresentable: RepresentableK[Logs[Id, *[_]]] =
+  implicit val logs2UniversalRepresentable: RepresentableK[Logs[Id, *[_]]]                =
     higherKind.derived.genRepresentableK[Logs[Id, *[_]]]
 
   implicit def logs2MonoidalK[Y[_]](implicit Y: Applicative[Y]): MonoidalK[Logs[Y, *[_]]] =

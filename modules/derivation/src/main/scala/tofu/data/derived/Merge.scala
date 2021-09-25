@@ -26,7 +26,7 @@ trait MergeInstances1 {
 }
 
 object Merge extends Derivation[Merge] with MergeInstances1 with DataComp[Merge] {
-  implicit def optionInstance[A](implicit m: Merge[A]): Merge[Option[A]] =
+  implicit def optionInstance[A](implicit m: Merge[A]): Merge[Option[A]]         =
     (ao, bo) => ao.fold(bo)(a => bo.fold(ao)(b => Some(m.merge(a, b))))
 
   implicit def primitiveInstance[A](implicit @unused ev: Primitive[A]): Merge[A] = (a: A, _: A) => a

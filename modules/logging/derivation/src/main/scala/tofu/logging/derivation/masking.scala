@@ -24,7 +24,7 @@ object MaskMode {
 object masking {
   private val SomeRe = "(?<=^Some(\\{value=|\\())(.+)(?=(\\}|\\))$)".r
 
-  private[derivation] def string(shown: String, mode: MaskMode) = {
+  private[derivation] def string(shown: String, mode: MaskMode)             = {
     @tailrec
     def loop(arr: Array[Char], cur: Int, left: Int): String = {
       if (left == 0 || cur == arr.length) new String(arr)

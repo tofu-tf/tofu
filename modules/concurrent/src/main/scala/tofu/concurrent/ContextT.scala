@@ -98,7 +98,7 @@ trait ContextTInstancesW extends ContextTInstancesX { self: ContextTInstances =>
   final implicit def contextTApplicative[F[+_]: Applicative, C[_[_]]]: Applicative[ContextT[F, C, *]] =
     new ContextTApplicativeI
 
-  final implicit def contextTFlatMap[F[+_]: FlatMap, C[_[_]]]: FlatMap[ContextT[F, C, *]] = new ContextTFlatMapI
+  final implicit def contextTFlatMap[F[+_]: FlatMap, C[_[_]]]: FlatMap[ContextT[F, C, *]]             = new ContextTFlatMapI
 }
 
 trait ContextTInstancesV extends ContextTInstancesW { self: ContextTInstances =>
@@ -135,7 +135,7 @@ trait ContextTInstancesS extends ContextTInstancesT { self: ContextTInstances =>
 trait ContextTInstancesR extends ContextTInstancesS { self: ContextTInstances =>
   final implicit def contextTAsync[F[+_]: Async, C[_[_]]]: Async[ContextT[F, C, *]] = new ContextTAsyncI
 
-  final implicit def contextTContext[F[+_]: Applicative, C[_[_]]]: ContextTContext[F, C] =
+  final implicit def contextTContext[F[+_]: Applicative, C[_[_]]]: ContextTContext[F, C]    =
     new ContextTContext
 
   final implicit def contextTNonEmptyParallel[F[+_]: NonEmptyParallel, C[_[_]]: InvariantK] =
@@ -150,16 +150,16 @@ trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
 }
 
 trait ContextTInstancesP extends ContextTInstancesQ { self: ContextTInstances =>
-  final implicit def contextTConcurrent[F[+_]: Concurrent, C[_[_]]]: Concurrent[ContextT[F, C, *]] =
+  final implicit def contextTConcurrent[F[+_]: Concurrent, C[_[_]]]: Concurrent[ContextT[F, C, *]]       =
     new ContextTConcurrentI
 
-  final implicit def contextTRunContext[F[+_]: Applicative: Defer, C[_[_]]]: ContextTRunContext[F, C] =
+  final implicit def contextTRunContext[F[+_]: Applicative: Defer, C[_[_]]]: ContextTRunContext[F, C]    =
     new ContextTRunContext
 
   final implicit def contextTParallel[F[+_]: Parallel, C[_[_]]: InvariantK]: Parallel[ContextT[F, C, *]] =
     new ContextTParallelI[F, C]
 
-  final implicit def contextTTimer[F[+_], C[_[_]]](implicit t: Timer[F]): Timer[ContextT[F, C, *]] =
+  final implicit def contextTTimer[F[+_], C[_[_]]](implicit t: Timer[F]): Timer[ContextT[F, C, *]]       =
     Timer.TimerOps[F](t).mapK(ContextT.liftF)
 
   final implicit def contextTContextShift[F[+_], C[_[_]]](implicit
@@ -186,7 +186,7 @@ trait ContextTInstancesP extends ContextTInstancesQ { self: ContextTInstances =>
     implicit def uloi(implicit c2c: Out[ContextT[F, Out, *]]): Unlift[ContextT[F, Out, *], ContextT[F, In, *]] =
       new uloi
 
-    implicit object ulio extends Unlift[ContextT[F, In, *], ContextT[F, Out, *]] {
+    implicit object ulio                               extends Unlift[ContextT[F, In, *], ContextT[F, Out, *]] {
       def lift[A](c1a: ContextT[F, In, A]): ContextT[F, Out, A] =
         implicit c2c => c1a.run(rc1.rebase(l.get(c2c)))
 

@@ -28,7 +28,7 @@ trait PEquivalent[-S, +T, +A, -B]
   def employ[F[+_], P[-_, +_]](pb: P[A, F[B]])(implicit F: Functor[F], P: Profunctor[P]): P[S, F[T]] =
     P.dimap(pb)(extract)(F.map(_)(back))
 
-  override def downcast(s: S): Option[A] = Some(extract(s))
+  override def downcast(s: S): Option[A]                                                             = Some(extract(s))
 
   def inverse: PEquivalent[B, A, T, S] = new PEquivalent[B, A, T, S] {
     def back(s: S): A    = self.extract(s)
@@ -98,7 +98,7 @@ object PEquivalent extends OpticCompanion[PEquivalent] with OpticProduct[PEquiva
     def profunctor: Profunctor[P]
   }
 
-  override def toGeneric[S, T, A, B](o: PEquivalent[S, T, A, B]): Optic[Context, S, T, A, B] =
+  override def toGeneric[S, T, A, B](o: PEquivalent[S, T, A, B]): Optic[Context, S, T, A, B]   =
     new Optic[Context, S, T, A, B] {
       def apply(c: Context)(p: c.P[A, c.F[B]]): c.P[S, c.F[T]] =
         o.employ[c.F, c.P](p)(c.functor, c.profunctor)
@@ -115,7 +115,7 @@ object PEquivalent extends OpticCompanion[PEquivalent] with OpticProduct[PEquiva
         })(pb)
     }
 
-  override def delayed[S, T, A, B](o: () => PEquivalent[S, T, A, B]): PEquivalent[S, T, A, B] =
+  override def delayed[S, T, A, B](o: () => PEquivalent[S, T, A, B]): PEquivalent[S, T, A, B]  =
     new PEquivalent[S, T, A, B] {
       lazy val opt         = o()
       def extract(s: S): A = opt.extract(s)

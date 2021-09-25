@@ -78,7 +78,7 @@ object Lurker extends LoggingBiCompanion[Lurker] {
   implicit val wrongStateLoggable: Loggable[State] =
     Loggable[String].contramap(st => s"cant do this operation in $st state")
 
-  lazy val DO: Lurker[ZIO[Dep, +*, +*]] = zioFunctions.expose[Lurker]
+  lazy val DO: Lurker[ZIO[Dep, +*, +*]]            = zioFunctions.expose[Lurker]
 
   @derive(loggable)
   final case class Point(x: Long, y: Long)
@@ -90,7 +90,7 @@ object Lurker extends LoggingBiCompanion[Lurker] {
       val dist  = shift.abs.min(maxDistance)
       if (shift >= 0) cur + dist else cur - dist
     }
-    def move(target: Point): IO[State, Point] =
+    def move(target: Point): IO[State, Point]    =
       ref.modify {
         case (Normal, pt) =>
           val res = Point(moveOne(pt.x, target.x), moveOne(pt.y, target.y))

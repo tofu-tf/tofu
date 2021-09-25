@@ -5,7 +5,7 @@ import tofu.control.Bind
 sealed trait StepResult[+F[+_, +_], +S, +E, +A]
 
 object StepResult {
-  sealed trait Now[+S, +E, +A] extends StepResult[Nothing, S, E, A] {
+  sealed trait Now[+S, +E, +A]                       extends StepResult[Nothing, S, E, A] {
     def state: S
     def result: Either[E, A] = this match {
       case Ok(_, a)    => Right(a)
@@ -20,7 +20,7 @@ object StepResult {
       state: S1,
       inner: F[X, M],
       cont: Continue[M, X, S1, CalcM[F, R, S1, S2, E, A]]
-  )                                                  extends StepResult[F, S2, E, A] {
+  ) extends StepResult[F, S2, E, A] {
     def stepFailure(x: X): StepResult[F, S2, E, A] = cont.error(state, x).step(input, state)
     def stepSuccess(m: M): StepResult[F, S2, E, A] = cont.success(state, m).step(input, state)
 

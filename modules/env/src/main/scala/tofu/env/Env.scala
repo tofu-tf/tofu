@@ -30,15 +30,15 @@ sealed trait Env[E, +A] {
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx)))
   def mapTask4[B1, B2, B3, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3])(
       f: (Task[A], Task[B1], Task[B2], Task[B3]) => Task[R]
-  ): Env[E, R]                                                                                                    =
+  ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx)))
   def mapTask5[B1, B2, B3, B4, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3], e4: Env[E, B4])(
       f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4]) => Task[R]
-  ): Env[E, R]                                                                                                    =
+  ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx), e4.run(ctx)))
   def mapTask6[B1, B2, B3, B4, B5, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3], e4: Env[E, B4], e5: Env[E, B5])(
       f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4], Task[B5]) => Task[R]
-  ): Env[E, R]                                                                                                    =
+  ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx), e4.run(ctx), e5.run(ctx)))
 
   // execution
@@ -212,7 +212,7 @@ sealed trait Env[E, +A] {
     mapTask(_.executeOn(s, forceAsync))
   def fork: Env[E, Fiber[Env[E, *], A @uv]]                          = executeAsync.start
   @scala.deprecated("Replaced with startAndForget", "0.3.0")
-  def forkAndForget: Env[E, Unit]                                    = mapTask(_.startAndForget)
+  def forkAndForget: Env[E, Unit] = mapTask(_.startAndForget)
   def startAndForget: Env[E, Unit]                                   = mapTask(_.startAndForget)
 
   //profunctorial syntax
@@ -250,7 +250,7 @@ final case class EnvTask[E, +A](ta: Task[A]) extends Env[E, A] {
     }
   override def mapTask3[B1, B2, D](e1: Env[E, B1], e2: Env[E, B2])(
       f: (Task[A], Task[B1], Task[B2]) => Task[D]
-  ): Env[E, D]                                                                            =
+  ): Env[E, D] =
     e1.mapTask2(e2)(f(ta, _, _))
 
   override def mapTask4[B1, B2, B3, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3])(
@@ -272,20 +272,20 @@ final case class EnvTask[E, +A](ta: Task[A]) extends Env[E, A] {
   )(f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4], Task[B5]) => Task[R]): Env[E, R] =
     e1.mapTask5(e2, e3, e4, e5)(f(ta, _, _, _, _, _))
 
-  override def map2[B, C](eb: Env[E, B])(f: (A, B) => C) = eb match {
+  override def map2[B, C](eb: Env[E, B])(f: (A, B) => C)                                  = eb match {
     case EnvTask(tb) => EnvTask(for (a <- ta; b <- tb) yield f(a, b))
     case _           => super.map2(eb)(f)
   }
 
-  override def memoizeOnSuccess: Env[E, A]                    = EnvTask(ta.memoizeOnSuccess)
-  override def memoize: Env[E, A]                             = EnvTask(ta.memoize)
-  override def localP[E1](f: E1 => E): Env[E1, A]             =
+  override def memoizeOnSuccess: Env[E, A]                                                = EnvTask(ta.memoizeOnSuccess)
+  override def memoize: Env[E, A]                                                         = EnvTask(ta.memoize)
+  override def localP[E1](f: E1 => E): Env[E1, A]                                         =
     this.asInstanceOf[Env[E1, A]]
-  override def compose[B](g: Env[B, E]): Env[B, A]            = g match {
+  override def compose[B](g: Env[B, E]): Env[B, A]                                        = g match {
     case EnvTask(te) => EnvTask(te.flatMap(_ => ta))
     case _           => super.compose(g)
   }
-  override def split[B, C](g: Env[B, C]): Env[(E, B), (A, C)] =
+  override def split[B, C](g: Env[B, C]): Env[(E, B), (A, C)]                             =
     g match {
       case EnvTask(tc) => EnvTask(Task.parZip2(ta, tc))
       case _           => super.split(g)

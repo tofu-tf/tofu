@@ -68,7 +68,7 @@ object Txr {
       val transP: Stream[ConnectionCIO[F, *], *] ~> Stream[F, *]    = makeTransP(true)
       val rawTransP: Stream[ConnectionCIO[F, *], *] ~> Stream[F, *] = makeTransP(false)
 
-      private def interpret(withStrategy: Boolean): Resource[F, ConnectionCIO.Cont[F]] = for {
+      private def interpret(withStrategy: Boolean): Resource[F, ConnectionCIO.Cont[F]]              = for {
         c <- t.connect(t.kernel)
         f  = new ConnectionCIO.Cont[F] {
                def apply[A](ca: ConnectionIO[A]): F[A] = ca.foldMap(t.interpret).run(c)
@@ -76,7 +76,7 @@ object Txr {
         _ <- withStrategy.when_(t.strategy.resource.mapK(f))
       } yield f
 
-      private def makeTrans(withStrategy: Boolean): ConnectionCIO[F, *] ~> F =
+      private def makeTrans(withStrategy: Boolean): ConnectionCIO[F, *] ~> F                        =
         funK(ccio => interpret(withStrategy).use(ccio.run))
 
       private def makeTransP(withStrategy: Boolean): Stream[ConnectionCIO[F, *], *] ~> Stream[F, *] =
@@ -95,9 +95,9 @@ object Txr {
   type Contextual[F[_], Ctx] = Txr[F, ConnectionRIO[Ctx, *]]
 
   @deprecated("Use `Txr[F, DB]` instead", since = "0.10.3")
-  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB]                      = ev
+  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB] = ev
   @deprecated("Use `Transactor.mapK` and `Txr.plain` instead", since = "0.10.3")
-  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F]                            = ev
+  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F] = ev
   @deprecated("Use `Transactor.mapK` and `Txr.continuational` as a better alternative", since = "0.10.3")
   def Contextual[F[_], Ctx](implicit ev: Contextual[F, Ctx]): Contextual[F, Ctx] = ev
 

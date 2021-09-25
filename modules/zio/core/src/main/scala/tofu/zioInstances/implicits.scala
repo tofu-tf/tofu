@@ -16,16 +16,16 @@ private[zioInstances] class ZioTofuImplicits1 extends ZioTofuImplicits2 {
   @inline final implicit def zioTofuErrorsExtractToImplicit[R, E, E1: * Extract E]: ZioTofuErrorsToInstance[R, E, E1] =
     zioTofuExtractErrorsInstance
 
-  @inline final implicit def zioTofuTimeoutImplicit[R <: Clock, E]: ZioTofuTimeoutInstance[R, E] =
+  @inline final implicit def zioTofuTimeoutImplicit[R <: Clock, E]: ZioTofuTimeoutInstance[R, E]                      =
     zioTofuTimeoutInstance
 
-  @inline final implicit def zioTofuConcurrentImplicit[R1, E1, R, E]: ZioTofuConcurrentInstance[R1, E1, R, E] =
+  @inline final implicit def zioTofuConcurrentImplicit[R1, E1, R, E]: ZioTofuConcurrentInstance[R1, E1, R, E]         =
     zioTofuConcurrentInstance
 
-  @inline final implicit def zioTofuConsoleImplicit[R <: Console, E >: IOException]: ZioTofuConsoleInstance[R, E] =
+  @inline final implicit def zioTofuConsoleImplicit[R <: Console, E >: IOException]: ZioTofuConsoleInstance[R, E]     =
     zioTofuConsoleInstance
 
-  @inline final implicit def zioTofuRandomImplicit[R <: Random, E]: ZioTofuRandomInstance[R, E] = zioTofuRandomInstance
+  @inline final implicit def zioTofuRandomImplicit[R <: Random, E]: ZioTofuRandomInstance[R, E]                       = zioTofuRandomInstance
 
   @inline final implicit def zioTofuContainsUnliftImplicit[R1, R2: * Contains R1, E]
       : ZioTofuContainsUnliftInstance[R1, R2, E] =
@@ -36,7 +36,7 @@ private[zioInstances] class ZioTofuImplicits1 extends ZioTofuImplicits2 {
   @inline final implicit def rioTofuBlockingImplicit[R <: Blocking]: RioTofuBlockingInstance[R] =
     rioTofuBlockingInstance[R]
 
-  @inline final implicit def zioTofuBiImplicit[R]: ZioTofuBiInstance[R] = zioTofuBiInstance[R]
+  @inline final implicit def zioTofuBiImplicit[R]: ZioTofuBiInstance[R]                         = zioTofuBiInstance[R]
 }
 private[zioInstances] trait ZioTofuImplicits2 extends ZioTofuImplicits3 {
   @inline final implicit def zioTofuErrorsToImplicit[R, E]: ZioTofuErrorsToInstance[R, E, Nothing]    =

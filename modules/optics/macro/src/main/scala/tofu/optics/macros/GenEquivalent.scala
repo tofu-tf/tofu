@@ -27,13 +27,13 @@ sealed abstract class GenEquivalentImplBase {
   val c: blackbox.Context
   import c.universe._
 
-  protected final def fail(msg: String): Nothing =
+  protected final def fail(msg: String): Nothing                            =
     c.abort(c.enclosingPosition, msg)
 
   protected final def caseAccessorsOf[S: c.WeakTypeTag]: List[MethodSymbol] =
     weakTypeOf[S].decls.collect { case m: MethodSymbol if m.isCaseAccessor => m }.toList
 
-  protected final def genEquiv_unit_tree[S: c.WeakTypeTag]: c.Tree = {
+  protected final def genEquiv_unit_tree[S: c.WeakTypeTag]: c.Tree          = {
     val sTpe = weakTypeOf[S]
 
     if (sTpe.typeSymbol.isModuleClass) {

@@ -21,12 +21,12 @@ object Mid extends MidInstances {
   /** when unification fails */
   def attach[U[f[_]]: ApplyK, F[_]](up: U[Mid[F, *]])(alg: U[F]): U[F] = up.attach(alg)
 
-  implicit final class TofuMidAlgebraSyntax[F[_], U[f[_]]](private val self: U[Mid[F, *]]) extends AnyVal {
+  implicit final class TofuMidAlgebraSyntax[F[_], U[f[_]]](private val self: U[Mid[F, *]]) extends AnyVal    {
     def attach(alg: U[F])(implicit U: ApplyK[U]): U[F] =
       U.map2K(alg, self)(funK(t2k => t2k.second(t2k.first)))
   }
 
-  private final case class MidCompose[F[_], A](elems: Chain[Mid[F, A]]) extends Mid[F, A] {
+  private final case class MidCompose[F[_], A](elems: Chain[Mid[F, A]])                    extends Mid[F, A] {
     override def apply(fa: F[A]): F[A]               = elems.foldLeft(fa)((x, m) => m(x))
     override def compose(that: Mid[F, A]): Mid[F, A] = that match {
       case MidCompose(es) => MidCompose(elems ++ es)
