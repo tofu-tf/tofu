@@ -4,9 +4,9 @@ import cats.data.ReaderT
 import cats.effect.{IO}
 
 class IOSummonChecks {
-  implicitly[Fire[IO[*]]]
-  implicitly[Start[IO[*]]]
-  implicitly[Race[IO[*]]]
+  implicitly[Fire[IO]]
+  implicitly[Start[IO]]
+  implicitly[Race[IO]]
   implicitly[Errors[IO, Throwable]]
 
   implicitly[Fire[ReaderT[IO, Unit, *]]]
