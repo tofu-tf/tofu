@@ -68,7 +68,7 @@ object LogTree extends LogBuilder[Json] {
         _  <- input.set(LogArr(vs))
       } yield true
     def dict(input: Value)(receive: LogDict => Eval[Unit]): Eval[Boolean]                    =
-      newdict flatMap input.set as true
+      newdict.flatTap(receive).flatMap(input.set).as(true)
   }
 
   def buildJson(buildTree: LogDict => Output): Eval[Json] = newdict flatTap buildTree flatMap (_.json)
