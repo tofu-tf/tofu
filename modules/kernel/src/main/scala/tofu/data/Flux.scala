@@ -70,7 +70,7 @@ class FluxStreamOps[F[_], A](private val value: F[Option[(A, Flux.Stream[F, A])]
 }
 
 class FluxOps[F[_], G[_], A](private val value: F[G[(A, Flux[F, G, A])]]) extends AnyVal {
-  def mapK[H[_]: Functor](f: F ~> H)(implicit G: Functor[G]): Flux[H, G, A]          =
+  def mapK[H[_]: Functor](f: F ~> H)(implicit G: Functor[G]): Flux[H, G, A] =
     Flux(f(value).map(_.map { case (a, flx) => (a, flx.mapK(f)) }))
 
   def flatMapF[B](f: A => F[B])(implicit F: Monad[F], G: Traverse[G]): Flux[F, G, B] =
@@ -81,7 +81,7 @@ class FluxOps[F[_], G[_], A](private val value: F[G[(A, Flux[F, G, A])]]) extend
   def zipWithIndex(starting: Int)(implicit F: Functor[F], G: Functor[G]): Flux[F, G, (A, Int)] =
     Flux(value.map(_.map { case (a, next) => ((a, starting), next.zipWithIndex(starting + 1)) }))
 
-  def zipWithIndex(implicit F: Functor[F], G: Functor[G]): Flux[F, G, (A, Int)]                = zipWithIndex(0)
+  def zipWithIndex(implicit F: Functor[F], G: Functor[G]): Flux[F, G, (A, Int)] = zipWithIndex(0)
 }
 
 trait FluxInstances extends FluxInstances1 { self: Flux.type =>

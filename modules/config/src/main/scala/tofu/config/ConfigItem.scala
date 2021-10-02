@@ -61,7 +61,7 @@ object ConfigItem {
   sealed trait ValueTypeStream     extends ValueType[StreamC]
 
   object ValueType {
-    case object Null extends ValueTypeSimple[Unit]       {
+    case object Null extends ValueTypeSimple[Unit] {
       def fromString(s: String): Option[Unit] = Some(())
 
     }

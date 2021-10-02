@@ -95,9 +95,9 @@ object Txr {
   type Contextual[F[_], Ctx] = Txr[F, ConnectionRIO[Ctx, *]]
 
   @deprecated("Use `Txr[F, DB]` instead", since = "0.10.3")
-  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB]                      = ev
+  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB] = ev
   @deprecated("Use `Transactor.mapK` and `Txr.plain` instead", since = "0.10.3")
-  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F]                            = ev
+  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F] = ev
   @deprecated("Use `Transactor.mapK` and `Txr.continuational` as a better alternative", since = "0.10.3")
   def Contextual[F[_], Ctx](implicit ev: Contextual[F, Ctx]): Contextual[F, Ctx] = ev
 

@@ -11,7 +11,7 @@ import scala.annotation.nowarn
 
 @nowarn
 class QVarSuite extends AnyFunSuite {
-  implicit val iort = IORuntime.global
+  implicit val iort                           = IORuntime.global
   def summonInstance[I[_]: Sync, F[_]: Async] = {
     implicitly[MakeQVar[I, F]]
   }

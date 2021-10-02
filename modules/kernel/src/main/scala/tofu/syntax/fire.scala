@@ -17,7 +17,7 @@ object start {
     def start[Exit[_], Fib[_]](implicit F: Fibers[F, Exit, Fib]): F[Fib[A]] = F.start(fa)
     def racePair[F1[x] >: F[x], B, Exit[_], Fib[_]](fb: F1[B])(implicit
         F: Fibers[F1, Exit, Fib]
-    ): F1[Either[(Exit[A], Fib[B]), (Fib[A], Exit[B])]]                     =
+    ): F1[Either[(Exit[A], Fib[B]), (Fib[A], Exit[B])]] =
       F.racePair[A, B](fa, fb)
   }
 }

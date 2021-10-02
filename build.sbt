@@ -220,7 +220,7 @@ lazy val opticsInterop = project
   .dependsOn(opticsCore)
   .settings(defaultSettings, libraryDependencies ++= Vector(monocle, catsCore), name := "tofu-optics-interop")
 
-lazy val opticsMacro   = project
+lazy val opticsMacro = project
   .in(file("modules/optics/macro"))
   .dependsOn(opticsCore)
   .settings(
@@ -288,7 +288,7 @@ lazy val fs2Interop = project
   )
   .dependsOn(concurrent, streams)
 
-lazy val doobie        = project
+lazy val doobie = project
   .in(file("modules/doobie/core"))
   .settings(
     libraryDependencies ++= List(doobieCore, derevo, monix % Test),

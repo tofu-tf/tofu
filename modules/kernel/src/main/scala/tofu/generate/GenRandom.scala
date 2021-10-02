@@ -30,7 +30,7 @@ object GenRandom {
       seed: Option[Long] = None,
       secure: Boolean = false
   ): I[GenRandom[F]] = {
-    def createStd() = seed.fold(new java.util.Random)(new java.util.Random(_))
+    def createStd()    = seed.fold(new java.util.Random)(new java.util.Random(_))
     def createSecure() = {
       val rnd = new java.security.SecureRandom()
       seed.foreach(rnd.setSeed)

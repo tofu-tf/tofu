@@ -58,7 +58,7 @@ object PFolded extends OpticCompanion[PFolded] {
 
   trait Context extends PReduced.Context with PItems.Context with PDowncast.Context {
     override def algebra: Monoid[X]
-    def default: X = algebra.empty
+    def default: X                       = algebra.empty
     override val functor: Applicative[F] = {
       implicit val alg = algebra
       Applicative[Constant[X, +*]]
