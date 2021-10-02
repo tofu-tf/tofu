@@ -57,14 +57,14 @@ object CE3Kernel {
       @unused _nonTofu: NonTofu[F]
   ): FibersCarrier3.Aux[F, E, Outcome[F, E, *], Fiber[F, E, *]] =
     new FibersCarrier3.Impl[F, E, Outcome[F, E, *], Fiber[F, E, *]] {
-      def start[A](fa: F[A]): F[Fiber[F, E, A]]                                            = F.start(fa)
-      def fireAndForget[A](fa: F[A]): F[Unit]                                              = F.void(start(fa))
+      def start[A](fa: F[A]): F[Fiber[F, E, A]]           = F.start(fa)
+      def fireAndForget[A](fa: F[A]): F[Unit]             = F.void(start(fa))
       def racePair[A, B](
           fa: F[A],
           fb: F[B]
       ): F[Either[(Outcome[F, E, A], Fiber[F, E, B]), (Fiber[F, E, A], Outcome[F, E, B])]] = F.racePair(fa, fb)
-      def race[A, B](fa: F[A], fb: F[B]): F[Either[A, B]]                                  = F.race(fa, fb)
-      def never[A]: F[A]                                                                   = F.never
+      def race[A, B](fa: F[A], fb: F[B]): F[Either[A, B]] = F.race(fa, fb)
+      def never[A]: F[A]                                  = F.never
     }
 
   final def makeExecute[Tag, F[_]](

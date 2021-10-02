@@ -24,15 +24,15 @@ object TaggedProfunctor extends Compose[Tagged] with PChoice[Tagged] {
 
   def dimap[A, B, C, D](fab: Tagged[A, B])(f: C => A)(
       g: B => D
-  ): Tagged[C, D]                                                          = _ => g(fab(()))
+  ): Tagged[C, D] = _ => g(fab(()))
   def compose[A, B, C](f: Tagged[B, C], g: Tagged[A, B]): Tagged[A, C]     = f
   def left[A, B, C](pab: Tagged[A, B]): Tagged[Either[A, C], Either[B, C]] = _ => Left(pab(()))
   def right[A, B, C](
       pab: Tagged[A, B]
-  ): Tagged[Either[C, A], Either[C, B]]                                    = _ => Right(pab((())))
+  ): Tagged[Either[C, A], Either[C, B]] = _ => Right(pab((())))
   override def optional[A, B, C](
       pab: Tagged[A, B]
-  ): Tagged[Option[A], Option[B]]                                          = _ => Some(pab(()))
+  ): Tagged[Option[A], Option[B]] = _ => Some(pab(()))
 }
 
 class ConstantFunctor[C] extends Functor[Constant[C, *]] {

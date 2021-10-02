@@ -161,7 +161,7 @@ object Loggable extends LoggableInstances with DataComp[Loggable] {
     Loggable[A].contraCollect[Either[A, B]] { case Left(a) => a } +
       Loggable[B].contraCollect { case Right(b) => b }
 
-  final implicit val loggableInstance: Consume[Loggable]       = new Consume[Loggable] {
+  final implicit val loggableInstance: Consume[Loggable] = new Consume[Loggable] {
     def empty[A]: Loggable[A]                                                  = Loggable.empty
     def combineK[A](x: Loggable[A], y: Loggable[A]): Loggable[A]               = x + y
     def contramap[A, B](fa: Loggable[A])(f: B => A): Loggable[B]               = fa.contramap(f)

@@ -65,7 +65,7 @@ class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, 
     flatMap(_ => c)
   def <<[F1[+x, +y] >: F[x, y] @uv212, R1 <: R, E1 >: E, SO1 >: SO, B](
       c: => CalcM[F1, R1, SO, SO1, E1, B]
-  ): CalcM[F1, R1, SI, SO1, E1, A]                                                                             = flatTap(_ => c)
+  ): CalcM[F1, R1, SI, SO1, E1, A] = flatTap(_ => c)
   def map[B](f: A => B): CalcM[F, R, SI, SO, E, B]                                                             = flatMap(a => CalcM.Pure(f(a)))
 
   def handleWith[F1[+x, +y] >: F[x, y] @uv212, E1, R1 <: R, SO1 >: SO, A1 >: A](

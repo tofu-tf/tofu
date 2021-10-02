@@ -9,7 +9,7 @@ import tofu.syntax.monadic._
 import cats.effect.unsafe.IORuntime
 
 class ConsoleSuite extends AnyFunSuite {
-  implicit val iort = IORuntime.global
+  implicit val iort                                           = IORuntime.global
   def check[A](inputs: String*)(a: => A): (A, Vector[String]) = {
     val input = new ByteArrayInputStream(
       inputs.mkString("\n").getBytes("UTF-8")

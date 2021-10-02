@@ -20,7 +20,7 @@ private[tofu] class HandleApErr[F[_]: ApplicativeError[*[_], E], E]
   def recWith[A](fa: F[A])(pf: PartialFunction[E, F[A]]): F[A] =
     appErr.recoverWith(fa) { case e if pf.isDefinedAt(e) => pf(e) }
 
-  def restore[A](fa: F[A]): F[Option[A]]                       = appErr.handleError[Option[A]](appErr.map(fa)(Some(_)))(_ => None)
+  def restore[A](fa: F[A]): F[Option[A]] = appErr.handleError[Option[A]](appErr.map(fa)(Some(_)))(_ => None)
 
   def lift[A](fa: F[A]): F[A] = fa
 }

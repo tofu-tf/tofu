@@ -121,7 +121,7 @@ trait ContextTFlatMap[F[+_], C[_[_]]] extends FlatMap[ContextT[F, C, *]] with Co
     c => F.mproduct(fa.run(c))(a => f(a).run(c))
   final override def ifM[B](
       fa: ContextT[F, C, Boolean]
-  )(ifTrue: => ContextT[F, C, B], ifFalse: => ContextT[F, C, B]): ContextT[F, C, B]                            =
+  )(ifTrue: => ContextT[F, C, B], ifFalse: => ContextT[F, C, B]): ContextT[F, C, B] =
     c => F.ifM(fa.run(c))(ifTrue.run(c), ifFalse.run(c))
   final override def flatTap[A, B](fa: ContextT[F, C, A])(f: A => ContextT[F, C, B]): ContextT[F, C, A]        =
     c => F.flatTap(fa.run(c))(a => f(a).run(c))
@@ -141,13 +141,13 @@ trait ContextTMonad[F[+_], C[_[_]]]
 
   final override def whileM[G[_], A](
       p: ContextT[F, C, Boolean]
-  )(body: => ContextT[F, C, A])(implicit G: Alternative[G]): ContextT[F, C, G[A]]                             =
+  )(body: => ContextT[F, C, A])(implicit G: Alternative[G]): ContextT[F, C, G[A]] =
     c => F.whileM(p.run(c))(body.run(c))
   final override def whileM_[A](p: ContextT[F, C, Boolean])(body: => ContextT[F, C, A]): ContextT[F, C, Unit] =
     c => F.whileM_(p.run(c))(body.run(c))
   final override def untilM[G[_], A](
       f: ContextT[F, C, A]
-  )(cond: => ContextT[F, C, Boolean])(implicit G: Alternative[G]): ContextT[F, C, G[A]]                       =
+  )(cond: => ContextT[F, C, Boolean])(implicit G: Alternative[G]): ContextT[F, C, G[A]] =
     c => F.untilM(f.run(c))(cond.run(c))
   final override def untilM_[A](f: ContextT[F, C, A])(cond: => ContextT[F, C, Boolean]): ContextT[F, C, Unit] =
     c => F.untilM_(f.run(c))(cond.run(c))
@@ -220,7 +220,7 @@ trait ContextTMonadError[F[+_], C[_[_]], E]
     c => F.rethrow(fa.run(c))
   final override def redeemWith[A, B](
       fa: ContextT[F, C, A]
-  )(recover: E => ContextT[F, C, B], bind: A => ContextT[F, C, B]): ContextT[F, C, B]                              =
+  )(recover: E => ContextT[F, C, B], bind: A => ContextT[F, C, B]): ContextT[F, C, B] =
     c => F.redeemWith(fa.run(c))(e => recover(e).run(c), a => bind(a).run(c))
   final override def adaptError[A](fa: ContextT[F, C, A])(pf: PartialFunction[E, E]): ContextT[F, C, A]            =
     c => F.adaptError(fa.run(c))(pf)
@@ -233,11 +233,11 @@ trait ContextTBracket[F[+_], C[_[_]], E] extends Bracket[ContextT[F, C, *], E] w
 
   final override def bracketCase[A, B](
       acquire: ContextT[F, C, A]
-  )(use: A => ContextT[F, C, B])(release: (A, ExitCase[E]) => ContextT[F, C, Unit]): ContextT[F, C, B]       =
+  )(use: A => ContextT[F, C, B])(release: (A, ExitCase[E]) => ContextT[F, C, Unit]): ContextT[F, C, B] =
     c => F.bracketCase(acquire.run(c))(a => use(a).run(c))((a, ec) => release(a, ec).run(c))
   final override def bracket[A, B](
       acquire: ContextT[F, C, A]
-  )(use: A => ContextT[F, C, B])(release: A => ContextT[F, C, Unit]): ContextT[F, C, B]                      =
+  )(use: A => ContextT[F, C, B])(release: A => ContextT[F, C, Unit]): ContextT[F, C, B] =
     c => F.bracket(acquire.run(c))(a => use(a).run(c))(a => release(a).run(c))
   final override def uncancelable[A](fa: ContextT[F, C, A]): ContextT[F, C, A]                               =
     c => F.uncancelable(fa.run(c))
@@ -245,7 +245,7 @@ trait ContextTBracket[F[+_], C[_[_]], E] extends Bracket[ContextT[F, C, *], E] w
     c => F.guarantee(fa.run(c))(finalizer.run(c))
   final override def guaranteeCase[A](
       fa: ContextT[F, C, A]
-  )(finalizer: ExitCase[E] => ContextT[F, C, Unit]): ContextT[F, C, A]                                       =
+  )(finalizer: ExitCase[E] => ContextT[F, C, Unit]): ContextT[F, C, A] =
     c => F.guaranteeCase(fa.run(c))(ec => finalizer(ec).run(c))
   final override def onCancel[A](fa: ContextT[F, C, A])(finalizer: ContextT[F, C, Unit]): ContextT[F, C, A]  =
     c => F.onCancel(fa.run(c))(finalizer.run(c))
@@ -286,18 +286,18 @@ trait ContextTConcurrent[F[+_], C[_[_]]] extends Concurrent[ContextT[F, C, *]] w
   final override def racePair[A, B](
       fa: ContextT[F, C, A],
       fb: ContextT[F, C, B]
-  ): ContextT[F, C, Either[(A, Fiber[ContextT[F, C, *], B]), (Fiber[ContextT[F, C, *], A], B)]]   =
+  ): ContextT[F, C, Either[(A, Fiber[ContextT[F, C, *], B]), (Fiber[ContextT[F, C, *], A], B)]] =
     c => F.racePair(fa.run(c), fb.run(c)).map(_.bimap(_.map(_.mapK(ContextT.liftF)), _.leftMap(_.mapK(ContextT.liftF))))
 
   final override def race[A, B](fa: ContextT[F, C, A], fb: ContextT[F, C, B]): ContextT[F, C, Either[A, B]] =
     c => F.race(fa.run(c), fb.run(c))
   final override def cancelable[A](
       k: (Either[Throwable, A] => Unit) => CancelToken[ContextT[F, C, *]]
-  ): ContextT[F, C, A]                                                                                      =
+  ): ContextT[F, C, A] =
     c => F.cancelable(cb => k(cb).run(c))
   final override def continual[A, B](
       fa: ContextT[F, C, A]
-  )(f: Either[Throwable, A] => ContextT[F, C, B]): ContextT[F, C, B]                                        =
+  )(f: Either[Throwable, A] => ContextT[F, C, B]): ContextT[F, C, B] =
     c => F.continual(fa.run(c))(e => f(e).run(c))
 }
 

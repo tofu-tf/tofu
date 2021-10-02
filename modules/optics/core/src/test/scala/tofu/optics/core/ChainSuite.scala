@@ -10,7 +10,7 @@ import language.postfixOps
 class ChainSuite extends AnyFlatSpec {
   type Onion[A] = Map[String, Vector[List[Map[Boolean, A]]]]
 
-  def onion[A](x: A, y: A, z: A): Onion[A]    =
+  def onion[A](x: A, y: A, z: A): Onion[A] =
     Map("hello" -> Vector(List(Map(true -> x))), "world" -> Vector(), "!!!" -> Vector(List(Map(true -> y, false -> z))))
 
   case class OnionSoup[A](onion: Onion[A])
