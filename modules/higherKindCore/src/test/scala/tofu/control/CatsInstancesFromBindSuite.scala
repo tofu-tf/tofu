@@ -1,6 +1,6 @@
 package tofu.control
 
-import cats.FlatMap
+import cats.{Applicative, FlatMap}
 import tofu.compat.unused
 import tofu.instances.bind._
 
@@ -10,7 +10,7 @@ class CatsInstancesFromBindSuite {
     requireFlatMap[F[Nothing, *]]
   }
 
-  def requireApplicative[F[_]](implicit @unused applicative: FlatMap[F]): Unit = ()
+  def requireApplicative[F[_]](implicit @unused applicative: Applicative[F]): Unit = ()
 
-  def requireFlatMap[F[_]](implicit @unused applicative: FlatMap[F]): Unit = ()
+  def requireFlatMap[F[_]](implicit @unused flatMap: FlatMap[F]): Unit = ()
 }
