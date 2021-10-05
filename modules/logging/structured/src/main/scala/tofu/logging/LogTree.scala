@@ -33,14 +33,14 @@ object LogTree extends LogBuilder[Json] {
   }
   type Top = LogDict
 
-  class LogDict(private val values: mutable.Map[String, LogTree]) extends LogTree {
+  class LogDict(private val values: mutable.LinkedHashMap[String, LogTree]) extends LogTree {
     def add(name: String, tree: LogTree): Eval[Unit] = Eval.always(values.update(name, tree))
     def getList: Eval[List[(String, LogTree)]]       = Eval.always(values.toList)
   }
 
   final case class LogArr(values: Iterable[LogTree]) extends LogTree
 
-  private val newdict = Eval.always(mutable.Map.empty[String, LogTree]).map(new LogDict(_))
+  private val newdict = Eval.always(mutable.LinkedHashMap.empty[String, LogTree]).map(new LogDict(_))
   private val newtree = Eval.always(new Value(NullValue))
 
   val receiver: LogRenderer[LogDict, Value, Output, ValRes] = new LogRenderer[LogDict, Value, Output, ValRes] {
@@ -68,7 +68,7 @@ object LogTree extends LogBuilder[Json] {
         _  <- input.set(LogArr(vs))
       } yield true
     def dict(input: Value)(receive: LogDict => Eval[Unit]): Eval[Boolean]                    =
-      newdict flatMap input.set as true
+      newdict.flatTap(receive).flatMap(input.set).as(true)
   }
 
   def buildJson(buildTree: LogDict => Output): Eval[Json] = newdict flatTap buildTree flatMap (_.json)
