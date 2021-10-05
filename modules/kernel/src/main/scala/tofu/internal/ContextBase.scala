@@ -81,10 +81,12 @@ trait ContextBaseInstances5 extends ContextBaseInstances6 {
     FG.andThen(ContextBase.readerTContext[F, R])
 }
 
-trait ContextBaseInstances6 {
-  final implicit def unliftEffectCE2[F[_], G[_]](implicit carrier: UnliftCarrier2[F, G]): Unlift[F, G] =
-    carrier
-
+trait ContextBaseInstances6 extends ContextBaseInstances7 {
   final implicit def unliftEffectCE3[F[_], G[_]](implicit carrier: UnliftCarrier3[F, G]): Unlift[F, G] =
+    carrier
+}
+
+trait ContextBaseInstances7 {
+  final implicit def unliftEffectCE2[F[_], G[_]](implicit carrier: UnliftCarrier2[F, G]): Unlift[F, G] =
     carrier
 }
