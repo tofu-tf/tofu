@@ -1,22 +1,20 @@
 package tofu
 package interop
 
+import java.util.concurrent.TimeUnit
+
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.effect.concurrent.{MVar, Ref}
 import cats.effect.{Async, Blocker, Bracket, Concurrent, ContextShift, Effect, ExitCase, Fiber, IO, Sync, Timer}
 import cats.{Functor, Id, Monad, ~>}
 import tofu.compat.unused
 import tofu.concurrent._
 import tofu.internal.NonTofu
-import tofu.PerformOf.ExitCont
 import tofu.internal.carriers._
 import tofu.lift.Lift
 import tofu.syntax.monadic._
-
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
-import java.util.concurrent.TimeUnit
-import tofu.concurrent.Exit
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search

@@ -1,12 +1,11 @@
 package tofu
 
-import cats.tagless.{ContravariantK, FunctorK}
-import tofu.internal.instances._
-import tofu.internal.carriers.PerformCarrier3
-import tofu.concurrent.Exit
-import tofu.internal.carriers.PerformCarrier2
-import cats.data.ReaderT
 import cats.Functor
+import cats.data.ReaderT
+import cats.tagless.{ContravariantK, FunctorK}
+import tofu.concurrent.Exit
+import tofu.internal.carriers.{PerformCarrier2, PerformCarrier3}
+import tofu.internal.instances._
 
 trait Performer[F[_], -Cont[_], Cancel] {
   def perform[A](cont: Cont[A])(fa: F[A]): F[Cancel]

@@ -1,25 +1,23 @@
 package tofu.interop
 
+import java.util.concurrent.TimeUnit
+
+import scala.annotation.unused
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.effect.kernel._
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
 import cats.effect.{Async, Fiber, IO, Sync}
 import cats.{Functor, Monad}
-import tofu.concurrent.impl.QVarSM
 import tofu.concurrent._
+import tofu.concurrent.impl.QVarSM
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
 import tofu.lift.Lift
 import tofu.syntax.monadic._
-import tofu.{Fire, Scoped, WithContext}
-
-import java.util.concurrent.TimeUnit
-import scala.annotation.unused
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
-import tofu.Performer
-import cats.Monad
-import tofu.concurrent.Exit
+import tofu.{Fire, Performer, Scoped, WithContext}
 
 object CE3Kernel {
   def delayViaSync[K[_]](implicit KS: Sync[K]): DelayCarrier3[K] =
@@ -129,19 +127,11 @@ object CE3Kernel {
       def performer: F[Performer.OfExit[F, Throwable]] =
         functor.executionContext.flatMap(implicit ce => functor.map(FD.context)(new DispatchPerformer(_, functor)))
     }
-}
 
-class DispatchPerformer[F[_]](dispatcher: Dispatcher[F], F: Async[F])(implicit ce: ExecutionContext)
-    extends Performer.OfExit[F, Throwable] {
-  def perform[A](cont: Exit[Throwable, A] => Unit)(fa: F[A]): F[Unit] = {
-    val (res, cancel) = dispatcher.unsafeToFutureCancelable(fa)
-    res.onComplete(t => cont(Exit.fromTry(t)))
-    F.fromFuture(F.delay(cancel()))
-  }
   final def agentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow: Fire](implicit
       makeRef: MakeRef[I, F],
       makeSemaphore: MakeSemaphore[I, F]
-  ): MkAgentCE3Carrier[I, F] = {
+  ): MkAgentCE3Carrier[I, F] =
     new MkAgentCE3Carrier[I, F] {
       def agentOf[A](a: A): I[Agent[F, A]] =
         for {
@@ -149,7 +139,6 @@ class DispatchPerformer[F[_]](dispatcher: Dispatcher[F], F: Async[F])(implicit c
           sem <- makeSemaphore.semaphore(1)
         } yield SemRef(ref, sem)
     }
-  }
 
   final def serialAgentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow](implicit
       makeRef: MakeRef[I, F],
@@ -175,4 +164,14 @@ class DispatchPerformer[F[_]](dispatcher: Dispatcher[F], F: Async[F])(implicit c
           sem <- makeSemaphore.semaphore(1)
         } yield UnderlyingSemRef[F, G, A](ref, sem)
     }
+}
+
+class DispatchPerformer[F[_]](dispatcher: Dispatcher[F], F: Async[F])(implicit ce: ExecutionContext)
+    extends Performer.OfExit[F, Throwable] {
+  def perform[A](cont: Exit[Throwable, A] => Unit)(fa: F[A]): F[Unit] = {
+    val (res, cancel) = dispatcher.unsafeToFutureCancelable(fa)
+    res.onComplete(t => cont(Exit.fromTry(t)))
+    F.fromFuture(F.delay(cancel()))
+  }
+
 }
