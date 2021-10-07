@@ -13,6 +13,6 @@ object PerformCarrier2 {
 trait PerformCarrier3[F[_], E] extends Perform[F, E]
 
 object PerformCarrier3 {
-  // final implicit def interop3IO[F[_], E]: PerformCarrier2[F, E] =
-  //   macro Interop.delegate1[PerformCarrier3[F, E], F, E, { val `tofu.interop.CE3Kernel.perform`: Unit }]
+  final implicit def interop3IO[F[_], E]: PerformCarrier3[F, E] =
+    macro Interop.delegate1[PerformCarrier3[F, E], F, E, { val `tofu.interop.CE3Kernel.perform`: Unit }]
 }
