@@ -1,9 +1,11 @@
 package tofu
 
 import cats.effect.Concurrent
+
 import scala.annotation.nowarn
 import cats.effect.IO
 import cats.effect.ContextShift
+import tofu.concurrent.{MakeAgent, MakeSerialAgent}
 import tofu.syntax.start._
 import tofu.syntax.monadic._
 
@@ -19,6 +21,8 @@ object StartSuite {
     Fire[IO]
     Start[IO]
     Race[IO]
+    MakeAgent[IO, IO]
+    MakeSerialAgent[IO, IO]
   }
 
   def testStartSyntaxCheck[A, B, F[_]: Concurrent](fa: F[A], fb: F[B]): F[(A, B)] = {

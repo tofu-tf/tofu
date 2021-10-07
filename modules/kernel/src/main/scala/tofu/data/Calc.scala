@@ -54,7 +54,7 @@ object Calc {
       src: Calc[R, S1, S2, E1, A],
       ksuc: A => Calc[R, S2, S3, E2, B],
       kerr: E1 => Calc[R, S2, S3, E2, B]
-  )                                                                       extends Calc[R, S1, S3, E2, B]              {
+  ) extends Calc[R, S1, S3, E2, B] {
     type MidState = S2
     type MidErr   = E1
   }
@@ -63,7 +63,7 @@ object Calc {
     def cont[R1 <: R, E2, S3, B](
         f: A => Calc[R1, S2, S3, E2, B],
         h: E => Calc[R1, S2, S3, E2, B]
-    ): Calc[R1, S1, S3, E2, B]                                                                 = Cont(calc, f, h)
+    ): Calc[R1, S1, S3, E2, B] = Cont(calc, f, h)
     def flatMap[R1 <: R, E1 >: E, B](f: A => Calc[R1, S2, S2, E1, B]): Calc[R1, S1, S2, E1, B] = cont(f, raise(_: E))
     def >>=[R1 <: R, E1 >: E, B](f: A => Calc[R1, S2, S2, E1, B])                              = flatMap(f)
     def >>[R1 <: R, E1 >: E, B](c: => Calc[R1, S2, S2, E1, B])                                 = flatMap(_ => c)
@@ -86,7 +86,7 @@ object Calc {
     def flatMapS[R1 <: R, S3, B, E](f: A => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B] = calc.cont(f, identity)
     def productRS[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]  = flatMapS(_ => r)
     def *>>[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]        = productRS(r)
-    def runSuccess(r: R, init: S1): (S2, A) = {
+    def runSuccess(r: R, init: S1): (S2, A)                                                 = {
       val (s2, res) = calc.run(r, init)
       s2 -> res.merge
     }

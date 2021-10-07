@@ -1,30 +1,32 @@
 package tofu.logging
 
-import scala.reflect.ClassTag
-
 import cats.kernel.Monoid
-import cats.{Applicative, Apply, FlatMap}
-import org.slf4j.{Logger, LoggerFactory, Marker}
+import cats.{Applicative, Apply, FlatMap, Id}
+import org.slf4j.Marker
 import tofu.compat.unused
 import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.logging.Logging.{Debug, Error, Info, Level, Trace, Warn}
-import tofu.logging.impl.EmbedLogging
+import tofu.logging.impl.{EmbedLogging, UniversalContextLogs, UniversalLogging}
 import tofu.syntax.monadic._
 import tofu.syntax.monoidalK._
-import tofu.{Init, higherKind}
+import tofu.{Delay, Init, WithContext, higherKind}
 
-/** Typeclass equivalent of Logger.
-  * May contain specified some Logger instance
-  * or try to read it from the context
+import scala.reflect.ClassTag
+
+/** Typeclass equivalent of Logger. May contain specified some Logger instance or try to read it from the context
   */
+@deprecated("Use Logging[F] instead", since = "0.10.4")
 trait LoggingBase[F[_]] {
 
   /** push new message to log, level will be automatically checked
-    * @param level desired level of logging, message will not be rendered\sent, if logging level
-    *              of current logger is not low enough
-    * @param message composed string with `{}` placeholders for values
-    *                 do not create strings on each call, use constant template string instead
-    * @param values  log parameters , values of types having `Loggable` instance would be converted automatically
+    * @param level
+    *   desired level of logging, message will not be rendered\sent, if logging level of current logger is not low
+    *   enough
+    * @param message
+    *   composed string with `{}` placeholders for values do not create strings on each call, use constant template
+    *   string instead
+    * @param values
+    *   log parameters , values of types having `Loggable` instance would be converted automatically
     */
   def write(level: Level, message: String, values: LoggedValue*): F[Unit]
 
@@ -69,7 +71,8 @@ trait LoggingBase[F[_]] {
 
 /** Logging tagged with some arbitrary tag type.
   *
-  * @note there are no guarantees that `Service` correspond to the type parameter of `Logs.forService` method
+  * @note
+  *   there are no guarantees that `Service` correspond to the type parameter of `Logs.forService` method
   */
 trait ServiceLogging[F[_], Service] extends LoggingBase[F] {
   final def to[Svc2]: ServiceLogging[F, Svc2] = this.asInstanceOf[ServiceLogging[F, Svc2]]
@@ -87,12 +90,13 @@ object ServiceLogging {
   final implicit def serviceLoggingRepresentable[Svc]: RepresentableK[ServiceLogging[*[_], Svc]] =
     representableAny.asInstanceOf[RepresentableK[ServiceLogging[*[_], Svc]]]
 
-  final implicit def byUniversal[F[_], Svc: ClassTag](implicit unilogs: Logs.Universal[F]): ServiceLogging[F, Svc] =
+  final implicit def byUniversal[F[_], Svc: ClassTag](implicit unilogs: Logging.Make[F]): ServiceLogging[F, Svc] =
     unilogs.service[Svc]
 }
 
 /** Typeclass for logging.
-  * @see [[tofu.logging.Logs]] for creating instances of that trait
+  * @see
+  *   [[tofu.logging.Logs]] for creating instances of that trait
   */
 trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
   final def widen[G[a] >: F[a]]: Logging[G] = this.asInstanceOf[Logging[G]]
@@ -101,6 +105,29 @@ trait Logging[F[_]] extends ServiceLogging[F, Nothing] {
 }
 
 object Logging {
+
+  type Make[F[_]] = Logs[Id, F]
+
+  object Make {
+    def apply[F[_]: Logging.Make]: Logging.Make[F] = implicitly
+
+    def plain[F[_]: Delay]: Logging.Make[F] = new UniversalLogging[F](_)
+
+    def contextual[F[_]: FlatMap: Delay, C: Loggable](implicit FC: F WithContext C): Logging.Make[F] =
+      new UniversalContextLogs[F, C]
+
+  }
+
+  /** Convenient alias type for LoggingCompanion for easier access. */
+  type Companion[U[_[_]]] = LoggingCompanion[U]
+
+  sealed trait Level
+
+  case object Trace extends Level
+  case object Debug extends Level
+  case object Info  extends Level
+  case object Warn  extends Level
+  case object Error extends Level
 
   def mid: LoggingMidFunctions.type = LoggingMidFunctions
 
@@ -118,9 +145,6 @@ object Logging {
   def combine[F[_]: Apply](first: Logging[F], second: Logging[F]): Logging[F] =
     first.zipWithK(second)(Function2K[F, F, F](_ *> _))
 
-  private[logging] def loggerForService[S](implicit ct: ClassTag[S]): Logger =
-    LoggerFactory.getLogger(ct.runtimeClass)
-
   def flatten[F[_]: FlatMap](underlying: F[Logging[F]]): Logging[F] = new EmbedLogging[F](underlying)
 
   implicit val loggingRepresentable: RepresentableK[Logging] = higherKind.derived.genRepresentableK[Logging]
@@ -130,14 +154,6 @@ object Logging {
     def combine(x: Logging[F], y: Logging[F]): Logging[F] = Logging.combine(x, y)
   }
 
-  /** Log level */
-  sealed trait Level
-
-  case object Trace extends Level
-  case object Debug extends Level
-  case object Info  extends Level
-  case object Warn  extends Level
-  case object Error extends Level
 }
 
 private[tofu] class EmptyLogging[F[_]: Applicative] extends Logging[F] {

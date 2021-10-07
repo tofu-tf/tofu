@@ -10,7 +10,7 @@ lazy val setMinorVersion = minorVersion := {
 }
 
 lazy val defaultSettings = Seq(
-  scalaVersion := Version.scala213,
+  scalaVersion       := Version.scala213,
   crossScalaVersions := Vector(Version.scala212, Version.scala213),
   setMinorVersion,
   defaultScalacOptions,
@@ -132,15 +132,6 @@ lazy val loggingLayout = project
   )
   .dependsOn(loggingStr)
 
-lazy val loggingUtil = project
-  .in(file("modules/logging/util"))
-  .settings(
-    defaultSettings,
-    name := "tofu-logging-util",
-    libraryDependencies ++= Vector(slf4j, catsEffect2),
-  )
-  .dependsOn(loggingStr)
-
 lazy val loggingShapeless = project
   .in(file("modules/logging/interop/shapeless"))
   .settings(
@@ -170,8 +161,8 @@ lazy val loggingLog4Cats = project
 
 lazy val logging = project
   .in(file("modules/logging"))
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
-  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .aggregate(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
   .settings(
     defaultSettings,
     name := "tofu-logging"
@@ -297,7 +288,7 @@ lazy val fs2Interop = project
   )
   .dependsOn(concurrent, streams)
 
-lazy val doobie        = project
+lazy val doobie = project
   .in(file("modules/doobie/core"))
   .settings(
     libraryDependencies ++= List(doobieCore, derevo, monix % Test),
@@ -318,7 +309,8 @@ lazy val doobieLogging = project
 lazy val examples = project
   .in(file("examples"))
   .settings(
-    libraryDependencies ++= List(doobieCore, doobieH2, derevo, monix, groovy),
+    libraryDependencies ++= List(doobieCore, doobieH2, derevo, monix, groovy, derevoCirce),
+    libraryDependencies ++= http4s,
     defaultSettings,
     name := "tofu-examples",
     noPublishSettings,
@@ -367,12 +359,12 @@ lazy val docs = project // new documentation project
     noPublishSettings,
     addCompilerPlugin(simulacrum),
     macros,
-    ScalaUnidoc / unidoc / scalacOptions += "-Ymacro-expand:none",
+    ScalaUnidoc / doc / scalacOptions += "-Ymacro-expand:none",
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*) -- inProjects(opticsMacro),
-    ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
+    ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
-    docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
-    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
+    docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
+    docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
   .dependsOn(mainModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
@@ -412,7 +404,7 @@ lazy val scalacWarningConfig = scalacOptions += {
   // }.mkString(",")
 
   // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
-  val contextDeprecationInfo = "cat=deprecation&msg=^(.*((Has)|(With)).*)$:silent"
+  val contextDeprecationInfo = "cat=deprecation&msg=^(.*((Has)|(With)|(Logging)).*)$:silent"
   val verboseWarnings        = "any:wv"
 
   s"-Wconf:$contextDeprecationInfo,$verboseWarnings"
@@ -428,7 +420,7 @@ lazy val noPublishSettings =
 
 lazy val simulacrumOptions = Seq(
   libraryDependencies += simulacrum % Provided,
-  pomPostProcess := { node =>
+  pomPostProcess                   := { node =>
     import scala.xml.transform.{RewriteRule, RuleTransformer}
 
     new RuleTransformer(new RewriteRule {

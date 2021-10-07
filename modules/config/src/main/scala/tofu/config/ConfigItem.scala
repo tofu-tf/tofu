@@ -6,7 +6,7 @@ import cats.instances.list._
 import cats.instances.option._
 import cats.syntax.option._
 import cats.{Applicative, Functor, Id, Monad, ~>}
-import tofu.concurrent.Refs
+import tofu.concurrent.ce2.Refs
 import tofu.config.ConfigItem.ValueType
 import tofu.data.{Flux, Identity}
 import tofu.syntax.monadic._
@@ -61,7 +61,7 @@ object ConfigItem {
   sealed trait ValueTypeStream     extends ValueType[StreamC]
 
   object ValueType {
-    case object Null extends ValueTypeSimple[Unit]       {
+    case object Null extends ValueTypeSimple[Unit] {
       def fromString(s: String): Option[Unit] = Some(())
 
     }

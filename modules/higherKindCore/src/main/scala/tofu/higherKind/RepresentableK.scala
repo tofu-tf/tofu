@@ -54,8 +54,7 @@ object RepresentableK extends RepresentableKInstanceChain[RepresentableK] {
     def apply(maker: funk.Maker[RepK[U, *], F, A1]): U[F] = rep.tabulate(maker)
   }
 
-  /** simply for reference
-    * continuation form of RepK makes higher order index trivial
+  /** simply for reference continuation form of RepK makes higher order index trivial
     */
   def index[U[_[_]], F[_], A](tf: U[F])(repr: RepK[U, A]): F[A] = repr(tf)
 }
@@ -97,7 +96,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
       OptionT(Tuple2K(af.value, ag.value))
     override def zipWith2K[F[_], G[_], H[_]](af: OptionT[F, A], ag: OptionT[G, A])(
         f2: Function2K[F, G, H]
-    ): OptionT[H, A]                                                                                      =
+    ): OptionT[H, A] =
       OptionT(f2(af.value, ag.value))
     override def pureK[F[_]](p: Point[F]): OptionT[F, A]                                                  = OptionT(p.point)
     override val unitK: OptionT[UnitK, A]                                                                 = super.unitK
@@ -114,7 +113,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
         EitherT(Tuple2K(af.value, ag.value))
       override def zipWith2K[F[_], G[_], H[_]](af: EitherT[F, E, A], ag: EitherT[G, E, A])(
           f2: Function2K[F, G, H]
-      ): EitherT[H, E, A]                                                                                            =
+      ): EitherT[H, E, A] =
         EitherT(f2(af.value, ag.value))
       override def pureK[F[_]](p: Point[F]): EitherT[F, E, A]                                                        =
         EitherT(p.point)
@@ -134,7 +133,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
         WriterT(Tuple2K(af.run, ag.run))
       override def zipWith2K[F[_], G[_], H[_]](af: WriterT[F, W, A], ag: WriterT[G, W, A])(
           f2: Function2K[F, G, H]
-      ): WriterT[H, W, A]                                                                                            =
+      ): WriterT[H, W, A] =
         WriterT(f2(af.run, ag.run))
       override def pureK[F[_]](p: Point[F]): WriterT[F, W, A]                                                        = WriterT(p.point)
       override val unitK: WriterT[UnitK, W, A]                                                                       = super.unitK
@@ -151,7 +150,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
       IorT(Tuple2K(af.value, ag.value))
     override def zipWith2K[F[_], G[_], H[_]](af: IorT[F, E, A], ag: IorT[G, E, A])(
         f2: Function2K[F, G, H]
-    ): IorT[H, E, A]                                                                                      =
+    ): IorT[H, E, A] =
       IorT(f2(af.value, ag.value))
     override def pureK[F[_]](p: Point[F]): IorT[F, E, A]                                                  = IorT(p.point)
     override val unitK: IorT[UnitK, E, A]                                                                 = super.unitK

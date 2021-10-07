@@ -6,17 +6,17 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val scala212 = "2.12.14"
+    val scala212 = "2.12.15"
 
     val scala213 = "2.13.6"
 
     val circe = "0.14.1"
 
-    val tethys = "0.24.0"
+    val tethys = "0.25.0"
 
     val cats = "2.6.1"
 
-    val catsEffect2 = "2.5.3"
+    val catsEffect2 = "2.5.4"
 
     val catsEffect3 = "3.1.1"
 
@@ -34,17 +34,17 @@ object Dependencies {
 
     val fs2 = "2.5.9"
 
-    val logback = "1.2.5"
+    val logback = "1.2.6"
 
     val monix = "3.4.0"
 
-    val scalatest = "3.2.9"
+    val scalatest = "3.2.10"
 
     val magnolia = "0.17.0"
 
     val typesafeConfig = "1.4.1"
 
-    val zio = "1.0.11"
+    val zio = "1.0.12"
 
     val zioCats = "2.5.1.0"
 
@@ -59,7 +59,7 @@ object Dependencies {
 
     val simulacrum = "1.0.1"
 
-    val kindProjector = "0.13.0"
+    val kindProjector = "0.13.2"
 
     val betterMonadicFor = "0.3.1"
 
@@ -67,7 +67,9 @@ object Dependencies {
 
     val log4Cats = "1.3.1"
 
-    val groovy = "3.0.8"
+    val groovy = "3.0.9"
+
+    val http4s = "0.22.5"
   }
 
   val noCatsCore       =
@@ -92,6 +94,7 @@ object Dependencies {
   val circeDerivation  = "io.circe"                   %% "circe-derivation"        % Version.circe excludeAll (noCatsCore: _*)
   val magnolia         = "com.propensive"             %% "magnolia"                % Version.magnolia
   val derevo           = "tf.tofu"                    %% "derevo-core"             % Version.derevo
+  val derevoCirce      = "tf.tofu"                    %% "derevo-circe"            % Version.derevo
   val derevoTagless    = "tf.tofu"                    %% "derevo-cats-tagless"     % Version.derevo
   val enumeratum       = "com.beachape"               %% "enumeratum"              % Version.enumeratum
   val fs2              = "co.fs2"                     %% "fs2-io"                  % Version.fs2
@@ -109,10 +112,13 @@ object Dependencies {
   val collectionCompat = "org.scala-lang.modules"     %% "scala-collection-compat" % Version.collectionCompat
   val log4Cats         = "org.typelevel"              %% "log4cats-core"           % Version.log4Cats
   val groovy           = "org.codehaus.groovy"         % "groovy"                  % Version.groovy
-
+  val http4s           =
+    Seq("org.http4s" %% "http4s-dsl", "org.http4s" %% "http4s-circe", "org.http4s" %% "http4s-blaze-server").map(
+      _ % Version.http4s
+    )
   // Compile-time only
-  val macroParadise    = "org.scalamacros" % "paradise"           % Version.macroParadise cross CrossVersion.patch
-  val kindProjector    = "org.typelevel"  %% "kind-projector"     % Version.kindProjector cross CrossVersion.patch
-  val simulacrum       = "org.typelevel"  %% "simulacrum"         % Version.simulacrum
-  val betterMonadicFor = "com.olegpy"     %% "better-monadic-for" % Version.betterMonadicFor
+  val macroParadise    = "org.scalamacros"             % "paradise"                % Version.macroParadise cross CrossVersion.patch
+  val kindProjector    = "org.typelevel"              %% "kind-projector"          % Version.kindProjector cross CrossVersion.patch
+  val simulacrum       = "org.typelevel"              %% "simulacrum"              % Version.simulacrum
+  val betterMonadicFor = "com.olegpy"                 %% "better-monadic-for"      % Version.betterMonadicFor
 }

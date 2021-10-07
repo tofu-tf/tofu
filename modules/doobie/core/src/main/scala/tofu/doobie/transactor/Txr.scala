@@ -13,16 +13,15 @@ import tofu.{BracketThrow, WithContext}
 
 import scala.annotation.nowarn
 
-/** A simple facade for [[doobie.Transactor]] that holds an inner database effect type `DB[_]` and provides
-  * natural transformations from this effect to the target effect `F[_]`.
+/** A simple facade for [[doobie.Transactor]] that holds an inner database effect type `DB[_]` and provides natural
+  * transformations from this effect to the target effect `F[_]`.
   *
   * The motivation for using this facade instead of `Transactor` is to:
   *
-  *   - initialize all its natural transformations early and remove the need for additional constraints
-  *     on `F[_]` later (e.g. `Bracket`);
+  *   - initialize all its natural transformations early and remove the need for additional constraints on `F[_]` later
+  *     (e.g. `Bracket`);
   *
-  *   - be able to use another `DB[_]` effect besides `ConnectionIO` and build a layer of transactional logic
-  *     with it.
+  *   - be able to use another `DB[_]` effect besides `ConnectionIO` and build a layer of transactional logic with it.
   */
 trait Txr[F[_], DB0[_]] {
   type DB[x] >: DB0[x] <: DB0[x]
@@ -96,9 +95,9 @@ object Txr {
   type Contextual[F[_], Ctx] = Txr[F, ConnectionRIO[Ctx, *]]
 
   @deprecated("Use `Txr[F, DB]` instead", since = "0.10.3")
-  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB]                      = ev
+  def Aux[F[_], DB[_]](implicit ev: Aux[F, DB]): Aux[F, DB] = ev
   @deprecated("Use `Transactor.mapK` and `Txr.plain` instead", since = "0.10.3")
-  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F]                            = ev
+  def Lifted[F[_]](implicit ev: Lifted[F]): Lifted[F] = ev
   @deprecated("Use `Transactor.mapK` and `Txr.continuational` as a better alternative", since = "0.10.3")
   def Contextual[F[_], Ctx](implicit ev: Contextual[F, Ctx]): Contextual[F, Ctx] = ev
 

@@ -26,9 +26,9 @@ object CalcM extends CalcMInstances {
   def get[S]: CalcM[Nothing, Any, S, S, Nothing, S]           = Get()
   def set[S](s: S): CalcM[Nothing, Any, Any, S, Nothing, S]   = Set(s)
 
-  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, S2]       =
+  def update[S1, S2](f: S1 => S2): CalcM[Nothing, Any, S1, S2, Nothing, S2]                                  =
     get[S1].flatMapS(s => set(f(s)))
-  def state[S1, S2, A](f: S1 => (S2, A)): CalcM[Nothing, Any, S1, S2, Nothing, A] =
+  def state[S1, S2, A](f: S1 => (S2, A)): CalcM[Nothing, Any, S1, S2, Nothing, A]                            =
     get[S1].flatMapS { s1 =>
       val (s2, a) = f(s1)
       set(s2) as a
@@ -64,7 +64,7 @@ object CalcM extends CalcMInstances {
       this
     def translateState[G[+_, +_], ST, R1](
         translator: Translator[Nothing, G, ST, Any, R1]
-    ): CalcM[G, R1, (ST, S1), (ST, S2), E, A]                                                                       = focusSecond
+    ): CalcM[G, R1, (ST, S1), (ST, S2), E, A] = focusSecond
   }
 
   final case class Pure[S, +A](a: A) extends CalcMResStatic[S, S, Nothing, A]   {
@@ -80,7 +80,7 @@ object CalcM extends CalcMInstances {
       CalcM.read[S, R1].map(translator.mapRead)
     def translateState[G[+_, +_], ST, R1](
         translator: Translator[Nothing, G, ST, R, R1]
-    ): CalcM[G, R1, (ST, S), (ST, S), Nothing, R]                                                                     =
+    ): CalcM[G, R1, (ST, S), (ST, S), Nothing, R] =
       CalcM.read[S, R1].map(translator.mapRead).focusSecond
   }
   final case class Get[S]()          extends CalcMResStatic[S, S, Nothing, S]   {

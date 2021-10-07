@@ -8,7 +8,8 @@ The library consists of a few modules, which can be installed all at once:
 or as standalone dependencies:
 
 ## Core
-`"tf.tofu" %% "tofu-core" % tofu-version`  
+`"tf.tofu" %% "tofu-core-*" % tofu-version`
+(replace suffix `*` with `ce2` or `ce3` depends on which cats-effect version you use)
 
 ## Concurrent
 `"tf.tofu" %% "tofu-concurrent" % tofu-version`  

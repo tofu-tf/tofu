@@ -10,20 +10,22 @@ import scala.collection.compat._
 
 import scala.{specialized => sp}
 
-/** contextual log construction
-  * could serve as weak form of JSON building
-  * I and V could be the same type: prefix, mutable builder, etc
-  * distinction is added to guide Loggable implementation
-  * for example, to work with unsafe builders like Tethys Writer
+/** contextual log construction could serve as weak form of JSON building I and V could be the same type: prefix,
+  * mutable builder, etc distinction is added to guide Loggable implementation for example, to work with unsafe builders
+  * like Tethys Writer
   *
-  * it would be great if we could use unique types `I` and `V` for each subcontext
-  * this would require however polymorphic lambdas everywhere, so we are praise for
-  * user consciousness for not reusing `I` and `V` values in the embedded scopes
+  * it would be great if we could use unique types `I` and `V` for each subcontext this would require however
+  * polymorphic lambdas everywhere, so we are praise for user consciousness for not reusing `I` and `V` values in the
+  * embedded scopes
   *
-  * @tparam I some top level context, meaning we are inside dictionary
-  * @tparam V some value level context, meanin we are building the value
-  * @tparam R logging result on the top level
-  * @tparam M logging result on the value level
+  * @tparam I
+  *   some top level context, meaning we are inside dictionary
+  * @tparam V
+  *   some value level context, meanin we are building the value
+  * @tparam R
+  *   logging result on the top level
+  * @tparam M
+  *   logging result on the value level
   */
 trait LogRenderer[I, V, @sp(Unit) R, @sp M] extends Semigroup[R] { self =>
   @inline implicit private[this] def thatRenderer: LogRenderer[I, V, R, M] = self
@@ -153,8 +155,7 @@ object LogRenderer {
     def dict(input: String)(receive: String => Unit): Unit                   = receive(input)
   }
 
-  /**
-    */
+  /** */
   final case class IdxPrefix(init: String, group: String, name: String) {
     def sub(s: String) = IdxPrefix(init, join(group, name), s)
     def idx(i: Int)    = IdxPrefix(join(init, join(group, name)), "", i.toString)

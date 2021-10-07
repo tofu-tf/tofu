@@ -8,7 +8,8 @@ import cats.syntax.foldable._
 import cats.syntax.traverse._
 import cats.{Functor, Monad}
 import tofu.Guarantee
-import tofu.concurrent.{MVars, MakeMVar, MakeRef, Refs}
+import tofu.concurrent.{MVars, MakeMVar, MakeRef}
+import tofu.concurrent.ce2._
 import tofu.memo.CacheKeyState.valueByMap
 import tofu.memo.CacheOperation.{CleanUp, GetOrElse}
 import tofu.syntax.bracket._
@@ -62,7 +63,7 @@ final case class CacheKeyStateMVar[F[_]: Monad: Guarantee, K, A](
     state: MVar[F, Map[K, CacheState[F, A]]],
     factory: CacheVal[A] => F[CacheState[F, A]]
 ) extends CacheKeyState[F, K, A] {
-  override def value(key: K): F[CacheVal[A]] = valueByMap(state.read)(key)
+  override def value(key: K): F[CacheVal[A]]                              = valueByMap(state.read)(key)
   override def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B] = {
     def miss: F[B] =
       op.getPureOrElse(CacheVal.none)(state.bracketModify(freshMap => {

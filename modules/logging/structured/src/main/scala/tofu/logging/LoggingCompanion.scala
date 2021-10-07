@@ -11,10 +11,8 @@ import tofu.syntax.monoidalK._
 
 /** Mix-in trait that supposed to be extended by companion of service
   *
-  * @example {{{
-  * class FooService[F[_] : FooService.Log]
-  * object FooService extends LoggingCompanion[FooService]
-  * }}}
+  * @example
+  *   {{{class FooService[F[_] : FooService.Log] object FooService extends LoggingCompanion[FooService]}}}
   */
 trait LoggingCompanion[U[_[_]]] {
   type Log[F[_]] = ServiceLogging[F, U[Any]]
@@ -22,20 +20,20 @@ trait LoggingCompanion[U[_[_]]] {
   implicit def toLogMidOps[F[_]](uf: U[F]): LogMidOps[U, F] = new LogMidOps(uf)
 
   def logMid[F[_]: Monad](implicit
-      L: Logs.Universal[F],
+      L: Logging.Make[F],
       svc: ClassTag[U[F]],
       U: FunctorK[U],
       UM: LoggingMid.Of[U]
   ): U[Mid[F, *]] = Logging.mid.in[U, Id, F]
 
   def logMidNamed[F[_]: Monad](name: String)(implicit
-      L: Logs.Universal[F],
+      L: Logging.Make[F],
       U: FunctorK[U],
       UM: LoggingMid.Of[U]
   ): U[Mid[F, *]] = Logging.mid.named[U, Id, F](name)
 
   def logErrMid[F[+_]: Monad, E](implicit
-      logs: Logs.Universal[F],
+      logs: Logging.Make[F],
       UCls: ClassTag[U[F]],
       lmid: LoggingErrMid.Of[U, E],
       errs: Errors[F, E],
@@ -43,7 +41,7 @@ trait LoggingCompanion[U[_[_]]] {
   ): U[Mid[F, *]] = Logging.mid.errIn[U, Id, F, E]
 
   def logErrMidNamed[F[+_]: Monad, E](name: String)(implicit
-      logs: Logs.Universal[F],
+      logs: Logging.Make[F],
       lmid: LoggingErrMid.Of[U, E],
       errs: Errors[F, E],
       U: FunctorK[U],
@@ -83,7 +81,7 @@ class LogMidOps[U[f[_]], F[_]](private val uf: U[F]) extends AnyVal {
   def attachLogs(implicit
       UL: U[LoggingMid],
       cls: ClassTag[U[F]],
-      L: Logs.Universal[F],
+      L: Logging.Make[F],
       U: MonoidalK[U],
       F: Monad[F]
   ): U[F] = {
@@ -93,7 +91,7 @@ class LogMidOps[U[f[_]], F[_]](private val uf: U[F]) extends AnyVal {
 
   def attachLogsNamed(name: String)(implicit
       UL: U[LoggingMid],
-      L: Logs.Universal[F],
+      L: Logging.Make[F],
       U: MonoidalK[U],
       F: Monad[F]
   ): U[F] = {
@@ -125,7 +123,7 @@ class LogMidOps[U[f[_]], F[_]](private val uf: U[F]) extends AnyVal {
   def attachErrLogs[E](implicit
       UL: U[LoggingErrMid[E, *]],
       cls: ClassTag[U[F]],
-      L: Logs.Universal[F],
+      L: Logging.Make[F],
       U: MonoidalK[U],
       F: Monad[F],
       FE: Errors[F, E],
@@ -136,7 +134,7 @@ class LogMidOps[U[f[_]], F[_]](private val uf: U[F]) extends AnyVal {
 
   def attachErrLogsNamed[E](name: String)(implicit
       UL: U[LoggingErrMid[E, *]],
-      L: Logs.Universal[F],
+      L: Logging.Make[F],
       U: MonoidalK[U],
       F: Monad[F],
       FE: Errors[F, E],

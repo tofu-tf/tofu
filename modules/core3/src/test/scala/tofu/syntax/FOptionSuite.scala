@@ -47,15 +47,48 @@ class FOptionSuite extends AnyFlatSpec {
     )
   }
 
-  "flatMapOpt" should "run when non empty" in {
+  "semiflatMap" should "run when non empty" in {
     assert(
       42.someF[List].semiflatMap(x => List(x + 1)) === List(Some(43))
     )
   }
 
-  "flatMapOpt" should "keep empty when empty" in {
+  "semiflatMap" should "keep empty when empty" in {
     assert(
       noneF[List, Int].semiflatMap(x => List(x + 1)) === List(None)
+    )
+  }
+
+  "mapIn" should "run when non empty" in {
+    assert(
+      42.someF[List].mapIn(_ + 1) === List(Some(43))
+    )
+  }
+
+  "mapIn" should "keep empty when empty" in {
+    assert(
+      noneF[List, Int].mapIn(_ + 1) === List(None)
+    )
+  }
+
+  "flatMapIn" should "run when non empty" in {
+    assert(
+      42.someF[List].flatMapIn(v => Some(v + 1)) === List(Some(43))
+    )
+  }
+
+  "flatMapIn" should "keep empty when empty" in {
+    assert(
+      noneF[List, Int].flatMapIn(v => Some(v + 1)) === List(None)
+    )
+    assert(
+      List.empty[Option[Int]].flatMapIn(v => Some(v + 1)) === Nil
+    )
+  }
+
+  "flatMapIn" should "return empty when empty is returned from function" in {
+    assert(
+      42.someF[List].flatMapIn(_ => None) === List(None)
     )
   }
 
@@ -83,7 +116,7 @@ class FOptionSuite extends AnyFlatSpec {
     )
   }
 
-  "toRightF" should "return Right when empty M" in {
+  "toRightF" should "return empty M when empty M" in {
     assert(
       List.empty[Option[Int]].toRightF(List("test")) === Nil
     )
@@ -101,6 +134,33 @@ class FOptionSuite extends AnyFlatSpec {
     )
     assert(
       42.someF[List].toRightF(boom) === List(Right(42))
+    )
+  }
+
+  "toRightIn" should "return non-empty Left" in {
+    assert(
+      noneF[List, Int].toRightIn("test") === List(Left("test"))
+    )
+  }
+
+  "toRightIn" should "return Right" in {
+    assert(
+      42.someF[List].toRightIn("test") === List(Right(42))
+    )
+  }
+
+  "toRightIn" should "return empty M when empty M" in {
+    assert(
+      List.empty[Option[Int]].toRightIn("test") === Nil
+    )
+  }
+
+  "toRightIn" should "check lazyness" in {
+    assert(
+      List.empty[Option[Int]].toRightIn(boom) === Nil
+    )
+    assert(
+      42.someF[List].toRightIn(boom) === List(Right(42))
     )
   }
 
@@ -122,7 +182,13 @@ class FOptionSuite extends AnyFlatSpec {
     )
   }
 
-  "toLeftF" should "return empty Right when None" in {
+  "toLeftF" should "return Right when None" in {
+    assert(
+      noneF[List, Int].toLeftF(List("test")) === List(Right("test"))
+    )
+  }
+
+  "toLeftF" should "return empty Right when None and function return empty M" in {
     assert(
       noneF[List, Int].toLeftF(List.empty[String]) === Nil
     )
@@ -134,6 +200,33 @@ class FOptionSuite extends AnyFlatSpec {
     )
     assert(
       42.someF[List].toLeftF(boom) === List(Left(42))
+    )
+  }
+
+  "toLeftIn" should "return Left" in {
+    assert(
+      42.someF[List].toLeftIn("test") === List(Left(42))
+    )
+  }
+
+  "toLeftIn" should "return Left when empty M" in {
+    assert(
+      List.empty[Option[Int]].toLeftIn(List("test")) === Nil
+    )
+  }
+
+  "toLeftIn" should "return Right when None" in {
+    assert(
+      noneF[List, Int].toLeftIn("test") === List(Right("test"))
+    )
+  }
+
+  "toLeftIn" should "check lazyness" in {
+    assert(
+      List.empty[Option[Int]].toLeftIn(boom) === Nil
+    )
+    assert(
+      42.someF[List].toLeftIn(boom) === List(Left(42))
     )
   }
 
@@ -242,6 +335,48 @@ class FOptionSuite extends AnyFlatSpec {
     )
     assert(
       42.someF[List].ensureF(i => List(i < 42), List("err")) === "err".asLeftF[List, Int]
+    )
+  }
+
+  "collectF" should "return successful collected" in {
+    assert(
+      42.someF[List].collectF { case v => List(v + 1) } === List(Some(43))
+    )
+  }
+
+  "collectF" should "return empty collected when empty M" in {
+    assert(
+      42.someF[List].collectF { case _ => List.empty[Int] } === Nil
+    )
+  }
+
+  "collectF" should "return None collected when matching is failed" in {
+    assert(
+      42.someF[List].collectF { case 1 => List(1) } === List(none[Int])
+    )
+  }
+
+  "collectF" should "return None collected when base is None" in {
+    assert(
+      noneF[List, Int].collectF { case 1 => List(1) } === List(none[Int])
+    )
+  }
+
+  "collectIn" should "return successful collected" in {
+    assert(
+      42.someF[List].collectIn { case v => v + 1 } === List(Some(43))
+    )
+  }
+
+  "collectIn" should "return None collected when matching is failed" in {
+    assert(
+      42.someF[List].collectIn { case 1 => 1 } === List(none[Int])
+    )
+  }
+
+  "collectIn" should "return None collected when base is None" in {
+    assert(
+      noneF[List, Int].collectIn { case 1 => 1 } === List(none[Int])
     )
   }
 
@@ -576,6 +711,10 @@ class FOptionSuite extends AnyFlatSpec {
     assert(
       List.empty[Option[Int]].flatMap2F(boom[Int])((_, _) => Nil) === Nil
     )
+  }
+
+  "someIn" should "return some in M (List)" in {
+    assert(List(42).someIn === List(Some(42)))
   }
 }
 

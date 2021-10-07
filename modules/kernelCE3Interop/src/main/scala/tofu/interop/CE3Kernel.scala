@@ -1,16 +1,17 @@
 package tofu.interop
 
-import cats.Functor
 import cats.effect.kernel._
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
 import cats.effect.{Async, Fiber, IO, Sync}
+import cats.{Functor, Monad}
 import tofu.concurrent.impl.QVarSM
-import tofu.concurrent.{Atom, QVar}
+import tofu.concurrent._
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
+import tofu.lift.Lift
 import tofu.syntax.monadic._
-import tofu.{Scoped, WithContext}
+import tofu.{Fire, Scoped, WithContext}
 
 import java.util.concurrent.TimeUnit
 import scala.annotation.unused
@@ -59,14 +60,14 @@ object CE3Kernel {
       @unused _nonTofu: NonTofu[F]
   ): FibersCarrier3.Aux[F, E, Outcome[F, E, *], Fiber[F, E, *]] =
     new FibersCarrier3.Impl[F, E, Outcome[F, E, *], Fiber[F, E, *]] {
-      def start[A](fa: F[A]): F[Fiber[F, E, A]]                                            = F.start(fa)
-      def fireAndForget[A](fa: F[A]): F[Unit]                                              = F.void(start(fa))
+      def start[A](fa: F[A]): F[Fiber[F, E, A]]           = F.start(fa)
+      def fireAndForget[A](fa: F[A]): F[Unit]             = F.void(start(fa))
       def racePair[A, B](
           fa: F[A],
           fb: F[B]
       ): F[Either[(Outcome[F, E, A], Fiber[F, E, B]), (Fiber[F, E, A], Outcome[F, E, B])]] = F.racePair(fa, fb)
-      def race[A, B](fa: F[A], fb: F[B]): F[Either[A, B]]                                  = F.race(fa, fb)
-      def never[A]: F[A]                                                                   = F.never
+      def race[A, B](fa: F[A], fb: F[B]): F[Either[A, B]] = F.race(fa, fb)
+      def never[A]: F[A]                                  = F.never
     }
 
   final def makeExecute[Tag, F[_]](
@@ -128,7 +129,6 @@ object CE3Kernel {
       def performer: F[Performer.OfExit[F, Throwable]] =
         functor.executionContext.flatMap(implicit ce => functor.map(FD.context)(new DispatchPerformer(_, functor)))
     }
-
 }
 
 class DispatchPerformer[F[_]](dispatcher: Dispatcher[F], F: Async[F])(implicit ce: ExecutionContext)
@@ -138,4 +138,41 @@ class DispatchPerformer[F[_]](dispatcher: Dispatcher[F], F: Async[F])(implicit c
     res.onComplete(t => cont(Exit.fromTry(t)))
     F.fromFuture(F.delay(cancel()))
   }
+  final def agentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow: Fire](implicit
+      makeRef: MakeRef[I, F],
+      makeSemaphore: MakeSemaphore[I, F]
+  ): MkAgentCE3Carrier[I, F] = {
+    new MkAgentCE3Carrier[I, F] {
+      def agentOf[A](a: A): I[Agent[F, A]] =
+        for {
+          ref <- makeRef.refOf(a)
+          sem <- makeSemaphore.semaphore(1)
+        } yield SemRef(ref, sem)
+    }
+  }
+
+  final def serialAgentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow](implicit
+      makeRef: MakeRef[I, F],
+      makeSemaphore: MakeSemaphore[I, F]
+  ): MkSerialAgentCE3Carrier[I, F] =
+    new MkSerialAgentCE3Carrier[I, F] {
+      override def serialAgentOf[A](a: A): I[SerialAgent[F, A]] =
+        for {
+          ref <- makeRef.refOf(a)
+          sem <- makeSemaphore.semaphore(1)
+        } yield SerialSemRef(ref, sem)
+    }
+
+  final def underlyingSerialAgentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow, G[_]: Monad](implicit
+      makeRef: MakeRef[I, F],
+      makeSemaphore: MakeSemaphore[I, F],
+      lift: Lift[F, G]
+  ): MkSerialAgentCE3Carrier[I, G] =
+    new MkSerialAgentCE3Carrier[I, G] {
+      override def serialAgentOf[A](a: A): I[SerialAgent[G, A]] =
+        for {
+          ref <- makeRef.refOf(a)
+          sem <- makeSemaphore.semaphore(1)
+        } yield UnderlyingSemRef[F, G, A](ref, sem)
+    }
 }

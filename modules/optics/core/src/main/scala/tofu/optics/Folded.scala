@@ -6,8 +6,7 @@ import cats.syntax.monoid._
 import cats.{Applicative, Foldable, Monoid}
 import tofu.optics.data._
 
-/** S has some or none occurrences of A
-  * and can collect them
+/** S has some or none occurrences of A and can collect them
   */
 trait PFolded[-S, +T, +A, -B] extends PBase[PFolded, S, T, A, B] { self =>
   def foldMap[X: Monoid](s: S)(f: A => X): X
@@ -59,7 +58,7 @@ object PFolded extends OpticCompanion[PFolded] {
 
   trait Context extends PReduced.Context with PItems.Context with PDowncast.Context {
     override def algebra: Monoid[X]
-    def default: X = algebra.empty
+    def default: X                       = algebra.empty
     override val functor: Applicative[F] = {
       implicit val alg = algebra
       Applicative[Constant[X, +*]]

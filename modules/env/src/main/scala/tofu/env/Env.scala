@@ -11,15 +11,14 @@ import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
-/** Env is a monad, allowing composition of functions that are context(environment)-aware.
-  * For example, you may have several functions that depend on some common environment/runtime.
-  * Env provides a way to compose such functions, allowing access to this environment in a monadic way.
-  * It is possible to override context locally for concrete functions that you may want to use with another context.
-  * Under the hood, Env is just a function `E => Task[A]`.
-  * Since it's primary based on Monix task, it mirrors most of its methods and functions, including parallel execution, error handling,
-  * memoization, forking and working with resources.
-  * Env plays well with Cats and Cats-Effect, providing instances for most of typeclasses (see [[tofu.env.EnvInstances]]),
-  * except Effect and ConcurrentEffect (which allow starting computation at any place, so it contradicts Env, which requires context being passed).
+/** Env is a monad, allowing composition of functions that are context(environment)-aware. For example, you may have
+  * several functions that depend on some common environment/runtime. Env provides a way to compose such functions,
+  * allowing access to this environment in a monadic way. It is possible to override context locally for concrete
+  * functions that you may want to use with another context. Under the hood, Env is just a function `E => Task[A]`.
+  * Since it's primary based on Monix task, it mirrors most of its methods and functions, including parallel execution,
+  * error handling, memoization, forking and working with resources. Env plays well with Cats and Cats-Effect, providing
+  * instances for most of typeclasses (see [[tofu.env.EnvInstances]]), except Effect and ConcurrentEffect (which allow
+  * starting computation at any place, so it contradicts Env, which requires context being passed).
   */
 sealed trait Env[E, +A] {
   def run(ctx: E): Task[A]
@@ -31,15 +30,15 @@ sealed trait Env[E, +A] {
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx)))
   def mapTask4[B1, B2, B3, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3])(
       f: (Task[A], Task[B1], Task[B2], Task[B3]) => Task[R]
-  ): Env[E, R]                                                                                                    =
+  ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx)))
   def mapTask5[B1, B2, B3, B4, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3], e4: Env[E, B4])(
       f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4]) => Task[R]
-  ): Env[E, R]                                                                                                    =
+  ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx), e4.run(ctx)))
   def mapTask6[B1, B2, B3, B4, B5, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3], e4: Env[E, B4], e5: Env[E, B5])(
       f: (Task[A], Task[B1], Task[B2], Task[B3], Task[B4], Task[B5]) => Task[R]
-  ): Env[E, R]                                                                                                    =
+  ): Env[E, R] =
     Env(ctx => f(run(ctx), e1.run(ctx), e2.run(ctx), e3.run(ctx), e4.run(ctx), e5.run(ctx)))
 
   // execution
@@ -171,9 +170,8 @@ sealed trait Env[E, +A] {
   def timeoutTo[B >: A](dur: FiniteDuration, backup: Env[E, B]): Env[E, B]   =
     mapTask2(backup)(_.timeoutTo(dur, _))
 
-  /** Times the Env execution, returning its duration and the computed value in case of success.
-    * Delegates to underlying [[monix.eval.Task.timed]].
-    * Usage example:
+  /** Times the Env execution, returning its duration and the computed value in case of success. Delegates to underlying
+    * [[monix.eval.Task.timed]]. Usage example:
     * {{{
     *   for {
     *     r <- Env.delay(1 + 1).timed
@@ -214,7 +212,7 @@ sealed trait Env[E, +A] {
     mapTask(_.executeOn(s, forceAsync))
   def fork: Env[E, Fiber[Env[E, *], A @uv]]                          = executeAsync.start
   @scala.deprecated("Replaced with startAndForget", "0.3.0")
-  def forkAndForget: Env[E, Unit]                                    = mapTask(_.startAndForget)
+  def forkAndForget: Env[E, Unit] = mapTask(_.startAndForget)
   def startAndForget: Env[E, Unit]                                   = mapTask(_.startAndForget)
 
   //profunctorial syntax
@@ -252,7 +250,7 @@ final case class EnvTask[E, +A](ta: Task[A]) extends Env[E, A] {
     }
   override def mapTask3[B1, B2, D](e1: Env[E, B1], e2: Env[E, B2])(
       f: (Task[A], Task[B1], Task[B2]) => Task[D]
-  ): Env[E, D]                                                                            =
+  ): Env[E, D] =
     e1.mapTask2(e2)(f(ta, _, _))
 
   override def mapTask4[B1, B2, B3, R](e1: Env[E, B1], e2: Env[E, B2], e3: Env[E, B3])(

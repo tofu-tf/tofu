@@ -1,0 +1,49 @@
+POST http://localhost:8080/cargo/move
+Content-Type: application/json
+
+{
+ "from": {
+   "address":"Cluevo city, Kukuevo street",
+   "city": "Cluevo"
+ },
+ "to": {
+   "address":"Ravenholm street, b. 15",
+   "city": "Darksburg"
+ },
+ "cargo": {
+   "weight": 101,
+   "name": "101 kilogram of feathers"
+ }
+}
+
+<> 2021-08-20T201248.200.json
+
+###
+POST http://localhost:8080/cargo/deposit
+Accept: application/json
+
+{
+ "daysAmount": 20,
+ "cargo": {
+   "weight": 101,
+   "name": "101 kilogram of feathers"
+ }
+}
+
+<> 2021-08-20T180330.200.json
+
+###
+POST http://localhost:8080/cargo/deposit
+Accept: application/json
+
+{
+ "daysAmount": 3,
+ "cargo": {
+   "weight": 10,
+   "name": "Set of Scala Books"
+ }
+}
+
+<> 2021-08-20T180136.200.json
+
+###

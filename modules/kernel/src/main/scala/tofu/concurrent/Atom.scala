@@ -13,8 +13,7 @@ trait Atom[+F[_], A] {
 
   /** Obtains the current value.
     *
-    * Since `Ref` is always guaranteed to have a value, the returned action
-    * completes immediately after being bound.
+    * Since `Ref` is always guaranteed to have a value, the returned action completes immediately after being bound.
     */
   def get: F[A]
 
@@ -22,8 +21,7 @@ trait Atom[+F[_], A] {
     *
     * The returned action completes after the reference has been successfully set.
     *
-    * Satisfies:
-    *   `r.set(fa) *> r.get == fa`
+    * Satisfies: `r.set(fa) *> r.get == fa`
     */
   def set(a: A): F[Unit]
 
@@ -31,12 +29,11 @@ trait Atom[+F[_], A] {
     */
   def getAndSet(a: A): F[A]
 
-  /** Modifies the current value using the supplied update function. If another modification
-    * occurs between the time the current value is read and subsequently updated, the modification
-    * is retried using the new value. Hence, `f` may be invoked multiple times.
+  /** Modifies the current value using the supplied update function. If another modification occurs between the time the
+    * current value is read and subsequently updated, the modification is retried using the new value. Hence, `f` may be
+    * invoked multiple times.
     *
-    * Satisfies:
-    *   `r.update(_ => a) == r.set(a)`
+    * Satisfies: `r.update(_ => a) == r.set(a)`
     */
   def update(f: A => A): F[Unit]
 

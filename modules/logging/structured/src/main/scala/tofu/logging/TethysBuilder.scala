@@ -6,6 +6,7 @@ import java.io.StringWriter
 import cats.instances.unit._
 import cats.kernel.Monoid
 import tofu.logging.LogRenderer.LogRendererUnit
+import tethys.commons.RawJson
 import tethys.writers.tokens.TokenWriter
 import tofu.compat.unused
 
@@ -36,11 +37,11 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
     def zero(v: TokenWriter): Boolean                                                           = false
     def coalesce(f: TokenWriter => Boolean, g: TokenWriter => Boolean, v: TokenWriter): Boolean = f(v) || g(v)
 
-    def putValue(value: LogParamValue, writer: TokenWriter): Boolean = {
+    def putValue(value: LogParamValue, writer: TokenWriter): Boolean                          = {
       writeValue(value, writer)
       true
     }
-    def sub(name: String, writer: TokenWriter)(receive: TokenWriter => Boolean): Unit = {
+    def sub(name: String, writer: TokenWriter)(receive: TokenWriter => Boolean): Unit         = {
       writer.writeFieldName(name)
       checkWritten(receive(writer), writer)
     }
@@ -50,7 +51,7 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
       writer.writeArrayEnd()
       true
     }
-    def dict(writer: TokenWriter)(receive: TokenWriter => Unit): Boolean = {
+    def dict(writer: TokenWriter)(receive: TokenWriter => Unit): Boolean                      = {
       writer.writeObjectStart()
       receive(writer)
       writer.writeObjectEnd()
@@ -64,19 +65,19 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
     }
 
     //optimized set of non-wrapping field writers
-    override def addString(name: String, value: String, input: TokenWriter): Unit = {
+    override def addString(name: String, value: String, input: TokenWriter): Unit      = {
       input.writeFieldName(name)
       input.writeString(value)
     }
-    override def addInt(name: String, value: Long, input: TokenWriter): Unit = {
+    override def addInt(name: String, value: Long, input: TokenWriter): Unit           = {
       input.writeFieldName(name)
       input.writeNumber(value)
     }
-    override def addFloat(name: String, value: Double, input: TokenWriter): Unit = {
+    override def addFloat(name: String, value: Double, input: TokenWriter): Unit       = {
       input.writeFieldName(name)
       input.writeNumber(value)
     }
-    override def addBigInt(name: String, value: BigInt, input: TokenWriter): Unit = {
+    override def addBigInt(name: String, value: BigInt, input: TokenWriter): Unit      = {
       input.writeFieldName(name)
       input.writeNumber(value)
     }
@@ -84,16 +85,16 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
       input.writeFieldName(name)
       input.writeNumber(value)
     }
-    override def addBool(name: String, value: Boolean, input: TokenWriter): Unit = {
+    override def addBool(name: String, value: Boolean, input: TokenWriter): Unit       = {
       input.writeFieldName(name)
       input.writeBoolean(value)
     }
-    override def putString(value: String, input: TokenWriter): Boolean = { input.writeString(value); true }
-    override def putInt(value: Long, input: TokenWriter): Boolean = { input.writeNumber(value); true }
-    override def putFloat(value: Double, input: TokenWriter): Boolean = { input.writeNumber(value); true }
-    override def putBigInt(value: BigInt, input: TokenWriter): Boolean = { input.writeNumber(value); true }
-    override def putDecimal(value: BigDecimal, input: TokenWriter): Boolean = { input.writeNumber(value); true }
-    override def putBool(value: Boolean, input: TokenWriter): Boolean = { input.writeBoolean(value); true }
+    override def putString(value: String, input: TokenWriter): Boolean                 = { input.writeString(value); true }
+    override def putInt(value: Long, input: TokenWriter): Boolean                      = { input.writeNumber(value); true }
+    override def putFloat(value: Double, input: TokenWriter): Boolean                  = { input.writeNumber(value); true }
+    override def putBigInt(value: BigInt, input: TokenWriter): Boolean                 = { input.writeNumber(value); true }
+    override def putDecimal(value: BigDecimal, input: TokenWriter): Boolean            = { input.writeNumber(value); true }
+    override def putBool(value: Boolean, input: TokenWriter): Boolean                  = { input.writeBoolean(value); true }
   }
 
   def monoid: Monoid[Unit] = implicitly
@@ -112,6 +113,20 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
   }
 }
 
+class TethysBuilderWithCustomFields(customFields: List[(String, RawJson)], prefix: String = "", postfix: String = "")
+    extends TethysBuilder(prefix, postfix) {
+
+  override def predefined(tokenWriter: TokenWriter): Unit = {
+    customFields.foreach { case (key, json) =>
+      tokenWriter.writeFieldName(key)
+      tokenWriter.writeRawJson(json.json)
+    }
+  }
+}
+
 object TethysBuilder extends TethysBuilder("", "") {
   def apply(prefix: String = "", postfix: String = "") = new TethysBuilder(prefix, postfix)
+
+  def withCustomFields(customFields: List[(String, RawJson)], prefix: String = "", postfix: String = "") =
+    new TethysBuilderWithCustomFields(customFields, prefix, postfix)
 }

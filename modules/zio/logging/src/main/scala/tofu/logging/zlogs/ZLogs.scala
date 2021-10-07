@@ -1,24 +1,19 @@
 package tofu.logging.zlogs
 
-import scala.reflect.ClassTag
-
 import izumi.reflect.Tag
-import org.slf4j.LoggerFactory
-import tofu.logging.zlogs.impl.{UIOZLogging, URIOZLoggingImpl}
+import tofu.logging.impl.{ZUniversalContextLogging, ZUniversalLogging}
 import tofu.logging.{Loggable, Logging}
 import zio.interop.catz._
 import zio.{Has, UIO, ULayer, ZIO, ZLayer}
+
 import scala.annotation.nowarn
+import scala.reflect.ClassTag
 
 object ZLogs {
-  val uio: ZLogs[Any] = new ZLogs[Any] {
-    def byName(name: String): UIO[Logging[UIO]] = UIO.effectTotal(new UIOZLogging(LoggerFactory.getLogger(name)))
-  }
+  val uio: ZLogs[Any] = (name: String) => UIO.effectTotal(new ZUniversalLogging(name))
 
-  def withContext[R: Loggable]: ZLogs[R] = new ZLogs[R] {
-    override def byName(name: String): UIO[ZLogging[R]] =
-      UIO.effectTotal(new URIOZLoggingImpl[R](LoggerFactory.getLogger(name)))
-  }
+  def withContext[R: Loggable]: ZLogs[R] =
+    (name: String) => UIO.effectTotal(new ZUniversalContextLogging(name, ZIO.environment[R]))
 
   val build = new ZioHasBuilder[Any](Loggable.empty)
 

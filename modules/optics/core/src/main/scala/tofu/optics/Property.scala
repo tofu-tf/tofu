@@ -9,9 +9,7 @@ import cats.syntax.functor._
 import cats.{Applicative, Functor, Monoid}
 import tofu.optics.data.Identity
 
-/** aka Optional
-  * S may or may not contain single element of A
-  * which may be set to B and change whole type to T
+/** aka Optional S may or may not contain single element of A which may be set to B and change whole type to T
   */
 trait PProperty[-S, +T, +A, -B]
     extends PItems[S, T, A, B] with PDowncast[S, T, A, B] with PBase[PProperty, S, T, A, B] { self =>

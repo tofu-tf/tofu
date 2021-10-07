@@ -99,7 +99,7 @@ private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
 
   final implicit def fs2StreamProvide[F[_], G[_], R](implicit
       fctx: WithProvide[F, G, R]
-  ): WithProvide[Stream[F, *], Stream[G, *], R]                                                       =
+  ): WithProvide[Stream[F, *], Stream[G, *], R] =
     new FS2Provide[F, G, R] { override val WP: WithProvide[F, G, R] = fctx }
 }
 

@@ -5,13 +5,16 @@ import cats.FlatMap
 import tofu.syntax.monadic._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import kernel.types._
 
 object scopedKernel extends ScopedSyntax
 
 trait ScopedSyntax {
   import Scoped.{Blocking, Calculation, Main}
   import ScopedSyntax._
+
+  private type Blocks[F[_]]     = kernel.types.Blocks[F]     // avoid import for unidoc
+  private type Calculates[F[_]] = kernel.types.Calculates[F] // avoid import for unidoc
+  private type Execute[F[_]]    = kernel.types.Execute[F]    // avoid import for unidoc
 
   /** run process in scope */
   def scoped[Tag] = new ScopedApply[Tag]

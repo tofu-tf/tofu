@@ -1,8 +1,10 @@
 ---
-id: logging 
+id: logging.old
 title: Logging
 ---
 
+# Warning
+This page is obsolete. Head on to the [new docs on logging](./tofu.logging.home.md).
 ## Installation
 
 Logging are available as a separate project
@@ -291,39 +293,7 @@ automagically. That is natural — describe how we can get a context from a comp
 context in log, and we will ensure it will be logged anytime you use `Logging` operations. You can log that context to
 string as well as use it as a part of structured logging.
 
-### Layouts
 
-Tofu is built upon [Logback](http://logback.qos.ch/) so it needs a custom `logback.xml` file with contexual logging
-support. Tofu uses mechanism called markers to store context in logs, so it won't work with existing Layouts e.g.
-with [Logstash-encoder](https://github.com/logstash/logstash-logback-encoder).
-
-Luckily for us, tofu has two special Layouts:
-
-* [ELKLayout](https://github.com/tofu-tf/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ELKLayout.scala)
-  that outputs structured logs in JSON format. Example appender looks like that:
-
-```xml
-
-<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-        <layout class="tofu.logging.ELKLayout"/>
-    </encoder>
-</appender>
-  ```
-
-* [ConsoleContextLayout](https://github.com/tofu-tf/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ConsoleContextLayout.scala)
-  that outputs simple text logs. Example appender looks like that:
-
-```xml
-
-<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-        <layout class="tofu.logging.logback.ConsoleContextLayout">
-            <pattern>%d{HH:mm:ss} %-5level %logger{36} - %msg%n [%mdc]%n</pattern>
-        </layout>
-    </encoder>
-</appender>
-```
 
 ### Example
 
@@ -512,7 +482,7 @@ your `LogRendered`, so your structured logging will work as expected.
 
 ## Integration with logs4cats
 
-There is a library for effectful logging named [log4cats](https://github.com/typelevel/log4cats) which shares
+There is a library for effectual logging named [log4cats](https://github.com/typelevel/log4cats) which shares
 the goal of representing logging as an effect and providing the ability to log context values. It is used by some of the
 open-source libraries which may require you to pass an instance of `org.typelevel.log4cats.Logger` to it in order to
 log something. Module `tofu-logging-log4cats` contains a helper that can create an instance of log4cats `Logger` from

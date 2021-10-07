@@ -35,6 +35,11 @@ trait Loggable[A] extends Loggable.Base[A] {
   /** whenever fields  are called it would be a single field named `name` and corresponding value */
   def named(name: String): Loggable[A] = new NamedLoggable[A](name, this)
 
+  /** something that works as [[named]] on the toplevel but ensures, that field is always represented as a singleton
+    * dict inside other value
+    */
+  def singleton(name: String): Loggable[A] = new SingletonLoggable[A](name, this)
+
   def showInstance: Show[A] = logShow
 
   def narrow[B <: A]: Loggable[B] = this.asInstanceOf[Loggable[B]]
@@ -64,30 +69,37 @@ object Loggable extends LoggableInstances with DataComp[Loggable] {
     def putField[I, V, R, S](a: A, name: String, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
       r.sub(name, i)(putValue(a, _))
 
-    /** put single logging field value in the field with supplied name if it's convertible to string, hide it otherwise */
+    /** put single logging field value in the field with supplied name if it's convertible to string, hide it otherwise
+      */
     def putMaskedField[I, V, R, S](@unused a: A, @unused name: String, i: I)(@unused f: String => String)(implicit
         r: LogRenderer[I, V, R, S]
     ): R = r.sub(name, i)(putMaskedValue(a, _)(f))
 
     /** add list of custom fields for value
       *
-      * @param a        value for logging
-      * @param addParam side-effectful function, adding custom field to log entry
+      * @param a
+      *   value for logging
+      * @param addParam
+      *   side-effectful function, adding custom field to log entry
       */
     def logVia(a: A, addParam: (String, Any) => Unit): Unit =
       fields(a: A, "")(LogRenderer.prefixed(addParam))
 
     /** display value in log message
       *
-      * @param a value for logging
-      * @return displayed form
+      * @param a
+      *   value for logging
+      * @return
+      *   displayed form
       */
     def logShow(a: A): String
 
     /** Convert value to LoggedValue
       *
-      * @param a value for logging
-      * @return new Logged Value
+      * @param a
+      *   value for logging
+      * @return
+      *   new Logged Value
       */
     def loggedValue(a: A): LoggedValue = new LoggedValue {
       override def logFields[I, V, @sp(Unit) R, @sp M](i: I)(implicit r: LogRenderer[I, V, R, M]): R =
@@ -124,6 +136,12 @@ object Loggable extends LoggableInstances with DataComp[Loggable] {
     def showInstance: Show.ContravariantShow[A]
 
     def narrow[B <: A]: Loggable[B]
+
+    /** generate the combined value of that loggable and the other at the given position */
+    def combinedValue[I, V, R, M, A1 <: A](a: A1, values: V, that: Base[A1])(implicit
+        render: LogRenderer[I, V, R, M]
+    ): M =
+      render.coalesce(this.putValue(a, _), that.putValue(a, _), values)
   }
 
   object Base extends DataComp[Base]
@@ -143,7 +161,7 @@ object Loggable extends LoggableInstances with DataComp[Loggable] {
     Loggable[A].contraCollect[Either[A, B]] { case Left(a) => a } +
       Loggable[B].contraCollect { case Right(b) => b }
 
-  final implicit val loggableInstance: Consume[Loggable]       = new Consume[Loggable] {
+  final implicit val loggableInstance: Consume[Loggable] = new Consume[Loggable] {
     def empty[A]: Loggable[A]                                                  = Loggable.empty
     def combineK[A](x: Loggable[A], y: Loggable[A]): Loggable[A]               = x + y
     def contramap[A, B](fa: Loggable[A])(f: B => A): Loggable[B]               = fa.contramap(f)
@@ -158,6 +176,11 @@ trait DictLoggable[A] extends Loggable[A] {
     r.subDict(name, input)(i1 => fields(a, i1))
 
   def putValue[I, V, R, M](a: A, v: V)(implicit r: LogRenderer[I, V, R, M]): M = r.dict(v)(fields(a, _))
+
+  override def combinedValue[I, V, R, M, A1 <: A](a: A1, v: V, that: Loggable.Base[A1])(implicit
+      r: LogRenderer[I, V, R, M]
+  ): M =
+    r.dict(v)(i => r.combine(this.fields(a, i), that.fields(a, i)))
 }
 
 /** specialized loggable where value is rendered by `.toString` method */
