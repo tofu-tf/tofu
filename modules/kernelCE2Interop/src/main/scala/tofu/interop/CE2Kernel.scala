@@ -124,7 +124,7 @@ object CE2Kernel {
   final def agentByRefAndSemaphore[I[_]: Monad, F[_]: Fire: Monad](implicit
       makeRef: MakeRef[I, F],
       makeSemaphore: MakeSemaphore[I, F]
-  ): MkAgentCE2Carrier[I, F] = 
+  ): MkAgentCE2Carrier[I, F] =
     new MkAgentCE2Carrier[I, F] {
       def agentOf[A](a: A): I[Agent[F, A]] =
         for {
@@ -132,7 +132,6 @@ object CE2Kernel {
           sem <- makeSemaphore.semaphore(1)
         } yield SemRef(ref, sem)
     }
-  
 
   final def serialAgentByRefAndSemaphore[I[_]: Monad, F[_]: Monad](implicit
       makeRef: MakeRef[I, F],
