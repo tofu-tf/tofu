@@ -16,6 +16,9 @@ import java.util.concurrent.TimeUnit
 import scala.annotation.unused
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
+import tofu.Performer
+import cats.Monad
+import tofu.concurrent.Exit
 
 object CE3Kernel {
   def delayViaSync[K[_]](implicit KS: Sync[K]): DelayCarrier3[K] =
@@ -115,4 +118,24 @@ object CE3Kernel {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
     }
 
+  final def performDispatch[F[_]](implicit
+      FD: WithContext[F, Dispatcher[F]],
+      F: Async[F]
+  ): PerformCarrier3[F, Throwable] =
+    new PerformCarrier3[F, Throwable] {
+      val functor: Async[F] = F
+
+      def performer: F[Performer.OfExit[F, Throwable]] =
+        functor.executionContext.flatMap(implicit ce => functor.map(FD.context)(new DispatchPerformer(_, functor)))
+    }
+
+}
+
+class DispatchPerformer[F[_]](dispatcher: Dispatcher[F], F: Async[F])(implicit ce: ExecutionContext)
+    extends Performer.OfExit[F, Throwable] {
+  def perform[A](cont: Exit[Throwable, A] => Unit)(fa: F[A]): F[Unit] = {
+    val (res, cancel) = dispatcher.unsafeToFutureCancelable(fa)
+    res.onComplete(t => cont(Exit.fromTry(t)))
+    F.fromFuture(F.delay(cancel()))
+  }
 }

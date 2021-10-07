@@ -7,12 +7,14 @@ import cats.{Id, ~>}
 import tofu.compat.unused
 import tofu.concurrent.{Atom, QVar}
 import tofu.internal.NonTofu
+import tofu.PerformOf.ExitCont
 import tofu.internal.carriers._
 import tofu.syntax.monadic._
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import java.util.concurrent.TimeUnit
+import tofu.concurrent.Exit
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search
@@ -107,5 +109,15 @@ object CE2Kernel {
   final def sleep[F[_]](implicit T: cats.effect.Timer[F]): SleepCE2Carrier[F] =
     new SleepCE2Carrier[F] {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
+    }
+
+  final def performEffect[F[_]](implicit F: Effect[F], @unused _nt: NonTofu[F]): PerformCarrier2[F, Throwable] =
+    new PerformCarrier2[F, Throwable] with Performer.OfExit[F, Throwable] {
+      val functor: Effect[F] = F
+
+      def performer: F[Performer.OfExit[F, Throwable]] = functor.pure(this)
+
+      def perform[A](cont: Exit[Throwable, A] => Unit)(f: F[A]): F[Unit] =
+        functor.delay(functor.runAsync(f)(e => IO(cont(Exit.fromEither(e)))).unsafeRunSync())
     }
 }

@@ -1,26 +1,27 @@
 package tofu.concurrent
 
 import cats.{Applicative, Eval, Traverse}
-import cats.effect.ExitCase
 import tofu.control.ApplicativeZip
 import tofu.syntax.monadic._
 
-sealed trait Exit[+E, +A] {
-  def exitCase: ExitCase[E]
-}
+sealed trait Exit[+E, +A]
 
 object Exit {
 
   sealed trait Incomplete[+E] extends Exit[E, Nothing]
 
-  case object Canceled                 extends Incomplete[Nothing] {
-    def exitCase = ExitCase.Canceled
+  case object Canceled                 extends Incomplete[Nothing]
+  final case class Error[+E](e: E)     extends Incomplete[E]
+  final case class Completed[+A](a: A) extends Exit[Nothing, A]
+
+  def fromEither[E, A](e: Either[E, A]): Exit[E, A] = e match {
+    case Left(err)  => Error(err)
+    case Right(res) => Completed(res)
   }
-  final case class Error[+E](e: E)     extends Incomplete[E]       {
-    def exitCase = ExitCase.Error(e)
-  }
-  final case class Completed[+A](a: A) extends Exit[Nothing, A]    {
-    override def exitCase = ExitCase.Completed
+
+  def fromTry[A](t: util.Try[A]): Exit[Throwable, A] = t match {
+    case util.Failure(ex)  => Error(ex)
+    case util.Success(res) => Completed(res)
   }
 
   private[this] object exitInstanceAny extends Traverse[Exit[Any, *]] with ApplicativeZip[Exit[Any, *]] {
