@@ -3,4 +3,19 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    reviewers:
+      - "Odomontois"
+      - "catostrophe"
+      - "oskin1"
+      - "danslapman"
+      - "funfunfine"
+    labels:
+      - "dependency-update"
+    ignore:
+      # managed by sbt-github-actions
+      - dependency-name: "olafurpg/setup-scala"
+      - dependency-name: "actions/checkout"
+      - dependency-name: "actions/cache"
+      - dependency-name: "actions/upload-artifact"
+      - dependency-name: "actions/download-artifact"
