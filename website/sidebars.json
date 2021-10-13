@@ -17,11 +17,35 @@
       },
       {
         "type": "category",
+        "label": "Logging",
+        "ids": [
+          "tofu.logging.home",
+          "tofu.logging.main.entities",
+          "tofu.logging.key-features",
+          "tofu.logging.syntax",
+          "tofu.logging.loggable",
+          "tofu.logging.layouts"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Logging Recipes",
+        "ids": [
+          "tofu.logging.recipes",
+          "tofu.logging.recipes.simple",
+          "tofu.logging.recipes.service",
+          "tofu.logging.recipes.context",
+          "tofu.logging.recipes.auto",
+          "tofu.logging.recipes.zio"
+        ]
+      },
+      {
+        "type": "category",
         "label": "Contextual",
         "items": [
           "env",
-          "hascontext",
-          "corecatsmtlinterop"
+          "withcontext",
+          "kernelcatsmtlinterop"
         ]
       },
       {
@@ -52,7 +76,6 @@
         "items": [
           "config",
           "console",
-          "logging",
           "memo"
         ]
       },

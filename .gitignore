@@ -13,3 +13,5 @@ website/static/api
 /null
 .vscode
 .bsp
+*.db
+.jvmopts

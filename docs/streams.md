@@ -1,4 +1,6 @@
 ---
+id: streams
+title: Streams
 ---
 # Streams
 

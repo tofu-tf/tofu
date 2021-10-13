@@ -1,9 +1,6 @@
 import Publish._, Dependencies._
 import com.typesafe.sbt.SbtGit.git
-
-moduleName := "tofu"
-
-val libVersion = "0.10.2"
+import sbt.ModuleID
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -12,14 +9,13 @@ lazy val setMinorVersion = minorVersion := {
   }
 }
 
-lazy val setModuleName = moduleName := { s"tofu-${(publishName or name).value}" }
-
 lazy val defaultSettings = Seq(
-  scalaVersion := Version.scala213,
+  scalaVersion       := Version.scala213,
+  crossScalaVersions := Vector(Version.scala212, Version.scala213),
   setMinorVersion,
-  setModuleName,
   defaultScalacOptions,
   scalacWarningConfig,
+  Compile / doc / scalacOptions -= "-Xfatal-warnings",
   libraryDependencies ++= Seq(
     compilerPlugin(kindProjector),
     compilerPlugin(betterMonadicFor),
@@ -27,59 +23,84 @@ lazy val defaultSettings = Seq(
     collectionCompat,
     scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided
   )
-) ++ macros ++ simulacrumOptions ++ publishSettings
+) ++ macros ++ simulacrumOptions
 
-lazy val higherKindCore = project settings (
-  defaultSettings,
-  publishName := "core-higher-kind",
-  libraryDependencies ++= Seq(catsCore, catsFree, catsTagless),
-)
+lazy val higherKindCore = project
+  .in(file("modules/higherKindCore"))
+  .settings(
+    defaultSettings,
+    name := "tofu-core-higher-kind",
+    libraryDependencies ++= Seq(catsCore, catsFree, catsTagless),
+  )
 
 lazy val kernel = project
+  .in(file("modules/kernel"))
   .settings(defaultSettings)
   .dependsOn(opticsCore, higherKindCore)
   .settings(
     defaultSettings,
-    publishName := "kernel"
+    name := "tofu-kernel"
   )
 
 lazy val kernelCE2Interop = project
+  .in(file("modules/kernelCE2Interop"))
   .dependsOn(kernel)
   .settings(
     defaultSettings,
-    publishName := "kernel-ce2-interop",
-    libraryDependencies += catsEffect
+    name := "tofu-kernel-ce2-interop",
+    libraryDependencies += catsEffect2
   )
 
-lazy val core = project dependsOn (kernel, kernelCE2Interop) settings (
-  defaultSettings,
-  publishName := "core",
-)
-
-lazy val coreCatsMtlInterop = project
-  .in(file("core/interop/cats-mtl"))
+lazy val core = project
+  .in(file("modules/core"))
+  .dependsOn(kernel, kernelCE2Interop)
   .settings(
     defaultSettings,
-    publishName := "core-cats-mtl",
+    name := "tofu-core-ce2",
+  )
+
+lazy val kernelCE3Interop = project
+  .in(file("modules/kernelCE3Interop"))
+  .dependsOn(kernel)
+  .settings(
+    defaultSettings,
+    name := "tofu-kernel-ce3-interop",
+    libraryDependencies += catsEffect3
+  )
+
+lazy val core3 = project
+  .in(file("modules/core3"))
+  .dependsOn(kernel, kernelCE3Interop)
+  .settings(
+    defaultSettings,
+    name := "tofu-core-ce3",
+  )
+
+lazy val kernelCatsMtlInterop = project
+  .in(file("modules/kernel/interop/cats-mtl"))
+  .settings(
+    defaultSettings,
+    name := "tofu-kernel-cats-mtl",
     libraryDependencies += catsMtl
   )
-  .dependsOn(core)
+  .dependsOn(kernel)
 
 lazy val memo = project
+  .in(file("modules/memo"))
   .dependsOn(core, concurrent)
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(catsCore, catsEffect),
+    libraryDependencies ++= Seq(catsCore, catsEffect2),
+    name := "tofu-memo"
   )
 
 lazy val loggingStr = project
-  .in(file("logging/structured"))
+  .in(file("modules/logging/structured"))
   .settings(
-    publishName := "logging-structured",
+    name := "tofu-logging-structured",
     defaultSettings,
     libraryDependencies ++= Seq(
       catsCore,
-      catsEffect,
       circeCore,
       tethys,
       tethysJackson,
@@ -90,105 +111,117 @@ lazy val loggingStr = project
       catsTagless
     ),
   )
-  .dependsOn(core, concurrent, data)
+  .dependsOn(kernel)
 
 lazy val loggingDer = project
-  .in(file("logging/derivation"))
+  .in(file("modules/logging/derivation"))
   .dependsOn(loggingStr)
   .dependsOn(opticsMacro % "compile->test", derivation % "compile->test")
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(derevo, magnolia, slf4j),
-    publishName := "logging-derivation"
+    name := "tofu-logging-derivation"
   )
 
 lazy val loggingLayout = project
-  .in(file("logging/layout"))
+  .in(file("modules/logging/layout"))
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(catsCore, catsEffect, logback, slf4j),
-    publishName := "logging-layout"
+    libraryDependencies ++= Seq(catsCore, logback, slf4j),
+    name := "tofu-logging-layout"
   )
   .dependsOn(loggingStr)
 
-lazy val loggingUtil = project
-  .in(file("logging/util"))
-  .settings(
-    defaultSettings,
-    publishName := "logging-util",
-    libraryDependencies += slf4j,
-  )
-  .dependsOn(loggingStr, concurrent)
-
 lazy val loggingShapeless = project
-  .in(file("logging/interop/shapeless"))
+  .in(file("modules/logging/interop/shapeless"))
   .settings(
     defaultSettings,
-    publishName := "logging-shapeless",
+    name := "tofu-logging-shapeless",
     libraryDependencies += shapeless
   )
   .dependsOn(loggingStr)
 
 lazy val loggingRefined = project
-  .in(file("logging/interop/refined"))
+  .in(file("modules/logging/interop/refined"))
   .settings(
     defaultSettings,
-    publishName := "logging-refined",
+    name := "tofu-logging-refined",
     libraryDependencies += refined
   )
   .dependsOn(loggingStr)
 
 lazy val loggingLog4Cats = project
-  .in(file("logging/interop/log4cats"))
+  .in(file("modules/logging/interop/log4cats"))
   .settings(
     defaultSettings,
-    publishName := "logging-log4cats",
+    name := "tofu-logging-log4cats",
     libraryDependencies += log4Cats
   )
   .dependsOn(loggingStr)
 
 lazy val logging = project
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
-  .aggregate(loggingStr, loggingDer, loggingLayout, loggingUtil, loggingShapeless, loggingRefined, loggingLog4Cats)
-  .settings(defaultSettings)
-
-lazy val env = project
-  .dependsOn(core, memo)
-  .settings(defaultSettings, libraryDependencies ++= Seq(catsCore, catsEffect, monix))
-
-lazy val observable = project.settings(
-  defaultSettings,
-  libraryDependencies ++= Vector(monix, catsEffect),
-  libraryDependencies += scalatest
-)
-
-lazy val concurrent =
-  project dependsOn (core, data) settings (
+  .in(file("modules/logging"))
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .aggregate(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(catsEffect, catsTagless),
+    name := "tofu-logging"
   )
 
-lazy val config = project dependsOn (core, data, opticsCore, concurrent) settings (
-  defaultSettings,
-  libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo),
-)
+lazy val env = project
+  .in(file("modules/env"))
+  .dependsOn(core, memo)
+  .settings(
+    defaultSettings,
+    libraryDependencies ++= Seq(catsCore, catsEffect2, monix),
+    name := "tofu-env"
+  )
+
+lazy val observable = project
+  .in(file("modules/observable"))
+  .settings(
+    defaultSettings,
+    libraryDependencies ++= Vector(monix, catsEffect2),
+    libraryDependencies += scalatest,
+    name := "tofu-observable",
+  )
+
+lazy val concurrent =
+  project
+    .in(file("modules/concurrent"))
+    .dependsOn(core, derivation % "compile->test", opticsMacro % "compile->test")
+    .settings(
+      defaultSettings,
+      libraryDependencies ++= Seq(catsEffect2, catsTagless),
+      libraryDependencies ++= Seq(simulacrum, derevoTagless).map(_ % Test),
+      name := "tofu-concurrent",
+    )
+
+lazy val config = project
+  .in(file("modules/config"))
+  .dependsOn(core, opticsCore, concurrent)
+  .settings(
+    defaultSettings,
+    libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo),
+    name := "tofu-config",
+  )
 
 lazy val opticsCore = project
-  .in(file("optics/core"))
+  .in(file("modules/optics/core"))
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(catsCore, alleycats),
-    publishName := "optics-core"
+    name := "tofu-optics-core"
   )
   .dependsOn(higherKindCore)
 
 lazy val opticsInterop = project
-  .in(file("optics/interop"))
+  .in(file("modules/optics/interop"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, libraryDependencies ++= Vector(monocle, catsCore), publishName := "optics-interop")
+  .settings(defaultSettings, libraryDependencies ++= Vector(monocle, catsCore), name := "tofu-optics-interop")
 
 lazy val opticsMacro = project
-  .in(file("optics/macro"))
+  .in(file("modules/optics/macro"))
   .dependsOn(opticsCore)
   .settings(
     defaultSettings,
@@ -199,83 +232,105 @@ lazy val opticsMacro = project
       )
       opts.filterNot(opt => suppressed.exists(opt.contains))
     },
-    publishName := "optics-macro"
+    name := "tofu-optics-macro"
   )
 
 lazy val enums = project
+  .in(file("modules/enums"))
   .dependsOn(loggingStr)
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(enumeratum)
+    libraryDependencies ++= Seq(enumeratum),
+    name := "tofu-enums",
   )
-
-lazy val data =
-  project
-    .settings(defaultSettings, libraryDependencies ++= Seq(catsFree))
-    .dependsOn(core, opticsCore)
 
 lazy val derivation =
   project
+    .in(file("modules/derivation"))
     .settings(
       defaultSettings,
       libraryDependencies ++= Seq(magnolia, derevo, catsTagless),
-      publishName := "derivation",
+      name := "tofu-derivation",
     )
-    .dependsOn(data)
+    .dependsOn(kernel)
 
 lazy val zioCore =
   project
-    .in(file("zio/core"))
-    .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), publishName := "zio-core")
+    .in(file("modules/zio/core"))
+    .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), name := "tofu-zio-core")
     .dependsOn(core, concurrent)
 
 lazy val zioLogging =
   project
-    .in(file("zio/logging"))
+    .in(file("modules/zio/logging"))
     .settings(
       defaultSettings,
       libraryDependencies ++= List(zio, zioCats, slf4j, logback % Test),
-      publishName := "zio-logging"
+      name := "tofu-zio-logging"
     )
     .dependsOn(loggingStr, loggingDer % "test", zioCore % Test)
 
 lazy val zioInterop = project
-  .in(file("zio"))
+  .in(file("modules/zio"))
   .settings(
-    publishName := "zio-interop",
+    name := "tofu-zio-interop",
     defaultSettings
   )
   .dependsOn(zioCore, zioLogging)
   .aggregate(zioCore, zioLogging)
 
 lazy val fs2Interop = project
-  .in(file("fs2"))
+  .in(file("modules/fs2"))
   .settings(
-    publishName := "fs2-interop",
+    name := "tofu-fs2-interop",
     libraryDependencies += fs2,
     defaultSettings
   )
   .dependsOn(concurrent, streams)
 
-lazy val doobie  = project
-  .in(file("doobie"))
+lazy val doobie = project
+  .in(file("modules/doobie/core"))
   .settings(
     libraryDependencies ++= List(doobieCore, derevo, monix % Test),
-    defaultSettings
+    defaultSettings,
+    name := "tofu-doobie",
   )
   .dependsOn(core, derivation, env % Test, zioInterop % Test)
 
+lazy val doobieLogging = project
+  .in(file("modules/doobie/logging"))
+  .settings(
+    libraryDependencies ++= List(doobieCore),
+    defaultSettings,
+    name := "tofu-doobie-logging",
+  )
+  .dependsOn(doobie, loggingStr)
+
+lazy val examples = project
+  .in(file("examples"))
+  .settings(
+    libraryDependencies ++= List(doobieCore, doobieH2, derevo, monix, groovy, derevoCirce),
+    libraryDependencies ++= http4s,
+    defaultSettings,
+    name := "tofu-examples",
+    noPublishSettings,
+  )
+  .dependsOn(mainModuleDeps: _*)
+
 lazy val streams = project
-  .in(file("streams"))
+  .in(file("modules/streams"))
   .settings(
     libraryDependencies ++= List(fs2 % Test),
-    defaultSettings
+    defaultSettings,
+    name := "tofu-streams",
   )
-  .dependsOn(core)
+  .dependsOn(kernel)
 
 lazy val coreModules =
   Vector(
     higherKindCore,
+    kernel,
+    kernelCE2Interop,
     core,
     opticsMacro,
     memo,
@@ -283,41 +338,44 @@ lazy val coreModules =
     env,
     concurrent,
     opticsCore,
-    data,
     streams,
-    coreCatsMtlInterop
+    kernelCatsMtlInterop
   )
 
-lazy val commonModules =
-  Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie)
+lazy val ce3CoreModules = Vector(
+  kernelCE3Interop,
+  core3,
+)
 
-lazy val allModuleRefs = (coreModules ++ commonModules).map(x => x: ProjectReference)
-lazy val allModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
+lazy val commonModules =
+  Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie, doobieLogging)
+
+lazy val allModuleRefs  = (coreModules ++ commonModules).map(x => x: ProjectReference)
+lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
 
 lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
   .settings(
-    defaultSettings,
+    noPublishSettings,
     addCompilerPlugin(simulacrum),
     macros,
-    ScalaUnidoc / unidoc / scalacOptions += "-Ymacro-expand:none",
+    ScalaUnidoc / doc / scalacOptions += "-Ymacro-expand:none",
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*) -- inProjects(opticsMacro),
-    ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
+    ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
-    docusaurusCreateSite := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
-    docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
+    docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
+    docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
-  .dependsOn(allModuleDeps: _*)
+  .dependsOn(mainModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
 lazy val tofu = project
   .in(file("."))
-  .settings(defaultSettings)
   .settings(
-    libraryDependencies += "tf.tofu" %% "derevo-cats-tagless" % Version.derevo,
-    libraryDependencies += catsEffect,
+    defaultSettings,
+    name := "tofu"
   )
-  .aggregate((coreModules ++ commonModules).map(x => x: ProjectReference): _*)
+  .aggregate((coreModules ++ commonModules ++ ce3CoreModules :+ docs :+ examples).map(x => x: ProjectReference): _*)
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
 lazy val defaultScalacOptions = scalacOptions := {
@@ -346,9 +404,10 @@ lazy val scalacWarningConfig = scalacOptions += {
   // }.mkString(",")
 
   // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
-  val verboseWarnings = "any:wv"
+  val contextDeprecationInfo = "cat=deprecation&msg=^(.*((Has)|(With)|(Logging)).*)$:silent"
+  val verboseWarnings        = "any:wv"
 
-  s"-Wconf:$verboseWarnings"
+  s"-Wconf:$contextDeprecationInfo,$verboseWarnings"
 }
 
 lazy val macros = Seq(
@@ -356,9 +415,12 @@ lazy val macros = Seq(
   libraryDependencies ++= { if (minorVersion.value == 12) Seq(compilerPlugin(macroParadise)) else Seq() }
 )
 
+lazy val noPublishSettings =
+  defaultSettings ++ Seq(publish := {}, publishArtifact := false, publishTo := None, publish / skip := true)
+
 lazy val simulacrumOptions = Seq(
   libraryDependencies += simulacrum % Provided,
-  pomPostProcess := { node =>
+  pomPostProcess                   := { node =>
     import scala.xml.transform.{RewriteRule, RuleTransformer}
 
     new RuleTransformer(new RewriteRule {
@@ -374,42 +436,7 @@ lazy val simulacrumOptions = Seq(
   }
 )
 
-lazy val publishSettings = Seq(
-  organization := "tf.tofu",
-  publishVersion := libVersion,
-  publishMavenStyle := true,
-  versionScheme := Some("semver-spec"),
-  description := "Opinionated set of tools for functional programming in Scala",
-  crossScalaVersions := Seq(Version.scala212, Version.scala213),
-  publishTo := {
-    if (isSnapshot.value) {
-      Some(Opts.resolver.sonatypeSnapshots)
-    } else sonatypePublishToBundle.value
-  },
-  credentials ++= ((Path.userHome / ".sbt" / "tofu.credentials") :: Nil)
-    .filter(_.exists())
-    .map(Credentials.apply),
-  version := {
-    val branch = git.gitCurrentBranch.value
-    if (branch == "master") publishVersion.value
-    else s"${publishVersion.value}-$branch-SNAPSHOT"
-  },
-  Compile / doc / sources := Seq.empty,
-  scmInfo := Some(
-    ScmInfo(
-      url("https://github.com/TinkoffCreditSystems/tofu"),
-      "git@github.com:TinkoffCreditSystems/tofu.git"
-    )
-  ),
-  licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
-  homepage := Some(url("https://github.com/tofu-tf/tofu")),
-  developers := List(
-    Developer("catostrophe", "λoλcat", "catostrophe@pm.me", url("https://github.com/catostrophe")),
-    Developer("danslapman", "Daniil Smirnov", "danslapman@gmail.com", url("https://github.com/danslapman")),
-    Developer("odomontois", "Oleg Nizhnik", "odomontois@gmail.com", url("https://github.com/odomontois")),
-    Developer("oskin1", "Ilya Oskin", "ilya.arcadich@gmail.com", url("https://github.com/oskin1")),
-  )
-)
-
 addCommandAlias("fmt", "all tofu/scalafmtSbt tofu/scalafmtAll")
 addCommandAlias("checkfmt", "all tofu/scalafmtSbtCheck tofu/scalafmtCheckAll")
+
+addCommandAlias("preparePR", "scalafmtAll ;scalafmtSbt ;reload; githubWorkflowGenerate; clean; Test / compile")
