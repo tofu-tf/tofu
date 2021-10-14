@@ -1,9 +1,11 @@
 module.exports = {
   title: "Tofu",
   tagline: "Functional programming toolbox",
-  url: "https://docs.tofu.tf",
-  baseUrl: "/",
-  organizationName: "TinkoffCreditSystems",
+  url: "https://ccellado.github.io",
+  //url: "https://docs.tofu.tf",
+  baseUrl: "/tofu/",
+  //organizationName: "TinkoffCreditSystems",
+  organizationName: "ccellado",
   projectName: "tofu",
   scripts: [
     "https://buttons.github.io/buttons.js"
