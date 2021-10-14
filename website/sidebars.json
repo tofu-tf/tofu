@@ -18,7 +18,7 @@
       {
         "type": "category",
         "label": "Logging",
-        "ids": [
+        "items": [
           "tofu.logging.home",
           "tofu.logging.main.entities",
           "tofu.logging.key-features",
@@ -30,7 +30,7 @@
       {
         "type": "category",
         "label": "Logging Recipes",
-        "ids": [
+        "items": [
           "tofu.logging.recipes",
           "tofu.logging.recipes.simple",
           "tofu.logging.recipes.service",

@@ -1,5 +1,6 @@
 ---
 id: start
+slug: /
 title: Getting started
 ---
 

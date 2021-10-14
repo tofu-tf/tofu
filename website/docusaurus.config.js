@@ -27,7 +27,6 @@ module.exports = {
       {
         docs: {
           path: "../docs",
-          homePageId: "start",
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
           sidebarPath: "../website/sidebars.json"

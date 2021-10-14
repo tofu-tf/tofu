@@ -23,6 +23,10 @@ html[data-theme='dark'] .docusaurus-highlight-code-line {
     --ifm-footer-background-color: #150031;
 }
 
+.users__main {
+  background-color: rgb(12, 0, 39);
+}
+
 .navbar__logo {
   max-height: 150%;
   height: 150%;
