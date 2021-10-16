@@ -1,6 +1,4 @@
-import Publish._, Dependencies._
-import com.typesafe.sbt.SbtGit.git
-import sbt.ModuleID
+import Dependencies._
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -439,4 +437,4 @@ lazy val simulacrumOptions = Seq(
 addCommandAlias("fmt", "all tofu/scalafmtSbt tofu/scalafmtAll")
 addCommandAlias("checkfmt", "all tofu/scalafmtSbtCheck tofu/scalafmtCheckAll")
 
-addCommandAlias("preparePR", "scalafmtAll ;scalafmtSbt ;reload; githubWorkflowGenerate; clean; Test / compile")
+addCommandAlias("preparePR", "scalafmtAll ;scalafmtSbt ;reload; githubWorkflowGenerate; clean; + Test / compile")
