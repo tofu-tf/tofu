@@ -19,6 +19,13 @@ object feither {
       }
     }
 
+    def orElseIn[L1 >: L, R1 >: R](f: => Either[L1, R1])(implicit F: Functor[F]): F[Either[L1, R1]] = {
+      e.map {
+        case r: Right[L, R] => r.wideLeft[L1].wideRight[R1]
+        case _              => f
+      }
+    }
+
     def getOrElseF[R1 >: R](f: => F[R1])(implicit F: Monad[F]): F[R1] = {
       e.flatMap(_.fold(_ => f, F.pure(_: R1)))
     }
@@ -57,6 +64,10 @@ object feither {
       e.flatMap(_.traverse(f))
     }
 
+    def tapF[B](f: R => F[B])(implicit F: Monad[F]): F[Either[L, R]] = {
+      e.flatTap(_.traverse(f))
+    }
+
     def mapIn[B](f: R => B)(implicit F: Functor[F]): F[Either[L, B]] =
       e.map(_.map(f))
 
@@ -65,6 +76,10 @@ object feither {
         case Left(left)       => f(left).map(_.asLeft)
         case right @ Right(_) => right.leftCast[L1].pure[F]
       }
+    }
+
+    def leftTapF[B](f: L => F[B])(implicit F: Monad[F]): F[Either[L, R]] = {
+      e.flatTap(_.swap.traverse(f))
     }
 
     def leftMapIn[B](f: L => B)(implicit F: Functor[F]): F[Either[B, R]] =
