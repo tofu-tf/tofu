@@ -10,6 +10,8 @@ import org.scalatest.wordspec.AnyWordSpec
 import tofu.Raise
 import tofu.syntax.feither._
 
+import java.util.concurrent.atomic.AtomicInteger
+
 class FEitherSuite extends AnyWordSpec with Matchers {
 
   //--Helpers------------------------------------
@@ -191,6 +193,46 @@ class FEitherSuite extends AnyWordSpec with Matchers {
     }
   }
 
+  "EitherFOps#tapF" should {
+
+    "run in case of Right" in {
+      val atom = new AtomicInteger(1)
+      val init = defaultRight
+
+      val result = init.tapF(i => Some(atom.addAndGet(i)))
+      result mustBe init
+      atom.get() mustBe 5
+
+    }
+
+    "not run in case of Left" in {
+      val atom = new AtomicInteger(1)
+      val init = defaultLeft
+
+      val result = init.tapF(i => Some(atom.addAndGet(i.toInt)))
+      result mustBe init
+      atom.get() mustBe 1
+    }
+
+    "not run in case of base None" in {
+      val atom = new AtomicInteger(1)
+      val init = none[Either[String, Int]].mapF(_.some)
+
+      val result = init.tapF(i => Some(atom.addAndGet(i)))
+      result mustBe init
+      atom.get() mustBe 1
+    }
+
+    "not run in case map to None" in {
+      val atom = new AtomicInteger(1)
+      val init = defaultRight
+
+      val result = init.tapF(_ => None)
+      result mustBe None
+      atom.get() mustBe 1
+    }
+  }
+
   "EitherFOps#mapIn" should {
 
     "return valid value in case of Right" in {
@@ -222,6 +264,48 @@ class FEitherSuite extends AnyWordSpec with Matchers {
 
     "return valid value in case map to None" in {
       defaultLeft.leftMapF(_ => None) mustBe None
+    }
+  }
+
+  "EitherFOps#leftTapF" should {
+
+    "run in case of Left" in {
+      defaultLeft.leftMapF(i => Some(i + 1)) mustBe Some(Left(5))
+      val atom = new AtomicInteger(1)
+      val init = defaultLeft
+
+      val result = init.leftTapF(i => Some(atom.addAndGet(i)))
+      result mustBe init
+      atom.get() mustBe 5
+    }
+
+    "not run in case of Right" in {
+      defaultRight.leftMapF(_.some) mustBe Some(Right(4))
+      val atom = new AtomicInteger(1)
+      val init = defaultRight
+
+      val result = init.leftTapF(i => Some(atom.addAndGet(i.toInt)))
+      result mustBe init
+      atom.get() mustBe 1
+
+    }
+
+    "not run in case of base None" in {
+      val atom = new AtomicInteger(1)
+      val init = none[Either[Int, String]]
+
+      val result = init.leftTapF(i => Some(atom.addAndGet(i)))
+      result mustBe init
+      atom.get() mustBe 1
+    }
+
+    "not run in case map to None" in {
+      val atom = new AtomicInteger(1)
+      val init = defaultLeft
+
+      val result = init.leftTapF(_ => None)
+      result mustBe None
+      atom.get() mustBe 1
     }
   }
 

@@ -6,9 +6,10 @@ import org.scalatest.flatspec.AnyFlatSpec
 import tofu.syntax.foption._
 import tofu.syntax.feither._
 import tofu.syntax.FOptionSuite._
-
 import cats.syntax.either.catsSyntaxEitherId
 import cats.syntax.option.none
+
+import java.util.concurrent.atomic.AtomicInteger
 
 class FOptionSuite extends AnyFlatSpec {
   "getOrElseF" should "return inner value when non empty" in {
@@ -57,6 +58,26 @@ class FOptionSuite extends AnyFlatSpec {
     assert(
       noneF[List, Int].semiflatMap(x => List(x + 1)) === List(None)
     )
+  }
+
+  "semiflatTap" should "run when non empty" in {
+    val atom = new AtomicInteger(1)
+    val init = 42.someF[List]
+
+    val result = init.semiflatTap(x => List(atom.addAndGet(x)))
+
+    assert(result === init)
+    assert(atom.get() === 43)
+  }
+
+  "semiflatTap" should "keep value when empty" in {
+    val atom = new AtomicInteger(1)
+    val init = noneF[List, Int]
+
+    val result = init.semiflatTap(x => List(atom.addAndGet(x)))
+
+    assert(result === init)
+    assert(atom.get() === 1)
   }
 
   "mapIn" should "run when non empty" in {
