@@ -30,7 +30,7 @@ libraryDependencies += "tf.tofu" %% "tofu-kernel-ce2-interop" % "<latest version
 For ZIO users the following is enough:
 
 ```sbt
-libraryDependencies += "tf.tofu" %% "tofu-logging-zio" % "<latest version in the badge in README>"
+libraryDependencies += "tf.tofu" %% "tofu-zio-logging" % "<latest version in the badge in README>"
 
 ```
 See also [ZIO Logging](./tofu.logging.recipes.zio.md) section.
