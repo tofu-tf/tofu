@@ -215,7 +215,7 @@ sealed trait Env[E, +A] {
   def forkAndForget: Env[E, Unit] = mapTask(_.startAndForget)
   def startAndForget: Env[E, Unit]                                   = mapTask(_.startAndForget)
 
-  //profunctorial syntax
+  // profunctorial syntax
   def choose[B, C](g: Env[B, C]): Env[Either[E, B], Either[A, C]] =
     Env {
       case Left(ctx) => run(ctx).map(Left(_))

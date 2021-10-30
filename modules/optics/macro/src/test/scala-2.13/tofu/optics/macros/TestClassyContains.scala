@@ -13,7 +13,7 @@ object TestClassyContains {
   implicitly[PContains[FooBar4[Double], FooBar4[Long], Double, Long] with Label["x"]]
   implicitly[Contains[FooBar5[String], List[String]] with Label["x"]]
 
-  //promote tests
+  // promote tests
   implicitly[Contains[FooInner, FooField1]]
   implicitly[Contains[FooInner, FooField2]]
 

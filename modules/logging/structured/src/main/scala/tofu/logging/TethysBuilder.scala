@@ -64,7 +64,7 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
       writeValue(value, writer)
     }
 
-    //optimized set of non-wrapping field writers
+    // optimized set of non-wrapping field writers
     override def addString(name: String, value: String, input: TokenWriter): Unit      = {
       input.writeFieldName(name)
       input.writeString(value)

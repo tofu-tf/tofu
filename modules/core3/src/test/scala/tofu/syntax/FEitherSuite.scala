@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class FEitherSuite extends AnyWordSpec with Matchers {
 
-  //--Helpers------------------------------------
+  // --Helpers------------------------------------
 
   implicit class SuiteIdOps[A](id: A) {
     def asRightS[L]: Option[Either[L, A]] = Some(Right(id))
@@ -36,7 +36,7 @@ class FEitherSuite extends AnyWordSpec with Matchers {
     override def raise[A](err: R): Option[A] = None
   }
 
-  //--Helpers end---------------------------------
+  // --Helpers end---------------------------------
 
   "EitherIdFOps#asRightF" should {
     "return Right" in {

@@ -24,7 +24,7 @@ object Memoize {
     new Memoize[F] {
       def memoize[A](fa: F[A]): F[F[A]] = Concurrent.memoize(fa)
 
-      //copy of Concurrent.memoize accepting success only
+      // copy of Concurrent.memoize accepting success only
       def memoizeOnSuccess[A](f: F[A]): F[F[A]] = {
         {
           sealed trait State

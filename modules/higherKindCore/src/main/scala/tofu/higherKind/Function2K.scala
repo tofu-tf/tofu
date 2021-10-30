@@ -39,7 +39,7 @@ object Function2K {
     final def tabulate[F[_]](hom: RepK[Function2K[X, Y, *[_]], *] ~> F): Function2K[X, Y, F] =
       Function2K((xa, ya) => hom(RepK[Function2K[X, Y, *[_]]](_.apply(xa, ya))))
 
-    //just optimized allocationwise redefinitions
+    // just optimized allocationwise redefinitions
     final override def mapK[F[_], G[_]](af: Function2K[X, Y, F])(fk: F ~> G): Function2K[X, Y, G] =
       Function2K((xa, ya) => fk(af(xa, ya)))
 

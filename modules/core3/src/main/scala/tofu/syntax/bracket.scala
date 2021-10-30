@@ -17,16 +17,16 @@ object bracket extends GuaranteeSyntax {
     )(release: (A, Outcome[F, Either[E, U], B]) => F[Unit])(implicit bracket: MonadCancel[F, U]): EitherT[F, E, B] =
       EitherT(
         e.value.bracketCase[Either[E, B]] {
-          //could not acquire resource
+          // could not acquire resource
           case Left(err)  => bracket.pure(err.asLeft[B])
-          //case logic error
+          // case logic error
           case Right(res) => use(res).leftSemiflatMap(e => release(res, Outcome.errored(e.asLeft[U])) as e).value
         }((res, cas) =>
           res match {
             case Left(_)  => bracket.unit
             case Right(v) =>
               cas match {
-                //case F underlying error
+                // case F underlying error
                 case Outcome.Errored(e)    => release(v, Outcome.errored(e.asRight[E]))
                 case Outcome.Canceled()    => release(v, Outcome.Canceled())
                 case Outcome.Succeeded(fa) =>
