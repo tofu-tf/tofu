@@ -73,7 +73,7 @@ object BarService {
 ```
 
 What can we learn from this code?
-1. According to ZIO [Module Pattern 2.0](https://zio.dev/docs/datatypes/contextual/index#module-pattern-20) 
+1. According to ZIO [Module Pattern 2.0](https://zio.dev/1.x/datatypes/contextual/index#module-pattern-20) 
 class constructors are used to define service dependencies. At the end of the day the class constructor
 is lifted to ZLayer: `(new BarServiceImpl(_, _)).toLayer`
 2. `TofuLogs` is a type alias for `Has[ZLogging.Make]`, but ZIO encourages us to use explicitly the `Has` wrapper 
@@ -139,9 +139,9 @@ Here we use [Tofu Derevo](https://github.com/tofu-tf/derevo) for automatic deriv
 One possible way to add a context to your logs is to use `layerPlainWithContext` which encapsulates dealing with the context inside
 (otherwise you can use `layerContextual` retrieving the context from a ZIO environment `R`, but we won't cover it here).
 
-The main idea of this approach is to store your context in ZIO [FiberRef](https://zio.dev/docs/datatypes/fiber/fiberref). 
+The main idea of this approach is to store your context in ZIO [FiberRef](https://zio.dev/1.x/datatypes/fiber/fiberref). 
 It provides all the power of State Monad. Unlike Java's `ThreadLocal`, `FiberRef` has copy-on-fork semantic: 
-a child [Fiber](https://zio.dev/docs/datatypes/fiber/fiber/) starts with `FiberRef` values of its parent.
+a child [Fiber](https://zio.dev/1.x/datatypes/fiber/fiber/) starts with `FiberRef` values of its parent.
 When the child set a new value of FiberRef, the change is visible only to the child itself. This means if we set `requestId` value to `117`
 (e.g. at the start of the request) and pass the `FiberRef` to a child fiber, it sees the value `117`.
 
