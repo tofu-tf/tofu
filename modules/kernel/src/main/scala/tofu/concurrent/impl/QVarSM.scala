@@ -46,7 +46,7 @@ abstract class QVarSM[F[_]: Monad, A, P] extends QVar[F, A] {
     case s: Await[P]                => (s, await(s.reqs.head.promise))
   }
 
-  //same as read but has promise to make other readers wait
+  // same as read but has promise to make other readers wait
   private[this] def retryRead(promise: P): F[A] = modifyF {
     case s @ Contains(a +: _, _) => (s, a.pure[F])
     case Contains(_, off)        => (Await(NEV.one(Read(promise)), off), await(promise))

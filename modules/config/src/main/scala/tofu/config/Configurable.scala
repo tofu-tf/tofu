@@ -103,7 +103,7 @@ object Configurable extends BaseGetters with MagnoliaDerivation {
     })
 }
 trait BaseGetters { self: Configurable.type =>
-  //simple types
+  // simple types
 
   private def numConfigurable[X](check: BigDecimal => Boolean, get: BigDecimal => X, name: String): Configurable[X] =
     requireSimple(ValueType.Num).flatMake { F => b =>
@@ -135,7 +135,7 @@ trait BaseGetters { self: Configurable.type =>
   implicit val uriConfigurable: Configurable[URI] =
     requireSimple(ValueType.Str).catchMake(new URI(_))(F => p => F.error(BadString(p._1, "bad URI")))
 
-  //simple sequence types
+  // simple sequence types
 
   private def monoidConfigurable[A: Configurable, C: Monoid](f: A => C): Configurable[C] =
     new Typeclass[C] {
