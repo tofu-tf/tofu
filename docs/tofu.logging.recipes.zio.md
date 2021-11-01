@@ -7,7 +7,7 @@ title: ZIO Logging
 To use logging functional adapted for ZIO users, first add the following dependency:
 
 ```sbt
-libraryDependencies += "tf.tofu" %% "tofu-logging-zio" % "<latest version in the badge in README>"
+libraryDependencies += "tf.tofu" %% "tofu-zio-logging" % "<latest version in the badge in README>"
 ```
 Then import the package:
 ```scala
