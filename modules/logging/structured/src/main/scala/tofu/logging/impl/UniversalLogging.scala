@@ -85,6 +85,13 @@ class UniversalLogging[F[_]](name: String)(implicit F: Delay[F]) extends Logging
       if (UniversalLogging.enabled(level, logger))
         UniversalLogging.writeMarker(level, logger, marker, message, values)
     }
+
+  override def writeCause(level: Logging.Level, message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    F.delay {
+      val logger = LoggerFactory.getLogger(name)
+      if (UniversalLogging.enabled(level, logger))
+        UniversalLogging.writeCause(level, logger, cause, message, values)
+    }
 }
 
 class UniversalContextLogging[F[_]](name: String, fctx: (LoggedValue => Unit) => F[Unit]) extends Logging[F] {
@@ -93,6 +100,13 @@ class UniversalContextLogging[F[_]](name: String, fctx: (LoggedValue => Unit) =>
       val logger = LoggerFactory.getLogger(name)
       if (UniversalLogging.enabled(level, logger))
         UniversalLogging.writeMarker(level, logger, ContextMarker(ctx), message, values)
+    }
+
+  override def writeCause(level: Logging.Level, message: String, cause: Throwable, values: LoggedValue*): F[Unit] =
+    fctx { ctx =>
+      val logger = LoggerFactory.getLogger(name)
+      if (UniversalLogging.enabled(level, logger))
+        UniversalLogging.writeMarkerCause(level, logger, ContextMarker(ctx), cause, message, values)
     }
 
   override def writeMarker(level: Logging.Level, message: String, marker: Marker, values: LoggedValue*): F[Unit] =
