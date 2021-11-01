@@ -22,7 +22,6 @@ class LogbackSuite extends AnyFunSuite {
   val appender = new ListAppender[ILoggingEvent]
 
   val logger = LoggerFactory.getLogger(this.getClass()).asInstanceOf[Logger]
-  println(logger.iteratorForAppenders.asScala.toList)
   appender.start()
   logger.addAppender(appender)
 
