@@ -22,4 +22,18 @@ class ZUniversalContextLogging[R, C: Loggable](name: String, ctxLog: URIO[R, C])
           UniversalLogging.writeMarker(level, logger, ContextMarker(ctx, List(marker)), message, values)
       }
     }
+
+  override def writeCause(
+      level: Logging.Level,
+      message: String,
+      cause: Throwable,
+      values: LoggedValue*
+  ): URIO[R, Unit] =
+    ctxLog.flatMap { ctx =>
+      ZIO.effectTotal {
+        val logger = LoggerFactory.getLogger(name)
+        if (UniversalLogging.enabled(level, logger))
+          UniversalLogging.writeMarkerCause(level, logger, ContextMarker(ctx), cause, message, values)
+      }
+    }
 }
