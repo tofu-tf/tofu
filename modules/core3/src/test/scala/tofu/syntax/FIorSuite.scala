@@ -227,7 +227,7 @@ class FIorSuite extends AnyWordSpec with Matchers {
 
       val atom = new AtomicInteger(1)
       none[Ior[String, Int]].doubleFlatTap(i => Ior.right(atom.addAndGet(i)).some) mustBe none[Ior[String, Int]]
-      none[Ior[String, Int]].doubleFlatTap(i => Ior.left("bar").some) mustBe none[Ior[String, Int]]
+      none[Ior[String, Int]].doubleFlatTap(_ => Ior.left("bar").some) mustBe none[Ior[String, Int]]
       none[Ior[String, Int]].doubleFlatTap(i => Ior.both("bar", atom.addAndGet(i)).some) mustBe none[Ior[String, Int]]
       atom.get() mustBe 1
     }
