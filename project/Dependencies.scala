@@ -28,7 +28,7 @@ object Dependencies {
 
     val enumeratum = "1.7.0"
 
-    val derevo = "0.12.7"
+    val derevo = "0.12.8"
 
     val slf4j = "1.7.32"
 
