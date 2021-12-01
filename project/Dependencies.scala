@@ -65,7 +65,7 @@ object Dependencies {
 
     val collectionCompat = "2.6.0"
 
-    val log4Cats = "1.3.1"
+    val log4Cats = "1.4.0"
 
     val groovy = "3.0.9"
 
