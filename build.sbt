@@ -480,5 +480,5 @@ addCommandAlias("checkfmt", "all tofu/scalafmtSbtCheck tofu/scalafmtCheckAll")
 
 addCommandAlias(
   "preparePR",
-  "scalafmtAll ;scalafmtSbt ;scalafixAll ;reload; githubWorkflowGenerate; clean; Test / compile"
+  "scalafmtAll ;scalafmtSbt ;scalafixAll ;Test / scalafixAll ;reload; githubWorkflowGenerate; clean; Test / compile"
 )

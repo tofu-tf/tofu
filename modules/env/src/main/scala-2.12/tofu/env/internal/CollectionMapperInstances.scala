@@ -1,7 +1,7 @@
 package tofu.env.internal
 
-import scala.collection.generic.CanBuildFrom
 import scala.collection.IterableLike
+import scala.collection.generic.CanBuildFrom
 
 class CollectionMapperInstances {
   implicit def iterableOpsMapper[A, B, C[x] <: IterableLike[x, C[x]]](implicit

@@ -2,7 +2,6 @@ package tofu.logging
 
 import cats.syntax.semigroup._
 import org.scalatest.funsuite.AnyFunSuite
-import tofu.logging.{LogTree, TethysBuilder}
 import tofu.syntax.logRenderer._
 class LogTreeSuite extends AnyFunSuite {
 
