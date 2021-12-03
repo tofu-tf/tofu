@@ -3,16 +3,13 @@ package zlogs
 
 import derevo.derive
 import org.scalatest.funsuite.AnyFunSuite
-import tofu.logging.derivation.{loggable, loggingBiMid}
-import zio.{Has, IO, RefM, ZIO, ZLayer}
-import zio.URLayer
-import tofu.logging.bi.LoggingBiCompanion
-import tofu.higherKind.derived.representableB
 import tofu.higherKind.bi.BiTemplate
-import tofu.zioInstances.implicits._
-import zio.UIO
-import zio.ZRef
+import tofu.higherKind.derived.representableB
+import tofu.logging.bi.LoggingBiCompanion
+import tofu.logging.derivation.{loggable, loggingBiMid}
 import tofu.zioFunctions
+import tofu.zioInstances.implicits._
+import zio.{Has, IO, RefM, UIO, URLayer, ZIO, ZLayer, ZRef}
 
 class ZLogBiMidSuite extends AnyFunSuite {
   import tofu.logging.zlogs.Lurker.{Point}

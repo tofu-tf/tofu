@@ -1,15 +1,15 @@
 package tofu.interop
 
-import tofu.WithContext
 import cats.effect.std.Dispatcher
-import cats.effect.Async
 import cats.effect.unsafe.IORuntime
-import cats.effect.IO
-import tofu.internal.carriers.UnliftCarrier3
-import tofu.syntax.monadic._
+import cats.effect.{Async, IO}
 import cats.~>
-import scala.concurrent.ExecutionContext
+import tofu.WithContext
+import tofu.internal.carriers.UnliftCarrier3
 import tofu.syntax.funk.funK
+import tofu.syntax.monadic._
+
+import scala.concurrent.ExecutionContext
 
 final class UnliftIOImpl[K[_]](implicit
     KD: WithContext[K, Dispatcher[K]],

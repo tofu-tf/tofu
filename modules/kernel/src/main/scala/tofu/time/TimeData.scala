@@ -1,7 +1,8 @@
 package tofu.time
 
-import java.time._
 import cats.Monad
+
+import java.time._
 import scala.annotation.tailrec
 
 /** typeclass for the types describing some time moment information possibly respecting timezone

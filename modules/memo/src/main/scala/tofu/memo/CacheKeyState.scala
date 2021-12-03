@@ -8,8 +8,8 @@ import cats.syntax.foldable._
 import cats.syntax.traverse._
 import cats.{Functor, Monad}
 import tofu.Guarantee
-import tofu.concurrent.{MVars, MakeMVar, MakeRef}
 import tofu.concurrent.ce2._
+import tofu.concurrent.{MVars, MakeMVar, MakeRef}
 import tofu.memo.CacheKeyState.valueByMap
 import tofu.memo.CacheOperation.{CleanUp, GetOrElse}
 import tofu.syntax.bracket._

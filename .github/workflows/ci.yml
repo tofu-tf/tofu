@@ -62,6 +62,9 @@ jobs:
       - name: Check formatting
         run: sbt ++${{ matrix.scala }} scalafmtCheckAll scalafmtSbtCheck
 
+      - name: Check scalafix rules
+        run: sbt ++${{ matrix.scala }} 'scalafixAll --check'
+
       - name: Check that workflows are up to date
         run: sbt ++${{ matrix.scala }} githubWorkflowCheck
 

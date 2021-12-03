@@ -1,10 +1,8 @@
 package tofu.zioInstances
 
-import tofu.control.Bind
-import zio.ZIO
 import tofu.bi.BiRun
-import zio.IO
-import tofu.control.StackSafeBind
+import tofu.control.{Bind, StackSafeBind}
+import zio.{IO, ZIO}
 
 class ZioTofuBiInstance[R] extends StackSafeBind[ZIO[R, +*, +*]] with BiRun[ZIO[R, +*, +*], IO, R, R] {
   override def bifunctor: Bind[ZIO[R, +*, +*]] = this

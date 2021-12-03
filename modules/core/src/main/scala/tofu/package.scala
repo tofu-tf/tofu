@@ -1,8 +1,7 @@
-import cats.effect.Bracket
-import cats.effect.Fiber
-import cats.data.Ior
-import tofu.kernel.KernelTypes
 import cats.Id
+import cats.data.Ior
+import cats.effect.{Bracket, Fiber}
+import tofu.kernel.KernelTypes
 
 package object tofu extends KernelTypes {
 

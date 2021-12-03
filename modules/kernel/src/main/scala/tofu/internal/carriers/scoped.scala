@@ -1,8 +1,7 @@
 package tofu.internal
 package carriers
 
-import tofu.ScopedExecute
-import tofu.Scoped
+import tofu.{Scoped, ScopedExecute}
 
 trait ScopedCarrier2[T, F[_]] extends ScopedExecute[T, F]
 

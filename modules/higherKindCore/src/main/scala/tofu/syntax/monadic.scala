@@ -1,7 +1,6 @@
 package tofu.syntax
 import cats.syntax._
-import cats.{Applicative, Apply, FlatMap, Functor, Monad, Semigroupal}
-import cats.Defer
+import cats.{Applicative, Apply, Defer, FlatMap, Functor, Monad, Semigroupal}
 
 object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadSyntax {
   def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit

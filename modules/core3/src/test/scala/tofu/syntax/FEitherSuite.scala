@@ -2,9 +2,8 @@ package tofu.syntax
 
 import cats.instances.list._
 import cats.instances.option._
-import cats.syntax.option.catsSyntaxOptionId
-import cats.syntax.option.none
 import cats.syntax.either._
+import cats.syntax.option.{catsSyntaxOptionId, none}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import tofu.Raise

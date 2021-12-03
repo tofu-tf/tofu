@@ -1,7 +1,6 @@
 package tofu.control
 
 import cats.Contravariant
-
 import tofu.internal.EffectComp
 
 trait ContravariantFilter[F[_]] extends Contravariant[F] with Optional[F] {

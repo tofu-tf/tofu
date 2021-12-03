@@ -13,8 +13,8 @@ import org.http4s.implicits._
 import org.http4s.server.Router
 import tofu.WithProvide
 import tofu.higherKind.derived.representableK
-import tofu.logging.{Loggable, Logging}
 import tofu.logging.derivation.{loggable, loggingMid}
+import tofu.logging.{Loggable, Logging}
 import tofu.syntax.context._
 import tofu.syntax.foption._
 import tofu.syntax.logging._

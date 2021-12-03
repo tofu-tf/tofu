@@ -1,11 +1,11 @@
 package tofu.common
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import org.scalatest.funsuite.AnyFunSuite
-import cats.effect.IO
 import cats.Monad
+import cats.effect.IO
+import org.scalatest.funsuite.AnyFunSuite
 import tofu.syntax.monadic._
+
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 class ConsoleSuite extends AnyFunSuite {
   def check[A](inputs: String*)(a: => A): (A, Vector[String]) = {

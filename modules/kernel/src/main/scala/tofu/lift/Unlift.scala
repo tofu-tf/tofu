@@ -4,10 +4,11 @@ package lift
 import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.{Applicative, FlatMap, Functor, Monad, ~>}
-import syntax.funk._
+import tofu.internal.ContextBase
 import tofu.optics.Contains
 import tofu.syntax.monadic._
-import tofu.internal.ContextBase
+
+import syntax.funk._
 
 trait Lift[F[_], G[_]] {
   def lift[A](fa: F[A]): G[A]

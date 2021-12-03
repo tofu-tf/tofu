@@ -1,9 +1,9 @@
 package tofu.time
 
-import scala.concurrent.duration.FiniteDuration
 import tofu.internal.EffectComp
-import tofu.internal.carriers.SleepCE3Carrier
-import tofu.internal.carriers.SleepCE2Carrier
+import tofu.internal.carriers.{SleepCE2Carrier, SleepCE3Carrier}
+
+import scala.concurrent.duration.FiniteDuration
 
 trait Sleep[F[_]] {
 

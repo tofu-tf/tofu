@@ -2,14 +2,14 @@ package tofu.logging.internal
 
 import cats.data.Tuple2K
 import cats.kernel.Monoid
+import cats.tagless.syntax.functorK._
 import cats.tagless.{ApplyK, FunctorK}
 import cats.{Applicative, Apply, Functor, Id, ~>}
 import tofu.higherKind
 import tofu.higherKind.{Function2K, MonoidalK, Point, RepresentableK}
 import tofu.logging.{Logging, Logs}
-import cats.tagless.syntax.functorK._
-import tofu.syntax.monoidalK._
 import tofu.syntax.monadic._
+import tofu.syntax.monoidalK._
 
 import scala.reflect.ClassTag
 

@@ -1,16 +1,14 @@
 package tofu.lift
 
-import cats.Applicative
 import cats.data.ReaderT
-import cats.effect.{IO}
-import cats.syntax.option._
-import org.scalatest.flatspec.AnyFlatSpec
-import tofu.compat.unused
-import cats.Monad
-import tofu.WithContext
 import cats.effect.std.Dispatcher
-import cats.effect.Async
 import cats.effect.unsafe.IORuntime
+import cats.effect.{Async, IO}
+import cats.syntax.option._
+import cats.{Applicative, Monad}
+import org.scalatest.flatspec.AnyFlatSpec
+import tofu.WithContext
+import tofu.compat.unused
 
 class UnliftSuite extends AnyFlatSpec {
   "Lift implicit def implementations" should "cast instances properly" in {

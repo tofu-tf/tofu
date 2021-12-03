@@ -1,10 +1,10 @@
 package tofu.concurrent.syntax
 
+import cats.Functor
 import cats.effect.concurrent.Deferred
 import tofu.Restore
 import tofu.syntax.handle._
 import tofu.syntax.monadic._
-import cats.Functor
 
 object deferred {
   implicit class TofuDeferredSyntax[F[_], A](private val deferred: Deferred[F, A]) extends AnyVal {

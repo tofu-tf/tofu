@@ -456,6 +456,9 @@ lazy val noPublishSettings =
 
 lazy val simulacrumOptions = Seq(
   libraryDependencies += simulacrum % Provided,
+  addCompilerPlugin(scalafixSemanticdb),
+  scalacOptions ++= Seq(s"-P:semanticdb:targetroot:${baseDirectory.value}/target/.semanticdb", "-Yrangepos"),
+  ThisBuild / scalafixDependencies ++= List("com.github.liancheng" %% "organize-imports" % "0.6.0"),
   pomPostProcess                   := { node =>
     import scala.xml.transform.{RewriteRule, RuleTransformer}
 
@@ -475,4 +478,7 @@ lazy val simulacrumOptions = Seq(
 addCommandAlias("fmt", "all tofu/scalafmtSbt tofu/scalafmtAll")
 addCommandAlias("checkfmt", "all tofu/scalafmtSbtCheck tofu/scalafmtCheckAll")
 
-addCommandAlias("preparePR", "scalafmtAll ;scalafmtSbt ;reload; githubWorkflowGenerate; clean; Test / compile")
+addCommandAlias(
+  "preparePR",
+  "scalafmtAll ;scalafmtSbt ;scalafixAll ;reload; githubWorkflowGenerate; clean; Test / compile"
+)

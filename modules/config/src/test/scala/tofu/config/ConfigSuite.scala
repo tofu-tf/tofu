@@ -1,13 +1,14 @@
 package tofu.config
+import cats.syntax.option._
+import com.typesafe.config.ConfigFactory
+import derevo.derive
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import derevo.derive
-import com.typesafe.config.ConfigFactory
-import cats.syntax.option._
+import tofu.config.ConfigError.{BadNumber, BadType, NotFound}
+import tofu.config.ConfigItem.ValueType
+
 import ConfigSuite.{Foe, Skill}
 import Key.{Index, Prop}
-import tofu.config.ConfigItem.ValueType
-import tofu.config.ConfigError.{BadType, NotFound, BadNumber}
 
 class ConfigSuite extends AnyFlatSpec with Matchers {
   import ConfigSuite.{tryParse, fallenParse}

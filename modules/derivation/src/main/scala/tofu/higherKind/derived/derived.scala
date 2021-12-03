@@ -1,9 +1,7 @@
 package tofu.higherKind.derived
-import derevo.DerivationK2
+import derevo.{DerivationK2, DerivationKN11}
+import tofu.higherKind.bi.{EmbedBK, RepresentableB}
 import tofu.higherKind.{Embed, RepresentableK}
-import derevo.DerivationKN11
-import tofu.higherKind.bi.RepresentableB
-import tofu.higherKind.bi.EmbedBK
 
 object representableK extends DerivationK2[RepresentableK] {
   def instance[T[_[_]]]: RepresentableK[T] = macro HigherKindedMacros.representableK[T]

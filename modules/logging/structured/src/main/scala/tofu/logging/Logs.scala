@@ -2,10 +2,10 @@ package tofu.logging
 
 import cats.{Applicative, Apply, FlatMap, Functor, Id, Monad}
 import org.slf4j.LoggerFactory
-import tofu.{Delay, WithContext}
 import tofu.logging.impl.{ContextSyncLoggingImpl, SyncLogging, UniversalContextLogs, UniversalLogging}
 import tofu.logging.internal.{LogsInstances, LogsInstances0, LogsInvariantSyntax}
 import tofu.syntax.monadic._
+import tofu.{Delay, WithContext}
 
 import scala.reflect.ClassTag
 

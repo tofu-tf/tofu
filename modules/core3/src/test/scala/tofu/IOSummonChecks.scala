@@ -1,7 +1,7 @@
 package tofu
 
 import cats.data.ReaderT
-import cats.effect.{IO}
+import cats.effect.IO
 
 class IOSummonChecks {
   implicitly[Fire[IO]]

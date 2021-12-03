@@ -1,10 +1,8 @@
 package tofu.logging.derivation
 
 import cats.Show
-
+import derevo.{Derivation, NewTypeDerivation}
 import magnolia.{CaseClass, Magnolia, SealedTrait}
-import derevo.Derivation
-import derevo.NewTypeDerivation
 
 object show extends Derivation[Show] with NewTypeDerivation[Show] {
 

@@ -1,15 +1,14 @@
 package tofu.data
 import cats.Eval.now
 import cats._
-
-import tofu.syntax.monadic._
-import cats.syntax.foldable._
-import cats.syntax.traverse._
-import cats.syntax.monoid._
-import cats.instances.option._
 import cats.instances.either._
-import cats.syntax.option._
+import cats.instances.option._
 import cats.syntax.either._
+import cats.syntax.foldable._
+import cats.syntax.monoid._
+import cats.syntax.option._
+import cats.syntax.traverse._
+import tofu.syntax.monadic._
 
 object Flux extends FluxInstances {
   trait FluxTag extends Any

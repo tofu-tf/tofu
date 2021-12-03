@@ -1,8 +1,7 @@
 package tofu
 package syntax
 
-import cats.{Applicative, Functor, Monad}
-import cats.ApplicativeError
+import cats.{Applicative, ApplicativeError, Functor, Monad}
 import tofu.Raise.ContravariantRaise
 object raise {
 

@@ -3,8 +3,8 @@ package syntax
 
 import cats.FlatMap
 import tofu.syntax.monadic._
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+
+import scala.concurrent.{ExecutionContext, Future}
 
 object scopedKernel extends ScopedSyntax
 

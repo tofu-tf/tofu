@@ -1,7 +1,6 @@
 package tofu.concurrent
 
-import cats.effect.Sync
-import cats.effect.Ref
+import cats.effect.{Ref, Sync}
 
 /** Effectful making and initialization for `Ref`. A `Ref` instance will be initialized in the `I[_]` effect. `F[_]` is
   * the effect in which 'Ref' will work.

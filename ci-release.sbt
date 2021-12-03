@@ -14,9 +14,15 @@ ThisBuild / githubWorkflowPublishTargetBranches := Seq(
 
 ThisBuild / githubWorkflowJavaVersions          := Seq(JavaSpec.temurin("8"), JavaSpec.temurin("17"))
 
-ThisBuild / githubWorkflowBuildPreamble += WorkflowStep.Sbt(
-  List("scalafmtCheckAll", "scalafmtSbtCheck"),
-  name = Some("Check formatting")
+ThisBuild / githubWorkflowBuildPreamble ++= List(
+  WorkflowStep.Sbt(
+    List("scalafmtCheckAll", "scalafmtSbtCheck"),
+    name = Some("Check formatting")
+  ),
+  WorkflowStep.Sbt(
+    List("scalafixAll --check"),
+    name = Some("Check scalafix rules")
+  )
 )
 
 ThisBuild / githubWorkflowPublish := Seq(

@@ -1,14 +1,13 @@
 package tofu.logging.atom
-import java.time.Instant
-import java.util.concurrent.TimeUnit
-
-import tofu.time.Clock
 import cats.{Applicative, FlatMap}
 import tofu.concurrent.Atom
 import tofu.higherKind.Embed
 import tofu.logging.{LoggedValue, Logging, Logs}
 import tofu.syntax.monadic._
+import tofu.time.Clock
 
+import java.time.Instant
+import java.util.concurrent.TimeUnit
 import scala.reflect.{ClassTag, classTag}
 
 final case class LogLine(

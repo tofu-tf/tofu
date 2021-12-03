@@ -2,9 +2,8 @@ package tofu.syntax
 
 import cats.Functor
 import cats.effect.kernel.{Deferred, MonadCancel, Ref}
-import cats.effect.std.Semaphore
+import cats.effect.std.{Queue, Semaphore}
 import tofu.lift.Lift
-import cats.effect.std.Queue
 
 object lift extends KernelLiftSyntax {
   implicit final class RefLiftSyntax[F[_], A](private val ref: Ref[F, A]) extends AnyVal {

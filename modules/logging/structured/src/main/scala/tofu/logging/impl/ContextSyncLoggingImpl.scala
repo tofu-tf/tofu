@@ -2,9 +2,9 @@ package tofu
 package logging
 package impl
 
+import cats.Monad
 import org.slf4j.{Logger, Marker}
 import tofu.syntax.monadic._
-import cats.Monad
 
 class ContextSyncLoggingImpl[F[_]: Monad, C: Loggable](context: F WithContext C, logger: Logger)(implicit F: Delay[F])
     extends LoggingImpl[F](logger) {

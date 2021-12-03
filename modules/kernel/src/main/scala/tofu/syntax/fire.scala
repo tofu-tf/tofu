@@ -1,6 +1,6 @@
 package tofu.syntax
 
-import tofu.{Fire, Race, Fibers}
+import tofu.{Fibers, Fire, Race}
 
 object fire  {
   final implicit class FireOps[F[_], A](private val fa: F[A]) extends AnyVal {

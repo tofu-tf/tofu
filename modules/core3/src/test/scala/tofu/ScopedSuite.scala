@@ -1,12 +1,12 @@
 package tofu
 
 import cats.effect.Async
-import scala.concurrent.ExecutionContext
-import tofu.syntax.scoped._
-import tofu.syntax.monadic._
-import scala.annotation.nowarn
-import scala.concurrent.Future
 import tofu.interop.Blocker
+import tofu.syntax.monadic._
+import tofu.syntax.scoped._
+
+import scala.annotation.nowarn
+import scala.concurrent.{ExecutionContext, Future}
 
 class ScopedSuite {
   @nowarn("msg=parameter value")

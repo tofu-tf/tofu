@@ -11,8 +11,9 @@ import tofu.config.ConfigItem.ValueType
 import tofu.data.{Flux, Identity}
 import tofu.syntax.monadic._
 
-import collection.immutable.IndexedSeq
 import scala.annotation.unchecked.{uncheckedVariance => uv}
+
+import collection.immutable.IndexedSeq
 
 sealed trait ConfigItem[+F[_]] {
   self =>

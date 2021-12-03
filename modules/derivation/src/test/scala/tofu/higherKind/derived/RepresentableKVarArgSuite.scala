@@ -1,14 +1,14 @@
 package tofu.higherKind.derived
 
 import cats.data.Tuple2K
-import cats.{Id, ~>}
-import derevo.derive
-import tofu.syntax.embed._
 import cats.tagless.syntax.functorK._
 import cats.tagless.syntax.semigroupalK._
+import cats.{Id, ~>}
+import derevo.derive
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import tofu.higherKind.derived.RepresentableKVarArgSuite.Foo
+import tofu.syntax.embed._
 
 class RepresentableKVarArgSuite extends AnyFlatSpec with Matchers {
   val ioFoo: Foo[Id] = new Foo[Id] {

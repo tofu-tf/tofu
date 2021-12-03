@@ -1,7 +1,7 @@
 package tofu.syntax
 import cats.Applicative
-import tofu.{Finally, Guarantee}
 import tofu.syntax.monadic._
+import tofu.{Finally, Guarantee}
 
 object guarantee extends GuaranteeSyntax
 

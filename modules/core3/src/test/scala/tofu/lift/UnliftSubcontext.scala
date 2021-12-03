@@ -1,16 +1,17 @@
 package tofu.lift
 
+import cats.Monad
 import cats.data.ReaderT
 import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import org.scalatest.flatspec.AnyFlatSpec
-import tofu.lift.UnliftSubcontext.FatApp
-import tofu.optics.Contains
-import UnliftSubcontext._
-import cats.Monad
 import org.scalatest.matchers.should.Matchers
 import tofu.HasContext
 import tofu.compat.unused
-import cats.effect.unsafe.IORuntime
+import tofu.lift.UnliftSubcontext.FatApp
+import tofu.optics.Contains
+
+import UnliftSubcontext._
 
 class UnliftSubcontext extends AnyFlatSpec with Matchers {
   implicit val iort = IORuntime.global

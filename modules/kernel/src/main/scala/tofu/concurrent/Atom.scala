@@ -1,12 +1,11 @@
 package tofu.concurrent
+import cats.data.StateT
 import cats.{Applicative, Functor}
-
+import tofu.data.calc.CalcM
 import tofu.higherKind.{RepresentableK, derived}
+import tofu.internal.carriers._
 import tofu.optics.Contains
 import tofu.syntax.monadic._
-import cats.data.StateT
-import tofu.data.calc.CalcM
-import tofu.internal.carriers._
 
 /** a middleground between cats.concurrent.Ref and zio.Ref */
 trait Atom[+F[_], A] {

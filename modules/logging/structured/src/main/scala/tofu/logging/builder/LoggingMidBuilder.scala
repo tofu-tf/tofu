@@ -1,13 +1,14 @@
 package tofu.logging
 package builder
 
-import scala.collection.mutable
-import scala.reflect.ClassTag
-
-import tofu.syntax.monadic._
 import cats.Monad
 import tofu.Errors
 import tofu.syntax.handle._
+import tofu.syntax.monadic._
+
+import scala.collection.mutable
+import scala.reflect.ClassTag
+
 import impl.ArgsLoggable
 
 trait Builder[+T[_]] {

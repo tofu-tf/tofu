@@ -2,9 +2,9 @@ package tofu.optics
 
 import cats._
 import cats.data.NonEmptyList
-import tofu.optics.data._
-import cats.syntax.semigroup._
 import cats.instances.option._
+import cats.syntax.semigroup._
+import tofu.optics.data._
 
 /** aka NonEmptyFold S has some occurences of A and can collect then
   */

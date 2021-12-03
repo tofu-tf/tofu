@@ -1,11 +1,10 @@
 package tofu.syntax
 
 import cats.data.Ior
+import cats.instances.option._
+import cats.syntax.option.{catsSyntaxOptionId, none}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import cats.instances.option._
-import cats.syntax.option.catsSyntaxOptionId
-import cats.syntax.option.none
 import tofu.syntax.fior._
 
 import java.util.concurrent.atomic.AtomicInteger

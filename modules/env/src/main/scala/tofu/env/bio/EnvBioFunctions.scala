@@ -1,8 +1,9 @@
 package tofu.env.bio
 
 import monix.eval.Task
-import scala.concurrent.duration.FiniteDuration
+
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.FiniteDuration
 
 private[bio] trait EnvBioFunctions extends EnvBioProducts { self: EnvBio.type =>
   def apply[R, E, A](f: R => Task[Either[E, A]]): EnvBio[R, E, A] = (ctx: R) =>

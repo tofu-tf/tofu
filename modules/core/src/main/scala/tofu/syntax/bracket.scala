@@ -3,8 +3,8 @@ package tofu.syntax
 import cats.Applicative
 import cats.data.EitherT
 import cats.effect.concurrent.MVar
-import cats.effect.{Bracket, ExitCase}
 import cats.effect.syntax.bracket._
+import cats.effect.{Bracket, ExitCase}
 import cats.syntax.either._
 import tofu.Guarantee
 import tofu.syntax.monadic._

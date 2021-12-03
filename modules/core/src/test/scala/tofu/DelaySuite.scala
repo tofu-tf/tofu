@@ -1,7 +1,7 @@
 package tofu
 
-import org.scalatest.funsuite.AnyFunSuite
 import cats.effect.IO
+import org.scalatest.funsuite.AnyFunSuite
 
 class DelaySuite extends AnyFunSuite {
   test("IO pure delay") {

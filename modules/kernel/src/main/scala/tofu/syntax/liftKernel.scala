@@ -1,9 +1,7 @@
 package tofu.syntax
-import tofu.lift.{Lift, IsoK, Unlift}
-import cats.tagless.InvariantK
-import cats.Functor
-import cats.~>
-import cats.tagless.FunctorK
+import cats.tagless.{FunctorK, InvariantK}
+import cats.{Functor, ~>}
+import tofu.lift.{IsoK, Lift, Unlift}
 
 object liftKernel extends KernelLiftSyntax
 

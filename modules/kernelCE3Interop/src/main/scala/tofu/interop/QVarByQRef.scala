@@ -1,10 +1,8 @@
 package tofu.interop
 
-import cats.effect.kernel.Ref
-import tofu.syntax.monadic._
+import cats.effect.kernel.{Deferred, GenConcurrent, Ref}
 import tofu.concurrent.impl.QVarSM
-import cats.effect.kernel.Deferred
-import cats.effect.kernel.GenConcurrent
+import tofu.syntax.monadic._
 
 //this implementation is really questionable
 final class QVarCE3[F[_], A](ref: Ref[F, QVarSM.State[A, Deferred[F, A]]])(implicit F: GenConcurrent[F, _])

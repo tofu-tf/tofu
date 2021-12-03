@@ -2,16 +2,16 @@ package tofu
 package concurrent
 
 import cats.data.StateT
-import cats.effect.{MonadThrow => _, _}
 import cats.effect.concurrent.{MVar, TryableDeferred}
 import cats.effect.syntax.bracket._
+import cats.effect.{MonadThrow => _, _}
 import cats.syntax.applicativeError._
 import cats.{Applicative, Apply, FlatMap, Monad}
+import tofu.concurrent.syntax.deferred._
 import tofu.control.ApplicativeZip
 import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.syntax.monadic._
 import tofu.syntax.start._
-import tofu.concurrent.syntax.deferred._
 
 import scala.annotation.nowarn
 

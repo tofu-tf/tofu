@@ -1,7 +1,7 @@
 package tofu.optics.functions
 
-import tofu.optics.Subset
 import cats.syntax.either._
+import tofu.optics.Subset
 
 trait ContainerFunctions {
   def right[A, B]: Subset[Either[A, B], B] = Subset[Either[A, B]](_.toOption)(_.asRight)

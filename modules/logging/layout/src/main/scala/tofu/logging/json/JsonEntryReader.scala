@@ -3,8 +3,9 @@ package tofu.logging.json
 import tethys._
 import tethys.commons.RawJson
 import tethys.jackson._
-import tethys.readers.{FieldName, KeyReader, ReaderError}
 import tethys.readers.tokens.TokenIterator
+import tethys.readers.{FieldName, KeyReader, ReaderError}
+
 import scala.annotation._
 import scala.collection._
 

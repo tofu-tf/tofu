@@ -1,11 +1,11 @@
 package tofu
 
-import cats.MonadError
-import Raise.ContravariantRaise
-import tofu.syntax.raise._
-import cats.Applicative
+import cats.{Applicative, MonadError}
 import org.scalatest.funsuite.AnyFunSuite
 import tofu.compat.unused
+import tofu.syntax.raise._
+
+import Raise.ContravariantRaise
 
 class RaiseSuite extends AnyFunSuite {
   import tofu.RaiseSuite._

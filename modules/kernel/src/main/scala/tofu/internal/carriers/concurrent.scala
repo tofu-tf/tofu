@@ -1,7 +1,7 @@
 package tofu.internal.carriers
 
-import tofu.internal.Interop
 import tofu.concurrent.{MakeAgent, MakeAtom, MakeQVar, MakeSerialAgent}
+import tofu.internal.Interop
 
 trait MkAtomCE2Carrier[I[_], F[_]] extends MakeAtom[I, F]
 

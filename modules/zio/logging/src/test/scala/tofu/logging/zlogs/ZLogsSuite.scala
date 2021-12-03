@@ -15,13 +15,13 @@ import tofu.logging.derivation.loggable
 import tofu.logging.impl.ContextMarker
 import tofu.logging.zlogs.ZLogsSuite.{BarService, FooService, Name}
 import tofu.syntax.logging._
+import zio._
 import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.console.Console
-import zio._
 
-import scala.jdk.CollectionConverters._
 import scala.annotation.nowarn
+import scala.jdk.CollectionConverters._
 
 class ZLogsSuite extends AnyFlatSpec with Matchers {
 

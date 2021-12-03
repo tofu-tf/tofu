@@ -1,9 +1,9 @@
 package tofu
 
-import scala.annotation.nowarn
-import cats.effect.kernel.MonadCancelThrow
+import cats.effect.kernel.{MonadCancelThrow, Outcome}
 import tofu.internal.carriers.FinallyCarrier3
-import cats.effect.kernel.Outcome
+
+import scala.annotation.nowarn
 
 object GuaranteeSuite {
 

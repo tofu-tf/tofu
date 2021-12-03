@@ -1,13 +1,11 @@
 package tofu
 
-import cats.effect.Concurrent
+import cats.effect.{Concurrent, ContextShift, IO}
+import tofu.concurrent.{MakeAgent, MakeSerialAgent}
+import tofu.syntax.monadic._
+import tofu.syntax.start._
 
 import scala.annotation.nowarn
-import cats.effect.IO
-import cats.effect.ContextShift
-import tofu.concurrent.{MakeAgent, MakeSerialAgent}
-import tofu.syntax.start._
-import tofu.syntax.monadic._
 
 @nowarn("msg=parameter")
 object StartSuite {

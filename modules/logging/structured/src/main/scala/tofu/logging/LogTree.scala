@@ -2,14 +2,13 @@ package tofu.logging
 
 import cats.instances.list._
 import cats.instances.unit._
-import tofu.syntax.monadic._
 import cats.syntax.foldable._
 import cats.syntax.traverse._
-import scala.collection.mutable
-
-import cats.{Applicative, Monoid}
+import cats.{Applicative, Eval, Monoid}
 import io.circe.Json
-import cats.Eval
+import tofu.syntax.monadic._
+
+import scala.collection.mutable
 
 sealed trait LogTree {
   import LogTree._

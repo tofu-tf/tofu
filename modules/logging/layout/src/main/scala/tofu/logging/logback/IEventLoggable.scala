@@ -2,14 +2,15 @@ package tofu
 package logging
 package logback
 
-import java.time.Instant
-
 import cats.syntax.monoid._
 import ch.qos.logback.classic.spi.{ILoggingEvent, ThrowableProxyUtil}
-import impl.ContextMarker
-import syntax.logRenderer._
 import tofu.data.PArray
 import tofu.logging.ELKLayout._
+
+import java.time.Instant
+
+import impl.ContextMarker
+import syntax.logRenderer._
 
 trait EventLoggable extends DictLoggable[ILoggingEvent] with ToStringLoggable[ILoggingEvent]
 

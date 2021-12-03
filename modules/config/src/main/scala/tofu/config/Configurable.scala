@@ -1,9 +1,6 @@
 package tofu
 package config
 
-import java.net.{URI, URL}
-
-import ConfigMonad.promote._
 import cats.data.{Chain, NonEmptyList}
 import cats.instances.list._
 import cats.instances.map._
@@ -11,26 +8,27 @@ import cats.instances.option._
 import cats.instances.vector._
 import cats.kernel.Monoid
 import cats.syntax.alternative._
+import cats.syntax.monoid._
 import cats.syntax.option._
 import cats.syntax.parallel._
-import cats.syntax.monoid._
 import cats.syntax.traverse._
+import derevo.Derivation
 import magnolia.{CaseClass, Magnolia, SealedTrait}
-import syntax.context._
-import syntax.handle._
-import tofu.config.ConfigError.{BadNumber, BadString, BadType, Invalid, MultipleVariants, NoVariantFound}
+import tofu.config.ConfigError.{BadNumber, BadString, BadType, Invalid, MultipleVariants, NoVariantFound, NotFound}
 import tofu.config.ConfigItem._
 import tofu.config.Key.{Index, Prop, Variant}
+import tofu.config.MagnoliaDerivation.{EnumConfigurable, SingletonConfigurable}
 import tofu.syntax.monadic._
 import tofu.syntax.raise._
 
+import java.net.{URI, URL}
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.util.control.NonFatal
-import tofu.config.MagnoliaDerivation.SingletonConfigurable
-import tofu.config.MagnoliaDerivation.EnumConfigurable
-import tofu.config.ConfigError.NotFound
-import derevo.Derivation
+
+import ConfigMonad.promote._
+import syntax.context._
+import syntax.handle._
 
 trait Configurable[A] extends ConfigArr[ConfigItem, A] { self =>
   import ConfigMonad.promote._

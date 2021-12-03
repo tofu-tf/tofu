@@ -1,14 +1,14 @@
 package tofu.logging
 package bi
 
-import scala.reflect.ClassTag
-
 import cats.{Functor, Id}
 import tofu.control.Bind
 import tofu.higherKind.bi.{BiMid, Fun2BK, FunctorBK, MonoidalBK}
 import tofu.logging.ServiceLogging
 import tofu.syntax.functorbk._
 import tofu.syntax.monadic._
+
+import scala.reflect.ClassTag
 
 trait LoggingBiCompanion[U[_[_, _]]] {
   type Log[F[_, _]] = ServiceLogging[F[Nothing, *], U[Any]]

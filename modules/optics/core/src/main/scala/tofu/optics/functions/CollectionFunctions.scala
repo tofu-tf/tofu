@@ -1,15 +1,14 @@
 package tofu.optics.functions
 
-import cats.Monoid
-import tofu.optics.{Contains, Folded, Items, PFolded, PItems, Property}
-import cats.syntax.foldable._
-import cats.instances.list._
-import cats.instances.vector._
 import alleycats.std.iterable._
 import alleycats.std.map._
-
+import cats.Monoid
+import cats.instances.list._
+import cats.instances.vector._
+import cats.syntax.foldable._
 import tofu.compat._
 import tofu.compat.lazySeqInstances._
+import tofu.optics.{Contains, Folded, Items, PFolded, PItems, Property}
 
 trait CollectionFunctions {
   def listElemsP[A, B]: PItems[List[A], List[B], A, B] = PItems.fromTraverse[List, A, B]

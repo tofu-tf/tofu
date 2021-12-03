@@ -16,3 +16,4 @@ website/.docusaurus
 .bsp
 *.db
 .jvmopts
+**.DS_Store

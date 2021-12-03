@@ -1,9 +1,8 @@
 package tofu.logging
 
-import zio.{Has, UIO, URIO}
 import tofu.higherKind.Embed
-import zio.ZIO
 import zio.interop.catz._
+import zio.{Has, UIO, URIO, ZIO}
 
 package object zlogs {
   type ZLogs[R]    = Logs[UIO, URIO[R, *]]

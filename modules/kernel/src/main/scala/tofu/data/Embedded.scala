@@ -1,13 +1,14 @@
 package tofu.data
 
 import cats._
+import cats.data.EitherT
 import cats.syntax.parallel._
-import tofu.syntax.monadic._
+import tofu.control.Bind
 import tofu.syntax.feither._
 import tofu.syntax.funk
+import tofu.syntax.monadic._
+
 import ExceptTInstances1._
-import cats.data.EitherT
-import tofu.control.Bind
 
 object Embedded extends ExceptTInstances {
   trait EmbedTag extends Any

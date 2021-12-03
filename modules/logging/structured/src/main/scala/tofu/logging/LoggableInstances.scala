@@ -1,13 +1,5 @@
 package tofu.logging
 
-import java.time.{Instant, LocalDate, LocalDateTime, OffsetDateTime, ZonedDateTime}
-import java.util.UUID
-
-import scala.collection.immutable.SortedSet
-import scala.collection.{immutable, mutable}
-import scala.concurrent.duration.FiniteDuration
-import scala.{specialized => sp}
-
 import alleycats.std.iterable._
 import alleycats.std.set._
 import cats.data._
@@ -23,8 +15,14 @@ import cats.{Foldable, Show}
 import tofu.compat._
 import tofu.compat.lazySeqInstances._
 import tofu.syntax.logRenderer._
-import java.io.StringWriter
-import java.io.PrintWriter
+
+import java.io.{PrintWriter, StringWriter}
+import java.time.{Instant, LocalDate, LocalDateTime, OffsetDateTime, ZonedDateTime}
+import java.util.UUID
+import scala.collection.immutable.SortedSet
+import scala.collection.{immutable, mutable}
+import scala.concurrent.duration.FiniteDuration
+import scala.{specialized => sp}
 
 class LoggableInstances {
   final implicit val stringValue: Loggable[String] = new SingleValueLoggable[String] {

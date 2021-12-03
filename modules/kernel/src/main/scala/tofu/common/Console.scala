@@ -1,14 +1,12 @@
 package tofu.common
 
-import java.io.{BufferedReader, PrintStream}
-
 import simulacrum.typeclass
-import tofu.higherKind
 import tofu.higherKind.RepresentableK
+import tofu.{Delay, higherKind}
 
+import java.io.{BufferedReader, PrintStream}
 import scala.annotation.nowarn
 import scala.{Console => ScalaConsole}
-import tofu.Delay
 
 @typeclass @nowarn("cat=unused-imports")
 trait Console[F[_]] {

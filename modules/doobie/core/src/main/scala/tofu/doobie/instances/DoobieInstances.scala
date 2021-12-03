@@ -1,9 +1,9 @@
 package tofu.doobie.instances
 
 import cats.data.ReaderT
-import cats.effect.{Effect, IO, SyncEffect}
 import cats.effect.syntax.effect._
 import cats.effect.syntax.syncEffect._
+import cats.effect.{Effect, IO, SyncEffect}
 import doobie.ConnectionIO
 import doobie.free.connection.AsyncConnectionIO
 import tofu.WithProvide

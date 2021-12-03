@@ -1,9 +1,9 @@
 package tofu.logging.derivation
 
+import magnolia.Param
+
 import scala.annotation.tailrec
 import scala.util.matching.Regex
-
-import magnolia.Param
 
 sealed trait MaskMode
 object MaskMode {

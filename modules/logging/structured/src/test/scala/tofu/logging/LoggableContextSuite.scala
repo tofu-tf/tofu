@@ -1,7 +1,7 @@
 package tofu.logging
 
-import tofu.compat.unused
 import tofu.WithContext
+import tofu.compat.unused
 
 object LoggableContextSuite {
 

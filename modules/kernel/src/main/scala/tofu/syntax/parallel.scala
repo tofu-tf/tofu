@@ -1,7 +1,6 @@
 package tofu.syntax
 import cats.syntax._
-import cats.Parallel
-import cats.Defer
+import cats.{Defer, Parallel}
 
 object parallel
     extends ParallelSyntax with ParallelTraverseSyntax with ParallelFlatSyntax with ParallelApplySyntax

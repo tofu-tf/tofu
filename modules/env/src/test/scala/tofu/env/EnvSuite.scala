@@ -4,8 +4,8 @@ import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import tofu.{HasContextRun, RunContext, WithRun}
 import tofu.lift.{Lift, Unlift, UnliftIO}
+import tofu.{HasContextRun, RunContext, WithRun}
 
 import scala.concurrent.duration._
 

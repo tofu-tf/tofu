@@ -3,10 +3,10 @@ package tofu.interop
 import cats.effect.Ref
 import cats.effect.kernel.MonadCancelThrow
 import cats.effect.std.Semaphore
+import cats.syntax.all._
 import cats.{Functor, Monad}
 import tofu.Fire
 import tofu.concurrent.{Agent, SerialAgent}
-import cats.syntax.all._
 import tofu.lift.Lift
 import tofu.syntax.fire._
 import tofu.syntax.liftKernel._

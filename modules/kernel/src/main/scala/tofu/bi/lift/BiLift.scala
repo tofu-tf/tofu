@@ -1,8 +1,8 @@
 package tofu.bi.lift
 
-import tofu.higherKind.bi.FunBK
 import cats.Bifunctor
 import tofu.control.Bind
+import tofu.higherKind.bi.FunBK
 
 trait BiLift[F[_, _], G[_, _]] {
   def bifunctor: Bifunctor[G]

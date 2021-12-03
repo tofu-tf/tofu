@@ -7,9 +7,9 @@ import tofu.higherKind.{Mid, Post, Pre}
 import tofu.lift.Lift
 import tofu.logging.impl.{CachedLogs, UniversalEmbedLogs}
 import tofu.logging.{Logging, Logs}
+import tofu.syntax.monadic._
 
 import scala.reflect.ClassTag
-import tofu.syntax.monadic._
 
 object LogsInvariantSyntax {
   final class LogsOps[I[_], F[_]](private val logs: Logs[I, F]) extends AnyVal {

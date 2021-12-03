@@ -1,8 +1,8 @@
 package tofu.logging
 
-import tofu.logging._
 import cats.syntax.semigroup._
 import org.scalatest.flatspec.AnyFlatSpec
+import tofu.logging._
 
 class NamedLoggableCompositionSuite extends AnyFlatSpec {
 

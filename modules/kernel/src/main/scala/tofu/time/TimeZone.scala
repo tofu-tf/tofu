@@ -1,9 +1,9 @@
 package tofu.time
 
-import java.time._
-
-import scala.jdk.CollectionConverters._
 import tofu.Delay
+
+import java.time._
+import scala.jdk.CollectionConverters._
 
 /** wrapping around ZoneId methods
   */

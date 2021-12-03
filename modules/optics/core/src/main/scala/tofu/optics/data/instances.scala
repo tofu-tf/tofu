@@ -1,15 +1,11 @@
 package tofu.optics.data
 
-import cats.arrow.Profunctor
-import tofu.syntax.monadic._
-import cats.Functor
-import cats.arrow.Compose
-import tofu.optics.classes.PChoice
-import cats.kernel.Monoid
-import cats.Applicative
+import cats.arrow.{Compose, Profunctor}
+import cats.kernel.{Monoid, Semigroup}
 import cats.syntax.monoid._
-import cats.kernel.Semigroup
-import cats.Apply
+import cats.{Applicative, Apply, Functor}
+import tofu.optics.classes.PChoice
+import tofu.syntax.monadic._
 
 class CoKleisliProfunctor[F[+_]: Functor] extends Profunctor[CoKleisli[F, *, *]] {
   def dimap[A, B, C, D](fab: CoKleisli[F, A, B])(f: C => A)(g: B => D): CoKleisli[F, C, D] =

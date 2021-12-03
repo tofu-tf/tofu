@@ -1,5 +1,6 @@
 package tofu.common
 import cats.{Eval, Show}
+
 import java.util.UUID
 import scala.collection.immutable.{BitSet, Queue, Seq, SortedMap, SortedSet}
 import scala.concurrent.duration.Duration

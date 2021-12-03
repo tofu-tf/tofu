@@ -1,20 +1,18 @@
 package tofu.logging
 
-import scala.reflect.ClassTag
-
 import cats.tagless.FunctorK
-import cats.{Functor, Monad}
-import tofu.higherKind.Mid
 import cats.tagless.syntax.functorK._
-import tofu.syntax.functorbk._
-import tofu.syntax.monadic._
-import tofu.syntax.funk._
-import tofu.higherKind.bi.FunctorBK
-import tofu.control.Bind
-import tofu.logging.bi.LoggingBiMid
-import tofu.higherKind.bi.BiMid
-import tofu.higherKind.bi.FunBK
+import cats.{Functor, Monad}
 import tofu.Errors
+import tofu.control.Bind
+import tofu.higherKind.Mid
+import tofu.higherKind.bi.{BiMid, FunBK, FunctorBK}
+import tofu.logging.bi.LoggingBiMid
+import tofu.syntax.functorbk._
+import tofu.syntax.funk._
+import tofu.syntax.monadic._
+
+import scala.reflect.ClassTag
 
 object LoggingMidFunctions {
   def in[U[_[_]]: FunctorK, I[_]: Functor, F[_]: Monad](implicit

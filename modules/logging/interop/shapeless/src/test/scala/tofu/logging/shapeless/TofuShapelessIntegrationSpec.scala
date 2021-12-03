@@ -1,11 +1,11 @@
 package tofu.logging.shapeless
 
-import shapeless.tag.@@
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import shapeless.tag
-import tofu.logging.Loggable._
+import shapeless.tag.@@
 import tofu.logging.Loggable
+import tofu.logging.Loggable._
 import tofu.logging.shapeless.implicits._
 
 class TofuShapelessIntegrationSpec extends AnyFlatSpec with Matchers {

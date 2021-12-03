@@ -8,9 +8,9 @@ import tethys._
 import tethys.commons.RawJson
 import tethys.jackson._
 import tofu.logging.ELKLayout.Arguments
-import tofu.logging.logback.EventLoggable
 import tofu.logging.json.JsonEntry
 import tofu.logging.json.instances._
+import tofu.logging.logback.EventLoggable
 
 /** logging layout writing JSON receivable by logstash */
 class ELKLayout extends LayoutBase[ILoggingEvent] {

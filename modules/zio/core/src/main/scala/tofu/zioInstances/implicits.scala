@@ -1,12 +1,12 @@
 package tofu.zioInstances
-import java.io.IOException
-
 import tofu.optics.{Contains, Extract}
+import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
 import zio.{Has, Tag}
-import zio.blocking.Blocking
+
+import java.io.IOException
 
 object implicits extends ZioTofuImplicits1
 

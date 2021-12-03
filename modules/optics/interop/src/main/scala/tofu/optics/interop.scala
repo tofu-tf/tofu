@@ -2,6 +2,7 @@ package tofu.optics
 
 import cats.{Applicative, Monoid}
 import monocle._
+
 import scala.annotation.unchecked.uncheckedVariance
 
 object interop {

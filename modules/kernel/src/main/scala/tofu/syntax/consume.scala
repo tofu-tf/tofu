@@ -1,8 +1,7 @@
 package tofu.syntax
 
 import cats.{MonoidK, SemigroupK}
-import tofu.control.{Optional, Switch}
-import tofu.control.ContravariantFilter
+import tofu.control.{ContravariantFilter, Optional, Switch}
 
 object consume extends MonoidK.ToMonoidKOps with SemigroupK.ToSemigroupKOps {
   implicit class TofuConsumeOps[F[_], A](private val fa: F[A]) extends AnyVal {

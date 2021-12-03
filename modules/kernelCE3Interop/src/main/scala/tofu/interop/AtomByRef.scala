@@ -1,7 +1,7 @@
 package tofu.interop
 
-import tofu.concurrent.Atom
 import cats.effect.Ref
+import tofu.concurrent.Atom
 
 final case class AtomByRef[F[_], A](ref: Ref[F, A]) extends Atom[F, A] {
   override def get: F[A]                       = ref.get

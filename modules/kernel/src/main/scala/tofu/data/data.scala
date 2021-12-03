@@ -2,6 +2,7 @@ package tofu
 
 import cats.Functor
 import cats.arrow.FunctionK
+
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 
 package object data {

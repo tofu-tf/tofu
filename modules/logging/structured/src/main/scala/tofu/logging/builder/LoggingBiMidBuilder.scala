@@ -1,13 +1,13 @@
 package tofu.logging
 package builder
-import scala.collection.mutable.Buffer
-import scala.reflect.ClassTag
-
 import tofu.control.Bind
 import tofu.logging.bi.LoggingBiMid
 import tofu.logging.impl.ArgsLoggable
 import tofu.logging.{Loggable, LoggedValue, Logging}
 import tofu.syntax.bindInv._
+
+import scala.collection.mutable.Buffer
+import scala.reflect.ClassTag
 
 trait BiBuilder[+T[_, _]] {
   def prepare[Alg[_[_, _]]](implicit Alg: ClassTag[Alg[Any]]): BiPrepared[Alg, T]

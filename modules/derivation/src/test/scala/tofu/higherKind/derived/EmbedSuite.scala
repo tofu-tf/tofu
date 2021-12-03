@@ -1,17 +1,19 @@
 package tofu.higherKind.derived
-import derevo.derive
-import tofu.higherKind.Embed
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
 import cats.data.OptionT
-import EmbedSuite.Foo
-import tofu.syntax.monadic._
-import tofu.syntax.embed._
 import cats.instances.either._
 import cats.instances.option._
-import cats.syntax.traverse._
 import cats.syntax.either._
+import cats.syntax.traverse._
+import derevo.derive
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import tofu.higherKind.Embed
+import tofu.syntax.embed._
+import tofu.syntax.monadic._
+
 import scala.util.Try
+
+import EmbedSuite.Foo
 
 class EmbedSuite extends AnyFlatSpec with Matchers {
   val checkingFoo1: Foo[Either[String, *]] = new Foo[Either[String, *]] {

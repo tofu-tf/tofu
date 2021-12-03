@@ -1,9 +1,10 @@
 package tofu.kernel.interop.catsmtl
 
-import cats.mtl.{Ask, Local, Handle => MHandle, Raise => MRaise}
+import cats.mtl.{Ask, Handle => MHandle, Local, Raise => MRaise}
 import cats.{Applicative, Functor}
-import instances._
 import tofu.{Errors, Raise, WithContext, WithLocal}
+
+import instances._
 
 object TofuCatsMtlExplicitChecks {
 

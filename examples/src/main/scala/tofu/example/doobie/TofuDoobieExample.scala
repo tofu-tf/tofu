@@ -2,6 +2,7 @@ package tofu.example.doobie
 
 import cats.data.ReaderT
 import cats.effect.{Async, ContextShift, IO, IOApp, Sync}
+import cats.effect.{ContextShift, Effect, IO, IOApp, Sync}
 import cats.tagless.syntax.functorK._
 import cats.{Apply, Monad}
 import derevo.derive

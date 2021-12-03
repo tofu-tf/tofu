@@ -1,10 +1,10 @@
 package tofu.interop
 
-import cats.{Functor, Monad}
 import cats.effect.concurrent.{Ref, Semaphore}
+import cats.syntax.all._
+import cats.{Functor, Monad}
 import tofu.Fire
 import tofu.concurrent.{Agent, SerialAgent}
-import cats.syntax.all._
 import tofu.lift.Lift
 import tofu.syntax.fire._
 import tofu.syntax.liftKernel._

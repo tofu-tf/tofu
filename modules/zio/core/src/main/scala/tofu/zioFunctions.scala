@@ -1,14 +1,13 @@
 package tofu
 
-import tofu.higherKind.bi.EmbedBK
-import zio.ZIO
-import zio.Has
-import zio.IO
+import izumi.reflect.HKTag
+import tofu.higherKind.bi.{EmbedBK, FunctorBK}
+import zio.{Has, IO, ZIO}
+
+import scala.annotation.nowarn
+
 import syntax.functorbk._
 import zioInstances.implicits._
-import tofu.higherKind.bi.FunctorBK
-import izumi.reflect.HKTag
-import scala.annotation.nowarn
 
 object zioFunctions {
   type TagB[U[f[_, _]]] = HKTag[{ type Arg[f[_, _]] = U[f] }]

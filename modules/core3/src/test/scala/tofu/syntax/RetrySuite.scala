@@ -3,13 +3,13 @@ package tofu.syntax
 import cats.Applicative
 import cats.effect.IO
 import cats.effect.kernel.Ref
+import cats.effect.unsafe.IORuntime
+import cats.syntax.all._
 import org.scalatest.flatspec.AnyFlatSpec
-import tofu.{ApplicativeThrow, Errors, Handle, Raise}
+import tofu.optics.Downcast
 import tofu.syntax.handle._
 import tofu.syntax.raise._
-import cats.syntax.all._
-import tofu.optics.Downcast
-import cats.effect.unsafe.IORuntime
+import tofu.{ApplicativeThrow, Errors, Handle, Raise}
 
 class RetrySuite extends AnyFlatSpec {
   implicit val iort = IORuntime.global

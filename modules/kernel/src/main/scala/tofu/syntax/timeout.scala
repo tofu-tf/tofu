@@ -2,9 +2,10 @@ package tofu.syntax
 
 import cats.Applicative
 import tofu.time.Timeout
-import raise.FindRaise
 
 import scala.concurrent.duration.FiniteDuration
+
+import raise.FindRaise
 
 object timeout {
   implicit final class TimeoutAddinitionalOps[F[_], A](private val fa: F[A]) extends AnyVal {

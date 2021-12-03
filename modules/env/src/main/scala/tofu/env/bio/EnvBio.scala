@@ -1,6 +1,7 @@
 package tofu.env.bio
 
 import monix.eval.Task
+
 import scala.concurrent.duration.FiniteDuration
 
 abstract class EnvBio[-R, +E, +A] {

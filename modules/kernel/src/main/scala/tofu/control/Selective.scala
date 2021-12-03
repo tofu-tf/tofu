@@ -6,7 +6,6 @@ import cats.syntax.coflatMap._
 import cats.syntax.option._
 import cats.{Applicative, Monad, Monoid}
 import tofu.control.impl._
-
 import tofu.internal.EffectComp
 
 trait Selective[F[_]] extends Applicative[F] {

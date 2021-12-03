@@ -1,13 +1,13 @@
 package tofu
 package logging
 
-import scala.reflect.ClassTag
-
 import cats.tagless.FunctorK
 import cats.{Functor, Id, Monad}
 import tofu.higherKind.{Function2K, Mid, MonoidalK}
 import tofu.syntax.monadic._
 import tofu.syntax.monoidalK._
+
+import scala.reflect.ClassTag
 
 /** Mix-in trait that supposed to be extended by companion of service
   *

@@ -1,7 +1,7 @@
-import cats.effect.Fiber
 import cats.data.Ior
-import tofu.kernel.KernelTypes
+import cats.effect.Fiber
 import cats.effect.kernel.Outcome
+import tofu.kernel.KernelTypes
 
 package object tofu extends KernelTypes {
 

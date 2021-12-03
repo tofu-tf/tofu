@@ -1,9 +1,6 @@
 package tofu.syntax
 
-import tofu.higherKind.bi.FunBK
-import tofu.higherKind.bi.FunctorBK
-import tofu.higherKind.bi.Fun2BK
-import tofu.higherKind.bi.SemigroupalBK
+import tofu.higherKind.bi.{Fun2BK, FunBK, FunctorBK, SemigroupalBK}
 
 object functorbk {
   implicit class TofuFunctorBKOps[U[f[_, _]], F[_, _]](private val uf: U[F]) extends AnyVal {

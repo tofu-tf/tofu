@@ -1,9 +1,9 @@
 package tofu.zioInstances
 import cats.effect.concurrent.Deferred
 import tofu.concurrent._
+import tofu.concurrent.impl.QVarSM
 import tofu.zioInstances.ZIODaemon.exitMap
 import zio.{Exit => _, _}
-import tofu.concurrent.impl.QVarSM
 
 abstract class ZioTofuConcurrentInstance[R1, E1, R, E]
     extends MakeConcurrent[ZIO[R1, E1, *], ZIO[R, E, *]] with Daemonic[ZIO[R, E, *], Cause[E]]

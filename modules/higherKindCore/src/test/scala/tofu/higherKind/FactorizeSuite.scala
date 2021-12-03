@@ -1,12 +1,11 @@
 package tofu.higherKind
 
-import scala.reflect.ClassTag
-import scala.reflect.classTag
-
 import cats.Show
 import cats.syntax.show._
 import org.scalatest.funsuite.AnyFunSuite
 import tofu.higherKind.derived.HigherKindedMacros
+
+import scala.reflect.{ClassTag, classTag}
 
 class FactorizeSuite extends AnyFunSuite {
   import FactorizeSuite._

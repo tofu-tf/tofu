@@ -1,15 +1,10 @@
 package tofu.logging
 package derivation
 
+import derevo.{DerivationKN11, DerivationKN3, ParamRequire, PassTypeArgs}
 import tofu.higherKind.derived.HigherKindedMacros
-import derevo.DerivationKN3
-import derevo.DerivationKN11
 import tofu.logging.bi.LoggingBiMid
-import derevo.PassTypeArgs
-import derevo.ParamRequire
-import tofu.logging.builder.LoggingMidBuilder
-import tofu.logging.builder.LoggingErrMidBuilder
-import tofu.logging.builder.LoggingBiMidBuilder
+import tofu.logging.builder.{LoggingBiMidBuilder, LoggingErrMidBuilder, LoggingMidBuilder}
 
 /** Default logging derivation mechanism for unary effect algebras
   *

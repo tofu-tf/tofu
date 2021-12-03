@@ -1,13 +1,13 @@
 package tofu.syntax
 
-import cats.instances.list._
 import cats.instances.either._
-import org.scalatest.flatspec.AnyFlatSpec
-import tofu.syntax.foption._
-import tofu.syntax.feither._
-import tofu.syntax.FOptionSuite._
+import cats.instances.list._
 import cats.syntax.either.catsSyntaxEitherId
 import cats.syntax.option.none
+import org.scalatest.flatspec.AnyFlatSpec
+import tofu.syntax.FOptionSuite._
+import tofu.syntax.feither._
+import tofu.syntax.foption._
 
 import java.util.concurrent.atomic.AtomicInteger
 

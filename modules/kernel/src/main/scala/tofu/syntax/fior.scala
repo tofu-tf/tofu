@@ -1,9 +1,9 @@
 package tofu.syntax
 
-import cats.{Functor, Monad, Semigroup}
 import cats.data.Ior
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.{Functor, Monad, Semigroup}
 
 object fior {
 

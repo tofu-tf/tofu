@@ -1,8 +1,8 @@
 package tofu
 
-import org.scalatest.funsuite.AnyFunSuite
 import cats.effect.IO
 import cats.effect.unsafe.IORuntime
+import org.scalatest.funsuite.AnyFunSuite
 
 class DelaySuite extends AnyFunSuite {
   implicit val rt = IORuntime.global

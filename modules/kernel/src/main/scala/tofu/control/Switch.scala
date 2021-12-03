@@ -2,7 +2,6 @@ package tofu.control
 
 import cats.Invariant
 import tofu.Void
-
 import tofu.internal.EffectComp
 
 /** monoidal with respect to Either */

@@ -1,8 +1,6 @@
 package tofu
 
-import cats.Eval
-import cats.Defer
-import cats.Applicative
+import cats.{Applicative, Defer, Eval}
 import org.scalatest.funsuite.AnyFunSuite
 
 trait Evallio[F[_]] {

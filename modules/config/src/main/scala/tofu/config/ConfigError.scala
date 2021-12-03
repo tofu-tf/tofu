@@ -1,13 +1,13 @@
 package tofu
 package config
 
-import cats.data.NonEmptyList
-import tofu.config.ConfigItem.ValueTag
 import cats.Show
-import cats.syntax.show._
-import cats.syntax.foldable._
+import cats.data.NonEmptyList
 import cats.instances.string._
 import cats.instances.vector._
+import cats.syntax.foldable._
+import cats.syntax.show._
+import tofu.config.ConfigItem.ValueTag
 
 sealed trait ConfigError extends Product with Serializable
 object ConfigError {

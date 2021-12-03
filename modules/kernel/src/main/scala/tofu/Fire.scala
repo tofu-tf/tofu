@@ -1,11 +1,11 @@
 package tofu
 
-import scala.util.Either
-import tofu.internal.{EffectComp, Effect3Comp}
-import tofu.internal.carriers.FibersCarrier2
 import cats.MonadError
-import tofu.internal.carriers.FibersCarrier3
+import tofu.internal.carriers.{FibersCarrier2, FibersCarrier3}
+import tofu.internal.{Effect3Comp, EffectComp}
+
 import scala.annotation.unused
+import scala.util.Either
 
 trait Fire[F[_]] {
   def fireAndForget[A](fa: F[A]): F[Unit]

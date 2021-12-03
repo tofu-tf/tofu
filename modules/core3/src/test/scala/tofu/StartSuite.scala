@@ -1,12 +1,10 @@
 package tofu
 
-import cats.effect.Concurrent
-import cats.effect.IO
-import tofu.syntax.start._
-import tofu.syntax.monadic._
-import cats.effect.kernel.Outcome
-import cats.effect.kernel.MonadCancelThrow
+import cats.effect.kernel.{MonadCancelThrow, Outcome}
+import cats.effect.{Concurrent, IO}
 import tofu.concurrent.{MakeAgent, MakeSerialAgent}
+import tofu.syntax.monadic._
+import tofu.syntax.start._
 
 object StartSuite {
   def summonInstancesForConcurrent[F[_]: Concurrent] = {
