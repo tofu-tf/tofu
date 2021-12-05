@@ -3,6 +3,8 @@ package tofu.logging.zlogs
 import tofu.logging.impl.{ZUniversalContextLogging, ZUniversalLogging}
 import tofu.logging.{Loggable, Logging}
 import zio._
+import zio.interop.catz._
+
 import scala.annotation.unused
 
 object ZLogging {
@@ -36,5 +38,7 @@ object ZLogging {
         new ZUniversalContextLogging[Any, Ctx](_, getContext(cs))
       }
     }
+
+    val layerEmpty: ULayer[Has[ZLogging.Make]] = ZLayer.succeed(_ => Logging.empty[UIO])
   }
 }

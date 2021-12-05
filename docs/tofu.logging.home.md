@@ -63,7 +63,7 @@ def processPayment[F[_]: Monad: Logging](client: Client, amount: Long): F[Result
 - Get to know [the core concepts](tofu.logging.main.entities.md)
 - Learn how to use [the syntax](tofu.logging.syntax.md)
 - Find a way to use `logging` suitable for you in the [recipes](tofu.logging.recipes.md)
-- Check out [the examples](https://github.com/tofu-tf/tofu/tree/better-doobie-example/examples)
+- Check out [the examples](.././examples/src/main/scala/tofu/example)
 
 ## Old documentation
 

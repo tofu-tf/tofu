@@ -28,13 +28,13 @@ object Dependencies {
 
     val enumeratum = "1.7.0"
 
-    val derevo = "0.12.6"
+    val derevo = "0.12.8"
 
     val slf4j = "1.7.32"
 
     val fs2 = "2.5.10"
 
-    val logback = "1.2.6"
+    val logback = "1.2.7"
 
     val monix = "3.4.0"
 
@@ -50,7 +50,7 @@ object Dependencies {
 
     val shapeless = "2.3.7"
 
-    val refined = "0.9.27"
+    val refined = "0.9.28"
 
     val doobie = "0.13.4"
 
@@ -63,9 +63,9 @@ object Dependencies {
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.5.0"
+    val collectionCompat = "2.6.0"
 
-    val log4Cats = "1.3.1"
+    val log4Cats = "1.4.0"
 
     val groovy = "3.0.9"
 
