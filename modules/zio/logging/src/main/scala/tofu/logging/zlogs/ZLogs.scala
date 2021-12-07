@@ -17,15 +17,15 @@ object ZLogs {
 
   val build = new ZioHasBuilder[Any](Loggable.empty)
 
-  @nowarn("cat=unused-params") //Tag
+  @nowarn("cat=unused-params") // Tag
   def named[R: Tag](logs: ZLogs[R], name: String): ULayer[ZLog[R]] =
     ZLayer.fromEffect(logs.byName(name))
 
-  @nowarn("cat=unused-params") //Tag
+  @nowarn("cat=unused-params") // Tag
   def service[R: Tag, S: ClassTag](logs: ZLogs[R]): ULayer[ZLog[R]] =
     ZLayer.fromEffect(logs.forService[S])
 
-  @nowarn("cat=unused-params") //Tag
+  @nowarn("cat=unused-params") // Tag
   def access[R <: ZLog[U] with U: Tag, U <: Has[_]: Tag]: ZLogging[R] =
     Logging.loggingRepresentable.embed(ZIO.access[ZLog[U]](_.get[ZLogging[U]].widen))
 }

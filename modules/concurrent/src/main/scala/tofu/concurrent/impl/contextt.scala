@@ -8,6 +8,8 @@ import cats.tagless.InvariantK
 import tofu.syntax.funk.funKFrom
 import tofu.syntax.monadic._
 import tofu.{WithContext, WithRun}
+
+import scala.annotation.nowarn
 import scala.annotation.unchecked.{uncheckedVariance => uv}
 import scala.concurrent.ExecutionContext
 
@@ -79,6 +81,7 @@ trait ContextTApply[F[+_], C[+_[_]]]
   )(fa: ContextT[F, C, A], fb: ContextT[F, C, B]): ContextT[F, C, Z] =
     c => ff.run(c).ap2(fa.run(c), fb.run(c))
 
+  @nowarn("cat=deprecation")
   final override def ifA[A](
       fcond: ContextT[F, C, Boolean]
   )(ifTrue: ContextT[F, C, A], ifFalse: ContextT[F, C, A]): ContextT[F, C, A] =

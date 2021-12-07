@@ -27,7 +27,7 @@ object display extends Derivation[Display] {
         case typeHeader +: innerValueParams =>
           val labeledTypeHeader =
             indent + label + typeHeader
-          labeledTypeHeader +: innerValueParams //.map(indent + _)
+          labeledTypeHeader +: innerValueParams // .map(indent + _)
         case _                              => Vector(indent + label)
       }
     }
@@ -47,7 +47,7 @@ object display extends Derivation[Display] {
           nestedCfg                         = cfg.copy(indent = nestedIndent, brackets = brackets.copy(right = indent + brackets.right))
           label                             = if (cfg.showFieldLabels) current.label + fieldAssign else ""
           displayedParameterValue          <- current.typeclass.displayBuild(nestedCfg, current.dereference(a))
-          //this value has at least one element in it by construction,
+          // this value has at least one element in it by construction,
           // but we avoid using NEVector here due to performance and simplicity
           adapted :+ value                  = adaptDisplayedParameter(label, displayedParameterValue)
           separator                         = if (index + 1 < ctx.parameters.size) fieldSeparator else ""

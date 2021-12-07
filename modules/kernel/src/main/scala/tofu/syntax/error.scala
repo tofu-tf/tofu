@@ -6,7 +6,7 @@ import cats.ApplicativeError
 import tofu.Raise.ContravariantRaise
 object raise {
 
-  //** special alias for Raise[F, E] for use in situations when F[_] can be unknown from the start */
+  // ** special alias for Raise[F, E] for use in situations when F[_] can be unknown from the start */
   type FindRaise[E] = FindRaise.Search[E]
 
   object FindRaise extends FindRaiseInstances {

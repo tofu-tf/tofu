@@ -18,4 +18,11 @@ class ZUniversalLogging(name: String) extends Logging[UIO] {
       if (UniversalLogging.enabled(level, logger))
         UniversalLogging.writeMarker(level, logger, marker, message, values)
     }
+
+  override def writeCause(level: Logging.Level, message: String, cause: Throwable, values: LoggedValue*): UIO[Unit] =
+    ZIO.effectTotal {
+      val logger = LoggerFactory.getLogger(name)
+      if (UniversalLogging.enabled(level, logger))
+        UniversalLogging.writeCause(level, logger, cause, message, values)
+    }
 }

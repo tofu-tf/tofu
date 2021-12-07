@@ -16,21 +16,21 @@ private[env] class EnvFunctorstance[E]
   import Env._
 
   override def functor: Functor[Env[E, *]]                    = this
-  //Functor
+  // Functor
   override def map[A, B](fa: Env[E, A])(f: A => B): Env[E, B] = fa.map(f)
 
-  //Applicative
+  // Applicative
   def pure[A](x: A): Env[E, A]                                                        = Env.pure(x)
   override def unit: Env[E, Unit]                                                     = Env.unit
   override def ap[A, B](ff: Env[E, A => B])(fa: Env[E, A]): Env[E, B]                 = Env.map2(ff, fa)(_(_))
   override def map2[A, B, Z](fa: Env[E, A], fb: Env[E, B])(f: (A, B) => Z): Env[E, Z] = fa.map2(fb)(f)
   override def product[A, B](fa: Env[E, A], fb: Env[E, B]): Env[E, (A, B)]            = fa.zip(fb)
 
-  //Monad
+  // Monad
   override def flatMap[A, B](fa: Env[E, A])(f: A => Env[E, B]): Env[E, B]    = fa.flatMap(f)
   override def tailRecM[A, B](a: A)(f: A => Env[E, Either[A, B]]): Env[E, B] = Env.tailRecM(a)(f)
 
-  //MonadError
+  // MonadError
   override def raiseError[A](e: Throwable): Env[E, A]                                                = Env.raiseError[E, A](e)
   def handleErrorWith[A](fa: Env[E, A])(f: Throwable => Env[E, A]): Env[E, A]                        =
     fa.onErrorRecoverWith { case e => f(e) }
@@ -44,7 +44,7 @@ private[env] class EnvFunctorstance[E]
   override def rethrow[A, EE <: Throwable](fa: Env[E, Either[EE, A]]): Env[E, A] =
     fa.mapTask(_.flatMap(Task.fromEither(_)))
 
-  //Bracket
+  // Bracket
   override def bracketCase[A, B](
       acquire: Env[E, A]
   )(use: A => Env[E, B])(release: (A, ExitCase[Throwable]) => Env[E, Unit]): Env[E, B] =
@@ -52,11 +52,11 @@ private[env] class EnvFunctorstance[E]
   override def bracket[A, B](acquire: Env[E, A])(use: A => Env[E, B])(release: A => Env[E, Unit]): Env[E, B] =
     acquire.bracket(use)(release)
 
-  //Sync
+  // Sync
   override def suspend[A](thunk: => Env[E, A]): Env[E, A] = Env.defer(thunk)
   override def delay[A](thunk: => A): Env[E, A]           = Env.delay(thunk)
 
-  //Async
+  // Async
   override def shift: Env[E, Unit]                                                     = fromTask(Task.shift)
   override def evalOn[A](ec: ExecutionContext)(fa: Env[E, A]): Env[E, A]               = fa.mapTask(_.executeOn(Scheduler(ec)))
   override def liftIO[A](ioa: IO[A]): Env[E, A]                                        = fromTask(Task.from(ioa))
@@ -65,7 +65,7 @@ private[env] class EnvFunctorstance[E]
   override def async[A](k: (Either[Throwable, A] => Unit) => Unit): Env[E, A]          =
     fromTask(Task.async(k))
 
-  //Concurrent
+  // Concurrent
   override def cancelable[A](k: (Either[Throwable, A] => Unit) => CancelToken[Env[E, *]]): Env[E, A] =
     apply(e => Task.cancelable(cb => k(cb).run(e)))
   override def uncancelable[A](fa: Env[E, A]): Env[E, A]                                             = fa.uncancelable
@@ -78,39 +78,39 @@ private[env] class EnvFunctorstance[E]
   ): Env[E, Either[(A, Fiber[Env[E, *], B]), (Fiber[Env[E, *], A], B)]] =
     Env.racePair(fa, fb)
 
-  //Timer
+  // Timer
   override object clock extends Clock[Env[E, *]] {
     override def realTime(unit: TimeUnit): Env[E, Long]  = scheduler.map(_.clockRealTime(unit))
     override def monotonic(unit: TimeUnit): Env[E, Long] = scheduler.map(_.clockMonotonic(unit))
   }
   override def sleep(duration: FiniteDuration): Env[E, Unit] = Env.sleep(duration)
 
-  //Context
+  // Context
   override val context: Env[E, E]                                                    = Env.fromFunc(identity)
   override def ask[A](f: E => A): Env[E, A]                                          = Env.fromFunc(f)
   override def askF[A](f: E => Env[E, A])(implicit F: FlatMap[Env[E, *]]): Env[E, A] = Env.withContext(f)
 
-  //Local
+  // Local
   override def local[A](fa: Env[E, A])(project: E => E): Env[E, A] = fa.local(project)
 
-  //Provide
+  // Provide
   override def lift[A](fa: Task[A]): Env[E, A]               = Env.fromTask(fa)
   override def runContext[A](fa: Env[E, A])(ctx: E): Task[A] = fa.run(ctx)
 
-  //Memoize
+  // Memoize
   override def memoize[A](fa: Env[E, A]): Env[E, Env[E, A]]          = fa.memo
   override def memoizeOnSuccess[A](fa: Env[E, A]): Env[E, Env[E, A]] = fa.memoSuccess
 
-  //Execute
+  // Execute
   override def runScoped[A](fa: Env[E, A]): Env[E, A]                            = Env.shift[E] *> fa
   override def executionContext: Env[E, ExecutionContext]                        = Env.deferTask(Task.deferAction(Task.pure))
   override def deferFutureAction[A](f: ExecutionContext => Future[A]): Env[E, A] = Env.deferFutureAction(f)
   override def deferFuture[A](f: => Future[A]): Env[E, A]                        = Env.deferFuture(f)
 
-  //Timeout
+  // Timeout
   override def timeoutTo[A](fa: Env[E, A], after: FiniteDuration, fallback: Env[E, A]): Env[E, A] =
     fa.mapTask2(fallback)(_.timeoutTo(after, _))
 
-  //Race
+  // Race
   def fireAndForget[A](fa: Env[E, A]): Env[E, Unit] = fa.startAndForget
 }

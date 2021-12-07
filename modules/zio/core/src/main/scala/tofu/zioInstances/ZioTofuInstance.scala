@@ -57,7 +57,7 @@ class ZioTofuInstance[R, E]
   )(action: A => ZIO[R, E, B])(release: (A, Exit[E, B]) => ZIO[R, E, C]): ZIO[R, E, B] =
     init.bracketExit[R, E, B]((a, e) => release(a, e).ignore, action)
 
-  //Execute
+  // Execute
   def runScoped[A](fa: ZIO[R, E, A]): ZIO[R, E, A] = fa
 
   def executionContext: ZIO[R, E, ExecutionContext] = ZIO.runtime[R].map(_.platform.executor.asEC)
