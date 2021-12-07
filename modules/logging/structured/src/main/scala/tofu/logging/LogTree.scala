@@ -63,7 +63,7 @@ object LogTree extends LogBuilder[Json] {
     def list(size: Int, input: Value)(receive: (Value, Int) => Eval[Boolean]): Eval[Boolean] =
       for {
         ts <- newtree.replicateA(size)
-        _  <- ts.zipWithIndex.traverse_(receive.tupled)
+        _  <- ts.zipWithIndex.foldM(true) { case (_, (v, i)) => receive(v, i) }
         vs <- ts.traverse(_.get)
         _  <- input.set(LogArr(vs))
       } yield true
