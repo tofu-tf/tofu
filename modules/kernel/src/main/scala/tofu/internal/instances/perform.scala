@@ -1,13 +1,14 @@
 package tofu.internal.instances
 
+import cats.data.{Kleisli, ReaderT}
 import cats.tagless.{ContravariantK, FunctorK}
-import cats.{Functor, ~>}
-import cats.data.ReaderT
+import cats.{Apply, Functor, ~>}
 import tofu.PerformOf.Cont
+import tofu.lift.{Lift, Unlift}
 import tofu.syntax.funk._
 import tofu.syntax.monadic._
-import tofu.{PerformOf, PerformVia, Performer}
-import cats.data.Kleisli
+import tofu.{PerformVia, Performer}
+import tofu.kernel.types.PerformOf
 
 final class PerformerContravariantK[F[_], Cancel] extends ContravariantK[Performer[F, *[_], Cancel]] {
   def contramapK[C1[_], C2[_]](af: Performer[F, C1, Cancel])(fk: C2 ~> C1): Performer[F, C2, Cancel] =
@@ -50,11 +51,25 @@ final class ReaderTPerformer[F[_], R, C[_], Cancel](p: Performer[F, C, Cancel], 
     ReaderT.liftF(p.perform(cont)(f.run(r)))
 }
 
-final class PerformViaReader[F[_]: Functor, R, C[_], Cancel](
+final class UnliftPerformer[F[_], B[_], C[_], Cancel](p: Performer[B, C, Cancel], unlifter: F ~> B, lift: Lift[B, F])
+    extends Performer[F, C, Cancel] {
+  def perform[A](cont: C[A])(f: F[A]): F[Cancel] = lift.lift(p.perform(cont)(unlifter(f)))
+}
+class PerformViaReader[F[_]: Functor, R, C[_], Cancel](
     p: PerformVia[F, C, Cancel]
 ) extends PerformVia[ReaderT[F, R, *], C, Cancel] {
   val functor: Functor[ReaderT[F, R, *]] = implicitly
 
   def performer: ReaderT[F, R, Performer[ReaderT[F, R, *], C, Cancel]] =
     ReaderT(r => p.performer.map(new ReaderTPerformer(_, r)))
+}
+
+class PerformViaUnlift[F[_], B[_], C[_], Cancel](implicit
+    p: PerformVia[B, C, Cancel],
+    unlift: Unlift[B, F],
+    val functor: Apply[F]
+) extends PerformVia[F, C, Cancel] {
+
+  def performer: F[Performer[F, C, Cancel]] =
+    unlift.lift(p.performer).map2(unlift.unlift)(new UnliftPerformer[F, B, C, Cancel](_, _, unlift))
 }

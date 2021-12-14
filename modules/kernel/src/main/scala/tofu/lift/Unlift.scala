@@ -31,13 +31,16 @@ object Lift extends LiftInstances1 {
   }
   implicit def liftIdentity[F[_]]: Lift[F, F]   = liftIdentityAny.asInstanceOf[Lift[F, F]]
 
-  private val liftReaderTAny: Lift[AnyK, ReaderT[Any, Any, *]] = {
+  private val unliftReaderTAny: Unlift[AnyK, ReaderT[Any, Any, *]] = {
     type RT[a] = ReaderT[Any, Any, a]
-    new Lift[Any, RT] {
+    new Unlift[Any, RT] {
       def lift[A](fa: Any): RT[A] = ReaderT.liftF(fa)
+
+      val unlift: RT[RT ~> Any] = ReaderT[Any, Any, RT ~> Any](r => funK[RT, Any](f => f.run(r)))
     }
   }
-  implicit def liftReaderT[F[_], R]: Lift[F, ReaderT[F, R, *]] = liftReaderTAny.asInstanceOf[Lift[F, ReaderT[F, R, *]]]
+  implicit def liftReaderT[F[_], R]: Lift[F, ReaderT[F, R, *]]     =
+    unliftReaderTAny.asInstanceOf[Unlift[F, ReaderT[F, R, *]]]
 }
 
 private[lift] trait LiftInstances1 extends LiftInstances2 {

@@ -1,24 +1,24 @@
 package tofu.example.doobie
 
 import cats.data.ReaderT
-import cats.effect.{ContextShift, Effect, IO, IOApp, Sync}
-import cats.{Apply, Monad}
+import cats.effect.{Async, ContextShift, IO, IOApp, Sync}
 import cats.tagless.syntax.functorK._
+import cats.{Apply, Monad}
 import derevo.derive
 import doobie._
 import doobie.implicits._
 import doobie.util.log.LogHandler
+import tofu.doobie.LiftConnectionIO
 import tofu.doobie.log.{EmbeddableLogHandler, LogHandlerF}
 import tofu.doobie.transactor.Txr
-import tofu.doobie.LiftConnectionIO
 import tofu.higherKind.derived.representableK
 import tofu.lift.{Lift, UnliftIO}
 import tofu.logging.derivation.{loggable, loggingMidTry}
 import tofu.logging.{Logging, LoggingCompanion, Logs}
 import tofu.syntax.context._
-import tofu.syntax.monadic._
 import tofu.syntax.doobie.log.handler._
 import tofu.syntax.doobie.log.string._
+import tofu.syntax.monadic._
 import tofu.{Delay, Tries, WithLocal, WithRun}
 
 // Simple context
@@ -108,8 +108,7 @@ object PersonStorage extends LoggingCompanion[PersonStorage] {
 }
 
 object TofuDoobieExample extends IOApp.Simple {
-  val run: IO[Unit] =
-    runF[IO, ReaderT[IO, Ctx, *]]
+  val run: IO[Unit] = runF[IO, ReaderT[IO, Ctx, *]]
 
   def runF[I[_]: Effect: ContextShift, F[_]: Sync: UnliftIO: WithRun[*[_], I, Ctx]]: I[Unit] = {
     // Simplified wiring below
