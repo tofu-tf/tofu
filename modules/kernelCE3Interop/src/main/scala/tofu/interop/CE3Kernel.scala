@@ -17,7 +17,8 @@ import tofu.internal.NonTofu
 import tofu.internal.carriers._
 import tofu.lift.Lift
 import tofu.syntax.monadic._
-import tofu.{Fire, Performer, Scoped, WithContext}
+import tofu.{Fire, Scoped, WithContext}
+import tofu.Performer
 
 object CE3Kernel {
   def delayViaSync[K[_]](implicit KS: Sync[K]): DelayCarrier3[K] =

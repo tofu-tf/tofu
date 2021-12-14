@@ -5,7 +5,7 @@ import cats.~>
 import doobie.ConnectionIO
 import tofu.kernel.types.AnyK
 
-object ConnectionCIO {
+object ConnectionCIO extends ConnectionCIOCrossVersion {
   trait Cont[F[_]] extends (ConnectionIO ~> F)
   object Cont {
     private val liftConnectionIOToConnectionCIOAny: LiftConnectionIO[ConnectionCIO[AnyK, *]]                =

@@ -15,6 +15,7 @@ import tofu.internal.NonTofu
 import tofu.internal.carriers._
 import tofu.lift.Lift
 import tofu.syntax.monadic._
+import tofu.internal.instances.PerformViaUnlift
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search
@@ -112,14 +113,17 @@ object CE2Kernel {
     }
 
   final def performEffect[F[_]](implicit F: Effect[F], @unused _nt: NonTofu[F]): PerformCarrier2[F, Throwable] =
-    new PerformCarrier2[F, Throwable] with Performer.OfExit[F, Throwable] {
-      val functor: Effect[F] = F
+    new EffectPerformer[F]
 
-      def performer: F[Performer.OfExit[F, Throwable]] = functor.pure(this)
-
-      def perform[A](cont: Exit[Throwable, A] => Unit)(f: F[A]): F[Unit] =
-        functor.delay(functor.runAsync(f)(e => IO(cont(Exit.fromEither(e)))).unsafeRunSync())
-    }
+  final def performContextEffect[F[_]](implicit
+      F: ContextEffect[F],
+      @unused _nt: NonTofu[F]
+  ): PerformCarrier2Contextual[F, Throwable] =
+    new PerformViaUnlift[F, F.Base, PerformOf.ExitCont[Throwable, *], Unit]()(
+      performEffect[F.Base](F.effect, NonTofu.refute),
+      F.unlift,
+      F.apply
+    ) with PerformCarrier2Contextual[F, Throwable]
 
   final def agentByRefAndSemaphore[I[_]: Monad, F[_]: Fire: Monad](implicit
       makeRef: MakeRef[I, F],
