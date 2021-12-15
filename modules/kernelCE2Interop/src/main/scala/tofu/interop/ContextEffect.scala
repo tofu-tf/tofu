@@ -13,7 +13,7 @@ abstract class ContextEffect[F[_]] {
   implicit def apply: Apply[F]
 }
 
-object ContextEffect{
+object ContextEffect {
   final class Impl[F[_], B[_]](implicit val effect: Effect[B], val unlift: Unlift[B, F], val apply: Apply[F])
       extends ContextEffect[F] {
     final type Base[A] = B[A]

@@ -14,7 +14,8 @@ trait PerformCarrier2Contextual[F[_], E] extends Perform[F, E]
 
 object PerformCarrier2Contextual {
   final implicit def interop2ContextEffect[F[_]]: PerformCarrier2Contextual[F, Throwable] =
-    macro Interop.delegate[PerformCarrier2Contextual[F, Throwable], F, { val `tofu.interop.CE2Kernel.performContextEffect`: Unit }]
+    macro Interop
+      .delegate[PerformCarrier2Contextual[F, Throwable], F, { val `tofu.interop.CE2Kernel.performContextEffect`: Unit }]
 }
 
 trait PerformCarrier3[F[_], E] extends Perform[F, E]
