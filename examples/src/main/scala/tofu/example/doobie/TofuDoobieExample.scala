@@ -12,9 +12,10 @@ import tofu.doobie.LiftConnectionIO
 import tofu.doobie.log.{EmbeddableLogHandler, LogHandlerF}
 import tofu.doobie.transactor.Txr
 import tofu.higherKind.derived.representableK
-import tofu.lift.{Lift, UnliftIO}
+import tofu.kernel.types.PerformThrow
+import tofu.lift.Lift
 import tofu.logging.derivation.{loggable, loggingMidTry}
-import tofu.logging.{Logging, LoggingCompanion, Logs}
+import tofu.logging.{Logging, LoggingCompanion}
 import tofu.syntax.context._
 import tofu.syntax.doobie.log.handler._
 import tofu.syntax.doobie.log.string._
@@ -110,9 +111,9 @@ object PersonStorage extends LoggingCompanion[PersonStorage] {
 object TofuDoobieExample extends IOApp.Simple {
   val run: IO[Unit] = runF[IO, ReaderT[IO, Ctx, *]]
 
-  def runF[I[_]: Effect: ContextShift, F[_]: Sync: UnliftIO: WithRun[*[_], I, Ctx]]: I[Unit] = {
+  def runF[I[_]: Async: ContextShift, F[_]: Sync: PerformThrow: WithRun[*[_], I, Ctx]]: I[Unit] = {
     // Simplified wiring below
-    implicit val loggingF = Logs.contextual[F, Ctx]
+    implicit val loggingF = Logging.Make.contextual[F, Ctx]
 
     val transactor   = Transactor.fromDriverManager[I](
       driver = "org.h2.Driver",
@@ -121,9 +122,9 @@ object TofuDoobieExample extends IOApp.Simple {
     implicit val txr = Txr.continuational(transactor.mapK(Lift.trans[I, F]))
 
     def initStorage[
-        DB[_]: Tries: Txr[F, *[_]]: Delay: Monad: LiftConnectionIO: WithLocal[*[_], Ctx]: UnliftIO
+        DB[_]: Tries: Txr[F, *[_]]: Delay: Monad: LiftConnectionIO: WithLocal[*[_], Ctx]: PerformThrow
     ]: PersonStorage[F] = {
-      implicit val loggingDB = Logs.contextual[DB, Ctx]
+      implicit val loggingDB = Logging.Make.contextual[DB, Ctx]
 
       implicit val elh = EmbeddableLogHandler.sync(LogHandlerF.loggable[DB](Logging.Debug))
 

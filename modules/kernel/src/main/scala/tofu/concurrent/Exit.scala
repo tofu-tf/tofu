@@ -64,4 +64,6 @@ object Exit {
 
   implicit def exitInstance[E]: Traverse[Exit[E, *]] with Applicative[Exit[E, *]] =
     exitInstanceAny.asInstanceOf[Traverse[Exit[E, *]] with Applicative[Exit[E, *]]]
+
+  object CanceledException extends InterruptedException
 }

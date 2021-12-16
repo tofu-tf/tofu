@@ -50,6 +50,4 @@ class PerformInterop2 {
 object PerformOf {
   type Cont[Ex[_], A] = Ex[A] => Unit
   type ExitCont[E, A] = Exit[E, A] => Unit
-
-  final implicit def functorK[F[_]]: FunctorK[PerformOf[F, *[_]]] = new PerformOfFunctorK[F]
 }
