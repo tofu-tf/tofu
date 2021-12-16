@@ -118,12 +118,12 @@ object CE2Kernel {
   final def performContextEffect[F[_]](implicit
       F: ContextEffect[F],
       @unused _nt: NonTofu[F]
-  ): PerformCarrier2Contextual[F, Throwable] =
+  ): PerformCarrier2Context[F] =
     new PerformViaUnlift[F, F.Base, PerformOf.ExitCont[Throwable, *], Unit]()(
       performEffect[F.Base](F.effect, NonTofu.refute),
       F.unlift,
       F.apply
-    ) with PerformCarrier2Contextual[F, Throwable]
+    ) with PerformCarrier2Contextual[F]
 
   final def agentByRefAndSemaphore[I[_]: Monad, F[_]: Fire: Monad](implicit
       makeRef: MakeRef[I, F],

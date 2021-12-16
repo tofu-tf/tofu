@@ -1,12 +1,11 @@
 package tofu
 import cats.Functor
 import cats.data.ReaderT
-import cats.tagless.{ContravariantK, FunctorK}
-import tofu.concurrent.Exit
-import tofu.internal.carriers.{PerformCarrier2, PerformCarrier3}
+import cats.tagless.ContravariantK
+import tofu.internal.carriers.{PerformCarrier2, PerformCarrier2Context, PerformCarrier3}
 import tofu.internal.instances._
-import tofu.internal.carriers.PerformCarrier2Contextual
-import tofu.kernel.types.PerformOf
+import tofu.internal.{Effect2Comp, EffectComp}
+import tofu.kernel.types.{PerformCont, PerformExitCont, PerformOf, PerformThrow}
 
 trait Performer[F[_], -Cont[_], Cancel] {
   def perform[A](cont: Cont[A])(fa: F[A]): F[Cancel]
@@ -25,6 +24,9 @@ trait PerformVia[F[_], Cont[_], Cancel] extends WithContext[F, Performer[F, Cont
 }
 
 object PerformVia extends PerformInterop {
+  def apply[F[_], Cont[_], Cancel](implicit instance: PerformVia[F, Cont, Cancel]): PerformVia[F, Cont, Cancel] =
+    instance
+
   implicit def contravariantK[F[_], Cancel]: ContravariantK[PerformVia[F, *[_], Cancel]] =
     new PerformViaContravariantK[F, Cancel]
 
@@ -33,21 +35,22 @@ object PerformVia extends PerformInterop {
   ): PerformVia[ReaderT[F, R, *], Cont, Cancel] = new PerformViaReader(RP)
 }
 
-class PerformInterop extends PerformInterop1 {
-  final implicit def interopCE3[F[_], E](implicit carrier: PerformCarrier3[F, E]): PerformOf[F, Exit[E, *]] = carrier
-
+class PerformInterop  extends PerformInterop1 {
+  final implicit def interopCE3[F[_]](implicit carrier: PerformCarrier3[F]): PerformThrow[F] = carrier
 }
 class PerformInterop1 extends PerformInterop2 {
-  final implicit def interopCE2[F[_], E](implicit carrier: PerformCarrier2[F, E]): PerformOf[F, Exit[E, *]] = carrier
+  final implicit def interopCE2[F[_]](implicit carrier: PerformCarrier2[F]): PerformThrow[F] = carrier
 }
 
 class PerformInterop2 {
-  final implicit def interopCE2Contextual[F[_], E](implicit
-      carrier: PerformCarrier2Contextual[F, E]
-  ): PerformOf[F, Exit[E, *]] = carrier
+  final implicit def interopCE2Contextual[F[_]](implicit
+      carrier: PerformCarrier2Context[F]
+  ): PerformThrow[F] = carrier
 }
 
-object PerformOf {
-  type Cont[Ex[_], A] = Ex[A] => Unit
-  type ExitCont[E, A] = Exit[E, A] => Unit
+object PerformOf extends Effect2Comp[PerformOf] {
+  type Cont[Ex[_], A] = PerformCont[Ex, A]
+  type ExitCont[E, A] = PerformExitCont[E, A]
 }
+
+object PerformThrow extends EffectComp[PerformThrow]

@@ -121,8 +121,8 @@ object CE3Kernel {
   final def performDispatch[F[_]](implicit
       FD: WithContext[F, Dispatcher[F]],
       F: Async[F]
-  ): PerformCarrier3[F, Throwable] =
-    new PerformCarrier3[F, Throwable] {
+  ): PerformCarrier3[F] =
+    new PerformCarrier3[F] {
       val functor: Async[F] = F
 
       def performer: F[Performer.OfExit[F, Throwable]] =

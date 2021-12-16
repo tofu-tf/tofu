@@ -41,7 +41,9 @@ trait KernelTypes extends Any {
   type Calculates[F[_]] = Scoped[Scoped.Calculation, F]
   type CalcExec[F[_]]   = ScopedExecute[Scoped.Calculation, F]
 
-  type PerformOf[F[_], Ex[_]] = PerformVia[F, PerformOf.Cont[Ex, *], Unit]
+  type PerformCont[Ex[_], A]  = Ex[A] => Unit
+  type PerformExitCont[E, A]  = Exit[E, A] => Unit
+  type PerformOf[F[_], Ex[_]] = PerformVia[F, PerformCont[Ex, *], Unit]
   type Perform[F[_], E]       = PerformOf[F, Exit[E, *]]
   type PerformThrow[F[_]]     = Perform[F, Throwable]
 }

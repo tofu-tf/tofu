@@ -6,7 +6,7 @@ import cats.effect.IO
 import cats.effect.Effect
 
 final class EffectPerformer[F[_]](implicit val functor: Effect[F])
-    extends PerformCarrier2[F, Throwable] with Performer.OfExit[F, Throwable] {
+    extends PerformCarrier2[F] with Performer.OfExit[F, Throwable] {
 
   def performer: F[Performer.OfExit[F, Throwable]] = functor.pure(this)
 
