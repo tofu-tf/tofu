@@ -2,12 +2,23 @@ package tofu
 package interop
 
 import java.util.concurrent.TimeUnit
-
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
-
 import cats.effect.concurrent.{MVar, Ref}
-import cats.effect.{Async, Blocker, Bracket, Concurrent, ContextShift, Effect, ExitCase, Fiber, IO, Sync, Timer}
+import cats.effect.{
+  Async,
+  Blocker,
+  Bracket,
+  Concurrent,
+  ConcurrentEffect,
+  ContextShift,
+  Effect,
+  ExitCase,
+  Fiber,
+  IO,
+  Sync,
+  Timer
+}
 import cats.{Functor, Id, Monad, ~>}
 import tofu.compat.unused
 import tofu.concurrent._
@@ -112,15 +123,18 @@ object CE2Kernel {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
     }
 
-  final def performEffect[F[_]](implicit F: Effect[F], @unused _nt: NonTofu[F]): PerformCarrier2[F, Throwable] =
-    new EffectPerformer[F]
+  final def performConcurrentEffect[F[_]](implicit
+      F: ConcurrentEffect[F],
+      @unused _nt: NonTofu[F]
+  ): PerformCarrier2[F, Throwable] =
+    new ConcurrentEffectPerformer[F]
 
-  final def performContextEffect[F[_]](implicit
-      F: ContextEffect[F],
+  final def performContextConcurrentEffect[F[_]](implicit
+      F: ContextConcurrentEffect[F],
       @unused _nt: NonTofu[F]
   ): PerformCarrier2Context[F] =
     new PerformViaUnlift[F, F.Base, PerformOf.ExitCont[Throwable, *], Unit]()(
-      performEffect[F.Base](F.effect, NonTofu.refute),
+      performConcurrentEffect[F.Base](F.concurrentEffect, NonTofu.refute),
       F.unlift,
       F.apply
     ) with PerformCarrier2Contextual[F]

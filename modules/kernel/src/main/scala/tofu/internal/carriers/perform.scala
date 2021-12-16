@@ -17,7 +17,7 @@ object PerformCarrier2Context {
     macro Interop.delegate[
       PerformCarrier2Context[F],
       F, {
-        val `tofu.interop.CE2Kernel.performContextEffect`: Unit
+        val `tofu.interop.CE2Kernel.performContextConcurrentEffect`: Unit
       }
     ]
 }

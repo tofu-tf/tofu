@@ -1,7 +1,7 @@
 package tofu.example.doobie
 
 import cats.data.ReaderT
-import cats.effect.{ContextShift, IO, IOApp, Sync, Effect}
+import cats.effect.{Async, ContextShift, IO, IOApp, Sync}
 import cats.tagless.syntax.functorK._
 import cats.{Apply, Monad}
 import derevo.derive
@@ -126,7 +126,7 @@ object TofuDoobieExample extends IOApp.Simple {
     ]: PersonStorage[F] = {
       implicit val loggingDB = Logging.Make.contextual[DB, Ctx]
 
-      implicit val elh = EmbeddableLogHandler.sync(LogHandlerF.loggable[DB](Logging.Debug))
+      implicit val elh = EmbeddableLogHandler.async(LogHandlerF.loggable[DB](Logging.Debug))
 
       val personSql = PersonSql.make[DB].attachErrLogs
       val deptSql   = DeptSql.make[DB].attachErrLogs

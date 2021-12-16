@@ -2,8 +2,7 @@ package tofu.interop
 import tofu.internal.carriers.PerformCarrier2
 import tofu.Performer
 import tofu.concurrent.Exit
-import cats.effect.IO
-import cats.effect.Effect
+import cats.effect.{ConcurrentEffect, IO}
 
 final class EffectPerformer[F[_]](implicit val functor: Effect[F])
     extends PerformCarrier2[F] with Performer.OfExit[F, Throwable] {
@@ -11,5 +10,5 @@ final class EffectPerformer[F[_]](implicit val functor: Effect[F])
   def performer: F[Performer.OfExit[F, Throwable]] = functor.pure(this)
 
   def perform[A](cont: Exit[Throwable, A] => Unit)(f: F[A]): F[Unit] =
-    functor.delay(functor.runAsync(f)(e => IO(cont(Exit.fromEither(e)))).unsafeRunSync())
+    functor.runCancelable(f)(e => IO(cont(Exit.fromEither(e)))).unsafeRunSync()
 }

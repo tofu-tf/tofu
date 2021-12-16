@@ -41,7 +41,13 @@ object EmbeddableLogHandler {
   def async[F[_]: Functor](logHandlerF: LogHandlerF[F])(implicit P: PerformThrow[F]): EmbeddableLogHandler[F] =
     new EmbeddableLogHandler(P.performer.map { perf =>
       LogHandler { event =>
-        val _ = perf.perform((_: Exit[Throwable, Unit]) => ())(logHandlerF.run(event))
+        val _ = perf.perform((exit: Exit[Throwable, Unit]) =>
+          exit match {
+            case Exit.Canceled     => throw Exit.CanceledException
+            case Exit.Error(e)     => throw e
+            case Exit.Completed(_) => ()
+          }
+        )(logHandlerF.run(event))
       }
     })
 
