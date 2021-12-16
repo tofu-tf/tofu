@@ -1,7 +1,7 @@
 package tofu
 import cats.Functor
 import cats.data.ReaderT
-import cats.tagless.{ContravariantK, FunctorK}
+import cats.tagless.ContravariantK
 import tofu.concurrent.Exit
 import tofu.internal.carriers.{PerformCarrier2, PerformCarrier3}
 import tofu.internal.instances._
