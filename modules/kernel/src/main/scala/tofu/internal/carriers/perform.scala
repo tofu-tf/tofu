@@ -6,18 +6,19 @@ import tofu.internal.Interop
 trait PerformCarrier2[F[_], E] extends Perform[F, E]
 
 object PerformCarrier2 {
-  final implicit def interop2Effect[F[_]]: PerformCarrier2[F, Throwable] =
-    macro Interop.delegate[PerformCarrier2[F, Throwable], F, { val `tofu.interop.CE2Kernel.performEffect`: Unit }]
+  final implicit def interop2ConcurrentEffect[F[_]]: PerformCarrier2[F, Throwable] =
+    macro Interop
+      .delegate[PerformCarrier2[F, Throwable], F, { val `tofu.interop.CE2Kernel.performConcurrentEffect`: Unit }]
 }
 
 trait PerformCarrier2Contextual[F[_], E] extends Perform[F, E]
 
 object PerformCarrier2Contextual {
-  final implicit def interop2ContextEffect[F[_]]: PerformCarrier2Contextual[F, Throwable] =
+  final implicit def interop2ContextConcurrentEffect[F[_]]: PerformCarrier2Contextual[F, Throwable] =
     macro Interop.delegate[
       PerformCarrier2Contextual[F, Throwable],
       F, {
-        val `tofu.interop.CE2Kernel.performContextEffect`: Unit
+        val `tofu.interop.CE2Kernel.performContextConcurrentEffect`: Unit
       }
     ]
 }
