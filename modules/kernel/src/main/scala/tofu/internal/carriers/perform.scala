@@ -26,5 +26,5 @@ trait PerformCarrier3[F[_]] extends Perform[F, Throwable]
 
 object PerformCarrier3 {
   final implicit def interop3IO[F[_]]: PerformCarrier3[F] =
-    macro Interop.delegate[PerformCarrier3[F], F, { val `tofu.interop.CE3Kernel.performDispatch`: Unit }]
+    macro Interop.delegate[PerformCarrier3[F], F, { val `tofu.interop.CE3Kernel.performDispatchContext`: Unit }]
 }

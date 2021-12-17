@@ -6,9 +6,19 @@ import tofu.internal.carriers.{PerformCarrier2, PerformCarrier2Context, PerformC
 import tofu.internal.instances._
 import tofu.internal.{Effect2Comp, EffectComp}
 import tofu.kernel.types.{PerformCont, PerformExitCont, PerformOf, PerformThrow}
+import scala.concurrent.Promise
+import tofu.concurrent.Exit
+import scala.concurrent.Future
 
 trait Performer[F[_], -Cont[_], Cancel] {
   def perform[A](cont: Cont[A])(fa: F[A]): F[Cancel]
+
+  def toFuture[A](fa: F[A])(implicit ev: (Exit[Throwable, A] => Unit) <:< Cont[A]): (Future[A], F[Cancel]) = {
+    val p                                = Promise[A]()
+    val cont: Exit[Throwable, A] => Unit = ex => p.complete(ex.toTry)
+
+    (p.future, perform[A](cont)(fa))
+  }
 }
 
 object Performer {

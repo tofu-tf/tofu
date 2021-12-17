@@ -126,7 +126,7 @@ object CE2Kernel {
   final def performConcurrentEffect[F[_]](implicit
       F: ConcurrentEffect[F],
       @unused _nt: NonTofu[F]
-  ): PerformCarrier2[F, Throwable] =
+  ): PerformCarrier2[F] =
     new ConcurrentEffectPerformer[F]
 
   final def performContextConcurrentEffect[F[_]](implicit
@@ -137,7 +137,7 @@ object CE2Kernel {
       performConcurrentEffect[F.Base](F.concurrentEffect, NonTofu.refute),
       F.unlift,
       F.apply
-    ) with PerformCarrier2Contextual[F]
+    ) with PerformCarrier2Context[F]
 
   final def agentByRefAndSemaphore[I[_]: Monad, F[_]: Fire: Monad](implicit
       makeRef: MakeRef[I, F],

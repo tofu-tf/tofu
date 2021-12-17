@@ -3,8 +3,24 @@ package tofu.concurrent
 import cats.{Applicative, Eval, Traverse}
 import tofu.control.ApplicativeZip
 import tofu.syntax.monadic._
+import scala.util.Try
+import tofu.concurrent.Exit.Canceled
+import tofu.concurrent.Exit.Completed
+import tofu.concurrent.Exit.Error
 
-sealed trait Exit[+E, +A]
+sealed trait Exit[+E, +A] {
+  def toTry(implicit ev: E <:< Throwable): Try[A] = this match {
+    case Canceled     => util.Failure(new InterruptedException)
+    case Error(e)     => util.Failure(e)
+    case Completed(a) => util.Success(a)
+  }
+
+  def toEither: Either[Option[E], A] = this match {
+    case Canceled     => Left(None)
+    case Error(e)     => Left(Some(e))
+    case Completed(a) => Right(a)
+  }
+}
 
 object Exit {
 

@@ -18,7 +18,6 @@ import tofu.internal.carriers._
 import tofu.lift.Lift
 import tofu.syntax.monadic._
 import tofu.{Fire, Scoped, WithContext}
-import tofu.Performer
 
 object CE3Kernel {
   def delayViaSync[K[_]](implicit KS: Sync[K]): DelayCarrier3[K] =
@@ -82,9 +81,15 @@ object CE3Kernel {
     }
 
   final def asyncExecute[F[_]](implicit
-      ec: ExecutionContext,
       F: Async[F]
-  ): ScopedCarrier3[Scoped.Main, F] = makeExecute[Scoped.Main, F](ec)
+  ): ScopedCarrier3[Scoped.Main, F] = new ScopedCarrier3[Scoped.Main, F] {
+    def runScoped[A](fa: F[A]): F[A] = fa
+
+    def executionContext: F[ExecutionContext] = F.executionContext
+
+    def deferFutureAction[A](f: ExecutionContext => Future[A]): F[A] =
+      F.fromFuture(executionContext.flatMap(ec => F.delay(f(ec))))
+  }
 
   final def blockerExecute[F[_]](implicit
       blocker: Blocker[F],
@@ -118,16 +123,10 @@ object CE3Kernel {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
     }
 
-  final def performDispatch[F[_]](implicit
-      FD: WithContext[F, Dispatcher[F]],
-      F: Async[F]
-  ): PerformCarrier3[F] =
-    new PerformCarrier3[F] {
-      val functor: Async[F] = F
-
-      def performer: F[Performer.OfExit[F, Throwable]] =
-        functor.executionContext.flatMap(implicit ce => functor.map(FD.context)(new DispatchPerformer(_, functor)))
-    }
+  final def performDispatchContext[F[_]](implicit
+      F: ContextDispatch[F],
+  ): PerformCarrier3[F] = new DispatchPerform[F, F.Base]()(F.async, F.apply, F.dispatcher, F.unlift)
+    with PerformCarrier3[F]
 
   final def agentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow: Fire](implicit
       makeRef: MakeRef[I, F],
@@ -165,14 +164,4 @@ object CE3Kernel {
           sem <- makeSemaphore.semaphore(1)
         } yield UnderlyingSemRef[F, G, A](ref, sem)
     }
-}
-
-class DispatchPerformer[F[_]](dispatcher: Dispatcher[F], F: Async[F])(implicit ce: ExecutionContext)
-    extends Performer.OfExit[F, Throwable] {
-  def perform[A](cont: Exit[Throwable, A] => Unit)(fa: F[A]): F[Unit] = {
-    val (res, cancel) = dispatcher.unsafeToFutureCancelable(fa)
-    res.onComplete(t => cont(Exit.fromTry(t)))
-    F.fromFuture(F.delay(cancel()))
-  }
-
 }

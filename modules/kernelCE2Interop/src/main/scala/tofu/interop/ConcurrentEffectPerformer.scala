@@ -4,7 +4,7 @@ import tofu.Performer
 import tofu.concurrent.Exit
 import cats.effect.{ConcurrentEffect, IO}
 
-final class EffectPerformer[F[_]](implicit val functor: Effect[F])
+final class ConcurrentEffectPerformer[F[_]](implicit val functor: ConcurrentEffect[F])
     extends PerformCarrier2[F] with Performer.OfExit[F, Throwable] {
 
   def performer: F[Performer.OfExit[F, Throwable]] = functor.pure(this)
