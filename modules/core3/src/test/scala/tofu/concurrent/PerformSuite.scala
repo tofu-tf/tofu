@@ -1,11 +1,7 @@
 package tofu.concurrent
 
-import java.time.Instant
-import java.{time => jt}
-
 import scala.annotation.unchecked.uncheckedVariance
 import scala.concurrent.duration._
-import scala.jdk.DurationConverters._
 
 import cats.Monad
 import cats.data.ReaderT
@@ -17,7 +13,7 @@ import tofu.generate.GenRandom
 import tofu.syntax.monadic._
 import tofu.syntax.scoped._
 import tofu.syntax.time._
-import tofu.time.{Clock, Sleep}
+import tofu.time.Sleep
 import tofu.{Execute, PerformThrow, WithContext}
 
 case class MyContext(dispatcher: Dispatcher[IO], traceId: Long)
@@ -42,8 +38,11 @@ class PerformSuite extends AnyFunSuite with Matchers {
     traceId    <- Resource.eval(genTraceId)
   } yield MyContext(dispatcher, traceId)
 
-  def waitTime[F[_]: Clock: Sleep: Monad](start: Instant): F[jt.Duration] =
-    Sleep[F].sleep(200.millis) *> now.instant[F].map(jt.Duration.between(start, _))
+  def waitUpdate[F[_]: Sleep: Monad](atom: Atom[F, Int]): F[Int] = for {
+    v <- atom.get
+    _ <- sleep(100.millis)
+    _ <- atom.update(_ + 1)
+  } yield v
 
   def program[F[_]: PerformThrow: Monad: Execute, A](fa: F[A]) = for {
     performer <- PerformThrow[F].performer
@@ -56,13 +55,13 @@ class PerformSuite extends AnyFunSuite with Matchers {
   } yield List(res1, res2, res3)
 
   val run = for {
-    start <- now.instant[Eff]
-    ress  <- program(waitTime[Eff](start))
-  } yield ress.map(_.toScala)
+    atom <- MakeAtom[Eff, Eff].of(1)
+    ress <- program(waitUpdate(atom))
+  } yield ress
 
   test("parallize over performed futures") {
     import cats.effect.unsafe.implicits.global
     val ts = init.use(run.run).unsafeRunSync()
-    all(ts) must (be > 200.millis and be < 400.millis)
+    all(ts) mustEqual 1
   }
 }
