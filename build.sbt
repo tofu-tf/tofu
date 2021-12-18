@@ -407,7 +407,11 @@ lazy val tofu = project
     defaultSettings,
     name := "tofu"
   )
-  .aggregate((coreModules ++ commonModules ++ ce3CoreModules :+ docs :+ examples).map(x => x: ProjectReference): _*)
+  .aggregate(
+    (coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules :+ docs :+ examples :+ examplesCE3).map(x =>
+      x: ProjectReference
+    ): _*
+  )
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
 lazy val defaultScalacOptions = scalacOptions := {
