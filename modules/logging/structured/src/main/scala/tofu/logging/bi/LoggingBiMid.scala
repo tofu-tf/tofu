@@ -9,9 +9,9 @@ import tofu.logging.{Logging, builder}
   * logging postponed until this middleware is attached to the core instance
   */
 abstract class LoggingBiMid[E, A] {
-  def around[F[+_, +_]: Bind: Logging.SafeBase](fa: F[E, A]): F[E, A]
+  def around[F[+_, +_]: Bind: Logging.Safe](fa: F[E, A]): F[E, A]
 
-  def toMid[F[+_, +_]: Bind: Logging.SafeBase]: BiMid[F, E, A] = fx => around(fx)
+  def toMid[F[+_, +_]: Bind: Logging.Safe]: BiMid[F, E, A] = fx => around(fx)
 }
 
 object LoggingBiMid extends builder.LoggingBiMidBuilder.Default {

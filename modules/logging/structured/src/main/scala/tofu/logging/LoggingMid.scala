@@ -10,9 +10,9 @@ import tofu.higherKind.derived.HigherKindedMacros
   * the core instance
   */
 abstract class LoggingMid[A] {
-  def around[F[_]: Monad: LoggingBase](fa: F[A]): F[A]
+  def around[F[_]: Monad: Logging](fa: F[A]): F[A]
 
-  def toMid[F[_]: Monad: LoggingBase]: Mid[F, A] = around(_)
+  def toMid[F[_]: Monad: Logging]: Mid[F, A] = around(_)
 }
 
 object LoggingMid extends builder.LoggingMidBuilder.DefaultImpl {
@@ -27,11 +27,11 @@ object LoggingMid extends builder.LoggingMidBuilder.DefaultImpl {
   * until this middleware is attached to the core instance
   */
 abstract class LoggingErrMid[E, A] extends LoggingMid[A] {
-  def aroundErr[F[_]: Monad: Errors[*[_], E]: LoggingBase](fa: F[A]): F[A]
+  def aroundErr[F[_]: Monad: Errors[*[_], E]: Logging](fa: F[A]): F[A]
 
-  def around[F[_]: Monad: LoggingBase](fa: F[A]): F[A] = around(fa)
+  def around[F[_]: Monad: Logging](fa: F[A]): F[A] = around(fa)
 
-  def toMid[F[_]: Monad: Errors[*[_], E]: LoggingBase]: Mid[F, A] = aroundErr(_)
+  def toMid[F[_]: Monad: Errors[*[_], E]: Logging]: Mid[F, A] = aroundErr(_)
 }
 
 object LoggingErrMid {

@@ -26,7 +26,7 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
   /** Creates an instance of [[tofu.logging.Logging]] with a given arbitrary type tag, using it as a class to create
     * underlying [[org.slf4j.Logger]] with.
     */
-  def forService[Svc](implicit Svc: ClassTag[Svc]): I[Logging[F]] = byName(Svc.runtimeClass.getName())
+  def forService[Svc](implicit Svc: ClassTag[Svc]): I[ServiceLogging[F, Svc]] = byName(Svc.runtimeClass.getName()).map(_.asService[Svc])
 
   /** Creates an instance of [[tofu.logging.Logging]] for a given arbitrary string name, using it to create underlying
     * [[org.slf4j.Logger]] with.
@@ -35,7 +35,7 @@ trait Logs[+I[_], F[_]] extends LogsVOps[I, F] {
 
   final def biwiden[I1[a] >: I[a], F1[a] >: F[a]]: Logs[I1, F1] = this.asInstanceOf[Logs[I1, F1]]
 
-  final def service[Svc: ClassTag]: I[ServiceLogging[F, Svc]] = forService[Svc].asInstanceOf[I[ServiceLogging[F, Svc]]]
+  final def service[Svc: ClassTag]: I[ServiceLogging[F, Svc]] = forService[Svc]
 
   /** An alternative to [[service]] method for tagless final services.
     *

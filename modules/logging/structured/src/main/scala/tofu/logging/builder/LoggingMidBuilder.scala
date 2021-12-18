@@ -27,10 +27,10 @@ trait Prepared[U[f[_]], +T[_]] {
 trait LoggingMidBuilder extends Builder[LoggingMid] {
 
   /** do some logging upon enter to method invocation */
-  def onEnter[F[_]: LoggingBase](cls: Class[_], method: String, args: Seq[(String, LoggedValue)]): F[Unit]
+  def onEnter[F[_]: Logging](cls: Class[_], method: String, args: Seq[(String, LoggedValue)]): F[Unit]
 
   /** do some logging after leaving method invocation with known result */
-  def onLeave[F[_]: LoggingBase](
+  def onLeave[F[_]: Logging](
       cls: Class[_],
       method: String,
       args: Seq[(String, LoggedValue)],
@@ -50,7 +50,7 @@ trait LoggingMidBuilder extends Builder[LoggingMid] {
     }
     def result: LoggingMid[Res]                         = new LoggingMid[Res] {
       private[this] val argSeq                                 = args.toSeq
-      def around[F[_]: Monad: LoggingBase](fa: F[Res]): F[Res] =
+      def around[F[_]: Monad: Logging](fa: F[Res]): F[Res] =
         onEnter(cls, method, argSeq) *> fa.flatTap(res => onLeave(cls, method, argSeq, res))
     }
   }
@@ -63,11 +63,11 @@ trait LoggingMidBuilder extends Builder[LoggingMid] {
 object LoggingMidBuilder {
   trait Default extends LoggingMidBuilder {
     def onEnter[F[_]](cls: Class[_], method: String, args: Seq[(String, LoggedValue)])(implicit
-        F: LoggingBase[F]
+        F: Logging[F]
     ): F[Unit] = F.debug("entering {} {}", method, new ArgsLoggable(args))
 
     def onLeave[F[_]](cls: Class[_], method: String, args: Seq[(String, LoggedValue)], res: LoggedValue)(implicit
-        F: LoggingBase[F]
+        F: Logging[F]
     ): F[Unit] = F.debug("leaving {} {} with result {}", method, new ArgsLoggable(args), res)
   }
 
@@ -75,7 +75,7 @@ object LoggingMidBuilder {
 }
 
 trait LoggingErrMidBuilder[E] extends LoggingMidBuilder with Builder[LoggingErrMid[E, *]] {
-  def onFault[F[_]: LoggingBase](
+  def onFault[F[_]: Logging](
       cls: Class[_],
       method: String,
       args: Seq[(String, LoggedValue)],
@@ -91,7 +91,7 @@ trait LoggingErrMidBuilder[E] extends LoggingMidBuilder with Builder[LoggingErrM
   ) extends MethodImpl[U, Res](cls, method, args) with Method[U, Res, LoggingErrMid[E, *]] {
     override def result: LoggingErrMid[E, Res] = new LoggingErrMid[E, Res] {
       private[this] val argSeq                                                     = args.toSeq
-      def aroundErr[F[_]: Monad: Errors[*[_], E]: LoggingBase](fa: F[Res]): F[Res] =
+      def aroundErr[F[_]: Monad: Errors[*[_], E]: Logging](fa: F[Res]): F[Res] =
         onEnter(cls, method, argSeq) *>
           fa.onError(onFault(cls, method, argSeq, _: E))
             .flatTap(res => onLeave(cls, method, argSeq, res))
@@ -113,7 +113,7 @@ object LoggingErrMidBuilder {
         method: String,
         args: Seq[(String, LoggedValue)],
         err: E
-    )(implicit F: LoggingBase[F]): F[Unit] =
+    )(implicit F: Logging[F]): F[Unit] =
       F.error("error during {} {} error is {}", method, new ArgsLoggable(args), err)
 
   }
