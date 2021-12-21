@@ -198,5 +198,19 @@ class LoggableInstances {
       }
 
     def logShow(a: Option[T]): String = a.fold("<none>")(loggable.logShow)
+
+    override def putMaskedValue[I, V, R, S](a: Option[T], v: V)(
+        f: String => String,
+    )(implicit r: LogRenderer[I, V, R, S]): S = a match {
+      case Some(value) => loggable.putMaskedValue(value, v)(f)
+      case None        => v.zero
+    }
+
+    override def putMaskedField[I, V, R, S](a: Option[T], name: String, i: I)(
+        f: String => String,
+    )(implicit r: LogRenderer[I, V, R, S]): R = a match {
+      case Some(value) => loggable.putMaskedField(value, name, i)(f)
+      case None        => i.noop
+    }
   }
 }

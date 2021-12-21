@@ -52,6 +52,18 @@ class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
     ) shouldBe """{"one":"...","two":"4###","three":"3.######","four":["1.###","5.###"]}"""
   }
 
+  "MaskedBaz" should "emit Some" in {
+    json(
+      MaskedBaz(Some("auf"))
+    ) shouldBe """{"kek":"***"}"""
+  }
+
+  it should "not emit None" in {
+    json(
+      MaskedBaz(None)
+    ) shouldBe """{}"""
+  }
+
 }
 
 object DerivedLoggableSuite {
@@ -75,4 +87,7 @@ object DerivedLoggableSuite {
 
   @derive(loggable)
   final case class Baz(foos: List[Foo] = Nil, ys: Vector[Int] = Vector(), zs: Option[List[List[String]]] = None)
+
+  @derive(loggable)
+  final case class MaskedBaz(@masked kek: Option[String])
 }
