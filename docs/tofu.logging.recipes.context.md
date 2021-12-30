@@ -51,8 +51,8 @@ the `tofu-zio` [module](https://github.com/tofu-tf/tofu/tree/better-doobie-examp
 The first step is to create appropriate `Logs`. Usually it is done at the point where you build your app:
 
 ```scala
-implicit val logsContext: Logging.Make[RequestIO] = Logging.Make.plain[IO]
-implicit val logsMain: Logging.Make[IO] = Logging.Make.contextual[RequestIO]
+implicit val logsMain: Logging.Make[IO] = Logging.Make.plain[IO]
+implicit val logsContext: Logging.Make[RequestIO] = Logging.Make.contextual[RequestIO, RequestContext]
 ```
 
 Most of the time your app works with two or more effects, one of those is main and has no notion of context at all. The
