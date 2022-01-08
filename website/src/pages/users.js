@@ -27,7 +27,7 @@ function Users() {
             </div>
             <div className="card__image">{showcase}</div>
             <p>Are you using this project?</p>
-            <button href={editUrl} className="button button--secondary button--block">
+            <button onclick={editUrl} className="button button--secondary button--block">
               Add your company
             </button>
           </div>

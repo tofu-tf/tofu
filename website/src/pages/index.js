@@ -1,9 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
 
 import React from 'react';
 import Link from '@docusaurus/Link';
@@ -93,21 +87,9 @@ function Home() {
                 <h1 className={clsx(styles.featureHeading)}>
                   <Translate>Functional</Translate>
                 </h1>
-                <p className="">
+                <p className="index__text">
                   <Translate>
-                  "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                  blanditiis praesentium voluptatum deleniti atque corrupti quos
-                  dolores et quas molestias excepturi sint occaecati cupiditate non
-                  provident, similique sunt in culpa qui officia deserunt mollitia
-                  animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis
-                  est et expedita distinctio. Nam libero tempore, cum soluta nobis est
-                  eligendi optio cumque nihil impedit quo minus id quod maxime placeat
-                  facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.
-                  Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus
-                  saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.
-                  Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis
-                  voluptatibus maiores alias consequatur aut perferendis doloribus asperiores
-                  repellat."
+                  Functional programming is a programming paradigm in which it is tried to bind each and everything in pure mathematical functions. It is a declarative type of programming style that focuses on what to solve rather than how to solve (aimed by the imperative style of programming).
                   </Translate>
                 </p>
               </div>
@@ -121,21 +103,9 @@ function Home() {
                 <h1 className={clsx(styles.featureHeading)}>
                   <Translate>Tagless Final</Translate>
                 </h1>
-                <p className="">
+                <p className="index__text">
                   <Translate>
-                  "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                  blanditiis praesentium voluptatum deleniti atque corrupti quos
-                  dolores et quas molestias excepturi sint occaecati cupiditate non
-                  provident, similique sunt in culpa qui officia deserunt mollitia
-                  animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis
-                  est et expedita distinctio. Nam libero tempore, cum soluta nobis est
-                  eligendi optio cumque nihil impedit quo minus id quod maxime placeat
-                  facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.
-                  Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus
-                  saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.
-                  Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis
-                  voluptatibus maiores alias consequatur aut perferendis doloribus asperiores
-                  repellat."
+                  The pattern, born in the Haskell community, lets us embed a DSL into a host language. Even though the semantic has diverged from the original in Scala, the pattern’s main aim is to use interfaces as much as possible. 
                   </Translate>
                 </p>
               </div>
@@ -163,21 +133,9 @@ function Home() {
                 <h1 className={clsx(styles.featureHeading)}>
                   <Translate>Modular</Translate>
                 </h1>
-                <p className="">
+                <p className="index__text">
                   <Translate>
-                  "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                  blanditiis praesentium voluptatum deleniti atque corrupti quos
-                  dolores et quas molestias excepturi sint occaecati cupiditate non
-                  provident, similique sunt in culpa qui officia deserunt mollitia
-                  animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis
-                  est et expedita distinctio. Nam libero tempore, cum soluta nobis est
-                  eligendi optio cumque nihil impedit quo minus id quod maxime placeat
-                  facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.
-                  Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus
-                  saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.
-                  Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis
-                  voluptatibus maiores alias consequatur aut perferendis doloribus asperiores
-                  repellat."
+                  Tired of vendor-locking? Tofu is an ecosystem of independent libraries and frameworks allowing you to significantly increase productivity of your Scala development.
                   </Translate>
                 </p>
               </div>

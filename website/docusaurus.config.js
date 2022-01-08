@@ -1,11 +1,9 @@
 module.exports = {
   title: "Tofu",
   tagline: "Functional programming toolbox",
-  url: "https://ccellado.github.io",
-  //url: "https://docs.tofu.tf",
-  baseUrl: "/tofu/",
-  //organizationName: "TinkoffCreditSystems",
-  organizationName: "ccellado",
+  url: "https://docs.tofu.tf",
+  baseUrl: "/",
+  organizationName: "tofu-tf",
   projectName: "tofu",
   scripts: [
     "https://buttons.github.io/buttons.js"
@@ -72,12 +70,12 @@ module.exports = {
         {
           to: "docs/",
           label: "Docs",
-          position: "left"
+          position: "right"
         },
         {
           href: "/api/index.html",
           label: "API",
-          position: "left"
+          position: "right"
         }
       ]
     },
@@ -134,6 +132,13 @@ module.exports = {
       // }
     },
     colorMode: {
+      switchConfig: {
+        darkIcon: '🌙',
+        darkIconStyle: {
+          marginLeft: '2px',
+        },
+        lightIcon: '🔆'
+      },
       respectPrefersColorScheme: true
     }
   }
