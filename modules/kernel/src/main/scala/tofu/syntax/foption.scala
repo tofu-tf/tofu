@@ -35,6 +35,9 @@ object foption {
     def semiflatMap[B](f: A => F[B])(implicit F: Monad[F]): F[Option[B]] =
       lhs.flatMapF(f(_).map(_.some))
 
+    def semiflatTap[B](f: A => F[B])(implicit F: Monad[F]): F[Option[A]] =
+      lhs.flatTap(_.traverse(f))
+
     def mapIn[B](f: A => B)(implicit F: Functor[F]): F[Option[B]] =
       lhs.map(_.map(f))
 

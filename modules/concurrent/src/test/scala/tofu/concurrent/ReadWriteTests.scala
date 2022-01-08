@@ -272,7 +272,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           rw            <- rwOf(1)
           initialState  <- rw.getState
           (i1, update1) <- rw.write
-          f <- rw.write.start // blocked
+          f             <- rw.write.start // blocked
           blockedState  <- smallDelay *> rw.getState
           _             <- update1(i1 + 1)
           releaseState1 <- rw.getState
@@ -318,7 +318,7 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
           rw            <- rwOf(1)
           initialState  <- rw.getState
           (i1, release) <- rw.read
-          f <- rw.write.start // blocked
+          f             <- rw.write.start // blocked
           blockedState  <- smallDelay *> rw.getState
           _             <- release
           releaseState1 <- rw.getState
@@ -773,8 +773,8 @@ class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {
         vec <- Vector.range(1, 11).traverse(i => Ref.of[IO, Int](i))
         arr <- ReadWrite.of[IO, Vector[Ref[IO, Int]]](vec, maxReaders = 5)
 
-        readers = reader(arr, fal).replicateA(1000).start.replicateA(100) // 100 readers, each will read 1000 times
-        writers = writer(arr).replicateA(1000).start.replicateA(100) // 100 writers, each will swap array 1000 times
+        readers   = reader(arr, fal).replicateA(1000).start.replicateA(100) // 100 readers, each will read 1000 times
+        writers   = writer(arr).replicateA(1000).start.replicateA(100)      // 100 writers, each will swap array 1000 times
         (l1, l2) <- (readers, writers).parTupled
 
         l3 = l1.sequence

@@ -212,10 +212,10 @@ sealed trait Env[E, +A] {
     mapTask(_.executeOn(s, forceAsync))
   def fork: Env[E, Fiber[Env[E, *], A @uv]]                          = executeAsync.start
   @scala.deprecated("Replaced with startAndForget", "0.3.0")
-  def forkAndForget: Env[E, Unit] = mapTask(_.startAndForget)
+  def forkAndForget: Env[E, Unit]                                    = mapTask(_.startAndForget)
   def startAndForget: Env[E, Unit]                                   = mapTask(_.startAndForget)
 
-  //profunctorial syntax
+  // profunctorial syntax
   def choose[B, C](g: Env[B, C]): Env[Either[E, B], Either[A, C]] =
     Env {
       case Left(ctx) => run(ctx).map(Left(_))

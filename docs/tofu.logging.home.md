@@ -30,7 +30,7 @@ libraryDependencies += "tf.tofu" %% "tofu-kernel-ce2-interop" % "<latest version
 For ZIO users the following is enough:
 
 ```sbt
-libraryDependencies += "tf.tofu" %% "tofu-logging-zio" % "<latest version in the badge in README>"
+libraryDependencies += "tf.tofu" %% "tofu-zio-logging" % "<latest version in the badge in README>"
 
 ```
 See also [ZIO Logging](./tofu.logging.recipes.zio.md) section.
@@ -63,7 +63,7 @@ def processPayment[F[_]: Monad: Logging](client: Client, amount: Long): F[Result
 - Get to know [the core concepts](tofu.logging.main.entities.md)
 - Learn how to use [the syntax](tofu.logging.syntax.md)
 - Find a way to use `logging` suitable for you in the [recipes](tofu.logging.recipes.md)
-- Check out [the examples](https://github.com/tofu-tf/tofu/tree/better-doobie-example/examples)
+- Check out [the examples](.././examples/src/main/scala/tofu/example)
 
 ## Old documentation
 

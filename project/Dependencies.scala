@@ -14,7 +14,7 @@ object Dependencies {
 
     val tethys = "0.25.0"
 
-    val cats = "2.6.1"
+    val cats = "2.7.0"
 
     val catsEffect2 = "2.5.4"
 
@@ -28,13 +28,13 @@ object Dependencies {
 
     val enumeratum = "1.7.0"
 
-    val derevo = "0.12.6"
+    val derevo = "0.12.8"
 
     val slf4j = "1.7.32"
 
-    val fs2 = "2.5.9"
+    val fs2 = "2.5.10"
 
-    val logback = "1.2.6"
+    val logback = "1.2.10"
 
     val monix = "3.4.0"
 
@@ -44,13 +44,13 @@ object Dependencies {
 
     val typesafeConfig = "1.4.1"
 
-    val zio = "1.0.12"
+    val zio = "1.0.13"
 
     val zioCats = "2.5.1.0"
 
     val shapeless = "2.3.7"
 
-    val refined = "0.9.27"
+    val refined = "0.9.28"
 
     val doobie = "0.13.4"
 
@@ -63,13 +63,13 @@ object Dependencies {
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.5.0"
+    val collectionCompat = "2.6.0"
 
-    val log4Cats = "1.3.1"
+    val log4Cats = "1.4.0"
 
     val groovy = "3.0.9"
 
-    val http4s = "0.22.5"
+    val http4s = "0.22.8"
   }
 
   val noCatsCore       =
