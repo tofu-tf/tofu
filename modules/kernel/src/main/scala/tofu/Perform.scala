@@ -35,7 +35,6 @@ if you are using cats-effect 3.0 make sure you have an implicit instance of With
 or in case of F[A] = ReaderT[G, C, A], you have an instance of WithContext[F, Dispatcher[G]]""")
 trait PerformVia[F[_], Cont[_], Cancel] extends WithContext[F, Performer[F, Cont, Cancel]] {
   def performer: F[Performer[F, Cont, Cancel]]
-  type A = Int <:< Int
   final def context: F[Performer[F, Cont, Cancel]] = performer
 }
 
