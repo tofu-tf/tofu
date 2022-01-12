@@ -114,7 +114,7 @@ object PersonStorage extends LoggingCompanion[PersonStorage] {
 object TofuDoobieExample extends IOApp.Simple {
 
   val run: IO[Unit] = Dispatcher[IO].use { (disp: Dispatcher[IO]) =>
-    @unused implicit val withDispatcher: WithContext[IO, Dispatcher[IO]] = WithContext.const(disp)
+    @unused implicit val withDispatcher: WithContext[ReaderT[IO, Ctx, *], Dispatcher[IO]] = WithContext.const(disp)
     runF[IO, ReaderT[IO, Ctx, *]]
   }
 

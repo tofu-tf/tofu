@@ -9,6 +9,7 @@ import tofu.kernel.types.{PerformCont, PerformExitCont, PerformOf, PerformThrow}
 import scala.concurrent.Promise
 import tofu.concurrent.Exit
 import scala.concurrent.Future
+import scala.annotation.implicitNotFound
 
 trait Performer[F[_], -Cont[_], Cancel] {
   def perform[A](cont: Cont[A])(fa: F[A]): F[Cancel]
@@ -28,8 +29,13 @@ object Performer {
     new PerformerContravariantK[F, Cancel]
 }
 
+@implicitNotFound("""can not find Perform instance for functor ${F} 
+with continuation ${Cont} and cancel result ${Cancel}
+if you are using cats-effect 3.0 make sure you have an implicit instance of WithContext[F, Dispatcher[F]] 
+or in case of F[A] = ReaderT[G, C, A], you have an instance of WithContext[F, Dispatcher[G]]""")
 trait PerformVia[F[_], Cont[_], Cancel] extends WithContext[F, Performer[F, Cont, Cancel]] {
   def performer: F[Performer[F, Cont, Cancel]]
+  type A = Int <:< Int
   final def context: F[Performer[F, Cont, Cancel]] = performer
 }
 
