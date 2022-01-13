@@ -30,7 +30,7 @@ object Dependencies {
 
     val derevo = "0.13.0"
 
-    val slf4j = "1.7.32"
+    val slf4j = "1.7.33"
 
     val fs2 = "2.5.10"
 
