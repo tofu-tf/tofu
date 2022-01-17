@@ -39,7 +39,7 @@ trait WithContext[F[_], C] extends Context[F] {
     * @param extract
     *   lens that can extract value of type `A` from `Ctx`
     */
-  override def extract[A](extract: Extract[Ctx, A]): WithContext[F, A] =
+  override def extract[A](extract: Extract[Ctx, A]): ContextExtractInstance[F, Ctx, A] =
     new ContextExtractInstance[F, Ctx, A](this, extract)
 
   override def asWithContext: WithContext[F, C] = this
@@ -88,15 +88,9 @@ object WithContext {
     * object MyContext extends Context.Companion[MyContext]
     * }}}
     */
-  trait Companion[C] extends ContextInstances[C] {
+  trait Companion[C] extends ContextInstances1[C] {
 
     type Has[F[_]] = WithContext[F, C]
-
-    implicit def promoteContextStructure[F[_], A](implicit
-        withContext: WithContext[F, C],
-        field: C Contains A
-    ): WithContextContainsInstance[F, C, A] =
-      new WithContextContainsInstance[F, C, A]
 
     /** Access context `C` in F.
       */
@@ -104,20 +98,20 @@ object WithContext {
       has.context
   }
 
-  trait ContextInstances[C] {
+  trait ContextInstances1[C] {
+    final implicit def promoteContextStructure[F[_], A](implicit
+        withContext: WithContext[F, C],
+        field: C Contains A
+    ): WithContext[F, A] = withContext.extract(field)
+  }
 
-    implicit def promoteLocalStructure[F[_], A](implicit
+  trait ContextInstances2[C] {
+    final implicit def promoteLocalStructure[F[_], A](implicit
         context: WithLocal[F, C],
         field: C Contains A
     ): WithLocal[F, A] =
       context.subcontext(field)
   }
-}
-
-final class WithContextContainsInstance[F[_], A, B](implicit wc: WithContext[F, A], lens: A Contains B)
-    extends WithContext[F, B] {
-  def functor: Functor[F] = wc.functor
-  def context: F[B]       = wc.extract(lens).context
 }
 
 private[tofu] class ContextExtractInstance[F[_], C1, C2](ctx: F WithContext C1, extract: C1 Extract C2)
