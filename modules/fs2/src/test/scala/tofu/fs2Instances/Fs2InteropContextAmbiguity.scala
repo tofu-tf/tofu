@@ -5,8 +5,7 @@ import cats.effect.IO
 import fs2.Stream
 import tofu.WithContext
 import tofu.optics.macros.{ClassyOptics, promote}
-import tofu.optics.Contains
-import tofu.WithLocal
+import scala.annotation.nowarn
 
 object Fs2InteropContextAmbiguity {
 
@@ -27,6 +26,7 @@ object Fs2InteropContextAmbiguity {
   type RunF[A]     = ReaderT[IO, AppConfig, A]
   type StreamF[+A] = Stream[RunF, A]
 
+  @nowarn("cat=unused")
   final class Service[S[_]: SubConfigA.Has, F[_]: SubConfigB.Has]
 
   def make = new Service[RunF, StreamF]
