@@ -1,8 +1,24 @@
 package tofu
 package interop
 
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
 import cats.effect.concurrent.{MVar, Ref}
-import cats.effect.{Async, Blocker, Bracket, Concurrent, ContextShift, Effect, ExitCase, Fiber, IO, Sync, Timer}
+import cats.effect.{
+  Async,
+  Blocker,
+  Bracket,
+  Concurrent,
+  ConcurrentEffect,
+  ContextShift,
+  Effect,
+  ExitCase,
+  Fiber,
+  IO,
+  Sync,
+  Timer
+}
 import cats.{Functor, Id, Monad, ~>}
 import tofu.compat.unused
 import tofu.concurrent._
@@ -10,10 +26,7 @@ import tofu.internal.NonTofu
 import tofu.internal.carriers._
 import tofu.lift.Lift
 import tofu.syntax.monadic._
-
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
+import tofu.internal.instances.PerformViaUnlift
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search
@@ -110,10 +123,26 @@ object CE2Kernel {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
     }
 
+  final def performConcurrentEffect[F[_]](implicit
+      F: ConcurrentEffect[F],
+      @unused _nt: NonTofu[F]
+  ): PerformCarrier2[F] =
+    new ConcurrentEffectPerformer[F]
+
+  final def performContextConcurrentEffect[F[_]](implicit
+      F: ContextConcurrentEffect[F],
+      @unused _nt: NonTofu[F]
+  ): PerformCarrier2Context[F] =
+    new PerformViaUnlift[F, F.Base, PerformOf.ExitCont[Throwable, *], Unit]()(
+      performConcurrentEffect[F.Base](F.concurrentEffect, NonTofu.refute),
+      F.unlift,
+      F.apply
+    ) with PerformCarrier2Context[F]
+
   final def agentByRefAndSemaphore[I[_]: Monad, F[_]: Fire: Monad](implicit
       makeRef: MakeRef[I, F],
       makeSemaphore: MakeSemaphore[I, F]
-  ): MkAgentCE2Carrier[I, F] = {
+  ): MkAgentCE2Carrier[I, F] =
     new MkAgentCE2Carrier[I, F] {
       def agentOf[A](a: A): I[Agent[F, A]] =
         for {
@@ -121,7 +150,6 @@ object CE2Kernel {
           sem <- makeSemaphore.semaphore(1)
         } yield SemRef(ref, sem)
     }
-  }
 
   final def serialAgentByRefAndSemaphore[I[_]: Monad, F[_]: Monad](implicit
       makeRef: MakeRef[I, F],

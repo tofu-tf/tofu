@@ -1,22 +1,23 @@
 package tofu.interop
 
+import java.util.concurrent.TimeUnit
+
+import scala.annotation.unused
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.effect.kernel._
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
 import cats.effect.{Async, Fiber, IO, Sync}
 import cats.{Functor, Monad}
-import tofu.concurrent.impl.QVarSM
 import tofu.concurrent._
+import tofu.concurrent.impl.QVarSM
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
 import tofu.lift.Lift
 import tofu.syntax.monadic._
 import tofu.{Fire, Scoped, WithContext}
-
-import java.util.concurrent.TimeUnit
-import scala.annotation.unused
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
 
 object CE3Kernel {
   def delayViaSync[K[_]](implicit KS: Sync[K]): DelayCarrier3[K] =
@@ -80,9 +81,15 @@ object CE3Kernel {
     }
 
   final def asyncExecute[F[_]](implicit
-      ec: ExecutionContext,
       F: Async[F]
-  ): ScopedCarrier3[Scoped.Main, F] = makeExecute[Scoped.Main, F](ec)
+  ): ScopedCarrier3[Scoped.Main, F] = new ScopedCarrier3[Scoped.Main, F] {
+    def runScoped[A](fa: F[A]): F[A] = fa
+
+    def executionContext: F[ExecutionContext] = F.executionContext
+
+    def deferFutureAction[A](f: ExecutionContext => Future[A]): F[A] =
+      F.fromFuture(executionContext.flatMap(ec => F.delay(f(ec))))
+  }
 
   final def blockerExecute[F[_]](implicit
       blocker: Blocker[F],
@@ -116,10 +123,15 @@ object CE3Kernel {
       def sleep(duration: FiniteDuration): F[Unit] = T.sleep(duration)
     }
 
+  final def performDispatchContext[F[_]](implicit
+      F: ContextDispatch[F],
+  ): PerformCarrier3[F] = new DispatchPerform[F, F.Base]()(F.async, F.apply, F.dispatcher, F.unlift)
+    with PerformCarrier3[F]
+
   final def agentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow: Fire](implicit
       makeRef: MakeRef[I, F],
       makeSemaphore: MakeSemaphore[I, F]
-  ): MkAgentCE3Carrier[I, F] = {
+  ): MkAgentCE3Carrier[I, F] =
     new MkAgentCE3Carrier[I, F] {
       def agentOf[A](a: A): I[Agent[F, A]] =
         for {
@@ -127,7 +139,6 @@ object CE3Kernel {
           sem <- makeSemaphore.semaphore(1)
         } yield SemRef(ref, sem)
     }
-  }
 
   final def serialAgentByRefAndSemaphore[I[_]: Monad, F[_]: MonadCancelThrow](implicit
       makeRef: MakeRef[I, F],

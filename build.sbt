@@ -300,11 +300,27 @@ lazy val doobie = project
 lazy val doobieLogging = project
   .in(file("modules/doobie/logging"))
   .settings(
-    libraryDependencies ++= List(doobieCore),
     defaultSettings,
     name := "tofu-doobie-logging",
   )
   .dependsOn(doobie, loggingStr)
+
+lazy val doobieCE3 = project
+  .in(file("modules/doobie/core-ce3"))
+  .settings(
+    libraryDependencies ++= List(doobieCoreCE3, derevo),
+    defaultSettings,
+    name := "tofu-doobie-ce3",
+  )
+  .dependsOn(core3, derivation)
+
+lazy val doobieLoggingCE3 = project
+  .in(file("modules/doobie/logging-ce3"))
+  .settings(
+    defaultSettings,
+    name := "tofu-doobie-logging-ce3",
+  )
+  .dependsOn(doobieCE3, loggingStr)
 
 lazy val examples = project
   .in(file("examples"))
@@ -316,6 +332,16 @@ lazy val examples = project
     noPublishSettings,
   )
   .dependsOn(mainModuleDeps: _*)
+
+lazy val examplesCE3 = project
+  .in(file("examples-ce3"))
+  .settings(
+    libraryDependencies ++= List(doobieCoreCE3, doobieH2CE3, derevo, groovy),
+    defaultSettings,
+    name := "tofu-examples-ce3",
+    noPublishSettings,
+  )
+  .dependsOn(ce3MainModuleDeps: _*)
 
 lazy val streams = project
   .in(file("modules/streams"))
@@ -350,8 +376,14 @@ lazy val ce3CoreModules = Vector(
 lazy val commonModules =
   Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie, doobieLogging)
 
+lazy val ce3CommonModules =
+  Vector(loggingStr, loggingDer, loggingLayout, doobieCE3, doobieLoggingCE3)
+
 lazy val allModuleRefs  = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
+
+lazy val ce3AllModuleRefs  = (ce3CoreModules ++ ce3CommonModules).map(x => x: ProjectReference)
+lazy val ce3MainModuleDeps = (ce3CoreModules ++ ce3CommonModules).map(x => x: ClasspathDep[ProjectReference])
 
 lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
@@ -375,7 +407,11 @@ lazy val tofu = project
     defaultSettings,
     name := "tofu"
   )
-  .aggregate((coreModules ++ commonModules ++ ce3CoreModules :+ docs :+ examples).map(x => x: ProjectReference): _*)
+  .aggregate(
+    (coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules :+ docs :+ examples :+ examplesCE3).map(x =>
+      x: ProjectReference
+    ): _*
+  )
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
 lazy val defaultScalacOptions = scalacOptions := {

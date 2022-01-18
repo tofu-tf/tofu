@@ -1,7 +1,8 @@
 package tofu.example.doobie
 
 import cats.data.ReaderT
-import cats.effect.{Async, ContextShift, IO, IOApp, Sync}
+import cats.effect.std.Dispatcher
+import cats.effect.{Async, IO, IOApp, Sync}
 import cats.tagless.syntax.functorK._
 import cats.{Apply, Monad}
 import derevo.derive
@@ -20,7 +21,9 @@ import tofu.syntax.context._
 import tofu.syntax.doobie.log.handler._
 import tofu.syntax.doobie.log.string._
 import tofu.syntax.monadic._
-import tofu.{Delay, Tries, WithLocal, WithRun}
+import tofu.{Delay, Tries, WithContext, WithLocal, WithRun}
+
+import scala.annotation.unused
 
 // Simple context
 @derive(loggable)
@@ -109,9 +112,13 @@ object PersonStorage extends LoggingCompanion[PersonStorage] {
 }
 
 object TofuDoobieExample extends IOApp.Simple {
-  val run: IO[Unit] = runF[IO, ReaderT[IO, Ctx, *]]
 
-  def runF[I[_]: Async: ContextShift, F[_]: Sync: PerformThrow: WithRun[*[_], I, Ctx]]: I[Unit] = {
+  val run: IO[Unit] = Dispatcher[IO].use { (disp: Dispatcher[IO]) =>
+    @unused implicit val withDispatcher: WithContext[ReaderT[IO, Ctx, *], Dispatcher[IO]] = WithContext.const(disp)
+    runF[IO, ReaderT[IO, Ctx, *]]
+  }
+
+  def runF[I[_]: Async, F[_]: Sync: PerformThrow: WithRun[*[_], I, Ctx]]: I[Unit] = {
     // Simplified wiring below
     implicit val loggingF = Logging.Make.contextual[F, Ctx]
 

@@ -1,26 +1,43 @@
 package tofu.concurrent
 
 import cats.{Applicative, Eval, Traverse}
-import cats.effect.ExitCase
 import tofu.control.ApplicativeZip
 import tofu.syntax.monadic._
+import scala.util.Try
+import tofu.concurrent.Exit.Canceled
+import tofu.concurrent.Exit.Completed
+import tofu.concurrent.Exit.Error
 
 sealed trait Exit[+E, +A] {
-  def exitCase: ExitCase[E]
+  def toTry(implicit ev: E <:< Throwable): Try[A] = this match {
+    case Canceled     => util.Failure(new InterruptedException)
+    case Error(e)     => util.Failure(e)
+    case Completed(a) => util.Success(a)
+  }
+
+  def toEither: Either[Option[E], A] = this match {
+    case Canceled     => Left(None)
+    case Error(e)     => Left(Some(e))
+    case Completed(a) => Right(a)
+  }
 }
 
 object Exit {
 
   sealed trait Incomplete[+E] extends Exit[E, Nothing]
 
-  case object Canceled                 extends Incomplete[Nothing] {
-    def exitCase = ExitCase.Canceled
+  case object Canceled                 extends Incomplete[Nothing]
+  final case class Error[+E](e: E)     extends Incomplete[E]
+  final case class Completed[+A](a: A) extends Exit[Nothing, A]
+
+  def fromEither[E, A](e: Either[E, A]): Exit[E, A] = e match {
+    case Left(err)  => Error(err)
+    case Right(res) => Completed(res)
   }
-  final case class Error[+E](e: E)     extends Incomplete[E]       {
-    def exitCase = ExitCase.Error(e)
-  }
-  final case class Completed[+A](a: A) extends Exit[Nothing, A]    {
-    override def exitCase = ExitCase.Completed
+
+  def fromTry[A](t: util.Try[A]): Exit[Throwable, A] = t match {
+    case util.Failure(ex)  => Error(ex)
+    case util.Success(res) => Completed(res)
   }
 
   private[this] object exitInstanceAny extends Traverse[Exit[Any, *]] with ApplicativeZip[Exit[Any, *]] {
@@ -63,4 +80,6 @@ object Exit {
 
   implicit def exitInstance[E]: Traverse[Exit[E, *]] with Applicative[Exit[E, *]] =
     exitInstanceAny.asInstanceOf[Traverse[Exit[E, *]] with Applicative[Exit[E, *]]]
+
+  object CanceledException extends InterruptedException
 }
