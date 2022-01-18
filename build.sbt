@@ -306,7 +306,6 @@ lazy val doobieLogging = project
   )
   .dependsOn(doobie, loggingStr)
 
-
 lazy val streams = project
   .in(file("modules/ce-shared/streams"))
   .settings(
