@@ -15,13 +15,13 @@ import tofu.syntax.funk._
   *
   * @example
   *   One common use of this is to make contextual logging:
-  * {{{
+  *   {{{
   *     import tofu.syntax.console._
   *
   *   def contexualConsolling[F[_]: Console: FlatMap](message: String)(implicit hasMyCtx: F HasContext MyCtx): F[Unit] =
   *     hasMyCtx.askF(ctx => puts"$message (Also context: $ctx)")
-  * }}}
-  * so when you have `MyCtx(3)` the call of `contextualConsolling("Hi!")` prints `Hi! (Also MyCtx(3))`
+  *   }}}
+  *   so when you have `MyCtx(3)` the call of `contextualConsolling("Hi!")` prints `Hi! (Also MyCtx(3))`
   */
 @deprecated("Migrate to With* typeclasses", "0.10.3")
 trait Context[F[_]] extends ContextBase { self =>
@@ -97,12 +97,12 @@ object Context {
   /** A mix-in for supplying environment data type companions with useful things
     *
     * @example
-    * {{{
+    *   {{{
     * @ClassyOptics
     *   case class MyContext(id: Int, date: String)
     *
     * object MyContext extends Context.Companion[MyContext]
-    * }}}
+    *   }}}
     */
   trait Companion[C] extends WithContext.Companion[C]
 }
