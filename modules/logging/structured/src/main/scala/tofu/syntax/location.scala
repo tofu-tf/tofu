@@ -1,12 +1,7 @@
 package tofu.syntax
 
-import tofu.logging.{LoggedValue, LoggingBase}
-import cats.{Eval, Foldable}
-import cats.syntax.foldable._
-import tofu.logging._
-import tofu.logging.LoggingBase
-import scala.collection.compat._
 import tofu.logging.location.Location
+import tofu.logging.{LoggedValue, LoggingBase}
 import tofu.syntax.loggable._
 
 object location {

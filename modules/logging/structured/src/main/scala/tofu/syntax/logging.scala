@@ -1,11 +1,6 @@
 package tofu.syntax
 
 import tofu.logging.{LoggedValue, LoggingBase}
-import cats.{Eval, Foldable}
-import cats.syntax.foldable._
-import tofu.logging._
-import tofu.logging.LoggingBase
-import scala.collection.compat._
 
 object logging {
   val braces = Array.range(0, 30).map(Array.fill(_)("{}").toSeq)

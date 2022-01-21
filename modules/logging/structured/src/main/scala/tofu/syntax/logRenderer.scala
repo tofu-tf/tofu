@@ -1,14 +1,10 @@
 package tofu.syntax
 
+import cats.syntax.foldable._
 import cats.{Eval, Foldable}
 import tofu.logging.{LogParamValue, LogRenderer, Loggable}
 
 import scala.collection.compat.IterableOnce
-import cats.{Eval, Foldable}
-import cats.syntax.foldable._
-import tofu.logging._
-import tofu.logging.LoggingBase
-import scala.collection.compat._
 
 object logRenderer {
   implicit final class LogRendererValueContextOps[I, V, R, M](private val v: V) extends AnyVal {

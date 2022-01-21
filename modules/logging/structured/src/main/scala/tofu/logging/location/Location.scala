@@ -1,6 +1,6 @@
 package tofu.logging.location
 
-import tofu.logging.{LogRenderer, Loggable}
+import tofu.logging.Loggable
 
 import scala.annotation.tailrec
 import scala.collection.mutable
