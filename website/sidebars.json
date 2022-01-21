@@ -6,9 +6,9 @@
     ],
     "Documentation": [
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Core",
-        "ids": [
+        "items": [
           "errors",
           "fork",
           "timeout",
@@ -16,9 +16,9 @@
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Logging",
-        "ids": [
+        "items": [
           "tofu.logging.home",
           "tofu.logging.main.entities",
           "tofu.logging.key-features",
@@ -28,9 +28,9 @@
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Logging Recipes",
-        "ids": [
+        "items": [
           "tofu.logging.recipes",
           "tofu.logging.recipes.simple",
           "tofu.logging.recipes.service",
@@ -40,49 +40,49 @@
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Contextual",
-        "ids": [
+        "items": [
           "env",
           "withcontext",
           "kernelcatsmtlinterop"
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Concurrent",
-        "ids": [
+        "items": [
           "agent",
           "concurrent-makeref"
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Higher-Kind",
-        "ids": [
+        "items": [
           "mid"
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Optics",
-        "ids": [
+        "items": [
           "optics"
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Utilities",
-        "ids": [
+        "items": [
           "config",
           "console",
           "memo"
         ]
       },
       {
-        "type": "subcategory",
+        "type": "category",
         "label": "Streams",
-        "ids": [
+        "items": [
           "streams"
         ]
       }

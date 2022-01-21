@@ -1,0 +1,96 @@
+/* your custom css */
+@import url('http://fonts.cdnfonts.com/css/tex-gyre-heros');
+
+
+:root {
+    --ifm-font-family-base: 'TeXGyreHeros', sans-serif;
+    --ifm-color-primary: rgb(0, 213, 176);
+    --ifm-color-primary-dark: rgb(33, 175, 144);
+    --ifm-color-primary-darker: rgb(31, 165, 136);
+    --ifm-color-primary-darkest: rgb(26, 136, 112);
+    --ifm-color-primary-light: rgb(70, 203, 174);
+    --ifm-color-primary-lighter: rgb(102, 212, 189);
+    --ifm-color-primary-lightest: rgb(146, 224, 208);
+    --ifm-color-feedback-background: rgb(255, 255, 255);
+}
+
+html[data-theme='dark'] {
+  --ifm-color-feedback-background: #f0f8ff;
+}
+
+html[data-theme='dark'] .docusaurus-highlight-code-line {
+    background-color: rgb(12, 0, 39);
+    --ifm-footer-background-color: #150031;
+}
+
+.users__main {
+  background-color: rgb(12, 0, 39);
+}
+
+.navbar__logo {
+  max-height: 150%;
+  height: 150%;
+  margin-right: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.navbar__brand {
+  margin-right: 0rem;
+}
+
+.unique-tabs .tabs__item {
+    height: 18px;
+    line-height: 16px;
+    margin-right: 8px;
+  }
+  
+.unique-tabs .tabs__item--active {
+    border: 0;
+    color: #fff;
+    border-radius: var(--ifm-global-radius);
+    background-color: var(--ifm-tabs-color-active);
+}
+
+html[data-theme='light'] {
+    /* --ifm-navbar-background-color: #2b3137;
+    --ifm-navbar-text-color: #2b3137;
+    --ifm-navbar-link-color: #FFF;
+    --ifm-navbar-link-active-color: var(--ifm-link-color); */
+}
+  
+.footer--dark {
+    --ifm-footer-background-color: #20232a;
+}
+
+html, body {
+  font-smoothing: antialiased;
+  text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+.footer__logo {
+    margin-top: 1rem;
+    max-width: 5rem;
+}
+
+.index__text {
+  font-size: 1.5em;
+}
+
+/* @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
+}
+
+@media only screen and (min-width: 1024px) {
+}
+
+@media only screen and (max-width: 1023px) {
+}
+
+@media only screen and (min-width: 1400px) {
+}
+
+@media only screen and (min-width: 1500px) {
+} */

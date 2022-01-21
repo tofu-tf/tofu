@@ -1,0 +1,133 @@
+
+.section {
+  padding: 72px 0;
+}
+
+.sectionAlt {
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+.sectionInner {
+  margin: 0 auto;
+}
+
+.featureImage {
+  max-width: 60%;
+  max-height: 128px;
+  margin: 0 auto;
+}
+
+.featureImageLarge {
+  max-width: 80%;
+  max-height: 400px;
+  margin: 0 auto;
+}
+
+.featureHeading {
+  font-size: var(--ifm-h3-font-size);
+  padding-top: 1rem;
+}
+
+.announcement {
+  font-weight: bold;
+  font-size: 24px;
+  padding: 48px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.announcementDark {
+  background-color: #20232a;
+  color: #fff;
+}
+
+.announcementInner {
+  margin: 0 auto;
+  max-width: 768px;
+}
+
+.hero {
+  background-color: #2b3137;
+  padding: 48px;
+}
+
+.heroInner {
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 0 20px;
+}
+
+.heroProjectTagline {
+  color: #fff;
+  font-size: 48px;
+  margin: 0;
+}
+
+.heroTitleTextHtml b {
+  color: var(--ifm-color-primary);
+}
+
+.heroLogo {
+  float: right;
+  margin-top: 20px;
+  padding: 0 30px 30px;
+}
+
+.indexCtas {
+  --ifm-button-size-multiplier: 1.6;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.indexCtas a:last-of-type {
+  margin: 20px 36px;
+}
+
+.indexCtasGitHubButtonWrapper {
+  display: flex;
+}
+
+.indexCtasGitHubButton {
+  border: none;
+  overflow: hidden;
+}
+
+.indexCtaTryNowButton:hover {
+  color: var(--ifm-color-primary);
+}
+
+@media only screen and (max-width: 768px) {
+  .hero {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .heroInner {
+    padding: 0;
+  }
+
+  .heroProjectTagline {
+    font-size: 32px;
+    text-align: center;
+  }
+
+  .heroLogo {
+    display: block;
+    float: none;
+    margin: 0 auto;
+  }
+
+  .indexCtas {
+    justify-content: center;
+  }
+
+  .indexCtas a {
+    margin: 20px 36px;
+  }
+
+  .indexCtasGitHubButton {
+    display: none;
+  }
+}

@@ -1,4 +1,4 @@
-FROM node:10.0.0
+FROM node:lts-buster-slim
 
 WORKDIR /app/website
 
