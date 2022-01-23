@@ -3,16 +3,9 @@ package tofu.logging.location
 import cats.Id
 import cats.data.Writer
 import cats.implicits._
-import io.circe.Json
 import org.scalatest.flatspec.AnyFlatSpec
-import tofu.data.{Calc, ICalc}
-import tofu.logging.{LogTree, LoggedValue, Logging, Logs}
-import tofu.logging.LoggingSuite.{Exprs, LogEntry, Pasque, Run}
-import tofu.logging.location.Location
-import tofu.syntax.logRenderer._
-import tofu.syntax.loggable._
+import tofu.logging.{ LoggedValue, Logging, Logs}
 import tofu.syntax.location.logging._
-import tofu.syntax.loggable._
 
 object WriterLogs extends Logs[Id, Writer[List[String], *]] {
   override def byName(name: String): Id[Logging[Writer[List[String], *]]] = new Logging[Writer[List[String], *]] {
