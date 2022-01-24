@@ -4,7 +4,7 @@ import cats.Id
 import cats.data.Writer
 import cats.implicits._
 import org.scalatest.flatspec.AnyFlatSpec
-import tofu.logging.{ LoggedValue, Logging, Logs}
+import tofu.logging.{LoggedValue, Logging, Logs}
 import tofu.syntax.location.logging._
 
 object WriterLogs extends Logs[Id, Writer[List[String], *]] {
