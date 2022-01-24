@@ -42,19 +42,19 @@ class LocationSyntaxSuite extends AnyFlatSpec {
     } yield s"$hello; $goodbye").run
 
     assertResult("Hello, my dear Бублик the good dog; Goodbye, my sweet Бублик")(result)
-    assertResult(
+    assert(
       List(
         "TRACE | I am about to say hello to {}",
         "Бублик the good dog",
-        "tofu.logging.location.TestService.sayHello@(LocationSyntaxSuite.scala:30)",
+        "tofu.logging.location.TestService.sayHello@(LocationSyntaxSuite.scala:23)",
         "INFO | Yes, I did it, I said hello!",
-        "tofu.logging.location.TestService.sayHello.30@(LocationSyntaxSuite.scala:32)",
+        "tofu.logging.location.TestService.sayHello.23@(LocationSyntaxSuite.scala:25)",
         "ERROR | I don't want to say goodbye to {}",
         "Бублик",
-        "tofu.logging.location.TestService.sayGoodbye@(LocationSyntaxSuite.scala:37)",
+        "tofu.logging.location.TestService.sayGoodbye@(LocationSyntaxSuite.scala:30)",
         "INFO | Let the stars shine through",
-        "tofu.logging.location.TestService.sayGoodbye.37@(LocationSyntaxSuite.scala:39)"
-      )
-    )(log)
+        "tofu.logging.location.TestService.sayGoodbye.30@(LocationSyntaxSuite.scala:32)"
+      ) == log
+    )
   }
 }
