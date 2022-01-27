@@ -1,8 +1,8 @@
 package tofu.logging
 
-import magnolia.TypeName
-
 import scala.collection.compat._
+
+import magnolia.TypeName
 
 package object derivation {
   private[derivation] def join(typeName: String, strings: IterableOnce[String]): String =

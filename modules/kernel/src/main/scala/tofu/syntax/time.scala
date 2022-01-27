@@ -1,12 +1,13 @@
 package tofu
 package syntax
+import java.time.{Clock => _, _}
+import java.util.concurrent.TimeUnit
+
+import scala.concurrent.duration.FiniteDuration
+
 import cats.{Apply, Functor}
 import tofu.syntax.monadic._
 import tofu.time.{Clock, Sleep, TimeData, TimeZone}
-
-import java.time.{Clock => _, _}
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.FiniteDuration
 
 object time {
   def sleep[F[_]](duration: FiniteDuration)(implicit sleep: Sleep[F]): F[Unit] = sleep.sleep(duration)

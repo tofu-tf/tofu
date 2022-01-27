@@ -1,8 +1,8 @@
 package tofu.optics
 
-import tofu.optics.classes.Category2
-
 import scala.annotation.unchecked.{uncheckedVariance => uv212}
+
+import tofu.optics.classes.Category2
 
 trait PBase[+O[-s, +t, +a, -b] <: PBase[O, s, t, a, b], -S, +T, +A, -B] { self: O[S, T, A, B] =>
   def label[label]: this.type with Label[label] = this.asInstanceOf[this.type with Label[label]]

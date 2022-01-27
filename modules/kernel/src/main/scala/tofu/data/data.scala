@@ -1,9 +1,9 @@
 package tofu
 
+import scala.annotation.unchecked.{uncheckedVariance => uv}
+
 import cats.Functor
 import cats.arrow.FunctionK
-
-import scala.annotation.unchecked.{uncheckedVariance => uv}
 
 package object data {
   type PArray[+A]                   = PArray.Type[A]

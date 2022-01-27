@@ -1,6 +1,8 @@
 package tofu
 package concurrent
 
+import scala.annotation.nowarn
+
 import cats.data.StateT
 import cats.effect.concurrent.{MVar, TryableDeferred}
 import cats.effect.syntax.bracket._
@@ -12,8 +14,6 @@ import tofu.control.ApplicativeZip
 import tofu.higherKind.{Function2K, RepresentableK}
 import tofu.syntax.monadic._
 import tofu.syntax.start._
-
-import scala.annotation.nowarn
 
 trait Daemonic[F[_], E] {
   def daemonize[A](process: F[A]): F[Daemon[F, E, A]]

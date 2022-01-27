@@ -1,13 +1,13 @@
 package tofu.generate
 
+import scala.annotation.nowarn
+import scala.util.Random
+
 import cats.Functor
 import simulacrum.typeclass
 import tofu.higherKind.RepresentableK
 import tofu.syntax.monadic._
 import tofu.{Delay, higherKind}
-
-import scala.annotation.nowarn
-import scala.util.Random
 
 @typeclass @nowarn("cat=unused-imports")
 trait GenRandom[F[_]] {

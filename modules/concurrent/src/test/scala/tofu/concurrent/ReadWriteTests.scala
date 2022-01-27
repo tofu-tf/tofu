@@ -1,5 +1,10 @@
 package tofu.concurrent
 
+import scala.collection.immutable.Queue
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+import scala.util.Random
+
 import cats.effect.concurrent.{Deferred, Ref}
 import cats.effect.{ContextShift, IO, Timer}
 import cats.instances.list._
@@ -11,11 +16,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 import org.scalatest.{Ignore, Inside}
 import tofu.concurrent.ReadWrite.{ConcurrentReadWrite, _}
-
-import scala.collection.immutable.Queue
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
-import scala.util.Random
 
 @Ignore
 class ReadWriteTests extends AsyncWordSpec with Matchers with Inside {

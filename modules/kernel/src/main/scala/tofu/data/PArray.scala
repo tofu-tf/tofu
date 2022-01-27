@@ -1,10 +1,10 @@
 package tofu.data
 
+import scala.collection.compat._
+
 import cats.syntax.foldable._
 import cats.{Eval, Foldable, Monad, MonoidK}
 import tofu.internal.Newtype1Covariant
-
-import scala.collection.compat._
 
 object PArray extends Newtype1Covariant {
   private def fromArray[X, A](xs: Array[X]): Type[A] = xs.asInstanceOf[Type[A]]

@@ -1,12 +1,12 @@
 package tofu.logging.impl
+import scala.reflect.{ClassTag, classTag}
+
 import cats.Monad
 import tofu.Guarantee
 import tofu.concurrent.QVar
 import tofu.logging.{LoggedValue, Logging, Logs}
 import tofu.syntax.guarantee._
 import tofu.syntax.monadic._
-
-import scala.reflect.{ClassTag, classTag}
 
 class CachedLogs[I[_]: Monad: Guarantee, F[_]](
     underlying: Logs[I, F],

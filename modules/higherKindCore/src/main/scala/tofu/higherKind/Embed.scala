@@ -1,10 +1,10 @@
 package tofu.higherKind
 
+import scala.annotation.nowarn
+
 import cats.FlatMap
 import cats.free.Free
 import simulacrum.typeclass
-
-import scala.annotation.nowarn
 
 @typeclass @nowarn("cat=unused-imports")
 trait Embed[U[_[_]]] {

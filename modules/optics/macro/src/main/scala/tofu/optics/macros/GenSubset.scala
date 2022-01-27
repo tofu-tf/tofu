@@ -1,8 +1,8 @@
 package tofu.optics.macros
 
-import tofu.optics.Subset
-
 import scala.reflect.macros.blackbox
+
+import tofu.optics.Subset
 
 object GenSubset {
 

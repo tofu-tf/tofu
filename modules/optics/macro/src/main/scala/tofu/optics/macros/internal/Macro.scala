@@ -1,8 +1,8 @@
 package tofu.optics.macros.internal
 
-import tofu.optics.{Contains, PContains}
-
 import scala.reflect.macros.blackbox
+
+import tofu.optics.{Contains, PContains}
 
 object Macro {
   def mkContains[S, T, A, B](fieldName: String): PContains[S, T, A, B] = macro MacroImpl.mkContains_impl[S, T, A, B]

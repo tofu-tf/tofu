@@ -2,8 +2,10 @@ package tofu
 package interop
 
 import java.util.concurrent.TimeUnit
+
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
+
 import cats.effect.concurrent.{MVar, Ref}
 import cats.effect.{
   Async,
@@ -24,9 +26,9 @@ import tofu.compat.unused
 import tofu.concurrent._
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
+import tofu.internal.instances.PerformViaUnlift
 import tofu.lift.Lift
 import tofu.syntax.monadic._
-import tofu.internal.instances.PerformViaUnlift
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search

@@ -1,5 +1,8 @@
 package tofu.doobie.log
 
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Promise}
+
 import _root_.doobie.LogHandler
 import cats.tagless.FunctorK
 import cats.tagless.syntax.functorK._
@@ -10,9 +13,6 @@ import tofu.kernel.types.PerformThrow
 import tofu.lift.Lift
 import tofu.syntax.embed._
 import tofu.syntax.monadic._
-
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Promise}
 
 /** A holder for a [[doobie.util.log.LogHandler]] instance wrapped in an effect `F[_]`. Only useful when `F[_]` is
   * contextual. Allows one to create a context-aware `LogHandler` and embed it into a database algebra that requires it

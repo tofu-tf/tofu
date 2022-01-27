@@ -1,9 +1,9 @@
 package tofu.time
 
+import scala.annotation.nowarn
+
 import cats.data.ReaderT
 import cats.effect.{IO, Temporal}
-
-import scala.annotation.nowarn
 
 @nowarn
 class TimeSuite {

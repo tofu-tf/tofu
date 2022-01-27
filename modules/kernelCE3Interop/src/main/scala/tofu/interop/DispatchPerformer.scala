@@ -1,16 +1,15 @@
 package tofu.interop
 
-import cats.effect.std.Dispatcher
-import tofu.Performer
-import tofu.kernel.types.PerformThrow
-import tofu.concurrent.Exit
-import cats.effect.Async
 import scala.concurrent.ExecutionContext
+
 import cats.Apply
-import tofu.WithContext
-import tofu.lift.Unlift
+import cats.effect.Async
+import cats.effect.std.Dispatcher
+import tofu.concurrent.Exit
 import tofu.internal.instances.UnliftPerformer
-import tofu.kernel.types.PerformExitCont
+import tofu.kernel.types.{PerformExitCont, PerformThrow}
+import tofu.lift.Unlift
+import tofu.{Performer, WithContext}
 
 class DispatchPerform[F[_], B[_]](implicit
     async: Async[B],

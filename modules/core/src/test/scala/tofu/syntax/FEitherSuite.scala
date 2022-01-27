@@ -1,5 +1,7 @@
 package tofu.syntax
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import cats.instances.list._
 import cats.instances.option._
 import cats.syntax.either._
@@ -8,8 +10,6 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import tofu.Raise
 import tofu.syntax.feither._
-
-import java.util.concurrent.atomic.AtomicInteger
 
 class FEitherSuite extends AnyWordSpec with Matchers {
 

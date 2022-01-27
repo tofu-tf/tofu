@@ -1,5 +1,8 @@
 package tofu.logging
 
+import scala.annotation.unused
+import scala.{PartialFunction => PF, specialized => sp}
+
 import cats.Show
 import cats.syntax.show._
 import tofu.control.Consume
@@ -7,9 +10,6 @@ import tofu.internal.DataComp
 import tofu.logging.Loggable.Base
 import tofu.logging.impl._
 import tofu.syntax.logRenderer._
-
-import scala.annotation.unused
-import scala.{PartialFunction => PF, specialized => sp}
 
 /** Typeclass for adding custom log values to message
   */

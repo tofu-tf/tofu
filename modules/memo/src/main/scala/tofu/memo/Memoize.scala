@@ -1,5 +1,7 @@
 package tofu.memo
 
+import scala.annotation.nowarn
+
 import cats.effect.concurrent.{Deferred, Ref}
 import cats.effect.syntax.bracket._
 import cats.effect.syntax.concurrent._
@@ -7,8 +9,6 @@ import cats.effect.{Concurrent, ExitCase}
 import cats.syntax.option._
 import simulacrum.typeclass
 import tofu.syntax.monadic._
-
-import scala.annotation.nowarn
 
 /** WARNING breaks referential transparency, use with great care */
 @typeclass @nowarn("cat=unused-imports")

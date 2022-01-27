@@ -1,8 +1,8 @@
 package tofu.interop
-import tofu.internal.carriers.PerformCarrier2
+import cats.effect.{ConcurrentEffect, IO}
 import tofu.Performer
 import tofu.concurrent.Exit
-import cats.effect.{ConcurrentEffect, IO}
+import tofu.internal.carriers.PerformCarrier2
 
 final class ConcurrentEffectPerformer[F[_]](implicit val functor: ConcurrentEffect[F])
     extends PerformCarrier2[F] with Performer.OfExit[F, Throwable] {

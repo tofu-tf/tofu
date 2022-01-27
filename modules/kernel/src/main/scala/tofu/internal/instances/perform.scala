@@ -4,11 +4,11 @@ import cats.data.{Kleisli, ReaderT}
 import cats.tagless.{ContravariantK, FunctorK}
 import cats.{Apply, Functor, ~>}
 import tofu.PerformOf.Cont
+import tofu.kernel.types.PerformOf
 import tofu.lift.{Lift, Unlift}
 import tofu.syntax.funk._
 import tofu.syntax.monadic._
 import tofu.{PerformVia, Performer}
-import tofu.kernel.types.PerformOf
 
 final class PerformerContravariantK[F[_], Cancel] extends ContravariantK[Performer[F, *[_], Cancel]] {
   def contramapK[C1[_], C2[_]](af: Performer[F, C1, Cancel])(fk: C2 ~> C1): Performer[F, C2, Cancel] =

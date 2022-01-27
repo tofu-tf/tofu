@@ -1,5 +1,7 @@
 package tofu.example.logging.simple
 
+import scala.concurrent.duration.{Duration, DurationInt}
+
 import cats.Monad
 import cats.data.ReaderT
 import cats.effect._
@@ -18,8 +20,6 @@ import tofu.syntax.context._
 import tofu.syntax.foption._
 import tofu.syntax.logging._
 import tofu.syntax.monadic._
-
-import scala.concurrent.duration.{Duration, DurationInt}
 
 @derive(loggable, decoder)
 case class Cargo(weight: Int, name: String)

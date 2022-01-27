@@ -72,6 +72,8 @@ object Dependencies {
     val groovy = "3.0.9"
 
     val http4s = "0.22.8"
+
+    val scalafixOrganizeImports = "0.6.0"
   }
 
   val noCatsCore       =
@@ -125,4 +127,6 @@ object Dependencies {
   val kindProjector    = "org.typelevel"              %% "kind-projector"          % Version.kindProjector cross CrossVersion.patch
   val simulacrum       = "org.typelevel"              %% "simulacrum"              % Version.simulacrum
   val betterMonadicFor = "com.olegpy"                 %% "better-monadic-for"      % Version.betterMonadicFor
+
+  val scalafixOrganizeImports = "com.github.liancheng" %% "organize-imports" % Version.scalafixOrganizeImports
 }

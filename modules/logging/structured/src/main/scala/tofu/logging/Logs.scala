@@ -1,13 +1,13 @@
 package tofu.logging
 
+import scala.reflect.ClassTag
+
 import cats.{Applicative, Apply, FlatMap, Functor, Id, Monad}
 import org.slf4j.LoggerFactory
 import tofu.logging.impl.{ContextSyncLoggingImpl, SyncLogging, UniversalContextLogs, UniversalLogging}
 import tofu.logging.internal.{LogsInstances, LogsInstances0, LogsInvariantSyntax}
 import tofu.syntax.monadic._
 import tofu.{Delay, WithContext}
-
-import scala.reflect.ClassTag
 
 /** A helper for creating instances of [[tofu.logging.Logging]], defining a way these instances will behave while doing
   * logging. Can create instances either on a by-name basic or a type tag basic. An instance of [[tofu.logging.Logs]]

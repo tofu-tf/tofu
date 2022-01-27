@@ -1,11 +1,11 @@
 package tofu.concurrent.impl
 
+import scala.annotation.tailrec
+
 import cats.Monad
 import cats.data.{NonEmptyVector => NEV}
 import tofu.concurrent.QVar
 import tofu.syntax.monadic._
-
-import scala.annotation.tailrec
 
 abstract class QVarSM[F[_]: Monad, A, P] extends QVar[F, A] {
   import QVarSM._

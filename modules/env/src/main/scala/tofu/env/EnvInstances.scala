@@ -1,5 +1,7 @@
 package tofu.env
 
+import scala.concurrent.Future
+
 import cats.arrow.{ArrowChoice, FunctionK, Profunctor}
 import cats.effect.IO
 import cats.{Applicative, Monad, Parallel, ~>}
@@ -8,8 +10,6 @@ import monix.execution.Scheduler
 import tofu.lift.{UnliftIO, UnsafeExecFuture}
 import tofu.optics.Contains
 import tofu.syntax.funk._
-
-import scala.concurrent.Future
 
 private[env] trait EnvInstances {
   self: Env.type =>

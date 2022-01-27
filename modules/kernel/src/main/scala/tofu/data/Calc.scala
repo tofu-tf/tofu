@@ -1,11 +1,11 @@
 package tofu.data
 
+import scala.annotation.tailrec
+
 import cats.data.IndexedState
 import cats.{MonadError, Monoid, StackSafeMonad}
 import tofu.Guarantee
 import tofu.optics.PContains
-
-import scala.annotation.tailrec
 
 sealed trait Calc[-R, -S1, +S2, +E, +A] {
   final def run(r: R, init: S1): (S2, Either[E, A]) = Calc.run(this, r, init)

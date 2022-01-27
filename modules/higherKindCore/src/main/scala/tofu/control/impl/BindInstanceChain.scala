@@ -1,10 +1,10 @@
 package tofu.control.impl
+import scala.annotation.tailrec
+
 import cats.data.EitherT
 import cats.{Bifunctor, Monad}
 import tofu.control.Bind
 import tofu.syntax.monadic._
-
-import scala.annotation.tailrec
 
 trait BindInstanceChain[TC[f[_, _]] >: Bind[f]] {
   implicit val eitherInstance: TC[Either] = new Bind[Either] {

@@ -1,13 +1,14 @@
 package tofu.generate
 
+import java.util.UUID
+
+import scala.annotation.nowarn
+
 import cats.Functor
 import cats.syntax.functor._
 import simulacrum.typeclass
 import tofu.higherKind.RepresentableK
 import tofu.{Delay, higherKind}
-
-import java.util.UUID
-import scala.annotation.nowarn
 
 @typeclass @nowarn("cat=unused-imports")
 trait GenUUID[F[_]] {

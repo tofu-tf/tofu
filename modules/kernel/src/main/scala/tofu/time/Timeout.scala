@@ -1,9 +1,9 @@
 package tofu.time
 
+import scala.concurrent.duration.FiniteDuration
+
 import tofu.internal.EffectComp
 import tofu.internal.carriers.{TimeoutCE2Carrier, TimeoutCE3Carrier}
-
-import scala.concurrent.duration.FiniteDuration
 
 trait Timeout[F[_]] {
   def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A]

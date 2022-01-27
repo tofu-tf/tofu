@@ -1,8 +1,8 @@
 package tofu
 
-import cats.effect.IO
-
 import scala.concurrent.Future
+
+import cats.effect.IO
 
 package object lift {
   type UnliftIO[F[_]]         = Unlift[IO, F]

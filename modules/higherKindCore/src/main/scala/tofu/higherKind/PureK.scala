@@ -1,7 +1,7 @@
 package tofu.higherKind
-import simulacrum.typeclass
-
 import scala.annotation.nowarn
+
+import simulacrum.typeclass
 
 /** Higher-order form of lax unital functor Transform identity in monoidal (with Tuple2K) category of endofunctors into
   * its image

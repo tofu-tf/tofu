@@ -1,6 +1,11 @@
 package tofu
 package zioInstances
 
+import java.io.IOException
+
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.effect.{CancelToken, Fiber, IO => CIO}
 import cats.{Applicative, Functor, ~>}
 import tofu.generate.GenRandom
@@ -14,10 +19,6 @@ import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random
 import zio.{Fiber => ZFiber, ZIO, blocking => _, _}
-
-import java.io.IOException
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
 
 class ZioTofuInstance[R, E]
     extends Errors[ZIO[R, E, *], E] with Start[ZIO[R, E, *]] with Finally[ZIO[R, E, *], Exit[E, *]]

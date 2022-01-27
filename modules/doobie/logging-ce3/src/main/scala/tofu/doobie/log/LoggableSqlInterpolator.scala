@@ -1,7 +1,7 @@
 package tofu.doobie.log
-import doobie.syntax.SqlInterpolator
-
 import scala.{specialized => sp}
+
+import doobie.syntax.SqlInterpolator
 import doobie.syntax.SqlInterpolator.SingleFragment
 import doobie.util.Put
 import doobie.util.fragment.Fragment

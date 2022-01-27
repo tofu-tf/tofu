@@ -1,9 +1,9 @@
 package tofu.higherKind.derived
 
+import scala.reflect.macros.blackbox
+
 import tofu.higherKind.bi.{EmbedBK, RepresentableB}
 import tofu.higherKind.{Embed, RepresentableK}
-
-import scala.reflect.macros.blackbox
 
 class HigherKindedMacros(override val c: blackbox.Context) extends cats.tagless.DeriveMacros(c) {
   import c.internal._

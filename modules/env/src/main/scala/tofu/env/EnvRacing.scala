@@ -1,9 +1,9 @@
 package tofu.env
 
+import scala.collection.compat._
+
 import cats.effect._
 import monix.eval.Task
-
-import scala.collection.compat._
 
 private[env] trait EnvRacing {
   self: Env.type =>

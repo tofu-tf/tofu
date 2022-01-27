@@ -1,14 +1,14 @@
 package tofu
 package env
 
+import scala.concurrent.duration.{FiniteDuration, TimeUnit}
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.effect._
 import cats.{FlatMap, Functor}
 import monix.eval.Task
 import monix.execution.Scheduler
 import tofu.memo.Memoize
-
-import scala.concurrent.duration.{FiniteDuration, TimeUnit}
-import scala.concurrent.{ExecutionContext, Future}
 
 private[env] class EnvFunctorstance[E]
     extends Concurrent[Env[E, *]] with Timer[Env[E, *]] with WithRun[Env[E, *], Task, E] with Execute[Env[E, *]]

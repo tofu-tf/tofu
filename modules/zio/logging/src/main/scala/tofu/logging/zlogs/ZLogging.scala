@@ -1,11 +1,11 @@
 package tofu.logging.zlogs
 
+import scala.annotation.unused
+
 import tofu.logging.impl.{ZUniversalContextLogging, ZUniversalLogging}
 import tofu.logging.{Loggable, Logging}
 import zio._
 import zio.interop.catz._
-
-import scala.annotation.unused
 
 object ZLogging {
   type ZMake[R] = Logging.Make[URIO[R, *]]

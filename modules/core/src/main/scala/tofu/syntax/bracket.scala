@@ -1,5 +1,7 @@
 package tofu.syntax
 
+import scala.annotation.nowarn
+
 import cats.Applicative
 import cats.data.EitherT
 import cats.effect.concurrent.MVar
@@ -8,8 +10,6 @@ import cats.effect.{Bracket, ExitCase}
 import cats.syntax.either._
 import tofu.Guarantee
 import tofu.syntax.monadic._
-
-import scala.annotation.nowarn
 
 object bracket extends GuaranteeSyntax {
   @nowarn("cat=deprecation")

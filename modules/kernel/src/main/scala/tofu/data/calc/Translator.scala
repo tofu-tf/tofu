@@ -1,8 +1,8 @@
 package tofu.data.calc
 
-import tofu.higherKind.bi.FunBK
-
 import scala.annotation.unchecked.{uncheckedVariance => uv}
+
+import tofu.higherKind.bi.FunBK
 
 trait Translator[-F[_, _], +G[+_, +_], ST, +RI, -RO] { self =>
   def mapRead(ro: RO): RI

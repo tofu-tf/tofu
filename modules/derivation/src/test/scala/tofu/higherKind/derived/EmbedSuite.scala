@@ -1,4 +1,6 @@
 package tofu.higherKind.derived
+import scala.util.Try
+
 import cats.data.OptionT
 import cats.instances.either._
 import cats.instances.option._
@@ -10,8 +12,6 @@ import org.scalatest.matchers.should.Matchers
 import tofu.higherKind.Embed
 import tofu.syntax.embed._
 import tofu.syntax.monadic._
-
-import scala.util.Try
 
 import EmbedSuite.Foo
 

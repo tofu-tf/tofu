@@ -1,5 +1,7 @@
 package tofu.logging.internal
 
+import scala.reflect.ClassTag
+
 import cats.{FlatMap, Functor, Monad}
 import tofu.Guarantee
 import tofu.concurrent.{MakeQVar, QVars}
@@ -8,8 +10,6 @@ import tofu.lift.Lift
 import tofu.logging.impl.{CachedLogs, UniversalEmbedLogs}
 import tofu.logging.{Logging, Logs}
 import tofu.syntax.monadic._
-
-import scala.reflect.ClassTag
 
 object LogsInvariantSyntax {
   final class LogsOps[I[_], F[_]](private val logs: Logs[I, F]) extends AnyVal {

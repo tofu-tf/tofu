@@ -1,7 +1,7 @@
 package tofu.internal.carriers
 
-import tofu.kernel.types.Perform
 import tofu.internal.Interop
+import tofu.kernel.types.Perform
 
 trait PerformCarrier2[F[_]] extends Perform[F, Throwable]
 

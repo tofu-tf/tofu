@@ -1,10 +1,10 @@
 package tofu.time
 
-import cats.data.ReaderT
-import cats.effect.{Concurrent, IO, Timer}
-
 import scala.annotation.nowarn
 import scala.concurrent.ExecutionContext
+
+import cats.data.ReaderT
+import cats.effect.{Concurrent, IO, Timer}
 
 @nowarn
 class TimeSuite {

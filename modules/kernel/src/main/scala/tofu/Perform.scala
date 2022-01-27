@@ -1,15 +1,15 @@
 package tofu
+import scala.annotation.implicitNotFound
+import scala.concurrent.{Future, Promise}
+
 import cats.Functor
 import cats.data.ReaderT
 import cats.tagless.ContravariantK
+import tofu.concurrent.Exit
 import tofu.internal.carriers.{PerformCarrier2, PerformCarrier2Context, PerformCarrier3}
 import tofu.internal.instances._
 import tofu.internal.{Effect2Comp, EffectComp}
 import tofu.kernel.types.{PerformCont, PerformExitCont, PerformOf, PerformThrow}
-import scala.concurrent.Promise
-import tofu.concurrent.Exit
-import scala.concurrent.Future
-import scala.annotation.implicitNotFound
 
 trait Performer[F[_], -Cont[_], Cancel] {
   def perform[A](cont: Cont[A])(fa: F[A]): F[Cancel]

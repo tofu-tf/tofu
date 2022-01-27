@@ -1,5 +1,7 @@
 package tofu.syntax
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import cats.instances.either._
 import cats.instances.list._
 import cats.syntax.either.catsSyntaxEitherId
@@ -8,8 +10,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import tofu.syntax.FOptionSuite._
 import tofu.syntax.feither._
 import tofu.syntax.foption._
-
-import java.util.concurrent.atomic.AtomicInteger
 
 class FOptionSuite extends AnyFlatSpec {
   "getOrElseF" should "return inner value when non empty" in {

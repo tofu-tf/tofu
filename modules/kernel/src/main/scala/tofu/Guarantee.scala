@@ -1,10 +1,10 @@
 package tofu
 
+import scala.annotation.unused
+
 import cats.MonadError
 import tofu.internal.carriers.{FinallyCarrier2, FinallyCarrier3}
 import tofu.internal.{Effect2Comp, EffectComp}
-
-import scala.annotation.unused
 
 /** Bracket-like typeclass allowing to understand if operation was succeed
   * @tparam F

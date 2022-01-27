@@ -1,12 +1,12 @@
 package tofu.common
 
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+
 import cats.Monad
 import cats.effect.IO
 import cats.effect.unsafe.IORuntime
 import org.scalatest.funsuite.AnyFunSuite
 import tofu.syntax.monadic._
-
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 class ConsoleSuite extends AnyFunSuite {
   implicit val iort                                           = IORuntime.global

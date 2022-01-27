@@ -1,10 +1,10 @@
 package tofu.syntax
 
+import scala.annotation.nowarn
+
 import cats.Functor
 import cats.effect.concurrent.{Deferred, MVar, MVar2, Ref, Semaphore}
 import tofu.lift.{IsoK, Lift, Unlift}
-
-import scala.annotation.nowarn
 
 object lift extends KernelLiftSyntax {
   @nowarn("cat=deprecation")

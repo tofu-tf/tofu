@@ -1,13 +1,13 @@
 package tofu.syntax
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import cats.data.Ior
 import cats.instances.option._
 import cats.syntax.option.{catsSyntaxOptionId, none}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import tofu.syntax.fior._
-
-import java.util.concurrent.atomic.AtomicInteger
 
 class FIorSuite extends AnyWordSpec with Matchers {
 

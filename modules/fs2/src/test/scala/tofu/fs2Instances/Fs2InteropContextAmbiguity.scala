@@ -1,11 +1,12 @@
 package tofu.fs2Instances
 
+import scala.annotation.nowarn
+
 import cats.data.ReaderT
 import cats.effect.IO
 import fs2.Stream
 import tofu.WithContext
 import tofu.optics.macros.{ClassyOptics, promote}
-import scala.annotation.nowarn
 
 object Fs2InteropContextAmbiguity {
 

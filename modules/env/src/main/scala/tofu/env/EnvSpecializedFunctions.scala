@@ -1,15 +1,15 @@
 package tofu.env
 
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
+
 import cats.Eval
 import cats.data.ReaderT
 import cats.effect._
 import monix.eval.{Coeval, Task}
 import monix.execution.Scheduler
 import monix.execution.compat.BuildFrom
-
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 import internal.CollectionMapper
 

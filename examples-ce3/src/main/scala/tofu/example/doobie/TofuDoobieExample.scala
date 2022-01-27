@@ -1,5 +1,7 @@
 package tofu.example.doobie
 
+import scala.annotation.unused
+
 import cats.data.ReaderT
 import cats.effect.std.Dispatcher
 import cats.effect.{Async, IO, IOApp, Sync}
@@ -22,8 +24,6 @@ import tofu.syntax.doobie.log.handler._
 import tofu.syntax.doobie.log.string._
 import tofu.syntax.monadic._
 import tofu.{Delay, Tries, WithContext, WithLocal, WithRun}
-
-import scala.annotation.unused
 
 // Simple context
 @derive(loggable)

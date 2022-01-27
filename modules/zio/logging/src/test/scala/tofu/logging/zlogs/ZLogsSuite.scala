@@ -1,6 +1,9 @@
 package tofu.logging
 package zlogs
 
+import scala.annotation.nowarn
+import scala.jdk.CollectionConverters._
+
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
@@ -19,9 +22,6 @@ import zio._
 import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.console.Console
-
-import scala.annotation.nowarn
-import scala.jdk.CollectionConverters._
 
 class ZLogsSuite extends AnyFlatSpec with Matchers {
 

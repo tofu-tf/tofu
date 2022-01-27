@@ -1,11 +1,11 @@
 package tofu.logging.zlogs
 
+import scala.annotation.implicitNotFound
+
 import izumi.reflect.Tag
 import tofu.logging.Loggable
 import tofu.logging.zlogs.ZioHasBuilder.UnHas
 import zio.Has
-
-import scala.annotation.implicitNotFound
 
 class ZioHasBuilder[R](val loggable: Loggable[R]) extends AnyVal { self =>
   def of[U <: Has[_]](implicit U: UnHas[U]) =

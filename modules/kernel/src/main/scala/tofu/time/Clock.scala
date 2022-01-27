@@ -1,9 +1,9 @@
 package tofu.time
 
+import java.util.concurrent.TimeUnit
+
 import tofu.internal.EffectComp
 import tofu.internal.carriers._
-
-import java.util.concurrent.TimeUnit
 
 trait Clock[F[_]] {
 

@@ -1,5 +1,7 @@
 package tofu.logging
 
+import scala.reflect.ClassTag
+
 import cats.kernel.Monoid
 import cats.{Applicative, Apply, FlatMap, Id}
 import org.slf4j.Marker
@@ -10,8 +12,6 @@ import tofu.logging.impl.{EmbedLogging, UniversalContextLogs, UniversalLogging}
 import tofu.syntax.monadic._
 import tofu.syntax.monoidalK._
 import tofu.{Delay, Init, WithContext, higherKind}
-
-import scala.reflect.ClassTag
 
 /** Typeclass equivalent of Logger. May contain specified some Logger instance or try to read it from the context
   */

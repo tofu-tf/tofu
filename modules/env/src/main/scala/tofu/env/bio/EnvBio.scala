@@ -1,8 +1,8 @@
 package tofu.env.bio
 
-import monix.eval.Task
-
 import scala.concurrent.duration.FiniteDuration
+
+import monix.eval.Task
 
 abstract class EnvBio[-R, +E, +A] {
   // todo should expose this to user?

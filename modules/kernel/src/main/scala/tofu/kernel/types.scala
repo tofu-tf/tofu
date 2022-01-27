@@ -1,8 +1,7 @@
 package tofu
 package kernel
 
-import cats.ApplicativeError
-import cats.MonadError
+import cats.{ApplicativeError, MonadError}
 import tofu.concurrent.Exit
 
 object types extends KernelTypes

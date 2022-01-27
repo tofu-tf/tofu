@@ -1,13 +1,11 @@
 package tofu.concurrent
 
-import cats.effect.ExitCase
+import scala.util.Try
+
 import cats.{Applicative, Eval, Traverse}
+import tofu.concurrent.Exit.{Canceled, Completed, Error}
 import tofu.control.ApplicativeZip
 import tofu.syntax.monadic._
-import scala.util.Try
-import tofu.concurrent.Exit.Canceled
-import tofu.concurrent.Exit.Completed
-import tofu.concurrent.Exit.Error
 
 sealed trait Exit[+E, +A] {
   def toTry(implicit ev: E <:< Throwable): Try[A] = this match {

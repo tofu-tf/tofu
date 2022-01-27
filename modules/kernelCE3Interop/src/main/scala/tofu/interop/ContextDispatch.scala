@@ -1,10 +1,10 @@
 package tofu.interop
 
-import tofu.lift.Unlift
+import cats.Apply
+import cats.effect.Async
 import cats.effect.std.Dispatcher
 import tofu.WithContext
-import cats.effect.Async
-import cats.Apply
+import tofu.lift.Unlift
 
 abstract class ContextDispatch[F[_]] {
   type Base[_]

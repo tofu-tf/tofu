@@ -1,10 +1,10 @@
 package tofu
 
+import scala.annotation.nowarn
+
 import izumi.reflect.HKTag
 import tofu.higherKind.bi.{EmbedBK, FunctorBK}
 import zio.{Has, IO, ZIO}
-
-import scala.annotation.nowarn
 
 import syntax.functorbk._
 import zioInstances.implicits._

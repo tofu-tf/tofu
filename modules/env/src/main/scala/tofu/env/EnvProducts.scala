@@ -1,10 +1,10 @@
 package tofu.env
 
+import scala.util.Try
+
 import cats.arrow.FunctionK
 import cats.{Id, ~>}
 import monix.eval.{Coeval, Task}
-
-import scala.util.Try
 private[env] trait EnvProducts {
   self: Env.type =>
   def parMap2[E, A1, A2, R](fa1: Env[E, A1], fa2: Env[E, A2])(f: (A1, A2) => R): Env[E, R] =

@@ -1,11 +1,11 @@
 package tofu.optics
 
+import scala.reflect.{ClassTag, classTag}
+
 import cats.Monoid
 import cats.instances.option._
 import cats.syntax.foldable._
 import tofu.optics.data.Constant
-
-import scala.reflect.{ClassTag, classTag}
 
 /** S could be T or not partial function from S to T and part of prism
   */

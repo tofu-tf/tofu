@@ -1,13 +1,13 @@
 package tofu.logging
 
+import scala.jdk.CollectionConverters._
+
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import org.scalatest.funsuite.AnyFunSuite
 import org.slf4j.LoggerFactory
 import tofu.{Delay, WithContext}
-
-import scala.jdk.CollectionConverters._
 
 class LogbackSuite extends AnyFunSuite {
   type Ctx = Map[String, String]

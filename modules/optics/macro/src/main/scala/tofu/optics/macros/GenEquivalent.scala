@@ -1,9 +1,9 @@
 package tofu.optics.macros
 
-import tofu.optics.Equivalent
-
 import scala.reflect.internal.SymbolTable
 import scala.reflect.macros.{blackbox, whitebox}
+
+import tofu.optics.Equivalent
 
 object GenEquivalent {
 

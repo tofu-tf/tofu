@@ -1,5 +1,8 @@
 package tofu.syntax
 
+import scala.concurrent.duration.DurationInt
+import scala.language.postfixOps
+
 import cats.Monad
 import tofu.compat.unused
 import tofu.syntax.feither._
@@ -7,9 +10,6 @@ import tofu.syntax.foption._
 import tofu.syntax.raise._
 import tofu.syntax.timeout._
 import tofu.{Raise, Timeout}
-
-import scala.concurrent.duration.DurationInt
-import scala.language.postfixOps
 
 @unused
 object FindRaiseSuite {

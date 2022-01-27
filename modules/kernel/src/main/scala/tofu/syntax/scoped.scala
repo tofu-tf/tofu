@@ -1,10 +1,10 @@
 package tofu
 package syntax
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.FlatMap
 import tofu.syntax.monadic._
-
-import scala.concurrent.{ExecutionContext, Future}
 
 object scopedKernel extends ScopedSyntax
 

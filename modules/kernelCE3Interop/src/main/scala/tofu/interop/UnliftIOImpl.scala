@@ -1,5 +1,7 @@
 package tofu.interop
 
+import scala.concurrent.ExecutionContext
+
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
 import cats.effect.{Async, IO}
@@ -8,8 +10,6 @@ import tofu.WithContext
 import tofu.internal.carriers.UnliftCarrier3
 import tofu.syntax.funk.funK
 import tofu.syntax.monadic._
-
-import scala.concurrent.ExecutionContext
 
 final class UnliftIOImpl[K[_]](implicit
     KD: WithContext[K, Dispatcher[K]],

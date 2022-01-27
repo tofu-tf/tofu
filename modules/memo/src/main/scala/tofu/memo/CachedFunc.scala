@@ -1,14 +1,15 @@
 package tofu.memo
 
+import java.util.concurrent.TimeUnit
+
+import scala.concurrent.duration.FiniteDuration
+
 import cats.effect.Clock
 import cats.{Functor, Monad}
 import tofu.Guarantee
 import tofu.concurrent.ce2._
 import tofu.concurrent.{MVars, MakeMVar, MakeRef}
 import tofu.syntax.monadic._
-
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.FiniteDuration
 
 object CachedFunc {
   def apply[I[_]] = new CachedApply[I]

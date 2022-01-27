@@ -1,12 +1,12 @@
 package tofu.higherKind
+import scala.annotation.nowarn
+
 import cats.data._
 import cats.tagless.IdK
 import cats.{FlatMap, ~>}
 import simulacrum.typeclass
 import tofu.syntax.funk
 import tofu.syntax.monadic._
-
-import scala.annotation.nowarn
 
 trait RepK[U[_[_]], A] {
   def apply[R[_]](ar: U[R]): R[A]

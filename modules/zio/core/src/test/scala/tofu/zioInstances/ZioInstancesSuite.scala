@@ -1,12 +1,12 @@
 package tofu.zioInstances
 
+import scala.annotation.nowarn
+
 import tofu._
 import tofu.lift.{Lift, Unlift, UnliftIO}
 import tofu.optics.{Contains, Extract}
 import tofu.zioInstances.implicits._
 import zio._
-
-import scala.annotation.nowarn
 
 object ZioInstancesSuite {
 

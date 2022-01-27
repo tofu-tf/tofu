@@ -1,13 +1,13 @@
 package tofu.concurrent
 
+import scala.annotation.nowarn
+import scala.concurrent.ExecutionContext
+
 import cats.Monad
 import cats.data.ReaderT
 import cats.effect.{Concurrent, IO, Sync}
 import org.scalatest.funsuite.AnyFunSuite
 import tofu.syntax.monadic._
-
-import scala.annotation.nowarn
-import scala.concurrent.ExecutionContext
 
 @nowarn
 class QVarSuite extends AnyFunSuite {

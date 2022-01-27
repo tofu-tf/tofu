@@ -458,7 +458,7 @@ lazy val simulacrumOptions = Seq(
   libraryDependencies += simulacrum % Provided,
   addCompilerPlugin(scalafixSemanticdb),
   scalacOptions ++= Seq(s"-P:semanticdb:targetroot:${baseDirectory.value}/target/.semanticdb", "-Yrangepos"),
-  ThisBuild / scalafixDependencies ++= List("com.github.liancheng" %% "organize-imports" % "0.6.0"),
+  ThisBuild / scalafixDependencies ++= List(scalafixOrganizeImports),
   pomPostProcess                   := { node =>
     import scala.xml.transform.{RewriteRule, RuleTransformer}
 

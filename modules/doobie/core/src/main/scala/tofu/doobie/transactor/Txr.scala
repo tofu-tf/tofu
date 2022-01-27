@@ -1,6 +1,8 @@
 package tofu.doobie
 package transactor
 
+import scala.annotation.nowarn
+
 import cats.data.{Kleisli, ReaderT}
 import cats.effect.Resource
 import cats.{Defer, Monad, ~>}
@@ -10,8 +12,6 @@ import tofu.lift.Lift
 import tofu.syntax.funk._
 import tofu.syntax.monadic._
 import tofu.{BracketThrow, WithContext}
-
-import scala.annotation.nowarn
 
 /** A simple facade for [[doobie.Transactor]] that holds an inner database effect type `DB[_]` and provides natural
   * transformations from this effect to the target effect `F[_]`.

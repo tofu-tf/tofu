@@ -1,11 +1,11 @@
 package tofu.observable
 
+import scala.concurrent.Future
+import scala.util.control.NonFatal
+
 import monix.execution.Ack
 import monix.execution.Ack.Stop
 import monix.reactive.observers.Subscriber
-
-import scala.concurrent.Future
-import scala.util.control.NonFatal
 
 //shameless copy of monix.reactive.internal.operators.TakeByPredicateOperator
 private[observable] final case class TakeWhileInclusive[A](p: A => Boolean, out: Subscriber[A]) extends Subscriber[A] {

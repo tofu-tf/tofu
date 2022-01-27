@@ -1,15 +1,15 @@
 package tofu
 package config
 
+import scala.annotation.nowarn
+import scala.jdk.CollectionConverters._
+
 import cats.Id
 import cats.effect.SyncIO
 import com.typesafe.config.{Config, ConfigValue}
 import tofu.concurrent.ce2.Refs
 import tofu.syntax.funk._
 import tofu.syntax.monadic._
-
-import scala.annotation.nowarn
-import scala.jdk.CollectionConverters._
 
 import ConfigItem._
 

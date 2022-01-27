@@ -1,8 +1,8 @@
 package tofu.data.calc
 
-import tofu.data.Nothing2T
-
 import scala.annotation.tailrec
+
+import tofu.data.Nothing2T
 
 trait CalcRunner[-F[+_, +_]] {
   def apply[R, SI, SO, E, A, X](calc: CalcM[F, R, SI, SO, E, A])(r: R, init: SI, cont: Continue[A, E, SO, X]): X

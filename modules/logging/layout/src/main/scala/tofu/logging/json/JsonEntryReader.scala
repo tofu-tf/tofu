@@ -1,13 +1,13 @@
 package tofu.logging.json
 
+import scala.annotation._
+import scala.collection._
+
 import tethys._
 import tethys.commons.RawJson
 import tethys.jackson._
 import tethys.readers.tokens.TokenIterator
 import tethys.readers.{FieldName, KeyReader, ReaderError}
-
-import scala.annotation._
-import scala.collection._
 
 trait JsonEntryReader {
 

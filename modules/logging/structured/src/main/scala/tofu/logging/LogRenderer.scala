@@ -1,13 +1,13 @@
 package tofu
 package logging
 
+import scala.collection.compat._
+import scala.{specialized => sp}
+
 import cats.Foldable
 import cats.kernel.{Monoid, Semigroup}
 import cats.syntax.monoid._
 import tofu.data.PArray
-
-import scala.collection.compat._
-import scala.{specialized => sp}
 
 import syntax.logRenderer._
 

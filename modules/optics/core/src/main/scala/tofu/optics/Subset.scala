@@ -1,5 +1,7 @@
 package tofu.optics
 
+import scala.reflect.ClassTag
+
 import alleycats.Pure
 import cats._
 import cats.instances.either._
@@ -9,8 +11,6 @@ import cats.syntax.profunctor._
 import tofu.optics.Subset.ByDowncast
 import tofu.optics.classes.PChoice
 import tofu.optics.data.{Identity, _}
-
-import scala.reflect.ClassTag
 
 /** aka Prism any of S could be equivalent to A
   */

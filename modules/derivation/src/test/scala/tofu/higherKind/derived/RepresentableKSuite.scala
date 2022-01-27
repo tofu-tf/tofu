@@ -1,5 +1,7 @@
 package tofu.higherKind.derived
 
+import scala.util.Try
+
 import cats.data.{OptionT, Tuple2K}
 import cats.instances.either._
 import cats.instances.option._
@@ -16,8 +18,6 @@ import org.scalatest.matchers.should.Matchers
 import tofu.data.Embedded
 import tofu.syntax.embed._
 import tofu.syntax.funk.funK
-
-import scala.util.Try
 
 import RepresentableKSuite.{Foo}
 

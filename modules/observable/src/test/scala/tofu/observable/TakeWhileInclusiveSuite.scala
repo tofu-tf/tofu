@@ -1,13 +1,13 @@
 package tofu.observable
 
+import scala.concurrent.duration._
+
 import monix.catnap.MVar
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import monix.reactive.Observable
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import scala.concurrent.duration._
 
 class TakeWhileInclusiveSuite extends AnyFlatSpec with Matchers {
 

@@ -1,15 +1,15 @@
 package tofu.env
 
+import scala.annotation.unchecked.{uncheckedVariance => uv}
+import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
+
 import cats.data.ReaderT
 import cats.effect._
 import monix.eval.Task
 import monix.execution.annotations.UnsafeBecauseImpure
 import monix.execution.{Cancelable, CancelableFuture, Scheduler}
 import tofu.internal.IsTofu
-
-import scala.annotation.unchecked.{uncheckedVariance => uv}
-import scala.concurrent.duration.FiniteDuration
-import scala.util.Try
 
 /** Env is a monad, allowing composition of functions that are context(environment)-aware. For example, you may have
   * several functions that depend on some common environment/runtime. Env provides a way to compose such functions,

@@ -1,9 +1,9 @@
 package tofu
 
+import scala.annotation.nowarn
+
 import tofu.internal.carriers.FinallyCarrier2
 import tofu.interop.CE2Kernel.CEExit
-
-import scala.annotation.nowarn
 
 object GuaranteeSuite {
 

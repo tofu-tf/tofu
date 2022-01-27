@@ -1,9 +1,9 @@
 package tofu.optics
 
+import scala.annotation.unchecked.uncheckedVariance
+
 import cats.{Applicative, Monoid}
 import monocle._
-
-import scala.annotation.unchecked.uncheckedVariance
 
 object interop {
   implicit final class EquivalentInteropOps[S, T, A, B](private val eqv: PEquivalent[S, T, A, B]) extends AnyVal {

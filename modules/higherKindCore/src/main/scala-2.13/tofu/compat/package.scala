@@ -1,8 +1,8 @@
 package tofu.compat
 
-import cats.data.NonEmptyLazyList
-
 import scala.annotation.StaticAnnotation
+
+import cats.data.NonEmptyLazyList
 
 object `package` {
   type LazySeq[+A]   = LazyList[A]

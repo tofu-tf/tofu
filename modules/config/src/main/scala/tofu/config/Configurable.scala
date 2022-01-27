@@ -1,6 +1,12 @@
 package tofu
 package config
 
+import java.net.{URI, URL}
+
+import scala.collection.immutable.IndexedSeq
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.util.control.NonFatal
+
 import cats.data.{Chain, NonEmptyList}
 import cats.instances.list._
 import cats.instances.map._
@@ -20,11 +26,6 @@ import tofu.config.Key.{Index, Prop, Variant}
 import tofu.config.MagnoliaDerivation.{EnumConfigurable, SingletonConfigurable}
 import tofu.syntax.monadic._
 import tofu.syntax.raise._
-
-import java.net.{URI, URL}
-import scala.collection.immutable.IndexedSeq
-import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.util.control.NonFatal
 
 import ConfigMonad.promote._
 import syntax.context._

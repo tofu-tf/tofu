@@ -1,10 +1,11 @@
 package tofu.common
-import cats.{Eval, Show}
-
 import java.util.UUID
+
 import scala.collection.immutable.{BitSet, Queue, Seq, SortedMap, SortedSet}
 import scala.concurrent.duration.Duration
 import scala.util.Try
+
+import cats.{Eval, Show}
 
 /** Configurable and performant conversion to String */
 trait Display[A] extends Show[A] {

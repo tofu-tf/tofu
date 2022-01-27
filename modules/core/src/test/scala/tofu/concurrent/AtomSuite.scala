@@ -1,12 +1,12 @@
 package tofu.concurrent
 
+import scala.annotation.nowarn
+
 import cats.Monad
 import cats.data.ReaderT
 import cats.effect.{IO, Sync}
 import org.scalatest.funsuite.AnyFunSuite
 import tofu.syntax.monadic._
-
-import scala.annotation.nowarn
 
 @nowarn
 class AtomSuite extends AnyFunSuite {

@@ -1,5 +1,7 @@
 package tofu.logging
 
+import scala.reflect.ClassTag
+
 import cats.tagless.FunctorK
 import cats.tagless.syntax.functorK._
 import cats.{Functor, Monad}
@@ -11,8 +13,6 @@ import tofu.logging.bi.LoggingBiMid
 import tofu.syntax.functorbk._
 import tofu.syntax.funk._
 import tofu.syntax.monadic._
-
-import scala.reflect.ClassTag
 
 object LoggingMidFunctions {
   def in[U[_[_]]: FunctorK, I[_]: Functor, F[_]: Monad](implicit

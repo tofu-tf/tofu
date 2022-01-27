@@ -1,13 +1,13 @@
 package tofu.logging.zlogs
 
+import scala.annotation.nowarn
+import scala.reflect.ClassTag
+
 import izumi.reflect.Tag
 import tofu.logging.impl.{ZUniversalContextLogging, ZUniversalLogging}
 import tofu.logging.{Loggable, Logging}
 import zio.interop.catz._
 import zio.{Has, UIO, ULayer, ZIO, ZLayer}
-
-import scala.annotation.nowarn
-import scala.reflect.ClassTag
 
 object ZLogs {
   val uio: ZLogs[Any] = (name: String) => UIO.effectTotal(new ZUniversalLogging(name))

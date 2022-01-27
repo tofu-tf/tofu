@@ -1,9 +1,9 @@
 package tofu.optics.macros
 
+import scala.reflect.macros.blackbox
+
 import tofu.compat.unused
 import tofu.optics.PContains
-
-import scala.reflect.macros.blackbox
 
 class Optics(val prefix: String = "") extends scala.annotation.StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro OpticsImpl.opticsAnnotationMacro

@@ -1,13 +1,13 @@
 package tofu
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats._
 import tofu.higherKind.{Mid, Point, PureK}
 import tofu.internal.carriers.{ScopedCarrier2, ScopedCarrier3}
 import tofu.internal.{EffectComp, Interop}
 import tofu.kernel.types._
 import tofu.syntax.funk._
-
-import scala.concurrent.{ExecutionContext, Future}
 
 /** can be used for scoped transformations
   * @tparam Tag

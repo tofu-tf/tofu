@@ -1,4 +1,6 @@
 package tofu.doobie.log
+import scala.{specialized => sp}
+
 import doobie.syntax.SqlInterpolator
 import doobie.syntax.SqlInterpolator.SingleFragment
 import doobie.util.Put
@@ -6,8 +8,6 @@ import doobie.util.fragment.Fragment
 import doobie.util.pos.Pos
 import tofu.doobie.log.LoggableSqlInterpolator.LoggableSingleFragment
 import tofu.logging.{LogRenderer, Loggable, LoggedValue}
-
-import scala.{specialized => sp}
 
 final class LoggableSqlInterpolator(private val ctx: StringContext) extends AnyVal {
   def lsql(parts: LoggableSingleFragment*)(implicit pos: Pos): Fragment =

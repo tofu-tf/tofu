@@ -2,11 +2,6 @@ package tofu
 package syntax
 
 import tofu.logging._
-import cats.syntax.foldable._
-import cats.{Eval, Foldable}
-import tofu.logging.{LoggingBase, _}
-
-import scala.collection.compat._
 
 object loggable {
   implicit final class TofuLoggableOps[A](private val a: A) extends AnyVal {

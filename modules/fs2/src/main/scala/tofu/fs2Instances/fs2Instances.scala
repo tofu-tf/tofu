@@ -1,5 +1,7 @@
 package tofu
 package fs2Instances
+import scala.concurrent.duration.FiniteDuration
+
 import _root_.fs2._
 import cats.effect.{Concurrent, ExitCase, Sync, Timer}
 import cats.tagless.FunctorK
@@ -8,8 +10,6 @@ import tofu.higherKind.Embed
 import tofu.lift.Lift
 import tofu.streams._
 import tofu.syntax.funk._
-
-import scala.concurrent.duration.FiniteDuration
 
 private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
   private[this] val fs2HKInstanceAny = new FS2StreamHKInstance[Any]

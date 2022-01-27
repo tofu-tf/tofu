@@ -1,5 +1,7 @@
 package tofu.memo
 
+import scala.annotation.nowarn
+
 import cats.data.OptionT
 import cats.effect.concurrent.{MVar, Ref}
 import cats.instances.list._
@@ -14,8 +16,6 @@ import tofu.memo.CacheKeyState.valueByMap
 import tofu.memo.CacheOperation.{CleanUp, GetOrElse}
 import tofu.syntax.bracket._
 import tofu.syntax.monadic._
-
-import scala.annotation.nowarn
 
 trait CacheKeyState[F[_], -K, A] {
   def runOperation[B](key: K, op: CacheOperation[F, A, B]): F[B]

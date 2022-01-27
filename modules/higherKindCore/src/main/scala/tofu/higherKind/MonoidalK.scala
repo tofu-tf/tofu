@@ -1,10 +1,10 @@
 package tofu.higherKind
+import scala.annotation.nowarn
+
 import cats.data.Tuple2K
 import cats.tagless.ApplyK
 import cats.~>
 import simulacrum.typeclass
-
-import scala.annotation.nowarn
 
 /** higher order form of monoidal functor for all F[_], uf: U[F] , zipWith2K(uf, unitK)(Function2K((f, _) => f)) == uf
   * for all F[_], uf: U[F] , zipWith2K(unitK, uf)(Function2K((_, f) => f)) == uf
