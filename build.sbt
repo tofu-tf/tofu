@@ -159,10 +159,27 @@ lazy val loggingLog4Cats = project
   )
   .dependsOn(loggingStr)
 
+lazy val loggingLogstashLogback = project
+  .in(file("modules/logging/interop/logstash-logback"))
+  .settings(
+    defaultSettings,
+    name := "tofu-logging-logstash-logback",
+    libraryDependencies ++= Seq(logback, logstashLogback)
+  )
+  .dependsOn(loggingStr)
+
 lazy val logging = project
   .in(file("modules/logging"))
   .dependsOn(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
-  .aggregate(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .aggregate(
+    loggingStr,
+    loggingDer,
+    loggingLayout,
+    loggingShapeless,
+    loggingRefined,
+    loggingLog4Cats,
+    loggingLogstashLogback
+  )
   .settings(
     defaultSettings,
     name := "tofu-logging"
