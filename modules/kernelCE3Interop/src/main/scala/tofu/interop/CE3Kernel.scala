@@ -113,7 +113,7 @@ object CE3Kernel {
 
   final def clock[F[_]: Functor](implicit C: cats.effect.Clock[F]): ClockCE3Carrier[F] =
     new ClockCE3Carrier[F] {
-      def realTime(unit: TimeUnit): F[Long] = C.realTime.map(d => TimeUnit.MILLISECONDS.convert(d.toMillis, unit))
+      def realTime(unit: TimeUnit): F[Long] = C.realTime.map(d => unit.convert(d.toMillis, TimeUnit.MILLISECONDS))
 
       def nanos: F[Long] = C.monotonic.map(_.toNanos)
     }
