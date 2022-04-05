@@ -7,10 +7,12 @@ metals.sbt
 website/build
 website/translated_docs
 website/yarn.lock
+website/package-lock.json
 website/node_modules
 website/i18n/*
 website/static/api
 website/.docusaurus
+node_modules/
 /null
 .vscode
 .bsp

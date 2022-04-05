@@ -63,6 +63,8 @@ Proud user of ToFu? Feel free to [add your company!](https://github.com/tofu-tf/
 
 <a href="https://tinkoff.ru/"><img width="40%" src="logos/yandex-travel-logo.svg?sanitize=true" /></a>
 
+<a href="https://vivid.money/"><img width="40%" src="logos/vivid.svg?sanitize=true" /></a>
+
 <a href="https://tele2.ru/"><img width="40%" src="logos/tele2-ru-logo.svg?sanitize=true" /></a>
 
 <a href="https://konfy.care/"><img width="40%" src="logos/konfy-logo.svg?sanitize=true" /></a>
