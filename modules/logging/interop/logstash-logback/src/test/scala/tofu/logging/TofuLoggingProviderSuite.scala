@@ -48,7 +48,7 @@ class TofuLoggingProviderSuite extends AnyFunSuite {
     val first = appender.list.asScala.head
 
     val log      = buildLogJson(provider.writeTo(_, first))
-    val expected = """{"oh":"noo","inner-keks":"2","inner-shreks":"3","what":"swamp"}"""
+    val expected = """{"oh":"noo","inner":{"keks":2,"shreks":3},"what":"swamp"}"""
 
     assert(log === expected)
   }
