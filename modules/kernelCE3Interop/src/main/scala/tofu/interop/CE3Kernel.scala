@@ -10,7 +10,7 @@ import cats.effect.kernel._
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
 import cats.effect.{Async, Fiber, IO, Sync}
-import cats.{Functor, Monad}
+import cats.{Functor, Monad, Parallel, Traverse}
 import tofu.concurrent._
 import tofu.concurrent.impl.QVarSM
 import tofu.internal.NonTofu
@@ -164,4 +164,12 @@ object CE3Kernel {
           sem <- makeSemaphore.semaphore(1)
         } yield UnderlyingSemRef[F, G, A](ref, sem)
     }
+
+  def wander[F[_]: Async: Parallel]: WanderCarrierCE3[F] = new WanderCarrierCE3.Impl[F] {
+    def wander[T[_]: Traverse, A, B](in: T[A])(f: A => F[B]): F[T[B]] =
+      Parallel.parTraverse(in)(f)
+
+    def wanderN[T[_]: Traverse, A, B](in: T[A], n: Int)(f: A => F[B]): F[T[B]] =
+      Async[F].parTraverseN(n)(in)(f)
+  }
 }
