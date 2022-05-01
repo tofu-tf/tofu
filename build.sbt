@@ -167,6 +167,7 @@ lazy val loggingLogstashLogback = project
     libraryDependencies ++= Seq(logback, logstashLogback)
   )
   .dependsOn(loggingStr)
+  .dependsOn(loggingDer % Test)
 
 lazy val logging = project
   .in(file("modules/logging"))
