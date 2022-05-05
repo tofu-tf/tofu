@@ -305,6 +305,15 @@ lazy val fs2Interop = project
   )
   .dependsOn(concurrent, streams)
 
+lazy val fs2CE3Interop = project
+  .in(file("modules/fs2-ce3"))
+  .settings(
+    name := "tofu-fs2-ce3-interop",
+    libraryDependencies += fs2CE3,
+    defaultSettings
+  )
+  .dependsOn(streams)
+
 lazy val doobie = project
   .in(file("modules/doobie/core"))
   .settings(
