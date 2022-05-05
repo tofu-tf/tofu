@@ -28,7 +28,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
     }
 
   implicit def fs2LiftInstance[F[_]]: Lift[F, Stream[F, *]] =
-    Lift.byFunK(funK(Stream.eval(_)))
+    Lift.byFunK(funK(Stream.eval))
 
   implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk] =
     new Chunks[Stream[F, *], Chunk] {
