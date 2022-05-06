@@ -28,7 +28,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
     }
 
   implicit def fs2LiftInstance[F[_]]: Lift[F, Stream[F, *]] =
-    Lift.byFunK(funK(Stream.eval))
+    Lift.byFunK(funK(Stream.eval(_)))
 
   implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk] =
     new Chunks[Stream[F, *], Chunk] {
@@ -99,9 +99,9 @@ private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
     new FS2Local[F, R] { override val F: F WithLocal R = ctx.asWithLocal }
 
   final implicit def fs2StreamProvide[F[_], G[_], R](implicit
-      fctx: WithProvide[F, G, R]
+      ctx: WithProvide[F, G, R]
   ): WithProvide[Stream[F, *], Stream[G, *], R] =
-    new FS2Provide[F, G, R] { override val WP: WithProvide[F, G, R] = fctx }
+    new FS2Provide[F, G, R] { override val WP: WithProvide[F, G, R] = ctx }
 }
 
 private[fs2Instances] trait Fs2Instances3 {
