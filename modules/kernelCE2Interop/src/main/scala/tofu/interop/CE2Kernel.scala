@@ -176,11 +176,11 @@ object CE2Kernel {
         } yield UnderlyingSemRef[F, G, A](ref, sem)
     }
 
-  def wander[F[_]: Async: Parallel]: WanderCarrierCE2[F] = new WanderCarrierCE2.Impl[F] {
-    def wander[T[_]: Traverse, A, B](in: T[A])(f: A => F[B]): F[T[B]] =
+  def boundedParallel[F[_]: Async: Parallel]: BoundedParallelCarrierCE2[F] = new BoundedParallelCarrierCE2.Impl[F] {
+    def parTraverse[T[_]: Traverse, A, B](in: T[A])(f: A => F[B]): F[T[B]] =
       Parallel.parTraverse(in)(f)
 
-    def wanderN[T[_]: Traverse, A, B](in: T[A], n: Int)(f: A => F[B]): F[T[B]] =
+    def parTraverseN[T[_]: Traverse, A, B](in: T[A], n: Int)(f: A => F[B]): F[T[B]] =
       Async.parTraverseN(n.toLong)(in)(f)
   }
 }

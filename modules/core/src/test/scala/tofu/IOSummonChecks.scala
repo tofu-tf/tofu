@@ -8,7 +8,7 @@ class IOSummonChecks(implicit cs: ContextShift[IO]) {
   implicitly[Start[IO]]
   implicitly[Race[IO]]
   implicitly[Errors[IO, Throwable]]
-  implicitly[Wander[IO]]
+  implicitly[BoundedParallel[IO]]
 
   implicitly[Fire[ReaderT[IO, Unit, *]]]
   implicitly[Start[ReaderT[IO, Unit, *]]]
