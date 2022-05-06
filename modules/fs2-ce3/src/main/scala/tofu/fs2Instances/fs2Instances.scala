@@ -71,7 +71,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override def delay[A](fa: Stream[F, A])(d: FiniteDuration): Stream[F, A] = fa.delayBy(d)
     }
 
-  implicit def fs2TemporalInstance[F[_]: CETemporal: Concurrent]: Temporal[Stream[F, *], Chunk] =
+  implicit def fs2TemporalInstance[F[_]: CETemporal]: Temporal[Stream[F, *], Chunk] =
     new Temporal[Stream[F, *], Chunk] {
       override def groupWithin[A](fa: Stream[F, A])(n: Int, d: FiniteDuration): Stream[F, Chunk[A]] =
         fa.groupWithin(n, d)
