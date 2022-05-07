@@ -38,7 +38,7 @@ object Dependencies {
 
     val logback = "1.2.11"
 
-    val monix = "3.4.0"
+    val monix = "3.4.1"
 
     val scalatest = "3.2.10"
 
