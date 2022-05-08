@@ -19,7 +19,7 @@ import cats.effect.{
   Sync,
   Timer
 }
-import cats.{Functor, Id, Monad, ~>}
+import cats.{Functor, Id, Monad, Parallel, Traverse, ~>}
 import tofu.compat.unused
 import tofu.concurrent._
 import tofu.internal.NonTofu
@@ -175,4 +175,12 @@ object CE2Kernel {
           sem <- makeSemaphore.semaphore(1)
         } yield UnderlyingSemRef[F, G, A](ref, sem)
     }
+
+  def boundedParallel[F[_]: Async: Parallel]: BoundedParallelCarrierCE2[F] = new BoundedParallelCarrierCE2.Impl[F] {
+    def parTraverse[T[_]: Traverse, A, B](in: T[A])(f: A => F[B]): F[T[B]] =
+      Parallel.parTraverse(in)(f)
+
+    def parTraverseN[T[_]: Traverse, A, B](in: T[A], n: Int)(f: A => F[B]): F[T[B]] =
+      Async.parTraverseN(n.toLong)(in)(f)
+  }
 }

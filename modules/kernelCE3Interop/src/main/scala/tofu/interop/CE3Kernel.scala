@@ -10,7 +10,7 @@ import cats.effect.kernel._
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
 import cats.effect.{Async, Fiber, IO, Sync}
-import cats.{Functor, Monad}
+import cats.{Functor, Monad, Parallel, Traverse}
 import tofu.concurrent._
 import tofu.concurrent.impl.QVarSM
 import tofu.internal.NonTofu
@@ -163,5 +163,14 @@ object CE3Kernel {
           ref <- makeRef.refOf(a)
           sem <- makeSemaphore.semaphore(1)
         } yield UnderlyingSemRef[F, G, A](ref, sem)
+    }
+
+  def boundedParallel[F[_]: Concurrent: Parallel]: BoundedParallelCarrierCE3[F] =
+    new BoundedParallelCarrierCE3.Impl[F] {
+      def parTraverse[T[_]: Traverse, A, B](in: T[A])(f: A => F[B]): F[T[B]] =
+        Parallel.parTraverse(in)(f)
+
+      def parTraverseN[T[_]: Traverse, A, B](in: T[A], n: Int)(f: A => F[B]): F[T[B]] =
+        Concurrent[F].parTraverseN(n)(in)(f)
     }
 }
