@@ -34,6 +34,8 @@ object Dependencies {
 
     val fs2 = "2.5.11"
 
+    val fs2CE3 = "3.2.7"
+
     val logback = "1.2.11"
 
     val monix = "3.4.0"
@@ -101,7 +103,8 @@ object Dependencies {
   val derevoCirce      = "tf.tofu"                    %% "derevo-circe"             % Version.derevo
   val derevoTagless    = "tf.tofu"                    %% "derevo-cats-tagless"      % Version.derevo
   val enumeratum       = "com.beachape"               %% "enumeratum"               % Version.enumeratum
-  val fs2              = "co.fs2"                     %% "fs2-io"                   % Version.fs2
+  val fs2              = "co.fs2"                     %% "fs2-core"                 % Version.fs2
+  val fs2CE3           = "co.fs2"                     %% "fs2-core"                 % Version.fs2CE3
   val tethys           = "com.tethys-json"            %% "tethys-core"              % Version.tethys
   val tethysJackson    = "com.tethys-json"            %% "tethys-jackson"           % Version.tethys
   val catsTagless      = "org.typelevel"              %% "cats-tagless-macros"      % Version.catsTagless

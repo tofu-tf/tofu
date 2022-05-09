@@ -306,6 +306,15 @@ lazy val fs2Interop = project
   )
   .dependsOn(concurrent, streams)
 
+lazy val fs2CE3Interop = project
+  .in(file("modules/fs2-ce3"))
+  .settings(
+    name := "tofu-fs2-ce3-interop",
+    libraryDependencies += fs2CE3,
+    defaultSettings
+  )
+  .dependsOn(core3, streams, derivation % "compile->test", opticsMacro % "compile->test")
+
 lazy val doobie = project
   .in(file("modules/doobie/core"))
   .settings(
@@ -395,7 +404,7 @@ lazy val commonModules =
   Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie, doobieLogging)
 
 lazy val ce3CommonModules =
-  Vector(loggingStr, loggingDer, loggingLayout, doobieCE3, doobieLoggingCE3)
+  Vector(loggingStr, loggingDer, loggingLayout, doobieCE3, doobieLoggingCE3, fs2CE3Interop)
 
 lazy val allModuleRefs  = (coreModules ++ commonModules).map(x => x: ProjectReference)
 lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDep[ProjectReference])
