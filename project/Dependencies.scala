@@ -32,7 +32,7 @@ object Dependencies {
 
     val slf4j = "1.7.36"
 
-    val fs2 = "2.5.11"
+    val fs2 = "3.0.1"
 
     val fs2CE3 = "3.2.7"
 
