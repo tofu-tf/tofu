@@ -1,13 +1,14 @@
 package tofu.logging
 package builder
-import scala.collection.mutable.Buffer
-import scala.reflect.ClassTag
 
 import tofu.control.Bind
+import tofu.logging.Logging.Level
 import tofu.logging.bi.LoggingBiMid
 import tofu.logging.impl.ArgsLoggable
-import tofu.logging.{Loggable, LoggedValue, Logging}
 import tofu.syntax.bindInv._
+
+import scala.collection.mutable.Buffer
+import scala.reflect.ClassTag
 
 trait BiBuilder[+T[_, _]] {
   def prepare[Alg[_[_, _]]](implicit Alg: ClassTag[Alg[Any]]): BiPrepared[Alg, T]
@@ -71,24 +72,26 @@ abstract class LoggingBiMidBuilder extends BiBuilder[LoggingBiMid] {
 }
 
 object LoggingBiMidBuilder {
-  class Default extends LoggingBiMidBuilder {
-    def onEnter[F[_, _]](cls: Class[_], method: String, args: Seq[(String, LoggedValue)])(implicit
-        F: Logging.SafeBase[F]
-    ): F[Nothing, Unit] = F.debug("entering {} {}", method, new ArgsLoggable(args))
 
-    def onLeave[F[_, _]](
+  class CustomLogLevel(logLevel: Level, errorLogLevel: Level) extends LoggingBiMidBuilder {
+
+    override def onEnter[F[+_, +_]](cls: Class[_], method: String, args: Seq[(String, LoggedValue)])(implicit
+        F: Logging.SafeBase[F]
+    ): F[Nothing, Unit] = F.write(logLevel, "entering {} {}", method, new ArgsLoggable(args))
+
+    override def onLeave[F[+_, +_]](
         cls: Class[_],
         method: String,
         args: Seq[(String, LoggedValue)],
         res: LoggedValue,
-        ok: Boolean,
+        ok: Boolean
     )(implicit
         F: Logging.SafeBase[F]
-    ): F[Nothing, Unit] =
-      if (ok)
-        F.debug("leaving {} {} result is {}", method, new ArgsLoggable(args), res)
-      else
-        F.error("error during {} {} error is {}", method, new ArgsLoggable(args), res)
+    ): F[Nothing, Unit] = if (ok)
+      F.write(logLevel, "leaving {} {} result is {}", method, new ArgsLoggable(args), res)
+    else
+      F.write(errorLogLevel, "error during {} {} error is {}", method, new ArgsLoggable(args), res)
   }
+  class Default extends CustomLogLevel(Logging.Debug, Logging.Error)
 
 }
