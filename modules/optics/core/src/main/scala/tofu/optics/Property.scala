@@ -16,6 +16,8 @@ trait PProperty[-S, +T, +A, -B]
   def set(s: S, b: B): T
   def narrow(s: S): Either[T, A]
 
+  def setF(b: B): S => T = set(_, b)
+
   override def traverse[F[+_]](s: S)(f: A => F[B])(implicit F: Applicative[F]): F[T] =
     narrow(s).traverse(f).map(_.fold(t => t, set(s, _)))
 
