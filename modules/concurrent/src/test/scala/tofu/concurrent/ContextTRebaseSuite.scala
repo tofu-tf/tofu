@@ -46,7 +46,6 @@ class ContextTRebaseSuite extends AnyFunSuite {
   }
 }
 
-
 object ContextTRebaseSuite {
   @derive(representableK)
   trait Name[F[_]] {

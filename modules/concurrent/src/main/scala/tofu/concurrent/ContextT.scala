@@ -168,7 +168,7 @@ trait ContextTInstancesP extends ContextTInstancesQ { self: ContextTInstances =>
   ): ContextShift[ContextT[F, C, *]] =
     new ContextTContextShift[F, C]
 
-  @nowarn("cat=w-flag-self-implicit")  
+  @nowarn("cat=w-flag-self-implicit")
   final implicit def contextTUnlifting[F[+_]: Monad, In[_[_]], Out[_[_]]](implicit
       l: Out[ContextT[F, Out, *]] Contains In[ContextT[F, Out, *]],
       rc1: Rebase[In],
