@@ -10,7 +10,7 @@ trait PUpdate[-S, +T, +A, -B] extends PBase[PUpdate, S, T, A, B] {
 
   def updateF(fb: A => B): S => T = update(_, fb)
 
-  def put(s: S, b: B) = update(s, _ => b)
+  def put(s: S, b: B): T = update(s, _ => b)
 
   def putF(b: B): S => T = put(_, b)
 
