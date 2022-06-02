@@ -10,7 +10,7 @@ pull_request_rules:
 
   - name: Merge Steward's PRs
     conditions:
-      - author=scala-steward
+      - author=Tofu-bot
       - or:
           - and:
               - "#files=1"
