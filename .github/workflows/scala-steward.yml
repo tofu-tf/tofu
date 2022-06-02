@@ -1,4 +1,4 @@
-# This workflow will launch at 00:00 every Sunday
+# This workflow will launch at 00:00 every day
 on:
   schedule:
     - cron: '0 0 * * *'
