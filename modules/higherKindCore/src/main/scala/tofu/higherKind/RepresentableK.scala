@@ -2,11 +2,10 @@ package tofu.higherKind
 import cats.data._
 import cats.tagless.IdK
 import cats.{FlatMap, ~>}
-import simulacrum.typeclass
 import tofu.syntax.funk
 import tofu.syntax.monadic._
 
-import scala.annotation.nowarn
+import tofu.internal.EffectCompHK
 
 trait RepK[U[_[_]], A] {
   def apply[R[_]](ar: U[R]): R[A]
@@ -28,7 +27,6 @@ object RepK {
   }
 }
 
-@typeclass @nowarn("cat=unused-imports")
 trait RepresentableK[U[_[_]]] extends MonoidalK[U] with Embed[U] {
   import RepresentableK.Tab
   def tabulate[F[_]](hom: RepK[U, *] ~> F): U[F]
@@ -48,7 +46,7 @@ trait RepresentableK[U[_[_]]] extends MonoidalK[U] with Embed[U] {
   override def pureK[F[_]](p: Point[F]): U[F] = tab(_ => p.point)
 }
 
-object RepresentableK extends RepresentableKInstanceChain[RepresentableK] {
+object RepresentableK extends RepresentableKInstanceChain[RepresentableK] with EffectCompHK[RepresentableK] {
   class Tab[U[f[_]], F[_]](private val rep: RepresentableK[U]) extends AnyVal {
     type A1
     def apply(maker: funk.Maker[RepK[U, *], F, A1]): U[F] = rep.tabulate(maker)

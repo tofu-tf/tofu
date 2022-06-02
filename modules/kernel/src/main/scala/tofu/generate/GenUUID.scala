@@ -4,19 +4,15 @@ import java.util.UUID
 
 import cats.Functor
 import cats.syntax.functor._
-import simulacrum.typeclass
-import tofu.higherKind
 import tofu.higherKind.RepresentableK
+import tofu.internal.EffectComp
+import tofu.{Delay, higherKind}
 
-import scala.annotation.nowarn
-import tofu.Delay
-
-@typeclass @nowarn("cat=unused-imports")
 trait GenUUID[F[_]] {
   def randomUUID: F[UUID]
 }
 
-object GenUUID {
+object GenUUID extends EffectComp[GenUUID] {
   def random[F[_]](implicit gen: GenUUID[F]): F[UUID] = gen.randomUUID
   def randomString[F[_]: Functor: GenUUID]: F[String] = random[F].map(_.toString)
 

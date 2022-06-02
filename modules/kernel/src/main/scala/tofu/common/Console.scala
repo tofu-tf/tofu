@@ -2,15 +2,12 @@ package tofu.common
 
 import java.io.{BufferedReader, PrintStream}
 
-import simulacrum.typeclass
-import tofu.higherKind
-import tofu.higherKind.RepresentableK
-
-import scala.annotation.nowarn
 import scala.{Console => ScalaConsole}
-import tofu.Delay
 
-@typeclass @nowarn("cat=unused-imports")
+import tofu.higherKind.RepresentableK
+import tofu.internal.EffectComp
+import tofu.{Delay, higherKind}
+
 trait Console[F[_]] {
   def readStrLn: F[String]
 
@@ -21,7 +18,7 @@ trait Console[F[_]] {
   def putErrLn(err: String): F[Unit]
 }
 
-object Console {
+object Console extends EffectComp[Console] {
   @deprecated("use tofu.syntax.console", since = "0.7.2")
   def readStrLn[F[_]](implicit F: Console[F]): F[String] = F.readStrLn
 

@@ -2,16 +2,13 @@ package tofu.memo
 
 import cats.effect.{Concurrent, ExitCase}
 import cats.effect.concurrent.{Deferred, Ref}
-import simulacrum.typeclass
 import tofu.syntax.monadic._
 import cats.syntax.option._
 import cats.effect.syntax.concurrent._
 import cats.effect.syntax.bracket._
 
-import scala.annotation.nowarn
+import tofu.internal.EffectComp
 
-/** WARNING breaks referential transparency, use with great care */
-@typeclass @nowarn("cat=unused-imports")
 trait Memoize[F[_]] {
   def memoize[A](fa: F[A]): F[F[A]]
 
@@ -19,7 +16,7 @@ trait Memoize[F[_]] {
   def memoizeOnSuccess[A](fa: F[A]): F[F[A]]
 }
 
-object Memoize {
+object Memoize extends EffectComp[Memoize] {
   def concurrentMemoize[F[_]](implicit F: Concurrent[F]): Memoize[F] =
     new Memoize[F] {
       def memoize[A](fa: F[A]): F[F[A]] = Concurrent.memoize(fa)
