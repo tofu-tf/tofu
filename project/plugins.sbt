@@ -18,7 +18,7 @@ addSbtPlugin("com.timushev.sbt" % "sbt-rewarn" % "0.1.3")
 
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.20")
 
-addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.2")
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.6.3")
 
 addSbtPlugin("com.codecommit" % "sbt-github-actions" % "0.14.2")
 
