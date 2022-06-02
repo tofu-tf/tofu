@@ -139,9 +139,9 @@ class LoggableInstances {
       }
     }
   final implicit def seqLoggable[A: Loggable]: Loggable[collection.Seq[A]]                  =
-    fldLoggable[Iterable, A].contramap(_.toIterable)
+    fldLoggable[Iterable, A].narrow
   final implicit def immutableSeqLoggable[A: Loggable]: Loggable[immutable.Seq[A]]          =
-    fldLoggable[Iterable, A].contramap(_.toIterable)
+    fldLoggable[Iterable, A].narrow
 
   final implicit def listLoggable[A: Loggable]: Loggable[List[A]]           = fldLoggable[List, A]
   final implicit def vectorLoggable[A: Loggable]: Loggable[Vector[A]]       = fldLoggable[Vector, A]

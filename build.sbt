@@ -23,7 +23,7 @@ lazy val defaultSettings = Seq(
     collectionCompat,
     scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided
   )
-) ++ macros ++ simulacrumOptions
+) ++ macros
 
 lazy val higherKindCore = project
   .in(file("modules/higherKindCore"))
@@ -418,7 +418,7 @@ lazy val docs = project // new documentation project
     noPublishSettings,
     addCompilerPlugin(simulacrum),
     macros,
-    ScalaUnidoc / doc / scalacOptions += "-Ymacro-expand:none",
+    // ScalaUnidoc / doc / scalacOptions += "-Ymacro-expand:none",
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*) -- inProjects(opticsMacro),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
@@ -480,24 +480,6 @@ lazy val macros = Seq(
 
 lazy val noPublishSettings =
   defaultSettings ++ Seq(publish := {}, publishArtifact := false, publishTo := None, publish / skip := true)
-
-lazy val simulacrumOptions = Seq(
-  libraryDependencies += simulacrum % Provided,
-  pomPostProcess                   := { node =>
-    import scala.xml.transform.{RewriteRule, RuleTransformer}
-
-    new RuleTransformer(new RewriteRule {
-      override def transform(node: xml.Node): Seq[xml.Node] = node match {
-        case e: xml.Elem
-            if e.label == "dependency" &&
-              e.child.exists(child => child.label == "groupId" && child.text == simulacrum.organization) &&
-              e.child.exists(child => child.label == "artifactId" && child.text.startsWith(s"${simulacrum.name}_")) =>
-          Nil
-        case _ => Seq(node)
-      }
-    }).transform(node).head
-  }
-)
 
 addCommandAlias("fmt", "all tofu/scalafmtSbt tofu/scalafmtAll")
 addCommandAlias("checkfmt", "all tofu/scalafmtSbtCheck tofu/scalafmtCheckAll")

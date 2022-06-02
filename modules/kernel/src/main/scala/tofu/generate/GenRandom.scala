@@ -1,16 +1,13 @@
 package tofu.generate
 
-import simulacrum.typeclass
-import tofu.higherKind
-import tofu.higherKind.RepresentableK
-import tofu.syntax.monadic._
-
-import scala.annotation.nowarn
 import scala.util.Random
-import tofu.Delay
-import cats.Functor
 
-@typeclass @nowarn("cat=unused-imports")
+import cats.Functor
+import tofu.higherKind.RepresentableK
+import tofu.internal.EffectComp
+import tofu.syntax.monadic._
+import tofu.{Delay, higherKind}
+
 trait GenRandom[F[_]] {
 
   /** generate random 8-bit number */
@@ -22,7 +19,7 @@ trait GenRandom[F[_]] {
   def nextInt(n: Int): F[Int]
 }
 
-object GenRandom {
+object GenRandom extends EffectComp[GenRandom] {
   def nextLong[F[_]](implicit g: GenRandom[F]): F[Long]       = g.nextLong
   def nextInt[F[_]](n: Int)(implicit g: GenRandom[F]): F[Int] = g.nextInt(n)
 

@@ -8,6 +8,7 @@ import tofu.optics.Contains
 import tofu.syntax.funk.{funK, funKFrom}
 import tofu.syntax.monadic._
 import tofu.{WithLocal, WithRun}
+import scala.annotation.nowarn
 
 /** a ReaderT analog, allowing to have context referring resulting type for instance you can define
   * {{{
@@ -167,6 +168,7 @@ trait ContextTInstancesP extends ContextTInstancesQ { self: ContextTInstances =>
   ): ContextShift[ContextT[F, C, *]] =
     new ContextTContextShift[F, C]
 
+  @nowarn("cat=w-flag-self-implicit")
   final implicit def contextTUnlifting[F[+_]: Monad, In[_[_]], Out[_[_]]](implicit
       l: Out[ContextT[F, Out, *]] Contains In[ContextT[F, Out, *]],
       rc1: Rebase[In],

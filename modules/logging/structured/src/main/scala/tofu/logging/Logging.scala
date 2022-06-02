@@ -12,6 +12,7 @@ import tofu.syntax.monoidalK._
 import tofu.{Delay, Init, WithContext, higherKind}
 
 import scala.reflect.ClassTag
+import scala.annotation.nowarn
 
 /** Typeclass equivalent of Logger. May contain specified some Logger instance or try to read it from the context
   */
@@ -147,6 +148,7 @@ object Logging {
 
   def flatten[F[_]: FlatMap](underlying: F[Logging[F]]): Logging[F] = new EmbedLogging[F](underlying)
 
+  @nowarn("cat=w-flag-self-implicit")
   implicit val loggingRepresentable: RepresentableK[Logging] = higherKind.derived.genRepresentableK[Logging]
 
   implicit def loggingMonoid[F[_]: Applicative]: Monoid[Logging[F]] = new Monoid[Logging[F]] {

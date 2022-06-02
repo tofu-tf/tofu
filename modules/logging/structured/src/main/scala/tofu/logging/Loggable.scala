@@ -71,7 +71,7 @@ object Loggable extends LoggableInstances with DataComp[Loggable] {
 
     /** put single logging field value in the field with supplied name if it's convertible to string, hide it otherwise
       */
-    def putMaskedField[I, V, R, S](@unused a: A, @unused name: String, i: I)(@unused f: String => String)(implicit
+    def putMaskedField[I, V, R, S](a: A, name: String, i: I)(f: String => String)(implicit
         r: LogRenderer[I, V, R, S]
     ): R = r.sub(name, i)(putMaskedValue(a, _)(f))
 

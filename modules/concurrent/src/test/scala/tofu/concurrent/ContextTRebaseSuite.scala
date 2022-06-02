@@ -5,7 +5,6 @@ import cats.{FlatMap, Monad}
 import derevo.derive
 import derevo.tagless.invariantK
 import org.scalatest.funsuite.AnyFunSuite
-import simulacrum.typeclass
 import tofu.Raise
 import tofu.concurrent.ContextTRebaseSuite.{History, Name, Out, State, outer}
 import tofu.data.calc.CalcM
@@ -19,7 +18,7 @@ import tofu.syntax.monadic._
 import tofu.syntax.raise._
 import tofu.syntax.selective._
 
-import scala.annotation.nowarn
+import tofu.internal.EffectComp
 
 class ContextTRebaseSuite extends AnyFunSuite {
   val count = 100
@@ -47,32 +46,28 @@ class ContextTRebaseSuite extends AnyFunSuite {
   }
 }
 
-@nowarn("cat=unused-imports")
 object ContextTRebaseSuite {
-  @typeclass
   @derive(representableK)
   trait Name[F[_]] {
     def getName: F[String]
     def setName(name: String): F[Unit]
   }
-  object Name extends ContextEmbed[Name]
+  object Name extends ContextEmbed[Name] with EffectComp[Name]
 
-  @typeclass
   @derive(representableK)
   trait Auth[F[_]] {
     def hasAuth(key: String): F[Boolean]
     def checkAuth(key: String): F[Unit]
   }
-  object Auth extends ContextEmbed[Auth]
+  object Auth extends ContextEmbed[Auth] with EffectComp[Auth]
 
-  @typeclass
   @derive(embed, invariantK)
   trait History[F[_]] {
     def readHistory: F[List[String]]
     def putHistory(s: String): F[Unit]
     def inkognito[A](actions: F[A]): F[A]
   }
-  object History extends ContextEmbed[History]
+  object History extends ContextEmbed[History] with EffectComp[History]
 
   case class NameImpl[F[_]: Auth: Monad](atom: Atom[F, String]) extends Name[F] {
     def getName: F[String] = atom.get

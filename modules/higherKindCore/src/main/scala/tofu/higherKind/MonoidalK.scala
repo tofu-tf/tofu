@@ -2,16 +2,13 @@ package tofu.higherKind
 import cats.data.Tuple2K
 import cats.tagless.ApplyK
 import cats.~>
-import simulacrum.typeclass
-
-import scala.annotation.nowarn
+import tofu.internal.EffectCompHK
 
 /** higher order form of monoidal functor for all F[_], uf: U[F] , zipWith2K(uf, unitK)(Function2K((f, _) => f)) == uf
   * for all F[_], uf: U[F] , zipWith2K(unitK, uf)(Function2K((_, f) => f)) == uf
   * @tparam U
   *   - higher order functor
   */
-@typeclass @nowarn("cat=unused-imports")
 trait MonoidalK[U[_[_]]] extends PureK[U] with ApplyK[U] {
   def zipWith2K[F[_], G[_], H[_]](af: U[F], ag: U[G])(f2: Function2K[F, G, H]): U[H]
 
@@ -24,3 +21,5 @@ trait MonoidalK[U[_[_]]] extends PureK[U] with ApplyK[U] {
   override def productK[F[_], G[_]](af: U[F], ag: U[G]): U[Tuple2K[F, G, *]] =
     zipWith2K(af, ag)(Function2K((f, g) => Tuple2K(f, g)))
 }
+
+object MonoidalK extends EffectCompHK[MonoidalK]
