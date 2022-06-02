@@ -1,7 +1,8 @@
 package tofu.syntax
+
 import cats.syntax._
-import cats.Parallel
-import cats.Defer
+import cats.{Defer, Parallel, Traverse}
+import tofu.BoundedParallel
 
 object parallel
     extends ParallelSyntax with ParallelTraverseSyntax with ParallelFlatSyntax with ParallelApplySyntax
@@ -19,5 +20,10 @@ object parallel
 
     def parReplicateBatch_(count: Long, batch: Long)(implicit F: Parallel[F], FD: Defer[F]): F[Unit] =
       F.monad.productR(parReplicate_(count.min(batch)))(FD.defer(parReplicateBatch_(count - batch, batch)))
+  }
+
+  final implicit class TofuBoundedParallelOps[T[_], A](private val ta: T[A]) extends AnyVal {
+    def parTraverseN[F[_]: BoundedParallel, B](bound: Int)(func: A => F[B])(implicit T: Traverse[T]): F[T[B]] =
+      BoundedParallel[F].parTraverseN(ta, bound)(func)
   }
 }
