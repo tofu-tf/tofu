@@ -12,3 +12,5 @@ final case class masked(mode: MaskMode = MaskMode.Full) extends StaticAnnotation
 
 /** when applied to the field means "log sub fields along with fields of owner" */
 final case class unembed() extends StaticAnnotation
+
+final case class ignoreOpt() extends StaticAnnotation
