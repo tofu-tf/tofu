@@ -75,7 +75,7 @@ object Dependencies {
 
     val groovy = "3.0.11"
 
-    val http4s = "0.22.13"
+    val http4s = "0.22.14"
   }
 
   val noCatsCore       =
