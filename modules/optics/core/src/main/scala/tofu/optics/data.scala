@@ -1,15 +1,24 @@
-package tofu.optics.data
+package tofu.optics
 
 import cats.arrow.Profunctor
-import tofu.syntax.monadic._
+import cats.syntax.functor.*
 import cats.Functor
 import cats.arrow.Compose
 import tofu.optics.classes.PChoice
 import cats.kernel.Monoid
 import cats.Applicative
-import cats.syntax.monoid._
+import cats.syntax.monoid.*
 import cats.kernel.Semigroup
 import cats.Apply
+import tofu.optics.data.*
+
+object data extends DataInstancesLv0 {
+  type Identity[+A]             = A
+  type CoKleisli[F[+_], -A, +B] = F[A] => B
+  type Proxy[+A]                = Unit
+  type Tagged[-A, +B]           = Unit => B
+  type Constant[+A, +B]         = A
+}
 
 class CoKleisliProfunctor[F[+_]: Functor] extends Profunctor[CoKleisli[F, *, *]] {
   def dimap[A, B, C, D](fab: CoKleisli[F, A, B])(f: C => A)(g: B => D): CoKleisli[F, C, D] =

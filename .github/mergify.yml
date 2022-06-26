@@ -24,6 +24,8 @@ pull_request_rules:
           - check-success~=Test \(ubuntu-latest, 2\.12\.\d+, temurin@17\)
           - check-success~=Test \(ubuntu-latest, 2\.13\.\d+, temurin@8\)
           - check-success~=Test \(ubuntu-latest, 2\.13\.\d+, temurin@17\)
+          - check-success~=Test \(ubuntu-latest, 3\.\d+, temurin@8\)
+          - check-success~=Test \(ubuntu-latest, 3\.\d+, temurin@17\)
     actions:
       merge:
         method: rebase

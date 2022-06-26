@@ -2,7 +2,7 @@ package tofu.optics
 
 import alleycats.Pure
 import cats.{Functor, Id}
-import tofu.compat.unused212
+import tofu.optics.compat.unused212
 import tofu.optics.classes.PChoice
 import tofu.optics.data._
 

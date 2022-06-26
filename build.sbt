@@ -17,20 +17,39 @@ lazy val defaultSettings = Seq(
   scalacWarningConfig,
   Compile / doc / scalacOptions -= "-Xfatal-warnings",
   libraryDependencies ++= Seq(
-    compilerPlugin(kindProjector),
-    compilerPlugin(betterMonadicFor),
     scalatest,
-    collectionCompat,
-    scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided
-  )
+    collectionCompat
+  ),
+  libraryDependencies ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, _)) =>
+        Seq(
+          compilerPlugin(kindProjector),
+          compilerPlugin(betterMonadicFor),
+          scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided
+        )
+      case _            => Seq.empty
+    }
+  }
 ) ++ macros
+
+lazy val scala3Settings = Seq(
+  crossScalaVersions += Version.scala3,
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) => Seq()
+      case Some((2, _)) => Seq("-Xsource:3")
+      case _            => Seq.empty
+    }
+  }
+)
 
 lazy val higherKindCore = project
   .in(file("modules/higherKindCore"))
   .settings(
     defaultSettings,
     name := "tofu-core-higher-kind",
-    libraryDependencies ++= Seq(catsCore, catsFree, catsTagless),
+    libraryDependencies ++= Seq(catsCore, catsFree, catsTagless)
   )
 
 lazy val kernel = project
@@ -228,10 +247,10 @@ lazy val opticsCore = project
   .in(file("modules/optics/core"))
   .settings(
     defaultSettings,
+    scala3Settings,
     libraryDependencies ++= Seq(catsCore, alleycats),
     name := "tofu-optics-core"
   )
-  .dependsOn(higherKindCore)
 
 lazy val opticsInterop = project
   .in(file("modules/optics/interop"))

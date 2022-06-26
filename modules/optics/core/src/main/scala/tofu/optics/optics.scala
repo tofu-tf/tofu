@@ -4,7 +4,7 @@ import cats.arrow._
 import tofu.optics.classes.Category2
 import tofu.optics.tags.Tagger
 import tofu.optics.classes.Delayed
-import tofu.compat.uv212
+import tofu.optics.compat.uv212
 
 trait OpticCompanion[O[-s, +t, +a, -b] >: PSame[s, t, a, b] @uv212] {
   self =>
@@ -32,11 +32,14 @@ trait OpticCompanion[O[-s, +t, +a, -b] >: PSame[s, t, a, b] @uv212] {
     def compose[S, T, A, B, U, V](f: O[A, B, U, V], g: O[S, T, A, B]): O[S, T, U, V] = self.compose(f, g)
   }
 
-  final implicit def toOpticComposeOps[S, T, A, B](o: O[S, T, A, B]) = new OpticComposeOps[O, S, T, A, B](o)
+  final implicit def toOpticComposeOps[S, T, A, B](o: O[S, T, A, B]): OpticComposeOps[O, S, T, A, B] =
+    new OpticComposeOps[O, S, T, A, B](o)
 
-  final implicit def toMonoOpticOps[S, A](o: O[S, S, A, A]) = new MonoOpticOps[O, S, A](o)
+  final implicit def toMonoOpticOps[S, A](o: O[S, S, A, A]): MonoOpticOps[O, S, A] =
+    new MonoOpticOps[O, S, A](o)
 
-  final implicit def toDelayOps[S, T, A, B](o: => O[S, T, A, B]) = new DelayedOps[O, S, T, A, B](() => o)
+  final implicit def toDelayOps[S, T, A, B](o: => O[S, T, A, B]): DelayedOps[O, S, T, A, B] =
+    new DelayedOps[O, S, T, A, B](() => o)
 
 }
 

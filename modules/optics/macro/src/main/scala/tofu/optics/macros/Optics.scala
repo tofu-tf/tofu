@@ -1,6 +1,6 @@
 package tofu.optics.macros
 
-import tofu.compat.unused
+import tofu.optics.compat.unused
 import tofu.optics.PContains
 
 import scala.reflect.macros.blackbox

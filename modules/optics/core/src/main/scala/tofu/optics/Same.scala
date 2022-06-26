@@ -1,6 +1,6 @@
 package tofu.optics
 
-import tofu.compat.unused
+import tofu.optics.compat.unused
 
 /** polymorphic equality: any relation for S and T equal to relation of A and B */
 trait PSame[-S, +T, +A, -B] extends PEquivalent[S, T, A, B] with PBase[PSame, S, T, A, B] {
