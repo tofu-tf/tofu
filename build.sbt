@@ -273,6 +273,7 @@ lazy val opticsMacro = project
   .dependsOn(opticsCore)
   .settings(
     defaultSettings,
+    scala3Settings,
     scalacOptions ~= { opts =>
       val suppressed = List(
         "unused:params",
