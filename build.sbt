@@ -37,7 +37,7 @@ lazy val scala3Settings = Seq(
   crossScalaVersions += Version.scala3,
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => Seq()
+      case Some((3, _)) => Seq("-scala-output-version:3.1")
       case Some((2, _)) => Seq("-Xsource:3")
       case _            => Seq.empty
     }
