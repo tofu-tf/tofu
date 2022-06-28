@@ -1,7 +1,7 @@
 package tofu.optics
 
 import cats.{Applicative, Monoid}
-import monocle._
+import monocle.*
 import scala.annotation.unchecked.uncheckedVariance
 
 object interop {
@@ -23,7 +23,7 @@ object interop {
 
   implicit final class MonocleLensInteropOps[S, T, A, B](private val lens: PLens[S, T, A, B]) extends AnyVal {
     def toContains: PContains[S, T, A, B] = new PContains[S, T, A, B] {
-      def set(s: S, b: B): T = lens.set(b)(s)
+      def set(s: S, b: B): T = lens.replace(b)(s)
       def extract(s: S): A   = lens.get(s)
     }
   }
@@ -45,14 +45,14 @@ object interop {
 
   implicit final class MonocleOptionalInteropOps[S, T, A, B](private val opt: POptional[S, T, A, B]) extends AnyVal {
     def toProperty: PProperty[S, T, A, B] = new PProperty[S, T, A, B] {
-      def set(s: S, b: B): T         = opt.set(b)(s)
+      def set(s: S, b: B): T         = opt.replace(b)(s)
       def narrow(s: S): Either[T, A] = opt.getOrModify(s)
     }
   }
 
   implicit final class ItemsInteropOps[S, T, A, B](private val items: PItems[S, T, A, B]) extends AnyVal {
     def toTraversal: PTraversal[S, T, A, B] = new PTraversal[S, T, A, B] {
-      def modifyF[F[_]: Applicative](f: A => F[B])(s: S): F[T] = {
+      def modifyA[F[_]: Applicative](f: A => F[B])(s: S): F[T] = {
         type F1[+x] = F[x @uncheckedVariance]
         items.traverse[F1](s)(f)
       }
@@ -61,7 +61,7 @@ object interop {
 
   implicit final class TraversalInteropOps[S, T, A, B](private val items: PTraversal[S, T, A, B]) extends AnyVal {
     def toItems: PItems[S, T, A, B] = new PItems[S, T, A, B] {
-      def traverse[F[_]: Applicative](a: S)(f: A => F[B]): F[T] = items.modifyF(f)(a)
+      def traverse[F[_]: Applicative](a: S)(f: A => F[B]): F[T] = items.modifyA(f)(a)
     }
   }
 
@@ -82,7 +82,7 @@ object interop {
   implicit final class UpdateInteropOps[S, T, A, B](private val update: PUpdate[S, T, A, B]) extends AnyVal {
     def toSetter: PSetter[S, T, A, B] = new PSetter[S, T, A, B] {
       def modify(f: A => B): S => T = update.update(_, f)
-      def set(b: B): S => T         = update.put(_, b)
+      def replace(b: B): S => T     = update.put(_, b)
     }
   }
 

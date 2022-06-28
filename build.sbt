@@ -255,7 +255,18 @@ lazy val opticsCore = project
 lazy val opticsInterop = project
   .in(file("modules/optics/interop"))
   .dependsOn(opticsCore)
-  .settings(defaultSettings, libraryDependencies ++= Vector(monocle, catsCore), name := "tofu-optics-interop")
+  .settings(
+    name := "tofu-optics-interop",
+    defaultSettings,
+    scala3Settings,
+    libraryDependencies += catsCore,
+    libraryDependencies += {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 12)) => monocle212
+        case _             => monocle
+      }
+    }
+  )
 
 lazy val opticsMacro = project
   .in(file("modules/optics/macro"))

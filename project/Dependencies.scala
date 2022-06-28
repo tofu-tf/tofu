@@ -26,7 +26,9 @@ object Dependencies {
 
     val catsTagless = "0.14.0"
 
-    val monocle = "2.1.0"
+    val monocle = "3.1.0"
+
+    val monocle212 = "2.1.0"
 
     val enumeratum = "1.7.0"
 
@@ -90,7 +92,8 @@ object Dependencies {
   val catsCore         = "org.typelevel"              %% "cats-core"                % Version.cats
   val catsFree         = "org.typelevel"              %% "cats-free"                % Version.cats
   val catsMtl          = "org.typelevel"              %% "cats-mtl"                 % Version.catsMtl
-  val monocle          = "com.github.julien-truffaut" %% "monocle-core"             % Version.monocle excludeAll (noCatsCore: _*)
+  val monocle          = "dev.optics"                 %% "monocle-core"             % Version.monocle excludeAll (noCatsCore: _*)
+  val monocle212       = "com.github.julien-truffaut" %% "monocle-core"             % Version.monocle212 excludeAll (noCatsCore: _*)
   val alleycats        = "org.typelevel"              %% "alleycats-core"           % Version.cats
   val catsEffect2      = "org.typelevel"              %% "cats-effect"              % Version.catsEffect2
   val catsEffect3      = "org.typelevel"              %% "cats-effect"              % Version.catsEffect3
