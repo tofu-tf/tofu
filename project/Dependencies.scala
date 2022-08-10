@@ -46,7 +46,7 @@ object Dependencies {
 
     val typesafeConfig = "1.4.2"
 
-    val zio = "2.0.0"
+    val zio = "1.0.15"
 
     val zioCats = "2.5.1.0"
 
