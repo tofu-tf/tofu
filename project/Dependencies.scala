@@ -34,7 +34,7 @@ object Dependencies {
 
     val fs2 = "2.5.11"
 
-    val fs2CE3 = "3.2.10"
+    val fs2CE3 = "3.2.12"
 
     val logback = "1.2.11"
 
@@ -46,7 +46,7 @@ object Dependencies {
 
     val typesafeConfig = "1.4.2"
 
-    val zio = "1.0.15"
+    val zio = "1.0.16"
 
     val zioCats = "2.5.1.0"
 
@@ -73,9 +73,9 @@ object Dependencies {
 
     val logstashLogback = "7.2"
 
-    val groovy = "3.0.11"
+    val groovy = "3.0.12"
 
-    val http4s = "0.22.13"
+    val http4s = "0.22.14"
   }
 
   val noCatsCore       =
