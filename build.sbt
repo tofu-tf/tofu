@@ -36,10 +36,11 @@ lazy val higherKindCore = project
 lazy val kernel = project
   .in(file("modules/kernel"))
   .settings(defaultSettings)
-  .dependsOn(opticsCore, higherKindCore)
+  .dependsOn(higherKindCore)
   .settings(
     defaultSettings,
-    name := "tofu-kernel"
+    name := "tofu-kernel",
+    libraryDependencies += glassCore
   )
 
 lazy val kernelCE2Interop = project
@@ -116,10 +117,10 @@ lazy val loggingStr = project
 lazy val loggingDer = project
   .in(file("modules/logging/derivation"))
   .dependsOn(loggingStr)
-  .dependsOn(opticsMacro % "compile->test", derivation % "compile->test")
+  .dependsOn(derivation % "compile->test")
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(derevo, magnolia, slf4j),
+    libraryDependencies ++= Seq(derevo, magnolia, slf4j, glassMacro % Test),
     name := "tofu-logging-derivation"
   )
 
@@ -207,50 +208,21 @@ lazy val observable = project
 lazy val concurrent =
   project
     .in(file("modules/concurrent"))
-    .dependsOn(core, derivation % "compile->test", opticsMacro % "compile->test")
+    .dependsOn(core, derivation % "compile->test")
     .settings(
       defaultSettings,
       libraryDependencies ++= Seq(catsEffect2, catsTagless),
-      libraryDependencies ++= Seq(simulacrum, derevoTagless).map(_ % Test),
+      libraryDependencies ++= Seq(simulacrum, derevoTagless, glassMacro).map(_ % Test),
       name := "tofu-concurrent",
     )
 
 lazy val config = project
   .in(file("modules/config"))
-  .dependsOn(core, opticsCore, concurrent)
+  .dependsOn(core, concurrent)
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo),
+    libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo, glassCore),
     name := "tofu-config",
-  )
-
-lazy val opticsCore = project
-  .in(file("modules/optics/core"))
-  .settings(
-    defaultSettings,
-    libraryDependencies ++= Seq(catsCore, alleycats),
-    name := "tofu-optics-core"
-  )
-  .dependsOn(higherKindCore)
-
-lazy val opticsInterop = project
-  .in(file("modules/optics/interop"))
-  .dependsOn(opticsCore)
-  .settings(defaultSettings, libraryDependencies ++= Vector(monocle, catsCore), name := "tofu-optics-interop")
-
-lazy val opticsMacro = project
-  .in(file("modules/optics/macro"))
-  .dependsOn(opticsCore)
-  .settings(
-    defaultSettings,
-    scalacOptions ~= { opts =>
-      val suppressed = List(
-        "unused:params",
-        "unused:patvars"
-      )
-      opts.filterNot(opt => suppressed.exists(opt.contains))
-    },
-    name := "tofu-optics-macro"
   )
 
 lazy val enums = project
@@ -300,8 +272,9 @@ lazy val zioInterop = project
 lazy val fs2Interop = project
   .in(file("modules/fs2"))
   .settings(
-    name := "tofu-fs2-interop",
+    name                             := "tofu-fs2-interop",
     libraryDependencies += fs2,
+    libraryDependencies += glassMacro % Test,
     defaultSettings
   )
   .dependsOn(concurrent, streams)
@@ -309,11 +282,12 @@ lazy val fs2Interop = project
 lazy val fs2CE3Interop = project
   .in(file("modules/fs2-ce3"))
   .settings(
-    name := "tofu-fs2-ce3-interop",
+    name                             := "tofu-fs2-ce3-interop",
     libraryDependencies += fs2CE3,
+    libraryDependencies += glassMacro % Test,
     defaultSettings
   )
-  .dependsOn(core3, streams, derivation % "compile->test", opticsMacro % "compile->test")
+  .dependsOn(core3, streams, derivation % "compile->test")
 
 lazy val doobie = project
   .in(file("modules/doobie/core"))
@@ -385,12 +359,10 @@ lazy val coreModules =
     kernel,
     kernelCE2Interop,
     core,
-    opticsMacro,
     memo,
     derivation,
     env,
     concurrent,
-    opticsCore,
     streams,
     kernelCatsMtlInterop
   )
@@ -401,7 +373,7 @@ lazy val ce3CoreModules = Vector(
 )
 
 lazy val commonModules =
-  Vector(observable, opticsInterop, logging, enums, config, zioInterop, fs2Interop, doobie, doobieLogging)
+  Vector(observable, logging, enums, config, zioInterop, fs2Interop, doobie, doobieLogging)
 
 lazy val ce3CommonModules =
   Vector(loggingStr, loggingDer, loggingLayout, doobieCE3, doobieLoggingCE3, fs2CE3Interop)
@@ -419,7 +391,7 @@ lazy val docs = project // new documentation project
     addCompilerPlugin(simulacrum),
     macros,
     // ScalaUnidoc / doc / scalacOptions += "-Ymacro-expand:none",
-    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*) -- inProjects(opticsMacro),
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,

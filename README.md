@@ -48,9 +48,6 @@ of `"tofu"`):
   * `tofu-logging-log4cats` for interop with [Log4Cats](https://github.com/typelevel/log4cats)
 * `tofu-memo` for caching utils
 * `tofu-observable` for `monix.reactive.Observable` utils
-* `tofu-optics-core` for optics core (Optics typeclasses)
-* `tofu-optics-interop` for optics interop with [Monocle](https://github.com/julien-truffaut/Monocle)
-* `tofu-optics-macro` for macro optics generators
 * `tofu-zio-interop` for interop with [ZIO](https://zio.dev) (core, logging)
   * `tofu-zio-core` for ZIO instances only
   * `tofu-zio-logging` for ZIO logging only

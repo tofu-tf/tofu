@@ -6,7 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.slf4j.helpers.MessageFormatter
 import tofu.data._
 import tofu.higherKind.derived.representableK
-import tofu.optics.macros.Optics
+import glass.macros.Optics
 
 import LoggingMidSuite._
 

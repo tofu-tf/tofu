@@ -9,7 +9,7 @@ import cats.{Applicative, Functor, ~>}
 import tofu.generate.GenRandom
 import tofu.internal.CachedMatcher
 import tofu.lift.{Unlift, UnliftIO, UnsafeExecFuture}
-import tofu.optics.{Contains, Extract}
+import glass.{Contains, Extract}
 import tofu.syntax.funk._
 import tofu.zioInstances.ZioTofuInstance.convertFiber
 import zio.clock.Clock

@@ -8,7 +8,7 @@ import tofu.{ApplicativeThrow, Errors, Handle, Raise}
 import tofu.syntax.handle._
 import tofu.syntax.raise._
 import cats.syntax.all._
-import tofu.optics.Downcast
+import glass.Downcast
 
 class RetrySuite extends AnyFlatSpec {
 

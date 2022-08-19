@@ -2,7 +2,7 @@ package tofu
 
 import cats.Applicative
 import cats.data.ReaderT
-import tofu.optics.Contains
+import glass.Contains
 
 object ContextSuite {
   type Ctx >: Unit

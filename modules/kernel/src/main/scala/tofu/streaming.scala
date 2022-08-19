@@ -1,9 +1,9 @@
 package tofu
 
 import cats.{Applicative, Functor, Monoid}
-import tofu.optics.Folded
+import glass.Folded
 import tofu.internal.DataEffectComp
-import tofu.optics.classes.Transform
+import glass.classes.Transform
 
 /** simply function A => F[Unit] in a typeclass form */
 trait Push[F[_], A] {

@@ -2,7 +2,7 @@ package tofu.concurrent.impl
 import cats.Functor
 import cats.data.State
 import cats.effect.concurrent.Ref
-import tofu.optics.Contains
+import glass.Contains
 import cats.syntax.functor._
 
 /** Having A Contains B relation, make a ref that would change only marked part of state */

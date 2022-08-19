@@ -1,7 +1,7 @@
 package tofu.data.calc
 
 import tofu.compat.unused212
-import tofu.optics.PContains
+import glass.PContains
 
 trait Continue[-A, -E, -S, +C] { self =>
   def success(s: S, a: A): C
