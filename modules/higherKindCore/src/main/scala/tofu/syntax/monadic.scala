@@ -14,13 +14,13 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
       * @example
       * {{{
       * val computation1: F[Thing] = ???
-      * val result11: F[Unit] = computation.void
-      * val result12: F[Unit] = computation.discard[Thing]
+      * val result11: F[Unit] = computation1.void
+      * val result12: F[Unit] = computation1.discard[Thing]
       *
       * //after changes or refactoring
       * val computation2: F[F[Thing]] = ???
-      * val result21: F[Unit] = computation.void //error here, nested F is not evaluated and compiler doesn't warn
-      * val result22: F[Unit] = computation.discard[Thing] //compiler produces an error
+      * val result21: F[Unit] = computation2.void //error here, nested F is not evaluated and compiler doesn't warn
+      * val result22: F[Unit] = computation2.discard[Thing] //compiler produces an error
       * }}} */
     def discard[AA](implicit ev: AA =:= A, F: Functor[F]): F[Unit] = F.void(fa)
     def map[B](f: A => B)(implicit F: Functor[F]): F[B]           = F.map(fa)(f)
