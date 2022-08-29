@@ -7,6 +7,22 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
   def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit
 
   implicit final class TofuFunctorOps[F[_], A](private val fa: F[A]) extends AnyVal {
+    /** Safer way than [[void]] to discard a value
+      *
+      * Explicit type ascription eliminates a bug when one can begin discarding non-discard-able value.
+      *
+      * @example
+      * {{{
+      * val computation1: F[Thing] = ???
+      * val result11: F[Unit] = computation.void
+      * val result12: F[Unit] = computation.discard[Thing]
+      *
+      * //after changes or refactoring
+      * val computation2: F[F[Thing]] = ???
+      * val result21: F[Unit] = computation.void //error here, nested F is not evaluated and compiler doesn't warn
+      * val result22: F[Unit] = computation.discard[Thing] //compiler produces an error
+      * }}} */
+    def discard[AA](implicit ev: AA =:= A, F: Functor[F]): F[Unit] = F.void(fa)
     def map[B](f: A => B)(implicit F: Functor[F]): F[B]           = F.map(fa)(f)
     def fmap[B](f: A => B)(implicit F: Functor[F]): F[B]          = F.fmap(fa)(f)
     def widen[B >: A](implicit F: Functor[F]): F[B]               = F.widen(fa)
