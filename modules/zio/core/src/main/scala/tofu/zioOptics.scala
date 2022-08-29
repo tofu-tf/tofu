@@ -1,7 +1,7 @@
 package tofu
 
 import izumi.reflect.Tag
-import tofu.optics.PContains
+import glass.PContains
 import zio.Has
 
 object zioOptics {

@@ -3,7 +3,7 @@ package errorInstances
 
 import cats.data.{EitherT, OptionT}
 import cats.{ApplicativeError, Id, Monad}
-import tofu.optics.{Downcast, Upcast}
+import glass.{Downcast, Upcast}
 
 private[tofu] class FromAppErr[F[_], E, E1](implicit
     protected val appErr: ApplicativeError[F, E],

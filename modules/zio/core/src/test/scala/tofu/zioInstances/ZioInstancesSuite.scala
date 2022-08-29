@@ -1,7 +1,7 @@
 package tofu.zioInstances
 
 import tofu.lift.{Lift, Unlift, UnliftIO}
-import tofu.optics.{Contains, Extract}
+import glass.{Contains, Extract}
 import tofu.zioInstances.implicits._
 import tofu._
 import zio._

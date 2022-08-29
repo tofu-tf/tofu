@@ -5,7 +5,7 @@ import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.{Applicative, FlatMap, Functor, Monad, ~>}
 import syntax.funk._
-import tofu.optics.Contains
+import glass.Contains
 import tofu.syntax.monadic._
 import tofu.internal.ContextBase
 

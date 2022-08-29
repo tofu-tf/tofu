@@ -12,7 +12,7 @@ import tofu.data.derived.ContextEmbed
 import tofu.data.{ICalcM, Nothing2T}
 import tofu.higherKind.derived.{embed, representableK}
 import tofu.lift.{Rebase, Unlift}
-import tofu.optics.macros.{ClassyOptics, GenContains, promote}
+import glass.macros.{ClassyOptics, GenContains, promote}
 import tofu.syntax.lift._
 import tofu.syntax.monadic._
 import tofu.syntax.raise._

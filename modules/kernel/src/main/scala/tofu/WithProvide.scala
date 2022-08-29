@@ -2,7 +2,7 @@ package tofu
 
 import cats.~>
 import tofu.lift.Lift
-import tofu.optics.Extract
+import glass.Extract
 import tofu.syntax.funk.funK
 
 /** Synonym for [[Provide]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference

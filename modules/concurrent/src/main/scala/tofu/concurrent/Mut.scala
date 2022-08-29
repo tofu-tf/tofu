@@ -6,7 +6,7 @@ import cats.effect.Bracket
 import cats.effect.concurrent.{MVar, Ref}
 import cats.syntax.functor._
 import tofu.concurrent.Mut.FocusedMut
-import tofu.optics.Contains
+import glass.Contains
 import tofu.syntax.bracket._
 
 /** simplified form of synchonized mutable variable, that could be satisfied both by MVar and Ref */

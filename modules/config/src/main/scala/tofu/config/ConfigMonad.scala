@@ -6,7 +6,7 @@ import cats.effect.concurrent.Ref
 import cats.{Monad, Parallel}
 import tofu.concurrent.ce2._
 import tofu.config.ConfigTContext.Fail
-import tofu.optics.Contains
+import glass.Contains
 import tofu.syntax.monadic._
 import cats.MonadError
 import cats.Applicative
