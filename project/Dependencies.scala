@@ -67,7 +67,7 @@ object Dependencies {
 
     val collectionCompat = "2.7.0"
 
-    val log4Cats = "1.6.0"
+    val log4Cats = "1.7.0"
 
     val logstashLogback = "7.2"
 
