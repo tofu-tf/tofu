@@ -9,11 +9,11 @@ package tofu.logging
   *      to problems in your logging platform)
   *
   * @example
-  * {{{
+  *   {{{
   *   val count = LogAnnotation.make[Int]("count")
   *   logger.info("Count has type Int", count +> 100)
   *   // logger.error("This line wouldn't be compiled", count +> "100")
-  * }}}
+  *   }}}
   */
 final class LogAnnotation[A](val name: String, valueLoggable: Loggable[A]) {
 
