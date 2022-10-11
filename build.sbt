@@ -260,6 +260,26 @@ lazy val zioLogging =
     )
     .dependsOn(loggingStr, loggingDer % "test", zioCore % Test)
 
+lazy val zio2Logging =
+  project
+    .in(file("modules/zio2/logging"))
+    .settings(
+      defaultSettings,
+      name:= "tofu-zio2-logging",
+      libraryDependencies ++= List(zio2, slf4j, logback % Test, zio2Test, zio2TestSbt)
+    )
+    .dependsOn(loggingStr, loggingDer % "test")
+
+lazy val zio2Examples =
+  project
+    .in(file("modules/zio2/examples"))
+    .settings(
+      defaultSettings,
+      name := "tofu-zio2-examples",
+      noPublishSettings
+    )
+    .dependsOn(zio2Logging, loggingDer, loggingLayout)
+
 lazy val zioInterop = project
   .in(file("modules/zio"))
   .settings(

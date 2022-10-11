@@ -46,6 +46,8 @@ object Dependencies {
 
     val zio = "1.0.17"
 
+    val zio2 = "2.0.2"
+
     val zioCats = "2.5.1.0"
 
     val shapeless = "2.3.10"
@@ -109,6 +111,9 @@ object Dependencies {
   val catsTagless      = "org.typelevel"          %% "cats-tagless-macros"      % Version.catsTagless
   val typesafeConfig   = "com.typesafe"            % "config"                   % Version.typesafeConfig
   val zio              = "dev.zio"                %% "zio"                      % Version.zio
+  val zio2             = "dev.zio"                    %% "zio"                     % Version.zio2
+  val zio2Test         = "dev.zio"                    %% "zio-test"                % Version.zio2 % Test
+  val zio2TestSbt      = "dev.zio"                    %% "zio-test-sbt"            % Version.zio2 % Test
   val zioCats          = "dev.zio"                %% "zio-interop-cats"         % Version.zioCats
   val scalatest        = "org.scalatest"          %% "scalatest"                % Version.scalatest % Test
   val shapeless        = "com.chuusai"            %% "shapeless"                % Version.shapeless
