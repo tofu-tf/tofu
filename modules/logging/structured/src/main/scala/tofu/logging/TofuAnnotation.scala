@@ -10,12 +10,12 @@ package tofu.logging
   *
   * @example
   *   {{{
-  *   val count = LogAnnotation.make[Int]("count")
-  *   logger.info("Count has type Int", count +> 100)
-  *   // logger.error("This line wouldn't be compiled", count +> "100")
+  *   val count = TofuAnnotation.make[Int]("count")
+  *   logger.info("Count has type Int", count -> 100)
+  *   // logger.error("This line wouldn't be compiled", count -> "100")
   *   }}}
   */
-final class LogAnnotation[A](val name: String, valueLoggable: Loggable[A]) {
+final class TofuAnnotation[A](val name: String, valueLoggable: Loggable[A]) {
 
   type Type = A
 
@@ -24,8 +24,8 @@ final class LogAnnotation[A](val name: String, valueLoggable: Loggable[A]) {
   override def hashCode: Int = name.hashCode
 
   override def equals(other: Any): Boolean = other match {
-    case other: LogAnnotation[_] => name == other.name
-    case _                       => false
+    case other: TofuAnnotation[_] => name == other.name
+    case _                        => false
   }
 
   /** Returns `LoggedValue` using original `Loggable` provided when this annotation created.
@@ -34,14 +34,14 @@ final class LogAnnotation[A](val name: String, valueLoggable: Loggable[A]) {
 
   /** Make `LoggedValue` as named single field with corresponding value.
     */
-  def +>(value: A): LoggedValue = value
+  def apply(value: A): LoggedValue = value
 
   /** Make `LoggedValue` as named single field with corresponding value (if it's non-empty).
     */
-  def +>(value: Option[A]): LoggedValue = value
+  def apply(value: Option[A]): LoggedValue = value
 }
 
-object LogAnnotation {
-  def make[A: Loggable](name: String): LogAnnotation[A] =
-    new LogAnnotation[A](name, Loggable[A])
+object TofuAnnotation {
+  def make[A: Loggable](name: String): TofuAnnotation[A] =
+    new TofuAnnotation[A](name, Loggable[A])
 }

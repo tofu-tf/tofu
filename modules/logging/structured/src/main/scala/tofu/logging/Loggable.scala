@@ -43,9 +43,9 @@ trait Loggable[A] extends Loggable.Base[A] {
 
   def narrow[B <: A]: Loggable[B] = this.asInstanceOf[Loggable[B]]
 
-  /** create a new `LogAnnotation` using this `Loggable` with provided name */
-  def logAnnotation(name: String): LogAnnotation[A] =
-    LogAnnotation.make(name)(this)
+  /** creates a new `TofuAnnotation` using this `Loggable` with provided name */
+  def annotation(name: String): TofuAnnotation[A] =
+    TofuAnnotation.make(name)(this)
 }
 
 object Loggable extends LoggableInstances with DataComp[Loggable] {

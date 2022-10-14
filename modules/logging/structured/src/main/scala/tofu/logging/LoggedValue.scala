@@ -29,6 +29,12 @@ object LoggedValue {
 
   implicit def loggableToLoggedValue[A](x: A)(implicit loggable: Loggable[A]): LoggedValue = loggable.loggedValue(x)
 
+  implicit def annotatedValueToLoggable[A](tpl: (TofuAnnotation[A], A)): LoggedValue =
+    tpl._1.apply(tpl._2)
+
+  implicit def annotatedOptValueToLoggable[A](tpl: (TofuAnnotation[A], Option[A])): LoggedValue =
+    tpl._1.apply(tpl._2)
+
   def error(cause: Throwable): LoggedThrowable = new LoggedThrowable(cause)
 }
 
