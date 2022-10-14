@@ -6,7 +6,7 @@ import tofu.logging.zlogs.TofuZLogger._
 import zio._
 import java.time.{Clock => JClock}
 
-class TofuZLogger(logContext: ZLogContext.LoggedValuesExtractor, jc: JClock) extends ZLogger[String, Unit] {
+class TofuZLogger(jc: JClock) extends ZLogger[String, Unit] {
 
   override def apply(
       trace: Trace,
@@ -22,7 +22,10 @@ class TofuZLogger(logContext: ZLogContext.LoggedValuesExtractor, jc: JClock) ext
       val loggerName            = parseLoggerName(trace)
       val slf4jLogger           = LoggerFactory.getLogger(loggerName)
       val tofuLevel             = ZUniversalContextLogging.zioLevel2TofuLevel(logLevel)
-      val ctx                   = logContext.loggedValueFromFiberRefs(context)
+      val tofuAnnotations       = context.get(ZLogContextLive.TofuLogContextRef).getOrElse(Map.empty)
+      val loggedValues = tofuAnnotations.toSeq.map { case (annotation, value) =>
+        annotation.apply(value.asInstanceOf[annotation.Value])
+      }
       val spansCtx: LoggedValue =
         if (spans.isEmpty) ()
         else spansLoggable(jc.millis()).loggedValue(spans)
@@ -32,7 +35,7 @@ class TofuZLogger(logContext: ZLogContext.LoggedValuesExtractor, jc: JClock) ext
         level = tofuLevel,
         message = message(),
         ctx = spansCtx,
-        values = Seq[LoggedValue](ctx, annotations)
+        values = loggedValues :+ annotations
       )
     }
   }
@@ -41,11 +44,8 @@ class TofuZLogger(logContext: ZLogContext.LoggedValuesExtractor, jc: JClock) ext
 
 object TofuZLogger {
 
-  val addToRuntime: URLayer[ZLogContext.LoggedValuesExtractor, Unit] = ZLayer(
-    for {
-      javaClock <- Clock.javaClock
-      context   <- ZIO.service[ZLogContext.LoggedValuesExtractor]
-    } yield Runtime.addLogger(new TofuZLogger(context, javaClock))
+  val addToRuntime: ULayer[Unit] = ZLayer(
+    Clock.javaClock.map(jc => Runtime.addLogger(new TofuZLogger(jc)))
   ).flatten
 
   def parseLoggerName(trace: Trace): String = trace match {

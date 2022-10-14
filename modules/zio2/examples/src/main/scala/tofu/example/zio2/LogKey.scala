@@ -1,8 +1,8 @@
 package tofu.example.zio2
 
-import tofu.logging.LogAnnotation
-import tofu.logging.LogAnnotation.make
 import derevo.derive
+import tofu.logging.TofuAnnotation
+import tofu.logging.TofuAnnotation.make
 import tofu.logging.derivation.{hidden, loggable}
 
 import java.util.UUID
@@ -16,7 +16,8 @@ case class TestUser(
 )
 
 object LogKey {
-  val user: LogAnnotation[TestUser]  = make[TestUser]("user")
-  val count: LogAnnotation[Int]      = make[Int]("count")
-  val requestId: LogAnnotation[UUID] = make[UUID]("requestId")
+
+  val user: TofuAnnotation[TestUser]  = make[TestUser]("user")
+  val count: TofuAnnotation[Int]      = make[Int]("count")
+  val requestId: TofuAnnotation[UUID] = make[UUID]("requestId")
 }

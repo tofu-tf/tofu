@@ -1,51 +1,53 @@
 package tofu.logging.zlogs
 
 import tofu.logging.zlogs.ZLogContextLive.ContextDump
-import tofu.logging.{LogAnnotation, LoggedValue}
-import zio.{FiberRef, FiberRefs, Tag, UIO, ULayer, ZLayer}
+import tofu.logging.{LoggedValue, TofuAnnotation}
+import zio._
 
-class ZLogContextLive(ref: FiberRef[ContextDump]) extends ZLogContext with ZLogContext.LoggedValuesExtractor {
+class ZLogContextLive(
+    ref: => FiberRef[ContextDump]
+) extends ZLogContext with ZLogContext.LoggedValuesExtractor {
 
-  override def update[A](pair: (LogAnnotation[A], A)): UIO[Unit] =
-    ref.update(_ + pair)
+  override def update[A](key: TofuAnnotation[A], value: A): UIO[Unit] =
+    ref.update(_ + (key -> value))
 
-  override def get[A](key: LogAnnotation[A]): UIO[Option[A]] =
+  override def get[A](key: TofuAnnotation[A]): UIO[Option[A]] =
     ref.get.map(_.get(key).asInstanceOf[Option[A]])
 
-  override def getOrUpdate[A](pair: (LogAnnotation[A], A)): UIO[A] = {
-    val (key, value) = pair
+  override def getOrUpdate[A](key: TofuAnnotation[A], value: A): UIO[A] = {
+
     ref.modify[A] { dataMap =>
       if (dataMap.contains(key)) {
         (dataMap(key).asInstanceOf[A], dataMap)
       } else {
-        (value, dataMap + pair)
+        (value, dataMap + (key -> value))
       }
     }
   }
 
-  override def loggedValue: UIO[LoggedValue] = ref.get.map(makeLoggedValue)
-
-  override def loggedValueFromFiberRefs(fiberRefs: FiberRefs): Option[LoggedValue] =
-    fiberRefs.get(ref).map(makeLoggedValue)
-
-  private def makeLoggedValue(map: Map[LogAnnotation[_], Any]): LoggedValue = {
-    map.map[String, LoggedValue] {
-      case (annot, value) =>
-        (annot.name, annot +> value.asInstanceOf[annot.Value])
-    }
+  override def locally[R, E, B](updates: ZLogContext => UIO[Unit])(zio: ZIO[R, E, B]): ZIO[R, E, B] = {
+    for {
+      oldValue <- ref.get
+      b        <- ZIO.acquireReleaseWith(updates(this))(_ => ref.set(oldValue))(_ => zio)
+    } yield b
   }
+
+  override def loggedValue: UIO[LoggedValue] = ref.get.map(
+    _.map { case (annotation, value) =>
+      annotation.name -> annotation.apply(value.asInstanceOf[annotation.Value])
+    }
+  )
 
 }
 
 object ZLogContextLive {
-  val layer: ULayer[ZLogContextLive] = ZLayer.scoped(
-    FiberRef.make[ContextDump](
-      initial = Map.empty,
-      join = (parent, child) => parent ++ child
-    ).map(new ZLogContextLive(_))
-  )
 
-  val DumpTag = Tag[ContextDump]
+  type ContextDump = Map[TofuAnnotation[_], Any]
 
-  type ContextDump = Map[LogAnnotation[_], Any]
+  private[zlogs] lazy val TofuLogContextRef: FiberRef[ContextDump] =
+    Unsafe.unsafe(implicit unsafe =>
+      Runtime.default.unsafe
+        .run(ZIO.scoped(FiberRef.make[ContextDump](Map.empty)))
+        .getOrThrow()
+    )
 }
