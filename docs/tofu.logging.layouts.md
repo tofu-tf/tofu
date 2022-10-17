@@ -6,7 +6,7 @@ title: Logback Layouts
 
 # Layouts
 
-Tofu is built upon [Logback](http://logback.qos.ch/) so it needs a custom `logback.xml` file with contexual logging
+Tofu is built upon [Logback](http://logback.qos.ch/) so it needs a custom `logback.xml` file with contextual logging
 support. Tofu uses mechanism called markers to store context in logs, so it won't work with existing Layouts e.g.
 with [Logstash-encoder](https://github.com/logstash/logstash-logback-encoder).
 

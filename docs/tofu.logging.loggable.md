@@ -11,7 +11,7 @@ There are multiple predefined ways to create an instance of `Loggable`, many of 
 in `tofu.logging.Loggable` object:
 
 * `Loggable.empty` for no-op logging of value
-* `Loggable.show` for using `cats.Show` instance as string representaion
+* `Loggable.show` for using `cats.Show` instance as string representation
 * `Loggable.either` for logging either of `A` and `B`
 * provided instances for all primitive types, as well as stdlib's collections and collections from Cats
 * java.time.* instances
