@@ -23,7 +23,7 @@ object LogKey {
 val maybeId = Some(MyId("123"))
 
 log.info("Hello", LogKey.count -> 5, LogKey.myId -> maybeId)
-// log.error("this wouldn't be compiled", LogKey.count -> "5")
+// log.error("this won't compile", LogKey.count -> "5")
 
 ```
 will produce:
