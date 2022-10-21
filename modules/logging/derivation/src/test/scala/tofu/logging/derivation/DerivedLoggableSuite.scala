@@ -64,6 +64,10 @@ class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
     ) shouldBe """{}"""
   }
 
+  it should "not show <none> for None with ignoreOpt" in {
+    Loggable[MaskedBaz].logShow(MaskedBaz(None)) shouldBe "MaskedBaz{kek=<none>}"
+  }
+
 }
 
 object DerivedLoggableSuite {
@@ -89,5 +93,5 @@ object DerivedLoggableSuite {
   final case class Baz(foos: List[Foo] = Nil, ys: Vector[Int] = Vector(), zs: Option[List[List[String]]] = None)
 
   @derive(loggable)
-  final case class MaskedBaz(@masked kek: Option[String])
+  final case class MaskedBaz(@masked kek: Option[String], @ignoreOpt a: Option[String] = None)
 }
