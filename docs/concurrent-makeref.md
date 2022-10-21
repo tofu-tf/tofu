@@ -35,9 +35,8 @@ object Ref {
 }
 ```
 
-In fact, mutable content modifying is a side effect. Creating of mutable reference itself is a side effect too. Sometime we w
-Ref helps to solve by offering some method to create instance which takes one or two type parameters as effect constructors.
-Althought, this methods needs to given Sync instances for our effects. 
+In fact, mutable content modifying is a side effect. Creating of mutable reference itself is a side effect too. Sometimes Ref helps to solve by offering some method to create instance which takes one or two type parameters as effect constructors.
+Although, this method needs to be given Sync instances for our effects. 
 
 ## Tofu: MakeRef
 
