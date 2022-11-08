@@ -70,15 +70,20 @@ object masking {
   )(fn: TypeClass[Any] => Any => String) =
     params.iterator
       .filterNot(_.annotations.contains(hidden()))
-      .map { param =>
+      .flatMap { param =>
         import param._
 
         val value: PType = dereference(tpe)
-        val shown        = fn(typeclass.asInstanceOf[TypeClass[Any]])(value)
-        val repr         = annotations.collectFirst { case masked(mode) => field(value, shown, mode) }
-          .getOrElse(shown)
+        if (value == None && param.annotations.contains(ignoreOpt()))
+          None
+        else {
+          val shown = fn(typeclass.asInstanceOf[TypeClass[Any]])(value)
 
-        s"$label=$repr"
+          val repr = annotations.collectFirst { case masked(mode) => field(value, shown, mode) }
+            .getOrElse(shown)
+
+          Some(s"$label=$repr")
+        }
       }
 
   implicit final class Ops(private val value: String) extends AnyVal {

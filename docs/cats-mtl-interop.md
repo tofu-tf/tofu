@@ -39,8 +39,8 @@ for {
 }
 ```
 
-so you have a problem - how we can easy use `extermalProblem`?
-Usually programmers write your own implicits conversions, but `TOFU` could provide this instances for you!
+so you have a problem - how we can easily use `extermalProblem`?
+Usually programmers write your own implicit conversions, but `TOFU` could provide this instance for you!
 
 ### Install
 For installation interop, add dependency into your project: 
