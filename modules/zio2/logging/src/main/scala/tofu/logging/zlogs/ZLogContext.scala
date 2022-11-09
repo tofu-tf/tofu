@@ -1,23 +1,23 @@
 package tofu.logging.zlogs
 
 import ZLogContextLive.TofuLogContextRef
-import tofu.logging.{LoggedValue, TofuAnnotation}
+import tofu.logging.{LoggedValue, LogAnnotation}
 import zio._
 
 trait ZLogContext {
 
   /** Adds the couple of `LogAnnotation` and corresponding value to the context.
     */
-  def update[A](key: TofuAnnotation[A], value: A): UIO[Unit]
+  def update[A](key: LogAnnotation[A], value: A): UIO[Unit]
 
   /** Adds a new value and returns it if the annotation is absent in the context, returns an actual value from the
     * context otherwise.
     */
-  def getOrUpdate[A](key: TofuAnnotation[A], value: A): UIO[A]
+  def getOrUpdate[A](key: LogAnnotation[A], value: A): UIO[A]
 
   /** Returns a value from the context if the annotation exists.
     */
-  def get[A](key: TofuAnnotation[A]): UIO[Option[A]]
+  def get[A](key: LogAnnotation[A]): UIO[Option[A]]
 
   /** Scopes the result of calling the specified function only for the given effect.
     */

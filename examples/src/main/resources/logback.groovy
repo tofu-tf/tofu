@@ -16,4 +16,4 @@ appender("STRUCTURED", ConsoleAppender) {
     }
 }
 
-root(DEBUG, ["PLAIN-COLORED", "STRUCTURED"])
+root(DEBUG, ["STRUCTURED"])

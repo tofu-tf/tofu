@@ -1,20 +1,20 @@
 package tofu.logging.zlogs
 
 import tofu.logging.zlogs.ZLogContextLive.ContextDump
-import tofu.logging.{LoggedValue, TofuAnnotation}
+import tofu.logging.{LoggedValue, LogAnnotation}
 import zio._
 
 class ZLogContextLive(
     ref: => FiberRef[ContextDump]
 ) extends ZLogContext with ZLogContext.LoggedValuesExtractor {
 
-  override def update[A](key: TofuAnnotation[A], value: A): UIO[Unit] =
+  override def update[A](key: LogAnnotation[A], value: A): UIO[Unit] =
     ref.update(_ + (key -> value))
 
-  override def get[A](key: TofuAnnotation[A]): UIO[Option[A]] =
+  override def get[A](key: LogAnnotation[A]): UIO[Option[A]] =
     ref.get.map(_.get(key).asInstanceOf[Option[A]])
 
-  override def getOrUpdate[A](key: TofuAnnotation[A], value: A): UIO[A] = {
+  override def getOrUpdate[A](key: LogAnnotation[A], value: A): UIO[A] = {
 
     ref.modify[A] { dataMap =>
       if (dataMap.contains(key)) {
@@ -42,7 +42,7 @@ class ZLogContextLive(
 
 object ZLogContextLive {
 
-  type ContextDump = Map[TofuAnnotation[_], Any]
+  type ContextDump = Map[LogAnnotation[_], Any]
 
   private[zlogs] lazy val TofuLogContextRef: FiberRef[ContextDump] =
     Unsafe.unsafe(implicit unsafe =>
