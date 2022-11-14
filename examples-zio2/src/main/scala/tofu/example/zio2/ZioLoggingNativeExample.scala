@@ -1,7 +1,8 @@
 package tofu.example.zio2
 
+import tofu.logging.LogAnnotation
 import tofu.logging.zlogs._
-import zio._
+import zio.{LogAnnotation => _, _}
 
 object ZioLoggingNativeExample extends ZIOAppDefault {
 
@@ -15,7 +16,7 @@ object ZioLoggingNativeExample extends ZIOAppDefault {
           _ <- ZIO.fail(new IllegalStateException(s"$i divided by 5")).when(i % 5 == 0)
           _ <- ZIO.logInfo("Request completed")
         } yield ()
-      }
+      } @@ LogKey.requestId(Some(requestId)) @@ LogKey.count(i)
     } yield ()
 
     zio.catchAllCause(c => ZIO.logErrorCause("Request failed", c))
@@ -28,7 +29,7 @@ object ZioLoggingNativeExample extends ZIOAppDefault {
       ZIO.logSpan("full_app") {
         for {
           _  <- ZIO.logWarning("Hello everybody") @@ ZIOAspect.annotated("detail" -> "Good day!")
-          _  <- ZIO.collectAllParDiscard(tasks) @@ ZLogAspect(LogKey.user -> TestUser("Vasya", "12345"))()
+          _  <- ZIO.collectAllParDiscard(tasks) @@ LogKey.user(TestUser("Vasya", "12345"))
           _  <- ZIO.log("Application shut down")
         } yield ()
       }

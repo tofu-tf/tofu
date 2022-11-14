@@ -21,9 +21,12 @@ object ZLogs {
   def layerContextual[R: Loggable](implicit @unused RT: Tag[R]): ULayer[ZLogs[R]] =
     ZLayer.succeed(make(new ZContextLogging(_, ZIO.service[R])))
 
-  val layerPlainWithContext: URLayer[ZLogContext.LoggedValuesExtractor, ULogs] = ZLayer(
-    ZIO.serviceWith[ZLogContext.LoggedValuesExtractor](_.loggedValue)
-      .map(ctxZIO => make(new ZContextLogging(_, ctxZIO)))
+  val layerPlainWithContext: URLayer[ContextProvider, ULogs] = ZLayer(
+    ZIO.serviceWith[ContextProvider](cp =>
+      make(new ZContextLogging(_, cp.getCtx))
+    )
   )
+
+  val layerEmpty: ULayer[ULogs] = ZLayer.succeed(make(_ => ZLogging.empty[Any]))
 
 }

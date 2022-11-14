@@ -13,16 +13,30 @@ object Test2 extends ZIOAppDefault {
   def tasks(l: ULogger) =
     (100 to 109).map(logI(_, l))
 
+  class FooDoo(seconds: => Long){
+    def dosmth: UIO[Unit] = ZIO.succeed(
+      println(s"Got time $seconds")
+    )
+  }
+
+  object FooDoo {
+    val layer = ZLayer(
+      Clock.javaClock
+        .map(jc => new FooDoo(jc.millis()/1000))
+    )
+  }
+
   def run = {
     for {
       logger <- ZIO.service[ULogger]
       _      <- logger.logMessage("1")
-      _      <- Global.TofuLogContextRef.update(_ + 1)
-      _      <- logger.logMessage("2")
-      _ <- ZIO.collectAllParDiscard(tasks(logger))
       _      <- logger.logMessage("end")
+      _      <- ZIO.serviceWithZIO[FooDoo](_.dosmth)
+      _      <- ZIO.serviceWithZIO[FooDoo](_.dosmth).delay(3.seconds)
+      _      <- ZIO.succeed(println("THE END!"))
+
     } yield ()
-  }.provide(logger)
+  }.provide(logger, FooDoo.layer)
 
   val logger = ZLayer.succeed(new ULogger(Global.TofuLogContextRef))
 }

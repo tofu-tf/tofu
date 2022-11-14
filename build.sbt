@@ -272,10 +272,10 @@ lazy val zio2Logging =
 
 lazy val zio2Examples =
   project
-    .in(file("modules/zio2/examples"))
+    .in(file("examples-zio2"))
     .settings(
       defaultSettings,
-      name := "tofu-zio2-examples",
+      name := "tofu-examples-zio2",
       noPublishSettings
     )
     .dependsOn(zio2Logging, loggingDer, loggingLayout)
