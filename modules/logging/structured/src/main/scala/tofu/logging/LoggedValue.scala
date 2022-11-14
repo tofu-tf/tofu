@@ -1,5 +1,8 @@
 package tofu.logging
 
+import cats.kernel.Semigroup
+import tofu.logging.impl.ComposedLoggedValue
+
 import scala.{specialized => sp}
 
 trait LoggedValue {
@@ -30,6 +33,10 @@ object LoggedValue {
   implicit def loggableToLoggedValue[A](x: A)(implicit loggable: Loggable[A]): LoggedValue = loggable.loggedValue(x)
 
   def error(cause: Throwable): LoggedThrowable = new LoggedThrowable(cause)
+
+  implicit val loggedValueSemigroup: Semigroup[LoggedValue] = Semigroup.instance { (a, b) =>
+    new ComposedLoggedValue(a :: b :: Nil)
+  }
 }
 
 final class LoggedThrowable(cause: Throwable) extends Throwable(cause.getMessage, cause) with LoggedValue {
