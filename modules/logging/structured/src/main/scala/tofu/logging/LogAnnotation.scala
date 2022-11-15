@@ -15,7 +15,7 @@ package tofu.logging
   *   // logger.error("This line wouldn't be compiled", count -> "100")
   *   }}}
   */
-final class LogAnnotation[A](val name: String, valueLoggable: Loggable[A]) {
+class LogAnnotation[A](val name: String, valueLoggable: Loggable[A]) {
   type Value = A
 
   implicit private lazy val loggable: Loggable[A] = valueLoggable.named(name)
