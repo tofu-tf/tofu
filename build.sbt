@@ -260,6 +260,26 @@ lazy val zioLogging =
     )
     .dependsOn(loggingStr, loggingDer % "test", zioCore % Test)
 
+lazy val zio2Logging =
+  project
+    .in(file("modules/zio2/logging"))
+    .settings(
+      defaultSettings,
+      name := "tofu-zio2-logging",
+      libraryDependencies ++= List(zio2, slf4j, logback % Test, zio2Test, zio2TestSbt)
+    )
+    .dependsOn(loggingStr, loggingDer % "test")
+
+lazy val examplesZIO2 =
+  project
+    .in(file("examples-zio2"))
+    .settings(
+      defaultSettings,
+      name := "tofu-examples-zio2",
+      noPublishSettings
+    )
+    .dependsOn(zio2Logging, loggingDer, loggingLayout)
+
 lazy val zioInterop = project
   .in(file("modules/zio"))
   .settings(
@@ -373,7 +393,7 @@ lazy val ce3CoreModules = Vector(
 )
 
 lazy val commonModules =
-  Vector(observable, logging, enums, config, zioInterop, fs2Interop, doobie, doobieLogging)
+  Vector(observable, logging, enums, config, zioInterop, zio2Logging, fs2Interop, doobie, doobieLogging)
 
 lazy val ce3CommonModules =
   Vector(loggingStr, loggingDer, loggingLayout, doobieCE3, doobieLoggingCE3, fs2CE3Interop)
@@ -407,9 +427,8 @@ lazy val tofu = project
     name := "tofu"
   )
   .aggregate(
-    (coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules :+ docs :+ examples :+ examplesCE3).map(x =>
-      x: ProjectReference
-    ): _*
+    (coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules :+ docs :+ examples :+ examplesCE3 :+ examplesZIO2)
+      .map(x => x: ProjectReference): _*
   )
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="10 minutes" >
+    <appender name="structured" class="ch.qos.logback.core.ConsoleAppender" packagingData="true">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>UTF-8</charset>
+            <layout class="tofu.logging.ELKLayout"/>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="structured"/>
+    </root>
+</configuration>
