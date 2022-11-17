@@ -1,16 +1,15 @@
 package tofu.logging
 
-import scala.{PartialFunction => PF, specialized => sp}
-
+import cats.Show
 import cats.syntax.show._
-import cats.{Show}
-
 import tofu.control.Consume
+import tofu.internal.DataComp
 import tofu.logging.Loggable.Base
 import tofu.logging.impl._
 import tofu.syntax.logRenderer._
-import tofu.internal.DataComp
+
 import scala.annotation.unused
+import scala.{PartialFunction => PF, specialized => sp}
 
 /** Typeclass for adding custom log values to message
   */
@@ -43,6 +42,10 @@ trait Loggable[A] extends Loggable.Base[A] {
   def showInstance: Show[A] = logShow
 
   def narrow[B <: A]: Loggable[B] = this.asInstanceOf[Loggable[B]]
+
+  /** Creates a new `LogAnnotation` using this `Loggable` with provided name */
+  def logAnnotation(name: String): LogAnnotation[A] =
+    LogAnnotation.make(name)(this)
 }
 
 object Loggable extends LoggableInstances with DataComp[Loggable] {
