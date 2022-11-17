@@ -1,6 +1,6 @@
 package tofu.logging
 
-/** Type-safe annotation for loggable values.
+/** Type-safe annotation for loggable values
   *
   * In particular this solves two problems:
   *
