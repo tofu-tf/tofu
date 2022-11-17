@@ -27,7 +27,7 @@ class LogAnnotation[A](val name: String, valueLoggable: Loggable[A]) {
     case _                       => false
   }
 
-  /** Returns `LoggedValue` using original `Loggable` provided when this annotation created.
+  /** Returns `LoggedValue` using original `Loggable` provided when this annotation was created.
     */
   def unnamed(value: Value): LoggedValue = valueLoggable.loggedValue(value)
 
