@@ -5,7 +5,7 @@ import tofu.logging.zlogs.ZLogging
 import tofu.logging.{Loggable, LoggedValue, Logging}
 import zio._
 
-class ZContextLogging[R, Ctx: Loggable](logger: => Logger, ctxLog: URIO[R, Ctx]) extends ZLogging[R] {
+private[logging] class ZContextLogging[R, Ctx: Loggable](logger: => Logger, ctxLog: URIO[R, Ctx]) extends ZLogging[R] {
   override def write(level: Logging.Level, message: String, values: LoggedValue*): URIO[R, Unit] =
     ctxLog.flatMap { ctx =>
       ZIO.succeed(

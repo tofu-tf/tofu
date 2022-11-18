@@ -11,7 +11,7 @@ object ZMakeSimpleExample extends ZIOAppDefault {
       for {
         id <- Random.nextIntBetween(1000, 4000)
         _  <- ZIO.serviceWithZIO[SimpleContext](_.set(id.toHexString))
-        _  <- ZIO.serviceWithZIO[FooService](_.foo(i))
+        _  <- ZIO.serviceWithZIO[FooService](_.foo(i)) // each task prints its own requestId set above
       } yield ()
     )
 
@@ -20,7 +20,7 @@ object ZMakeSimpleExample extends ZIOAppDefault {
       .collectAllParDiscard(tasks)
       .provide(
         FooService.layer,
-        ZLogging.Make.layerPlainWithContext,
-        SimpleContext.layer
+        SimpleContext.layer,                 // ULayer[SimpleContext]
+        ZLogging.Make.layerPlainWithContext, // requires ContextProvider, but easily finds its implementation — SimpleContext
       )
 }
