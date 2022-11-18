@@ -24,7 +24,8 @@
           "tofu.logging.key-features",
           "tofu.logging.syntax",
           "tofu.logging.loggable",
-          "tofu.logging.layouts"
+          "tofu.logging.layouts",
+          "tofu.logging.annotation"
         ]
       },
       {
