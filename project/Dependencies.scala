@@ -67,7 +67,7 @@ object Dependencies {
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.8.1"
+    val collectionCompat = "2.9.0"
 
     val log4Cats = "1.7.0"
 
@@ -77,7 +77,7 @@ object Dependencies {
 
     val http4s = "0.22.14"
 
-    val glass = "0.1.0"
+    val glass = "0.2.1"
   }
 
   val noCatsCore       =
