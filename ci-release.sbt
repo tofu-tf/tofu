@@ -1,11 +1,11 @@
 ThisBuild / scalaVersion := Dependencies.Version.scala213
 
-ThisBuild / crossScalaVersions                  := Vector(
+ThisBuild / crossScalaVersions := Vector(
   Dependencies.Version.scala213,
   Dependencies.Version.scala212
 )
 
-ThisBuild / versionScheme         := Some("semver-spec")
+ThisBuild / versionScheme      := Some("semver-spec")
 
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
@@ -23,7 +23,7 @@ ThisBuild / homepage := Some(url("https://github.com/tofu-tf/tofu"))
 
 ThisBuild / description := "Opinionated set of tools for functional programming in Scala"
 
-ThisBuild / scmInfo                   := Some(
+ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/tofu-tf/tofu"),
     "git@github.com:tofu-tf/tofu.git"
