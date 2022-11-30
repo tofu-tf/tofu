@@ -11,7 +11,9 @@ import tofu.Raise
 import tofu.syntax.feither._
 
 import java.util.concurrent.atomic.AtomicInteger
+import scala.annotation.nowarn
 
+@nowarn("cat=lint-infer-any")
 class FEitherSuite extends AnyWordSpec with Matchers {
 
   // --Helpers------------------------------------

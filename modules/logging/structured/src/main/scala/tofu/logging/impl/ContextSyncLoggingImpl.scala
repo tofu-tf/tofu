@@ -5,7 +5,9 @@ package impl
 import org.slf4j.{Logger, Marker}
 import tofu.syntax.monadic._
 import cats.Monad
+import scala.annotation.nowarn
 
+@nowarn("cat=lint-infer-any")
 class ContextSyncLoggingImpl[F[_]: Monad, C: Loggable](context: F WithContext C, logger: Logger)(implicit F: Delay[F])
     extends LoggingImpl[F](logger) {
 

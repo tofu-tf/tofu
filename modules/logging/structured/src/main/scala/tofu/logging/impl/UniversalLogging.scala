@@ -5,7 +5,9 @@ import cats.FlatMap
 import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.logging.Logging.{Debug, Error, Info, Trace, Warn}
 import tofu.{Delay, WithContext}
+import scala.annotation.nowarn
 
+@nowarn("cat=lint-infer-any")
 object UniversalLogging {
   private[impl] final def enabled(level: Logging.Level, logger: Logger): Boolean = level match {
     case Trace => logger.isTraceEnabled()

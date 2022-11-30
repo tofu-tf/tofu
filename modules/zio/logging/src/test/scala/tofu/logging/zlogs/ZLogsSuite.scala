@@ -21,7 +21,6 @@ import zio.console.Console
 import zio._
 
 import scala.jdk.CollectionConverters._
-import scala.annotation.nowarn
 
 class ZLogsSuite extends AnyFlatSpec with Matchers {
 
@@ -54,7 +53,6 @@ class ZLogsSuite extends AnyFlatSpec with Matchers {
     val logLayer: URLayer[Has[CtxService], Has[ZLogging.Make]] =
       ZLogging.Make.layerPlainWithContext(_.get)
 
-    @nowarn("cat=unused-locals")
     val program = for {
       logs                       <- ZIO.service[ZLogging.Make]
       implicit0(logger: ULogging) = logs.byName(Name)

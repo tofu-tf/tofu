@@ -8,7 +8,6 @@ import cats.kernel.Monoid
 import tofu.logging.LogRenderer.LogRendererUnit
 import tethys.commons.RawJson
 import tethys.writers.tokens.TokenWriter
-import tofu.compat.unused
 
 class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilder[String] {
   type Top    = TokenWriter
@@ -17,7 +16,7 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
   type Output = Unit
 
   /** override to add predefined fields */
-  def predefined(@unused tokenWriter: TokenWriter): Unit = {}
+  def predefined(tokenWriter: TokenWriter): Unit = {}
 
   def writeValue(value: LogParamValue, writer: TokenWriter): Unit = value match {
     case StrValue(v)     => writer.writeString(v)
