@@ -53,15 +53,15 @@ lazy val coreCE2 = project
     libraryDependencies += catsEffect2
   )
 
-lazy val concurrent =
+lazy val concurrentCE2 =
   project
-    .in(modules / "concurrent")
+    .in(modules / "core" / "concurrent-ce2")
     .dependsOn(coreCE2, derivation % "compile->test")
     .settings(
       defaultSettings,
       libraryDependencies ++= Seq(catsEffect2, catsTagless),
       libraryDependencies ++= Seq(simulacrum, derevoTagless, glassMacro).map(_ % Test),
-      name := "tofu-concurrent",
+      name := "tofu-concurrent-ce2",
     )
 
 lazy val coreCE3 = project
@@ -207,7 +207,7 @@ lazy val observable = project
 
 lazy val config = project
   .in(util / "config")
-  .dependsOn(coreCE2, concurrent)
+  .dependsOn(coreCE2, concurrentCE2)
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo, glassCore),
@@ -216,7 +216,7 @@ lazy val config = project
 
 lazy val memo = project
   .in(util / "memo")
-  .dependsOn(coreCE2, concurrent)
+  .dependsOn(coreCE2, concurrentCE2)
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(catsCore, catsEffect2),
@@ -239,7 +239,7 @@ lazy val zio1Core =
   project
     .in(zioInterop / "core")
     .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), name := "tofu-zio-core")
-    .dependsOn(coreCE2, concurrent)
+    .dependsOn(coreCE2, concurrentCE2)
 
 lazy val zio1Logging =
   project
@@ -281,7 +281,7 @@ lazy val fs2CE2Interop = project
     libraryDependencies += glassMacro % Test,
     defaultSettings
   )
-  .dependsOn(concurrent, streams)
+  .dependsOn(concurrentCE2, streams)
 
 lazy val fs2CE3Interop = project
   .in(interop / "fs2" / "ce3")
@@ -377,7 +377,7 @@ lazy val coreModules =
     memo,
     derivation,
     env,
-    concurrent,
+    concurrentCE2,
     streams,
     kernelCatsMtlInterop
   )
