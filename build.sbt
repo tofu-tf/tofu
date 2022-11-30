@@ -1,5 +1,4 @@
 import Publish._, Dependencies._
-import com.typesafe.sbt.SbtGit.git
 import sbt.ModuleID
 
 lazy val setMinorVersion = minorVersion := {
