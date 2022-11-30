@@ -6,7 +6,7 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val scala212 = "2.12.16"
+    val scala212 = "2.12.17"
 
     val scala213 = "2.13.10"
 
@@ -38,7 +38,7 @@ object Dependencies {
 
     val monix = "3.4.1"
 
-    val scalatest = "3.2.10"
+    val scalatest = "3.2.14"
 
     val magnolia = "0.17.0"
 
@@ -67,7 +67,7 @@ object Dependencies {
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.8.1"
+    val collectionCompat = "2.9.0"
 
     val log4Cats = "1.7.0"
 
@@ -77,7 +77,7 @@ object Dependencies {
 
     val http4s = "0.22.14"
 
-    val glass = "0.1.0"
+    val glass = "0.2.1"
   }
 
   val noCatsCore       =
