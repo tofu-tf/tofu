@@ -10,7 +10,7 @@ import scala.annotation.nowarn
 import scala.concurrent.Future
 
 class ScopedSuite {
-  @nowarn("msg=parameter value")
+  @nowarn("cat=unused-params")
   def doSomething[F[_]: ContextShift: Async, A](fa: F[A], ea: => A)(calcEc: ExecutionContext)(implicit
       ec: ExecutionContext,
       block: Blocker

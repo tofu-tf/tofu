@@ -2,7 +2,7 @@ package tofu.env
 import cats.~>
 import monix.eval.Task
 import tofu.lift.Unlift
-import tofu.optics.Contains
+import glass.Contains
 import tofu.syntax.funk.funK
 
 class EnvUnliftTask[E] extends Unlift[Task, Env[E, *]] {

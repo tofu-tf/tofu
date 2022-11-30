@@ -5,7 +5,9 @@ import org.slf4j.{Logger, Marker}
 import tofu.syntax.monadic._
 import cats.Monad
 import tofu.Delay
+import scala.annotation.nowarn
 
+@nowarn("cat=lint-infer-any")
 class SyncLogging[F[_]: Monad](logger: Logger)(implicit F: Delay[F]) extends LoggingImpl[F](logger) {
   override def trace(message: String, values: LoggedValue*): F[Unit] =
     F.delay(logger.trace(message, values: _*)).whenA(traceEnabled)

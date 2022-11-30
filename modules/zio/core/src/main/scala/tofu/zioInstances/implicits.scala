@@ -1,7 +1,7 @@
 package tofu.zioInstances
 import java.io.IOException
 
-import tofu.optics.{Contains, Extract}
+import glass.{Contains, Extract}
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random

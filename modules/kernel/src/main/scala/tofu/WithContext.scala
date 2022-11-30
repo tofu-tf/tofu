@@ -1,7 +1,7 @@
 package tofu
 
 import cats.{Applicative, FlatMap, Functor}
-import tofu.optics.{Contains, Extract}
+import glass.{Contains, Extract}
 
 /** Synonym for [[Context]] with explicit C as Ctx for better type inference
   *

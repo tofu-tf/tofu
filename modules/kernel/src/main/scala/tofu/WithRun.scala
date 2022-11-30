@@ -2,7 +2,7 @@ package tofu
 
 import cats.~>
 import tofu.lift.Unlift
-import tofu.optics.Equivalent
+import glass.Equivalent
 import tofu.syntax.funk.funK
 
 /** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type

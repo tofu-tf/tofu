@@ -1,10 +1,11 @@
 package tofu.concurrent
+
 import cats._
 import cats.effect._
 import cats.tagless.InvariantK
 import tofu.concurrent.impl._
 import tofu.lift.{Rebase, Unlift}
-import tofu.optics.Contains
+import glass.Contains
 import tofu.syntax.funk.{funK, funKFrom}
 import tofu.syntax.monadic._
 import tofu.{WithLocal, WithRun}

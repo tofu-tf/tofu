@@ -5,7 +5,7 @@ import cats.effect.concurrent.Ref
 import cats.{Functor, Monad}
 import tofu.BracketThrow
 import tofu.concurrent.impl.FocusedRef
-import tofu.optics.{Contains, PProperty}
+import glass.{Contains, PProperty}
 import tofu.syntax.monadic._
 
 object ref {

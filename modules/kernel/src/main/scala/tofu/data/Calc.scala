@@ -2,7 +2,7 @@ package tofu.data
 
 import cats.data.IndexedState
 import cats.{MonadError, Monoid, StackSafeMonad}
-import tofu.optics.PContains
+import glass.PContains
 
 import scala.annotation.tailrec
 import tofu.Guarantee

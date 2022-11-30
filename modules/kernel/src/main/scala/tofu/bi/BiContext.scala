@@ -4,7 +4,7 @@ import cats.Bifunctor
 import tofu.bi.lift.BiUnlift
 import tofu.control.Bind
 import tofu.higherKind.bi.FunBK
-import tofu.optics.{Contains, Equivalent, PExtract, Same}
+import glass.{Contains, Equivalent, PExtract, Same}
 
 /** typeclass for access a functional environment in a bifuntor
   * @tparam X
@@ -207,7 +207,7 @@ class BiLocalSubInstance[F[+_, +_], X, C, E, A](ctx: BiLocal[F, X, C], lcts: Con
   override def bilocal[E1, A1](fea: F[E1, A1])(lproj: E => E, rproj: A => A): F[E1, A1] =
     ctx.bilocal(fea)(lcts.update(_, lproj), rcts.update(_, rproj))
 
-  override def sub[E1, A1](err: tofu.optics.Contains[E, E1], res: tofu.optics.Contains[A, A1]): BiLocal[F, E1, A1] =
+  override def sub[E1, A1](err: glass.Contains[E, E1], res: glass.Contains[A, A1]): BiLocal[F, E1, A1] =
     ctx.sub(lcts >> err, rcts >> res)
 }
 

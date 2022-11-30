@@ -6,8 +6,8 @@ import cats.{Applicative, ApplicativeError, FlatMap, Functor, Id, Monad}
 import tofu.errorInstances._
 import tofu.internal.{CachedMatcher, DataEffectComp}
 import tofu.lift.Lift
-import tofu.optics.PUpcast.GenericSubtypeImpl
-import tofu.optics.{Downcast, Subset, Upcast}
+import glass.PUpcast.GenericSubtypeImpl
+import glass.{Downcast, Subset, Upcast}
 
 import scala.annotation.implicitNotFound
 

@@ -7,14 +7,32 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
   def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit
 
   implicit final class TofuFunctorOps[F[_], A](private val fa: F[A]) extends AnyVal {
-    def map[B](f: A => B)(implicit F: Functor[F]): F[B]           = F.map(fa)(f)
-    def fmap[B](f: A => B)(implicit F: Functor[F]): F[B]          = F.fmap(fa)(f)
-    def widen[B >: A](implicit F: Functor[F]): F[B]               = F.widen(fa)
-    def void(implicit F: Functor[F]): F[Unit]                     = F.void(fa)
-    def fproduct[B](f: A => B)(implicit F: Functor[F]): F[(A, B)] = F.fproduct(fa)(f)
-    def as[B](b: B)(implicit F: Functor[F]): F[B]                 = F.as(fa, b)
-    def tupleLeft[B](b: B)(implicit F: Functor[F]): F[(B, A)]     = F.tupleLeft(fa, b)
-    def tupleRight[B](b: B)(implicit F: Functor[F]): F[(A, B)]    = F.tupleRight(fa, b)
+
+    /** Safer way than [[void]] to discard a value
+      *
+      * Explicit type ascription eliminates a bug when one can begin discarding non-discard-able value.
+      *
+      * @example
+      *   {{{
+      * val computation1: F[Thing] = ???
+      * val result11: F[Unit] = computation1.void
+      * val result12: F[Unit] = computation1.discard[Thing]
+      *
+      * //after changes or refactoring
+      * val computation2: F[F[Thing]] = ???
+      * val result21: F[Unit] = computation2.void //error here, nested F is not evaluated and compiler doesn't warn
+      * val result22: F[Unit] = computation2.discard[Thing] //compiler produces an error
+      *   }}}
+      */
+    def discard[AA](implicit ev: AA =:= A, F: Functor[F]): F[Unit] = F.void(fa)
+    def map[B](f: A => B)(implicit F: Functor[F]): F[B]            = F.map(fa)(f)
+    def fmap[B](f: A => B)(implicit F: Functor[F]): F[B]           = F.fmap(fa)(f)
+    def widen[B >: A](implicit F: Functor[F]): F[B]                = F.widen(fa)
+    def void(implicit F: Functor[F]): F[Unit]                      = F.void(fa)
+    def fproduct[B](f: A => B)(implicit F: Functor[F]): F[(A, B)]  = F.fproduct(fa)(f)
+    def as[B](b: B)(implicit F: Functor[F]): F[B]                  = F.as(fa, b)
+    def tupleLeft[B](b: B)(implicit F: Functor[F]): F[(B, A)]      = F.tupleLeft(fa, b)
+    def tupleRight[B](b: B)(implicit F: Functor[F]): F[(A, B)]     = F.tupleRight(fa, b)
   }
 
   implicit final class TofuSemigroupalOps[F[_], A](private val fa: F[A]) extends AnyVal {

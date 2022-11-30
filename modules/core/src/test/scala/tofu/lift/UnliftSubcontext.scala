@@ -4,7 +4,7 @@ import cats.data.ReaderT
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import tofu.lift.UnliftSubcontext.FatApp
-import tofu.optics.Contains
+import glass.Contains
 import UnliftSubcontext._
 import cats.Monad
 import org.scalatest.matchers.should.Matchers

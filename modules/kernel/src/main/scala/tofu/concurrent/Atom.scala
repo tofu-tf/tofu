@@ -2,7 +2,7 @@ package tofu.concurrent
 import cats.{Applicative, Functor}
 
 import tofu.higherKind.{RepresentableK, derived}
-import tofu.optics.Contains
+import glass.Contains
 import tofu.syntax.monadic._
 import cats.data.StateT
 import tofu.data.calc.CalcM

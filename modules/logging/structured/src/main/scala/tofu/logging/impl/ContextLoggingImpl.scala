@@ -5,7 +5,9 @@ package impl
 import cats.Applicative
 import cats.syntax.applicative._
 import org.slf4j.{Logger, Marker}
+import scala.annotation.nowarn
 
+@nowarn("cat=lint-infer-any")
 class ContextLoggingImpl[F[_]: Applicative, C: Loggable, Service](context: F WithContext C, logger: Logger)
     extends LoggingImpl[F](logger) {
 

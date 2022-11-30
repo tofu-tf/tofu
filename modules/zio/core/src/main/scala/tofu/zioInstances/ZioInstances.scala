@@ -2,8 +2,8 @@ package tofu
 package zioInstances
 
 import java.io.IOException
-import tofu.optics.functions.extractSubtype
-import tofu.optics.{Contains, Extract}
+import glass.functions.extractSubtype
+import glass.{Contains, Extract}
 import zio.clock.Clock
 import zio.console.Console
 import zio.random.Random

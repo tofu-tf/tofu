@@ -1,6 +1,6 @@
 package tofu
 
-import tofu.optics.Contains
+import glass.Contains
 
 /** Synonym for [[Local]] with explicit C as Ctx for better type inference */
 trait WithLocal[F[_], C] extends Local[F] with WithContext[F, C] {

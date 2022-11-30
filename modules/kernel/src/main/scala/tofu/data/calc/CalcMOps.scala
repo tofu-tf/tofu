@@ -5,10 +5,10 @@ import tofu.control.Bind
 import tofu.higherKind.bi.FunBK
 
 import cats.data.IndexedState
-import tofu.optics.PContains
+import glass.PContains
 
 import tofu.compat.uv212
-import tofu.optics.functions._
+import glass.functions._
 
 class CalcMOps[+F[+_, +_], -R, -SI, +SO, +E, +A] { self: CalcM[F, R, SI, SO, E, A] =>
   def widenF[F1[+x, +y] >: F[x, y] @uv212]: CalcM[F1, R, SI, SO, E, A] = this

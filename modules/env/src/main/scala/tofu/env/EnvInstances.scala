@@ -6,7 +6,7 @@ import cats.{Applicative, Monad, Parallel, ~>}
 import monix.eval.{Task, TaskLift}
 import monix.execution.Scheduler
 import tofu.lift.{UnliftIO, UnsafeExecFuture}
-import tofu.optics.Contains
+import glass.Contains
 import tofu.syntax.funk._
 
 import scala.concurrent.Future
