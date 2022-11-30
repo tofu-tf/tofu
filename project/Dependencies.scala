@@ -6,7 +6,7 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val scala212 = "2.12.16"
+    val scala212 = "2.12.17"
 
     val scala213 = "2.13.10"
 
@@ -38,7 +38,7 @@ object Dependencies {
 
     val monix = "3.4.1"
 
-    val scalatest = "3.2.10"
+    val scalatest = "3.2.14"
 
     val magnolia = "0.17.0"
 
