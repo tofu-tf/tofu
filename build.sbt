@@ -276,7 +276,7 @@ lazy val examplesZIO2 =
     .settings(
       defaultSettings,
       name := "tofu-examples-zio2",
-      noPublishSettings
+      exampleSettings
     )
     .dependsOn(zio2Logging, loggingDer, loggingLayout)
 
@@ -350,7 +350,7 @@ lazy val examples = project
     libraryDependencies ++= http4s,
     defaultSettings,
     name := "tofu-examples",
-    noPublishSettings,
+    exampleSettings,
   )
   .dependsOn(mainModuleDeps: _*)
 
@@ -360,7 +360,7 @@ lazy val examplesCE3 = project
     libraryDependencies ++= List(doobieCoreCE3, doobieH2CE3, derevo, groovy),
     defaultSettings,
     name := "tofu-examples-ce3",
-    noPublishSettings,
+    exampleSettings,
   )
   .dependsOn(ce3MainModuleDeps: _*)
 
@@ -464,6 +464,8 @@ lazy val scalacWarningConfig = scalacOptions += {
   s"-Wconf:$contextDeprecationInfo,$verboseWarnings"
 }
 
+ThisBuild / libraryDependencySchemes += "io.circe" %% "circe-core" % "early-semver"
+
 lazy val macros = Seq(
   scalacOptions ++= { if (minorVersion.value == 13) Seq("-Ymacro-annotations") else Seq() },
   libraryDependencies ++= { if (minorVersion.value == 12) Seq(compilerPlugin(macroParadise)) else Seq() }
@@ -471,6 +473,9 @@ lazy val macros = Seq(
 
 lazy val noPublishSettings =
   defaultSettings ++ Seq(publish := {}, publishArtifact := false, publishTo := None, publish / skip := true)
+
+lazy val exampleSettings = 
+  noPublishSettings ++ Set(evictionErrorLevel := Level.Info)
 
 addCommandAlias("fmt", "all tofu/scalafmtSbt tofu/scalafmtAll")
 addCommandAlias("checkfmt", "all tofu/scalafmtSbtCheck tofu/scalafmtCheckAll")
