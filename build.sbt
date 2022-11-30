@@ -266,7 +266,8 @@ lazy val zio2Logging =
     .settings(
       defaultSettings,
       name := "tofu-zio2-logging",
-      libraryDependencies ++= List(zio2, slf4j, logback % Test, zio2Test, zio2TestSbt)
+      libraryDependencies ++= List(zio2, slf4j, logback % Test, zio2Test, zio2TestSbt),
+      testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
     )
     .dependsOn(loggingStr, loggingDer % "test")
 
