@@ -5,6 +5,7 @@ import tofu.logging.Loggable
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.reflect.macros.blackbox
+import scala.annotation.nowarn
 
 case class Location(file: String, line: Int, applicationPoint: String)
 
@@ -16,6 +17,7 @@ object Location {
   implicit def location: Location = macro LocationMacro.getEnclosingPosition
 }
 
+@nowarn("cat=lint-infer-any")
 object LocationMacro {
 
   /** Based on Izumi Logstage CodePosition */
