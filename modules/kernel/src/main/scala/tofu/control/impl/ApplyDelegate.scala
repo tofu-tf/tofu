@@ -6,23 +6,23 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
 
   final override def ap[A, B](ff: F[A => B])(fa: F[A]): F[B] = F.ap(ff)(fa)
 
-  final override def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B]                                           = F.imap(fa)(f)(g)
-  final override def productR[A, B](fa: F[A])(fb: F[B]): F[B]                                                   = F.productR(fa)(fb)
-  final override def productL[A, B](fa: F[A])(fb: F[B]): F[A]                                                   = F.productL(fa)(fb)
-  final override def product[A, B](fa: F[A], fb: F[B]): F[(A, B)]                                               = F.product(fa, fb)
-  final override def ap2[A, B, Z](ff: F[(A, B) => Z])(fa: F[A], fb: F[B]): F[Z]                                 = F.ap2(ff)(fa, fb)
-  final override def map2[A, B, Z](fa: F[A], fb: F[B])(f: (A, B) => Z): F[Z]                                    = F.map2(fa, fb)(f)
-  final override def map2Eval[A, B, Z](fa: F[A], fb: Eval[F[B]])(f: (A, B) => Z): Eval[F[Z]]                    = F.map2Eval(fa, fb)(f)
-  final override def composeApply[G[_]](implicit G: Apply[G]): InvariantSemigroupal[λ[α => F[G[α]]]]            =
+  final override def imap[A, B](fa: F[A])(f: A => B)(g: B => A): F[B]                                        = F.imap(fa)(f)(g)
+  final override def productR[A, B](fa: F[A])(fb: F[B]): F[B]                                                = F.productR(fa)(fb)
+  final override def productL[A, B](fa: F[A])(fb: F[B]): F[A]                                                = F.productL(fa)(fb)
+  final override def product[A, B](fa: F[A], fb: F[B]): F[(A, B)]                                            = F.product(fa, fb)
+  final override def ap2[A, B, Z](ff: F[(A, B) => Z])(fa: F[A], fb: F[B]): F[Z]                              = F.ap2(ff)(fa, fb)
+  final override def map2[A, B, Z](fa: F[A], fb: F[B])(f: (A, B) => Z): F[Z]                                 = F.map2(fa, fb)(f)
+  final override def map2Eval[A, B, Z](fa: F[A], fb: Eval[F[B]])(f: (A, B) => Z): Eval[F[Z]]                 = F.map2Eval(fa, fb)(f)
+  final override def composeApply[G[_]](implicit G: Apply[G]): InvariantSemigroupal[λ[α => F[G[α]]]]         =
     F.composeApply[G]
-  final override def composeFunctor[G[_]](implicit evidence$2: Functor[G]): Invariant[λ[α => F[G[α]]]]          =
+  final override def composeFunctor[G[_]](implicit evidence$2: Functor[G]): Invariant[λ[α => F[G[α]]]]       =
     F.composeFunctor
-  final override def tuple2[A, B](f1: F[A], f2: F[B]): F[(A, B)]                                                = F.tuple2(f1, f2)
-  final override def ap3[A0, A1, A2, Z](f: F[(A0, A1, A2) => Z])(f0: F[A0], f1: F[A1], f2: F[A2]): F[Z]         =
+  final override def tuple2[A, B](f1: F[A], f2: F[B]): F[(A, B)]                                             = F.tuple2(f1, f2)
+  final override def ap3[A0, A1, A2, Z](f: F[(A0, A1, A2) => Z])(f0: F[A0], f1: F[A1], f2: F[A2]): F[Z]      =
     F.ap3(f)(f0, f1, f2)
-  final override def map3[A0, A1, A2, Z](f0: F[A0], f1: F[A1], f2: F[A2])(f: (A0, A1, A2) => Z): F[Z]           =
+  final override def map3[A0, A1, A2, Z](f0: F[A0], f1: F[A1], f2: F[A2])(f: (A0, A1, A2) => Z): F[Z]        =
     F.map3(f0, f1, f2)(f)
-  final override def tuple3[A0, A1, A2, Z](f0: F[A0], f1: F[A1], f2: F[A2]): F[(A0, A1, A2)]                    = F.tuple3(f0, f1, f2)
+  final override def tuple3[A0, A1, A2](f0: F[A0], f1: F[A1], f2: F[A2]): F[(A0, A1, A2)]                    = F.tuple3(f0, f1, f2)
   final override def ap4[A0, A1, A2, A3, Z](
       f: F[(A0, A1, A2, A3) => Z]
   )(f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3]): F[Z] =
@@ -31,7 +31,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f: (A0, A1, A2, A3) => Z
   ): F[Z] =
     F.map4(f0, f1, f2, f3)(f)
-  final override def tuple4[A0, A1, A2, A3, Z](f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3]): F[(A0, A1, A2, A3)] =
+  final override def tuple4[A0, A1, A2, A3](f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3]): F[(A0, A1, A2, A3)] =
     F.tuple4(f0, f1, f2, f3)
   final override def ap5[A0, A1, A2, A3, A4, Z](
       f: F[(A0, A1, A2, A3, A4) => Z]
@@ -39,7 +39,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
   final override def map5[A0, A1, A2, A3, A4, Z](f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3], f4: F[A4])(
       f: (A0, A1, A2, A3, A4) => Z
   ): F[Z] = F.map5(f0, f1, f2, f3, f4)(f)
-  final override def tuple5[A0, A1, A2, A3, A4, Z](
+  final override def tuple5[A0, A1, A2, A3, A4](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -52,7 +52,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
   final override def map6[A0, A1, A2, A3, A4, A5, Z](f0: F[A0], f1: F[A1], f2: F[A2], f3: F[A3], f4: F[A4], f5: F[A5])(
       f: (A0, A1, A2, A3, A4, A5) => Z
   ): F[Z] = F.map6(f0, f1, f2, f3, f4, f5)(f)
-  final override def tuple6[A0, A1, A2, A3, A4, A5, Z](
+  final override def tuple6[A0, A1, A2, A3, A4, A5](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -73,7 +73,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f5: F[A5],
       f6: F[A6]
   )(f: (A0, A1, A2, A3, A4, A5, A6) => Z): F[Z] = F.map7(f0, f1, f2, f3, f4, f5, f6)(f)
-  final override def tuple7[A0, A1, A2, A3, A4, A5, A6, Z](
+  final override def tuple7[A0, A1, A2, A3, A4, A5, A6](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -96,7 +96,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f6: F[A6],
       f7: F[A7]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7) => Z): F[Z] = F.map8(f0, f1, f2, f3, f4, f5, f6, f7)(f)
-  final override def tuple8[A0, A1, A2, A3, A4, A5, A6, A7, Z](
+  final override def tuple8[A0, A1, A2, A3, A4, A5, A6, A7](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -121,7 +121,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f7: F[A7],
       f8: F[A8]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8) => Z): F[Z] = F.map9(f0, f1, f2, f3, f4, f5, f6, f7, f8)(f)
-  final override def tuple9[A0, A1, A2, A3, A4, A5, A6, A7, A8, Z](
+  final override def tuple9[A0, A1, A2, A3, A4, A5, A6, A7, A8](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -158,7 +158,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f8: F[A8],
       f9: F[A9]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9) => Z): F[Z] = F.map10(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9)(f)
-  final override def tuple10[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, Z](
+  final override def tuple10[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -199,7 +199,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f10: F[A10]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) => Z): F[Z] =
     F.map11(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10)(f)
-  final override def tuple11[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, Z](
+  final override def tuple11[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -243,7 +243,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f11: F[A11]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) => Z): F[Z] =
     F.map12(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11)(f)
-  final override def tuple12[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, Z](
+  final override def tuple12[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -291,7 +291,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f12: F[A12]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) => Z): F[Z] =
     F.map13(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12)(f)
-  final override def tuple13[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, Z](
+  final override def tuple13[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -342,7 +342,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f13: F[A13]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) => Z): F[Z] =
     F.map14(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13)(f)
-  final override def tuple14[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, Z](
+  final override def tuple14[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -396,7 +396,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f14: F[A14]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) => Z): F[Z] =
     F.map15(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14)(f)
-  final override def tuple15[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, Z](
+  final override def tuple15[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -453,7 +453,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f15: F[A15]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) => Z): F[Z] =
     F.map16(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15)(f)
-  final override def tuple16[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, Z](
+  final override def tuple16[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -513,7 +513,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f16: F[A16]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16) => Z): F[Z] =
     F.map17(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16)(f)
-  final override def tuple17[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, Z](
+  final override def tuple17[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -576,7 +576,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f17: F[A17]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17) => Z): F[Z] =
     F.map18(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17)(f)
-  final override def tuple18[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, Z](
+  final override def tuple18[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -642,7 +642,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       f18: F[A18]
   )(f: (A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18) => Z): F[Z] =
     F.map19(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18)(f)
-  final override def tuple19[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, Z](
+  final override def tuple19[A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18](
       f0: F[A0],
       f1: F[A1],
       f2: F[A2],
@@ -731,8 +731,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       A16,
       A17,
       A18,
-      A19,
-      Z
+      A19
   ](
       f0: F[A0],
       f1: F[A1],
@@ -873,8 +872,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       A17,
       A18,
       A19,
-      A20,
-      Z
+      A20
   ](
       f0: F[A0],
       f1: F[A1],
@@ -1021,8 +1019,7 @@ trait ApplyDelegate[F[_]] extends Apply[F] with FunctorDelegate[F] {
       A18,
       A19,
       A20,
-      A21,
-      Z
+      A21
   ](
       f0: F[A0],
       f1: F[A1],
