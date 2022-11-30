@@ -3,7 +3,7 @@
 # ToFu
 
 [![Build & Release](https://github.com/tofu-tf/tofu/workflows/Scala%20CI/badge.svg)](https://github.com/tofu-tf/tofu/actions?query=workflow%3A%22Scala+CI%22)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core-ce3_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core_2.13)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core-ce3_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/tf.tofu/tofu-core-ce3_2.13)
 [![Sonatype Nexus (Snapshots) badge](https://img.shields.io/nexus/s/https/oss.sonatype.org/tf.tofu/tofu-core-ce3_2.13.svg)](https://oss.sonatype.org/content/repositories/snapshots/tf/tofu/tofu-core-ce3_2.13/)
 [![Discord Chat](https://img.shields.io/discord/657318688025739283.svg)](https://discord.gg/qPD5GGH)
 [![Zulip](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.zulip.org)
