@@ -474,7 +474,7 @@ lazy val macros = Seq(
 lazy val noPublishSettings =
   defaultSettings ++ Seq(publish := {}, publishArtifact := false, publishTo := None, publish / skip := true)
 
-lazy val exampleSettings = 
+lazy val exampleSettings =
   noPublishSettings ++ Set(evictionErrorLevel := Level.Info)
 
 addCommandAlias("fmt", "all tofu/scalafmtSbt tofu/scalafmtAll")
