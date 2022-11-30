@@ -7,6 +7,7 @@ import ch.qos.logback.classic.spi.{ILoggingEvent, IThrowableProxy, LoggerContext
 import org.slf4j.Marker
 import tofu.logging.LoggedValue
 import tofu.logging.impl.ContextMarker
+import org.slf4j.event.KeyValuePair
 
 class ConsoleContextLayout extends PatternLayout {
 
@@ -15,7 +16,6 @@ class ConsoleContextLayout extends PatternLayout {
 }
 
 class WrappedEvent(event: ILoggingEvent) extends ILoggingEvent {
-
   lazy val getMDCPropertyMap: util.Map[String, String] = {
     val map                   = new util.HashMap[String, String]
     map.putAll(event.getMDCPropertyMap)
@@ -48,8 +48,16 @@ class WrappedEvent(event: ILoggingEvent) extends ILoggingEvent {
   def getThrowableProxy: IThrowableProxy      = event.getThrowableProxy
   def getCallerData: Array[StackTraceElement] = event.getCallerData
   def hasCallerData: Boolean                  = event.hasCallerData
-  def getMarker: Marker                       = event.getMarker
-  def getMdc: util.Map[String, String]        = getMDCPropertyMap
-  def getTimeStamp: Long                      = event.getTimeStamp
-  def prepareForDeferredProcessing(): Unit    = event.prepareForDeferredProcessing()
+
+  def getMdc: util.Map[String, String]     = getMDCPropertyMap
+  def getTimeStamp: Long                   = event.getTimeStamp
+  def prepareForDeferredProcessing(): Unit = event.prepareForDeferredProcessing()
+
+  def getMarkerList(): util.List[Marker] = event.getMarkerList
+
+  def getNanoseconds(): Int = event.getNanoseconds
+
+  def getSequenceNumber(): Long = event.getSequenceNumber
+
+  def getKeyValuePairs(): util.List[KeyValuePair] = event.getKeyValuePairs()
 }
