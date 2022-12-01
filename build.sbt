@@ -24,8 +24,10 @@ lazy val defaultSettings = Seq(
   )
 ) ++ macros
 
+val modules = file("modules")
+
 lazy val higherKindCore = project
-  .in(file("modules/higherKindCore"))
+  .in(modules / "kernel" / "higherKind")
   .settings(
     defaultSettings,
     name := "tofu-core-higher-kind",
@@ -33,7 +35,7 @@ lazy val higherKindCore = project
   )
 
 lazy val kernel = project
-  .in(file("modules/kernel"))
+  .in(modules / "kernel")
   .settings(defaultSettings)
   .dependsOn(higherKindCore)
   .settings(
@@ -42,42 +44,37 @@ lazy val kernel = project
     libraryDependencies += glassCore
   )
 
-lazy val kernelCE2Interop = project
-  .in(file("modules/kernelCE2Interop"))
+lazy val coreCE2 = project
+  .in(modules / "core" / "ce2")
   .dependsOn(kernel)
-  .settings(
-    defaultSettings,
-    name := "tofu-kernel-ce2-interop",
-    libraryDependencies += catsEffect2
-  )
-
-lazy val core = project
-  .in(file("modules/core"))
-  .dependsOn(kernel, kernelCE2Interop)
   .settings(
     defaultSettings,
     name := "tofu-core-ce2",
+    libraryDependencies += catsEffect2
   )
 
-lazy val kernelCE3Interop = project
-  .in(file("modules/kernelCE3Interop"))
+lazy val concurrentCE2 =
+  project
+    .in(modules / "core" / "concurrent-ce2")
+    .dependsOn(coreCE2, derivation % "compile->test")
+    .settings(
+      defaultSettings,
+      libraryDependencies ++= Seq(catsEffect2, catsTagless),
+      libraryDependencies ++= Seq(simulacrum, derevoTagless, glassMacro).map(_ % Test),
+      name := "tofu-concurrent-ce2",
+    )
+
+lazy val coreCE3 = project
+  .in(modules / "core" / "ce3")
   .dependsOn(kernel)
   .settings(
     defaultSettings,
-    name := "tofu-kernel-ce3-interop",
+    name := "tofu-core-ce3",
     libraryDependencies += catsEffect3
   )
 
-lazy val core3 = project
-  .in(file("modules/core3"))
-  .dependsOn(kernel, kernelCE3Interop)
-  .settings(
-    defaultSettings,
-    name := "tofu-core-ce3",
-  )
-
 lazy val kernelCatsMtlInterop = project
-  .in(file("modules/kernel/interop/cats-mtl"))
+  .in(modules / "kernel" / "interop" / "cats-mtl")
   .settings(
     defaultSettings,
     name := "tofu-kernel-cats-mtl",
@@ -85,17 +82,8 @@ lazy val kernelCatsMtlInterop = project
   )
   .dependsOn(kernel)
 
-lazy val memo = project
-  .in(file("modules/memo"))
-  .dependsOn(core, concurrent)
-  .settings(
-    defaultSettings,
-    libraryDependencies ++= Seq(catsCore, catsEffect2),
-    name := "tofu-memo"
-  )
-
 lazy val loggingStr = project
-  .in(file("modules/logging/structured"))
+  .in(modules / "logging" / "structured")
   .settings(
     name := "tofu-logging-structured",
     defaultSettings,
@@ -114,7 +102,7 @@ lazy val loggingStr = project
   .dependsOn(kernel)
 
 lazy val loggingDer = project
-  .in(file("modules/logging/derivation"))
+  .in(modules / "logging" / "derivation")
   .dependsOn(loggingStr)
   .dependsOn(derivation % "compile->test")
   .settings(
@@ -124,7 +112,7 @@ lazy val loggingDer = project
   )
 
 lazy val loggingLayout = project
-  .in(file("modules/logging/layout"))
+  .in(modules / "logging" / "layout")
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(catsCore, logback, slf4j),
@@ -132,8 +120,10 @@ lazy val loggingLayout = project
   )
   .dependsOn(loggingStr)
 
+val loggingInterop = modules / "logging" / "interop"
+
 lazy val loggingShapeless = project
-  .in(file("modules/logging/interop/shapeless"))
+  .in(loggingInterop / "shapeless")
   .settings(
     defaultSettings,
     name := "tofu-logging-shapeless",
@@ -142,7 +132,7 @@ lazy val loggingShapeless = project
   .dependsOn(loggingStr)
 
 lazy val loggingRefined = project
-  .in(file("modules/logging/interop/refined"))
+  .in(loggingInterop / "refined")
   .settings(
     defaultSettings,
     name := "tofu-logging-refined",
@@ -151,7 +141,7 @@ lazy val loggingRefined = project
   .dependsOn(loggingStr)
 
 lazy val loggingLog4Cats = project
-  .in(file("modules/logging/interop/log4cats"))
+  .in(loggingInterop / "log4cats")
   .settings(
     defaultSettings,
     name := "tofu-logging-log4cats",
@@ -160,7 +150,7 @@ lazy val loggingLog4Cats = project
   .dependsOn(loggingStr)
 
 lazy val loggingLogstashLogback = project
-  .in(file("modules/logging/interop/logstash-logback"))
+  .in(loggingInterop / "logstash-logback")
   .settings(
     defaultSettings,
     name := "tofu-logging-logstash-logback",
@@ -169,8 +159,17 @@ lazy val loggingLogstashLogback = project
   .dependsOn(loggingStr)
   .dependsOn(loggingDer % Test)
 
+lazy val loggingEnumeratum = project
+  .in(loggingInterop / "enums")
+  .dependsOn(loggingStr)
+  .settings(
+    defaultSettings,
+    libraryDependencies ++= Seq(enumeratum),
+    name := "tofu-logging-enumeratum",
+  )
+
 lazy val logging = project
-  .in(file("modules/logging"))
+  .in(modules / "logging")
   .dependsOn(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
   .aggregate(
     loggingStr,
@@ -186,9 +185,11 @@ lazy val logging = project
     name := "tofu-logging"
   )
 
+val util = modules / "util"
+
 lazy val env = project
-  .in(file("modules/env"))
-  .dependsOn(core, memo)
+  .in(util / "env")
+  .dependsOn(coreCE2, memo)
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(catsCore, catsEffect2, monix),
@@ -196,7 +197,7 @@ lazy val env = project
   )
 
 lazy val observable = project
-  .in(file("modules/observable"))
+  .in(util / "observable")
   .settings(
     defaultSettings,
     libraryDependencies ++= Vector(monix, catsEffect2),
@@ -204,38 +205,27 @@ lazy val observable = project
     name := "tofu-observable",
   )
 
-lazy val concurrent =
-  project
-    .in(file("modules/concurrent"))
-    .dependsOn(core, derivation % "compile->test")
-    .settings(
-      defaultSettings,
-      libraryDependencies ++= Seq(catsEffect2, catsTagless),
-      libraryDependencies ++= Seq(simulacrum, derevoTagless, glassMacro).map(_ % Test),
-      name := "tofu-concurrent",
-    )
-
 lazy val config = project
-  .in(file("modules/config"))
-  .dependsOn(core, concurrent)
+  .in(util / "config")
+  .dependsOn(coreCE2, concurrentCE2)
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo, glassCore),
     name := "tofu-config",
   )
 
-lazy val enums = project
-  .in(file("modules/enums"))
-  .dependsOn(loggingStr)
+lazy val memo = project
+  .in(util / "memo")
+  .dependsOn(coreCE2, concurrentCE2)
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(enumeratum),
-    name := "tofu-enums",
+    libraryDependencies ++= Seq(catsCore, catsEffect2),
+    name := "tofu-memo"
   )
 
 lazy val derivation =
   project
-    .in(file("modules/derivation"))
+    .in(modules / "derivation")
     .settings(
       defaultSettings,
       libraryDependencies ++= Seq(magnolia, derevo, catsTagless),
@@ -243,25 +233,27 @@ lazy val derivation =
     )
     .dependsOn(kernel)
 
-lazy val zioCore =
-  project
-    .in(file("modules/zio/core"))
-    .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), name := "tofu-zio-core")
-    .dependsOn(core, concurrent)
+val zioInterop = modules / "interop" / "zio1"
 
-lazy val zioLogging =
+lazy val zio1Core =
   project
-    .in(file("modules/zio/logging"))
+    .in(zioInterop / "core")
+    .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), name := "tofu-zio-core")
+    .dependsOn(coreCE2, concurrentCE2)
+
+lazy val zio1Logging =
+  project
+    .in(zioInterop / "logging")
     .settings(
       defaultSettings,
       libraryDependencies ++= List(zio, zioCats, slf4j, logback % Test),
       name := "tofu-zio-logging"
     )
-    .dependsOn(loggingStr, loggingDer % "test", zioCore % Test)
+    .dependsOn(loggingStr, loggingDer % "test", zio1Core % Test)
 
 lazy val zio2Logging =
   project
-    .in(file("modules/zio2/logging"))
+    .in(modules / "interop" / "zio2" / "logging")
     .settings(
       defaultSettings,
       name := "tofu-zio2-logging",
@@ -270,56 +262,48 @@ lazy val zio2Logging =
     )
     .dependsOn(loggingStr, loggingDer % "test")
 
-lazy val examplesZIO2 =
-  project
-    .in(file("examples-zio2"))
-    .settings(
-      defaultSettings,
-      name := "tofu-examples-zio2",
-      exampleSettings
-    )
-    .dependsOn(zio2Logging, loggingDer, loggingLayout)
+val interop = modules / "interop"
 
-lazy val zioInterop = project
+lazy val zio1Interop = project
   .in(file("modules/zio"))
   .settings(
     name := "tofu-zio-interop",
     defaultSettings
   )
-  .dependsOn(zioCore, zioLogging)
-  .aggregate(zioCore, zioLogging)
+  .dependsOn(zio1Core, zio1Logging)
+  .aggregate(zio1Core, zio1Logging)
 
-lazy val fs2Interop = project
-  .in(file("modules/fs2"))
+lazy val fs2CE2Interop = project
+  .in(interop / "fs2" / "ce2")
   .settings(
     name                             := "tofu-fs2-interop",
     libraryDependencies += fs2,
     libraryDependencies += glassMacro % Test,
     defaultSettings
   )
-  .dependsOn(concurrent, streams)
+  .dependsOn(concurrentCE2, streams)
 
 lazy val fs2CE3Interop = project
-  .in(file("modules/fs2-ce3"))
+  .in(interop / "fs2" / "ce3")
   .settings(
     name                             := "tofu-fs2-ce3-interop",
     libraryDependencies += fs2CE3,
     libraryDependencies += glassMacro % Test,
     defaultSettings
   )
-  .dependsOn(core3, streams, derivation % "compile->test")
+  .dependsOn(coreCE3, streams, derivation % "compile->test")
 
 lazy val doobie = project
-  .in(file("modules/doobie/core"))
+  .in(modules / "doobie" / "core-ce2")
   .settings(
     libraryDependencies ++= List(doobieCore, derevo, monix % Test),
     defaultSettings,
     name := "tofu-doobie",
   )
-  .dependsOn(core, derivation, env % Test, zioInterop % Test)
+  .dependsOn(coreCE2, derivation, env % Test, zio1Interop % Test)
 
 lazy val doobieLogging = project
-  .in(file("modules/doobie/logging"))
+  .in(modules / "doobie" / "logging-ce2")
   .settings(
     defaultSettings,
     name := "tofu-doobie-logging",
@@ -327,13 +311,13 @@ lazy val doobieLogging = project
   .dependsOn(doobie, loggingStr)
 
 lazy val doobieCE3 = project
-  .in(file("modules/doobie/core-ce3"))
+  .in(modules / "doobie" / "core-ce3")
   .settings(
     libraryDependencies ++= List(doobieCoreCE3, derevo),
     defaultSettings,
     name := "tofu-doobie-ce3",
   )
-  .dependsOn(core3, derivation)
+  .dependsOn(coreCE3, derivation)
 
 lazy val doobieLoggingCE3 = project
   .in(file("modules/doobie/logging-ce3"))
@@ -342,27 +326,6 @@ lazy val doobieLoggingCE3 = project
     name := "tofu-doobie-logging-ce3",
   )
   .dependsOn(doobieCE3, loggingStr)
-
-lazy val examples = project
-  .in(file("examples"))
-  .settings(
-    libraryDependencies ++= List(doobieCore, doobieH2, derevo, monix, groovy, derevoCirce),
-    libraryDependencies ++= http4s,
-    defaultSettings,
-    name := "tofu-examples",
-    exampleSettings,
-  )
-  .dependsOn(mainModuleDeps: _*)
-
-lazy val examplesCE3 = project
-  .in(file("examples-ce3"))
-  .settings(
-    libraryDependencies ++= List(doobieCoreCE3, doobieH2CE3, derevo, groovy),
-    defaultSettings,
-    name := "tofu-examples-ce3",
-    exampleSettings,
-  )
-  .dependsOn(ce3MainModuleDeps: _*)
 
 lazy val streams = project
   .in(file("modules/streams"))
@@ -373,27 +336,56 @@ lazy val streams = project
   )
   .dependsOn(kernel)
 
+val examples = file("examples")
+
+lazy val examplesCE2 = project
+  .in(examples / "ce2")
+  .settings(
+    libraryDependencies ++= List(doobieCore, doobieH2, derevo, monix, groovy, derevoCirce),
+    libraryDependencies ++= http4s,
+    defaultSettings,
+    name := "tofu-examples-ce2",
+    exampleSettings,
+  )
+  .dependsOn(mainModuleDeps: _*)
+
+lazy val examplesCE3 = project
+  .in(examples / "ce3")
+  .settings(
+    libraryDependencies ++= List(doobieCoreCE3, doobieH2CE3, derevo, groovy),
+    defaultSettings,
+    name := "tofu-examples-ce3",
+    exampleSettings,
+  )
+  .dependsOn(ce3MainModuleDeps: _*)
+
+lazy val examplesZIO2 =
+  project
+    .in(examples / "zio2")
+    .settings(
+      defaultSettings,
+      name := "tofu-examples-zio2",
+      exampleSettings
+    )
+    .dependsOn(zio2Logging, loggingDer, loggingLayout)
+
 lazy val coreModules =
   Vector(
     higherKindCore,
     kernel,
-    kernelCE2Interop,
-    core,
+    coreCE2,
     memo,
     derivation,
     env,
-    concurrent,
+    concurrentCE2,
     streams,
     kernelCatsMtlInterop
   )
 
-lazy val ce3CoreModules = Vector(
-  kernelCE3Interop,
-  core3,
-)
+lazy val ce3CoreModules = Vector(coreCE3)
 
 lazy val commonModules =
-  Vector(observable, logging, enums, config, zioInterop, zio2Logging, fs2Interop, doobie, doobieLogging)
+  Vector(observable, logging, loggingEnumeratum, config, zio1Interop, zio2Logging, fs2CE2Interop, doobie, doobieLogging)
 
 lazy val ce3CommonModules =
   Vector(loggingStr, loggingDer, loggingLayout, doobieCE3, doobieLoggingCE3, fs2CE3Interop)
@@ -427,7 +419,7 @@ lazy val tofu = project
     name := "tofu"
   )
   .aggregate(
-    (coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules :+ docs :+ examples :+ examplesCE3 :+ examplesZIO2)
+    (coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules :+ docs :+ examplesCE2 :+ examplesCE3 :+ examplesZIO2)
       .map(x => x: ProjectReference): _*
   )
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
