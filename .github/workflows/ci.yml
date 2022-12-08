@@ -24,8 +24,7 @@ jobs:
 
       - uses: coursier/cache-action@v6
 
-      - name: Setup Java (temurin@${{ matrix.java }})
-        uses: actions/setup-java@v3
+      - uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: ${{matrix.java}}
@@ -46,13 +45,11 @@ jobs:
     if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout current branch (full)
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup Java (temurin@17)
-        uses: actions/setup-java@v3
+      - uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
