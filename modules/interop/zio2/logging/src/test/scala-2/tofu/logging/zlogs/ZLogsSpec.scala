@@ -1,17 +1,17 @@
 package tofu.logging.zlogs
 
-import zio._
-import zio.test._
-import TestStuff._
 import ch.qos.logback.classic.Level
 import io.circe.{Json, JsonObject}
-import tofu.logging.{LogTree, LoggedValue}
 import tofu.logging.impl.ContextMarker
+import tofu.logging.zlogs.TestStuff._
 import tofu.logging.zlogs.TofuDefaultContextSpec.{testCount, testStatus, testUser}
+import tofu.logging.{LogTree, LoggedValue}
+import zio._
+import zio.test._
 
 object ZLogsSpec extends ZIOSpecDefault {
 
-  val loggerName: String = classOf[ZLogsSpec.type].getName.replace("$", "")
+  val loggerName: String = this.getClass.getName.replace("$", "")
 
   val myLoggerName = "myLogger"
 
@@ -24,26 +24,29 @@ object ZLogsSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Tofu ZIO2 Logging")(
       test("TofuZLogger parses default logger name") {
+        val expectedArgs: Set[Json] =
+          Set[LoggedValue](LogKey.status -> testStatus, LogKey.count -> testCount).map(LogTree(_))
         addLogSpan("testSpan")(
-          for {
-            _      <- TestClock.adjust(5.seconds)
-            _      <- ZIO.log("Some message")
-            events <- LogAppender.events
-          } yield {
-            val e   = events.head
-            val ctx = e.getMarker.asInstanceOf[ContextMarker].ctx
-            assertTrue(LogTree(ctx) == TofuDefaultContextSpec.justZIOContextJson) &&
-            assertTrue(
-              e.getArgumentArray.toSet
-                .asInstanceOf[Set[LoggedValue]]
-                .map(LogTree(_)) ==
-                Set(LogKey.status -> testStatus, LogKey.count -> testCount).map(LogTree(_))
-            ) &&
-            assertTrue(e.getLevel == Level.WARN)
+          LogLevel.Warning {
+            for {
+              _      <- TestClock.adjust(5.seconds)
+              _      <- ZIO.log("Some message")
+              events <- LogAppender.events
+            } yield {
+              val e   = events.head
+              val ctx = e.getMarker.asInstanceOf[ContextMarker].ctx
+              assertTrue(LogTree(ctx) == TofuDefaultContextSpec.justZIOContextJson) &&
+              assertTrue(
+                e.getArgumentArray.toSet
+                  .asInstanceOf[Set[LoggedValue]]
+                  .map(LogTree(_)) == expectedArgs
+              ) &&
+              assertTrue(e.getLevel == Level.WARN)
+            }
           }
         ) @@ ZIOAspect.annotated("foo", "bar") @@ LogKey.status(testStatus) @@ LogKey.count(
           testCount
-        ) @@ LogLevel.Warning
+        )
       }.provide(
         Runtime.removeDefaultLoggers,
         TofuZLogger.addToRuntime,
@@ -103,7 +106,6 @@ object ZLogsSpec extends ZIOSpecDefault {
         }
       }.provide(
         ZLogging.Make.layerPlain,
-        contextProvider,
         ZLayer(ZIO.serviceWith[ZLogging.Make](_.byName(loggerName))),
         LogAppender.layer(loggerName)
       )
