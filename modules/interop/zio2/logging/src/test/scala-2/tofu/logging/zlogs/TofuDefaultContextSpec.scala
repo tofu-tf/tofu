@@ -53,12 +53,14 @@ object TofuDefaultContextSpec extends ZIOSpecDefault {
     LogKey.status.name -> testStatus.asJson
   ).asJson
 
-  val expectedJsonWithZIOContext: Json = JsonObject(
+  val justZIOContextJson: Json = JsonObject(
     "zSpans"       -> JsonObject(
       "testSpan" -> Json.fromLong(adjustDuration.toMillis)
     ).asJson,
     "zAnnotations" -> JsonObject(
       "foo" -> "bar".asJson
     ).asJson
-  ).asJson.deepMerge(expectedJsonOnlyTofuContext)
+  ).asJson
+
+  val expectedJsonWithZIOContext: Json = justZIOContextJson.deepMerge(expectedJsonOnlyTofuContext)
 }
