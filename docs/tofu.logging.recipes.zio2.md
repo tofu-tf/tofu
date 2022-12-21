@@ -131,14 +131,20 @@ If you want more flexible Tofu Logging, `tofu-zio2-logging` provides some useful
 
 ### ContextProvider
 
+If we need to carry some contextual information and don't want to use the ZIO environment to store it, we can use
+a `ContextProvider`:
+
 ```scala
 trait ContextProvider {
   def getCtx: UIO[LoggedValue]
 }
 ```
 
-Is required by `layerPlainWithContext` factory, every logger will log the provided `LoggedValue`.
-To implement your own instance it can be convenient to use `ValuedContextProvider`:
+This service required by `layerPlainWithContext` factory. Every logger will log the provided `LoggedValue` which
+evaluated every time the log method is called. ZIO encourage us to
+use [FiberRef](https://zio.dev/reference/state-management/fiberref) under the hood, which binds the context to an
+executing fiber.
+It can be convenient to use `ValuedContextProvider` to implement your own instance:
 
 ```scala
 abstract class ValueContextProvider[A](implicit L: Loggable[A]) extends ContextProvider {

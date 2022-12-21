@@ -9,9 +9,11 @@ import tofu.logging.{LogTree, LoggedValue}
 import zio._
 import zio.test._
 
-object ZLogsSpec extends ZIOSpecDefault {
+case object ZLogsSpec extends ZIOSpecDefault {
 
-  val loggerName: String = this.getClass.getName.replace("$", "")
+  val loggerName: String = this.getClass.getName.replace("$", "") // tofu.logging.zlogs.ZLogsSpec
+
+  println(loggerName)
 
   val myLoggerName = "myLogger"
 
