@@ -15,14 +15,18 @@ Add these dependencies into your project:
 libraryDependencies += "tf.tofu" %% "tofu-logging" % "<latest version in the badge in README>"
 libraryDependencies += "tf.tofu" %% "tofu-logging-derivation" % "<latest version in the badge in README>"
 ```
-`logging` requires an instance of the `Delay` typeclass, which can be created by hand, or can be imported from an according package:
+
+`logging` requires an instance of the `Delay` typeclass, which can be created by hand, or can be imported from an
+according package:
 
 Cats Effect 3 users should add the following dependency:
+
 ```sbt
 libraryDependencies += "tf.tofu" %% "tofu-kernel-ce3-interop" % "<latest version in the badge in README>"
 ```
 
 and Cats Effect 2 users should add:
+
 ```sbt
 libraryDependencies += "tf.tofu" %% "tofu-kernel-ce2-interop" % "<latest version in the badge in README>"
 ```
@@ -30,10 +34,12 @@ libraryDependencies += "tf.tofu" %% "tofu-kernel-ce2-interop" % "<latest version
 For ZIO users the following is enough:
 
 ```sbt
+libraryDependencies += "tf.tofu" %% "tofu-zio2-logging" % "<latest version in the badge in README>" // OR:
 libraryDependencies += "tf.tofu" %% "tofu-zio-logging" % "<latest version in the badge in README>"
 
 ```
-See also [ZIO Logging](./tofu.logging.recipes.zio.md) section.
+
+See also [ZIO1](./tofu.logging.recipes.zio.md), [ZIO2](./tofu.logging.recipes.zio2.md) Logging sections.
 
 ## Quick demo
 
@@ -48,12 +54,12 @@ type CardNumber = String //could be a newtype
 @derive(loggable)
 case class Client(name: String, @hidden cardNumber: CardNumber, id: UUID)
 
-def processPayment[F[_]: Monad: Logging](client: Client, amount: Long): F[Result] =
+def processPayment[F[_] : Monad : Logging](client: Client, amount: Long): F[Result] =
   for {
     _ <- info"Processing payment for $client"
     _ <- warn"Amount $amount is lower than zero!".whenA(amount < 0)
     result <- processData(client, amount, "USD")
-                        .onError(errorCause"Got error on processing payment for $client"(_))
+      .onError(errorCause"Got error on processing payment for $client"(_))
   } yield result
 ```
 
@@ -63,7 +69,7 @@ def processPayment[F[_]: Monad: Logging](client: Client, amount: Long): F[Result
 - Get to know [the core concepts](tofu.logging.main.entities.md)
 - Learn how to use [the syntax](tofu.logging.syntax.md)
 - Find a way to use `logging` suitable for you in the [recipes](tofu.logging.recipes.md)
-- Check out [the examples](.././examples/src/main/scala/tofu/example)
+- Check out [the examples](.././examples/ce2/src/main/scala-2/tofu/example)
 
 ## Old documentation
 
