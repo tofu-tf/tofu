@@ -5,7 +5,7 @@ title: ZIO2 Logging
 
 Tofu provides an implementation of `zio.ZLogger` and special annotations called `ZLogAnnotation`
 for [ZIO logging facade](https://zio.dev/guides/tutorials/enable-logging-in-a-zio-application).
-If you feel more confident with [Tofu Logging](./tofu.logging.main.entities.md#Logging) interface, `ULogging`
+If you feel more confident with [Tofu Logging](./tofu.logging.main.entities.md#logging) interface, `ULogging`
 , `ZLogging.Make`, `ZLogs` are at your service.
 
 First add the following dependency:

@@ -385,7 +385,7 @@ lazy val coreModules =
 lazy val ce3CoreModules = Vector(coreCE3)
 
 lazy val commonModules =
-  Vector(observable, logging, loggingEnumeratum, config, zio1Interop, zio2Logging, fs2CE2Interop, doobie, doobieLogging)
+  Vector(observable, logging, loggingEnumeratum, config, zio1Interop, fs2CE2Interop, doobie, doobieLogging)
 
 lazy val ce3CommonModules =
   Vector(loggingStr, loggingDer, loggingLayout, doobieCE3, doobieLoggingCE3, fs2CE3Interop)
@@ -395,6 +395,8 @@ lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDe
 
 lazy val ce3AllModuleRefs  = (ce3CoreModules ++ ce3CommonModules).map(x => x: ProjectReference)
 lazy val ce3MainModuleDeps = (ce3CoreModules ++ ce3CommonModules).map(x => x: ClasspathDep[ProjectReference])
+
+lazy val zio2Modules = Vector(zio2Logging)
 
 lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
@@ -419,7 +421,7 @@ lazy val tofu = project
     name := "tofu"
   )
   .aggregate(
-    (coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules :+ docs :+ examplesCE2 :+ examplesCE3 :+ examplesZIO2)
+    (coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules ++ zio2Modules :+ docs :+ examplesCE2 :+ examplesCE3 :+ examplesZIO2)
       .map(x => x: ProjectReference): _*
   )
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
