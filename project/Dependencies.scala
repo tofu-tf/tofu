@@ -75,7 +75,7 @@ object Dependencies {
 
     val groovy = "3.0.14"
 
-    val http4s = "0.22.14"
+    val http4s = "0.22.15"
 
     val glass = "0.2.1"
   }
