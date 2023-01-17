@@ -46,7 +46,7 @@ object Dependencies {
 
     val zio = "1.0.17"
 
-    val zio2 = "2.0.5"
+    val zio2 = "2.0.6"
 
     val zioCats = "2.5.1.0"
 
