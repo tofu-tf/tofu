@@ -21,11 +21,7 @@ object TofuDefaultContext {
     * `zio.logging#logContext`.
     */
   private[logging] lazy val AnnotatedContextRef: FiberRef[Map[LogAnnotation[_], Any]] =
-    Unsafe.unsafe(implicit unsafe =>
-      Runtime.default.unsafe
-        .run(ZIO.scoped(FiberRef.make[Map[LogAnnotation[_], Any]](Map.empty)))
-        .getOrThrow()
-    )
+    Unsafe.unsafe(implicit unsafe => FiberRef.unsafe.make[Map[LogAnnotation[_], Any]](Map.empty))
 
   private[logging] def getValueUnsafe[A](key: LogAnnotation[A])(m: Map[LogAnnotation[_], Any]): Option[A] =
     m.get(key).asInstanceOf[Option[A]]
