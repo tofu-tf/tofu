@@ -5,11 +5,11 @@ ThisBuild / crossScalaVersions := Vector(
   Dependencies.Version.scala212
 )
 
-ThisBuild / versionScheme      := Some("semver-spec")
+ThisBuild / versionScheme := Some("semver-spec")
 
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
-ThisBuild / developers       := List(
+ThisBuild / developers := List(
   Developer("catostrophe", "λoλcat", "catostrophe@pm.me", url("https://github.com/catostrophe")),
   Developer("danslapman", "Daniil Smirnov", "danslapman@gmail.com", url("https://github.com/danslapman")),
   Developer("odomontois", "Oleg Nizhnik", "odomontois@gmail.com", url("https://github.com/odomontois")),
