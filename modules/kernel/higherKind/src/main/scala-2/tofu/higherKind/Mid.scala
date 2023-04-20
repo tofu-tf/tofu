@@ -47,7 +47,9 @@ trait MidInstances extends MidInstances1 {
 
 trait MidInstances1 {
   implicit def midAlgebraSemigroup[F[_], U[f[_]]: ApplyK]: Semigroup[U[Mid[F, *]]] = new MidAlgebraSemigroup[F, U]
-  implicit def midInvariantK[A]: InvariantK[Mid[*[_], A]]                          = midInvariantInstance.asInstanceOf[InvariantK[Mid[*[_], A]]]
+
+  private val midInvariantInstance                        = new MidInvariantK()
+  implicit def midInvariantK[A]: InvariantK[Mid[*[_], A]] = midInvariantInstance.asInstanceOf[InvariantK[Mid[*[_], A]]]
 }
 
 class MidMonoidK[F[_]] extends MonoidK[Mid[F, *]] {
@@ -55,7 +57,6 @@ class MidMonoidK[F[_]] extends MonoidK[Mid[F, *]] {
   def combineK[A](x: Mid[F, A], y: Mid[F, A]): Mid[F, A] = fa => x(y(fa))
 }
 
-private val midInvariantInstance = new MidInvariantK()
 class MidInvariantK extends InvariantK[Mid[*[_], Any]] {
   def imapK[F[_], G[_]](af: Mid[F, Any])(fk: F ~> G)(gk: G ~> F): Mid[G, Any] = { ga =>
     fk(af(gk(ga)))
