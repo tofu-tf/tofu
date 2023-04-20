@@ -1,7 +1,7 @@
 package tofu.higherKind
 import cats.data.Chain
-import cats.tagless.ApplyK
-import cats.{Monoid, MonoidK, Semigroup}
+import cats.tagless.{ApplyK, InvariantK}
+import cats.{Monoid, MonoidK, Semigroup, ~>}
 import tofu.higherKind.Mid.MidCompose
 import tofu.syntax.funk.funK
 
@@ -47,11 +47,20 @@ trait MidInstances extends MidInstances1 {
 
 trait MidInstances1 {
   implicit def midAlgebraSemigroup[F[_], U[f[_]]: ApplyK]: Semigroup[U[Mid[F, *]]] = new MidAlgebraSemigroup[F, U]
+
+  private val midInvariantInstance: InvariantK[Mid[*[_], Any]] = new MidInvariantK()
+  implicit def midInvariantK[A]: InvariantK[Mid[*[_], A]]      = midInvariantInstance.asInstanceOf[InvariantK[Mid[*[_], A]]]
 }
 
 class MidMonoidK[F[_]] extends MonoidK[Mid[F, *]] {
   def empty[A]: Mid[F, A]                                = fa => fa
   def combineK[A](x: Mid[F, A], y: Mid[F, A]): Mid[F, A] = fa => x(y(fa))
+}
+
+class MidInvariantK extends InvariantK[Mid[*[_], Any]] {
+  def imapK[F[_], G[_]](af: Mid[F, Any])(fk: F ~> G)(gk: G ~> F): Mid[G, Any] = { ga =>
+    fk(af(gk(ga)))
+  }
 }
 
 class MidAlgebraMonoid[F[_], U[f[_]]: MonoidalK] extends MidAlgebraSemigroup[F, U] with Monoid[U[Mid[F, *]]] {
