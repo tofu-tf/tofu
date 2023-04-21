@@ -241,6 +241,12 @@ lazy val zio1Core =
     .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), name := "tofu-zio-core")
     .dependsOn(coreCE2, concurrentCE2)
 
+lazy val zio2Core =
+  project
+    .in(modules / "interop" / "zio2" / "core")
+    .settings(defaultSettings, libraryDependencies ++= List(zio2, zio2Cats), name := "tofu-zio2-core")
+    .dependsOn(coreCE3)
+
 lazy val zio1Logging =
   project
     .in(zioInterop / "logging")

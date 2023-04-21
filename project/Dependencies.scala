@@ -18,7 +18,7 @@ object Dependencies {
 
     val catsEffect2 = "2.5.5"
 
-    val catsEffect3 = "3.1.1"
+    val catsEffect3 = "3.4.9"
 
     val catsMtl = "1.3.0"
 
@@ -49,6 +49,8 @@ object Dependencies {
     val zio2 = "2.0.13"
 
     val zioCats = "2.5.1.0"
+
+    val zio2Cats = "23.0.0.4"
 
     val shapeless = "2.3.10"
 
@@ -115,6 +117,7 @@ object Dependencies {
   val zio2Test         = "dev.zio"                %% "zio-test"                 % Version.zio2      % Test
   val zio2TestSbt      = "dev.zio"                %% "zio-test-sbt"             % Version.zio2      % Test
   val zioCats          = "dev.zio"                %% "zio-interop-cats"         % Version.zioCats
+  val zio2Cats         = "dev.zio"                %% "zio-interop-cats"         % Version.zio2Cats
   val scalatest        = "org.scalatest"          %% "scalatest"                % Version.scalatest % Test
   val shapeless        = "com.chuusai"            %% "shapeless"                % Version.shapeless
   val refined          = "eu.timepit"             %% "refined"                  % Version.refined
