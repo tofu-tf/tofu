@@ -141,7 +141,7 @@ lazy val loggingRefined = project
   .dependsOn(loggingStr)
 
 lazy val loggingLog4CatsLegacy = project
-  .in(loggingInterop / "log4cats")
+  .in(loggingInterop / "log4cats-legacy")
   .settings(
     defaultSettings,
     name := "tofu-logging-log4cats-legacy",
@@ -187,7 +187,8 @@ lazy val logging = project
     loggingShapeless,
     loggingRefined,
     loggingLog4Cats,
-    loggingLogstashLogback
+    loggingLog4CatsLegacy,
+    loggingLogstashLogback,
   )
   .settings(
     defaultSettings,
