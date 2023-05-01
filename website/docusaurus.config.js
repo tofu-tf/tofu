@@ -73,7 +73,7 @@ module.exports = {
           position: "right"
         },
         {
-          href: "pathname:///api/index.html",
+          href: "pathname:///api/",
           label: "API",
           position: "right"
         }
