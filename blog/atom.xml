@@ -9,11 +9,11 @@
     <icon>https://docs.tofu.tf/img/tofu_logo_turquose_square.svg</icon>
     <entry>
         <title type="html"><![CDATA[Started docs]]></title>
-        <id>/2017/10/29/hello-docs</id>
+        <id>https://docs.tofu.tf/blog/2017/10/29/hello-docs</id>
         <link href="https://docs.tofu.tf/blog/2017/10/29/hello-docs"/>
         <updated>2017-10-29T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[Starting from today we have docs in tofu.]]></summary>
-        <content type="html"><![CDATA[<p>Starting from today we have docs in tofu.<br/>
+        <content type="html"><![CDATA[<p>Starting from today we have docs in tofu.<br>
 <!-- -->Also checkout the new logo. Spent over 9000h in draw.io</p>]]></content>
         <author>
             <name>Oleg Nizhnik</name>

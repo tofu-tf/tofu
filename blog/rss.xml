@@ -7,13 +7,14 @@
         <lastBuildDate>Sun, 29 Oct 2017 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
+        <language>en</language>
         <item>
             <title><![CDATA[Started docs]]></title>
             <link>https://docs.tofu.tf/blog/2017/10/29/hello-docs</link>
-            <guid>/2017/10/29/hello-docs</guid>
+            <guid>https://docs.tofu.tf/blog/2017/10/29/hello-docs</guid>
             <pubDate>Sun, 29 Oct 2017 00:00:00 GMT</pubDate>
             <description><![CDATA[Starting from today we have docs in tofu.]]></description>
-            <content:encoded><![CDATA[<p>Starting from today we have docs in tofu.<br/>
+            <content:encoded><![CDATA[<p>Starting from today we have docs in tofu.<br>
 <!-- -->Also checkout the new logo. Spent over 9000h in draw.io</p>]]></content:encoded>
         </item>
     </channel>
