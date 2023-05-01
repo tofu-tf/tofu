@@ -69,7 +69,9 @@ object Dependencies {
 
     val collectionCompat = "2.9.0"
 
-    val log4Cats = "1.7.0"
+    val log4CatsLegacy = "1.7.0"
+
+    val log4Cats = "2.6.0"
 
     val logstashLogback = "7.3"
 
@@ -123,6 +125,7 @@ object Dependencies {
   val doobieCoreCE3    = "org.tpolecat"           %% "doobie-core"              % Version.doobieCE3
   val doobieH2CE3      = "org.tpolecat"           %% "doobie-h2"                % Version.doobieCE3
   val collectionCompat = "org.scala-lang.modules" %% "scala-collection-compat"  % Version.collectionCompat
+  val log4CatsLegacy   = "org.typelevel"          %% "log4cats-core"            % Version.log4CatsLegacy
   val log4Cats         = "org.typelevel"          %% "log4cats-core"            % Version.log4Cats
   val logstashLogback  = "net.logstash.logback"    % "logstash-logback-encoder" % Version.logstashLogback
   val groovy           = "org.codehaus.groovy"     % "groovy"                   % Version.groovy
