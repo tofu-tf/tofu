@@ -34,7 +34,7 @@ class PerformSuite extends AnyFunSuite with Matchers {
   } yield traceId
 
   val init = for {
-    dispatcher <- Dispatcher[IO]
+    dispatcher <- Dispatcher.parallel[IO]
     traceId    <- Resource.eval(genTraceId)
   } yield MyContext(dispatcher, traceId)
 
