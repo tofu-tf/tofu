@@ -418,9 +418,7 @@ lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
   .settings(
     noPublishSettings,
-    addCompilerPlugin(simulacrum),
     macros,
-    // ScalaUnidoc / doc / scalacOptions += "-Ymacro-expand:none",
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,

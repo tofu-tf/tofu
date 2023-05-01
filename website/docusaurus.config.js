@@ -35,7 +35,7 @@ module.exports = {
           path: "blog"
         },
         theme: {
-          customCss: "../src/css/customTheme.css"
+          customCss: "./src/css/customTheme.css"
         }
       }
     ]
@@ -73,7 +73,7 @@ module.exports = {
           position: "right"
         },
         {
-          href: "/api/index.html",
+          href: "api/index.html",
           label: "API",
           position: "right"
         }
@@ -127,18 +127,15 @@ module.exports = {
       },
     ],
       copyright: `Copyright © ${new Date().getFullYear()} Tinkoff.ru`,
-      // logo: {
-        // src: "img/tofu_logo_turquose_square.png"
-      // }
     },
     colorMode: {
-      switchConfig: {
-        darkIcon: '🌙',
-        darkIconStyle: {
-          marginLeft: '2px',
-        },
-        lightIcon: '🔆'
-      },
+    //   switchConfig: {
+    //     darkIcon: '🌙',
+    //     darkIconStyle: {
+    //       marginLeft: '2px',
+    //     },
+    //     lightIcon: '🔆'
+    //   },
       respectPrefersColorScheme: true
     }
   }
