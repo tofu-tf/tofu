@@ -412,7 +412,7 @@ lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDe
 lazy val ce3AllModuleRefs  = (ce3CoreModules ++ ce3CommonModules).map(x => x: ProjectReference)
 lazy val ce3MainModuleDeps = (ce3CoreModules ++ ce3CommonModules).map(x => x: ClasspathDep[ProjectReference])
 
-lazy val zio2Modules = Vector(zio2Logging)
+lazy val zio2Modules = Vector(zio2Logging, zio2Core)
 
 lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
