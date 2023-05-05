@@ -60,7 +60,7 @@ of `"tofu"`):
 
 Proud user of ToFu? Feel free to [add your company!](https://github.com/tofu-tf/tofu/edit/master/README.md)
 
-<a href="https://www.pitsdatarecovery.net/"><img width="40%" src="https://www.pitsdatarecovery.net/wp-content/uploads/2020/09/pits-logo.svg" /></a>
+<a href="https://www.pitsdatarecovery.net/" title="PITS Global Data Recovery Services"><img width="40%" src="https://www.pitsdatarecovery.net/wp-content/uploads/2020/09/pits-logo.svg" alt="PITS Global Data Recovery Services logo"/></a>
 
 <a href="https://tinkoff.ru/"><img width="40%" src="logos/yandex-travel-logo.svg?sanitize=true" /></a>
 
