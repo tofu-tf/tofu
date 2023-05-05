@@ -6,7 +6,7 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val scala212 = "2.12.16"
+    val scala212 = "2.12.17"
 
     val scala213 = "2.13.10"
 
@@ -18,13 +18,13 @@ object Dependencies {
 
     val catsEffect2 = "2.5.5"
 
-    val catsEffect3 = "3.1.1"
+    val catsEffect3 = "3.4.9"
 
-    val catsMtl = "1.3.0"
+    val catsMtl = "1.3.1"
 
     val catsTagless = "0.14.0"
 
-    val enumeratum = "1.7.0"
+    val enumeratum = "1.7.2"
 
     val derevo = "0.13.0"
 
@@ -32,27 +32,29 @@ object Dependencies {
 
     val fs2 = "2.5.11"
 
-    val fs2CE3 = "3.2.14"
+    val fs2CE3 = "3.6.1"
 
-    val logback = "1.4.5"
+    val logback = "1.4.7"
 
     val monix = "3.4.1"
 
-    val scalatest = "3.2.10"
+    val scalatest = "3.2.15"
 
     val magnolia = "0.17.0"
 
     val typesafeConfig = "1.4.2"
 
-    val zio = "1.0.17"
+    val zio = "1.0.18"
 
-    val zio2 = "2.0.4"
+    val zio2 = "2.0.13"
 
     val zioCats = "2.5.1.0"
 
+    val zio2Cats = "23.0.0.4"
+
     val shapeless = "2.3.10"
 
-    val refined = "0.10.1"
+    val refined = "0.10.3"
 
     val doobie = "0.13.4"
 
@@ -67,17 +69,19 @@ object Dependencies {
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.8.1"
+    val collectionCompat = "2.10.0"
 
-    val log4Cats = "1.7.0"
+    val log4CatsLegacy = "1.7.0"
 
-    val logstashLogback = "7.2"
+    val log4Cats = "2.6.0"
 
-    val groovy = "3.0.13"
+    val logstashLogback = "7.3"
 
-    val http4s = "0.22.14"
+    val groovy = "3.0.17"
 
-    val glass = "0.1.0"
+    val http4s = "0.22.15"
+
+    val glass = "0.2.1"
   }
 
   val noCatsCore       =
@@ -115,6 +119,7 @@ object Dependencies {
   val zio2Test         = "dev.zio"                %% "zio-test"                 % Version.zio2      % Test
   val zio2TestSbt      = "dev.zio"                %% "zio-test-sbt"             % Version.zio2      % Test
   val zioCats          = "dev.zio"                %% "zio-interop-cats"         % Version.zioCats
+  val zio2Cats         = "dev.zio"                %% "zio-interop-cats"         % Version.zio2Cats
   val scalatest        = "org.scalatest"          %% "scalatest"                % Version.scalatest % Test
   val shapeless        = "com.chuusai"            %% "shapeless"                % Version.shapeless
   val refined          = "eu.timepit"             %% "refined"                  % Version.refined
@@ -123,6 +128,7 @@ object Dependencies {
   val doobieCoreCE3    = "org.tpolecat"           %% "doobie-core"              % Version.doobieCE3
   val doobieH2CE3      = "org.tpolecat"           %% "doobie-h2"                % Version.doobieCE3
   val collectionCompat = "org.scala-lang.modules" %% "scala-collection-compat"  % Version.collectionCompat
+  val log4CatsLegacy   = "org.typelevel"          %% "log4cats-core"            % Version.log4CatsLegacy
   val log4Cats         = "org.typelevel"          %% "log4cats-core"            % Version.log4Cats
   val logstashLogback  = "net.logstash.logback"    % "logstash-logback-encoder" % Version.logstashLogback
   val groovy           = "org.codehaus.groovy"     % "groovy"                   % Version.groovy

@@ -7,12 +7,41 @@ title: Logback Layouts
 # Layouts
 
 Tofu is built upon [Logback](http://logback.qos.ch/) so it needs a custom `logback.xml` file with contextual logging
-support. Tofu uses mechanism called markers to store context in logs, so it won't work with existing Layouts e.g.
-with [Logstash-encoder](https://github.com/logstash/logstash-logback-encoder).
+support. Tofu uses mechanism called markers to store context in logs, so it won't work with existing Layouts.
 
-Luckily for us, tofu has two special Layouts:
+Luckily for us, tofu brings a logging provider for _Logstash-encoder_:
 
-* [ELKLayout](https://github.com/tofu-tf/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ELKLayout.scala)
+```sbt
+libraryDependencies += "tf.tofu" %% "tofu-logging-logstash-logback" % "<latest version in the badge in README>"
+```
+
+* **TofuLoggingProvider** provides JSON logs for logstash-logback-encoder. See [README on github](https://github.com/logstash/logstash-logback-encoder) for more details. 
+
+```xml
+<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+          <providers>
+              <pattern>
+                  <pattern>
+                      { "a": 1 }
+                  </pattern>
+              </pattern>
+              <timestamp/>
+              <logLevel/>
+              <message/>
+              <provider class="tofu.logging.TofuLoggingProvider"/>
+          </providers>
+      </encoder>
+  </appender>
+```
+
+In addition, tofu has two own special Layouts:
+
+```sbt
+libraryDependencies += "tf.tofu" %% "tofu-logging-layout" % "<latest version in the badge in README>"
+```
+
+* **ELKLayout**
   that outputs structured logs in JSON format. Example appender looks like that:
 
 ```xml
@@ -33,7 +62,7 @@ Luckily for us, tofu has two special Layouts:
 </appender>
   ```
 
-* [ConsoleContextLayout](https://github.com/tofu-tf/tofu/blob/master/logging/layout/src/main/scala/tofu/logging/ConsoleContextLayout.scala)
+* **ConsoleContextLayout**
   that outputs simple text logs. Example appender looks like that:
 
 ```xml
