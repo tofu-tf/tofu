@@ -38,7 +38,7 @@ object Dependencies {
 
     val monix = "3.4.1"
 
-    val scalatest = "3.2.15"
+    val scalatest = "3.2.16"
 
     val magnolia = "0.17.0"
 
