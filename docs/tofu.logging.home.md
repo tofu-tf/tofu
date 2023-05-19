@@ -22,13 +22,13 @@ according package:
 Cats Effect 3 users should add the following dependency:
 
 ```sbt
-libraryDependencies += "tf.tofu" %% "tofu-kernel-ce3-interop" % "<latest version in the badge in README>"
+libraryDependencies += "tf.tofu" %% "tofu-core-ce3" % "<latest version in the badge in README>"
 ```
 
 and Cats Effect 2 users should add:
 
 ```sbt
-libraryDependencies += "tf.tofu" %% "tofu-kernel-ce2-interop" % "<latest version in the badge in README>"
+libraryDependencies += "tf.tofu" %% "tofu-core-ce2" % "<latest version in the badge in README>"
 ```
 
 For ZIO users the following is enough:
