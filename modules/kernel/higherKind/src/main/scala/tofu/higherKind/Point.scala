@@ -33,7 +33,7 @@ object Point {
   }
 
   implicit val pointRepresentable: RepresentableK[Point] = new RepresentableK[Point] {
-    def tabulate[F[_]](hom: RepK[Point, *] ~> F): Point[F] = new Point[F] {
+    def tabulate[F[_]](hom: RepK[Point, _] ~> F): Point[F] = new Point[F] {
       def point[A]: F[A] = hom(RepK[Point](_.point))
     }
   }

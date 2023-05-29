@@ -7,7 +7,7 @@ trait Fun2BK[F[_, _], G[_, _], H[_, _]] {
 object Fun2BK {
 
   implicit class Ops[F[+_, +_], G[+_, +_], H[+_, +_]](private val f: Fun2BK[F, G, H]) extends AnyVal {
-    def tupled: Tuple2BK[F, G, *, *] FunBK H = FunBK.apply(t => f(t._1, t._2))
+    def tupled: Tuple2BK[F, G, _, _] FunBK H = FunBK.apply[Tuple2BK[F, G, _, _]](t => f(t._1, t._2))
   }
 
   def apply[F[_, _], G[_, _]] = new Applied[F, G]
