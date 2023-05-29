@@ -126,7 +126,7 @@ trait Bind[F[_, _]] extends TwinMonad[F] { self =>
   def tailRecHandle[R, A, B](a: A)(f: A => F[Either[A, B], R]): F[B, R] =
     foldRec[A, Nothing, B, R](Left(a)) { ea => map(f(ea.merge))(Right(_)) }
 
-  def monad[E]: Monad[F[E, *]] = new Monad[F[E, *]] {
+  def monad[E]: Monad[F[E, _]] = new Monad[F[E, _]] {
     def pure[A](x: A): F[E, A] = self.pure(x)
 
     def flatMap[A, B](fa: F[E, A])(f: A => F[E, B]): F[E, B] = self.flatMap(fa, f)
@@ -134,7 +134,7 @@ trait Bind[F[_, _]] extends TwinMonad[F] { self =>
     def tailRecM[A, B](a: A)(f: A => F[E, Either[A, B]]): F[E, B] = self.tailRecMap(a)(f)
   }
 
-  def lmonad[R]: Monad[F[*, R]] = new Monad[F[*, R]] {
+  def lmonad[R]: Monad[F[_, R]] = new Monad[F[_, R]] {
     override def flatMap[A, B](fa: F[A, R])(f: A => F[B, R]): F[B, R] = self.handleWith(fa, f)
 
     override def tailRecM[A, B](a: A)(f: A => F[Either[A, B], R]): F[B, R] = self.tailRecHandle(a)(f)

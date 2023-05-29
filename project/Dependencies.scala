@@ -10,6 +10,8 @@ object Dependencies {
 
     val scala213 = "2.13.10"
 
+    val scala3 = "3.2.2"
+
     val circe = "0.14.3"
 
     val tethys = "0.26.0"
@@ -22,7 +24,7 @@ object Dependencies {
 
     val catsMtl = "1.3.1"
 
-    val catsTagless = "0.14.0"
+    val catsTagless = "0.15.0"
 
     val enumeratum = "1.7.2"
 
@@ -112,7 +114,8 @@ object Dependencies {
   val fs2CE3           = "co.fs2"                 %% "fs2-core"                 % Version.fs2CE3
   val tethys           = "com.tethys-json"        %% "tethys-core"              % Version.tethys
   val tethysJackson    = "com.tethys-json"        %% "tethys-jackson"           % Version.tethys
-  val catsTagless      = "org.typelevel"          %% "cats-tagless-macros"      % Version.catsTagless
+  val catsTaglessMacros= "org.typelevel"          %% "cats-tagless-macros"      % Version.catsTagless
+  val catsTaglessCore  = "org.typelevel"          %% "cats-tagless-core"        % Version.catsTagless
   val typesafeConfig   = "com.typesafe"            % "config"                   % Version.typesafeConfig
   val zio              = "dev.zio"                %% "zio"                      % Version.zio
   val zio2             = "dev.zio"                %% "zio"                      % Version.zio2

@@ -8,8 +8,8 @@ trait Delay[F[_]] {
 }
 
 object Delay extends CatsDelay with EffectComp[Delay] {
-  type Safe[F[_, _]]  = Delay[F[Nothing, *]]
-  type Catch[F[_, _]] = Delay[F[Throwable, *]]
+  type Safe[F[_, _]]  = Delay[F[Nothing, _]]
+  type Catch[F[_, _]] = Delay[F[Throwable, _]]
 }
 
 class CatsDelay extends CatsDelayCE2 {
