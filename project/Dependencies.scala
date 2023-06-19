@@ -75,7 +75,7 @@ object Dependencies {
 
     val log4Cats = "2.6.0"
 
-    val logstashLogback = "7.3"
+    val logstashLogback = "7.4"
 
     val groovy = "3.0.17"
 
