@@ -15,6 +15,8 @@ object ZioLoggingNativeExample extends ZIOAppDefault {
                          _ <- ZIO.log("Start request")
                          // {"zSpans":{"backend_2":10,"full_app":35}}
                          _ <- ZIO.sleep(i.seconds)
+                         // every log in scope will contain: "user":{"login":"Vasya","accessLevel":1}
+                         _ <- LogKey.user.scoped(TestUser("Vasya", "12345"))
                          _ <- ZIO.fail(new IllegalStateException(s"$i divided by 3")).when(i % 3 == 0)
                          _ <- ZIO.logInfo("Request completed") // + i seconds:
                          // {"zSpans":{"backend_2":2032,"full_app":2063}}
@@ -40,15 +42,17 @@ object ZioLoggingNativeExample extends ZIOAppDefault {
       ZIO.logSpan("full_app") {
         // logs will contain {"zSpans":{"full_app":6}}: this is
         // the time (milliseconds) spent from the span started
-        for {
-          // adds object with zioAnnotations: {"zSpans":{"full_app":6},"zAnnotations":{"detail":"Good day!"}}
-          _ <- ZIO.logWarning("Hello everybody") @@ ZIOAspect.annotated("detail" -> "Good day!")
-          // adds tofu-anotation for every parallel task:
-          // {"user":{"login":"Vasya","accessLevel":1}}
-          _ <- ZIO.collectAllParDiscard(tasks) @@ LogKey.user(TestUser("Vasya", "12345"))
-          // {"message":"Application shut down","zSpans":{"full_app":3064}}
-          _ <- ZIO.log("Application shut down")
-        } yield ()
+        ZIO.scoped {
+          for {
+            // adds object with zioAnnotations: {"zSpans":{"full_app":6},"zAnnotations":{"detail":"Good day!"}}
+            _ <- ZIO.logWarning("Hello everybody") @@ ZIOAspect.annotated("detail" -> "Good day!")
+            // adds tofu-anotation for every parallel task:
+            // {"user":{"login":"Vasya","accessLevel":1}}
+            _ <- ZIO.collectAllParDiscard(tasks) @@ LogKey.user(TestUser("Vasya", "12345"))
+            // {"message":"Application shut down","zSpans":{"full_app":3064}}
+            _ <- ZIO.log("Application shut down")
+          } yield ()
+        }
       }
   }
     .provide(

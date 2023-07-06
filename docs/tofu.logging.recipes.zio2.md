@@ -82,13 +82,33 @@ will produce:
 ```json
 {
   "level": "INFO",
-  "logger_name": "MyLogger",
+  "loggerName": "MyLogger",
   "message": "Hello, ZIO logging!",
   "httpCode": 204
 }
 ```
 
 You can change the logger name via `ZLogAnnotation.loggerName`.
+
+Also you can create scoped annotations via `ZLogAnnotation.scoped`
+
+```scala
+import tofu.logging.zlogs.ZLogAnnotation._
+
+val httpCode: ZLogAnnotation[Int] = make("httpCode")
+
+override def run = {
+  ZIO.scoped {
+    for {
+      _    <- httpCode.scoped(code)
+      _    <- program
+    } yield ()
+  }
+}.provide(
+  Runtime.removeDefaultLoggers,
+  TofuZLogger.addToRuntime
+)
+```
 
 `ZLogAnnotation.make[A]` implicitly requires a `Loggable[A]` instance, see more
 in [Loggable](./tofu.logging.loggable.md) section.
