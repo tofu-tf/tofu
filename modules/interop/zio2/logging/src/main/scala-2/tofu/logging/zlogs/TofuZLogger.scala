@@ -9,7 +9,7 @@ import zio._
 
 import java.time.{Clock => JClock}
 
-class TofuZLogger(jc: JClock) extends ZLogger[String, Unit] {
+class TofuZLogger private (jc: JClock) extends ZLogger[String, Unit] {
 
   protected val zioLevel2TofuLevel: LogLevel => Logging.Level = {
     case LogLevel.All     => Logging.Trace
@@ -64,8 +64,17 @@ object TofuZLogger {
     *   }}}
     */
   val addToRuntime: ULayer[Unit] = ZLayer(
-    Clock.javaClock.map(jc => Runtime.addLogger(new TofuZLogger(jc)))
+    Clock.javaClock.map(jc => Runtime.addLogger(TofuZLogger(jc)))
   ).flatten
+
+  def apply(jc: JClock): TofuZLogger = {
+    // get some slf4j logger to invoke slf4j initialisation
+    // as in some program failure cases it may happen, that program exit sooner then log message will be logged
+    // @see https://github.com/zio/zio-logging/issues/616
+    LoggerFactory.getLogger("zio-tofu-logger")
+
+    new TofuZLogger(jc)
+  }
 
   /** Parses logger name from [[Trace]]
     *
