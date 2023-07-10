@@ -82,7 +82,7 @@ will produce:
 ```json
 {
   "level": "INFO",
-  "loggerName": "MyLogger",
+  "logger_name": "MyLogger",
   "message": "Hello, ZIO logging!",
   "httpCode": 204
 }

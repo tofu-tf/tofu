@@ -71,7 +71,7 @@ object TofuZLogger {
     // get some slf4j logger to invoke slf4j initialisation
     // as in some program failure cases it may happen, that program exit sooner then log message will be logged
     // @see https://github.com/zio/zio-logging/issues/616
-    LoggerFactory.getLogger("zio-tofu-logger")
+    LoggerFactory.getLogger(DefaultLoggerName)
 
     new TofuZLogger(jc)
   }
