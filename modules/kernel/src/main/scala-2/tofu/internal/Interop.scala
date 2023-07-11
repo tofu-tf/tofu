@@ -37,3 +37,4 @@ class WBInterop(override val c: whitebox.Context) extends Interop(c) {
   def delegate0[F[_]: WTTU, N: WTT]: Tree         = delegateTree[N](tc[F])
   def delegate1[F[_]: WTTU, A: WTT, N: WTT]: Tree = delegateTree[N](tc[F], t[A])
 }
+

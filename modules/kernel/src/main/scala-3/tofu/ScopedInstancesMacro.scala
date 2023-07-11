@@ -1,0 +1,3 @@
+package tofu
+
+trait ScopedInstancesMacro

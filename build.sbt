@@ -9,12 +9,19 @@ lazy val setMinorVersion = minorVersion := {
 }
 
 lazy val defaultSettings = Seq(
-  scalaVersion       := Version.scala213,
-  crossScalaVersions := Vector(Version.scala212, Version.scala213),
+  scalaVersion       := Version.scala3,
   setMinorVersion,
   defaultScalacOptions,
   scalacWarningConfig,
   Compile / doc / scalacOptions -= "-Xfatal-warnings",
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) => Seq("-Ykind-projector:underscores")
+      case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders")
+      case _ => Nil
+    }
+  },
+  crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
   libraryDependencies ++= {
     (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, n)) =>
@@ -43,13 +50,6 @@ lazy val higherKindCore = project
           Seq(catsCore, catsFree, catsTaglessCore)
       }
     },
-    scalacOptions ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((3, _)) => Seq("-Ykind-projector:underscores")
-        case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders")
-      }
-    },
-    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
   )
 
 lazy val kernel = project
