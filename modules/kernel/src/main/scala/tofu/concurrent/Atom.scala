@@ -82,7 +82,7 @@ object Atom extends AtomInstances {
     def update(f: S => S): CalcM[F, R, S, S, E, Unit]      = CalcM.update(f).void
     def modify[B](f: S => (S, B)): CalcM[F, R, S, S, E, B] = CalcM.state(f)
   }
-  private[this] object calcMAtomAny             extends CalcMAtom[hktAny.AnyK, Any, Any, Any]
+  private[this] object calcMAtomAny             extends CalcMAtom[hktAny.AnyKK, Any, Any, Any]
 }
 
 trait MakeAtom[I[_], F[_]] {

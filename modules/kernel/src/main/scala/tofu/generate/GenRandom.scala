@@ -1,12 +1,11 @@
 package tofu.generate
 
-import scala.util.Random
-
 import cats.Functor
-import tofu.higherKind.RepresentableK
+import tofu.Delay
 import tofu.internal.EffectComp
-import tofu.syntax.monadic._
-import tofu.{Delay, higherKind}
+import tofu.syntax.monadic.*
+
+import scala.util.Random
 
 trait GenRandom[F[_]] {
 

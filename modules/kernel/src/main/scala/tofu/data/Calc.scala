@@ -83,7 +83,8 @@ object Calc {
   }
 
   implicit final class CalcSuccessfullOps[R, S1, S2, A](private val calc: Calc[R, S1, S2, Nothing, A]) extends AnyVal {
-    def flatMapS[R1 <: R, S3, B, E](f: A => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B] = calc.cont(f, identity) 
+    def flatMapS[R1 <: R, S3, B, E](f: A => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B] =
+      calc.cont[R1, E, S3, B](f, (e: Nothing) => e)
     def productRS[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]  = flatMapS(_ => r)
     def *>>[R1 <: R, S3, B, E](r: => Calc[R1, S2, S3, E, B]): Calc[R1, S1, S3, E, B]        = productRS(r)
     def runSuccess(r: R, init: S1): (S2, A)                                                 = {
@@ -95,7 +96,7 @@ object Calc {
   implicit final class CalcUnsuccessfullOps[R, S1, S2, E](private val calc: Calc[R, S1, S2, E, Nothing])
       extends AnyVal {
     def handleWithS[R1 <: R, E1, S3, B, A](f: E => Calc[R, S2, S3, E1, A]): Calc[R1, S1, S3, E1, A] =
-      calc.cont(identity, f)
+      calc.cont((a: Calc[R1, S2, S3, E1, A]) => a, f)
   }
 
   implicit final class CalcFixedStateOps[R, S, E, A](private val calc: Calc[R, S, S, E, A]) extends AnyVal {
@@ -127,26 +128,26 @@ object Calc {
 
     def toState: IndexedState[S1, S2, A] = IndexedState(runSuccessUnit)
   }
-
-  @tailrec def run[R, S1, S2, E, A](calc: Calc[R, S1, S2, E, A], r: R, init: S1): (S2, Either[E, A]) =
+  
+  @tailrec def run[R, S1, S2, S3, E1, E2, A](calc: Calc[R, S1, S3, E2, A], r: R, init: S1): (S3, Either[E2, A]) =
     calc match {
-      case res: CalcRes[R, S1, S2, E, A] =>
+      case res: CalcRes[R, S1, S3, E2, A]        =>
         res.submit(r, init, (s2, e) => (s2, Left(e)), (s2, a) => (s2, Right(a)))
-      case Defer(f)                      => run(f(), r, init)
-      case c @ Cont(src, ks, ke)         =>
-        src match {
+      case Defer(f)                              => run(f(), r, init)
+      case c: Cont[R, S1, S2, S3, E1, E2, S2, A] =>
+        c.src match {
           case res: CalcRes[R, S1, c.MidState, c.MidErr, c.MidState] =>
             val (sm, next) =
-              res.submit[(c.MidState, Calc[R, c.MidState, S2, E, A])](
+              res.submit[(c.MidState, Calc[R, c.MidState, S3, E2, A])](
                 r,
                 init,
-                (sm, e) => (sm, ke(e)),
-                (sm, a) => (sm, ks(a))
+                (sm, e) => (sm, c.kerr(e)),
+                (sm, a) => (sm, c.ksuc(a))
               )
             run(next, r, sm)
-          case Defer(f)                                              => run(f().cont(ks, ke), r, init)
+          case Defer(f)                                              => run(f().cont(c.ksuc, c.kerr), r, init)
           case Cont(src1, ks1, ke1)                                  =>
-            run(src1.cont(a => ks1(a).cont(ks, ke), e => ke1(e).cont(ks, ke)), r, init)
+            run(src1.cont(a => ks1(a).cont(c.ksuc, c.kerr), e => ke1(e).cont(c.ksuc, c.kerr)), r, init)
         }
     }
 

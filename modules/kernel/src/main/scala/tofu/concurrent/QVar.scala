@@ -1,12 +1,10 @@
 package tofu.concurrent
 
-import tofu.higherKind.{RepresentableK, derived}
 import cats.Applicative
 import tofu.Guarantee
-import tofu.syntax.monadic._
-import tofu.syntax.guarantee._
-import tofu.internal.carriers.MkQVarCE3Carrier
-import tofu.internal.carriers.MkQVarCE2Carrier
+import tofu.internal.carriers.{MkQVarCE2Carrier, MkQVarCE3Carrier}
+import tofu.syntax.guarantee.*
+import tofu.syntax.monadic.*
 
 /** a middleground between cats.concurrent.MVar and zio.Queue.bounded(1) */
 trait QVar[+F[_], A] {

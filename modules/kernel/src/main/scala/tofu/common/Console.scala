@@ -1,12 +1,10 @@
 package tofu.common
 
-import java.io.{BufferedReader, PrintStream}
-
-import scala.{Console => ScalaConsole}
-
-import tofu.higherKind.RepresentableK
+import tofu.Delay
 import tofu.internal.EffectComp
-import tofu.{Delay, higherKind}
+
+import java.io.{BufferedReader, PrintStream}
+import scala.Console as ScalaConsole
 
 trait Console[F[_]] {
   def readStrLn: F[String]
