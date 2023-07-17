@@ -42,7 +42,7 @@ object ZioLoggingNativeExample extends ZIOAppDefault {
       ZIO.logSpan("full_app") {
         // logs will contain {"zSpans":{"full_app":6}}: this is
         // the time (milliseconds) spent from the span started
-        ZIO.scoped {
+        ZIO.scoped[Any] {
           for {
             // adds object with zioAnnotations: {"zSpans":{"full_app":6},"zAnnotations":{"detail":"Good day!"}}
             _ <- ZIO.logWarning("Hello everybody") @@ ZIOAspect.annotated("detail" -> "Good day!")
