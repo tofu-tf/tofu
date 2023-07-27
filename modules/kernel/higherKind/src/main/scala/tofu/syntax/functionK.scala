@@ -1,4 +1,5 @@
 package tofu.syntax
+
 import cats.~>
 
 @deprecated("use tofu.syntax.funk._", since = "0.7.2")

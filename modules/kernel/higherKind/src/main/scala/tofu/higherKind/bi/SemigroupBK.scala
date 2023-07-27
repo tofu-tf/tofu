@@ -6,11 +6,11 @@ import cats.kernel.Semigroup
 trait SemigroupBK[F[_, _]] {
   def combinebk[A, B](x: F[A, B], y: F[A, B]): F[A, B]
 
-  def semigroupK[X]: SemigroupK[F[X, *]] = new SemigroupK[F[X, *]] {
+  def semigroupK[X]: SemigroupK[F[X, _]] = new SemigroupK[F[X, _]] {
     def combineK[A](x: F[X, A], y: F[X, A]): F[X, A] = combinebk(x, y)
   }
 
-  def leftSemigroupK[X]: SemigroupK[F[*, X]] = new SemigroupK[F[*, X]] {
+  def leftSemigroupK[X]: SemigroupK[F[_, X]] = new SemigroupK[F[_, X]] {
     def combineK[A](x: F[A, X], y: F[A, X]): F[A, X] = combinebk(x, y)
   }
 

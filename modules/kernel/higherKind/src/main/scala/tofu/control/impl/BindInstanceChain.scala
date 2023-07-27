@@ -1,4 +1,5 @@
 package tofu.control.impl
+
 import tofu.control.Bind
 
 import cats.Monad
@@ -42,7 +43,7 @@ trait BindInstanceChain[TC[f[_, _]] >: Bind[f]] {
     override def bifunctor: Bifunctor[Either] = implicitly
   }
 
-  implicit def eitherTInstance[F[_]](implicit F: Monad[F]): TC[EitherT[F, *, *]] = new Bind[EitherT[F, *, *]] {
+  implicit def eitherTInstance[F[_]](implicit F: Monad[F]): TC[EitherT[F, _, _]] = new Bind[EitherT[F, _, _]] {
     def foldRec[E, A, X, B](init: Either[E, A])(
         step: Either[E, A] => EitherT[F, Either[E, X], Either[A, B]]
     ): EitherT[F, X, B] =
@@ -67,8 +68,8 @@ trait BindInstanceChain[TC[f[_, _]] >: Bind[f]] {
 
     override def fromEither[E, A](ea: Either[E, A]): EitherT[F, E, A] = EitherT.fromEither(ea)
 
-    override def monad[E]: Monad[EitherT[F, E, *]] = implicitly
+    override def monad[E]: Monad[EitherT[F, E, _]] = implicitly
 
-    override val bifunctor: Bifunctor[EitherT[F, *, *]] = implicitly
+    override val bifunctor: Bifunctor[EitherT[F, _, _]] = implicitly
   }
 }

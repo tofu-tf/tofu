@@ -15,13 +15,17 @@ lazy val defaultSettings = Seq(
   defaultScalacOptions,
   scalacWarningConfig,
   Compile / doc / scalacOptions -= "-Xfatal-warnings",
-  libraryDependencies ++= Seq(
-    compilerPlugin(kindProjector),
-    compilerPlugin(betterMonadicFor),
-    scalatest,
-    collectionCompat,
-    scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided
-  )
+  libraryDependencies ++= {
+    (CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, n)) =>
+        Seq(
+          compilerPlugin(betterMonadicFor),
+          compilerPlugin(kindProjector),
+          scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided
+        )
+      case _ => Seq()
+    }) ++ Seq(scalatest, collectionCompat)
+  }
 ) ++ macros
 
 val modules = file("modules")
@@ -31,7 +35,21 @@ lazy val higherKindCore = project
   .settings(
     defaultSettings,
     name := "tofu-core-higher-kind",
-    libraryDependencies ++= Seq(catsCore, catsFree, catsTagless),
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) =>
+          Seq(catsCore, catsFree, catsTaglessMacros)
+        case _ =>
+          Seq(catsCore, catsFree, catsTaglessCore)
+      }
+    },
+    scalacOptions ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((3, _)) => Seq("-Ykind-projector:underscores")
+        case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders")
+      }
+    },
+    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
   )
 
 lazy val kernel = project
@@ -59,7 +77,7 @@ lazy val concurrentCE2 =
     .dependsOn(coreCE2, derivation % "compile->test")
     .settings(
       defaultSettings,
-      libraryDependencies ++= Seq(catsEffect2, catsTagless),
+      libraryDependencies ++= Seq(catsEffect2, catsTaglessMacros),
       libraryDependencies ++= Seq(simulacrum, derevoTagless, glassMacro).map(_ % Test),
       name := "tofu-concurrent-ce2",
     )
@@ -96,7 +114,7 @@ lazy val loggingStr = project
       alleycats,
       scalatest,
       derevo,
-      catsTagless
+      catsTaglessMacros
     ),
   )
   .dependsOn(kernel)
@@ -238,7 +256,7 @@ lazy val derivation =
     .in(modules / "derivation")
     .settings(
       defaultSettings,
-      libraryDependencies ++= Seq(magnolia, derevo, catsTagless),
+      libraryDependencies ++= Seq(magnolia, derevo, catsTaglessMacros),
       name := "tofu-derivation",
     )
     .dependsOn(kernel)
