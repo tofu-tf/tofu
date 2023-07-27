@@ -1,7 +1,7 @@
 package tofu.logging.zlogs
 
 import tofu.logging.{LogAnnotation, Loggable}
-import zio.{Trace, ZIO, ZIOAspect}
+import zio.{Scope, Trace, URIO, ZIO, ZIOAspect}
 
 /** The [[LogAnnotation]] extension allows you add structured log annotations into the default log context. The stored
   * values are accessible via [[TofuDefaultContext]] and would be logged by [[TofuZLogger]].
@@ -25,6 +25,13 @@ class ZLogAnnotation[V](name: String, valueLoggable: Loggable[V]) extends LogAnn
       case Some(v) => apply(v)
       case None    => ZLogAnnotation.NoopAspect
     }
+
+  def scoped(value: V): URIO[Scope, Unit] =
+    TofuDefaultContext.AnnotatedContextRef
+      .locallyScopedWith(_ + ((this, value)))
+
+  def scoped(value: Option[V]): URIO[Scope, Unit] =
+    value.fold[URIO[Scope, Unit]](ZIO.unit)(scoped)
 
 }
 

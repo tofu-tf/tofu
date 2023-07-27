@@ -18,12 +18,16 @@ Tofu contains its own optics library with some notable features:
 Hierarchy
 ---------
 
-import ImageSwitcher from '../website/src/components/ImageSwitcher.js';
+import ThemedImage from '@theme/ThemedImage';
 
-<ImageSwitcher 
-lightImageSrc="/docs_img/optics-hierarchy.svg"
-darkImageSrc="/docs_img/optics-hierarchy-dark.svg"
-imageHeight="700"/>
+<ThemedImage
+  alt="Docusaurus themed image"
+  sources={{
+    light: '/docs_img/optics-hierarchy.svg',
+    dark: '/docs_img/optics-hierarchy-dark.svg',
+  }}
+/>
+
 
 Intuition
 ---------

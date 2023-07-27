@@ -140,6 +140,15 @@ lazy val loggingRefined = project
   )
   .dependsOn(loggingStr)
 
+lazy val loggingLog4CatsLegacy = project
+  .in(loggingInterop / "log4cats-legacy")
+  .settings(
+    defaultSettings,
+    name := "tofu-logging-log4cats-legacy",
+    libraryDependencies += log4CatsLegacy
+  )
+  .dependsOn(loggingStr)
+
 lazy val loggingLog4Cats = project
   .in(loggingInterop / "log4cats")
   .settings(
@@ -178,7 +187,8 @@ lazy val logging = project
     loggingShapeless,
     loggingRefined,
     loggingLog4Cats,
-    loggingLogstashLogback
+    loggingLog4CatsLegacy,
+    loggingLogstashLogback,
   )
   .settings(
     defaultSettings,
@@ -240,6 +250,12 @@ lazy val zio1Core =
     .in(zioInterop / "core")
     .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), name := "tofu-zio-core")
     .dependsOn(coreCE2, concurrentCE2)
+
+lazy val zio2Core =
+  project
+    .in(modules / "interop" / "zio2" / "core")
+    .settings(defaultSettings, libraryDependencies ++= List(zio2, zio2Cats), name := "tofu-zio2-core")
+    .dependsOn(coreCE3)
 
 lazy val zio1Logging =
   project
@@ -396,15 +412,13 @@ lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: ClasspathDe
 lazy val ce3AllModuleRefs  = (ce3CoreModules ++ ce3CommonModules).map(x => x: ProjectReference)
 lazy val ce3MainModuleDeps = (ce3CoreModules ++ ce3CommonModules).map(x => x: ClasspathDep[ProjectReference])
 
-lazy val zio2Modules = Vector(zio2Logging)
+lazy val zio2Modules = Vector(zio2Logging, zio2Core)
 
 lazy val docs = project // new documentation project
   .in(file("tofu-docs"))
   .settings(
     noPublishSettings,
-    addCompilerPlugin(simulacrum),
     macros,
-    // ScalaUnidoc / doc / scalacOptions += "-Ymacro-expand:none",
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
