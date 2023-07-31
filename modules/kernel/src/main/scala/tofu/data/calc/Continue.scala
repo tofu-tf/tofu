@@ -2,6 +2,7 @@ package tofu.data.calc
 
 import tofu.compat.unused212
 import glass.PContains
+import tofu.data.Nothing2T
 
 trait Continue[-A, -E, -S, +C] { self =>
   def success(s: S, a: A): C
@@ -34,11 +35,11 @@ object Continue {
     override def error(s: S, e: E): X   = h(s, e)
   }
 
-  type Result[A, E, S] = Continue[A, E, Any, CalcM[Nothing, Any, S, S, E, A]]
+  type Result[A, E, S] = Continue[A, E, Any, CalcM[Nothing2T, Any, S, S, E, A]]
 
   private[this] def result1[A, E, S]: Result[A, E, S] = new Result[A, E, S] {
-    override def success(s: Any, a: A): CalcM[Nothing, Any, S, S, E, A] = CalcM.pure(a)
-    override def error(s: Any, e: E): CalcM[Nothing, Any, S, S, E, A]   = CalcM.raise(e)
+    override def success(s: Any, a: A): CalcM[Nothing2T, Any, S, S, E, A] = CalcM.pure(a)
+    override def error(s: Any, e: E): CalcM[Nothing2T, Any, S, S, E, A]   = CalcM.raise(e)
   }
   private[this] val resultAny: Result[Any, Any, Any]  = result1
   def result[A, E, S]: Result[A, E, S]                = resultAny.asInstanceOf[Result[A, E, S]]
@@ -60,19 +61,19 @@ object Continue {
       def error(s: S1, e: E): CalcM[F, R, S1, S3, W, C]   = c1.error(s, e).bind(c2)
     }
 
-  def flatMapConst[A, E, S, X >: CalcM[Nothing, Any, S, S, E, Nothing]](f: A => X): Continue[A, E, S, X] =
+  def flatMapConst[A, E, S, X >: CalcM[Nothing2T, Any, S, S, E, Nothing]](f: A => X): Continue[A, E, S, X] =
     new Continue[A, E, S, X] {
       def success(s: S, a: A): X = f(a)
       def error(s: S, e: E): X   = CalcM.Raise[S, E](e)
     }
 
-  def handleWithConst[A, E, S, X >: CalcM[Nothing, Any, S, S, Nothing, A]](f: E => X): Continue[A, E, S, X] =
+  def handleWithConst[A, E, S, X >: CalcM[Nothing2T, Any, S, S, Nothing, A]](f: E => X): Continue[A, E, S, X] =
     new Continue[A, E, S, X] {
       def success(s: S, a: A): X = CalcM.Pure[S, A](a)
       def error(s: S, e: E): X   = f(e)
     }
 
-  type Swap[A, E, S] = Continue[A, E, S, CalcM[Nothing, Any, S, S, A, E]]
+  type Swap[A, E, S] = Continue[A, E, S, CalcM[Nothing2T, Any, S, S, A, E]]
   private[this] def swap1[A, E, S]: Swap[A, E, S] =
     new Swap[A, E, S] {
       override def success(s: S, a: A) = CalcM.Raise(a)
@@ -82,7 +83,7 @@ object Continue {
   private[this] val swapAny        = swap1[Any, Any, Any]
   def swap[A, E, S]: Swap[A, E, S] = swapAny.asInstanceOf[Swap[A, E, S]]
 
-  type Update[A, E, SI, SO] = Continue[A, E, SI, CalcM[Nothing, Any, Any, SO, E, A]]
+  type Update[A, E, SI, SO] = Continue[A, E, SI, CalcM[Nothing2T, Any, Any, SO, E, A]]
   def update[A, E, SI, SO](f: SI => SO): Update[A, E, SI, SO] =
     new Update[A, E, SI, SO] {
       override def success(s: SI, a: A) = CalcM.set(f(s)) as_ a

@@ -84,7 +84,7 @@ class CalcBiContextInstance[F[+_, +_], R, S]
 
   override def disclose[E, A](
       k: FunBK[CalcM[F, R, S, S, *, *], CalcM[F, Any, S, S, *, *]] => CalcM[F, R, S, S, E, A]
-  ): CalcM[F, R, S, S, E, A] = CalcM.read[S, R].flatMap(r => k(FunBK.apply(_.provide(r))))
+  ): CalcM[F, R, S, S, E, A] = CalcM.read[S, R].flatMap(r => k(FunBK.apply[CalcM[F, R, S, S, *, *]](_.provide(r))))
 }
 
 class CalcMBifoldable[F[+_, +_], S](implicit F: Bifoldable[F]) extends Bifoldable[CalcM[F, Any, Any, S, *, *]] {

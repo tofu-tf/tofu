@@ -2,6 +2,7 @@ package tofu.data.calc
 
 import tofu.higherKind.bi.FunBK
 import scala.annotation.unchecked.{uncheckedVariance => uv}
+import tofu.data.Nothing2T
 
 trait Translator[-F[_, _], +G[+_, +_], ST, +RI, -RO] { self =>
   def mapRead(ro: RO): RI
@@ -32,7 +33,7 @@ object Translator {
 
     def apply[G[+_, +_]](mk: AsStateK[F, G, ST, R, E, A]): Translator[F, G, ST, R, R] = mk
 
-    def pure(mk: AsStateK[F, Nothing, ST, R, E, A]): Translator[F, Nothing, ST, R, R] = mk
+    def pure(mk: AsStateK[F, Nothing2T, ST, R, E, A]): Translator[F, Nothing2T, ST, R, R] = mk
   }
 
   abstract class As[-F[_, _], G[+_, +_], ST, R] extends Translator[F, G, ST, R, R] {
@@ -132,8 +133,9 @@ class TranslateStatePack[+F[+_, +_], -R, -SI, +SO, +E, +A, ST](private val calc:
   )(implicit s: Unit <:< SI): CalcM[G, R, ST, ST, E, A] =
     CalcM.get[ST].mapState(st => (st, (): SI)) *>> calc.translateState(fk).mapState(_._1)
 
+
   def pure(
-      fk: Translator.AsStateK[F, Nothing, ST, R @uv, EArb, AArb]
-  )(implicit s: Unit <:< SI): CalcM[Nothing, R, ST, ST, E, A] =
-    CalcM.get[ST].mapState(st => (st, (): SI)) *>> calc.translateState(fk).mapState(_._1)
+      fk: Translator.AsStateK[F, Nothing2T, ST, R @uv, EArb, AArb]
+  )(implicit s: Unit <:< SI): CalcM[λ[(`+x`, `+y`) => Nothing], R, ST, ST, E, A] =
+    CalcM.get[ST].mapState(st => (st, (): SI)) *>> (calc.translateState(fk).mapState(_._1))
 }
