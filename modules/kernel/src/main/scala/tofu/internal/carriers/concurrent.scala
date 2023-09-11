@@ -28,12 +28,8 @@ object MkAgentCE3Carrier extends MkAgentCE3CarrierMacro
 
 trait MkSerialAgentCE2Carrier[I[_], F[_]] extends MakeSerialAgent[I, F]
 
-object MkSerialAgentCE2Carrier extends MkSerialAgentCE2CarrierMacro with MkSerialAgentCE2Carrier0 
-
-trait MkSerialAgentCE2Carrier0 extends MkSerialAgentCE2Carrier0Macro
+object MkSerialAgentCE2Carrier extends MkSerialAgentCE2CarrierMacro
 
 trait MkSerialAgentCE3Carrier[I[_], F[_]] extends MakeSerialAgent[I, F]
 
-object MkSerialAgentCE3Carrier extends MkSerialAgentCE3Carrier0 with MkSerialAgentCE3CarrierMacro
-
-trait MkSerialAgentCE3Carrier0 extends MkSerialAgentCE3Carrier0Macro
+object MkSerialAgentCE3Carrier extends MkSerialAgentCE3CarrierMacro

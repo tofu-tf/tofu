@@ -34,7 +34,7 @@ trait MkAgentCE3CarrierMacro {
       .delegate2[MkAgentCE3Carrier[I, F], I, F, { val `tofu.interop.CE3Kernel.agentByRefAndSemaphore`: Unit }]
 }
 
-trait MkSerialAgentCE2CarrierMacro {
+trait MkSerialAgentCE2CarrierMacro extends MkSerialAgentCE2Carrier0Macro {
   final implicit def interopCE2Carrier[I[_], F[_]]: MkSerialAgentCE2Carrier[I, F] =
     macro Interop.delegate2[MkSerialAgentCE2Carrier[
       I,
@@ -50,7 +50,7 @@ trait MkSerialAgentCE2Carrier0Macro {
     ], I, F, { val `tofu.interop.CE2Kernel.underlyingSerialAgentByRefAndSemaphore`: Unit }]
 }
 
-trait MkSerialAgentCE3CarrierMacro {
+trait MkSerialAgentCE3CarrierMacro extends MkSerialAgentCE3Carrier0Macro {
   final implicit def interopCE3Carrier[I[_], F[_]]: MkSerialAgentCE3Carrier[I, F] =
     macro Interop.delegate2[MkSerialAgentCE3Carrier[
       I,
