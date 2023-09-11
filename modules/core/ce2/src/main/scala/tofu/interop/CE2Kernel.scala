@@ -20,7 +20,7 @@ import cats.effect.{
   Timer
 }
 import cats.{Functor, Id, Monad, Parallel, Traverse, ~>}
-import tofu.compat.unused
+import tofu.compat.unused212
 import tofu.concurrent._
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
@@ -43,7 +43,7 @@ object CE2Kernel {
       def unlift: K[K ~> IO]       = Effect.toIOK[K].pure[K]
     }
 
-  def timeout[F[_]: Concurrent: Timer](implicit @unused nonTofu: NonTofu[F]): TimeoutCE2Carrier[F] =
+  def timeout[F[_]: Concurrent: Timer](implicit @unused212 nonTofu: NonTofu[F]): TimeoutCE2Carrier[F] =
     new TimeoutCE2Carrier[F] {
       override def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A] =
         Concurrent.timeoutTo(fa, after, fallback)
@@ -66,7 +66,7 @@ object CE2Kernel {
 
   final def startFromConcurrent[F[_]](implicit
       F: Concurrent[F],
-      @unused _nonTofu: NonTofu[F]
+      @unused212 _nonTofu: NonTofu[F]
   ): FibersCarrier2.Aux[F, Id, Fiber[F, *]] =
     new FibersCarrier2.Impl[F, Id, Fiber[F, *]] {
       def start[A](fa: F[A]): F[Fiber[F, A]]                                                = F.start(fa)
@@ -125,13 +125,13 @@ object CE2Kernel {
 
   final def performConcurrentEffect[F[_]](implicit
       F: ConcurrentEffect[F],
-      @unused _nt: NonTofu[F]
+      @unused212 _nt: NonTofu[F]
   ): PerformCarrier2[F] =
     new ConcurrentEffectPerformer[F]
 
   final def performContextConcurrentEffect[F[_]](implicit
       F: ContextConcurrentEffect[F],
-      @unused _nt: NonTofu[F]
+      @unused212 _nt: NonTofu[F]
   ): PerformCarrier2Context[F] =
     new PerformViaUnlift[F, F.Base, PerformOf.ExitCont[Throwable, *], Unit]()(
       performConcurrentEffect[F.Base](F.concurrentEffect, NonTofu.refute),

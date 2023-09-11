@@ -1,6 +1,5 @@
 package tofu.internal.carriers
 
-import tofu.compat.unused212
 import tofu.internal.Interop
 
 trait BoundedParallelCarrierCE2Macro:

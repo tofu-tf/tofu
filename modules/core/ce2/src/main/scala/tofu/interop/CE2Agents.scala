@@ -42,7 +42,7 @@ final case class SerialSemRef[F[_]: Monad, A](ref: Ref[F, A], sem: Semaphore[F])
   * `G[_]`, but can be created for some `F[_]`, for which an instance of [[tofu.lift.Lift]] `Lift[F, G]` is present,
   * this implementation can be used
   */
-final case class UnderlyingSemRef[F[_]: Functor, G[_]: Monad: Lift[F, *[_]], A](ref: Ref[F, A], sem: Semaphore[F])
+final case class UnderlyingSemRef[F[_]: Functor, G[_]: Monad: ({ type L[x[_]] = Lift[F, x] })#L, A](ref: Ref[F, A], sem: Semaphore[F])
     extends SerialAgent[G, A] {
   override def get: G[A] = ref.get.lift[G]
 
