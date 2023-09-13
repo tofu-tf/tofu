@@ -10,14 +10,14 @@ object ContextSuite {
   val ctx: Ctx = ()
 
   def testInstancesForReaderT[F[_]: Applicative](): Unit = {
-    implicitly[HasContext[ReaderT[F, Ctx, *], Ctx]]
-    implicitly[WithContext[ReaderT[F, Ctx, *], Ctx]]
-    implicitly[HasLocal[ReaderT[F, Ctx, *], Ctx]]
-    implicitly[WithLocal[ReaderT[F, Ctx, *], Ctx]]
-    implicitly[HasProvide[ReaderT[F, Ctx, *], F, Ctx]]
-    implicitly[WithProvide[ReaderT[F, Ctx, *], F, Ctx]]
-    implicitly[HasContextRun[ReaderT[F, Ctx, *], F, Ctx]]
-    implicitly[WithRun[ReaderT[F, Ctx, *], F, Ctx]]
+    implicitly[HasContext[ReaderT[F, Ctx, _], Ctx]]
+    implicitly[WithContext[ReaderT[F, Ctx, _], Ctx]]
+    implicitly[HasLocal[ReaderT[F, Ctx, _], Ctx]]
+    implicitly[WithLocal[ReaderT[F, Ctx, _], Ctx]]
+    implicitly[HasProvide[ReaderT[F, Ctx, _], F, Ctx]]
+    implicitly[WithProvide[ReaderT[F, Ctx, _], F, Ctx]]
+    implicitly[HasContextRun[ReaderT[F, Ctx, _], F, Ctx]]
+    implicitly[WithRun[ReaderT[F, Ctx, _], F, Ctx]]
     ()
   }
 
@@ -33,12 +33,12 @@ object ContextSuite {
 
   import D._
 
-  def contextFromLocalSummon[F[_]: WithLocal[*[_], D]](implicit lens: D Contains B): Unit = {
+  def contextFromLocalSummon[F[_]: ({ type L[x[_]] = WithLocal[x[_], D] })#L](implicit lens: D Contains B): Unit = {
     implicitly[WithContext[F, B]]
     ()
   }
 
-  def contextFromContextSummon[F[_]: WithContext[*[_], D]](implicit lens: D Contains B): Unit = {
+  def contextFromContextSummon[F[_]: ({ type L[x[_]] = WithContext[x[_], D] })#L](implicit lens: D Contains B): Unit = {
     implicitly[WithContext[F, B]]
     ()
   }

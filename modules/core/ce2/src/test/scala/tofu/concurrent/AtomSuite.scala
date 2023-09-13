@@ -15,7 +15,7 @@ class AtomSuite extends AnyFunSuite {
   }
 
   test("check IO has Atom") {
-    assert(MakeAtom[IO, ReaderT[IO, Unit, *]].of(1).flatMap(atomProg(_).run(())).unsafeRunSync() === ("1" -> 2))
+    assert(MakeAtom[IO, ReaderT[IO, Unit, _]].of(1).flatMap(atomProg(_).run(())).unsafeRunSync() === ("1" -> 2))
   }
 
   def atomProg[F[_]: Monad](atom: Atom[F, Int]) =

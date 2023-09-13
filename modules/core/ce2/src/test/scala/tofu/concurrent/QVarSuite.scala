@@ -10,6 +10,7 @@ import cats.effect.Concurrent
 import cats.Monad
 import tofu.syntax.monadic._
 import scala.concurrent.ExecutionContext
+import cats.effect.ContextShift
 
 @nowarn
 class QVarSuite extends AnyFunSuite {
@@ -17,10 +18,10 @@ class QVarSuite extends AnyFunSuite {
     implicitly[MakeQVar[I, F]]
   }
 
-  implicit val iocs = IO.contextShift(ExecutionContext.global)
+  implicit val iocs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   test("check IO has QVar") {
-    assert(MakeQVar[IO, ReaderT[IO, Unit, *]].of(1).flatMap(qvarProg(_).run(())).unsafeRunSync() === (1 -> 2))
+    assert(MakeQVar[IO, ReaderT[IO, Unit, _]].of(1).flatMap(qvarProg(_).run(())).unsafeRunSync() === (1 -> 2))
   }
 
   def qvarProg[F[_]: Monad](q: QVar[F, Int]) = for {

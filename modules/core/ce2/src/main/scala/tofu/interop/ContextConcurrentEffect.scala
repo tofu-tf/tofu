@@ -22,6 +22,6 @@ object ContextConcurrentEffect {
     final type Base[A] = B[A]
   }
 
-  implicit def resolveReaderTConcurrentEffect[F[_]: ConcurrentEffect, C]: Impl[ReaderT[F, C, *], F] =
-    new Impl[ReaderT[F, C, *], F]
+  implicit def resolveReaderTConcurrentEffect[F[_]: ConcurrentEffect, C]: Impl[ReaderT[F, C, _], F] =
+    new Impl[ReaderT[F, C, _], F]
 }

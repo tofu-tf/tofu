@@ -38,13 +38,13 @@ class FOptionSuite extends AnyFlatSpec {
 
   "orThrow" should "return inner value when non empty" in {
     assert(
-      42.someF[Either[String, *]].orThrow("empty") === Right(42)
+      42.someF[Either[String, _]].orThrow("empty") === Right(42)
     )
   }
 
   "orThrow" should "raise error when empty" in {
     assert(
-      noneF[Either[String, *], Int].orThrow("empty") === Left("empty")
+      noneF[Either[String, _], Int].orThrow("empty") === Left("empty")
     )
   }
 

@@ -10,7 +10,7 @@ package object tofu extends KernelTypes {
 
   type IorC[C[_], E, A] = Ior[C[E], C[A]]
 
-  type Start[F[_]] = Fibers[F, Id, Fiber[F, *]]
+  type Start[F[_]] = Fibers[F, Id, Fiber[F, _]]
 
   type Timeout[F[_]] = tofu.time.Timeout[F]
 

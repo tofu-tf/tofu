@@ -5,12 +5,12 @@ import Raise.ContravariantRaise
 import tofu.syntax.raise._
 import cats.Applicative
 import org.scalatest.funsuite.AnyFunSuite
-import tofu.compat.unused
+import tofu.compat.unused212
 
 class RaiseSuite extends AnyFunSuite {
   import tofu.RaiseSuite._
-  val rooster1 = new Rooster1[Either[Throwable, *]]
-  val rooster2 = new Rooster2[Either[Throwable, *]]
+  val rooster1 = new Rooster1[Either[Throwable, _]]
+  val rooster2 = new Rooster2[Either[Throwable, _]]
 
   test("error should be raised") {
     assert(rooster1.crow === Left(CrowErr))
@@ -33,22 +33,22 @@ object RaiseSuite {
   object CrowErr               extends Exception("Oh no!")
   case class LalErr(s: String) extends Exception(s)
 
-  def foo0[F[_]: Raise[*[_], ConcreteError]: Raise[*[_], AnotherConcreteError]]: F[Unit] = {
+  def foo0[F[_]: ({ type L[x[_]] = Raise[x[_], ConcreteError] })#L: ({ type L[x[_]] = Raise[x[_], AnotherConcreteError] })#L]: F[Unit] = {
     ConcreteError().raise[F, Unit]
     AnotherConcreteError().raise[F, Unit]
   }
 
-  def foo1[F[_]: Raise[*[_], CommonError]]: F[Unit] =
+  def foo1[F[_]: ({ type L[x[_]] = Raise[x[_], CommonError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
-  def foo2[F[_]: ContravariantRaise[*[_], CommonError]]: F[Unit] =
+  def foo2[F[_]: ({ type L[x[_]] = ContravariantRaise[x[_], CommonError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
-  def foo3[F[_]: ContravariantRaise[*[_], ConcreteError]]: F[Unit] =
+  def foo3[F[_]: ({ type L[x[_]] = ContravariantRaise[x[_], ConcreteError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
-  @unused
-  def foo4[F[_]: ContravariantRaise[*[_], ConcreteError]: ContravariantRaise[*[_], AnotherConcreteError]]: F[Unit] =
+  @unused212
+  def foo4[F[_]: ({ type L[x[_]] = ContravariantRaise[x[_], ConcreteError] })#L: ({ type L[x[_]] = ContravariantRaise[x[_], AnotherConcreteError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
   {

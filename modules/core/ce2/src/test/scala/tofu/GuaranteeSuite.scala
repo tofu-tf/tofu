@@ -16,12 +16,12 @@ object GuaranteeSuite {
   def summonInstancesForBracket[F[_]: BracketThrow](): Unit = {
     implicitly[Guarantee[F]]
 
-    implicitly[FinallyCarrier2.Aux[F, Throwable, CEExit[Throwable, *]]]
+    implicitly[FinallyCarrier2.Aux[F, Throwable, CEExit[Throwable, _]]]
 
-    implicitly[Finally[F, CEExit[Throwable, *]]]
+    val a = implicitly[Finally[F, CEExit[Throwable, _]]]
 
-    val xx                                           = summonFinally[F].some
-    @nowarn val yy: Finally[F, CEExit[Throwable, *]] = xx
+    val xx                                           = summonFinally[F].some[CEExit[Throwable, _]]
+    @nowarn val yy: Finally[F, CEExit[Throwable, _]] = xx
 
     ()
   }

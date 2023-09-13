@@ -5,12 +5,13 @@ import cats.effect.{Concurrent, IO, Timer}
 
 import scala.annotation.nowarn
 import scala.concurrent.ExecutionContext
+import cats.effect.ContextShift
 
 @nowarn
 class TimeSuite {
 
-  implicit val ioTimer = IO.timer(ExecutionContext.global)
-  implicit val ioCS    = IO.contextShift(ExecutionContext.global)
+  implicit val ioTimer: Timer[IO]     = IO.timer(ExecutionContext.global)
+  implicit val ioCS: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   def summon[F[_]: Timer] = {
     Clock[F]
@@ -28,8 +29,8 @@ class TimeSuite {
   }
 
   def readerIO = {
-    Clock[ReaderT[IO, Unit, *]]
-    Sleep[ReaderT[IO, Unit, *]]
-    Timeout[ReaderT[IO, Unit, *]]
+    Clock[ReaderT[IO, Unit, _]]
+    Sleep[ReaderT[IO, Unit, _]]
+    Timeout[ReaderT[IO, Unit, _]]
   }
 }

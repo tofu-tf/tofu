@@ -10,8 +10,8 @@ class IOSummonChecks(implicit cs: ContextShift[IO]) {
   implicitly[Errors[IO, Throwable]]
   implicitly[BoundedParallel[IO]]
 
-  implicitly[Fire[ReaderT[IO, Unit, *]]]
-  implicitly[Start[ReaderT[IO, Unit, *]]]
-  implicitly[Race[ReaderT[IO, Unit, *]]]
-  implicitly[Errors[ReaderT[IO, Unit, *], Throwable]]
+  implicitly[Fire[ReaderT[IO, Unit, _]]]
+  implicitly[Start[ReaderT[IO, Unit, _]]]
+  implicitly[Race[ReaderT[IO, Unit, _]]]
+  implicitly[Errors[ReaderT[IO, Unit, _], Throwable]]
 }

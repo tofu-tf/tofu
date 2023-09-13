@@ -6,8 +6,10 @@ import scala.annotation.nowarn
 import cats.effect.IO
 import cats.effect.ContextShift
 import tofu.concurrent.{MakeAgent, MakeSerialAgent}
-import tofu.syntax.start._
-import tofu.syntax.monadic._
+import tofu.syntax.start.*
+import tofu.syntax.monadic.{*, given}
+import cats.effect.Fiber
+import cats.Id
 
 @nowarn("msg=parameter")
 object StartSuite {
@@ -25,10 +27,10 @@ object StartSuite {
     MakeSerialAgent[IO, IO]
   }
 
-  def testStartSyntaxCheck[A, B, F[_]: Concurrent](fa: F[A], fb: F[B]): F[(A, B)] = {
-    fa.racePair(fb).flatMap {
+  def testStartSyntaxCheck[A, B, F[_]: Concurrent](fa: F[A], fb: F[B]): F[(A, B)] =
+    fa.racePair[F, B, Id, Fiber[F, _]](fb).flatMap {
       case Left((a, eb))  => eb.join.tupleLeft(a)
       case Right((ea, b)) => ea.join.tupleRight(b)
     }
-  }
+
 }

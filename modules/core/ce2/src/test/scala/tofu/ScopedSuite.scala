@@ -4,8 +4,8 @@ import cats.effect.ContextShift
 import cats.effect.Async
 import scala.concurrent.ExecutionContext
 import cats.effect.Blocker
-import tofu.syntax.scoped._
-import tofu.syntax.monadic._
+import tofu.syntax.scoped.*
+import tofu.syntax.monadic.*
 import scala.annotation.nowarn
 import scala.concurrent.Future
 
