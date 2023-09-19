@@ -18,39 +18,64 @@ object Interop {
 
   def mkDelegate1[F[_]: Type, X: Type](path: Expr[String])(using Quotes): Expr[X] =
     import quotes.reflect.*
-    mkDelegateTyped[X](path, TypeTree.of[F])
+    mkDelegateImpl[X](path, Nil, TypeTree.of[F])
 
   def mkDelegate1_0[F[_]: Type, E: Type, X: Type](path: Expr[String])(using Quotes): Expr[X] =
     import quotes.reflect.*
-    mkDelegateTyped[X](path, TypeTree.of[F], TypeTree.of[E])
+    mkDelegateImpl[X](path, Nil, TypeTree.of[F], TypeTree.of[E])
 
   def mkDelegate0_1_p[T: Type, F[_]: Type, P, X: Type](path: Expr[String], p: Expr[P])(using Quotes): Expr[X] =
     import quotes.reflect.*
-    val typed = mkDelegateTyped[X](path, TypeTree.of[T], TypeTree.of[F])
-    Apply(typed.asTerm, p.asTerm :: Nil).asExprOf[X]
+    mkDelegateImpl[X](path, p.asTerm :: Nil, TypeTree.of[T], TypeTree.of[F])
 
   def mkDelegate2[I[_]: Type, F[_]: Type, X: Type](path: Expr[String])(using Quotes): Expr[X] =
     import quotes.reflect.*
-    mkDelegateTyped[X](path, TypeTree.of[I], TypeTree.of[F])
+    mkDelegateImpl[X](path, Nil, TypeTree.of[I], TypeTree.of[F])
 
-  private def mkDelegateTyped[X: Type](using
+  private def mkDelegateImpl[X: Type](using
       Quotes
-  )(path: Expr[String], tps: quotes.reflect.TypeTree*): Expr[X] =
+  )(path: Expr[String], args: List[quotes.reflect.Term], tps: quotes.reflect.TypeTree*): Expr[X] =
     import quotes.reflect.*
-    val sym     = Symbol.requiredMethod(path.valueOrAbort)
-    var iterSym = sym
-    val acc     = List.newBuilder[Symbol]
 
-    while !iterSym.isNoSymbol do
-      val sym = if iterSym.isClassDef then iterSym.companionModule else iterSym
-      acc += sym
-      iterSym = iterSym.owner
+    val sym = Symbol.requiredMethod(path.valueOrAbort)
+    println("|||termRef:" + sym.termRef.show)
+    // println("|||tree:" + sym.tree.show)
+    // println("|||tree.getClas:" + sym.tree.getClass())
 
-    val root :: tail = acc.result().reverse
-    val start: Term  = Ident(root.termRef)
-    val wtf          = tail.foldLeft(start) { (acc, s) => acc.select(s) }
-    val out          = TypeApply(wtf, tps.toList)
-    val expr         = out.asExprOf[X]
-    expr
+    val symExists =
+      try {
+        sym.tree
+        true
+      } catch { case _ => false }
 
+    if !symExists then
+      println("!sym.exists")
+      report.errorAndAbort("Boom")
+    else
+      val wtf              = Ident(sym.termRef)
+      val withTypes        = wtf.appliedToTypeTrees(tps.toList)
+      val withExplicitArgs =
+        if args.nonEmpty then withTypes.appliedToArgs(args)
+        else withTypes
+
+      // println("AAA1" + withTypes.tpe.show)
+      // println("AAA2" + withTypes.tpe)
+      // println("BBB1" + withTypes.etaExpand(sym).show)
+      // println("BBB1" + withTypes.etaExpand(sym))
+
+      val withImplicitArgs = withExplicitArgs.tpe match
+        case t: LambdaType =>
+          println("YY" + t.paramNames + " | " + t.paramTypes + " | " + t.resType.show)
+          val summonedInst = t.paramTypes.map(t =>
+            Implicits.search(t) match
+              case result: ImplicitSearchSuccess => result.tree
+              case _                             => report.errorAndAbort(s"Cannot find an implicit instance for type ${t.asType}! Please help!")
+          )
+          withExplicitArgs.appliedToArgs(summonedInst)
+        case _             =>
+          println("NO")
+          withExplicitArgs
+
+      val expr = withImplicitArgs.asExprOf[X]
+      expr
 }

@@ -1,6 +1,15 @@
 package tofu.internal.carriers
 
 import scala.concurrent.Future
+import tofu.data.calc.CalcM.Bound
+
+trait Bounds[F[_]] {
+  def foo: F[String] = ???
+}
+
+object Bounds {
+  given b[F[_]]: Bounds[F] = ???
+}
 
 class Kek[F[_]]
 
@@ -10,7 +19,7 @@ class Kek2[F[_], I[_]]
 
 object abc {
 
-  def testPath[F[_]]: Kek[F] = new Kek[F] {
+  def testPath[F[_]: Bounds]: Kek[F] = new Kek[F] {
     override def toString(): String = "KEKE HAHA"
   }
 

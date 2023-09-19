@@ -1,10 +1,9 @@
 import cats.effect.Bracket
 import cats.effect.Fiber
 import cats.data.Ior
-import tofu.kernel.KernelTypes
 import cats.Id
 
-package object tofu extends KernelTypes {
+package object tofu extends tofu.kernel.KernelTypes {
 
   type BracketThrow[F[_]] = Bracket[F, Throwable]
 
