@@ -1,28 +1,18 @@
 package tofu
 
-import scala.util.Either
-import tofu.internal.{EffectComp, Effect3Comp}
-import tofu.internal.carriers.FibersCarrier2
 import cats.MonadError
-import tofu.internal.carriers.FibersCarrier3
+import tofu.internal.carriers.{FibersCarrier2, FibersCarrier3}
+import tofu.internal.instances.FireInstance
+import tofu.internal.{Effect3Comp, EffectComp}
+
 import scala.annotation.unused
+import scala.util.Either
 
 trait Fire[F[_]] {
   def fireAndForget[A](fa: F[A]): F[Unit]
 }
 
-object Fire extends EffectComp[Fire] with FireInstances0 {
-  final implicit def byCarrierCE3[F[_], E, Ex[_], Fib[_]](implicit
-      @unused FE: MonadError[F, E],
-      carrier: FibersCarrier3.Aux[F, E, Ex, Fib]
-  ): Fibers[F, Ex, Fib] = carrier.content
-}
-
-private[tofu] trait FireInstances0 {
-  final implicit def byCarrierCE2[F[_], Ex[_], Fib[_]](implicit
-      carrier: FibersCarrier2.Aux[F, Ex, Fib]
-  ): Fibers[F, Ex, Fib] = carrier.content
-}
+object Fire extends EffectComp[Fire] with FireInstance
 
 trait Race[F[_]] extends Fire[F] {
   def race[A, B](fa: F[A], fb: F[B]): F[Either[A, B]]

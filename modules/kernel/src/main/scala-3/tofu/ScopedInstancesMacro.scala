@@ -1,7 +1,8 @@
 package tofu
 
-import tofu.internal.Interop
 import scala.concurrent.ExecutionContext
+
+import tofu.internal.Interop
 import tofu.kernel.types._
 
 trait ScopedInstancesMacro:

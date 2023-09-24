@@ -2,7 +2,8 @@ package tofu.concurrent
 
 import cats.Applicative
 import tofu.Guarantee
-import tofu.internal.carriers.{MkQVarCE2Carrier, MkQVarCE3Carrier}
+import tofu.internal.instances.MakeQVarInstance
+
 import tofu.syntax.guarantee.*
 import tofu.syntax.monadic.*
 
@@ -61,20 +62,13 @@ object QVars {
   def apply[F[_]](implicit qvars: MakeQVar[F, F]): MakeQVar.Applier[F, F] = new MakeQVar.Applier(qvars)
 }
 
-object MakeQVar extends MakeQVarInterop {
+object MakeQVar extends MakeQVarInstance {
   def apply[I[_], F[_]](implicit mkvar: MakeQVar[I, F]) = new Applier[I, F](mkvar)
 
   final class Applier[I[_], F[_]](private val makeMVar: MakeQVar[I, F]) extends AnyVal {
     def empty[A]: I[QVar[F, A]]    = makeMVar.qvarEmpty[A]
     def of[A](a: A): I[QVar[F, A]] = makeMVar.qvarOf(a)
   }
-
-  final implicit def interopCE3[I[_], F[_]](implicit carrier: MkQVarCE3Carrier[I, F]): MakeQVar[I, F] = carrier
-
-}
-
-trait MakeQVarInterop {
-  final implicit def interopCE2[I[_], F[_]](implicit carrier: MkQVarCE2Carrier[I, F]): MakeQVar[I, F] = carrier
 }
 
 final case class QAtom[F[_]: Applicative: Guarantee, A](qvar: QVar[F, A]) extends Atom[F, A] {

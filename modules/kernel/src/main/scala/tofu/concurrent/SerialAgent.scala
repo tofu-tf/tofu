@@ -1,6 +1,6 @@
 package tofu.concurrent
 
-import tofu.internal.carriers.{MkSerialAgentCE2Carrier, MkSerialAgentCE3Carrier}
+import tofu.internal.instances.MakeSerialAgentInstance
 
 /** A less powerful version of [[tofu.concurrent.Agent]]. It does not have the `fireUpdateM` method and thus can be
   * created for greater variety of `F`
@@ -135,7 +135,7 @@ object SerialAgents {
   *   } yield ()
   * }}}
   */
-object MakeSerialAgent extends MakeSerialAgentInstances {
+object MakeSerialAgent extends MakeSerialAgentInstance {
 
   def apply[I[_], F[_]](implicit mkSerialAgent: MakeSerialAgent[I, F]): SerialApplier[I, F] =
     new SerialApplier[I, F](mkSerialAgent)
@@ -143,14 +143,4 @@ object MakeSerialAgent extends MakeSerialAgentInstances {
   final class SerialApplier[I[_], F[_]](private val mkSerialAgent: MakeSerialAgent[I, F]) extends AnyVal {
     def of[A](a: A): I[SerialAgent[F, A]] = mkSerialAgent.serialAgentOf(a)
   }
-
-  final implicit def interopCE3[I[_], F[_]](implicit carrier: MkSerialAgentCE3Carrier[I, F]): MakeSerialAgent[I, F] =
-    carrier
-
-}
-
-trait MakeSerialAgentInstances {
-  final implicit def interopCE2[I[_], F[_]](implicit carrier: MkSerialAgentCE2Carrier[I, F]): MakeSerialAgent[I, F] =
-    carrier
-
 }

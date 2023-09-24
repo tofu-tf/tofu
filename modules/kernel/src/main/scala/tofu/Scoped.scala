@@ -1,13 +1,13 @@
 package tofu
 
-import tofu.higherKind.{Mid, Point, PureK}
-import cats._
-import tofu.syntax.funk._
 import scala.concurrent.{ExecutionContext, Future}
+
+import cats._
+import tofu.higherKind.{Mid, Point, PureK}
 import tofu.internal.EffectComp
+import tofu.internal.instances.ScopedInstance
 import tofu.kernel.types._
-import tofu.internal.carriers.ScopedCarrier2
-import tofu.internal.carriers.ScopedCarrier3
+import tofu.syntax.funk._
 
 /** can be used for scoped transformations
   * @tparam Tag
@@ -34,7 +34,7 @@ trait Scoped[Tag, F[_]] {
   }
 }
 
-object Scoped extends ScopedInstances {
+object Scoped extends ScopedInstance with ScopedInstancesMacro {
 
   /** type tag for blocking scopes */
   type Blocking
@@ -87,15 +87,6 @@ trait ScopedExecute[Tag, F[_]] extends Scoped[Tag, F] {
   def deferFutureAction[A](f: ExecutionContext => Future[A]): F[A]
 
   def deferFuture[A](f: => Future[A]): F[A] = deferFutureAction(_ => f)
-}
-
-trait ScopedInstances extends ScopedInstances0 with ScopedInstancesMacro {
-
-  final implicit def interopCE3[Tag, F[_]](implicit carrier: ScopedCarrier3[Tag, F]): ScopedExecute[Tag, F] = carrier
-}
-
-private[tofu] trait ScopedInstances0 {
-  final implicit def interopCE2[Tag, F[_]](implicit carrier: ScopedCarrier2[Tag, F]): ScopedExecute[Tag, F] = carrier
 }
 
 object Execute extends EffectComp[Execute]

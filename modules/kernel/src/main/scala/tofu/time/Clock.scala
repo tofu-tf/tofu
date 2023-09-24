@@ -1,9 +1,10 @@
 package tofu.time
 
+import java.util.concurrent.TimeUnit
+
 import tofu.internal.EffectComp
 import tofu.internal.carriers._
-
-import java.util.concurrent.TimeUnit
+import tofu.internal.instances.ClockInstance
 
 trait Clock[F[_]] {
 
@@ -21,12 +22,4 @@ trait Clock[F[_]] {
   def nanos: F[Long]
 }
 
-object Clock extends EffectComp[Clock] with ClockInterop
-
-trait ClockInterop extends ClockInterop1 {
-  implicit def ce3Interop[F[_]](implicit clock: ClockCE3Carrier[F]): Clock[F] = clock
-}
-
-trait ClockInterop1 {
-  implicit def ce2Interop[F[_]](implicit clock: ClockCE2Carrier[F]): Clock[F] = clock
-}
+object Clock extends EffectComp[Clock] with ClockInstance

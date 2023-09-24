@@ -7,8 +7,7 @@ import tofu.lift.Unlift
 // before checking an implicit for eligibility
 trait UnliftCarrier2[F[_], G[_]] extends Unlift[F, G]
 
-object UnliftCarrier2 extends UnliftCarrier2Macro {
-}
+object UnliftCarrier2 extends UnliftCarrier2Macro
 
 trait UnliftCarrier3[F[_], G[_]] extends Unlift[F, G]
 

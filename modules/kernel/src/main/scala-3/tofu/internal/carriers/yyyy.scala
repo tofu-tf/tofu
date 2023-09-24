@@ -14,5 +14,5 @@ object xxx {
     Interop.delegate1_0[F, E, Kek1[F, E]]("tofu.internal.carriers.abc.testPath1")
 
   implicit def instance2[F[_], I[_]]: Kek2[F, I] =
-    Interop.delegate2[I, F, Kek2[F, I]]("tofu.internal.carriers.abc.testPath2")
+    Interop.delegate2[F, I, Kek2[F, I]]("tofu.internal.carriers.abc.testPath2")
 }

@@ -5,7 +5,7 @@ import glass.Contains
 import tofu.syntax.monadic._
 import cats.data.StateT
 import tofu.data.calc.CalcM
-import tofu.internal.carriers._
+import tofu.internal.instances.MakeAtomInstance
 import tofu.internal.hktAny
 
 /** a middleground between cats.concurrent.Ref and zio.Ref */
@@ -89,16 +89,10 @@ trait MakeAtom[I[_], F[_]] {
   def atom[A](a: A): I[Atom[F, A]]
 }
 
-object MakeAtom extends MakeAtomInterop {
+object MakeAtom extends MakeAtomInstance {
   def apply[I[_], F[_]](implicit makeAtom: MakeAtom[I, F]) = new Applier[I, F](makeAtom)
 
   final class Applier[I[_], F[_]](private val makeAtom: MakeAtom[I, F]) extends AnyVal {
     def of[A](a: A): I[Atom[F, A]] = makeAtom.atom(a)
   }
-
-  final implicit def interopCE3[I[_], F[_]](implicit carrier: MkAtomCE3Carrier[I, F]): MakeAtom[I, F] = carrier
-}
-
-trait MakeAtomInterop {
-  final implicit def interopCE2[I[_], F[_]](implicit carrier: MkAtomCE2Carrier[I, F]): MakeAtom[I, F] = carrier
 }
