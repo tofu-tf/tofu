@@ -4,6 +4,8 @@ package derivation
 import derevo.derive
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import java.time.LocalDate
+import java.util.UUID
 
 class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
 
@@ -68,6 +70,11 @@ class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
     Loggable[MaskedBaz].logShow(MaskedBaz(None)) shouldBe "MaskedBaz{kek=<none>}"
   }
 
+  "MaskedContra logging" should "mask fields" in {
+    json(
+      MaskedContra(UUID.randomUUID(), LocalDate.of(2023, 12, 1))
+    ) shouldBe """{"id":"...","date":"2023-##-##"}"""
+  }
 }
 
 object DerivedLoggableSuite {
@@ -94,4 +101,10 @@ object DerivedLoggableSuite {
 
   @derive(loggable)
   final case class MaskedBaz(@masked kek: Option[String], @ignoreOpt a: Option[String] = None)
+
+  @derive(loggable)
+  final case class MaskedContra(
+      @masked(MaskMode.Erase) id: UUID,
+      @masked(MaskMode.ForLength(4)) date: LocalDate,
+  )
 }
