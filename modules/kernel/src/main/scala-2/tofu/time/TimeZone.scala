@@ -20,8 +20,8 @@ trait TimeZone[F[_]] {
     */
   def of(zoneId: String): F[ZoneId]
 
-  /** Obtains an instance of {@code ZoneId} wrapping an offset. <p> If the prefix is "GMT", "UTC", or "UT" a {@code
-    * ZoneId} with the prefix and the non-zero offset is returned. If the prefix is empty {@code ""} the {@code
+  /** Obtains an instance of {@@codeZoneId} wrapping an offset. <p> If the prefix is "GMT", "UTC", or "UT" a {@code
+    * ZoneId} with the prefix and the non-zero offset is returned. If the prefix is empty {@@code""} the {@code
     * ZoneOffset} is returned.
     */
   def ofOffset(prefix: String, offset: ZoneOffset): F[ZoneId]
