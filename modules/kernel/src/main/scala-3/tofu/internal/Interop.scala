@@ -86,7 +86,13 @@ object Interop {
 
         println("DEBUG_FINALLY: " + withImplicitArgs.show)
 
-        val expr = withImplicitArgs.asExprOf[X]
+        val asInstanceOf = TypeRepr.of[AnyRef].typeSymbol.methodMember("asInstanceOf").head
+        println(s"AS INSTANCE OF $asInstanceOf")
+        val casted =
+          withImplicitArgs.select(asInstanceOf)
+            .appliedToType(TypeRepr.of[X])
+
+        val expr = casted.asExprOf[X]
         println("DEBUG_FINALLY_EXPR: " + expr.show)
         expr
       } catch {

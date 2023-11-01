@@ -3,6 +3,7 @@ package instances
 
 import cats.MonadError
 import tofu.Finally
+import tofu.Guarantee
 import tofu.internal.carriers.{FinallyCarrier2, FinallyCarrier3}
 
 import scala.compiletime.summonFrom
