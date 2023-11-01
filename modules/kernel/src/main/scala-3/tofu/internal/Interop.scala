@@ -56,15 +56,9 @@ object Interop {
       else
         val wtf              = Ident(sym.termRef)
         val withTypes        = wtf.appliedToTypeTrees(tps.toList)
-        println("DEBUG: " + withTypes.tpe.show)
         val withExplicitArgs =
           if args.nonEmpty then withTypes.appliedToArgs(args)
           else withTypes
-
-        // println("AAA1" + withTypes.tpe.show)
-        // println("AAA2" + withTypes.tpe)
-        // println("BBB1" + withTypes.etaExpand(sym).show)
-        // println("BBB1" + withTypes.etaExpand(sym))
 
         val withImplicitArgs = withExplicitArgs.tpe match
           case t: LambdaType =>

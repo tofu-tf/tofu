@@ -4,6 +4,7 @@ import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.{Applicative, Functor, Monad, ~>}
 import tofu.internal.carriers.{UnliftCarrier2, UnliftCarrier3}
+import tofu.internal.instances.ContextBaseCarrierInstance
 import tofu.lift.Unlift
 import tofu.syntax.monadic._
 import tofu.{WithContext, WithLocal, WithProvide, WithRun}
@@ -76,17 +77,7 @@ trait ContextBaseInstances4 extends ContextBaseInstances5 {
     }
 }
 
-trait ContextBaseInstances5 extends ContextBaseInstances6 {
+trait ContextBaseInstances5 extends ContextBaseCarrierInstance {
   final implicit def unliftReaderCompose[F[_]: Monad, G[_], R](implicit FG: Unlift[G, F]): Unlift[G, ReaderT[F, R, *]] =
     FG.andThen(ContextBase.readerTContext[F, R])
-}
-
-trait ContextBaseInstances6 extends ContextBaseInstances7 {
-  final implicit def unliftEffectCE3[F[_], G[_]](implicit carrier: UnliftCarrier3[F, G]): Unlift[F, G] =
-    carrier
-}
-
-trait ContextBaseInstances7 {
-  final implicit def unliftEffectCE2[F[_], G[_]](implicit carrier: UnliftCarrier2[F, G]): Unlift[F, G] =
-    carrier
 }
