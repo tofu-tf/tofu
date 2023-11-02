@@ -6,8 +6,8 @@ import scala.annotation.nowarn
 import cats.effect.IO
 import cats.effect.ContextShift
 import tofu.concurrent.{MakeAgent, MakeSerialAgent}
-import tofu.syntax.start.*
-import tofu.syntax.monadic.{*, given}
+import tofu.syntax.start._
+import tofu.syntax.monadic._
 import cats.effect.Fiber
 import cats.Id
 

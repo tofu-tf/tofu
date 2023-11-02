@@ -36,14 +36,8 @@ object Interop {
       Quotes
   )(path: Expr[String], args: List[quotes.reflect.Term], tps: quotes.reflect.TypeTree*): Expr[X] =
     import quotes.reflect.*
-    try {    
-      println("START: " + path.show)
-
-      val sym = Symbol.requiredMethod(path.valueOrAbort)
-      println("|||termRef:" + sym.termRef.show)
-      // println("|||tree:" + sym.tree.show)
-      // println("|||tree.getClas:" + sym.tree.getClass())
-
+    try {
+      val sym       = Symbol.requiredMethod(path.valueOrAbort)
       val symExists =
         try {
           sym.tree
@@ -51,8 +45,7 @@ object Interop {
         } catch { case _ => false }
 
       if !symExists then
-        println("!sym.exists")
-        report.errorAndAbort("Boom")
+        report.errorAndAbort("Symbol does not exists")
       else
         val wtf              = Ident(sym.termRef)
         val withTypes        = wtf.appliedToTypeTrees(tps.toList)
@@ -62,38 +55,36 @@ object Interop {
 
         val withImplicitArgs = withExplicitArgs.tpe match
           case t: LambdaType =>
-            println("Lambda:" + t.paramNames + " | " + t.paramTypes + " | " + t.resType.show)
-            println("Trying to get implicits for this types: " + t.paramTypes.map(_.show).mkString(", "))
             val summonedInst = t.paramTypes.map(t =>
               Implicits.search(t) match
-                case result: ImplicitSearchSuccess => 
-                  println(s"Found implicit instance for type: ${t.show}: ${result.tree.show}")
+                case result: ImplicitSearchSuccess =>
                   result.tree
                 case _                             =>
-                  println(s"Cannot find an implicit instance for type ${t.show}!")
-                  report.errorAndAbort(s"Cannot find an implicit instance for type ${t.show}! Please help!")
+                  report.errorAndAbort(
+                    s"Applying definition need extra implicit arguments. Cannot find an implicit instance for type ${t.show}."
+                  )
             )
             withExplicitArgs.appliedToArgs(summonedInst)
           case _             =>
-            println("Non_Lambda: " + withExplicitArgs.tpe)
             withExplicitArgs
 
-        println("DEBUG_FINALLY: " + withImplicitArgs.show)
+        // for some reason lambda type like this `FinallyCarrier2.Aux[F, Throwable, [x] =>> CE2Kernel.CEExit[java.lang.Throwable, x]]`
+        // has no subtyping relations with type `FinallyCarrier2.Aux[F, Throwable, [x] =>> Any]` and `.asExprOf[X]` throws java.lang.Exception: Expr cast exception
+
+        // For such cases old and classic `asInstanceOf` helps with extra casting.
 
         val asInstanceOf = TypeRepr.of[AnyRef].typeSymbol.methodMember("asInstanceOf").head
-        println(s"AS INSTANCE OF $asInstanceOf")
-        val casted =
-          withImplicitArgs.select(asInstanceOf)
+        val casted       =
+          withImplicitArgs
+            .select(asInstanceOf)
             .appliedToType(TypeRepr.of[X])
 
-        val expr = casted.asExprOf[X]
-        println("DEBUG_FINALLY_EXPR: " + expr.show)
-        expr
-      } catch {
-        case e: scala.quoted.runtime.StopMacroExpansion =>
-          throw e
-        case err =>
-          println("ERROR: " + err)
-          report.errorAndAbort("Error in macros: " + err)
-      }
+        casted.asExprOf[X]
+    } catch {
+      case e: scala.quoted.runtime.StopMacroExpansion =>
+        throw e
+      case err                                        =>
+        println("ERROR: " + err)
+        report.errorAndAbort("Error in macros: " + err)
+    }
 }

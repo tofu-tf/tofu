@@ -20,7 +20,7 @@ class RetrySuite extends AnyFlatSpec {
   val createCounter: IO[Ref[IO, Int]] = Ref.of[IO, Int](0)
   val times                           = 10
 
-  def runRetry[E <: Err, F[_]: Applicative: ({ type L[x[_]] = Raise[x[_], Err] })#L: ({ type L[x[_]] = Handle[x[_], Err] })#L](
+  def runRetry[E <: Err, F[_]: Applicative: ({ type L[x[_]] = Raise[x, Err] })#L: ({ type L[x[_]] = Handle[x, Err] })#L](
       counter: Ref[F, Int],
       times: Int
   )(implicit DC: Downcast[Err, E]): F[Unit] =

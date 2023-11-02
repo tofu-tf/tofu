@@ -43,7 +43,7 @@ trait KernelTypes extends Any {
 
   type PerformCont[Ex[_], A]  = Ex[A] => Unit
   type PerformExitCont[E, A]  = Exit[E, A] => Unit
-  type PerformOf[F[_], Ex[_]] = PerformVia[F, PerformCont[Ex, *], Unit]
-  type Perform[F[_], E]       = PerformOf[F, Exit[E, *]]
+  type PerformOf[F[_], Ex[_]] = PerformVia[F, PerformCont[Ex, _], Unit]
+  type Perform[F[_], E]       = PerformOf[F, Exit[E, _]]
   type PerformThrow[F[_]]     = Perform[F, Throwable]
 }

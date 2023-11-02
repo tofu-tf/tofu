@@ -33,22 +33,22 @@ object RaiseSuite {
   object CrowErr               extends Exception("Oh no!")
   case class LalErr(s: String) extends Exception(s)
 
-  def foo0[F[_]: ({ type L[x[_]] = Raise[x[_], ConcreteError] })#L: ({ type L[x[_]] = Raise[x[_], AnotherConcreteError] })#L]: F[Unit] = {
+  def foo0[F[_]: ({ type L[x[_]] = Raise[x, ConcreteError] })#L: ({ type L[x[_]] = Raise[x, AnotherConcreteError] })#L]: F[Unit] = {
     ConcreteError().raise[F, Unit]
     AnotherConcreteError().raise[F, Unit]
   }
 
-  def foo1[F[_]: ({ type L[x[_]] = Raise[x[_], CommonError] })#L]: F[Unit] =
+  def foo1[F[_]: ({ type L[x[_]] = Raise[x, CommonError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
-  def foo2[F[_]: ({ type L[x[_]] = ContravariantRaise[x[_], CommonError] })#L]: F[Unit] =
+  def foo2[F[_]: ({ type L[x[_]] = ContravariantRaise[x, CommonError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
-  def foo3[F[_]: ({ type L[x[_]] = ContravariantRaise[x[_], ConcreteError] })#L]: F[Unit] =
+  def foo3[F[_]: ({ type L[x[_]] = ContravariantRaise[x, ConcreteError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
   @unused212
-  def foo4[F[_]: ({ type L[x[_]] = ContravariantRaise[x[_], ConcreteError] })#L: ({ type L[x[_]] = ContravariantRaise[x[_], AnotherConcreteError] })#L]: F[Unit] =
+  def foo4[F[_]: ({ type L[x[_]] = ContravariantRaise[x, ConcreteError] })#L: ({ type L[x[_]] = ContravariantRaise[x, AnotherConcreteError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
   {

@@ -33,12 +33,12 @@ object ContextSuite {
 
   import D._
 
-  def contextFromLocalSummon[F[_]: ({ type L[x[_]] = WithLocal[x[_], D] })#L](implicit lens: D Contains B): Unit = {
+  def contextFromLocalSummon[F[_]: ({ type L[x[_]] = WithLocal[x, D] })#L](implicit lens: D Contains B): Unit = {
     implicitly[WithContext[F, B]]
     ()
   }
 
-  def contextFromContextSummon[F[_]: ({ type L[x[_]] = WithContext[x[_], D] })#L](implicit lens: D Contains B): Unit = {
+  def contextFromContextSummon[F[_]: ({ type L[x[_]] = WithContext[x, D] })#L](implicit lens: D Contains B): Unit = {
     implicitly[WithContext[F, B]]
     ()
   }

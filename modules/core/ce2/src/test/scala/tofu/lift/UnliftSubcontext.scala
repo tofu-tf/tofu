@@ -12,8 +12,8 @@ import tofu.HasContext
 import tofu.compat.unused212
 
 class UnliftSubcontext extends AnyFlatSpec with Matchers {
-  def context[F[_]: ({ type L[x[_]] = HasContext[x[_], Big] })#L]: F[Big]      = HasContext[F, Big].context
-  def smallCtx[F[_]: ({ type L[x[_]] = HasContext[x[_], Small] })#L]: F[Small] = HasContext[F, Small].context
+  def context[F[_]: ({ type L[x[_]] = HasContext[x, Big] })#L]: F[Big]      = HasContext[F, Big].context
+  def smallCtx[F[_]: ({ type L[x[_]] = HasContext[x, Small] })#L]: F[Small] = HasContext[F, Small].context
 
   implicit val ul: Unlift[App, FatApp] = Unlift.subContextUnlift
   val init: Big                        = Big(0, Small(1))

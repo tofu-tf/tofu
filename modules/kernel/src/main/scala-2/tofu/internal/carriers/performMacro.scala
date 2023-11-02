@@ -18,7 +18,6 @@ trait PerformCarrier2ContextMacro {
 }
 
 trait PerformCarrier3Macro {
-
   final implicit def interop3IO[F[_]]: PerformCarrier3[F] =
     macro Interop.delegate[PerformCarrier3[F], F, { val `tofu.interop.CE3Kernel.performDispatchContext`: Unit }]
 }

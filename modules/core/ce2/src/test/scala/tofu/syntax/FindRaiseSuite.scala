@@ -20,21 +20,21 @@ object FindRaiseSuite {
 
   def fOptionFindRaise[F[
       _
-  ]: Monad: ({ type L[x[_]] = Raise[x[_], CommonError] })#L: ({ type L[x[_]] = Raise[x[_], AnotherCommonError] })#L]
+  ]: Monad: ({ type L[x[_]] = Raise[x, CommonError] })#L: ({ type L[x[_]] = Raise[x, AnotherCommonError] })#L]
       : F[Unit] = {
     Monad[F].pure(Option.empty[Unit]).orThrow(ConcreteError)
   }
 
   def verifiedFindRaise[F[
       _
-  ]: Monad: ({ type L[x[_]] = Raise[x[_], CommonError] })#L: ({ type L[x[_]] = Raise[x[_], AnotherCommonError] })#L]
+  ]: Monad: ({ type L[x[_]] = Raise[x, CommonError] })#L: ({ type L[x[_]] = Raise[x, AnotherCommonError] })#L]
       : F[Unit] = {
     Monad[F].unit.verified(_ => true)(ConcreteError)
   }
 
   def fEitherFindRaise[F[
       _
-  ]: Monad: ({ type L[x[_]] = Raise[x[_], CommonError] })#L: ({ type L[x[_]] = Raise[x[_], AnotherCommonError] })#L]
+  ]: Monad: ({ type L[x[_]] = Raise[x, CommonError] })#L: ({ type L[x[_]] = Raise[x, AnotherCommonError] })#L]
       : F[Unit] = {
     val x = ConcreteError.asLeftF[F, Unit]
     x.reRaise
@@ -43,7 +43,7 @@ object FindRaiseSuite {
 
   def timeoutFindRaise[F[
       _
-  ]: Monad: ({ type L[x[_]] = Raise[x[_], CommonError] })#L: ({ type L[x[_]] = Raise[x[_], AnotherCommonError] })#L: Timeout]
+  ]: Monad: ({ type L[x[_]] = Raise[x, CommonError] })#L: ({ type L[x[_]] = Raise[x, AnotherCommonError] })#L: Timeout]
       : F[Unit] = {
     Monad[F].unit.timeoutRaise(5 seconds, ConcreteError)
   }
