@@ -10,6 +10,6 @@ import scala.annotation.nowarn
 
 object zioFunctions {
   @nowarn("cat=unused-params")
-  def expose[U[_[_, _]]: EmbedBK: FunctorBK: Tag.auto.T]: U[ZIO[U[IO], +*, +*]] =
-    EmbedBK.of[ZIO[U[IO], +*, +*], U](ZIO.environmentWith(_.get[U[IO]](ZTag[U[IO]]).widenb))
+  def expose[U[_[_, _]]: EmbedBK: FunctorBK: Tag.auto.T]: U[ZIO[U[IO], +_, +_]] =
+    EmbedBK.of[ZIO[U[IO], +_, +_], U](ZIO.environmentWith(_.get[U[IO]](ZTag[U[IO]]).widenb))
 }

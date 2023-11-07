@@ -15,7 +15,7 @@ private[zioInstances] class ZioInstances {
     new ZioTofuErrorsToInstance[Any, Any, Nothing]()(extractSubtype[Nothing, Any])
   final def zioTofuErrorsToInstance[R, E]: ZioTofuErrorsToInstance[R, E, Nothing]                  =
     zioErrorsToInstanceAny.asInstanceOf[ZioTofuErrorsToInstance[R, E, Nothing]]
-  final def zioTofuExtractErrorsInstance[R, E, E1: * Extract E]: ZioTofuErrorsToInstance[R, E, E1] =
+  final def zioTofuExtractErrorsInstance[R, E, E1: Extract[_, E]]: ZioTofuErrorsToInstance[R, E, E1] =
     new ZioTofuErrorsToInstance
 
   private[this] val zioTofuTimeoutInstanceAny: ZioTofuTimeoutInstance[Any, Any] = new ZioTofuTimeoutInstance
@@ -30,7 +30,7 @@ private[zioInstances] class ZioInstances {
   final def zioTofuRandomInstance[R, E]: ZioTofuRandomInstance[R, E]              =
     zioTofuRandomInstanceAny.asInstanceOf[ZioTofuRandomInstance[R, E]]
 
-  final def zioTofuContainsUnliftInstance[R1: Tag, R2: Tag: * Contains R1, E]
+  final def zioTofuContainsUnliftInstance[R1: Tag, R2: Tag: Contains[_, R1], E]
       : ZioTofuContainsUnliftInstance[R1, R2, E] =
     new ZioTofuContainsUnliftInstance
 

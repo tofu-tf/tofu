@@ -9,7 +9,7 @@ object implicits extends ZioTofuImplicits1
 private[zioInstances] class ZioTofuImplicits1 extends ZioTofuImplicits2 {
   @inline final implicit def rioTofuImplicit[R]: RioTofuInstance[R] = rioTofuInstance
 
-  @inline final implicit def zioTofuErrorsExtractToImplicit[R, E, E1: * Extract E]: ZioTofuErrorsToInstance[R, E, E1] =
+  @inline final implicit def zioTofuErrorsExtractToImplicit[R, E, E1: Extract[_, E]]: ZioTofuErrorsToInstance[R, E, E1] =
     zioTofuExtractErrorsInstance
 
   @inline final implicit def zioTofuTimeoutImplicit[R, E]: ZioTofuTimeoutInstance[R, E] =
@@ -20,7 +20,7 @@ private[zioInstances] class ZioTofuImplicits1 extends ZioTofuImplicits2 {
 
   @inline final implicit def zioTofuRandomImplicit[R, E]: ZioTofuRandomInstance[R, E] = zioTofuRandomInstance
 
-  @inline final implicit def zioTofuContainsUnliftImplicit[R1: Tag, R2: Tag: * Contains R1, E]
+  @inline final implicit def zioTofuContainsUnliftImplicit[R1: Tag, R2: Tag: Contains[_, R1], E]
       : ZioTofuContainsUnliftInstance[R1, R2, E] =
     zioTofuContainsUnliftInstance[R1, R2, E]
 

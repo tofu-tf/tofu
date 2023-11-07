@@ -18,8 +18,8 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
 class ZioTofuInstance[R, E]
-    extends Errors[ZIO[R, E, *], E] with GenStart[ZIO[R, E, *], E] with Finally[ZIO[R, E, *], Exit[E, *]]
-    with Execute[ZIO[R, E, *]] with Delay[ZIO[R, E, *]] {
+    extends Errors[ZIO[R, E, _], E] with GenStart[ZIO[R, E, _], E] with Finally[ZIO[R, E, _], Exit[E, _]]
+    with Execute[ZIO[R, E, _]] with Delay[ZIO[R, E, _]] {
   final def restore[A](fa: ZIO[R, E, A]): ZIO[R, E, Option[A]]                             = fa.option
   final def raise[A](err: E): ZIO[R, E, A]                                                 = ZIO.fail(err)
   final def lift[A](fa: ZIO[R, E, A]): ZIO[R, E, A]                                        = fa
@@ -27,24 +27,24 @@ class ZioTofuInstance[R, E]
     fa.catchSome(CachedMatcher(f))
   final override def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E, A]): ZIO[R, E, A]   = fa.catchAll(f)
 
-  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, *], E, A]] =
+  final def start[A](fa: ZIO[R, E, A]): ZIO[R, E, Fiber[ZIO[R, E, _], E, A]] =
     fa.interruptible.forkDaemon.map(convertFiber)
 
   final def racePair[A, B](fa: ZIO[R, E, A], fb: ZIO[R, E, B]): ZIO[R, E, Either[
-    (Outcome[ZIO[R, E, *], E, A], Fiber[ZIO[R, E, *], E, B]),
-    (Fiber[ZIO[R, E, *], E, A], Outcome[ZIO[R, E, *], E, B])
+    (Outcome[ZIO[R, E, _], E, A], Fiber[ZIO[R, E, _], E, B]),
+    (Fiber[ZIO[R, E, _], E, A], Outcome[ZIO[R, E, _], E, B])
   ]] =
     (fa raceWith fb)(
       { case (l, f) =>
         l.foldZIO(
           e => f.interrupt *> ZIO.fail(e),
-          r => ZIO.succeed(Outcome.Succeeded[ZIO[R, E, *], E, A](ZIO.succeed(r)))
+          r => ZIO.succeed(Outcome.Succeeded[ZIO[R, E, _], E, A](ZIO.succeed(r)))
         ).map(lv => Left((lv, convertFiber(f))))
       },
       { case (r, f) =>
         r.foldZIO(
           e => f.interrupt *> ZIO.fail(e),
-          r => ZIO.succeed(Outcome.Succeeded[ZIO[R, E, *], E, B](ZIO.succeed(r)))
+          r => ZIO.succeed(Outcome.Succeeded[ZIO[R, E, _], E, B](ZIO.succeed(r)))
         ).map(rv => Right((convertFiber(f), rv)))
       }
     )
@@ -80,9 +80,9 @@ class RioTofuInstance[R] extends ZioTofuInstance[R, Throwable] {
   override def delay[A](a: => A): ZIO[R, Throwable, A] = ZIO.attempt(a)
 }
 
-class ZioTofuWithRunInstance[R: Tag, E] extends WithRun[ZIO[R, E, *], ZIO[Any, E, *], R] {
+class ZioTofuWithRunInstance[R: Tag, E] extends WithRun[ZIO[R, E, _], ZIO[Any, E, _], R] {
   val context: ZIO[R, E, R]                                           = ZIO.service[R]
-  val functor: Functor[ZIO[R, E, *]]                                  = new Functor[ZIO[R, E, *]] {
+  val functor: Functor[ZIO[R, E, _]]                                  = new Functor[ZIO[R, E, _]] {
     def map[A, B](fa: ZIO[R, E, A])(f: A => B): ZIO[R, E, B] = fa.map(f)
   }
   final def runContext[A](fa: ZIO[R, E, A])(ctx: R): ZIO[Any, E, A]   = fa.provideEnvironment(ZEnvironment(ctx))
@@ -92,17 +92,17 @@ class ZioTofuWithRunInstance[R: Tag, E] extends WithRun[ZIO[R, E, *], ZIO[Any, E
   final def lift[A](fa: ZIO[Any, E, A]): ZIO[R, E, A]                 = fa
 }
 
-class ZioTofuTimeoutInstance[R, E] extends Timeout[ZIO[R, E, *]] {
+class ZioTofuTimeoutInstance[R, E] extends Timeout[ZIO[R, E, _]] {
   final def timeoutTo[A](fa: ZIO[R, E, A], after: FiniteDuration, fallback: ZIO[R, E, A]): ZIO[R, E, A] =
     fa.timeoutTo(fallback)(ZIO.succeed(_))(zio.Duration.fromScala(after)).flatten
 }
 
-class ZioTofuRandomInstance[R, E] extends GenRandom[ZIO[R, E, *]] {
+class ZioTofuRandomInstance[R, E] extends GenRandom[ZIO[R, E, _]] {
   override def nextLong: ZIO[R, E, Long]       = Random.nextLong
   override def nextInt(n: Int): ZIO[R, E, Int] = Random.nextIntBounded(n)
 }
 
-class ZioTofuConsoleInstance[R, E >: IOException] extends tofu.common.Console[ZIO[R, E, *]] {
+class ZioTofuConsoleInstance[R, E >: IOException] extends tofu.common.Console[ZIO[R, E, _]] {
   override def readStrLn: ZIO[R, E, String]           = Console.readLine
   override def putStr(s: String): ZIO[R, E, Unit]     = Console.print(s)
   override def putStrLn(s: String): ZIO[R, E, Unit]   = Console.printLine(s)
@@ -111,55 +111,55 @@ class ZioTofuConsoleInstance[R, E >: IOException] extends tofu.common.Console[ZI
 }
 
 object ZioTofuInstance {
-  def convertFiber[R, E, A](f: ZFiber[E, A]): Fiber[ZIO[R, E, *], E, A] = new Fiber[ZIO[R, E, *], E, A] {
+  def convertFiber[R, E, A](f: ZFiber[E, A]): Fiber[ZIO[R, E, _], E, A] = new Fiber[ZIO[R, E, _], E, A] {
     override def cancel: ZIO[R, E, Unit]                      = f.interrupt.unit
-    override def join: ZIO[R, E, Outcome[ZIO[R, E, *], E, A]] =
+    override def join: ZIO[R, E, Outcome[ZIO[R, E, _], E, A]] =
       f.join.fold(e => Outcome.Errored(e), r => Outcome.Succeeded(ZIO.succeed(r)))
   }
 }
 
 class ZioTofuErrorsToInstance[R, E, E1](implicit lens: Extract[E1, E])
-    extends ErrorsTo[ZIO[R, E, *], ZIO[R, E1, *], E] {
+    extends ErrorsTo[ZIO[R, E, _], ZIO[R, E1, _], E] {
   final def handleWith[A](fa: ZIO[R, E, A])(f: E => ZIO[R, E1, A]): ZIO[R, E1, A] = fa.catchAll(f)
   final def restore[A](fa: ZIO[R, E, A]): ZIO[R, E1, Option[A]]                   = fa.option
   final def raise[A](err: E): ZIO[R, E, A]                                        = ZIO.fail(err)
   final def lift[A](fa: ZIO[R, E1, A]): ZIO[R, E, A]                              = fa.mapError(lens.extract)
 
-  final override def handle[A](fa: ZIO[R, E, A])(f: E => A)(implicit G: Applicative[ZIO[R, E1, *]]): ZIO[R, E1, A] =
+  final override def handle[A](fa: ZIO[R, E, A])(f: E => A)(implicit G: Applicative[ZIO[R, E1, _]]): ZIO[R, E1, A] =
     fa.catchAll(e => ZIO.succeed(f(e)))
 
   final override def attempt[A](
       fa: ZIO[R, E, A]
-  )(implicit F: Functor[ZIO[R, E, *]], G: Applicative[ZIO[R, E1, *]]): ZIO[R, E1, Either[E, A]] =
+  )(implicit F: Functor[ZIO[R, E, _]], G: Applicative[ZIO[R, E1, _]]): ZIO[R, E1, Either[E, A]] =
     fa.either
 }
 
 class ZioTofuContainsUnliftInstance[R1: Tag, R2: Tag, E](implicit lens: Contains[R2, R1])
-    extends Unlift[ZIO[R1, E, *], ZIO[R2, E, *]] {
+    extends Unlift[ZIO[R1, E, _], ZIO[R2, E, _]] {
   def lift[A](fa: ZIO[R1, E, A]): ZIO[R2, E, A]          =
     fa.provideSomeEnvironment[R2](r2env => ZEnvironment(lens.extract(r2env.get)))
-  def unlift: ZIO[R2, E, ZIO[R2, E, *] ~> ZIO[R1, E, *]] =
-    ZIO.serviceWith[R2](r2 => funK(_.provideSomeEnvironment[R1](r1env => ZEnvironment(lens.set(r2, r1env.get)))))
+  def unlift: ZIO[R2, E, ZIO[R2, E, _] ~> ZIO[R1, E, _]] =
+    ZIO.serviceWith[R2](r2 => funK[ZIO[R2, E, _], ZIO[R1, E, _]](_.provideSomeEnvironment[R1](r1env => ZEnvironment(lens.set(r2, r1env.get)))))
 }
 
-class RioTofuUnliftIOInstance[R] extends UnliftIO[RIO[R, *]] {
+class RioTofuUnliftIOInstance[R] extends UnliftIO[RIO[R, _]] {
   import cats.effect.unsafe.implicits._
   import zio.interop._
   import zio.interop.catz._
 
-  def lift[A](fa: CIO[A]): RIO[R, A]   = implicitly[LiftIO[RIO[R, *]]].liftIO(fa)
-  def unlift: RIO[R, RIO[R, *] ~> CIO] =
-    ZIO.runtime[R].map(implicit runtime => funK[RIO[R, *], CIO](rio => rio.toEffect[CIO]))
+  def lift[A](fa: CIO[A]): RIO[R, A]   = implicitly[LiftIO[RIO[R, _]]].liftIO(fa)
+  def unlift: RIO[R, RIO[R, _] ~> CIO] =
+    ZIO.runtime[R].map(implicit runtime => funK[RIO[R, _], CIO](rio => rio.toEffect[CIO]))
 }
 
-class RioTofuUnsafeExecFutureInstance[R] extends UnsafeExecFuture[RIO[R, *]] {
+class RioTofuUnsafeExecFutureInstance[R] extends UnsafeExecFuture[RIO[R, _]] {
   def lift[A](fa: Future[A]): RIO[R, A]   = ZIO.fromFuture(_ => fa)
-  def unlift: RIO[R, RIO[R, *] ~> Future] =
-    ZIO.runtime[R].map(r => Unsafe.unsafe(implicit unsafe => funK(r.unsafe.runToFuture(_))))
+  def unlift: RIO[R, RIO[R, _] ~> Future] =
+    ZIO.runtime[R].map(r => Unsafe.unsafe(implicit unsafe => funK[RIO[R, _], Future](r.unsafe.runToFuture(_))))
 }
 
-class ZioTofuUnliftManyInstance[R, E, R1: Tag] extends WithRun[ZIO[R with R1, E, *], ZIO[R, E, *], R1] {
-  override def functor: Functor[ZIO[R with R1, E, *]] = zio.interop.catz.monadErrorInstance
+class ZioTofuUnliftManyInstance[R, E, R1: Tag] extends WithRun[ZIO[R with R1, E, _], ZIO[R, E, _], R1] {
+  override def functor: Functor[ZIO[R with R1, E, _]] = zio.interop.catz.monadErrorInstance
 
   override def runContext[A](fa: ZIO[R with R1, E, A])(ctx: R1): ZIO[R, E, A] =
     fa.provideSomeEnvironment[R](_.add[R1](ctx))
@@ -172,7 +172,7 @@ class ZioTofuUnliftManyInstance[R, E, R1: Tag] extends WithRun[ZIO[R with R1, E,
   override def lift[A](fa: ZIO[R, E, A]): ZIO[R with R1, E, A] = fa
 }
 
-class ZioTofuBlockingInstance[R, E] extends BlockExec[ZIO[R, E, *]] {
+class ZioTofuBlockingInstance[R, E] extends BlockExec[ZIO[R, E, _]] {
   def runScoped[A](fa: ZIO[R, E, A]): ZIO[R, E, A] = blocking(fa)
 
   def executionContext: ZIO[R, E, ExecutionContext] = blockingExecutor.map(_.asExecutionContext)
