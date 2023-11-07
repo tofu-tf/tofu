@@ -6,7 +6,6 @@ import cats.Functor
 import cats.data.ReaderT
 import cats.tagless.ContravariantK
 import tofu.concurrent.Exit
-import tofu.internal.carriers.{PerformCarrier2, PerformCarrier2Context, PerformCarrier3}
 import tofu.internal.instances._
 import tofu.internal.{Effect2Comp, EffectComp}
 import tofu.kernel.types.{PerformCont, PerformExitCont, PerformOf, PerformThrow}
@@ -52,18 +51,6 @@ trait PerformInstance1 {
       RP: PerformVia[F, Cont, Cancel]
   ): PerformVia[ReaderT[F, R, *], Cont, Cancel] = new PerformViaReader(RP)
 }
-
-// class PerformInterop  extends PerformInterop1 {
-//   final implicit def interopCE3[F[_]](implicit carrier: PerformCarrier3[F]): PerformThrow[F] = carrier
-// }
-// class PerformInterop1 extends PerformInterop2 {
-//   final implicit def interopCE2[F[_]](implicit carrier: PerformCarrier2[F]): PerformThrow[F] = carrier
-// }
-// trait PerformInstance2 {
-//   final implicit def interopCE2Contextual[F[_]](implicit
-//       carrier: PerformCarrier2Context[F]
-//   ): PerformThrow[F] = carrier
-// }
 
 object PerformOf extends Effect2Comp[PerformOf] {
   type Cont[Ex[_], A] = PerformCont[Ex, A]
