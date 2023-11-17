@@ -1,7 +1,6 @@
 package tofu.internal.carriers
 
 import tofu.internal.WBInterop
-import tofu.internal.carriers.{BoundedParallelCarrierCE2, BoundedParallelCarrierCE3}
 
 trait BoundedParallelCarrierCE2Macro {
 

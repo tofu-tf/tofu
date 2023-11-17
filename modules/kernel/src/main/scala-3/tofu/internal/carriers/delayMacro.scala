@@ -1,8 +1,6 @@
 package tofu.internal
 package carriers
 
-import tofu.internal.Interop
-
 trait DelayCarrier2Macro:
   inline given interop[F[_]]: DelayCarrier2[F] =
     Interop.delegate1[F, DelayCarrier2[F]]("tofu.interop.CE2Kernel.delayViaSync")

@@ -3,7 +3,6 @@ package tofu
 import scala.concurrent.ExecutionContext
 
 import tofu.internal.Interop
-import tofu.kernel.types._
 
 trait ScopedInstancesMacro:
   /** make ScopedExecute instance with given tag using cats-effect2 hidden implicits are: Async[F], ContextShift[F]

@@ -30,7 +30,7 @@ trait Scoped[Tag, F[_]] {
   final def tagged[NewTag]: Scoped[NewTag, F] = this.asInstanceOf[Scoped[NewTag, F]]
 
   final def midPoint: Point[Mid[F, *]] = new Point[Mid[F, *]] {
-    def point[A]: Mid[F, A] = runScoped
+    def point[A]: Mid[F, A] = runScoped(_)
   }
 }
 

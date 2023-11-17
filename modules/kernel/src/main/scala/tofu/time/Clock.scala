@@ -3,7 +3,6 @@ package tofu.time
 import java.util.concurrent.TimeUnit
 
 import tofu.internal.EffectComp
-import tofu.internal.carriers._
 import tofu.internal.instances.ClockInstance
 
 trait Clock[F[_]] {

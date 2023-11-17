@@ -1,7 +1,6 @@
 package tofu.internal
 package instances
 
-import tofu.Delay
 import tofu.internal.carriers.{SleepCE2Carrier, SleepCE3Carrier}
 import tofu.time.Sleep
 

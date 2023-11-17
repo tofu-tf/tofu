@@ -1,7 +1,6 @@
 package tofu
 
 import tofu.internal.EffectComp
-import tofu.internal.carriers.{DelayCarrier2, DelayCarrier3}
 import tofu.internal.instances.DelayInstance
 
 trait Delay[F[_]] {
