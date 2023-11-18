@@ -1,8 +1,9 @@
 package tofu.internal
 package instances
 
-import cats.MonadError
 import tofu.compat.unused
+
+import cats.MonadError
 import tofu.Finally
 import tofu.internal.carriers.FinallyCarrier2
 import tofu.internal.carriers.FinallyCarrier3

@@ -1,7 +1,7 @@
 package tofu.syntax
 import cats.syntax._
-import cats.{Applicative, Apply, FlatMap, Functor, Monad, Semigroupal}
-import cats.Defer
+import cats.{Applicative, Apply, Defer, FlatMap, Functor, Monad, Semigroupal}
+import tofu.compat.unused212
 
 object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadSyntax {
   def unit[F[_]](implicit F: Applicative[F]): F[Unit] = F.unit
@@ -24,7 +24,7 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
       * val result22: F[Unit] = computation2.discard[Thing] //compiler produces an error
       *   }}}
       */
-    def discard[AA](implicit ev: AA =:= A, F: Functor[F]): F[Unit] = F.void(fa)
+    def discard[AA](implicit @unused212 ev: AA =:= A, F: Functor[F]): F[Unit] = F.void(fa)
     def map[B](f: A => B)(implicit F: Functor[F]): F[B]            = F.map(fa)(f)
     def fmap[B](f: A => B)(implicit F: Functor[F]): F[B]           = F.fmap(fa)(f)
     def widen[B >: A](implicit F: Functor[F]): F[B]                = F.widen(fa)

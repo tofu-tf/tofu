@@ -9,7 +9,7 @@ import UnliftSubcontext._
 import cats.Monad
 import org.scalatest.matchers.should.Matchers
 import tofu.HasContext
-import tofu.compat.unused212
+import tofu.compat.unused
 
 class UnliftSubcontext extends AnyFlatSpec with Matchers {
   def context[F[_]: ({ type L[x[_]] = HasContext[x, Big] })#L]: F[Big]      = HasContext[F, Big].context
@@ -47,7 +47,7 @@ object UnliftSubcontext {
   type FatApp[A] = ReaderT[IO, Big, A]
 
   def summonUnliftSubContext[F[_]: Monad](): Unit = {
-    @unused212
+    @unused
     val ul: Unlift[ReaderT[F, Small, _], ReaderT[F, Big, _]] = Unlift.subContextUnlift
     ()
   }

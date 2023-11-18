@@ -1,11 +1,12 @@
 package tofu
 
+import tofu.compat.unused
+
 import cats.MonadError
 import Raise.ContravariantRaise
 import tofu.syntax.raise._
 import cats.Applicative
 import org.scalatest.funsuite.AnyFunSuite
-import tofu.compat.unused212
 
 class RaiseSuite extends AnyFunSuite {
   import tofu.RaiseSuite._
@@ -50,7 +51,7 @@ object RaiseSuite {
   def foo3[F[_]: ({ type L[x[_]] = ContravariantRaise[x, ConcreteError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
-  @unused212
+  @unused
   def foo4[
     F[_]: ({ type L[x[_]] = ContravariantRaise[x, ConcreteError] })#L: ({ type L[x[_]] = ContravariantRaise[x, AnotherConcreteError] })#L
   ]: F[Unit] =

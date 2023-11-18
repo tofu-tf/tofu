@@ -1,5 +1,7 @@
 package tofu.lift
 
+import tofu.compat.unused
+
 import cats.data.ReaderT
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
@@ -9,7 +11,6 @@ import UnliftSubcontext._
 import cats.Monad
 import org.scalatest.matchers.should.Matchers
 import tofu.HasContext
-import tofu.compat.unused212
 import cats.effect.unsafe.IORuntime
 
 class UnliftSubcontext extends AnyFlatSpec with Matchers {
@@ -50,7 +51,7 @@ object UnliftSubcontext {
   type FatApp[A] = ReaderT[IO, Big, A]
 
   def summonUnliftSubContext[F[_]: Monad](): Unit = {
-    @unused212
+    @unused
     val ul: Unlift[ReaderT[F, Small, _], ReaderT[F, Big, _]] = Unlift.subContextUnlift
     ()
   }

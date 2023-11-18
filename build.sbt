@@ -16,7 +16,7 @@ lazy val defaultSettings = Seq(
   Compile / doc / scalacOptions -= "-Xfatal-warnings",
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => Seq("-Ykind-projector:underscores")
+      case Some((3, _)) => Seq("-Ykind-projector:underscores", "-Wunused:imports")
       case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders")
       case _ => Nil
     }

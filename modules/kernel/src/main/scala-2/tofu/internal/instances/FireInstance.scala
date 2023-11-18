@@ -1,8 +1,9 @@
 package tofu.internal
 package instances
 
-import cats.MonadError
 import tofu.compat.unused
+
+import cats.MonadError
 import tofu.Fibers
 import tofu.internal.carriers.{FibersCarrier2, FibersCarrier3}
 

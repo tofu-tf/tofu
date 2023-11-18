@@ -2,7 +2,6 @@ package tofu.interop
 
 import java.util.concurrent.TimeUnit
 
-import scala.annotation.unused
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -11,6 +10,7 @@ import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
 import cats.effect.{Async, Fiber, IO, Sync}
 import cats.{Functor, Monad, Parallel, Traverse}
+import tofu.compat.unused
 import tofu.concurrent._
 import tofu.concurrent.impl.QVarSM
 import tofu.internal.NonTofu

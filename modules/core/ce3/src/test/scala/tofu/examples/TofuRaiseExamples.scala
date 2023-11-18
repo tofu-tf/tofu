@@ -1,8 +1,9 @@
 package tofu.examples
 
+import tofu.compat.unused
+
 import cats.FlatMap
 import cats.syntax.flatMap._
-import tofu.compat.unused212
 import tofu.syntax.handle._
 import tofu.syntax.raise._
 import tofu.{Errors, Handle, Raise}
@@ -25,7 +26,7 @@ object CardStorage {
 
   def make[F[_]: ({ type L[x[_]] = Raise[x, CardNotFound] })#L]: CardStorage[F] = new Impl[F]
 
-  @unused212
+  @unused
   private final class Impl[F[_]: ({ type L[x[_]] = Raise[x, CardNotFound] })#L] extends CardStorage[F] {
     override def get(cardId: Long): F[Card]                             = ???
     override def updateBalance(cardId: Long, newBalance: Long): F[Unit] = ???
@@ -40,7 +41,7 @@ object UserStorage {
 
   def make[F[_]: ({ type L[x[_]] = Raise[x, UserNotFound] })#L]: UserStorage[F] = new Impl[F]
 
-  @unused212
+  @unused
   private final class Impl[F[_]: ({ type L[x[_]] = Raise[x, UserNotFound] })#L] extends UserStorage[F] {
     override def get(userId: Long): F[User] = ???
   }

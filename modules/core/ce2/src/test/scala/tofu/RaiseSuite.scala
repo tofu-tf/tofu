@@ -5,7 +5,7 @@ import Raise.ContravariantRaise
 import tofu.syntax.raise._
 import cats.Applicative
 import org.scalatest.funsuite.AnyFunSuite
-import tofu.compat.unused212
+import tofu.compat.unused
 
 class RaiseSuite extends AnyFunSuite {
   import tofu.RaiseSuite._
@@ -33,7 +33,8 @@ object RaiseSuite {
   object CrowErr               extends Exception("Oh no!")
   case class LalErr(s: String) extends Exception(s)
 
-  def foo0[F[_]: ({ type L[x[_]] = Raise[x, ConcreteError] })#L: ({ type L[x[_]] = Raise[x, AnotherConcreteError] })#L]: F[Unit] = {
+  def foo0[F[_]: ({ type L[x[_]] = Raise[x, ConcreteError] })#L: ({ type L[x[_]] = Raise[x, AnotherConcreteError] })#L]
+      : F[Unit] = {
     ConcreteError().raise[F, Unit]
     AnotherConcreteError().raise[F, Unit]
   }
@@ -47,8 +48,12 @@ object RaiseSuite {
   def foo3[F[_]: ({ type L[x[_]] = ContravariantRaise[x, ConcreteError] })#L]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
-  @unused212
-  def foo4[F[_]: ({ type L[x[_]] = ContravariantRaise[x, ConcreteError] })#L: ({ type L[x[_]] = ContravariantRaise[x, AnotherConcreteError] })#L]: F[Unit] =
+  @unused
+  def foo4[
+      F[_]: ({ type L[x[_]] = ContravariantRaise[x, ConcreteError] })#L: ({
+        type L[x[_]] = ContravariantRaise[x, AnotherConcreteError]
+      })#L
+  ]: F[Unit] =
     ConcreteError().raise[F, Unit]
 
   {

@@ -6,7 +6,7 @@ import cats.effect.{Effect, IO}
 import cats.syntax.option._
 import org.scalatest.flatspec.AnyFlatSpec
 import cats.Monad
-import tofu.compat.unused212
+import tofu.compat.unused
 
 class UnliftSuite extends AnyFlatSpec {
   "Lift implicit def implementations" should "cast instances properly" in {
@@ -27,7 +27,7 @@ object UnliftSuite {
     ()
   }
 
-  def summonLiftWithIsoKUnambiguously[F[_]](implicit @unused212 iso: IsoK[F, F]): Unit = {
+  def summonLiftWithIsoKUnambiguously[F[_]](implicit @unused iso: IsoK[F, F]): Unit = {
     implicitly[Lift[F, F]]
     ()
   }

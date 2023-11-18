@@ -2,31 +2,20 @@ package tofu
 package interop
 
 import java.util.concurrent.TimeUnit
+
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
+
+import cats.effect._
 import cats.effect.concurrent.{MVar, Ref}
-import cats.effect.{
-  Async,
-  Blocker,
-  Bracket,
-  Concurrent,
-  ConcurrentEffect,
-  ContextShift,
-  Effect,
-  ExitCase,
-  Fiber,
-  IO,
-  Sync,
-  Timer
-}
 import cats.{Functor, Id, Monad, Parallel, Traverse, ~>}
-import tofu.compat.unused212
+import tofu.compat.unused
 import tofu.concurrent._
 import tofu.internal.NonTofu
 import tofu.internal.carriers._
+import tofu.internal.instances.PerformViaUnlift
 import tofu.lift.Lift
 import tofu.syntax.monadic._
-import tofu.internal.instances.PerformViaUnlift
 
 object CE2Kernel {
   // 2.12 sometimes gets mad on Const partial alias during implicit search
@@ -43,7 +32,7 @@ object CE2Kernel {
       def unlift: K[K ~> IO]       = Effect.toIOK[K].pure[K]
     }
 
-  def timeout[F[_]: Concurrent: Timer](implicit @unused212 nonTofu: NonTofu[F]): TimeoutCE2Carrier[F] =
+  def timeout[F[_]: Concurrent: Timer](implicit @unused nonTofu: NonTofu[F]): TimeoutCE2Carrier[F] =
     new TimeoutCE2Carrier[F] {
       override def timeoutTo[A](fa: F[A], after: FiniteDuration, fallback: F[A]): F[A] =
         Concurrent.timeoutTo(fa, after, fallback)
@@ -66,7 +55,7 @@ object CE2Kernel {
 
   final def startFromConcurrent[F[_]](implicit
       F: Concurrent[F],
-      @unused212 _nonTofu: NonTofu[F]
+      @unused _nonTofu: NonTofu[F]
   ): FibersCarrier2.Aux[F, Id, Fiber[F, _]] =
     new FibersCarrier2.Impl[F, Id, Fiber[F, _]] {
       def start[A](fa: F[A]): F[Fiber[F, A]]                                                = F.start(fa)
@@ -125,13 +114,13 @@ object CE2Kernel {
 
   final def performConcurrentEffect[F[_]](implicit
       F: ConcurrentEffect[F],
-      @unused212 _nt: NonTofu[F]
+      @unused _nt: NonTofu[F]
   ): PerformCarrier2[F] =
     new ConcurrentEffectPerformer[F]
 
   final def performContextConcurrentEffect[F[_]](implicit
       F: ContextConcurrentEffect[F],
-      @unused212 _nt: NonTofu[F]
+      @unused _nt: NonTofu[F]
   ): PerformCarrier2Context[F] =
     new PerformViaUnlift[F, F.Base, PerformOf.ExitCont[Throwable, _], Unit]()(
       performConcurrentEffect[F.Base](F.concurrentEffect, NonTofu.refute),

@@ -1,11 +1,12 @@
 package tofu.lift
 
+import tofu.compat.unused
+
 import cats.Applicative
 import cats.data.ReaderT
 import cats.effect.{IO}
 import cats.syntax.option._
 import org.scalatest.flatspec.AnyFlatSpec
-import tofu.compat.unused212
 import cats.Monad
 import tofu.WithContext
 import cats.effect.std.Dispatcher
@@ -31,7 +32,7 @@ object UnliftSuite {
     ()
   }
 
-  def summonLiftWithIsoKUnambiguously[F[_]](implicit @unused212 iso: IsoK[F, F]): Unit = {
+  def summonLiftWithIsoKUnambiguously[F[_]](implicit @unused iso: IsoK[F, F]): Unit = {
     implicitly[Lift[F, F]]
     ()
   }
@@ -54,8 +55,8 @@ object UnliftSuite {
     ()
   }
 
-  def summonUnliftIOInstances1[F[_]: Async, R](implicit @unused212 disp: WithContext[F, Dispatcher[F]]): Unit = {
-    @unused212 implicit val rt: WithContext[F, IORuntime] = WithContext.const(IORuntime.global)
+  def summonUnliftIOInstances1[F[_]: Async, R](implicit @unused disp: WithContext[F, Dispatcher[F]]): Unit = {
+    @unused implicit val rt: WithContext[F, IORuntime] = WithContext.const(IORuntime.global)
 
     implicitly[UnliftIO[F]]
     implicitly[UnliftIO[ReaderT[F, R, _]]]
