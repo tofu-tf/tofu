@@ -69,12 +69,12 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
 
   private[this] def readerTInstance[R, A]: RepresentableK[({ type L[x[_]] = ReaderT[x, R, A] })#L] =
     new RepresentableK[({ type L[x[_]] = ReaderT[x, R, A] })#L] {
-      def tabulate[F[_]](hom: RepK[({ type L[x[_]] = ReaderT[x, R, A]})#L, _] ~> F): ReaderT[F, R, A]      =
+      def tabulate[F[_]](hom: RepK[({ type L[x[_]] = ReaderT[x, R, A] })#L, _] ~> F): ReaderT[F, R, A] =
         ReaderT(r => hom(RepK[({ type L[x[_]] = ReaderT[x, R, A] })#L](_.run(r))))
-      override def embed[F[_]: FlatMap](ft: F[ReaderT[F, R, A]]): ReaderT[F, R, A]      = ReaderT(r => ft.flatMap(_.run(r)))
-      override def pureK[F[_]](p: Point[F]): ReaderT[F, R, A]                           = ReaderT(_ => p.point[A])
-      override val unitK: ReaderT[UnitK, R, A]                                          = super.unitK
-      override def mapK[F[_], G[_]](af: ReaderT[F, R, A])(fk: F ~> G): ReaderT[G, R, A] = af.mapK(fk)
+      override def embed[F[_]: FlatMap](ft: F[ReaderT[F, R, A]]): ReaderT[F, R, A]                     = ReaderT(r => ft.flatMap(_.run(r)))
+      override def pureK[F[_]](p: Point[F]): ReaderT[F, R, A]                                          = ReaderT(_ => p.point[A])
+      override val unitK: ReaderT[UnitK, R, A]                                                         = super.unitK
+      override def mapK[F[_], G[_]](af: ReaderT[F, R, A])(fk: F ~> G): ReaderT[G, R, A]                = af.mapK(fk)
 
       override def productK[F[_], G[_]](af: ReaderT[F, R, A], ag: ReaderT[G, R, A]): ReaderT[Tuple2K[F, G, _], R, A] =
         ReaderT(r => Tuple2K(af.run(r), ag.run(r)))
@@ -84,22 +84,23 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
       ): ReaderT[H, R, A] = ReaderT(r => f2(af.run(r), ag.run(r)))
     }
 
-  private[this] def optionTInstance[A]: RepresentableK[({ type L[x[_]] = OptionT[x, A] })#L] = new RepresentableK[({ type L[x[_]] = OptionT[x, A] })#L] {
-    def tabulate[F[_]](hom: RepK[({ type L[x[_]] = OptionT[x, A] })#L, _] ~> F): OptionT[F, A] = OptionT(
-      hom(RepK[({ type L[x[_]] = OptionT[x, A] })#L](_.value))
-    )
+  private[this] def optionTInstance[A]: RepresentableK[({ type L[x[_]] = OptionT[x, A] })#L] =
+    new RepresentableK[({ type L[x[_]] = OptionT[x, A] })#L] {
+      def tabulate[F[_]](hom: RepK[({ type L[x[_]] = OptionT[x, A] })#L, _] ~> F): OptionT[F, A] = OptionT(
+        hom(RepK[({ type L[x[_]] = OptionT[x, A] })#L](_.value))
+      )
 
-    override def mapK[F[_], G[_]](af: OptionT[F, A])(fk: F ~> G): OptionT[G, A]                           = af.mapK(fk)
-    override def productK[F[_], G[_]](af: OptionT[F, A], ag: OptionT[G, A]): OptionT[Tuple2K[F, G, _], A] =
-      OptionT(Tuple2K(af.value, ag.value))
-    override def zipWith2K[F[_], G[_], H[_]](af: OptionT[F, A], ag: OptionT[G, A])(
-        f2: Function2K[F, G, H]
-    ): OptionT[H, A] =
-      OptionT(f2(af.value, ag.value))
-    override def pureK[F[_]](p: Point[F]): OptionT[F, A]                                                  = OptionT(p.point)
-    override val unitK: OptionT[UnitK, A]                                                                 = super.unitK
-    override def embed[F[_]: FlatMap](ft: F[OptionT[F, A]]): OptionT[F, A]                                = OptionT(ft.flatMap(_.value))
-  }
+      override def mapK[F[_], G[_]](af: OptionT[F, A])(fk: F ~> G): OptionT[G, A]                           = af.mapK(fk)
+      override def productK[F[_], G[_]](af: OptionT[F, A], ag: OptionT[G, A]): OptionT[Tuple2K[F, G, _], A] =
+        OptionT(Tuple2K(af.value, ag.value))
+      override def zipWith2K[F[_], G[_], H[_]](af: OptionT[F, A], ag: OptionT[G, A])(
+          f2: Function2K[F, G, H]
+      ): OptionT[H, A] =
+        OptionT(f2(af.value, ag.value))
+      override def pureK[F[_]](p: Point[F]): OptionT[F, A]                                                  = OptionT(p.point)
+      override val unitK: OptionT[UnitK, A]                                                                 = super.unitK
+      override def embed[F[_]: FlatMap](ft: F[OptionT[F, A]]): OptionT[F, A]                                = OptionT(ft.flatMap(_.value))
+    }
 
   private[this] def eitherTInstance[E, A]: RepresentableK[({ type L[x[_]] = EitherT[x, E, A] })#L] =
     new RepresentableK[({ type L[x[_]] = EitherT[x, E, A] })#L] {
@@ -138,22 +139,25 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
       override def embed[F[_]: FlatMap](ft: F[WriterT[F, W, A]]): WriterT[F, W, A]                                   = WriterT(ft.flatMap(_.run))
     }
 
-  private[this] def iorTInstance[E, A]: RepresentableK[({ type L[x[_]] = IorT[x, E, A] })#L] = new RepresentableK[({ type L[x[_]] = IorT[x, E, A] })#L] {
+  private[this] def iorTInstance[E, A]: RepresentableK[({ type L[x[_]] = IorT[x, E, A] })#L] =
+    new RepresentableK[({ type L[x[_]] = IorT[x, E, A] })#L] {
 
-    def tabulate[F[_]](hom: RepK[({ type L[x[_]] = IorT[x, E, A] })#L, _] ~> F): IorT[F, E, A] = IorT(hom(RepK[({ type L[x[_]] = IorT[x, E, A] })#L](_.value)))
+      def tabulate[F[_]](hom: RepK[({ type L[x[_]] = IorT[x, E, A] })#L, _] ~> F): IorT[F, E, A] = IorT(
+        hom(RepK[({ type L[x[_]] = IorT[x, E, A] })#L](_.value))
+      )
 
-    override def mapK[F[_], G[_]](af: IorT[F, E, A])(fk: F ~> G): IorT[G, E, A]                           =
-      af.mapK(fk)
-    override def productK[F[_], G[_]](af: IorT[F, E, A], ag: IorT[G, E, A]): IorT[Tuple2K[F, G, _], E, A] =
-      IorT(Tuple2K(af.value, ag.value))
-    override def zipWith2K[F[_], G[_], H[_]](af: IorT[F, E, A], ag: IorT[G, E, A])(
-        f2: Function2K[F, G, H]
-    ): IorT[H, E, A] =
-      IorT(f2(af.value, ag.value))
-    override def pureK[F[_]](p: Point[F]): IorT[F, E, A]                                                  = IorT(p.point)
-    override val unitK: IorT[UnitK, E, A]                                                                 = super.unitK
-    override def embed[F[_]: FlatMap](ft: F[IorT[F, E, A]]): IorT[F, E, A]                                = IorT(ft.flatMap(_.value))
-  }
+      override def mapK[F[_], G[_]](af: IorT[F, E, A])(fk: F ~> G): IorT[G, E, A]                           =
+        af.mapK(fk)
+      override def productK[F[_], G[_]](af: IorT[F, E, A], ag: IorT[G, E, A]): IorT[Tuple2K[F, G, _], E, A] =
+        IorT(Tuple2K(af.value, ag.value))
+      override def zipWith2K[F[_], G[_], H[_]](af: IorT[F, E, A], ag: IorT[G, E, A])(
+          f2: Function2K[F, G, H]
+      ): IorT[H, E, A] =
+        IorT(f2(af.value, ag.value))
+      override def pureK[F[_]](p: Point[F]): IorT[F, E, A]                                                  = IorT(p.point)
+      override val unitK: IorT[UnitK, E, A]                                                                 = super.unitK
+      override def embed[F[_]: FlatMap](ft: F[IorT[F, E, A]]): IorT[F, E, A]                                = IorT(ft.flatMap(_.value))
+    }
 
   private[this] val optionTRepresentableKAny = optionTInstance[Any]
   private[this] val eitherTRepresentableKAny = eitherTInstance[Any, Any]
@@ -162,7 +166,7 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
   private[this] val idKRepresentableAny      = idKRepresentableInst[Any]
   private[this] val readerTInstanceAny       = readerTInstance[Any, Any]
 
-  final implicit def idKRepresentable[A]: TC[IdK[A]#λ]                   = idKRepresentableAny.asInstanceOf[TC[IdK[A]#λ]]
+  final implicit def idKRepresentable[A]: TC[IdK[A]#λ]                                       = idKRepresentableAny.asInstanceOf[TC[IdK[A]#λ]]
   final implicit def readerTRepresentable[R, A]: TC[({ type L[x[_]] = ReaderT[x, R, A] })#L] =
     readerTInstanceAny.asInstanceOf[TC[({ type L[x[_]] = ReaderT[x, R, A] })#L]]
 

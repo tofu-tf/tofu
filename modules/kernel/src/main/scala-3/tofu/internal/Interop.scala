@@ -44,8 +44,7 @@ object Interop {
           true
         } catch { case _ => false }
 
-      if !symExists then
-        report.errorAndAbort("Symbol does not exists")
+      if !symExists then report.errorAndAbort("Symbol does not exists")
       else
         val wtf              = Ident(sym.termRef)
         val withTypes        = wtf.appliedToTypeTrees(tps.toList)

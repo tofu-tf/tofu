@@ -15,9 +15,9 @@ class ErrorsSuite extends AnyFlatSpec with Matchers with EitherValues {
   }
 
   "Errors" should "adoptError" in {
-    val err: String                              = "oops"
-    val pf: PartialFunction[String, String]      = { case s if s == err => err + "_" + err }
-    val fa: ErrorOr[Unit]                        = Raise[ErrorOr, String].raise(err)
+    val err: String                         = "oops"
+    val pf: PartialFunction[String, String] = { case s if s == err => err + "_" + err }
+    val fa: ErrorOr[Unit]                   = Raise[ErrorOr, String].raise(err)
 
     implicitly[Errors[ErrorOr, String]]
 

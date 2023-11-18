@@ -1,4 +1,3 @@
 package tofu.generate
 
-trait GenUUIDInstances {
-}
+trait GenUUIDInstances {}

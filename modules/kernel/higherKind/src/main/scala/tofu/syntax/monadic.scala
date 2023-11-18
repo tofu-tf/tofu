@@ -25,14 +25,14 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
       *   }}}
       */
     def discard[AA](implicit @unused212 ev: AA =:= A, F: Functor[F]): F[Unit] = F.void(fa)
-    def map[B](f: A => B)(implicit F: Functor[F]): F[B]            = F.map(fa)(f)
-    def fmap[B](f: A => B)(implicit F: Functor[F]): F[B]           = F.fmap(fa)(f)
-    def widen[B >: A](implicit F: Functor[F]): F[B]                = F.widen(fa)
-    def void(implicit F: Functor[F]): F[Unit]                      = F.void(fa)
-    def fproduct[B](f: A => B)(implicit F: Functor[F]): F[(A, B)]  = F.fproduct(fa)(f)
-    def as[B](b: B)(implicit F: Functor[F]): F[B]                  = F.as(fa, b)
-    def tupleLeft[B](b: B)(implicit F: Functor[F]): F[(B, A)]      = F.tupleLeft(fa, b)
-    def tupleRight[B](b: B)(implicit F: Functor[F]): F[(A, B)]     = F.tupleRight(fa, b)
+    def map[B](f: A => B)(implicit F: Functor[F]): F[B]                       = F.map(fa)(f)
+    def fmap[B](f: A => B)(implicit F: Functor[F]): F[B]                      = F.fmap(fa)(f)
+    def widen[B >: A](implicit F: Functor[F]): F[B]                           = F.widen(fa)
+    def void(implicit F: Functor[F]): F[Unit]                                 = F.void(fa)
+    def fproduct[B](f: A => B)(implicit F: Functor[F]): F[(A, B)]             = F.fproduct(fa)(f)
+    def as[B](b: B)(implicit F: Functor[F]): F[B]                             = F.as(fa, b)
+    def tupleLeft[B](b: B)(implicit F: Functor[F]): F[(B, A)]                 = F.tupleLeft(fa, b)
+    def tupleRight[B](b: B)(implicit F: Functor[F]): F[(A, B)]                = F.tupleRight(fa, b)
   }
 
   implicit final class TofuSemigroupalOps[F[_], A](private val fa: F[A]) extends AnyVal {

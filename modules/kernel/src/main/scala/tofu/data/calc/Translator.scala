@@ -133,7 +133,6 @@ class TranslateStatePack[+F[+_, +_], -R, -SI, +SO, +E, +A, ST](private val calc:
   )(implicit s: Unit <:< SI): CalcM[G, R, ST, ST, E, A] =
     CalcM.get[ST].mapState(st => (st, (): SI)) *>> calc.translateState(fk).mapState(_._1)
 
-
   def pure(
       fk: Translator.AsStateK[F, Nothing2T, ST, R @uv, EArb, AArb]
   )(implicit s: Unit <:< SI): CalcM[λ[(`+x`, `+y`) => Nothing], R, ST, ST, E, A] =

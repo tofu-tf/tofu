@@ -16,9 +16,9 @@ lazy val defaultSettings = Seq(
   Compile / doc / scalacOptions -= "-Xfatal-warnings",
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => Seq("-Ykind-projector:underscores", "-Wunused:imports")
+      case Some((3, _))       => Seq("-Ykind-projector:underscores", "-Wunused:imports")
       case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders")
-      case _ => Nil
+      case _                  => Nil
     }
   },
   crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
@@ -30,7 +30,7 @@ lazy val defaultSettings = Seq(
           compilerPlugin(kindProjector),
           scalaOrganization.value % "scala-reflect" % scalaVersion.value % Provided
         )
-      case _ => Seq()
+      case _            => Seq()
     }) ++ Seq(scalatest, collectionCompat)
   }
 ) ++ macros
@@ -46,7 +46,7 @@ lazy val higherKindCore = project
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) =>
           Seq(catsCore, catsFree, catsTaglessMacros)
-        case _ =>
+        case _            =>
           Seq(catsCore, catsFree, catsTaglessCore)
       }
     },
@@ -54,7 +54,6 @@ lazy val higherKindCore = project
 
 lazy val kernel = project
   .in(modules / "kernel")
-  .settings(defaultSettings)
   .dependsOn(higherKindCore)
   .settings(
     defaultSettings,

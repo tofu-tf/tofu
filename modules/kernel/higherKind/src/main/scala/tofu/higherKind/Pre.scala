@@ -61,7 +61,9 @@ class PreInstances1 {
 
 private class PreAlgebraSemigroup[F[_], U[f[_]]](implicit F: Apply[F], U: ApplyK[U]) extends Semigroup[U[Pre[F, _]]] {
   def combine(x: U[Pre[F, _]], y: U[Pre[F, _]]): U[Pre[F, _]] =
-    U.map2K(x, y)(funK[Tuple2K[Pre[F, _], Pre[F, _], _], Pre[F, _]](t2k => Pre.apply(t2k.first.value *> t2k.second.value)))
+    U.map2K(x, y)(
+      funK[Tuple2K[Pre[F, _], Pre[F, _], _], Pre[F, _]](t2k => Pre.apply(t2k.first.value *> t2k.second.value))
+    )
 }
 
 private class PreAlgebraMonoid[F[_], U[f[_]]](implicit F: Applicative[F], U: MonoidalK[U])

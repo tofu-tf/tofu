@@ -20,15 +20,13 @@ object FindRaiseSuite {
 
   def fOptionFindRaise[
       F[_]: Monad: ({ type L[x[_]] = Raise[x, CommonError] })#L: ({ type L[x[_]] = Raise[x, AnotherCommonError] })#L
-  ]: F[Unit] = {
+  ]: F[Unit] =
     Monad[F].pure(Option.empty[Unit]).orThrow(ConcreteError)
-  }
 
   def verifiedFindRaise[
       F[_]: Monad: ({ type L[x[_]] = Raise[x, CommonError] })#L: ({ type L[x[_]] = Raise[x, AnotherCommonError] })#L
-  ]: F[Unit] = {
+  ]: F[Unit] =
     Monad[F].unit.verified(_ => true)(ConcreteError)
-  }
 
   def fEitherFindRaise[
       F[_]: Monad: ({ type L[x[_]] = Raise[x, CommonError] })#L: ({ type L[x[_]] = Raise[x, AnotherCommonError] })#L

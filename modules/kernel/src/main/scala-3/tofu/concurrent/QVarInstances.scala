@@ -1,4 +1,3 @@
 package tofu.concurrent
 
-trait QVarInstances {
-}
+trait QVarInstances {}

@@ -18,10 +18,9 @@ object FindRaiseSuite {
 
   case object ConcreteError extends CommonError
 
-  def fOptionFindRaise[F[
-      _
-  ]: Monad: ({ type L[x[_]] = Raise[x, CommonError] })#L: ({ type L[x[_]] = Raise[x, AnotherCommonError] })#L]
-      : F[Unit] = {
+  def fOptionFindRaise[
+      F[_]: Monad: ({ type L[x[_]] = Raise[x, CommonError] })#L: ({ type L[x[_]] = Raise[x, AnotherCommonError] })#L
+  ]: F[Unit] = {
     Monad[F].pure(Option.empty[Unit]).orThrow(ConcreteError)
   }
 

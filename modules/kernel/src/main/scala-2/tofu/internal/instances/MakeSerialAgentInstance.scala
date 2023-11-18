@@ -5,7 +5,7 @@ import tofu.concurrent.MakeSerialAgent
 import tofu.internal.carriers.{MkSerialAgentCE2Carrier, MkSerialAgentCE3Carrier}
 
 private[tofu] trait MakeSerialAgentInstance extends MakeSerialAgentInstance0 {
-    final implicit def interopCE3[I[_], F[_]](implicit carrier: MkSerialAgentCE3Carrier[I, F]): MakeSerialAgent[I, F] =
+  final implicit def interopCE3[I[_], F[_]](implicit carrier: MkSerialAgentCE3Carrier[I, F]): MakeSerialAgent[I, F] =
     carrier
 }
 

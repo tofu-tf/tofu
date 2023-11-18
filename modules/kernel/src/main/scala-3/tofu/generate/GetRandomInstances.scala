@@ -1,5 +1,3 @@
 package tofu.generate
 
-trait GetRandomInstances {
-
-}
+trait GetRandomInstances {}

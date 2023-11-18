@@ -22,7 +22,8 @@ object Function2K {
 
   def apply[F[_], G[_]] = new Applied[F, G]
 
-  def untupled[F[_], G[_], H[_]](fk: Tuple2K[F, G, _] ~> H): Function2K[F, G, H] = apply[F, G, H]((f, g) => fk(Tuple2K(f, g)))
+  def untupled[F[_], G[_], H[_]](fk: Tuple2K[F, G, _] ~> H): Function2K[F, G, H] =
+    apply[F, G, H]((f, g) => fk(Tuple2K(f, g)))
 
   class Applied[F[_], G[_]](private val __ : Boolean = true) extends AnyVal {
     def apply[H[_]](maker: MakeFunctionK[F, G, H]): Function2K[F, G, H] = maker
@@ -39,7 +40,7 @@ object Function2K {
 
   private class Function2KRepresentable[X[_], Y[_]] extends RepresentableK[({ type L[x[_]] = Function2K[X, Y, x] })#L] {
     final def tabulate[F[_]](hom: RepK[({ type L[x[_]] = Function2K[X, Y, x] })#L, _] ~> F): Function2K[X, Y, F] =
-      Function2K[X, Y, F]((xa, ya) => hom(RepK[({ type L[x[_]] = Function2K[X, Y, x]})#L](_.apply(xa, ya))))
+      Function2K[X, Y, F]((xa, ya) => hom(RepK[({ type L[x[_]] = Function2K[X, Y, x] })#L](_.apply(xa, ya))))
 
     // just optimized allocationwise redefinitions
     final override def mapK[F[_], G[_]](af: Function2K[X, Y, F])(fk: F ~> G): Function2K[X, Y, G] =

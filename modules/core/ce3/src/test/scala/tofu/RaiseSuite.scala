@@ -36,8 +36,7 @@ object RaiseSuite {
 
   def foo0[F[
       _
-  ]: ({ type L[x[_]] = Raise[x, ConcreteError] })#L: ({ type L[x[_]] = Raise[x, AnotherConcreteError] })#L]
-      : F[Unit] = {
+  ]: ({ type L[x[_]] = Raise[x, ConcreteError] })#L: ({ type L[x[_]] = Raise[x, AnotherConcreteError] })#L]: F[Unit] = {
     ConcreteError().raise[F, Unit]
     AnotherConcreteError().raise[F, Unit]
   }
@@ -53,7 +52,9 @@ object RaiseSuite {
 
   @unused
   def foo4[
-    F[_]: ({ type L[x[_]] = ContravariantRaise[x, ConcreteError] })#L: ({ type L[x[_]] = ContravariantRaise[x, AnotherConcreteError] })#L
+      F[_]: ({ type L[x[_]] = ContravariantRaise[x, ConcreteError] })#L: ({
+        type L[x[_]] = ContravariantRaise[x, AnotherConcreteError]
+      })#L
   ]: F[Unit] =
     ConcreteError().raise[F, Unit]
 

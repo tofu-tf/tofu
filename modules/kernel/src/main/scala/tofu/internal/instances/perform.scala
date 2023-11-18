@@ -10,14 +10,16 @@ import tofu.syntax.monadic._
 import tofu.{PerformVia, Performer}
 import tofu.kernel.types.PerformOf
 
-final class PerformerContravariantK[F[_], Cancel] extends ContravariantK[({ type L[x[_]] = Performer[F, x, Cancel]})#L] {
+final class PerformerContravariantK[F[_], Cancel]
+    extends ContravariantK[({ type L[x[_]] = Performer[F, x, Cancel] })#L] {
   def contramapK[C1[_], C2[_]](af: Performer[F, C1, Cancel])(fk: C2 ~> C1): Performer[F, C2, Cancel] =
     new Performer[F, C2, Cancel] {
       def perform[A](cont: C2[A])(f: F[A]): F[Cancel] = af.perform(fk(cont))(f)
     }
 }
 
-final class PerformViaContravariantK[F[_], Cancel] extends ContravariantK[({ type L[x[_]] = PerformVia[F, x, Cancel]})#L] {
+final class PerformViaContravariantK[F[_], Cancel]
+    extends ContravariantK[({ type L[x[_]] = PerformVia[F, x, Cancel] })#L] {
   def contramapK[C1[_], C2[_]](af: PerformVia[F, C1, Cancel])(fk: C2 ~> C1) =
     new PerformViaMappedPerformer(af, fk)
 }
@@ -40,7 +42,7 @@ class PerformOfMappedPerformer[F[_], Ex1[_], Ex2[_]](
       funK[Cont[Ex2, *], Cont[Ex1, *]](c1 => ex1 => c1(fk(ex1))),
     ) with PerformOf[F, Ex2]
 
-final class PerformOfFunctorK[F[_]] extends FunctorK[({type L[x[_]] = PerformOf[F, x]})#L] {
+final class PerformOfFunctorK[F[_]] extends FunctorK[({ type L[x[_]] = PerformOf[F, x] })#L] {
   def mapK[Ex1[_], Ex2[_]](af: PerformOf[F, Ex1])(fk: Ex1 ~> Ex2): PerformOf[F, Ex2] =
     new PerformOfMappedPerformer(af, fk)
 }

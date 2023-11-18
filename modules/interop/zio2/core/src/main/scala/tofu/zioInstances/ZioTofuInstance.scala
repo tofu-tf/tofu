@@ -139,7 +139,9 @@ class ZioTofuContainsUnliftInstance[R1: Tag, R2: Tag, E](implicit lens: Contains
   def lift[A](fa: ZIO[R1, E, A]): ZIO[R2, E, A]          =
     fa.provideSomeEnvironment[R2](r2env => ZEnvironment(lens.extract(r2env.get)))
   def unlift: ZIO[R2, E, ZIO[R2, E, _] ~> ZIO[R1, E, _]] =
-    ZIO.serviceWith[R2](r2 => funK[ZIO[R2, E, _], ZIO[R1, E, _]](_.provideSomeEnvironment[R1](r1env => ZEnvironment(lens.set(r2, r1env.get)))))
+    ZIO.serviceWith[R2](r2 =>
+      funK[ZIO[R2, E, _], ZIO[R1, E, _]](_.provideSomeEnvironment[R1](r1env => ZEnvironment(lens.set(r2, r1env.get))))
+    )
 }
 
 class RioTofuUnliftIOInstance[R] extends UnliftIO[RIO[R, _]] {

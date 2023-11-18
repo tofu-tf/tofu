@@ -40,7 +40,7 @@ object Lift extends LiftInstances1 {
       val unlift: RT[RT ~> AnyK] = ReaderT[AnyK, Any, RT ~> AnyK](r => funK[RT, AnyK](f => f.run(r)))
     }
   }
-  implicit def liftReaderT[F[_], R]: Lift[F, ReaderT[F, R, *]]     =
+  implicit def liftReaderT[F[_], R]: Lift[F, ReaderT[F, R, *]]                    =
     unliftReaderTAny.asInstanceOf[Unlift[F, ReaderT[F, R, *]]]
 }
 

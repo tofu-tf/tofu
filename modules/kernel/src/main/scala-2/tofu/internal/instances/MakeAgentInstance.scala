@@ -9,5 +9,5 @@ private[tofu] trait MakeAgentInstance extends MakeAgentInstance0 {
 }
 
 private[tofu] trait MakeAgentInstance0 {
-  final implicit def interopCE2[I[_], F[_]](implicit carrier: MkAgentCE2Carrier[I, F]): MakeAgent[I, F] = carrier  
+  final implicit def interopCE2[I[_], F[_]](implicit carrier: MkAgentCE2Carrier[I, F]): MakeAgent[I, F] = carrier
 }

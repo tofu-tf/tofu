@@ -128,7 +128,7 @@ object Calc {
 
     def toState: IndexedState[S1, S2, A] = IndexedState(runSuccessUnit)
   }
-  
+
   @tailrec def run[R, S1, S2, S3, E1, E2, A](calc: Calc[R, S1, S3, E2, A], r: R, init: S1): (S3, Either[E2, A]) =
     calc match {
       case res: CalcRes[R, S1, S3, E2, A]        =>

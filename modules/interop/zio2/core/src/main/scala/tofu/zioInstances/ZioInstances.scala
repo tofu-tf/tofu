@@ -11,9 +11,9 @@ private[zioInstances] class ZioInstances {
   private[this] val rioTofuInstanceAny: RioTofuInstance[Any] = new RioTofuInstance
   final def rioTofuInstance[R]: RioTofuInstance[R]           = rioTofuInstanceAny.asInstanceOf[RioTofuInstance[R]]
 
-  private[this] val zioErrorsToInstanceAny: ZioTofuErrorsToInstance[Any, Any, Nothing]             =
+  private[this] val zioErrorsToInstanceAny: ZioTofuErrorsToInstance[Any, Any, Nothing]               =
     new ZioTofuErrorsToInstance[Any, Any, Nothing]()(extractSubtype[Nothing, Any])
-  final def zioTofuErrorsToInstance[R, E]: ZioTofuErrorsToInstance[R, E, Nothing]                  =
+  final def zioTofuErrorsToInstance[R, E]: ZioTofuErrorsToInstance[R, E, Nothing]                    =
     zioErrorsToInstanceAny.asInstanceOf[ZioTofuErrorsToInstance[R, E, Nothing]]
   final def zioTofuExtractErrorsInstance[R, E, E1: Extract[_, E]]: ZioTofuErrorsToInstance[R, E, E1] =
     new ZioTofuErrorsToInstance

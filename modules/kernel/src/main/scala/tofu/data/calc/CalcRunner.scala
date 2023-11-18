@@ -16,7 +16,6 @@ trait CalcRunner[-F[+_, +_]] {
   }
 }
 
-
 object CalcRunner extends LowPriorRunner {
   implicit val nothingRunner: CalcRunner[Nothing] = nothing2TRunner
 }
@@ -30,7 +29,7 @@ trait LowPriorRunner { self: CalcRunner.type =>
         calc: CalcM[Nothing2T, R, SI, SO, E, A]
     )(r: R, init: SI, cont: Continue[A, E, SO, X]): X =
       calc match {
-        case res: CalcM.CalcMRes[R, SI, SO, E, A]                  => res.submit(r, init, cont)
+        case res: CalcM.CalcMRes[R, SI, SO, E, A]                    => res.submit(r, init, cont)
         case d: CalcM.Defer[Nothing2T, R, ?, ?, ?, ?]                => apply(d.runStep())(r, init, cont)
         case m: CalcM.ProvideM[Nothing2T, R, SI, SO, E, A]           => apply(m.inner)(m.r, init, cont)
         case sub: CalcM.Sub[Nothing2T, SI, SO, E, A]                 => sub.fa
@@ -39,12 +38,12 @@ trait LowPriorRunner { self: CalcRunner.type =>
           type EM = em
           type AM = am
           b1.src match {
-            case res: CalcM.CalcMRes[R, SI, SM, EM, AM]                   =>
+            case res: CalcM.CalcMRes[R, SI, SM, EM, AM]                 =>
               val (st, next) = res.submit(r, init, b1.continue.withState[sm])
               apply(next)(r, st, cont)
-            case d: CalcM.Defer[Nothing2T, R, SI, SM, EM, AM]           => 
+            case d: CalcM.Defer[Nothing2T, R, SI, SM, EM, AM]           =>
               apply(d.runStep().bind(b1.continue))(r, init, cont)
-            case m: CalcM.ProvideM[Nothing2T, R, SI, SM, EM, AM]           =>
+            case m: CalcM.ProvideM[Nothing2T, R, SI, SM, EM, AM]        =>
               type Cont[r] = Continue[am, em, sm, CalcM[Nothing2T, r, sm, SO, E, A]]
               val kcont = m.any.substitute[Cont](b1.continue)
               apply(m.inner.bind(kcont))(m.r, init, cont)
