@@ -9,14 +9,12 @@ trait Evallio[F[_]] {
   def eval[A](a: => A): F[A]
 }
 
-object Evallio extends LowPrioEvallio {
-  implicit def prioritized[F[_]: Delay]: Evallio[F] = new Evallio[F] {
+object Evallio extends EvallioInstances {
+  def byDelay[F[_]: Delay]: Evallio[F] = new Evallio[F] {
     def eval[A](a: => A): F[A] = Delay[F].delay(a)
   }
-}
 
-class LowPrioEvallio {
-  implicit def lowPrioEval[F[_]: Defer: Applicative]: Evallio[F] = new Evallio[F] {
+  def byDeferWithApplicative[F[_]: Defer: Applicative]: Evallio[F] = new Evallio[F] {
     def eval[A](a: => A): F[A] = Defer[F].defer(Applicative[F].pure(a))
   }
 }
