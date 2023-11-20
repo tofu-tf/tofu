@@ -226,7 +226,7 @@ object CalcM extends CalcMInstances {
             type Cont[r] = Continue[A1, E1, S1, CalcM[F, r, S1, S2, E, A]]
             val kcont = p.any.substitute[Cont](c1.continue)
             step(p.inner.bind[F, p.R1, E, S2, A](kcont), p.r, init)
-          case c2: Bound[F @unchecked, R @unchecked, S1 @unchecked, s2, ?, e2, ?, a2, ?]                                                            =>
+          case c2: Bound[F @unchecked, R @unchecked, S1 @unchecked, s2, ?, e2, ?, a2, ?]                           =>
             step(c2.src.bind(Continue.compose(c2.continue, c1.continue)), r, init)
         }
     }

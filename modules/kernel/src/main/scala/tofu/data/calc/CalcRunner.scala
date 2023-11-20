@@ -56,10 +56,10 @@ trait LowPriorRunner { self: CalcRunner.type =>
           type EM = em
           type AM = am
           b1.src match {
-            case res: CalcM.CalcMRes[R, SI, SM, EM, AM]                 =>
+            case res: CalcM.CalcMRes[R, SI, SM, EM, AM]                                                  =>
               val (st, next) = res.submit(r, init, b1.continue.withState[sm])
               apply(next)(r, st, cont)
-            case d: CalcM.Defer[Nothing2T, R, SI, SM, EM, AM]           =>
+            case d: CalcM.Defer[Nothing2T, R, SI, SM, EM, AM]                                            =>
               apply(d.runStep().bind(b1.continue))(r, init, cont)
             case m: CalcM.ProvideM[
                   Nothing2T @unchecked,
@@ -72,7 +72,7 @@ trait LowPriorRunner { self: CalcRunner.type =>
               type Cont[r] = Continue[am, em, sm, CalcM[Nothing2T, r, sm, SO, E, A]]
               val kcont = m.any.substitute[Cont](b1.continue)
               apply(m.inner.bind(kcont))(m.r, init, cont)
-            case sub: CalcM.Sub[Nothing2T @unchecked, ?, ?, ?, ?]                  => sub.fa
+            case sub: CalcM.Sub[Nothing2T @unchecked, ?, ?, ?, ?]                                        => sub.fa
             case b2: CalcM.Bound[Nothing2T @unchecked, R @unchecked, SI @unchecked, sp, ?, ep, ?, ap, ?] =>
               apply(b2.src.bind(Continue.compose(b2.continue, b1.continue)))(r, init, cont)
           }
