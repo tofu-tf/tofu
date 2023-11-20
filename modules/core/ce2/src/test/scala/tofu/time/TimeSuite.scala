@@ -3,11 +3,11 @@ package tofu.time
 import cats.data.ReaderT
 import cats.effect.{Concurrent, IO, Timer}
 
-import scala.annotation.nowarn
 import scala.concurrent.ExecutionContext
 import cats.effect.ContextShift
+import tofu.compat.unused
 
-@nowarn
+@unused
 class TimeSuite {
 
   implicit val ioTimer: Timer[IO]     = IO.timer(ExecutionContext.global)

@@ -6,10 +6,9 @@ import cats.effect.unsafe.IORuntime
 import cats.effect.{IO, Sync}
 import org.scalatest.funsuite.AnyFunSuite
 import tofu.syntax.monadic._
+import tofu.compat.unused
 
-import scala.annotation.nowarn
-
-@nowarn
+@unused
 class AtomSuite extends AnyFunSuite {
   implicit val iort: IORuntime = IORuntime.global
 

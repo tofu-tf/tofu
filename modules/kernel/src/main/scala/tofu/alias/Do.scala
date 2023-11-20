@@ -53,10 +53,10 @@ object DoMonad {
     ): F1[D] =
       F.!.ap2(fa.asInstanceOf[F1[(B, C) => D]])(fa, fb)
 
-    def whenM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], @unused212 ev: A <:< Boolean): F1[Unit] =
+    def whenM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], ev: A <:< Boolean): F1[Unit] =
       F.!.flatMap(fa)(a => if (ev(a)) F.!.void(fb) else F.!.unit)
 
-    def unlessM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], @unused212 ev: A <:< Boolean): F1[Unit] =
+    def unlessM[F1[x] >: F[x], B](fb: => F1[B])(implicit F: Do[F1], ev: A <:< Boolean): F1[Unit] =
       F.!.flatMap(fa)(a => if (ev(a)) F.!.unit else F.!.void(fb))
 
     def ifM[F1[x] >: F[x], B](fthen: => F1[B], felse: => F1[B])(implicit

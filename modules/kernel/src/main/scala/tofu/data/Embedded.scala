@@ -39,9 +39,9 @@ trait ExceptTInstances extends ExceptTInstances1 {
       def parallel   = par1
       def sequential = funk.funKFrom[ExceptTPar[G.F, E, *]](fx => Embedded(G.sequential(fromPar(fx))))
 
-      def monad = exceptTMonad[G, E](G.monad)
+      def monad: Monad[ExceptT[G, E, _]] = exceptTMonad[G, E](G.monad)
 
-      def applicative = new ParApplicative[G.F, E]()(G.applicative, E)
+      def applicative: Applicative[F] = new ParApplicative[G.F, E]()(G.applicative, E)
     }
 }
 trait ExceptTInstances1 {
@@ -119,9 +119,9 @@ trait ExceptTInstances1 {
       def parallel   = funk.funKFrom[ExceptT[G, E, *]](fx => toPar(fx.value))
       def sequential = funk.funK[ExceptTPar[G, E, *], ExceptT[G, E, *]](fx => fromPartoExcept(fx))
 
-      def monad = exceptTMonad[G, E]
+      def monad: Monad[ExceptT[G, E, _]] = exceptTMonad[G, E]
 
-      def applicative = new ParApplicative[G, E]
+      def applicative: Applicative[F] = new ParApplicative[G, E]
     }
 }
 

@@ -4,6 +4,7 @@ import tofu.compat.unused212
 
 import glass.PContains
 import tofu.data.Nothing2T
+import tofu.data.calc.StepResult.Now
 
 trait Continue[-A, -E, -S, +C] { self =>
   def success(s: S, a: A): C
@@ -47,8 +48,8 @@ object Continue {
 
   type StResult[A, E, S] = Continue[A, E, S, StepResult.Now[S, E, A]]
   private[this] def stepResult1[A, E, S]: StResult[A, E, S] = new StResult[A, E, S] {
-    override def success(s: S, a: A) = StepResult.Ok(s, a)
-    override def error(s: S, e: E)   = StepResult.Error(s, e)
+    override def success(s: S, a: A): Now[S, E, A] = StepResult.Ok(s, a)
+    override def error(s: S, e: E): Now[S, E, A]   = StepResult.Error(s, e)
   }
   private[this] val stepResultAny                           = stepResult1[Any, Any, Any]
   def stepResult[A, E, S]: StResult[A, E, S]                = stepResultAny.asInstanceOf[StResult[A, E, S]]
@@ -77,8 +78,8 @@ object Continue {
   type Swap[A, E, S] = Continue[A, E, S, CalcM[Nothing2T, Any, S, S, A, E]]
   private[this] def swap1[A, E, S]: Swap[A, E, S] =
     new Swap[A, E, S] {
-      override def success(s: S, a: A) = CalcM.Raise(a)
-      override def error(s: S, e: E)   = CalcM.Pure(e)
+      override def success(s: S, a: A): CalcM[Nothing2T, Any, S, S, A, E] = CalcM.Raise(a)
+      override def error(s: S, e: E): CalcM[Nothing2T, Any, S, S, A, E]   = CalcM.Pure(e)
     }
 
   private[this] val swapAny        = swap1[Any, Any, Any]
@@ -87,8 +88,8 @@ object Continue {
   type Update[A, E, SI, SO] = Continue[A, E, SI, CalcM[Nothing2T, Any, Any, SO, E, A]]
   def update[A, E, SI, SO](f: SI => SO): Update[A, E, SI, SO] =
     new Update[A, E, SI, SO] {
-      override def success(s: SI, a: A) = CalcM.set(f(s)) as_ a
-      override def error(s: SI, e: E)   = CalcM.set(f(s)).swap errorAs_ e
+      override def success(s: SI, a: A): CalcM[Nothing2T, Any, Any, SO, E, A] = CalcM.set(f(s)) as_ a
+      override def error(s: SI, e: E): CalcM[Nothing2T, Any, Any, SO, E, A]   = CalcM.set(f(s)).swap errorAs_ e
     }
 
   private[this] def biflatten1[F[+_, +_], R, SI, SO, E, A] =

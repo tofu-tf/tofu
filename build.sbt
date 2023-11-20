@@ -1,5 +1,7 @@
 import Publish._, Dependencies._
 import sbt.ModuleID
+import org.typelevel.scalacoptions.{ScalacOption, ScalaVersion, ScalacOptions}
+import scala.Ordering.Implicits._
 
 lazy val setMinorVersion = minorVersion := {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -11,17 +13,10 @@ lazy val setMinorVersion = minorVersion := {
 lazy val defaultSettings = Seq(
   scalaVersion       := Version.scala3,
   setMinorVersion,
-  defaultScalacOptions,
   scalacWarningConfig,
-  Compile / doc / scalacOptions -= "-Xfatal-warnings",
-  scalacOptions ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _))       => Seq("-Ykind-projector:underscores", "-Wunused:imports")
-      case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders")
-      case _                  => Nil
-    }
-  },
-  crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
+  Test / tpolecatExcludeOptions += ScalacOptions.warnNonUnitStatement,
+  Compile / doc / tpolecatExcludeOptions += ScalacOptions.fatalWarnings,
+  crossScalaVersions := Vector(Version.scala212, Version.scala213),
   libraryDependencies ++= {
     (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, n)) =>
@@ -33,7 +28,7 @@ lazy val defaultSettings = Seq(
       case _            => Seq()
     }) ++ Seq(scalatest, collectionCompat)
   }
-) ++ macros
+) ++ macros ++ defaultScalacOptions
 
 val modules = file("modules")
 
@@ -41,7 +36,8 @@ lazy val higherKindCore = project
   .in(modules / "kernel" / "higherKind")
   .settings(
     defaultSettings,
-    name := "tofu-core-higher-kind",
+    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
+    name               := "tofu-core-higher-kind",
     libraryDependencies ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) =>
@@ -57,7 +53,8 @@ lazy val kernel = project
   .dependsOn(higherKindCore)
   .settings(
     defaultSettings,
-    name := "tofu-kernel",
+    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
+    name               := "tofu-kernel",
     libraryDependencies += glassCore
   )
 
@@ -66,7 +63,8 @@ lazy val coreCE2 = project
   .dependsOn(kernel)
   .settings(
     defaultSettings,
-    name := "tofu-core-ce2",
+    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
+    name               := "tofu-core-ce2",
     libraryDependencies += catsEffect2
   )
 
@@ -86,7 +84,8 @@ lazy val coreCE3 = project
   .dependsOn(kernel)
   .settings(
     defaultSettings,
-    name := "tofu-core-ce3",
+    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
+    name               := "tofu-core-ce3",
     libraryDependencies += catsEffect3
   )
 
@@ -457,24 +456,24 @@ lazy val tofu = project
   )
   .dependsOn(coreModules.map(x => x: ClasspathDep[ProjectReference]): _*)
 
-lazy val defaultScalacOptions = scalacOptions := {
-  val tpolecatOptions = scalacOptions.value
-
-  val dropLints = Set(
-    "-Ywarn-dead-code",
-    "-Wdead-code" // ignore dead code paths where `Nothing` is involved
+lazy val defaultScalacOptions =
+  Seq(
+    tpolecatScalacOptions ++= Set(
+      ScalacOption("-Ykind-projector:underscores", _ >= ScalaVersion.V3_0_0),
+      ScalacOption("-P:kind-projector:underscore-placeholders", _ < ScalaVersion.V3_0_0),
+      ScalacOptions.source3,
+      ScalacOption("-Xmigration", _ < ScalaVersion.V3_0_0)
+    ),
+    tpolecatExcludeOptions ++= Set(ScalacOptions.warnDeadCode, ScalacOptions.privateWarnDeadCode),
+    tpolecatExcludeOptions ++= (
+      if (!sys.env.get("CI").contains("true") || (minorVersion.value == 12))
+        Set(ScalacOptions.fatalWarnings)
+      else
+        Set.empty
+    )
   )
 
-  val opts = tpolecatOptions.filterNot(dropLints)
-
-  // drop `-Xfatal-warnings` on dev and 2.12 CI
-  if (!sys.env.get("CI").contains("true") || (minorVersion.value == 12))
-    opts.filterNot(Set("-Xfatal-warnings"))
-  else
-    opts
-}
-
-lazy val scalacWarningConfig = scalacOptions += {
+lazy val scalacWarningConfig = tpolecatScalacOptions ++= {
   // // ignore unused imports that cannot be removed due to cross-compilation
   // val suppressUnusedImports = Seq(
   //   "scala/tofu/config/typesafe.scala"
@@ -486,13 +485,19 @@ lazy val scalacWarningConfig = scalacOptions += {
   val contextDeprecationInfo = "cat=deprecation&msg=^(.*((Has)|(With)|(Logging)).*)$:silent"
   val verboseWarnings        = "any:wv"
 
-  s"-Wconf:$contextDeprecationInfo,$verboseWarnings"
+  Set(
+    ScalacOption(s"-Wconf:$contextDeprecationInfo", _ >= ScalaVersion.V3_0_0),
+    ScalacOption(s"-Wconf:$contextDeprecationInfo,$verboseWarnings", _ < ScalaVersion.V3_0_0)
+  )
 }
 
 ThisBuild / libraryDependencySchemes += "io.circe" %% "circe-core" % "early-semver"
 
 lazy val macros = Seq(
-  scalacOptions ++= { if (minorVersion.value == 13) Seq("-Ymacro-annotations") else Seq() },
+  tpolecatScalacOptions += ScalacOption(
+    "-Ymacro-annotations",
+    _.isBetween(ScalaVersion.V2_13_0, ScalaVersion.V3_0_0)
+  ),
   libraryDependencies ++= { if (minorVersion.value == 12) Seq(compilerPlugin(macroParadise)) else Seq() }
 )
 

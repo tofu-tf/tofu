@@ -1,8 +1,8 @@
 package tofu
 
-import scala.annotation.nowarn
 import tofu.interop.CE2Kernel.CEExit
 import tofu.internal.carriers.FinallyCarrier2
+import tofu.compat.unused
 
 object GuaranteeSuite {
 
@@ -18,10 +18,10 @@ object GuaranteeSuite {
 
     implicitly[FinallyCarrier2.Aux[F, Throwable, CEExit[Throwable, _]]]
 
-    val a = implicitly[Finally[F, CEExit[Throwable, _]]]
+    @unused val a = implicitly[Finally[F, CEExit[Throwable, _]]]
 
     val xx                                           = summonFinally[F].some[CEExit[Throwable, _]]
-    @nowarn val yy: Finally[F, CEExit[Throwable, _]] = xx
+    @unused val yy: Finally[F, CEExit[Throwable, _]] = xx
 
     ()
   }

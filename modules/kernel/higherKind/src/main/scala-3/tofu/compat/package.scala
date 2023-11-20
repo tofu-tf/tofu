@@ -8,8 +8,7 @@ object `package` {
   type LazySeq[+A]   = LazyList[A]
   type NELazySeq[+A] = NonEmptyLazyList[A]
 
-  // this should be preferred over scala.annotation.unused, since it's tracked by -Wunused:nowarn
-  type unused = scala.annotation.nowarn
+  type unused = scala.annotation.unused
   val lazySeqInstances       = cats.instances.lazyList
   val LazySeq: LazyList.type = LazyList
 }

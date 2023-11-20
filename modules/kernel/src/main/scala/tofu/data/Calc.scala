@@ -131,10 +131,19 @@ object Calc {
 
   @tailrec def run[R, S1, S2, S3, E1, E2, A](calc: Calc[R, S1, S3, E2, A], r: R, init: S1): (S3, Either[E2, A]) =
     calc match {
-      case res: CalcRes[R, S1, S3, E2, A]        =>
+      case res: CalcRes[R, S1, S3, E2, A] =>
         res.submit(r, init, (s2, e) => (s2, Left(e)), (s2, a) => (s2, Right(a)))
-      case Defer(f)                              => run(f(), r, init)
-      case c: Cont[R, S1, S2, S3, E1, E2, S2, A] =>
+      case Defer(f)                       => run(f(), r, init)
+      case c: Cont[
+            R @unchecked,
+            S1 @unchecked,
+            S2 @unchecked,
+            S3 @unchecked,
+            E1 @unchecked,
+            E2 @unchecked,
+            S2 @unchecked,
+            A @unchecked
+          ] =>
         c.src match {
           case res: CalcRes[R, S1, c.MidState, c.MidErr, c.MidState] =>
             val (sm, next) =

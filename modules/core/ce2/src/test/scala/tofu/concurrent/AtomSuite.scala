@@ -3,12 +3,12 @@ package tofu.concurrent
 import cats.effect.Sync
 import cats.effect.IO
 import cats.data.ReaderT
-import scala.annotation.nowarn
 import org.scalatest.funsuite.AnyFunSuite
 import cats.Monad
 import tofu.syntax.monadic._
+import tofu.compat.unused
 
-@nowarn
+@unused
 class AtomSuite extends AnyFunSuite {
   def summonInstance[I[_]: Sync, F[_]: Sync] = {
     implicitly[MakeAtom[I, F]]

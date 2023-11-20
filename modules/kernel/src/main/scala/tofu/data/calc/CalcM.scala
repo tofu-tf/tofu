@@ -193,30 +193,40 @@ object CalcM extends CalcMInstances {
   @tailrec
   def step[F[+_, +_], R, S1, S2, E, A](calc: CalcM[F, R, S1, S2, E, A], r: R, init: S1): StepResult[F, S2, E, A] =
     calc match {
-      case res: CalcMRes[R, S1, S2, E, A]            => res.submit(r, init, Continue.stepResult)
-      case d: Defer[F, R, S1, S2, E, A]              => step(d.runStep(), r, init)
-      case sub: Sub[F, S1, S2, E, A]                 =>
+      case res: CalcMRes[R, S1, S2, E, A]                                                   => res.submit(r, init, Continue.stepResult)
+      case d: Defer[F, R, S1, S2, E, A]                                                     => step(d.runStep(), r, init)
+      case sub: Sub[F @unchecked, S1 @unchecked, S2 @unchecked, E @unchecked, A @unchecked] =>
         type Cont[-S] = Continue[A, E, Any, CalcM[Nothing2T, Any, S, S2, E, A]]
         val cont = sub.iss.substitute[Cont](Continue.result[A, E, S2])
         StepResult.Wrap[F, R, S1, S2, E, E, A, A](r, init, sub.fa, cont)
-      case p: Provide[F, r, S1, S2, E, A]            => step[F, r, S1, S2, E, A](p.inner, p.r, init)
-      case c1: Bound[F, R, S1, S1, S2, e1, E, a1, A] =>
+      case p: Provide[F, r, S1, S2, E, A]                                                   => step[F, r, S1, S2, E, A](p.inner, p.r, init)
+      case c1: Bound[
+            F @unchecked,
+            R @unchecked,
+            S1 @unchecked,
+            S1 @unchecked,
+            S2 @unchecked,
+            e1,
+            E @unchecked,
+            a1,
+            A @unchecked
+          ] =>
         type E1 = e1
         type A1 = a1
         c1.src match {
-          case res: CalcMRes[R, S1, c1.MidState, E1, A1] =>
+          case res: CalcMRes[R, S1, c1.MidState, E1, A1]                                                           =>
             val (sm, next) = res.submit(r, init, c1.continue.withState[S1])
             step[F, R, S1, S2, E, A](next, r, sm)
-          case d: Defer[F, R, S1, ?, ?, ?]               => step(d.runStep().bind(c1.continue), r, init)
-          case sub: Sub[F, S1, S1, c1.MidErr, c1.MidVal] =>
+          case d: Defer[F, R, S1, ?, ?, ?]                                                                         => step(d.runStep().bind(c1.continue), r, init)
+          case sub: Sub[F @unchecked, S1 @unchecked, S1 @unchecked, c1.MidErr @unchecked, c1.MidVal @unchecked]    =>
             type Cont[-S] = Continue[a1, e1, S, CalcM[F, R, S, S2, E, A]]
             val cont1 = sub.iss.substitute[Cont](c1.continue)
             StepResult.Wrap[F, R, S1, S2, e1, E, a1, A](r, init, sub.fa, cont1)
-          case p: ProvideM[F, R, S1, S1, E1, A1]         =>
+          case p: ProvideM[F @unchecked, R @unchecked, S1 @unchecked, S1 @unchecked, E1 @unchecked, A1 @unchecked] =>
             type Cont[r] = Continue[A1, E1, S1, CalcM[F, r, S1, S2, E, A]]
             val kcont = p.any.substitute[Cont](c1.continue)
             step(p.inner.bind[F, p.R1, E, S2, A](kcont), p.r, init)
-          case c2: Bound[F, R, S1, s2, ?, e2, ?, a2, ?]  =>
+          case c2: Bound[F @unchecked, R @unchecked, S1 @unchecked, s2, ?, e2, ?, a2, ?]                                                            =>
             step(c2.src.bind(Continue.compose(c2.continue, c1.continue)), r, init)
         }
     }

@@ -20,7 +20,7 @@ final class PerformerContravariantK[F[_], Cancel]
 
 final class PerformViaContravariantK[F[_], Cancel]
     extends ContravariantK[({ type L[x[_]] = PerformVia[F, x, Cancel] })#L] {
-  def contramapK[C1[_], C2[_]](af: PerformVia[F, C1, Cancel])(fk: C2 ~> C1) =
+  def contramapK[C1[_], C2[_]](af: PerformVia[F, C1, Cancel])(fk: C2 ~> C1): PerformVia[F, C2, Cancel] =
     new PerformViaMappedPerformer(af, fk)
 }
 

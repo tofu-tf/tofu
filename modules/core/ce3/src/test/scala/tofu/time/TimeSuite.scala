@@ -3,9 +3,9 @@ package tofu.time
 import cats.data.ReaderT
 import cats.effect.{IO, Temporal}
 
-import scala.annotation.nowarn
+import tofu.compat.unused
 
-@nowarn
+@unused
 class TimeSuite {
 
   def summon[F[_]: Temporal] = {

@@ -12,7 +12,7 @@ object FinallyCarrier2 extends FinallyCarrier2Macro {
 
   trait Impl[F[_], E, Ex[_]] extends FinallyCarrier2[F, E] with Finally[F, Ex] {
     type Exit[a] = Ex[a]
-    def content = this
+    def content: Finally[F, Ex] = this
   }
 
 }
@@ -27,7 +27,7 @@ object FinallyCarrier3 extends FinallyCarrier3Macro {
 
   trait Impl[F[_], E, Ex[_]] extends FinallyCarrier3[F, E] with Finally[F, Ex] {
     type Exit[a] = Ex[a]
-    def content = this
+    def content: Finally[F, Exit] = this
   }
 
 }

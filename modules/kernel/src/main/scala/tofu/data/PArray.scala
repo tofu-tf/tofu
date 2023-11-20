@@ -10,7 +10,7 @@ object PArray extends Newtype1Covariant {
 
   val empty: PArray[Nothing] = fromArray(Array.empty[Any])
 
-  def apply[A](xs: A*): Type[A] = fromArray((xs: Seq[Any]).toArray)
+  def apply[A](xs: A*): Type[A] = fromArray(xs.toArray[Any])
 
   def fromFoldable[F[_]: Foldable, A](fa: F[A]): PArray[A] =
     fromArray(fa.foldLeft(Array.newBuilder[Any])((bldr, a) => { bldr += a }).result())
