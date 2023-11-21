@@ -13,4 +13,4 @@ trait ScopedCarrier3Macro:
   inline given asyncExecute[F[_]]: ScopedCarrier3[Scoped.Main, F]       =
     Interop.delegate1[F, ScopedCarrier3[Scoped.Main, F]]("tofu.interop.CE3Kernel.asyncExecute")
   inline given blockerExecute[F[_]]: ScopedCarrier3[Scoped.Blocking, F] =
-    Interop.delegate1[F, ScopedCarrier3[Scoped.Blocking, F]]("tofu.interop.CE3Kernel.asyncExecute")
+    Interop.delegate1[F, ScopedCarrier3[Scoped.Blocking, F]]("tofu.interop.CE3Kernel.blockerExecute")
