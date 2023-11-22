@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import derevo.derive
+import ch.qos.logback.classic.LoggerContext
 import org.slf4j.LoggerFactory
 import tofu.logging.derivation.loggable
 import zio.{Clock, FiberRef, LogSpan, ULayer, ZIO, ZLayer}
