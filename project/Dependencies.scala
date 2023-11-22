@@ -30,13 +30,13 @@ object Dependencies {
 
     val derevo = "0.13.0"
 
-    val slf4j = "1.7.36"
+    val slf4j = "2.0.7"
 
     val fs2 = "2.5.11"
 
     val fs2CE3 = "3.7.0"
 
-    val logback = "1.2.12"
+    val logback = "1.3.11"
 
     val monix = "3.4.1"
 

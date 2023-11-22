@@ -13,7 +13,6 @@ case object ZLogsSpec extends ZIOSpecDefault {
 
   val loggerName: String = this.getClass.getName.replace("$", "") // tofu.logging.zlogs.ZLogsSpec
 
-  println("loggerName:")
   println(loggerName)
 
   val myLoggerName = "myLogger"

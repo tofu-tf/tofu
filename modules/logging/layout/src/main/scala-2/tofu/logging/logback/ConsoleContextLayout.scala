@@ -5,6 +5,7 @@ import java.util
 import ch.qos.logback.classic.{Level, PatternLayout}
 import ch.qos.logback.classic.spi.{ILoggingEvent, IThrowableProxy, LoggerContextVO}
 import org.slf4j.Marker
+import org.slf4j.event.KeyValuePair
 import tofu.logging.LoggedValue
 import tofu.logging.impl.ContextMarker
 
@@ -38,18 +39,21 @@ class WrappedEvent(event: ILoggingEvent) extends ILoggingEvent {
     map
   }
 
-  def getThreadName: String                   = event.getThreadName
-  def getLevel: Level                         = event.getLevel
-  def getMessage: String                      = event.getMessage
-  def getArgumentArray: Array[AnyRef]         = event.getArgumentArray
-  def getFormattedMessage: String             = event.getFormattedMessage
-  def getLoggerName: String                   = event.getLoggerName
-  def getLoggerContextVO: LoggerContextVO     = event.getLoggerContextVO
-  def getThrowableProxy: IThrowableProxy      = event.getThrowableProxy
-  def getCallerData: Array[StackTraceElement] = event.getCallerData
-  def hasCallerData: Boolean                  = event.hasCallerData
-  def getMarker: Marker                       = event.getMarker
-  def getMdc: util.Map[String, String]        = getMDCPropertyMap
-  def getTimeStamp: Long                      = event.getTimeStamp
-  def prepareForDeferredProcessing(): Unit    = event.prepareForDeferredProcessing()
+  def getThreadName: String                     = event.getThreadName
+  def getLevel: Level                           = event.getLevel
+  def getMessage: String                        = event.getMessage
+  def getArgumentArray: Array[AnyRef]           = event.getArgumentArray
+  def getFormattedMessage: String               = event.getFormattedMessage
+  def getLoggerName: String                     = event.getLoggerName
+  def getLoggerContextVO: LoggerContextVO       = event.getLoggerContextVO
+  def getThrowableProxy: IThrowableProxy        = event.getThrowableProxy
+  def getCallerData: Array[StackTraceElement]   = event.getCallerData
+  def hasCallerData: Boolean                    = event.hasCallerData
+  def getMarkerList: util.List[Marker]          = event.getMarkerList
+  def getMdc: util.Map[String, String]          = getMDCPropertyMap
+  def getTimeStamp: Long                        = event.getTimeStamp
+  def getNanoseconds: Int                       = event.getNanoseconds
+  def getSequenceNumber: Long                   = event.getSequenceNumber
+  def getKeyValuePairs: util.List[KeyValuePair] = event.getKeyValuePairs
+  def prepareForDeferredProcessing(): Unit      = event.prepareForDeferredProcessing()
 }
