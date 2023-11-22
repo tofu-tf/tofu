@@ -8,11 +8,11 @@ import scala.annotation.unused
 
 object ZLogging {
 
-  type ZMake[R] = Logging.Make[URIO[R, _]]
+  type ZMake[R] = Logging.Make[URIO[R, *]]
 
   type Make = Logging.Make[UIO]
 
-  def empty[R]: ZLogging[R] = new Logging[URIO[R, _]] {
+  def empty[R]: ZLogging[R] = new Logging[URIO[R, *]] {
     override def write(level: Logging.Level, message: String, values: LoggedValue*): URIO[R, Unit] = ZIO.unit
   }
 

@@ -36,8 +36,8 @@ lazy val higherKindCore = project
   .in(modules / "kernel" / "higherKind")
   .settings(
     defaultSettings,
-    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
-    name               := "tofu-core-higher-kind",
+    scala3MigratedModuleOptions,
+    name := "tofu-core-higher-kind",
     libraryDependencies ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) =>
@@ -53,8 +53,8 @@ lazy val kernel = project
   .dependsOn(higherKindCore)
   .settings(
     defaultSettings,
-    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
-    name               := "tofu-kernel",
+    scala3MigratedModuleOptions,
+    name := "tofu-kernel",
     libraryDependencies += glassCore
   )
 
@@ -63,8 +63,8 @@ lazy val coreCE2 = project
   .dependsOn(kernel)
   .settings(
     defaultSettings,
-    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
-    name               := "tofu-core-ce2",
+    scala3MigratedModuleOptions,
+    name := "tofu-core-ce2",
     libraryDependencies += catsEffect2
   )
 
@@ -84,8 +84,8 @@ lazy val coreCE3 = project
   .dependsOn(kernel)
   .settings(
     defaultSettings,
-    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3),
-    name               := "tofu-core-ce3",
+    scala3MigratedModuleOptions,
+    name := "tofu-core-ce3",
     libraryDependencies += catsEffect3
   )
 
@@ -270,7 +270,12 @@ lazy val zio1Core =
 lazy val zio2Core =
   project
     .in(modules / "interop" / "zio2" / "core")
-    .settings(defaultSettings, libraryDependencies ++= List(zio2, zio2Cats), name := "tofu-zio2-core")
+    .settings(
+      defaultSettings,
+      scala3MigratedModuleOptions,
+      libraryDependencies ++= List(zio2, zio2Cats),
+      name := "tofu-zio2-core"
+    )
     .dependsOn(coreCE3)
 
 lazy val zio1Logging =
@@ -458,12 +463,6 @@ lazy val tofu = project
 
 lazy val defaultScalacOptions =
   Seq(
-    tpolecatScalacOptions ++= Set(
-      ScalacOption("-Ykind-projector:underscores", _ >= ScalaVersion.V3_0_0),
-      ScalacOption("-P:kind-projector:underscore-placeholders", _ < ScalaVersion.V3_0_0),
-      ScalacOptions.source3,
-      ScalacOption("-Xmigration", _ < ScalaVersion.V3_0_0)
-    ),
     tpolecatExcludeOptions ++= Set(ScalacOptions.warnDeadCode, ScalacOptions.privateWarnDeadCode),
     tpolecatExcludeOptions ++= (
       if (!sys.env.get("CI").contains("true") || (minorVersion.value == 12))
@@ -471,6 +470,17 @@ lazy val defaultScalacOptions =
       else
         Set.empty
     )
+  )
+
+lazy val scala3MigratedModuleOptions =
+  Seq(
+    tpolecatScalacOptions ++= Set(
+      ScalacOption("-Ykind-projector:underscores", _ >= ScalaVersion.V3_0_0),
+      ScalacOption("-P:kind-projector:underscore-placeholders", _ < ScalaVersion.V3_0_0),
+      ScalacOptions.source3,
+      ScalacOption("-Xmigration", _ < ScalaVersion.V3_0_0)
+    ),
+    crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3)
   )
 
 lazy val scalacWarningConfig = tpolecatScalacOptions ++= {
