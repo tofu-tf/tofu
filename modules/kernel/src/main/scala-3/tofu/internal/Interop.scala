@@ -67,18 +67,7 @@ object Interop {
           case _             =>
             withExplicitArgs
 
-        // for some reason lambda type like this `FinallyCarrier2.Aux[F, Throwable, [x] =>> CE2Kernel.CEExit[java.lang.Throwable, x]]`
-        // has no subtyping relations with type `FinallyCarrier2.Aux[F, Throwable, [x] =>> Any]` and `.asExprOf[X]` throws java.lang.Exception: Expr cast exception
-
-        // For such cases old and classic `asInstanceOf` helps with extra casting.
-
-        val asInstanceOf = TypeRepr.of[AnyRef].typeSymbol.methodMember("asInstanceOf").head
-        val casted       =
-          withImplicitArgs
-            .select(asInstanceOf)
-            .appliedToType(TypeRepr.of[X])
-
-        casted.asExprOf[X]
+        withImplicitArgs.asExprOf[X]
     } catch {
       case e: scala.quoted.runtime.StopMacroExpansion =>
         throw e
