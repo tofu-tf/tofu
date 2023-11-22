@@ -432,6 +432,7 @@ lazy val docs = project // new documentation project
   .settings(
     noPublishSettings,
     macros,
+    tpolecatExcludeOptions ++= Set(ScalacOptions.fatalWarnings, ScalacOptions.warnError),
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
