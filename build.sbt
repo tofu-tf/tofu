@@ -3,10 +3,8 @@ import sbt.ModuleID
 import org.typelevel.scalacoptions.{ScalacOption, ScalaVersion, ScalacOptions}
 import scala.Ordering.Implicits._
 
-ThisBuild / useLog4J := false
-
 lazy val defaultSettings = Seq(
-  scalaVersion       := Version.scala3,
+  scalaVersion       := Version.scala213,
   scalacWarningConfig,
   Test / tpolecatExcludeOptions += ScalacOptions.warnNonUnitStatement,
   Compile / doc / tpolecatExcludeOptions ++= Set(ScalacOptions.fatalWarnings, ScalacOptions.warnError),

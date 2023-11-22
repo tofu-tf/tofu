@@ -50,7 +50,8 @@ case object ZLogsSpec extends ZIOSpecDefault {
           testCount
         )
       }.provide(
-        Runtime.removeDefaultLoggers >>> TofuZLogger.addToRuntime,
+        Runtime.removeDefaultLoggers,
+        TofuZLogger.addToRuntime,
         LogAppender.layer(loggerName)
       ),
       test("TofuZLogger uses user-defined logger name") {
@@ -69,7 +70,8 @@ case object ZLogsSpec extends ZIOSpecDefault {
           }
         ) @@ ZLogAnnotation.loggerName(myLoggerName)
       }.provide(
-        Runtime.removeDefaultLoggers >>> TofuZLogger.addToRuntime,
+        Runtime.removeDefaultLoggers,
+        TofuZLogger.addToRuntime,
         LogAppender.layer(myLoggerName)
       ),
       test("ZLogs") {
