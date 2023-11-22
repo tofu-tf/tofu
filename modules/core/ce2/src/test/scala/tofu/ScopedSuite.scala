@@ -6,13 +6,14 @@ import scala.concurrent.ExecutionContext
 import cats.effect.Blocker
 import tofu.syntax.scoped.*
 import tofu.syntax.monadic.*
-import tofu.compat.unused
+import scala.annotation.nowarn
 import scala.concurrent.Future
 
 class ScopedSuite {
+  @nowarn("cat=unused-params")
   def doSomething[F[_]: ContextShift: Async, A](fa: F[A], ea: => A)(calcEc: ExecutionContext)(implicit
-      @unused ec: ExecutionContext,
-      @unused block: Blocker
+      ec: ExecutionContext,
+      block: Blocker
   ): F[List[A]] = {
     implicit val exec: CalcExec[F] = Scoped.makeExecuteCE2(calcEc)
 

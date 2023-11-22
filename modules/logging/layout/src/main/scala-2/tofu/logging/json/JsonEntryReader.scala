@@ -23,7 +23,7 @@ trait JsonEntryReader {
       ): List[JsonEntry] =
         it.currentToken() match {
           case token if token.isObjectEnd =>
-            it.nextToken()
+            val _ = it.nextToken()
             builder.result()
           case token if token.isFieldName =>
             val name          = it.fieldName()

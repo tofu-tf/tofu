@@ -7,6 +7,7 @@ import tofu._
 import zio._
 
 import scala.annotation.nowarn
+import tofu.compat.unused212
 
 object ZioInstancesSuite {
 
@@ -42,7 +43,7 @@ object ZioInstancesSuite {
     ()
   }
 
-  @nowarn("cat=unused-locals")
+  @unused212
   def summonZioInstances[E, Ctx: Tag](): Unit = {
     type ZContext = Has[Ctx]
 

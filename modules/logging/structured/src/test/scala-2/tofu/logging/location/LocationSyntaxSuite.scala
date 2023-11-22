@@ -16,7 +16,7 @@ object WriterLogs extends Logs[Id, Writer[List[String], *]] {
 
 class TestService {
   type Run[A] = Writer[List[String], A]
-  implicit val logger = WriterLogs.byName("TestLogger")
+  implicit val logger: Logging[Writer[List[String], *]] = WriterLogs.byName("TestLogger")
 
   def sayHello(name: String): Run[String] =
     for {
