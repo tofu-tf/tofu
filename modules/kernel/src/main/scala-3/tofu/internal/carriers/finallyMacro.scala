@@ -8,7 +8,7 @@ trait FinallyCarrier2Macro extends FinallyCarrier2MacroLowLevel:
   inline given fromBracketAny[F[_], E]: FinallyCarrier2.Aux[F, E, [x] =>> Any] =
     Interop
       .delegate1_0[F, E, FinallyCarrier2[F, E]](FinallyCarrier2Macro.method)
-      .asInstanceOf[FinallyCarrier2.Aux[F, E, [x] =>> Any]]
+      .widen
 
 trait FinallyCarrier2MacroLowLevel:
   inline given fromBracket[F[_], E, Exit[_]]: FinallyCarrier2.Aux[F, E, Exit] =
@@ -21,7 +21,7 @@ trait FinallyCarrier3Macro extends FinallyCarrier3MacroLowLevel:
   inline given fromBracketAny[F[_], E]: FinallyCarrier3.Aux[F, E, [x] =>> Any] =
     Interop
       .delegate1_0[F, E, FinallyCarrier3[F, E]](FinallyCarrier3Macro.method)
-      .asInstanceOf[FinallyCarrier3.Aux[F, E, [x] =>> Any]]
+      .widen
 
 trait FinallyCarrier3MacroLowLevel:
   inline given fromBracket[F[_], E, Exit[_]]: FinallyCarrier3.Aux[F, E, Exit] =
