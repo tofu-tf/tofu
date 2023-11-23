@@ -5,6 +5,9 @@ import tofu.Finally
 trait FinallyCarrier2[F[_], E] {
   type Exit[_]
   def content: Finally[F, Exit]
+
+  def widen[Ex[x] >: Exit[x]]: FinallyCarrier2.Aux[F, E, Ex] =
+    this.asInstanceOf[FinallyCarrier2.Aux[F, E, Ex]]
 }
 
 object FinallyCarrier2 extends FinallyCarrier2Macro {
@@ -20,6 +23,9 @@ object FinallyCarrier2 extends FinallyCarrier2Macro {
 trait FinallyCarrier3[F[_], E] {
   type Exit[_]
   def content: Finally[F, Exit]
+
+  def widen[Ex[x] >: Exit[x]]: FinallyCarrier3.Aux[F, E, Ex] =
+    this.asInstanceOf[FinallyCarrier3.Aux[F, E, Ex]]
 }
 
 object FinallyCarrier3 extends FinallyCarrier3Macro {
