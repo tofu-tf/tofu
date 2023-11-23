@@ -7,7 +7,7 @@ lazy val defaultSettings = Seq(
   scalaVersion       := Version.scala213,
   scalacWarningConfig,
   Test / tpolecatExcludeOptions += ScalacOptions.warnNonUnitStatement,
-  Compile / doc / tpolecatExcludeOptions ++= Set(ScalacOptions.fatalWarnings, ScalacOptions.warnError),
+  Compile / doc / tpolecatExcludeOptions ++= fatalWarningsOptions,
   crossScalaVersions := Vector(Version.scala212, Version.scala213),
   libraryDependencies ++= {
     (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -432,7 +432,7 @@ lazy val docs = project // new documentation project
   .settings(
     noPublishSettings,
     macros,
-    tpolecatExcludeOptions ++= Set(ScalacOptions.fatalWarnings, ScalacOptions.warnError),
+    tpolecatExcludeOptions ++= fatalWarningsOptions,
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
@@ -459,8 +459,8 @@ lazy val defaultScalacOptions =
     tpolecatExcludeOptions ++= Set(ScalacOptions.warnDeadCode, ScalacOptions.privateWarnDeadCode),
     tpolecatExcludeOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 12))                            => Set(ScalacOptions.fatalWarnings, ScalacOptions.warnError)
-        case _ if !sys.env.get("CI").contains("true") => Set(ScalacOptions.fatalWarnings, ScalacOptions.warnError)
+        case Some((2, 12))                            => fatalWarningsOptions
+        case _ if !sys.env.get("CI").contains("true") => fatalWarningsOptions
         case _                                        => Set.empty
       }
     }
@@ -502,6 +502,9 @@ lazy val scalacWarningConfig = tpolecatScalacOptions ++= {
     ScalacOption(s"-Wconf:$deprecationInfo,$verboseWarnings", _ < ScalaVersion.V2_13_0)
   )
 }
+
+lazy val fatalWarningsOptions =
+  Set(ScalacOptions.fatalWarnings, ScalacOptions.warnError)
 
 ThisBuild / libraryDependencySchemes += "io.circe" %% "circe-core" % "early-semver"
 
