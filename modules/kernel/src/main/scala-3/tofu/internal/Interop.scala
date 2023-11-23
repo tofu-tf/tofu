@@ -46,26 +46,27 @@ object Interop {
 
       if !symExists then report.errorAndAbort("Symbol does not exists")
       else
-        val wtf              = Ident(sym.termRef)
-        val withTypes        = wtf.appliedToTypeTrees(tps.toList)
+        val methodIdent      = Ident(sym.termRef)
+        val withTypes        = methodIdent.appliedToTypeTrees(tps.toList)
         val withExplicitArgs =
           if args.nonEmpty then withTypes.appliedToArgs(args)
           else withTypes
 
-        val withImplicitArgs = withExplicitArgs.tpe match
-          case t: LambdaType =>
-            val summonedInst = t.paramTypes.map(t =>
-              Implicits.search(t) match
-                case result: ImplicitSearchSuccess =>
-                  result.tree
-                case _                             =>
-                  report.errorAndAbort(
-                    s"Applying definition need extra implicit arguments. Cannot find an implicit instance for type ${t.show}."
-                  )
-            )
-            withExplicitArgs.appliedToArgs(summonedInst)
-          case _             =>
-            withExplicitArgs
+        val withImplicitArgs =
+          withExplicitArgs.tpe match
+            case t: LambdaType =>
+              val summonedInst = t.paramTypes.map(t =>
+                Implicits.search(t) match
+                  case result: ImplicitSearchSuccess =>
+                    result.tree
+                  case _                             =>
+                    report.errorAndAbort(
+                      s"Applying definition need extra implicit arguments. Cannot find an implicit instance for type ${t.show}."
+                    )
+              )
+              withExplicitArgs.appliedToArgs(summonedInst)
+            case _             =>
+              withExplicitArgs
 
         withImplicitArgs.asExprOf[X]
     } catch {
