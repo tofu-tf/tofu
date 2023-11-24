@@ -16,7 +16,7 @@ jobs:
     name: Build and Test
     strategy:
       matrix:
-        scala: [2.13.x, 2.12.x]
+        scala: [2.13.x, 2.12.x, 3.3.x]
         java: [8, 17]
     runs-on: ubuntu-latest
     steps:
@@ -63,4 +63,4 @@ jobs:
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-        run: sbt ++2.13.x ci-release
+        run: sbt +ci-release
