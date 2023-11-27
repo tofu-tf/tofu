@@ -3,16 +3,40 @@ import sbt.ModuleID
 import org.typelevel.scalacoptions.{ScalacOption, ScalaVersion, ScalacOptions}
 import scala.Ordering.Implicits._
 import sbt.internal._
+import sbt.Reference.display
+import complete.DefaultParsers._
+import sbt.librarymanagement.CrossVersion.{binaryScalaVersion, partialVersion}
 
-lazy val scala2Versions = List(Version.scala212, Version.scala213)
-lazy val scala3Versions = List(Version.scala212, Version.scala213, Version.scala3)
+lazy val scala2Versions     = List(Version.scala212, Version.scala213)
+lazy val scala2And3Versions = scala2Versions ::: List(Version.scala3)
+
+val scopesDescription = s"Scala version can be: ${scala2And3Versions.mkString}"
+val testScoped        = inputKey[Unit](s"Run tests in the given scope. Usage: testScoped [scala version]. $scopesDescription")
+
+def filterByScalaVersion(scalaVersionFilter: String) = {
+  val scalaVersion =
+    scala2And3Versions
+      .filter(_.startsWith(scalaVersionFilter))
+      .headOption
+      .getOrElse(
+        sys.error(
+          s"invalid scala version value: $scalaVersionFilter, please use one of: ${scala2And3Versions.mkString}"
+        )
+      )
+
+  ScopeFilter(
+    inProjects(
+      allModules
+        .flatMap(_.filterProjects(Seq(VirtualAxis.scalaABIVersion(scalaVersion), VirtualAxis.jvm)))
+        .map(x => x: ProjectReference): _*
+    )
+  )
+}
 
 lazy val defaultSettings = Seq(
-  scalaVersion := Version.scala213,
   scalacWarningConfig,
   Test / tpolecatExcludeOptions += ScalacOptions.warnNonUnitStatement,
   Compile / doc / tpolecatExcludeOptions ++= fatalWarningsOptions,
-  // crossScalaVersions := scala2Versions,
   libraryDependencies ++= {
     (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, n)) =>
@@ -43,7 +67,7 @@ lazy val higherKindCore = projectMatrix
       }
     },
   )
-  .jvmPlatform(scala3Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
 
 lazy val kernel = projectMatrix
   .in(modules / "kernel")
@@ -53,7 +77,7 @@ lazy val kernel = projectMatrix
     name := "tofu-kernel",
     libraryDependencies += glassCore
   )
-  .jvmPlatform(scala3Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(higherKindCore)
 
 lazy val coreCE2 = projectMatrix
@@ -64,20 +88,19 @@ lazy val coreCE2 = projectMatrix
     name := "tofu-core-ce2",
     libraryDependencies += catsEffect2
   )
-  .jvmPlatform(scala3Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(kernel)
 
-lazy val concurrentCE2 =
-  projectMatrix
-    .in(modules / "core" / "concurrent-ce2")
-    .settings(
-      defaultSettings,
-      libraryDependencies ++= Seq(catsEffect2, catsTaglessMacros),
-      libraryDependencies ++= Seq(simulacrum, derevoTagless, glassMacro).map(_ % Test),
-      name := "tofu-concurrent-ce2",
-    )
-    .jvmPlatform(scala2Versions)
-    .dependsOn(coreCE2, derivation % "compile->test")
+lazy val concurrentCE2 = projectMatrix
+  .in(modules / "core" / "concurrent-ce2")
+  .settings(
+    defaultSettings,
+    libraryDependencies ++= Seq(catsEffect2, catsTaglessMacros),
+    libraryDependencies ++= Seq(simulacrum, derevoTagless, glassMacro).map(_ % Test),
+    name := "tofu-concurrent-ce2",
+  )
+  .jvmPlatform(scala2Versions)
+  .dependsOn(coreCE2, derivation % "compile->test")
 
 lazy val coreCE3 = projectMatrix
   .in(modules / "core" / "ce3")
@@ -87,7 +110,7 @@ lazy val coreCE3 = projectMatrix
     name := "tofu-core-ce3",
     libraryDependencies += catsEffect3
   )
-  .jvmPlatform(scala3Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(kernel)
 
 lazy val kernelCatsMtlInterop = projectMatrix
@@ -202,16 +225,6 @@ lazy val loggingEnumeratum = projectMatrix
   .jvmPlatform(scala2Versions)
   .dependsOn(loggingStr)
 
-// lazy val allLoggingModuleRefs =
-//   loggingStr.projectRefs ++
-//     loggingDer.projectRefs ++
-//     loggingLayout.projectRefs ++
-//     loggingShapeless.projectRefs ++
-//     loggingRefined.projectRefs ++
-//     loggingLog4Cats.projectRefs ++
-//     loggingLog4CatsLegacy.projectRefs ++
-//     loggingLogstashLogback.projectRefs
-
 lazy val logging = projectMatrix
   .in(modules / "logging")
   .aggregate(
@@ -222,14 +235,14 @@ lazy val logging = projectMatrix
     loggingRefined,
     loggingLog4Cats,
     loggingLog4CatsLegacy,
-    loggingLogstashLogback
+    loggingLogstashLogback,
   )
   .settings(
-    // defaultSettings,
+    defaultSettings,
     name := "tofu-logging"
   )
-  .jvmPlatform(scala2Versions)
   .dependsOn(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
+  .jvmPlatform(scala2Versions)
 
 val util = modules / "util"
 
@@ -255,78 +268,73 @@ lazy val observable = projectMatrix
 
 lazy val config = projectMatrix
   .in(util / "config")
-  .dependsOn(coreCE2, concurrentCE2)
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo, glassCore),
     name := "tofu-config",
   )
   .jvmPlatform(scala2Versions)
+  .dependsOn(coreCE2, concurrentCE2)
 
 lazy val memo = projectMatrix
   .in(util / "memo")
-  .dependsOn(coreCE2, concurrentCE2)
   .settings(
     defaultSettings,
     libraryDependencies ++= Seq(catsCore, catsEffect2),
     name := "tofu-memo"
   )
   .jvmPlatform(scala2Versions)
+  .dependsOn(coreCE2, concurrentCE2)
 
-lazy val derivation =
-  projectMatrix
-    .in(modules / "derivation")
-    .settings(
-      defaultSettings,
-      libraryDependencies ++= Seq(magnolia, derevo, catsTaglessMacros),
-      name := "tofu-derivation",
-    )
-    .jvmPlatform(scala2Versions)
-    .dependsOn(kernel)
+lazy val derivation = projectMatrix
+  .in(modules / "derivation")
+  .settings(
+    defaultSettings,
+    libraryDependencies ++= Seq(magnolia, derevo, catsTaglessMacros),
+    name := "tofu-derivation",
+  )
+  .jvmPlatform(scala2Versions)
+  .dependsOn(kernel)
 
 val zioInterop = modules / "interop" / "zio1"
 
-lazy val zio1Core =
-  projectMatrix
-    .in(zioInterop / "core")
-    .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), name := "tofu-zio-core")
-    .jvmPlatform(scala2Versions)
-    .dependsOn(coreCE2, concurrentCE2)
+lazy val zio1Core = projectMatrix
+  .in(zioInterop / "core")
+  .settings(defaultSettings, libraryDependencies ++= List(zio, zioCats), name := "tofu-zio-core")
+  .jvmPlatform(scala2Versions)
+  .dependsOn(coreCE2, concurrentCE2)
 
-lazy val zio2Core =
-  projectMatrix
-    .in(modules / "interop" / "zio2" / "core")
-    .settings(
-      defaultSettings,
-      scala3MigratedModuleOptions,
-      libraryDependencies ++= List(zio2, zio2Cats),
-      name := "tofu-zio2-core"
-    )
-    .jvmPlatform(scala2Versions)
-    .dependsOn(coreCE3)
+lazy val zio2Core = projectMatrix
+  .in(modules / "interop" / "zio2" / "core")
+  .settings(
+    defaultSettings,
+    scala3MigratedModuleOptions,
+    libraryDependencies ++= List(zio2, zio2Cats),
+    name := "tofu-zio2-core"
+  )
+  .jvmPlatform(scala2Versions)
+  .dependsOn(coreCE3)
 
-lazy val zio1Logging =
-  projectMatrix
-    .in(zioInterop / "logging")
-    .settings(
-      defaultSettings,
-      libraryDependencies ++= List(zio, zioCats, slf4j, logback % Test),
-      name := "tofu-zio-logging"
-    )
-    .jvmPlatform(scala2Versions)
-    .dependsOn(loggingStr, loggingDer % "test", zio1Core % Test)
+lazy val zio1Logging = projectMatrix
+  .in(zioInterop / "logging")
+  .settings(
+    defaultSettings,
+    libraryDependencies ++= List(zio, zioCats, slf4j, logback % Test),
+    name := "tofu-zio-logging"
+  )
+  .jvmPlatform(scala2Versions)
+  .dependsOn(loggingStr, loggingDer % "test", zio1Core % Test)
 
-lazy val zio2Logging =
-  projectMatrix
-    .in(modules / "interop" / "zio2" / "logging")
-    .settings(
-      defaultSettings,
-      name := "tofu-zio2-logging",
-      libraryDependencies ++= List(zio2, slf4j, logback % Test, zio2Test, zio2TestSbt),
-      testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
-    )
-    .jvmPlatform(scala2Versions)
-    .dependsOn(loggingStr, loggingDer % "test")
+lazy val zio2Logging = projectMatrix
+  .in(modules / "interop" / "zio2" / "logging")
+  .settings(
+    defaultSettings,
+    name := "tofu-zio2-logging",
+    libraryDependencies ++= List(zio2, slf4j, logback % Test, zio2Test, zio2TestSbt),
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
+  )
+  .jvmPlatform(scala2Versions)
+  .dependsOn(loggingStr, loggingDer % "test")
 
 val interop = modules / "interop"
 
@@ -435,16 +443,15 @@ lazy val examplesCE3 = projectMatrix
   .jvmPlatform(scala2Versions)
   .dependsOn(ce3MainModuleDeps: _*)
 
-lazy val examplesZIO2 =
-  projectMatrix
-    .in(examples / "zio2")
-    .settings(
-      defaultSettings,
-      name := "tofu-examples-zio2",
-      exampleSettings
-    )
-    .jvmPlatform(scala2Versions)
-    .dependsOn(zio2Logging, loggingDer, loggingLayout)
+lazy val examplesZIO2 = projectMatrix
+  .in(examples / "zio2")
+  .settings(
+    defaultSettings,
+    name := "tofu-examples-zio2",
+    exampleSettings
+  )
+  .jvmPlatform(scala2Versions)
+  .dependsOn(zio2Logging, loggingDer, loggingLayout)
 
 lazy val coreModules =
   Vector(
@@ -470,11 +477,13 @@ lazy val ce3CommonModules =
 lazy val allModuleRefs  = (coreModules ++ commonModules).flatMap(_.projectRefs)
 lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: MatrixClasspathDep[ProjectMatrixReference])
 
-//lazy val ce3AllModuleRefs  = (ce3CoreModules ++ ce3CommonModules).map(x => x: ProjectReference)
 lazy val ce3MainModuleDeps =
   (ce3CoreModules ++ ce3CommonModules).map(x => x: MatrixClasspathDep[ProjectMatrixReference])
 
 lazy val zio2Modules = Vector(zio2Logging, zio2Core)
+
+lazy val allModules =
+  coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules ++ zio2Modules :+ docs :+ examplesCE2 :+ examplesCE3 :+ examplesZIO2
 
 lazy val docs = projectMatrix // new documentation project
   .in(file("tofu-docs"))
@@ -492,18 +501,17 @@ lazy val docs = projectMatrix // new documentation project
   .dependsOn(mainModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
-lazy val allProjectsRef =
-  (coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules ++ zio2Modules :+ docs :+ examplesCE2 :+ examplesCE3 :+ examplesZIO2)
-    .flatMap(_.projectRefs)
-
 lazy val tofu = project
   .in(file("."))
   .settings(
     defaultSettings,
-    name := "tofu"
+    name       := "tofu",
+    testScoped := Def.inputTaskDyn {
+      val args = spaceDelimited("<arg>").parsed
+      Def.taskDyn((Test / test).all(filterByScalaVersion(args.head)))
+    }.evaluated
   )
-  .aggregate(allProjectsRef: _*)
-//.dependsOn(coreModules.map(x => x: MatrixClasspathDep[ProjectMatrixReference]): _*)
+  .aggregate(allModules.flatMap(_.projectRefs): _*)
 
 lazy val defaultScalacOptions =
   Seq(
@@ -519,14 +527,12 @@ lazy val defaultScalacOptions =
 
 lazy val scala3MigratedModuleOptions =
   Seq(
-    scalaVersion := Version.scala3,
     tpolecatScalacOptions ++= Set(
       ScalacOption("-Ykind-projector:underscores", _ >= ScalaVersion.V3_0_0),
       ScalacOption("-P:kind-projector:underscore-placeholders", _ < ScalaVersion.V3_0_0),
       ScalacOptions.source3,
       ScalacOption("-Xmigration", _ < ScalaVersion.V3_0_0)
-    ),
-    // crossScalaVersions := Vector(Version.scala212, Version.scala213, Version.scala3)
+    )
   )
 
 lazy val scalacWarningConfig = tpolecatScalacOptions ++= {

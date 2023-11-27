@@ -16,7 +16,7 @@ jobs:
     name: Build and Test
     strategy:
       matrix:
-        scala: [2.13.x, 2.12.x, 3.3.x]
+        scala: [2.13, 2.12, 3.3]
         java: [8, 17]
     runs-on: ubuntu-latest
     steps:
@@ -33,11 +33,11 @@ jobs:
         run: sbt scalafmtCheckAll scalafmtSbtCheck
 
       - name: Build project
-        run: sbt ++${{ matrix.scala }} test
+        run: sbt "testScoped ${{ matrix.scala }} JVM"
 
-      - name: Generate docs
-        if: matrix.scala == '2.13.x'
-        run: sbt ++${{ matrix.scala }} docs/mdoc
+      # - name: Generate docs
+      #   if: matrix.scala == '2.13'
+      #   run: sbt +${{ matrix.scala }} docs/mdoc
 
   publish:
     name: Publish Artifacts
