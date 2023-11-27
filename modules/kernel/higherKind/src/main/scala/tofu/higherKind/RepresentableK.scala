@@ -69,12 +69,13 @@ trait RepresentableKInstanceChain[TC[u[_[_]]] >: RepresentableK[u]] {
 
   private[this] def readerTInstance[R, A]: RepresentableK[({ type L[x[_]] = ReaderT[x, R, A] })#L] =
     new RepresentableK[({ type L[x[_]] = ReaderT[x, R, A] })#L] {
-      def tabulate[F[_]](hom: RepK[({ type L[x[_]] = ReaderT[x, R, A] })#L, _] ~> F): ReaderT[F, R, A] =
-        ReaderT(r => hom(RepK[({ type L[x[_]] = ReaderT[x, R, A] })#L](_.run(r))))
-      override def embed[F[_]: FlatMap](ft: F[ReaderT[F, R, A]]): ReaderT[F, R, A]                     = ReaderT(r => ft.flatMap(_.run(r)))
-      override def pureK[F[_]](p: Point[F]): ReaderT[F, R, A]                                          = ReaderT(_ => p.point[A])
-      override val unitK: ReaderT[UnitK, R, A]                                                         = super.unitK
-      override def mapK[F[_], G[_]](af: ReaderT[F, R, A])(fk: F ~> G): ReaderT[G, R, A]                = af.mapK(fk)
+      type LReaderT[x[_]] = ReaderT[x, R, A]
+      def tabulate[F[_]](hom: RepK[LReaderT, _] ~> F): ReaderT[F, R, A]                 =
+        ReaderT(r => hom(RepK[LReaderT](_.run(r))))
+      override def embed[F[_]: FlatMap](ft: F[ReaderT[F, R, A]]): ReaderT[F, R, A]      = ReaderT(r => ft.flatMap(_.run(r)))
+      override def pureK[F[_]](p: Point[F]): ReaderT[F, R, A]                           = ReaderT(_ => p.point[A])
+      override val unitK: ReaderT[UnitK, R, A]                                          = super.unitK
+      override def mapK[F[_], G[_]](af: ReaderT[F, R, A])(fk: F ~> G): ReaderT[G, R, A] = af.mapK(fk)
 
       override def productK[F[_], G[_]](af: ReaderT[F, R, A], ag: ReaderT[G, R, A]): ReaderT[Tuple2K[F, G, _], R, A] =
         ReaderT(r => Tuple2K(af.run(r), ag.run(r)))
