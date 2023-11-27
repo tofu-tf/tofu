@@ -527,6 +527,7 @@ lazy val defaultScalacOptions =
 
 lazy val scala3MigratedModuleOptions =
   Seq(
+    tpolecatExcludeOptions ++= Set(ScalacOptions.privateKindProjector),
     tpolecatScalacOptions ++= Set(
       ScalacOption("-Ykind-projector:underscores", _ >= ScalaVersion.V3_0_0),
       ScalacOption("-P:kind-projector:underscore-placeholders", _ < ScalaVersion.V3_0_0),
