@@ -39,8 +39,9 @@ object Function2K {
   type Arbitrary
 
   private class Function2KRepresentable[X[_], Y[_]] extends RepresentableK[({ type L[x[_]] = Function2K[X, Y, x] })#L] {
-    final def tabulate[F[_]](hom: RepK[({ type L[x[_]] = Function2K[X, Y, x] })#L, _] ~> F): Function2K[X, Y, F] =
-      Function2K[X, Y, F]((xa, ya) => hom(RepK[({ type L[x[_]] = Function2K[X, Y, x] })#L](_.apply(xa, ya))))
+    type Function2KT[x[_]] = Function2K[X, Y, x]
+    final def tabulate[F[_]](hom: RepK[Function2KT, _] ~> F): Function2K[X, Y, F] =
+      Function2K[X, Y, F]((xa, ya) => hom(RepK[Function2KT](_.apply(xa, ya))))
 
     // just optimized allocationwise redefinitions
     final override def mapK[F[_], G[_]](af: Function2K[X, Y, F])(fk: F ~> G): Function2K[X, Y, G] =

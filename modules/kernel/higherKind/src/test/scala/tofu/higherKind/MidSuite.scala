@@ -8,7 +8,8 @@ object MidSuite {
   def summonMidInstances[F[_], U[_[_]]: ApplyK, W[_[_]]: MonoidalK](): Unit = {
     implicitly[Semigroup[U[Mid[F, _]]]]
     implicitly[Monoid[W[Mid[F, _]]]]
-    implicitly[InvariantK[({ type L[x[_]] = Mid[x, Any] })#L]]
+    type LMid[x[_]] = Mid[x, Any]
+    implicitly[InvariantK[LMid]]
     ()
   }
 }

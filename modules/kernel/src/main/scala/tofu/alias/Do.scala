@@ -137,11 +137,9 @@ object DoMonad {
   }
 }
 
-trait DoSyntaxExtension extends DoSyntaxExtension1 {
+trait DoSyntaxExtension {
   def Do(b: Boolean): DoMonad.DoBooleanMethods = new DoMonad.DoBooleanMethods(b)
-}
 
-trait DoSyntaxExtension1 {
   def Do[F[_]]: DoMonad.DoMethods[F] = new DoMonad.DoMethods[F](true)
 
   @inline final implicit def Do[F[_], A](fa: F[A]): DoMonad.TofuDoOps[F, A] = new DoMonad.TofuDoOps[F, A](fa)

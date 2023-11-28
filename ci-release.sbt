@@ -2,7 +2,8 @@ ThisBuild / scalaVersion := Dependencies.Version.scala213
 
 ThisBuild / crossScalaVersions := Vector(
   Dependencies.Version.scala213,
-  Dependencies.Version.scala212
+  Dependencies.Version.scala212,
+  Dependencies.Version.scala3
 )
 
 ThisBuild / versionScheme := Some("semver-spec")

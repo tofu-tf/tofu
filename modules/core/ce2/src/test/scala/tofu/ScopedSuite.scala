@@ -6,11 +6,11 @@ import scala.concurrent.ExecutionContext
 import cats.effect.Blocker
 import tofu.syntax.scoped.*
 import tofu.syntax.monadic.*
-import scala.annotation.nowarn
 import scala.concurrent.Future
+import tofu.compat.unused
 
 class ScopedSuite {
-  @nowarn("cat=unused-params")
+  @unused
   def doSomething[F[_]: ContextShift: Async, A](fa: F[A], ea: => A)(calcEc: ExecutionContext)(implicit
       ec: ExecutionContext,
       block: Blocker
