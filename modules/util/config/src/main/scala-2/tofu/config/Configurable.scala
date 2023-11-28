@@ -15,7 +15,7 @@ import cats.syntax.option._
 import cats.syntax.parallel._
 import cats.syntax.monoid._
 import cats.syntax.traverse._
-import magnolia.{CaseClass, Magnolia, SealedTrait}
+import magnolia1.{CaseClass, Magnolia, SealedTrait}
 import syntax.context._
 import syntax.handle._
 import tofu.config.ConfigError.{BadNumber, BadString, BadType, Invalid, MultipleVariants, NoVariantFound}
@@ -184,7 +184,7 @@ trait BaseGetters { self: Configurable.type =>
 trait MagnoliaDerivation extends Derivation[Configurable] {
   type Typeclass[T] = Configurable[T]
 
-  def combine[T](ctx: CaseClass[Configurable, T]): Configurable[T] =
+  def join[T](ctx: CaseClass[Configurable, T]): Configurable[T] =
     if (ctx.isObject) new SingletonConfigurable(ctx.typeName.short, ctx.construct(_ => ()))
     else
       new Configurable[T] {
@@ -202,7 +202,7 @@ trait MagnoliaDerivation extends Derivation[Configurable] {
           }
       }
 
-  def dispatch[T](ctx: SealedTrait[Configurable, T]): Configurable[T] =
+  def split[T](ctx: SealedTrait[Configurable, T]): Configurable[T] =
     ctx.subtypes.toList.map(_.typeclass).traverse[Option, Map[String, T]] {
       case en: EnumConfigurable[_] => Some(en.nameMap)
       case _                       => None

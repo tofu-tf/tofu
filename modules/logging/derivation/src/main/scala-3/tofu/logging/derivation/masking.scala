@@ -3,7 +3,7 @@ package tofu.logging.derivation
 import scala.annotation.tailrec
 import scala.util.matching.Regex
 
-import magnolia1.Param
+import magnolia1.CaseClass.Param
 
 sealed trait MaskMode
 object MaskMode {
@@ -73,7 +73,7 @@ object masking {
       .flatMap { param =>
         import param._
 
-        val value: PType = dereference(tpe)
+        val value: PType = deref(tpe)
         if (value == None && param.annotations.contains(ignoreOpt()))
           None
         else {
