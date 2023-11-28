@@ -11,8 +11,6 @@ trait Function2K[F[_], G[_], H[_]] {
 }
 
 object Function2K {
-  type HKAny[A] = Any
-
   private[this] val representableAny = new Function2KRepresentable[HKAny, HKAny]
 
   implicit def representableK[F[_], G[_]]: RepresentableK[({ type L[x[_]] = Function2K[F, G, x] })#L] =

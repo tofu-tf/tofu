@@ -8,7 +8,7 @@ import complete.DefaultParsers._
 import sbt.librarymanagement.CrossVersion.{binaryScalaVersion, partialVersion}
 
 lazy val scala2Versions     = List(Version.scala212, Version.scala213)
-lazy val scala2And3Versions = scala2Versions ::: List(Version.scala3)
+lazy val scala2And3Versions = scala2Versions ++ List(Version.scala3)
 
 val scopesDescription = s"Scala version can be: ${scala2And3Versions.mkString}"
 val testScoped        = inputKey[Unit](s"Run tests in the given scope. Usage: testScoped [scala version]. $scopesDescription")
@@ -58,12 +58,13 @@ lazy val higherKindCore = projectMatrix
     defaultSettings,
     scala3MigratedModuleOptions,
     name := "tofu-core-higher-kind",
+    libraryDependencies ++= Seq(catsCore, catsFree, catsTaglessCore),
     libraryDependencies ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) =>
-          Seq(catsCore, catsFree, catsTaglessMacros)
+          Seq(catsTaglessMacros)
         case _            =>
-          Seq(catsCore, catsFree, catsTaglessCore)
+          Seq.empty
       }
     },
   )
@@ -128,30 +129,38 @@ lazy val loggingStr = projectMatrix
   .settings(
     name := "tofu-logging-structured",
     defaultSettings,
+    scala3MigratedModuleOptions,
     libraryDependencies ++= Seq(
       catsCore,
       circeCore,
-      tethys,
-      tethysJackson,
+      // it is impossible to use tethys compiled for scala 3 until https://github.com/tethys-json/tethys/issues/266 is resolved
+      tethys cross CrossVersion.for3Use2_13,
+      tethysJackson cross CrossVersion.for3Use2_13,
       slf4j,
       alleycats,
-      scalatest,
-      derevo,
-      catsTaglessMacros
-    ),
+      catsTaglessCore,
+      scalatest
+    )
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scala2And3Versions)
   .dependsOn(kernel)
 
 lazy val loggingDer = projectMatrix
   .in(modules / "logging" / "derivation")
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(derevo, magnolia, slf4j, glassMacro % Test),
+    scala3MigratedModuleOptions,
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, _)) => Seq(derevo, magnolia2, slf4j, glassMacro % Test)
+        case Some((3, _)) => Seq(magnolia3, slf4j)
+        case _            => Seq.empty
+      }
+    },
     name := "tofu-logging-derivation"
   )
-  .jvmPlatform(scala2Versions)
-  .dependsOn(loggingStr, derivation % "compile->test")
+  .jvmPlatform(scala2And3Versions)
+  .dependsOn(loggingStr)
 
 lazy val loggingLayout = projectMatrix
   .in(modules / "logging" / "layout")
@@ -270,7 +279,7 @@ lazy val config = projectMatrix
   .in(util / "config")
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(typesafeConfig, magnolia, derevo, glassCore),
+    libraryDependencies ++= Seq(typesafeConfig, magnolia2, derevo, glassCore),
     name := "tofu-config",
   )
   .jvmPlatform(scala2Versions)
@@ -290,7 +299,7 @@ lazy val derivation = projectMatrix
   .in(modules / "derivation")
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(magnolia, derevo, catsTaglessMacros),
+    libraryDependencies ++= Seq(magnolia2, derevo, catsTaglessMacros),
     name := "tofu-derivation",
   )
   .jvmPlatform(scala2Versions)
@@ -539,8 +548,7 @@ lazy val scala3MigratedModuleOptions =
     tpolecatScalacOptions ++= Set(
       ScalacOption("-Ykind-projector:underscores", _ >= ScalaVersion.V3_0_0),
       ScalacOption("-P:kind-projector:underscore-placeholders", _ < ScalaVersion.V3_0_0),
-      ScalacOptions.source3,
-      ScalacOption("-Xmigration", _ < ScalaVersion.V3_0_0)
+      ScalacOptions.source3
     )
   )
 

@@ -5,12 +5,14 @@ import derevo.derive
 import org.scalatest.funsuite.AnyFunSuite
 import org.slf4j.helpers.MessageFormatter
 import tofu.data._
-import tofu.higherKind.derived.representableK
 import glass.macros.Optics
+import tofu.higherKind.RepK
+import tofu.higherKind.RepresentableK
+import cats.~>
 
 import LoggingMidSuite._
 
-@derive(representableK, loggingMidTry)
+@derive(loggingMidTry)
 trait Greeter[F[_]] {
   def setName(name: String): F[Unit]
   def hello: F[String]
@@ -18,6 +20,14 @@ trait Greeter[F[_]] {
 
 object Greeter extends LoggingCompanion[Greeter] {
   import LoggingMidSuite._
+
+  implicit val repK: RepresentableK[Greeter] =
+    new RepresentableK[Greeter] {
+      def tabulate[F[_]](hom: RepK[Greeter, _] ~> F): Greeter[F] = new Greeter[F] {
+        def setName(name: String): F[Unit] = hom(RepK[Greeter](_.setName(name)))
+        def hello: F[String]               = hom(RepK[Greeter](_.hello))
+      }
+    }
   implicit object Instance extends Greeter[Eff] {
     def setName(name: String): Eff[Unit] =
       CalcM.set(Some(name)).focus(State.name).void
@@ -46,7 +56,7 @@ object LoggingMidSuite {
     }
   }
 
-  implicit val logs: Logs.Universal[Eff] = logging
+  implicit val logs: Logs.Universal[Eff] = logging(_)
 }
 
 class LoggingMidSuite extends AnyFunSuite {
