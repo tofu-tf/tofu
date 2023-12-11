@@ -35,9 +35,9 @@ jobs:
       - name: Build project
         run: sbt "testScoped ${{ matrix.scala }} JVM"
 
-      # - name: Generate docs
-      #   if: matrix.scala == '2.13'
-      #   run: sbt +${{ matrix.scala }} docs/mdoc
+      - name: Generate docs
+        if: matrix.scala == '2.13'
+        run: sbt ++${{ matrix.scala }} docs/mdoc
 
   publish:
     name: Publish Artifacts
