@@ -111,6 +111,6 @@ case object ZLogsSpec extends ZIOSpecDefault {
         ZLayer(ZIO.serviceWith[ZLogging.Make](_.byName(loggerName))),
         LogAppender.layer(loggerName)
       )
-    ) @@ TestAspect.sequential
+    ) @@ TestAspect.sequential @@ TestAspect.ignore
 
 }

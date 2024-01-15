@@ -16,7 +16,7 @@ jobs:
     name: Build and Test
     strategy:
       matrix:
-        scala: [2.13.x, 2.12.x]
+        scala: [2.13, 2.12, 3.3]
         java: [8, 17]
     runs-on: ubuntu-latest
     steps:
@@ -33,10 +33,10 @@ jobs:
         run: sbt scalafmtCheckAll scalafmtSbtCheck
 
       - name: Build project
-        run: sbt ++${{ matrix.scala }} test
+        run: sbt "testScoped ${{ matrix.scala }} JVM"
 
       - name: Generate docs
-        if: matrix.scala == '2.13.x'
+        if: matrix.scala == '2.13'
         run: sbt ++${{ matrix.scala }} docs/mdoc
 
   publish:
@@ -63,4 +63,4 @@ jobs:
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-        run: sbt ++2.13.x ci-release
+        run: sbt +ci-release

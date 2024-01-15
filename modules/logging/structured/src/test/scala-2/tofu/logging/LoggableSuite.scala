@@ -34,7 +34,7 @@ class LoggableSuite extends AnyFlatSpec with Matchers {
     json(TestInt(-1)) shouldBe """{"missing":null,"sign":"negative","value":-1}"""
   }
 
-  implicit val testLoggableEither = Loggable.either[String, Int].named("kek")
+  implicit val testLoggableEither: Loggable[Either[String, Int]] = Loggable.either[String, Int].named("kek")
 
   "either custom logging" should "handle left" in {
     json("lol".asLeft[Int]) shouldBe """{"kek":"lol"}"""

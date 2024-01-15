@@ -136,7 +136,7 @@ object CargoApp extends IOApp {
 
   implicit val logMakeTraced: Logging.Make[TracedIO] = Logging.Make.contextual[TracedIO, Trace]
   implicit val logMake: Logging.Make[IO]             = Logging.Make.plain[IO]
-  implicit val appLogger                             = logMake.byName("CargoApp")
+  implicit val appLogger: Logging[IO]                = logMake.byName("CargoApp")
 
   val endpoints = Endpoints.cargoEndpoints[IO, TracedIO](
     CargoService.make(MovingCompany.make[TracedIO], Warehouse.makeSmall[TracedIO])

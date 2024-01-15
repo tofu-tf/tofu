@@ -135,5 +135,6 @@ object Logs extends LogsInstances with LogsInstances0 {
   }
 
   /** Set of useful syntax stuff for Logs */
-  implicit def ops[I[_], F[_]](logs: Logs[I, F]) = new LogsInvariantSyntax.LogsOps[I, F](logs)
+  implicit def ops[I[_], F[_]](logs: Logs[I, F]): LogsInvariantSyntax.LogsOps[I, F] =
+    new LogsInvariantSyntax.LogsOps[I, F](logs)
 }

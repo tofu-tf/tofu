@@ -140,8 +140,8 @@ trait ContextTInstancesR extends ContextTInstancesS { self: ContextTInstances =>
   final implicit def contextTContext[F[+_]: Applicative, C[_[_]]]: ContextTContext[F, C] =
     new ContextTContext
 
-  final implicit def contextTNonEmptyParallel[F[+_]: NonEmptyParallel, C[_[_]]: InvariantK] =
-    new ContextTNonEmptyParallelI[F, C]
+  final implicit def contextTNonEmptyParallel[F[+_]: NonEmptyParallel, C[_[_]]: InvariantK]
+      : ContextTNonEmptyParallelI[F, C] = new ContextTNonEmptyParallelI[F, C]
 }
 
 trait ContextTInstancesQ extends ContextTInstancesR { self: ContextTInstances =>
@@ -175,7 +175,8 @@ trait ContextTInstancesP extends ContextTInstancesQ { self: ContextTInstances =>
       rc1: Rebase[In],
   ): Unlift[ContextT[F, In, *], ContextT[F, Out, *]] = {
     class uloi(implicit c2c: Out[ContextT[F, Out, *]]) extends Unlift[ContextT[F, Out, *], ContextT[F, In, *]] {
-      implicit def self                                         = this
+      implicit def self: Unlift[ContextT[F, Out, *], ContextT[F, In, *]] = this
+
       def lift[A](c2a: ContextT[F, Out, A]): ContextT[F, In, A] =
         c1c => c2a.run(l.set(c2c, rc1.rebase(c1c)))
 

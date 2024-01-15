@@ -21,7 +21,7 @@ object ZioHasBuilder {
   class UnHas[U](val loggable: Loggable[U]) extends AnyVal
 
   object UnHas {
-    implicit def unHas[S: Tag](implicit S: Loggable[S]) =
+    implicit def unHas[S: Tag](implicit S: Loggable[S]): UnHas[Has[S]] =
       new UnHas[Has[S]](S.contramap(_.get))
   }
 }

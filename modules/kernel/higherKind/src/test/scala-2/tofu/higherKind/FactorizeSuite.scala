@@ -42,7 +42,7 @@ class FactorizeSuite extends AnyFunSuite {
 
   test("derive factorization")(testFactorization(`🤫`[Foo, MapF]))
 
-  type MapB[E, A] = Map[String, (Class[_], String)]
+  type MapB[E, A] = Map[String, (Class[?], String)]
 
   def testBiFactorization(barMap: Bar[MapB]) = {
     assert(
@@ -77,7 +77,7 @@ class FactorizeSuite extends AnyFunSuite {
 }
 
 object FactorizeSuite {
-  type MyMap = Map[String, (Class[_], String)]
+  type MyMap = Map[String, (Class[?], String)]
 
   trait Foo[F[_]] {
     def person(name: String, age: Int): F[Unit]
@@ -97,7 +97,7 @@ object FactorizeSuite {
     def conjure[U[f[_]], F[_]]: U[F] = macro HigherKindedMacros.factorizeThis[U]
   }
 
-  class Builder(algCls: Class[_]) {
+  class Builder(algCls: Class[?]) {
     def start[Res: ClassTag](name: String): Building =
       Building(Map(name -> (classTag[Res].runtimeClass -> ""), "" -> (algCls -> "")))
   }
@@ -110,7 +110,7 @@ object FactorizeSuite {
     def conjure[U[f[_, _]], F[_, _]]: U[F] = macro HigherKindedMacros.bifactorizeThis[U]
   }
 
-  class BiBuilder(algCls: Class[_]) {
+  class BiBuilder(algCls: Class[?]) {
     def start[Err: ClassTag, Res: ClassTag](name: String): Building =
       Building(
         Map(
@@ -121,7 +121,7 @@ object FactorizeSuite {
       )
   }
 
-  case class Building(result: Map[String, (Class[_], String)] = Map()) {
+  case class Building(result: Map[String, (Class[?], String)] = Map()) {
     def arg[V: ClassTag: Show](name: String, a: V): Building =
       copy(result = result + (name -> (classTag[V].runtimeClass -> a.show)))
   }
