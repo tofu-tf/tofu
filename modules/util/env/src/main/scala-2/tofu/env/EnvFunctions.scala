@@ -75,9 +75,9 @@ private[env] trait EnvFunctions
   def tailRecM[E, A, B](a: A)(f: (A) => Env[E, Either[A, B]]): Env[E, B] =
     Env(ctx => Task.tailRecM(a)(a1 => f(a1).run(ctx)))
 
-  def when[E](cond: => Boolean)(io: => Env[E, _]): Env[E, Unit] =
+  def when[E](cond: => Boolean)(io: => Env[E, ?]): Env[E, Unit] =
     whenF(delay[E, Boolean](cond))(io)
 
-  def whenF[E](cond: Env[E, Boolean])(io: => Env[E, _]): Env[E, Unit] =
+  def whenF[E](cond: Env[E, Boolean])(io: => Env[E, ?]): Env[E, Unit] =
     cond.flatMap(run => if (run) io.flatMap(_ => Env.unit[E]) else Env.unit[E])
 }

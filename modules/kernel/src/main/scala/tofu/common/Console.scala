@@ -4,7 +4,7 @@ import tofu.Delay
 import tofu.internal.EffectComp
 
 import java.io.{BufferedReader, PrintStream}
-import scala.Console as ScalaConsole
+import scala.{Console => ScalaConsole}
 
 trait Console[F[_]] {
   def readStrLn: F[String]

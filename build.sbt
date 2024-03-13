@@ -474,8 +474,14 @@ lazy val commonModules =
 lazy val ce3CommonModules =
   Vector(loggingStr, loggingDer, loggingLayout, doobieCE3, doobieLoggingCE3, fs2CE3Interop)
 
-lazy val allModuleRefs  = (coreModules ++ commonModules).flatMap(_.projectRefs)
-lazy val mainModuleDeps = (coreModules ++ commonModules).map(x => x: MatrixClasspathDep[ProjectMatrixReference])
+lazy val mainModules = (coreModules ++ commonModules)
+
+lazy val mainModuleScala213Refs =
+  mainModules
+    .flatMap(_.filterProjects(Seq(VirtualAxis.scalaABIVersion(Version.scala213), VirtualAxis.jvm)))
+    .map(x => x: ProjectReference)
+
+lazy val mainModuleDeps = mainModules.map(x => x: MatrixClasspathDep[ProjectMatrixReference])
 
 lazy val ce3MainModuleDeps =
   (ce3CoreModules ++ ce3CommonModules).map(x => x: MatrixClasspathDep[ProjectMatrixReference])
@@ -488,16 +494,18 @@ lazy val allModules =
 lazy val docs = projectMatrix // new documentation project
   .in(file("tofu-docs"))
   .settings(
+    defaultSettings,
+    scala3MigratedModuleOptions,
     noPublishSettings,
     macros,
     tpolecatScalacOptions += ScalacOption(s"-Wconf:cat=other-pure-statement:silent", _ >= ScalaVersion.V2_13_0),
-    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(allModuleRefs: _*),
+    ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(mainModuleScala213Refs: _*),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
     docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(Seq(Version.scala213))
   .dependsOn(mainModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 

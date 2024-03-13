@@ -37,7 +37,7 @@ jobs:
 
       - name: Generate docs
         if: matrix.scala == '2.13'
-        run: sbt ++${{ matrix.scala }} docs/mdoc
+        run: sbt ++${{ matrix.scala }} docs/mdoc unidoc
 
   publish:
     name: Publish Artifacts
