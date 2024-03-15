@@ -28,6 +28,9 @@ trait TimeZone[F[_]] {
 }
 
 object TimeZone {
+
+  def apply[F[_]](implicit tz: TimeZone[F]): TimeZone[F] = tz
+
   implicit def syncSystem[F[_]](implicit F: Delay[F]): TimeZone[F] = new TimeZone[F] {
     def system: F[ZoneId] = F.delay(ZoneId.systemDefault())
 
