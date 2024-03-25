@@ -1,11 +1,11 @@
 package tofu.data.instances
 import cats.Order
-import magnolia.{CaseClass, Magnolia, SealedTrait}
+import magnolia1.{CaseClass, Magnolia, SealedTrait}
 
 object order {
   type Typeclass[A] = Order[A]
 
-  def combine[T](ctx: CaseClass[Order, T]): Order[T] = (x: T, y: T) => {
+  def join[T](ctx: CaseClass[Order, T]): Order[T] = (x: T, y: T) => {
     val it        = ctx.parameters.iterator
     def go(): Int =
       if (it.hasNext) {
@@ -17,7 +17,7 @@ object order {
     go()
   }
 
-  def dispatch[T](ctx: SealedTrait[Order, T]): Order[T] =
+  def split[T](ctx: SealedTrait[Order, T]): Order[T] =
     (x: T, y: T) => {
       val it        = ctx.subtypes.iterator
       def go(): Int =
