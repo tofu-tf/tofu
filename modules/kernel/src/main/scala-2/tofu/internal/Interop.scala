@@ -1,5 +1,5 @@
 package tofu.internal
-import scala.collection
+
 import scala.reflect.macros._
 
 class Interop(val c: blackbox.Context) {
@@ -10,9 +10,7 @@ class Interop(val c: blackbox.Context) {
   protected def tc[F[_]](implicit wttu: WTTU[F]) = wttu.tpe.typeConstructor
   protected def t[A](implicit wttu: WTT[A])      = wttu.tpe
 
-  protected def delegateParamTree[N](
-      ps: collection.Seq[collection.Seq[Tree]]
-  )(ts: collection.Seq[Type])(implicit N: WTT[N]): Tree = {
+  protected def delegateParamTree[N](ps: Seq[Seq[Tree]])(ts: Seq[Type])(implicit N: WTT[N]): Tree = {
     val s   = N.tpe.decls.head.asTerm.name.decodedName.toString
     val exp = c.parse(s)
 

@@ -6,7 +6,6 @@ import org.slf4j.{Logger, LoggerFactory, Marker}
 import tofu.logging.Logging.{Debug, Error, Info, Trace, Warn}
 import tofu.{Delay, WithContext}
 import scala.annotation.nowarn
-import scala.collection.immutable.Seq
 
 @nowarn("msg=a type was inferred to be `Object`") //cat=lint-infer-any filter does not work for Scala 3
 object UniversalLogging {

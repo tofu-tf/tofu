@@ -4,7 +4,7 @@ import java.time.{Instant, LocalDate, LocalDateTime, OffsetDateTime, ZonedDateTi
 import java.util.UUID
 
 import scala.collection.immutable.SortedSet
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable.Buffer
 import scala.concurrent.duration.FiniteDuration
 
 import alleycats.std.iterable._
@@ -121,14 +121,14 @@ class LoggableInstances {
   private[this] def fldLoggable[T[x]: Foldable, A](implicit A: Loggable[A]): Loggable[T[A]] =
     new SubLoggable[T[A]] {
       def putValue[I, V, R, M](ta: T[A], v: V)(implicit r: LogRenderer[I, V, R, M]): M = {
-        val arr = ta.foldLeft(mutable.Buffer.newBuilder[A])(_ += _).result()
+        val arr = ta.foldLeft(Buffer.newBuilder[A])(_ += _).result()
         v.list(arr.size)((v, idx) => A.putValue(arr(idx), v))
       }
 
       override def putMaskedValue[I, V, R, S](ta: T[A], v: V)(
           f: String => String
       )(implicit r: LogRenderer[I, V, R, S]): S = {
-        val arr = ta.foldLeft(mutable.Buffer.newBuilder[A])(_ += _).result()
+        val arr = ta.foldLeft(Buffer.newBuilder[A])(_ += _).result()
         v.list(arr.size)((v, idx) => A.putMaskedValue(arr(idx), v)(f))
       }
 
@@ -139,7 +139,7 @@ class LoggableInstances {
     }
   final implicit def seqLoggable[A: Loggable]: Loggable[collection.Seq[A]]                  =
     fldLoggable[Iterable, A].narrow
-  final implicit def immutableSeqLoggable[A: Loggable]: Loggable[immutable.Seq[A]]          =
+  final implicit def immutableSeqLoggable[A: Loggable]: Loggable[Seq[A]]          =
     fldLoggable[Iterable, A].narrow
 
   final implicit def listLoggable[A: Loggable]: Loggable[List[A]]           = fldLoggable[List, A]

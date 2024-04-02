@@ -7,7 +7,6 @@ import tofu.logging.bi.LoggingBiMid
 import tofu.logging.impl.ArgsLoggable
 import tofu.syntax.bindInv._
 
-import scala.collection.immutable.Seq
 import scala.collection.mutable.Buffer
 import scala.reflect.ClassTag
 

@@ -1,8 +1,7 @@
 package tofu.logging
 package builder
 
-import scala.collection.immutable.Seq
-import scala.collection.mutable
+import scala.collection.mutable.Buffer
 import scala.reflect.ClassTag
 import tofu.syntax.monadic._
 import cats.Monad
@@ -46,7 +45,7 @@ trait LoggingMidBuilder extends Builder[LoggingMid] {
   protected class MethodImpl[U[f[_]], Res: Loggable](
       cls: Class[?],
       method: String,
-      args: mutable.Buffer[(String, LoggedValue)]
+      args: Buffer[(String, LoggedValue)]
   ) extends Method[U, Res, LoggingMid] {
     def arg[A: Loggable](name: String, a: A): this.type = {
       args += (name -> a)
@@ -62,7 +61,7 @@ trait LoggingMidBuilder extends Builder[LoggingMid] {
   }
 
   protected class PreparedImpl[U[f[_]]](cls: Class[?]) extends Prepared[U, LoggingMid] {
-    def start[Res: Loggable](method: String): MethodImpl[U, Res] = new MethodImpl(cls, method, mutable.Buffer())
+    def start[Res: Loggable](method: String): MethodImpl[U, Res] = new MethodImpl(cls, method, Buffer())
   }
 }
 
@@ -111,7 +110,7 @@ trait LoggingErrMidBuilder[E] extends LoggingMidBuilder with Builder[LoggingErrM
   protected class MethodErrImpl[U[f[_]], Res: Loggable](
       cls: Class[?],
       method: String,
-      args: mutable.Buffer[(String, LoggedValue)]
+      args: Buffer[(String, LoggedValue)]
   ) extends MethodImpl[U, Res](cls, method, args) with Method[U, Res, LoggingErrMid[E, _]] {
     override def result: LoggingErrMid[E, Res] = new LoggingErrMid[E, Res] {
       private[this] val argSeq = args.toSeq
@@ -125,7 +124,7 @@ trait LoggingErrMidBuilder[E] extends LoggingMidBuilder with Builder[LoggingErrM
 
   class PreparedErr[U[f[_]]](cls: Class[?]) extends super.PreparedImpl[U](cls) with Prepared[U, LoggingErrMid[E, _]] {
     override def start[Res: Loggable](method: String): MethodErrImpl[U, Res] =
-      new MethodErrImpl(cls, method, mutable.Buffer())
+      new MethodErrImpl(cls, method, Buffer())
   }
 }
 

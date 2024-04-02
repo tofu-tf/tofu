@@ -2,8 +2,6 @@ package tofu.logging.impl
 
 import tofu.logging.{LogRenderer, LoggedValue}
 
-import scala.collection.immutable.Seq
-
 class ArgsLoggable(values: Seq[(String, LoggedValue)]) extends LoggedValue {
   override def shortName: String = "arguments"
 
