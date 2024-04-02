@@ -130,8 +130,8 @@ object Errors extends DataEffectComp[Errors] {
 trait ErrorBase
 object ErrorBase extends ErrorsBaseInstances {
 
-  final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, *], E] =
-    new Errors[ReaderT[F, R, *], E] {
+  final implicit def readerTErrors[F[_], R, E](implicit F: Errors[F, E]): Errors[ReaderT[F, R, _], E] =
+    new Errors[ReaderT[F, R, _], E] {
       def raise[A](err: E): ReaderT[F, R, A] =
         ReaderT.liftF(F.raise(err))
 
@@ -177,12 +177,12 @@ class ErrorsBaseInstances2 extends ErrorsBaseInstances3 {
 
 class ErrorsBaseInstances3 {
 
-  final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, *], F, E] =
+  final implicit def eitherTIntance[F[_], E](implicit F: Monad[F]): ErrorsTo[EitherT[F, E, _], F, E] =
     new EitherTErrorsTo[F, E]
 
-  final implicit def optionTIntance[F[_]](implicit F: Monad[F]): ErrorsTo[OptionT[F, *], F, Unit] =
+  final implicit def optionTIntance[F[_]](implicit F: Monad[F]): ErrorsTo[OptionT[F, _], F, Unit] =
     new OptionTErrorsTo[F]
 
-  final implicit def eitherIntance[E]: ErrorsTo[Either[E, *], Id, E] = new EitherErrorsTo[E]
+  final implicit def eitherIntance[E]: ErrorsTo[Either[E, _], Id, E] = new EitherErrorsTo[E]
   final implicit val optionTIntance: ErrorsTo[Option, Id, Unit]      = OptionErrorsTo
 }

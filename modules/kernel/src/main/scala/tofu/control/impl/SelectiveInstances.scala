@@ -42,7 +42,7 @@ trait SelectiveWithMap[F[_]] extends Selective[F] {
   override def map[A, B](fa: F[A])(f: A => B): F[B] = smap(fa)(f)
 }
 
-class SelectiveOptionT[F[_]](implicit F: Selective[F]) extends Selective[OptionT[F, *]] {
+class SelectiveOptionT[F[_]](implicit F: Selective[F]) extends Selective[OptionT[F, _]] {
   def selectAp[A, B](fe: OptionT[F, Either[A, B]])(ff: => OptionT[F, A => B]): OptionT[F, B] =
     OptionT(F.selectAp(fe.value.map {
       case Some(Left(a))  => Left(a)
@@ -59,7 +59,7 @@ class SelectiveOptionT[F[_]](implicit F: Selective[F]) extends Selective[OptionT
   def pure[A](x: A): OptionT[F, A] = OptionT.pure(x)
 }
 
-class SelectiveEitherT[F[_], L](implicit F: Selective[F]) extends Selective[EitherT[F, L, *]] {
+class SelectiveEitherT[F[_], L](implicit F: Selective[F]) extends Selective[EitherT[F, L, _]] {
   def selectAp[A, B](fe: EitherT[F, L, Either[A, B]])(ff: => EitherT[F, L, A => B]): EitherT[F, L, B] =
     EitherT(F.selectAp[A, Either[L, B]](fe.value.map {
       case Right(Left(a))       => Left(a)
@@ -77,16 +77,16 @@ class SelectiveEitherT[F[_], L](implicit F: Selective[F]) extends Selective[Eith
 }
 
 class SelectiveReaderT[F[_], R](implicit FS: Selective[F])
-    extends Selective[ReaderT[F, R, *]] with ApplicativeDelegate[ReaderT[F, R, *]] {
-  val F: Applicative[ReaderT[F, R, *]] = implicitly
+    extends Selective[ReaderT[F, R, _]] with ApplicativeDelegate[ReaderT[F, R, _]] {
+  val F: Applicative[ReaderT[F, R, _]] = implicitly
 
   def selectAp[A, B](fe: ReaderT[F, R, Either[A, B]])(ff: => ReaderT[F, R, A => B]): ReaderT[F, R, B] =
     ReaderT(r => FS.selectAp(fe.run(r))(ff.run(r)))
 }
 
 class SelectiveWriterT[F[_], W: Monoid](implicit FS: Selective[F])
-    extends Selective[WriterT[F, W, *]] with ApplicativeDelegate[WriterT[F, W, *]] {
-  val F: Applicative[WriterT[F, W, *]] = implicitly
+    extends Selective[WriterT[F, W, _]] with ApplicativeDelegate[WriterT[F, W, _]] {
+  val F: Applicative[WriterT[F, W, _]] = implicitly
 
   def selectAp[A, B](fe: WriterT[F, W, Either[A, B]])(ff: => WriterT[F, W, A => B]): WriterT[F, W, B] =
     WriterT(FS.selectAp[(W, A), (W, B)](FS.map(fe.run) {

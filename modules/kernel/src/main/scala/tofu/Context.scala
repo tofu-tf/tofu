@@ -169,7 +169,7 @@ object Local {
   * that can use `F[Ctx]` inside.
   *
   * @tparam F
-  *   context-aware effect e.g.`ReaderT[Lower, Ctx, *]`
+  *   context-aware effect e.g.`ReaderT[Lower, Ctx, _]`
   */
 @deprecated("Migrate to With* typeclasses", "0.10.3")
 trait Provide[F[_]] extends ContextBase {
@@ -205,10 +205,10 @@ trait Provide[F[_]] extends ContextBase {
     *
     * @example
     *   {{{ trait ProcessHandler[G[_]] { def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ??? //...other methods } type
-    *   WithMyContext[F[_], A] = ReaderT[F, MyCtx, A] val contextualProcessHandler: ProcessHandler[IO WithMyContext *] =
+    *   WithMyContext[F[_], A] = ReaderT[F, MyCtx, A] val contextualProcessHandler: ProcessHandler[IO WithMyContext _] =
     *   ???
     *
-    * val processHandler: ProcessHandler[IO] = processHandler.mapK( WithProvide[IO WithMyContext *, IO,
+    * val processHandler: ProcessHandler[IO] = processHandler.mapK( WithProvide[IO WithMyContext _, IO,
     * MyCtx].runContextK ) }}}
     */
   def runContextK(ctx: Ctx): F ~> Lower = funK[F, Lower](a => runContext(a)(ctx))
@@ -244,7 +244,7 @@ object Provide {
 /** Combination of [[Local]] and [[Provide]]
   *
   * @tparam F
-  *   context-aware effect e.g.`ReaderT[Lower, Ctx, *]`
+  *   context-aware effect e.g.`ReaderT[Lower, Ctx, _]`
   */
 @deprecated("Migrate to With* typeclasses", "0.10.3")
 trait RunContext[F[_]] extends Local[F] with Provide[F] {
@@ -256,9 +256,9 @@ trait RunContext[F[_]] extends Local[F] with Provide[F] {
     *
     * type WithMyContext[F[_], A] = ReaderT[F, MyCtx, A]
     *
-    * val processHandler: ProcessHandler[IO WithMyContext *] = ???
+    * val processHandler: ProcessHandler[IO WithMyContext _] = ???
     *
-    * val contextualHandler: IO WithMyContext ProcessHandler[IO] = processHandler.mapK( WithRun[WithMyContext[IO, *],
+    * val contextualHandler: IO WithMyContext ProcessHandler[IO] = processHandler.mapK( WithRun[WithMyContext[IO, _],
     * IO, MyCtx].unlift.map(fk => processHandler.mapK(fk)) ) //now it is able to process MyCtx but is wrapped in IO
     * WithMyContext * }}}
     * @return

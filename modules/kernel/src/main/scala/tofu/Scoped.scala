@@ -29,7 +29,7 @@ trait Scoped[Tag, F[_]] {
 
   final def tagged[NewTag]: Scoped[NewTag, F] = this.asInstanceOf[Scoped[NewTag, F]]
 
-  final def midPoint: Point[Mid[F, *]] = new Point[Mid[F, *]] {
+  final def midPoint: Point[Mid[F, _]] = new Point[Mid[F, _]] {
     def point[A]: Mid[F, A] = runScoped(_)
   }
 }
@@ -78,7 +78,7 @@ object Scoped extends ScopedInstance with ScopedInstancesMacro {
   }
 
   /** helpful method to create middleware that executes all proceses in the given scope */
-  def mid[Tag, U[_[_]], F[_]](implicit U: PureK[U], F: Scoped[Tag, F]): U[Mid[F, *]] = U.pureK(F.midPoint)
+  def mid[Tag, U[_[_]], F[_]](implicit U: PureK[U], F: Scoped[Tag, F]): U[Mid[F, _]] = U.pureK(F.midPoint)
 }
 
 trait ScopedExecute[Tag, F[_]] extends Scoped[Tag, F] {

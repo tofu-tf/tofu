@@ -7,7 +7,7 @@ import tofu.syntax.funk.funK
 
 /** Synonym for [[Provide]] with explicit `C` as `Ctx` and `G` as `Lower` for better type inference
   *
-  * Can be seen as transformation `F[*] = C => G[*]`
+  * Can be seen as transformation `F[_] = C => G[_]`
   */
 trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
   override type Lower[A] = G[A]
@@ -40,10 +40,10 @@ trait WithProvide[F[_], G[_], C] extends Provide[F] with Lift[G, F] {
     *
     * @example
     *   {{{ trait ProcessHandler[G[_]] { def mapK[M[_]](fk: G ~> M): ProcessHandler[M] = ??? //...other methods } type
-    *   WithMyContext[F[_], A] = ReaderT[F, MyCtx, A] val contextualProcessHandler: ProcessHandler[IO WithMyContext *] =
+    *   WithMyContext[F[_], A] = ReaderT[F, MyCtx, A] val contextualProcessHandler: ProcessHandler[IO WithMyContext _] =
     *   ???
     *
-    * val processHandler: ProcessHandler[IO] = processHandler.mapK( WithProvide[IO WithMyContext *, IO,
+    * val processHandler: ProcessHandler[IO] = processHandler.mapK( WithProvide[IO WithMyContext _, IO,
     * MyCtx].runContextK ) }}}
     */
   override def runContextK(ctx: Ctx): F ~> Lower = funK[F, Lower](runContext(_)(ctx))

@@ -37,9 +37,9 @@ class PerformViaMappedPerformer[F[_], C1[_], C2[_], Cancel](
 class PerformOfMappedPerformer[F[_], Ex1[_], Ex2[_]](
     af: PerformOf[F, Ex1],
     fk: Ex1 ~> Ex2,
-) extends PerformViaMappedPerformer[F, Cont[Ex1, *], Cont[Ex2, *], Unit](
+) extends PerformViaMappedPerformer[F, Cont[Ex1, _], Cont[Ex2, _], Unit](
       af,
-      funK[Cont[Ex2, *], Cont[Ex1, *]](c1 => ex1 => c1(fk(ex1))),
+      funK[Cont[Ex2, _], Cont[Ex1, _]](c1 => ex1 => c1(fk(ex1))),
     ) with PerformOf[F, Ex2]
 
 final class PerformOfFunctorK[F[_]] extends FunctorK[({ type L[x[_]] = PerformOf[F, x] })#L] {
@@ -48,7 +48,7 @@ final class PerformOfFunctorK[F[_]] extends FunctorK[({ type L[x[_]] = PerformOf
 }
 
 final class ReaderTPerformer[F[_], R, C[_], Cancel](p: Performer[F, C, Cancel], r: R)
-    extends Performer[ReaderT[F, R, *], C, Cancel] {
+    extends Performer[ReaderT[F, R, _], C, Cancel] {
   def perform[A](cont: C[A])(f: Kleisli[F, R, A]): Kleisli[F, R, Cancel] =
     ReaderT.liftF(p.perform(cont)(f.run(r)))
 }
@@ -59,10 +59,10 @@ final class UnliftPerformer[F[_], B[_], C[_], Cancel](p: Performer[B, C, Cancel]
 }
 class PerformViaReader[F[_]: Functor, R, C[_], Cancel](
     p: PerformVia[F, C, Cancel]
-) extends PerformVia[ReaderT[F, R, *], C, Cancel] {
-  val functor: Functor[ReaderT[F, R, *]] = implicitly
+) extends PerformVia[ReaderT[F, R, _], C, Cancel] {
+  val functor: Functor[ReaderT[F, R, _]] = implicitly
 
-  def performer: ReaderT[F, R, Performer[ReaderT[F, R, *], C, Cancel]] =
+  def performer: ReaderT[F, R, Performer[ReaderT[F, R, _], C, Cancel]] =
     ReaderT(r => p.performer.map(new ReaderTPerformer(_, r)))
 }
 

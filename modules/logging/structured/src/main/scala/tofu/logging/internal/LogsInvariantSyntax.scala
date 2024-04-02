@@ -34,13 +34,13 @@ object LogsInvariantSyntax {
     ): I[Logs.Universal[F]] = cached.map(_.universal)
 
     /** Collection of useful methods for creating middleware
-      * {{{logs.logged[Service].mid(implicit l => new Service[Mid[F, *]]{... })}}}
+      * {{{logs.logged[Service].mid(implicit l => new Service[Mid[F, _]]{... })}}}
       */
     final def logged[U[_[_]]](implicit c: ClassTag[U[HKAny]]): LogWares[U, I, F] =
       new LogWares(logs.forService[U[HKAny]])
 
     /** Collection of useful methods for creating middleware
-      * {{{logs.nameLogged[Service]("service").mid(implicit l => new Service[Mid[F, *]]{... })}}}
+      * {{{logs.nameLogged[Service]("service").mid(implicit l => new Service[Mid[F, _]]{... })}}}
       */
     final def nameLogged[U[_[_]]](name: String): LogWares[U, I, F] =
       new LogWares(logs.byName(name))

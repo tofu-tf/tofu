@@ -62,9 +62,9 @@ object Atom extends AtomInstances {
     }
   }
 
-  def stateTAtom[F[_]: Applicative, A]: Atom[StateT[F, A, *], A] = StateTAtom()
+  def stateTAtom[F[_]: Applicative, A]: Atom[StateT[F, A, _], A] = StateTAtom()
 
-  private case class StateTAtom[F[_]: Applicative, A]() extends Atom[StateT[F, A, *], A] {
+  private case class StateTAtom[F[_]: Applicative, A]() extends Atom[StateT[F, A, _], A] {
     override def get: StateT[F, A, A]                       = StateT.get
     override def set(a: A): StateT[F, A, Unit]              = StateT.set(a)
     override def getAndSet(a: A): StateT[F, A, A]           = StateT(a1 => (a, a1).pure[F])
@@ -72,10 +72,10 @@ object Atom extends AtomInstances {
     override def modify[B](f: A => (A, B)): StateT[F, A, B] = StateT(a => f(a).pure[F])
   }
 
-  def calcMAtom[F[+_, +_], R, S, E]: Atom[CalcM[F, R, S, S, E, *], S] =
-    calcMAtomAny.asInstanceOf[Atom[CalcM[F, R, S, S, E, *], S]]
+  def calcMAtom[F[+_, +_], R, S, E]: Atom[CalcM[F, R, S, S, E, _], S] =
+    calcMAtomAny.asInstanceOf[Atom[CalcM[F, R, S, S, E, _], S]]
 
-  private class CalcMAtom[F[+_, +_], R, S, E]() extends Atom[CalcM[F, R, S, S, E, *], S] {
+  private class CalcMAtom[F[+_, +_], R, S, E]() extends Atom[CalcM[F, R, S, S, E, _], S] {
     def get: CalcM[F, R, S, S, E, S]                       = CalcM.get
     def set(a: S): CalcM[F, R, S, S, E, Unit]              = CalcM.set(a).void
     def getAndSet(a: S): CalcM[F, R, S, S, E, S]           = CalcM.get[S] << CalcM.set(a)

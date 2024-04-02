@@ -20,7 +20,7 @@ object LoggingMid extends builder.LoggingMidBuilder.DefaultImpl with LoggingMidM
   type Of[U[_[_]]] = U[LoggingMid]
 }
 
-/** Logging middleware supporting error reporting Alg[LoggingErrMid[E, *]] is a special form of implicit evidence of
+/** Logging middleware supporting error reporting Alg[LoggingErrMid[E, _]] is a special form of implicit evidence of
   * injectable logging support generally you don't need `Logging` instance to derive this so choice of logging postponed
   * until this middleware is attached to the core instance
   */

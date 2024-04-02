@@ -47,7 +47,7 @@ private[tofu] trait HandlePrism[F[_], E, E1] extends Handle[F, E1] {
   def lift[A](fa: F[A]): F[A] = fa
 }
 
-private[tofu] class EitherTErrorsTo[F[_]: Monad, E] extends ErrorsTo[EitherT[F, E, *], F, E] {
+private[tofu] class EitherTErrorsTo[F[_]: Monad, E] extends ErrorsTo[EitherT[F, E, _], F, E] {
   def handleWith[A](fa: EitherT[F, E, A])(f: E => F[A]): F[A] = fa.valueOrF(f)
 
   // Members declared in tofu.Raise
@@ -60,7 +60,7 @@ private[tofu] class EitherTErrorsTo[F[_]: Monad, E] extends ErrorsTo[EitherT[F, 
   def lift[A](fa: F[A]): EitherT[F, E, A] = EitherT.liftF(fa)
 }
 
-private[tofu] class OptionTErrorsTo[F[_]: Monad] extends ErrorsTo[OptionT[F, *], F, Unit] {
+private[tofu] class OptionTErrorsTo[F[_]: Monad] extends ErrorsTo[OptionT[F, _], F, Unit] {
   def handleWith[A](fa: OptionT[F, A])(f: Unit => F[A]): F[A] = fa.getOrElseF(f(()))
 
   // Members declared in tofu.Raise
@@ -73,7 +73,7 @@ private[tofu] class OptionTErrorsTo[F[_]: Monad] extends ErrorsTo[OptionT[F, *],
   def lift[A](fa: F[A]): OptionT[F, A] = OptionT.liftF(fa)
 }
 
-private[tofu] class EitherErrorsTo[E] extends ErrorsTo[Either[E, *], Id, E] {
+private[tofu] class EitherErrorsTo[E] extends ErrorsTo[Either[E, _], Id, E] {
   def handleWith[A](fa: Either[E, A])(f: E => A): A = fa.fold(f, identity)
 
   // Members declared in tofu.Raise

@@ -5,8 +5,8 @@ import tofu.instances.bind._
 
 class CatsInstancesFromBindSuite {
   def summonBindInstances[F[+_, +_]](implicit bind: Bind[F]): Unit = {
-    requireApplicative[F[Throwable, *]]
-    requireFlatMap[F[Nothing, *]]
+    requireApplicative[F[Throwable, _]]
+    requireFlatMap[F[Nothing, _]]
   }
 
   def requireApplicative[F[_]](implicit applicative: Applicative[F]): Unit = ()
