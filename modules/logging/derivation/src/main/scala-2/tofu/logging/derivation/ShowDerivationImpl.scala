@@ -6,7 +6,7 @@ import magnolia1.{CaseClass, Magnolia, SealedTrait}
 import derevo.Derivation
 import derevo.NewTypeDerivation
 
-object show extends Derivation[Show] with NewTypeDerivation[Show] {
+trait ShowDerivationImpl extends Derivation[Show] with NewTypeDerivation[Show] {
 
   /** the type constructor for new [[Show]] instances
     *

@@ -3,7 +3,8 @@ package tofu.logging.derivation
 import scala.annotation.tailrec
 import scala.util.matching.Regex
 
-import magnolia1.CaseClass.Param
+import tofu.magnolia.compat
+import tofu.magnolia.compat.Param
 
 sealed trait MaskMode
 object MaskMode {
@@ -22,8 +23,6 @@ object MaskMode {
 }
 
 object masking {
-  private val SomeRe = "(?<=^Some(\\{value=|\\())(.+)(?=(\\}|\\))$)".r
-
   private[derivation] def string(shown: String, mode: MaskMode) = {
     @tailrec
     def loop(arr: Array[Char], cur: Int, left: Int): String = {
@@ -60,7 +59,7 @@ object masking {
 
   private[derivation] def field[T](field: T, shown: String, mode: MaskMode) = field match {
     case None    => shown
-    case Some(_) => SomeRe.replaceSomeIn(shown, m => Some(string(m.toString, mode)))
+    case Some(f) => s"Some(${string(f.toString, mode)})"
     case _       => string(shown, mode)
   }
 
@@ -73,7 +72,7 @@ object masking {
       .flatMap { param =>
         import param._
 
-        val value: PType = deref(tpe)
+        val value: PType = compat.deref[TypeClass, Type](param)(tpe)
         if (value == None && param.annotations.contains(ignoreOpt()))
           None
         else {

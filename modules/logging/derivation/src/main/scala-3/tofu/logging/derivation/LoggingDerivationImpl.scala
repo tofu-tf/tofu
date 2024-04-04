@@ -3,8 +3,9 @@ package derivation
 
 import cats.Show
 import magnolia1.*
+import scala.deriving.Mirror
 
-trait DerivationImpl extends AutoDerivation[Loggable] {
+trait LoggingDerivationImpl extends AutoDerivation[Loggable] {
 
   def byShow[T: Show](name: String): Loggable[T] =
     Loggable.stringValue.contramap(Show[T].show).named(name)
@@ -54,4 +55,5 @@ trait DerivationImpl extends AutoDerivation[Loggable] {
       ctx.choose(a)(sub => sub.typeclass.putField(sub.cast(a), name, input))
   }
 
+  inline def instance[A](using Mirror.Of[A]): Loggable[A] = autoDerived[A]
 }

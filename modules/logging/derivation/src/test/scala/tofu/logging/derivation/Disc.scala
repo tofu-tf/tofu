@@ -1,4 +1,5 @@
 package tofu.logging.derivation
+
 import tofu.compat.unused
 import tofu.logging.{LogTree, Loggable}
 import tofu.syntax.loggable._

@@ -6,7 +6,7 @@ import magnolia1.{CaseClass, Magnolia, SealedTrait}
 import derevo.Derivation
 import derevo.NewTypeDerivation
 
-trait DerivationImpl extends Derivation[Loggable] with NewTypeDerivation[Loggable] {
+trait LoggingDerivationImpl extends Derivation[Loggable] with NewTypeDerivation[Loggable] {
   type Typeclass[A] = Loggable[A]
 
   def byShow[T: Show](name: String): Loggable[T] =
