@@ -83,6 +83,6 @@ Please note we use the following labels for automated release descriptions:
   If you have any trouble during this check, just run `sbt fmt` and commit again.
   
 # Copyright
-Copyright the maintainers, 2019-2021
+Copyright the maintainers, 2019-2024
 
 Logos made with love by [@impurepics](https://twitter.com/impurepics)
