@@ -418,6 +418,17 @@ class FEitherSuite extends AnyWordSpec with Matchers {
       defaultRight.foldF(s => Some(s.length), c => Some(c * c)) mustBe Some(16)
       defaultLeft.foldF(c => Some(c * c), s => Some(s.length)) mustBe Some(16)
     }
+
+    "fold to None" in {
+      defaultRight.foldF(_ => None, _ => None) mustBe None
+      defaultLeft.foldF(_ => None, _ => None) mustBe None
+    }
+
+    "fold on None" in {
+      val emptyF = Option.empty[Either[String, Int]]
+      emptyF.foldF(_ => None, _ => None) mustBe None
+      emptyF.foldIn(_ => 1, _ => 1) mustBe None
+    }
   }
 
   "EitherFOps#ensure" should {

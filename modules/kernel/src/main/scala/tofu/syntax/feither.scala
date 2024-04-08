@@ -106,7 +106,6 @@ object feither {
 
     def foldIn[C](lMap: L => C, rMap: R => C)(implicit F: Functor[F]): F[C] = {
       e.map(_.fold(lMap, rMap))
-      e.map(_.fold(lMap, rMap))
     }
 
     def foldF[C](lMap: L => F[C], rMap: R => F[C])(implicit F: Monad[F]): F[C] = {
