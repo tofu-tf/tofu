@@ -10,7 +10,7 @@ import tofu.syntax.functorbk._
 import tofu.syntax.monadic._
 
 trait LoggingBiCompanion[U[_[_, _]]] {
-  type Log[F[_, _]] = ServiceLogging[F[Nothing, _], U[({ type L[_, _] = Any })#L]]
+  type Log[F[_, _]] = ServiceLogging[F[Nothing, _], U[({ type L[a, b] = Any })#L]]
 
   implicit def toBiLogBiMidOps[F[+_, +_]](uf: U[F]): LogBiMidOps[U, F] = new LogBiMidOps(uf)
 

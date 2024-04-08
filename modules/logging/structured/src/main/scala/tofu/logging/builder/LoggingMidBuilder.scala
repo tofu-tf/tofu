@@ -92,7 +92,7 @@ object LoggingMidBuilder {
 
   class CustomLevelImpl(logLevel: Level) extends CustomLevel {
     override def onLog[F[_]](message: String, values: LoggedValue*)(implicit F: LoggingBase[F]): F[Unit] =
-      F.write(logLevel, message, values)
+      F.write(logLevel, message, values: _*)
   }
 }
 
@@ -162,6 +162,6 @@ object LoggingErrMidBuilder {
   class CustomLevelImpl[E](logLevel: Level, errorLogLevel: Level)(implicit val errLoggable: Loggable[E])
       extends LoggingMidBuilder.CustomLevelImpl(logLevel) with CustomLevel[E] {
     override def onFaultLog[F[_]](message: String, values: LoggedValue*)(implicit F: LoggingBase[F]): F[Unit] =
-      F.write(errorLogLevel, message, values)
+      F.write(errorLogLevel, message, values: _*)
   }
 }

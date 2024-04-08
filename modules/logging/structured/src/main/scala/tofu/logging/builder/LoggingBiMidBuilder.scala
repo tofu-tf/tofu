@@ -11,7 +11,7 @@ import scala.collection.mutable.Buffer
 import scala.reflect.ClassTag
 
 trait BiBuilder[+T[_, _]] {
-  def prepare[Alg[_[_, _]]](implicit Alg: ClassTag[Alg[({ type L[_, _] = Any })#L]]): BiPrepared[Alg, T]
+  def prepare[Alg[_[_, _]]](implicit Alg: ClassTag[Alg[({ type L[a, b] = Any })#L]]): BiPrepared[Alg, T]
 }
 
 trait BiMethod[U[f[_, _]], Err, Res, +T[_, _]] {
@@ -42,7 +42,7 @@ abstract class LoggingBiMidBuilder extends BiBuilder[LoggingBiMid] {
       ok: Boolean
   ): F[Nothing, Unit]
 
-  def prepare[Alg[_[_, _]]](implicit Alg: ClassTag[Alg[({ type L[_, _] = Any })#L]]) =
+  def prepare[Alg[_[_, _]]](implicit Alg: ClassTag[Alg[({ type L[a, b] = Any })#L]]) =
     new PreparedImpl[Alg](Alg.runtimeClass)
 
   protected class MethodImpl[U[f[_, _]], Err: Loggable, Res: Loggable](
