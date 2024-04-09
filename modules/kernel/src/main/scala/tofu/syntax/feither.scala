@@ -104,6 +104,14 @@ object feither {
       e.flatMap(_.wideLeft[L1].flatTraverse(f))
     }
 
+    def foldIn[C](lMap: L => C, rMap: R => C)(implicit F: Functor[F]): F[C] = {
+      e.map(_.fold(lMap, rMap))
+    }
+
+    def foldF[C](lMap: L => F[C], rMap: R => F[C])(implicit F: Monad[F]): F[C] = {
+      e.flatMap(_.fold(lMap, rMap))
+    }
+
     def swapF(implicit F: Functor[F]): F[Either[R, L]] = {
       F.map(e)(_.swap)
     }
