@@ -68,6 +68,23 @@ class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
     Loggable[MaskedBaz].logShow(MaskedBaz(None)) shouldBe "MaskedBaz{kek=<none>}"
   }
 
+  it should "show mask Option values in logShow" in {
+    val maybeMasked = MaskedOptBaz(
+      maybeStr = Some("str"),
+      maybeInt = Some(123),
+      maybeBool = Some(true),
+      maybeDouble = Some(100.001),
+      maybeStr2 = None
+    )
+    Loggable[MaskedOptBaz].logShow(maybeMasked) shouldBe
+      "MaskedOptBaz{" +
+      "maybeStr=Some(***)," +
+      "maybeInt=Some(###)," +
+      "maybeBool=Some(****)," +
+      "maybeDouble=Some(###.###)," +
+      "maybeStr2=<none>" +
+      "}"
+  }
 }
 
 object DerivedLoggableSuite {
@@ -94,4 +111,13 @@ object DerivedLoggableSuite {
 
   @derive(loggable)
   final case class MaskedBaz(@masked kek: Option[String], @ignoreOpt a: Option[String] = None)
+
+  @derive(loggable)
+  final case class MaskedOptBaz(
+      @masked maybeStr: Option[String],
+      @masked maybeInt: Option[Int],
+      @masked maybeBool: Option[Boolean],
+      @masked maybeDouble: Option[Double],
+      @masked maybeStr2: Option[String]
+  )
 }
