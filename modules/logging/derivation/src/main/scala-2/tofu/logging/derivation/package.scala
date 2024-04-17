@@ -1,10 +1,13 @@
 package tofu.logging
 
-import magnolia.TypeName
+import magnolia1.TypeName
 import scala.collection.compat._
 
 package object derivation {
-  private[derivation] def join(typeName: String, strings: IterableOnce[String]): String =
+
+  type MagnoliaParam[TC[_], T] = magnolia1.Param[TC, T]
+
+  private[derivation] def strJoin(typeName: String, strings: IterableOnce[String]): String =
     if (strings.iterator.isEmpty) typeName else strings.iterator.mkString(s"$typeName{", ",", "}")
 
   private[derivation] def calcTypeName(typeName: TypeName, seen: Set[TypeName] = Set()): String =

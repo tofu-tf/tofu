@@ -2,7 +2,7 @@ package tofu.common.derived
 
 import cats.Eval
 import derevo.Derivation
-import magnolia.{CaseClass, Magnolia, SealedTrait}
+import magnolia1.{CaseClass, Magnolia, SealedTrait}
 import tofu.common.Display
 
 /** Derivation of [[Display]] typeclass for case classes and sealed traits
@@ -15,7 +15,7 @@ object display extends Derivation[Display] {
 
   private type Typeclass[T] = Display[T]
 
-  def combine[T](ctx: CaseClass[Typeclass, T]): Display[T]    = (cfg: Display.Config, a: T) => {
+  def join[T](ctx: CaseClass[Typeclass, T]): Display[T]    = (cfg: Display.Config, a: T) => {
     import cfg.{fieldSeparator, indent, brackets, fieldAssign, newline}
 
     val nestedIndent = indent + indent
@@ -57,8 +57,8 @@ object display extends Derivation[Display] {
       }
       .map(s => s :+ brackets.right)
   }
-  def dispatch[T](ctx: SealedTrait[Typeclass, T]): Display[T] = (cfg: Display.Config, a: T) =>
-    ctx.dispatch(a)(adtCase => adtCase.typeclass.displayBuild(cfg, adtCase.cast(a)))
+  def split[T](ctx: SealedTrait[Typeclass, T]): Display[T] = (cfg: Display.Config, a: T) =>
+    ctx.split(a)(adtCase => adtCase.typeclass.displayBuild(cfg, adtCase.cast(a)))
 
   def instance[T]: Display[T] = macro Magnolia.gen[T]
 

@@ -22,7 +22,7 @@ trait Performer[F[_], -Cont[_], Cancel] {
 }
 
 object Performer {
-  type OfExit[F[_], E] = Performer[F, PerformOf.ExitCont[E, *], Unit]
+  type OfExit[F[_], E] = Performer[F, PerformOf.ExitCont[E, _], Unit]
 
   implicit def contravariantK[F[_], Cancel]: ContravariantK[({ type L[x[_]] = Performer[F, x, Cancel] })#L] =
     new PerformerContravariantK[F, Cancel]
@@ -49,7 +49,7 @@ object PerformVia extends PerformInstance with PerformInstance1 {
 trait PerformInstance1 {
   implicit def performReader[F[_]: Functor, Cont[_], R, Cancel](implicit
       RP: PerformVia[F, Cont, Cancel]
-  ): PerformVia[ReaderT[F, R, *], Cont, Cancel] = new PerformViaReader(RP)
+  ): PerformVia[ReaderT[F, R, _], Cont, Cancel] = new PerformViaReader(RP)
 }
 
 object PerformOf extends Effect2Comp[PerformOf] {

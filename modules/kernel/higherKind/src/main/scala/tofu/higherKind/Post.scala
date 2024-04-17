@@ -6,7 +6,7 @@ import cats.{Applicative, Apply, FlatMap, Monoid, MonoidK, Semigroup, SemigroupK
 import tofu.syntax.funk.funK
 import tofu.syntax.monadic.*
 
-/** A function `[F[_], A] =>> A => F[Unit]` An algebra `U[Post[F, *]]` is an algebra which translates all actions to `A
+/** A function `[F[_], A] =>> A => F[Unit]` An algebra `U[Post[F, _]]` is an algebra which translates all actions to `A
   * \=> F[Unit]`. This is useful to represent actions succeeding main logic.
   */
 trait Post[F[_], A] {

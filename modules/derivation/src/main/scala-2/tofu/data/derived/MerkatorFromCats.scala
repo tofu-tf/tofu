@@ -1,6 +1,6 @@
 package tofu.data.derived
 import cats.Monad
-import mercator.Monadic
+import magnolia1.Monadic
 
 class MerkatorFromCats[F[_]](implicit F: Monad[F]) extends Monadic[F] {
   def point[A](value: A): F[A]                       = F.pure(value)

@@ -24,18 +24,18 @@ trait CalcMInstances extends CalcMInstances1 {
 }
 
 trait CalcMInstances1 {
-  final implicit def calcMBitraverse[F[+_, +_]: Bitraverse, S]: Bitraverse[CalcM[F, Any, Any, S, *, *]] =
+  final implicit def calcMBitraverse[F[+_, +_]: Bitraverse, S]: Bitraverse[CalcM[F, Any, Any, S, _, _]] =
     new CalcMBitraverse
 }
 
 trait CalcMInstances2 {
-  final implicit def calcMBifoldable[F[+_, +_]: Bifoldable, S]: Bifoldable[CalcM[F, Any, Any, S, *, *]] =
+  final implicit def calcMBifoldable[F[+_, +_]: Bifoldable, S]: Bifoldable[CalcM[F, Any, Any, S, _, _]] =
     new CalcMBifoldable
 }
 
 class CalcMonadInstance[F[+_, +_], R, S, E]
-    extends MonadError[CalcM[F, R, S, S, E, *], E] with cats.Defer[CalcM[F, R, S, S, E, *]]
-    with StackSafeMonad[CalcM[F, R, S, S, E, *]] {
+    extends MonadError[CalcM[F, R, S, S, E, _], E] with cats.Defer[CalcM[F, R, S, S, E, _]]
+    with StackSafeMonad[CalcM[F, R, S, S, E, _]] {
   def defer[A](fa: => CalcM[F, R, S, S, E, A]): CalcM[F, R, S, S, E, A]                                         = CalcM.defer(fa)
   def raiseError[A](e: E): CalcM[F, R, S, S, E, A]                                                              = CalcM.raise(e)
   def handleErrorWith[A](fa: CalcM[F, R, S, S, E, A])(f: E => CalcM[F, R, S, S, E, A]): CalcM[F, R, S, S, E, A] =
@@ -45,7 +45,7 @@ class CalcMonadInstance[F[+_, +_], R, S, E]
   def pure[A](x: A): CalcM[F, R, S, S, E, A]                                                                    = CalcM.pure(x)
 }
 
-class CalcBindInstance[F[+_, +_], R, S] extends StackSafeBind[CalcM[F, R, S, S, *, *]] {
+class CalcBindInstance[F[+_, +_], R, S] extends StackSafeBind[CalcM[F, R, S, S, _, _]] {
   override def pure[E, A](a: A): CalcM[F, R, S, S, E, A] = CalcM.pure(a)
 
   override def raise[E, A](e: E): CalcM[F, R, S, S, E, A] = CalcM.raise(e)
@@ -56,9 +56,9 @@ class CalcBindInstance[F[+_, +_], R, S] extends StackSafeBind[CalcM[F, R, S, S, 
   ): CalcM[F, R, S, S, X, B] = fa.foldWith(f, h)
 }
 
-class CalcContextInstance[F[+_, +_], R, S, E] extends WithRun[CalcM[F, R, S, S, E, *], CalcM[F, Any, S, S, E, *], R] {
+class CalcContextInstance[F[+_, +_], R, S, E] extends WithRun[CalcM[F, R, S, S, E, _], CalcM[F, Any, S, S, E, _], R] {
   override val context: CalcM[F, R, S, S, E, R]          = CalcM.read
-  override val functor: Functor[CalcM[F, R, S, S, E, *]] = CalcM.calcFunctorInstance
+  override val functor: Functor[CalcM[F, R, S, S, E, _]] = CalcM.calcFunctorInstance
 
   override def runContext[A](fa: CalcM[F, R, S, S, E, A])(ctx: R): CalcM[F, Any, S, S, E, A]   = fa.provide(ctx)
   override def local[A](fa: CalcM[F, R, S, S, E, A])(project: R => R): CalcM[F, R, S, S, E, A] =
@@ -67,8 +67,8 @@ class CalcContextInstance[F[+_, +_], R, S, E] extends WithRun[CalcM[F, R, S, S, 
 }
 
 class CalcBiContextInstance[F[+_, +_], R, S]
-    extends BiRun[CalcM[F, R, S, S, +*, +*], CalcM[F, Any, S, S, +*, +*], Nothing, R] {
-  override def bifunctor: Bind[CalcM[F, R, S, S, *, *]] = CalcM.calcBindInstance
+    extends BiRun[CalcM[F, R, S, S, +_, +_], CalcM[F, Any, S, S, +_, +_], Nothing, R] {
+  override def bifunctor: Bind[CalcM[F, R, S, S, _, _]] = CalcM.calcBindInstance
 
   override def lift[E, A](fa: CalcM[F, Any, S, S, E, A]): CalcM[F, R, S, S, E, A] = fa
 
@@ -83,11 +83,11 @@ class CalcBiContextInstance[F[+_, +_], R, S]
   )(lproj: Nothing => Nothing, rproj: R => R): CalcM[F, R, S, S, E, A] = fea.local(rproj)
 
   override def disclose[E, A](
-      k: FunBK[CalcM[F, R, S, S, *, *], CalcM[F, Any, S, S, *, *]] => CalcM[F, R, S, S, E, A]
-  ): CalcM[F, R, S, S, E, A] = CalcM.read[S, R].flatMap(r => k(FunBK.apply[CalcM[F, R, S, S, *, *]](_.provide(r))))
+      k: FunBK[CalcM[F, R, S, S, _, _], CalcM[F, Any, S, S, _, _]] => CalcM[F, R, S, S, E, A]
+  ): CalcM[F, R, S, S, E, A] = CalcM.read[S, R].flatMap(r => k(FunBK.apply[CalcM[F, R, S, S, _, _]](_.provide(r))))
 }
 
-class CalcMBifoldable[F[+_, +_], S](implicit F: Bifoldable[F]) extends Bifoldable[CalcM[F, Any, Any, S, *, *]] {
+class CalcMBifoldable[F[+_, +_], S](implicit F: Bifoldable[F]) extends Bifoldable[CalcM[F, Any, Any, S, _, _]] {
   private[this] val MaxDepth = 256
 
   def bifoldLeft1Slow[E, A, B](
@@ -145,7 +145,7 @@ class CalcMBifoldable[F[+_, +_], S](implicit F: Bifoldable[F]) extends Bifoldabl
 }
 
 class CalcMBitraverse[F[+_, +_], S](implicit F: Bitraverse[F])
-    extends CalcMBifoldable[F, S] with Bitraverse[CalcM[F, Any, Any, S, *, *]] {
+    extends CalcMBifoldable[F, S] with Bitraverse[CalcM[F, Any, Any, S, _, _]] {
 
   def bitraverse1[G[_]: Applicative, A, B, C, D](
       fab: StepResult[F, S, A, B]

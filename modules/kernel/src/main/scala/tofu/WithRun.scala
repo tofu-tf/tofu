@@ -8,7 +8,7 @@ import tofu.syntax.funk.funK
 /** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type
   * inference
   *
-  * Can be seen as transformation `F[*] = C => G[*]`
+  * Can be seen as transformation `F[_] = C => G[_]`
   */
 trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] with RunContext[F] with Unlift[G, F] {
   override type Ctx = C
@@ -20,9 +20,9 @@ trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] w
     *
     * type WithMyContext[F[_], A] = ReaderT[F, MyCtx, A]
     *
-    * val processHandler: ProcessHandler[IO WithMyContext *] = ???
+    * val processHandler: ProcessHandler[IO WithMyContext _] = ???
     *
-    * val contextualHandler: IO WithMyContext ProcessHandler[IO] = processHandler.mapK( WithRun[WithMyContext[IO, *],
+    * val contextualHandler: IO WithMyContext ProcessHandler[IO] = processHandler.mapK( WithRun[WithMyContext[IO, _],
     * IO, MyCtx].unlift.map(fk => processHandler.mapK(fk)) ) //now it is able to process MyCtx but is wrapped in IO
     * WithMyContext * }}}
     * @return

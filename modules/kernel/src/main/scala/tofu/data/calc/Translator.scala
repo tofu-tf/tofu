@@ -24,7 +24,7 @@ object Translator {
   type Uno[F[_], E, A] = F[A]
 
   def apply[F[_, _], R, S]: Applied[F, R, S]       = new Applied
-  def uno[F[_], R, S]: Applied[Uno[F, *, *], R, S] = new Applied[Uno[F, *, *], R, S]
+  def uno[F[_], R, S]: Applied[Uno[F, _, _], R, S] = new Applied[Uno[F, _, _], R, S]
 
   class Applied[F[_, _], R, ST] {
     type E

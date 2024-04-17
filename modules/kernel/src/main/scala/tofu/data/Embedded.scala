@@ -30,14 +30,14 @@ trait ExceptTInstances extends ExceptTInstances1 {
   implicit def exceptTVeryParallel[G[+_], E](implicit
       G: Parallel[G],
       E: Semigroup[E]
-  ): Parallel.Aux[ExceptT[G, E, *], ExceptTPar[G.F, E, *]] =
-    new Parallel[ExceptT[G, E, *]] {
+  ): Parallel.Aux[ExceptT[G, E, _], ExceptTPar[G.F, E, _]] =
+    new Parallel[ExceptT[G, E, _]] {
       type F[A] = ExceptTPar[G.F, E, A]
 
-      @inline private def par1 = funk.funKFrom[ExceptT[G, E, *]](fx => toPar(G.parallel(fx.value)))
+      @inline private def par1 = funk.funKFrom[ExceptT[G, E, _]](fx => toPar(G.parallel(fx.value)))
 
       def parallel   = par1
-      def sequential = funk.funKFrom[ExceptTPar[G.F, E, *]](fx => Embedded(G.sequential(fromPar(fx))))
+      def sequential = funk.funKFrom[ExceptTPar[G.F, E, _]](fx => Embedded(G.sequential(fromPar(fx))))
 
       def monad: Monad[ExceptT[G, E, _]] = exceptTMonad[G, E](G.monad)
 
@@ -45,8 +45,8 @@ trait ExceptTInstances extends ExceptTInstances1 {
     }
 }
 trait ExceptTInstances1 {
-  implicit def exceptTMonad[F[+_], E](implicit F: Monad[F]): MonadError[ExceptT[F, E, *], E] =
-    new MonadError[ExceptT[F, E, *], E] {
+  implicit def exceptTMonad[F[+_], E](implicit F: Monad[F]): MonadError[ExceptT[F, E, _], E] =
+    new MonadError[ExceptT[F, E, _], E] {
       override def map[A, B](fa: ExceptT[F, E, A])(f: A => B): ExceptT[F, E, B] =
         Embedded(fa.value.map(_.map(f)))
 
@@ -78,8 +78,8 @@ trait ExceptTInstances1 {
       def raiseError[A](e: E): ExceptT[F, E, A] = Embedded(e.asLeftF[F, A])
     }
 
-  implicit def exceptTBind[F[+_]](implicit F: Monad[F]): Bind[ExceptT[F, *, *]] =
-    new Bind[ExceptT[F, *, *]] {
+  implicit def exceptTBind[F[+_]](implicit F: Monad[F]): Bind[ExceptT[F, _, _]] =
+    new Bind[ExceptT[F, _, _]] {
       def pure[E, A](a: A): ExceptT[F, E, A] = Embedded(a.asRightF[F, E])
 
       def raise[E, A](e: E): ExceptT[F, E, A] = Embedded(e.asLeftF[F, A])
@@ -112,12 +112,12 @@ trait ExceptTInstances1 {
 
   implicit def exceptTParallel[G[+_], E: Semigroup](implicit
       G: Monad[G]
-  ): Parallel.Aux[ExceptT[G, E, *], ExceptTPar[G, E, *]] =
-    new Parallel[ExceptT[G, E, *]] {
+  ): Parallel.Aux[ExceptT[G, E, _], ExceptTPar[G, E, _]] =
+    new Parallel[ExceptT[G, E, _]] {
       type F[A] = ExceptTPar[G, E, A]
 
-      def parallel   = funk.funKFrom[ExceptT[G, E, *]](fx => toPar(fx.value))
-      def sequential = funk.funK[ExceptTPar[G, E, *], ExceptT[G, E, *]](fx => fromPartoExcept(fx))
+      def parallel   = funk.funKFrom[ExceptT[G, E, _]](fx => toPar(fx.value))
+      def sequential = funk.funK[ExceptTPar[G, E, _], ExceptT[G, E, _]](fx => fromPartoExcept(fx))
 
       def monad: Monad[ExceptT[G, E, _]] = exceptTMonad[G, E]
 
@@ -131,7 +131,7 @@ private[tofu] object ExceptTInstances1 {
   @inline final def fromPar[F[_], E, A](et: ExceptTPar[F, E, A])          = et.asInstanceOf[F[Either[E, A]]]
   @inline final def fromPartoExcept[F[+_], E, A](et: ExceptTPar[F, E, A]) = et.asInstanceOf[ExceptT[F, E, A]]
 
-  class ParApplicative[F[_]: Applicative, E: Semigroup] extends Applicative[ExceptTPar[F, E, *]] {
+  class ParApplicative[F[_]: Applicative, E: Semigroup] extends Applicative[ExceptTPar[F, E, _]] {
     def pure[A](x: A): ExceptTPar[F, E, A] = toPar(x.asRightF[F, E])
 
     def ap[A, B](ff: ExceptTPar[F, E, A => B])(fa: ExceptTPar[F, E, A]): ExceptTPar[F, E, B] = map2(ff, fa)(_(_))

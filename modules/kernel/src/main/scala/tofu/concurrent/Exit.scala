@@ -40,7 +40,7 @@ object Exit {
     case util.Success(res) => Completed(res)
   }
 
-  private[this] object exitInstanceAny extends Traverse[Exit[Any, *]] with ApplicativeZip[Exit[Any, *]] {
+  private[this] object exitInstanceAny extends Traverse[Exit[Any, _]] with ApplicativeZip[Exit[Any, _]] {
     def traverse[G[_], A, B](fa: Exit[Any, A])(f: A => G[B])(implicit G: Applicative[G]): G[Exit[Any, B]] =
       fa match {
         case Canceled     => G.pure(Canceled)
@@ -78,8 +78,8 @@ object Exit {
     def pure[A](x: A): Exit[Any, A]                                                        = Completed(x)
   }
 
-  implicit def exitInstance[E]: Traverse[Exit[E, *]] with Applicative[Exit[E, *]] =
-    exitInstanceAny.asInstanceOf[Traverse[Exit[E, *]] with Applicative[Exit[E, *]]]
+  implicit def exitInstance[E]: Traverse[Exit[E, _]] with Applicative[Exit[E, _]] =
+    exitInstanceAny.asInstanceOf[Traverse[Exit[E, _]] with Applicative[Exit[E, _]]]
 
   object CanceledException extends InterruptedException
 }

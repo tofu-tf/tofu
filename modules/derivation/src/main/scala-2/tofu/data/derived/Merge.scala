@@ -3,7 +3,7 @@ package derived
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 import cats.kernel.Semigroup
-import magnolia.{CaseClass, Magnolia, SealedTrait}
+import magnolia1.{CaseClass, Magnolia, SealedTrait}
 import derevo.Derivation
 import tofu.compat.unused
 
@@ -16,11 +16,11 @@ trait Merge[A] {
 trait MergeInstances1 {
   type Typeclass[A] = Merge[A]
 
-  def combine[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] =
+  def join[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] =
     (a, b) => caseClass.construct(p => p.typeclass.merge(p.dereference(a), p.dereference(b)))
 
-  def dispatch[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
-    (a, b) => sealedTrait.dispatch(a) { h => if (h.cast.isDefinedAt(b)) h.typeclass.merge(h.cast(a), h.cast(b)) else a }
+  def split[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
+    (a, b) => sealedTrait.split(a) { h => if (h.cast.isDefinedAt(b)) h.typeclass.merge(h.cast(a), h.cast(b)) else a }
 
   implicit def instance[A]: Merge[A] = macro Magnolia.gen[A]
 }

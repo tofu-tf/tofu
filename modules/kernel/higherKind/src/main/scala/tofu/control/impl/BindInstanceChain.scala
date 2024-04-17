@@ -38,7 +38,7 @@ trait BindInstanceChain[TC[f[_, _]] >: Bind[f]] {
 
     override def handle[E, X, A](fa: Either[E, A], h: E => A): Either[X, A] = Right(fa.fold(h, identity))
 
-    override def monad[E]: Monad[Either[E, *]] = implicitly
+    override def monad[E]: Monad[Either[E, _]] = implicitly
 
     override def bifunctor: Bifunctor[Either] = implicitly
   }
