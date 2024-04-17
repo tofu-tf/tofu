@@ -22,8 +22,6 @@ object MaskMode {
 }
 
 object masking {
-  private val SomeRe = "(?<=^Some(\\{value=|\\())(.+)(?=(\\}|\\))$)".r
-
   private[derivation] def string(shown: String, mode: MaskMode) = {
     @tailrec
     def loop(arr: Array[Char], cur: Int, left: Int): String = {
@@ -60,7 +58,7 @@ object masking {
 
   private[derivation] def field[T](field: T, shown: String, mode: MaskMode) = field match {
     case None    => shown
-    case Some(_) => SomeRe.replaceSomeIn(shown, m => Some(string(m.toString, mode)))
+    case Some(f) => s"Some(${string(f.toString, mode)})"
     case _       => string(shown, mode)
   }
 
