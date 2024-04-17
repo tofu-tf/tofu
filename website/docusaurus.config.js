@@ -1,8 +1,8 @@
 module.exports = {
   title: "Tofu",
   tagline: "Functional programming toolbox",
-  url: "https://docs.tofu.tf",
-  baseUrl: "/",
+  url: "https://tofu-tf.github.io",
+  baseUrl: "/tofu/",
   organizationName: "tofu-tf",
   projectName: "tofu",
   scripts: [

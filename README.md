@@ -13,7 +13,7 @@
 
 # Quick Start
 
-## see [the docs on the microsite](https://docs.tofu.tf)
+## see [the docs on the microsite](https://tofu-tf.github.io/tofu)
 
 ## see the [examples in the `examples` directory](https://github.com/tofu-tf/tofu/tree/master/examples)
 
