@@ -28,4 +28,9 @@ class TimeSuite {
     Sleep[ReaderT[IO, Unit, _]]
     Timeout[ReaderT[IO, Unit, _]]
   }
+
+  def readerF[F[_]: Clock: Sleep] = {
+    Clock[ReaderT[F, Unit, _]]
+    Sleep[ReaderT[F, Unit, _]]
+  }
 }
