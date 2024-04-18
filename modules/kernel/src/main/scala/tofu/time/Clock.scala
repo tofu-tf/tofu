@@ -1,10 +1,12 @@
 package tofu.time
 
-import java.util.concurrent.TimeUnit
-
-import cats.data.Kleisli
+import cats.data.*
+import cats.{Applicative, FlatMap, Functor, Monoid}
 import tofu.internal.EffectComp
 import tofu.internal.instances.ClockInstance
+import tofu.syntax.liftKernel.CatsTaglessLiftSyntax
+
+import java.util.concurrent.TimeUnit
 
 trait Clock[F[_]] {
 
@@ -23,13 +25,12 @@ trait Clock[F[_]] {
 }
 
 object Clock extends EffectComp[Clock] with ClockInstance {
-  implicit def clockForKleisli[F[_], R](implicit clock: Clock[F]): Clock[Kleisli[F, R, *]] =
-    new Clock[Kleisli[F, R, *]] {
-
-      override def realTime(unit: TimeUnit): Kleisli[F, R, Long] =
-        Kleisli.liftF(clock.realTime(unit))
-
-      override def nanos: Kleisli[F, R, Long] =
-        Kleisli.liftF(clock.nanos)
-    }
+  implicit def clockForKleisli[F[_]: Clock, R]: Clock[Kleisli[F, R, _]]                            = Clock[F].lift
+  implicit def clockForWriterT[F[_]: Applicative: Clock, R: Monoid]: Clock[WriterT[F, R, _]]       = Clock[F].lift
+  implicit def clockForOptionT[F[_]: Functor: Clock]: Clock[OptionT[F, _]]                         = Clock[F].lift
+  implicit def clockForEitherT[F[_]: Functor: Clock, E]: Clock[EitherT[F, E, _]]                   = Clock[F].lift
+  implicit def clockForStateT[F[_]: Applicative: Clock, S]: Clock[StateT[F, S, _]]                 = Clock[F].lift
+  implicit def clockForIorT[F[_]: Applicative: Clock, L]: Clock[IorT[F, L, _]]                     = Clock[F].lift
+  implicit def clockForContT[F[_]: FlatMap: Clock, R]: Clock[ContT[F, R, _]]                       = Clock[F].lift
+  implicit def clockForRWST[F[_]: Applicative: Clock, R, L: Monoid, S]: Clock[RWST[F, R, L, S, _]] = Clock[F].lift
 }
