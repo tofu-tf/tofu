@@ -3,6 +3,7 @@ package derivation
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import tofu.logging.derivation.MaskMode.Custom
 
 class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
 
@@ -67,6 +68,35 @@ class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
     Loggable[MaskedBaz].logShow(MaskedBaz(None)) shouldBe "MaskedBaz{kek=<none>}"
   }
 
+  it should "show mask Option values in logShow" in {
+    val maybeMasked = MaskedOptBaz(
+      maybeStr = Some("str"),
+      maybeInt = Some(123),
+      maybeBool = Some(true),
+      maybeDouble = Some(100.001),
+      maybeStr2 = None
+    )
+    Loggable[MaskedOptBaz].logShow(maybeMasked) shouldBe
+      "MaskedOptBaz{" +
+      "maybeStr=Some(***)," +
+      "maybeInt=Some(###)," +
+      "maybeBool=Some(****)," +
+      "maybeDouble=Some(###.###)," +
+      "maybeStr2=<none>" +
+      "}"
+  }
+
+  it should "show mask fields with custom masker function" in {
+    val maskedCustom = MaskedCustom(
+      sensitiveField = "som sensitive data",
+      firstName = Some("John"),
+      age = 42
+    )
+
+    json(maskedCustom) shouldBe """{"sensitiveField":"*","firstName":"J***","age":"**"}"""
+    Loggable[MaskedCustom].logShow(maskedCustom) shouldBe
+      "MaskedCustom{sensitiveField=*,firstName=Some(J***),age=**}"
+  }
 }
 
 object DerivedLoggableSuite {
@@ -89,4 +119,25 @@ object DerivedLoggableSuite {
       derives Loggable
 
   final case class MaskedBaz(@masked kek: Option[String], @ignoreOpt a: Option[String] = None) derives Loggable
+
+  final case class MaskedOptBaz(
+      @masked maybeStr: Option[String],
+      @masked maybeInt: Option[Int],
+      @masked maybeBool: Option[Boolean],
+      @masked maybeDouble: Option[Double],
+      @masked maybeStr2: Option[String]
+  ) derives Loggable
+
+  final case class MaskedCustom(
+      @masked(Custom(_ => "*")) sensitiveField: String,
+      @masked(Custom(maskName)) firstName: Option[String],
+      @masked(Custom(maskAge)) age: Int
+  ) derives Loggable
+
+  def maskName(name: String): String =
+    name.take(1) + "***"
+
+  def maskAge(i: String): String =
+    "*" * i.length
+
 }

@@ -20,6 +20,9 @@ object MaskMode {
     def this(length: Int) = this(0, length)
   }
   case class Regexp(pattern: Regex)                      extends MaskMode
+
+  /** Allows to define a custom masker function */
+  case class Custom(f: String => String) extends MaskMode
 }
 
 object masking {
@@ -54,6 +57,8 @@ object masking {
           .getOrElse(shown)
       case MaskMode.ForLength(offset, maxLength) =>
         loop(shown.toCharArray, shown.length min (offset max 0), if (maxLength == -1) shown.length else maxLength)
+      case MaskMode.Custom(f)                    =>
+        f(shown)
     }
   }
 
