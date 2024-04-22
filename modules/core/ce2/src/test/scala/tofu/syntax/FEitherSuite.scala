@@ -250,6 +250,40 @@ class FEitherSuite extends AnyWordSpec with Matchers {
     }
   }
 
+  "EitherFOps#asIn" should {
+
+    "return valid value in case of Right" in {
+      defaultRight.asIn(1) mustBe Some(Right(1))
+    }
+
+    "return Left value without changes" in {
+      defaultLeft.asIn(1) mustBe Some(Left(4))
+    }
+
+    "return valid value in case of base None" in {
+      none[Either[String, Int]].asIn(1) mustBe None
+    }
+  }
+
+  "EitherFOps#asF" should {
+
+    "return valid value in case of Right" in {
+      defaultRight.asF(Some(1)) mustBe Some(Right(1))
+    }
+
+    "return None if inner value is None" in {
+      defaultRight.asF(None) mustBe None
+    }
+
+    "return Left value without changes" in {
+      defaultLeft.asF(Some(1)) mustBe Some(Left(4))
+    }
+
+    "return valid value in case of base None" in {
+      none[Either[String, Int]].asIn(Some(1)) mustBe None
+    }
+  }
+
   "EitherFOps#leftMapF" should {
 
     "return valid value in case of Left" in {
@@ -403,6 +437,26 @@ class FEitherSuite extends AnyWordSpec with Matchers {
       defaultLeft.doubleFlatMap(i => Some(Left(i.length))) mustBe Some(Left(4))
       defaultLeft.doubleFlatMap(i => Some(Right(i.length))) mustBe Some(Left(4))
       defaultLeft.doubleFlatMap(_ => None) mustBe Some(Left(4))
+    }
+  }
+
+  "EitherFOps#doubleFlatTap" should {
+
+    "return None" in {
+      none[Either[String, Int]].doubleFlatTap(_ => None) mustBe None
+      defaultRight.doubleFlatTap(_ => None) mustBe None
+    }
+
+    "return Right without changes" in {
+      defaultRight.doubleFlatTap(i => Some(Right(i + 1))) mustBe defaultRight
+    }
+
+    "return Left" in {
+      defaultRight.doubleFlatTap(i => Some(Left(i.toString))) mustBe Some(Left("4"))
+
+      defaultLeft.doubleFlatTap(i => Some(Left(i.length))) mustBe Some(Left(4))
+      defaultLeft.doubleFlatTap(i => Some(Right(i.length))) mustBe Some(Left(4))
+      defaultLeft.doubleFlatTap(_ => None) mustBe Some(Left(4))
     }
   }
 
