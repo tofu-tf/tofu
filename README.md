@@ -60,7 +60,7 @@ of `"tofu"`):
 
 Proud user of ToFu? Feel free to [add your company!](https://github.com/tofu-tf/tofu/edit/master/README.md)
 
-<a href="https://tinkoff.ru/"><img width="40%" src="logos/yandex-travel-logo.svg?sanitize=true" /></a>
+<a href="https://tinkoff.ru/"><img width="40%" src="logos/t-logo.svg?sanitize=true" /></a>
 
 <a href="https://vivid.money/"><img width="40%" src="logos/vivid.svg?sanitize=true" /></a>
 
