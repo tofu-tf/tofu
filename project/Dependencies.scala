@@ -42,7 +42,7 @@ object Dependencies {
 
     val scalatest = "3.2.16"
 
-    val magnolia2 = "1.1.6"
+    val magnolia2 = "1.1.8"
 
     val magnolia3 = "1.3.4"
 
