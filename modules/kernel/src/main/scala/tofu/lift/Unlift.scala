@@ -4,9 +4,9 @@ package lift
 import cats.arrow.FunctionK
 import cats.data.ReaderT
 import cats.{Applicative, FlatMap, Functor, Monad, ~>}
-import syntax.funk._
+import syntax.funk.*
 import glass.Contains
-import tofu.syntax.monadic._
+import tofu.syntax.monadic.*
 import tofu.internal.ContextBase
 import tofu.internal.hktAny
 
@@ -32,16 +32,14 @@ object Lift extends LiftInstances1 {
   }
   implicit def liftIdentity[F[_]]: Lift[F, F]   = liftIdentityAny.asInstanceOf[Lift[F, F]]
 
-  private val unliftReaderTAny: Unlift[hktAny.AnyK, ReaderT[hktAny.AnyK, Any, _]] = {
-    type RT[a] = ReaderT[hktAny.AnyK, Any, a]
-    new Unlift[hktAny.AnyK, RT] {
+  private val liftReaderTAny: Lift[hktAny.AnyK, ReaderT[hktAny.AnyK, Any, _]] = {
+    type RT[A] = ReaderT[hktAny.AnyK, Any, A]
+    new Lift[hktAny.AnyK, RT] {
       def lift[A](fa: hktAny.AnyK[A]): RT[A] = ReaderT.liftF(fa)
-
-      val unlift: RT[RT ~> AnyK] = ReaderT[AnyK, Any, RT ~> AnyK](r => funK[RT, AnyK](f => f.run(r)))
     }
   }
-  implicit def liftReaderT[F[_], R]: Lift[F, ReaderT[F, R, _]]                    =
-    unliftReaderTAny.asInstanceOf[Unlift[F, ReaderT[F, R, _]]]
+  implicit def liftReaderT[F[_], R]: Lift[F, ReaderT[F, R, _]]                =
+    liftReaderTAny.asInstanceOf[Lift[F, ReaderT[F, R, _]]]
 }
 
 private[lift] trait LiftInstances1 extends LiftInstances2 {
