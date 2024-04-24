@@ -71,6 +71,12 @@ object feither {
     def mapIn[B](f: R => B)(implicit F: Functor[F]): F[Either[L, B]] =
       e.map(_.map(f))
 
+    def asIn[B](b: B)(implicit F: Functor[F]): F[Either[L, B]] =
+      mapIn(_ => b)
+
+    def asF[B](b: F[B])(implicit F: Monad[F]): F[Either[L, B]] =
+      mapF(_ => b)
+
     def leftMapF[L1](f: L => F[L1])(implicit F: Monad[F]): F[Either[L1, R]] = {
       e.flatMap {
         case Left(left)       => f(left).map(_.asLeft)
@@ -103,6 +109,9 @@ object feither {
     def doubleFlatMap[L1 >: L, R1](f: R => F[Either[L1, R1]])(implicit F: Monad[F]): F[Either[L1, R1]] = {
       e.flatMap(_.wideLeft[L1].flatTraverse(f))
     }
+
+    def doubleFlatTap[L1 >: L, R1](f: R => F[Either[L1, R1]])(implicit F: Monad[F]): F[Either[L1, R]] =
+      e.doubleFlatMap(r => f(r).asIn(r))
 
     def foldIn[C](lMap: L => C, rMap: R => C)(implicit F: Functor[F]): F[C] = {
       e.map(_.fold(lMap, rMap))
