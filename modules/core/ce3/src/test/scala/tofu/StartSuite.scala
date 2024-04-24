@@ -1,13 +1,12 @@
 package tofu
 
-import cats.effect.Concurrent
-import cats.effect.IO
-import tofu.syntax.start._
-import tofu.syntax.monadic._
-import cats.effect.kernel.Outcome
-import cats.effect.kernel.MonadCancelThrow
+import cats.Applicative
+import cats.data.*
+import cats.effect.{Concurrent, IO}
+import cats.effect.kernel.{Fiber, MonadCancelThrow, Outcome}
 import tofu.concurrent.{MakeAgent, MakeSerialAgent}
-import cats.effect.kernel.Fiber
+import tofu.syntax.monadic.*
+import tofu.syntax.start.*
 
 object StartSuite {
   def summonInstancesForConcurrent[F[_]: Concurrent] = {
@@ -23,6 +22,22 @@ object StartSuite {
     Race[IO]
     MakeAgent[IO, IO]
     MakeSerialAgent[IO, IO]
+  }
+
+  def fireForDataF[F[_]: Applicative: Fire] = {
+    Fire[ReaderT[F, String, _]]
+    Fire[OptionT[F, _]]
+    Fire[EitherT[F, String, _]]
+    Fire[IorT[F, String, _]]
+    Fire[WriterT[F, String, _]]
+  }
+
+  def raceForDataF[F[_]: Applicative: Race] = {
+    Race[ReaderT[F, String, _]]
+    Race[OptionT[F, _]]
+    Race[EitherT[F, String, _]]
+    Race[IorT[F, String, _]]
+    Race[WriterT[F, String, _]]
   }
 
   private def withInterrupt[F[_], A](oa: Outcome[F, Throwable, A])(implicit F: MonadCancelThrow[F]): F[A] =
