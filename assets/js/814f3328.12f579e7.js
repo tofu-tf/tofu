@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[7472],{5513:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Started docs","permalink":"/tofu/blog/2017/10/29/hello-docs"}]}')}}]);

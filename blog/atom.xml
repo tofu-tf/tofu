@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://docs.tofu.tf/blog</id>
+    <id>https://tofu-tf.github.io/tofu/blog</id>
     <title>Tofu Blog</title>
     <updated>2017-10-29T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://docs.tofu.tf/blog"/>
+    <link rel="alternate" href="https://tofu-tf.github.io/tofu/blog"/>
     <subtitle>Tofu Blog</subtitle>
-    <icon>https://docs.tofu.tf/img/tofu_logo_turquose_square.svg</icon>
+    <icon>https://tofu-tf.github.io/tofu/img/tofu_logo_turquose_square.svg</icon>
     <entry>
         <title type="html"><![CDATA[Started docs]]></title>
-        <id>https://docs.tofu.tf/blog/2017/10/29/hello-docs</id>
-        <link href="https://docs.tofu.tf/blog/2017/10/29/hello-docs"/>
+        <id>https://tofu-tf.github.io/tofu/blog/2017/10/29/hello-docs</id>
+        <link href="https://tofu-tf.github.io/tofu/blog/2017/10/29/hello-docs"/>
         <updated>2017-10-29T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[Starting from today we have docs in tofu.]]></summary>
         <content type="html"><![CDATA[<p>Starting from today we have docs in tofu.<br>
