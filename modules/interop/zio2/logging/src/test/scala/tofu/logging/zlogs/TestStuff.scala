@@ -3,9 +3,8 @@ package tofu.logging.zlogs
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import derevo.derive
 import org.slf4j.LoggerFactory
-import tofu.logging.derivation.loggable
+import tofu.logging.Loggable
 import zio.{Clock, FiberRef, LogSpan, ULayer, ZIO, ZLayer}
 import scala.jdk.CollectionConverters._
 
@@ -20,8 +19,11 @@ object TestStuff {
     )
   }
 
-  @derive(loggable)
   case class User(name: String)
+
+  object User {
+    implicit val userLoggable: Loggable[User] = Loggable.stringValue.contramap(_.toString)
+  }
 
   type LogAppender = ListAppender[ILoggingEvent]
 
