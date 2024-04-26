@@ -8,7 +8,7 @@ import scala.annotation.unused
 
 object ZLogging {
 
-  type ZMake[R] = Logging.Make[URIO[R, *]]
+  type ZMake[R] = Logging.Make[URIO[R, _]]
 
   type Make = Logging.Make[UIO]
 

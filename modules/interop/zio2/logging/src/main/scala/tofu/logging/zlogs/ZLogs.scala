@@ -10,7 +10,7 @@ import scala.annotation.unused
 object ZLogs {
 
   private def make[R](f: Logger => ZLogging[R]) =
-    new Logs[UIO, URIO[R, *]] {
+    new Logs[UIO, URIO[R, _]] {
       override def byName(name: String): UIO[ZLogging[R]] =
         ZIO.succeed(LoggerFactory.getLogger(name)).map(f)
     }

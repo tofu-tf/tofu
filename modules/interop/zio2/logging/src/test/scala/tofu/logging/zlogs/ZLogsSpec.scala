@@ -23,7 +23,7 @@ case object ZLogsSpec extends ZIOSpecDefault {
     override def getCtx: UIO[LoggedValue] = ZIO.succeed(expectedContextValue)
   })
 
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("Tofu ZIO2 Logging")(
       test("TofuZLogger parses default logger name") {
         val expectedArgs: Set[Json] =
