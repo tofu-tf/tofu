@@ -1,6 +1,6 @@
 package tofu.logging.zlogs
 import ZLogAnnotation.make
-import tofu.logging.zlogs.TestStuff.User
+import tofu.logging.zlogs.DerivedData.User
 
 object LogKey {
   val count: ZLogAnnotation[Int]     = make("count")

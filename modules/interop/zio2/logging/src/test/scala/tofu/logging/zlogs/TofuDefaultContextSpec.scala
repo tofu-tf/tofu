@@ -2,7 +2,7 @@ package tofu.logging.zlogs
 
 import io.circe.syntax.EncoderOps
 import io.circe.{Json, JsonObject}
-import tofu.logging.zlogs.TestStuff.User
+import tofu.logging.zlogs.DerivedData.User
 import tofu.logging.{LogTree, LoggedValue}
 import zio._
 import zio.test._
