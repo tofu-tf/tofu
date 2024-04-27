@@ -11,13 +11,13 @@ import scala.jdk.CollectionConverters._
 
 class LogbackSuite extends AnyFunSuite {
   type Ctx = Map[String, String]
-  implicit val delay: Delay[Ctx => *] = new Delay[Ctx => *] {
+  implicit val delay: Delay[Ctx => _] = new Delay[Ctx => _] {
     def delay[A](a: => A) = _ => a
   }
 
-  implicit val context: WithContext[Ctx => *, Ctx] = WithContext.make(identity)
+  implicit val context: WithContext[Ctx => _, Ctx] = WithContext.make(identity)
 
-  implicit val logs: Logging.Make[Ctx => *] = Logging.Make.contextual[Ctx => *, Ctx]
+  implicit val logs: Logging.Make[Ctx => _] = Logging.Make.contextual[Ctx => _, Ctx]
 
   val appender = new ListAppender[ILoggingEvent]
 

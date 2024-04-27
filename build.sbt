@@ -165,10 +165,11 @@ lazy val loggingLayout = projectMatrix
   .in(modules / "logging" / "layout")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     libraryDependencies ++= Seq(catsCore, logback, slf4j),
     name := "tofu-logging-layout"
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(loggingStr)
 
 val loggingInterop = modules / "logging" / "interop"
