@@ -3,9 +3,7 @@ package tofu.logging.zlogs
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import derevo.derive
 import org.slf4j.LoggerFactory
-import tofu.logging.derivation.loggable
 import zio.{Clock, FiberRef, LogSpan, ULayer, ZIO, ZLayer}
 import scala.jdk.CollectionConverters._
 
@@ -19,9 +17,6 @@ object TestStuff {
       FiberRef.currentLogSpan.locallyWith(list => LogSpan(name, instant.toEpochMilli) :: list)(zio)
     )
   }
-
-  @derive(loggable)
-  case class User(name: String)
 
   type LogAppender = ListAppender[ILoggingEvent]
 

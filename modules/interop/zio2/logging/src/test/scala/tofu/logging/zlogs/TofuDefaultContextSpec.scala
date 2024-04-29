@@ -2,14 +2,14 @@ package tofu.logging.zlogs
 
 import io.circe.syntax.EncoderOps
 import io.circe.{Json, JsonObject}
-import tofu.logging.zlogs.TestStuff.User
+import tofu.logging.zlogs.DerivedData.User
 import tofu.logging.{LogTree, LoggedValue}
 import zio._
 import zio.test._
 
 object TofuDefaultContextSpec extends ZIOSpecDefault {
 
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("TofuDefaultContext")(
       test("extracts all values added via ZLogAnnotation") {
         {

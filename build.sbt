@@ -338,11 +338,12 @@ lazy val zio2Logging = projectMatrix
   .in(modules / "interop" / "zio2" / "logging")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-zio2-logging",
     libraryDependencies ++= List(zio2, slf4j, logback % Test, zio2Test, zio2TestSbt),
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(loggingStr, loggingDer % "test")
 
 val interop = modules / "interop"

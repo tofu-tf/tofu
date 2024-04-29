@@ -20,10 +20,10 @@ object TofuDefaultContext {
     * [[ZLogAnnotation]]. This way the logContext is implemented in official zio-logging library, see
     * `zio.logging#logContext`.
     */
-  private[logging] lazy val AnnotatedContextRef: FiberRef[Map[LogAnnotation[_], Any]] =
-    Unsafe.unsafe(implicit unsafe => FiberRef.unsafe.make[Map[LogAnnotation[_], Any]](Map.empty))
+  private[logging] lazy val AnnotatedContextRef: FiberRef[Map[LogAnnotation[?], Any]] =
+    Unsafe.unsafe(implicit unsafe => FiberRef.unsafe.make[Map[LogAnnotation[?], Any]](Map.empty))
 
-  private[logging] def getValueUnsafe[A](key: LogAnnotation[A])(m: Map[LogAnnotation[_], Any]): Option[A] =
+  private[logging] def getValueUnsafe[A](key: LogAnnotation[A])(m: Map[LogAnnotation[?], Any]): Option[A] =
     m.get(key).asInstanceOf[Option[A]]
 
   /** This [[ContextProvider]] logs just tofu annotations (values added via [[ZLogAnnotation]]) */
