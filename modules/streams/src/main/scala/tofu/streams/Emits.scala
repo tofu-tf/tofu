@@ -28,7 +28,7 @@ trait Evals[F[_], G[_]] extends Emits[F] with Lift[G, F] {
 
   implicit val monad: Monad[F]
 
-  lazy val applicative: Applicative[F] = monad
+  val applicative: Applicative[F] = monad
 
   def eval[A](ga: G[A]): F[A] = lift(ga)
 

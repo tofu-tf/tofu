@@ -7,7 +7,7 @@ import tofu.syntax.streams.all._
 
 object SyntaxTypeInferenceSuite {
 
-  class EvalsInference[S[_]: Evals[*[_], F], F[_]: Applicative] {
+  class EvalsInference[S[_]: ({ type L[x[_]] = Evals[x, F] })#L, F[_]: Applicative] {
     def foo: S[Unit] = eval(().pure[F])
     def bar: S[Unit] = evals(List((), (), ()).pure[F])
   }

@@ -423,9 +423,10 @@ lazy val streams = projectMatrix
   .settings(
     libraryDependencies ++= List(fs2 % Test),
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-streams",
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(kernel)
 
 val examples = file("examples")
