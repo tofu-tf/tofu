@@ -118,10 +118,11 @@ lazy val kernelCatsMtlInterop = projectMatrix
   .in(modules / "kernel" / "interop" / "cats-mtl")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-kernel-cats-mtl",
     libraryDependencies += catsMtl
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(kernel)
 
 lazy val loggingStr = projectMatrix
