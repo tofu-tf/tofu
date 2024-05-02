@@ -20,18 +20,18 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
 
   final implicit def fs2StreamRunContext[F[_], G[_], R](implicit
       ctx: WithRun[F, G, R]
-  ): WithRun[Stream[F, *], Stream[G, *], R] =
+  ): WithRun[Stream[F, _], Stream[G, _], R] =
     new FS2RunContext[F, G, R] {
       override val F: WithRun[F, G, R] = ctx.self
 
       override implicit def WP: WithProvide[F, G, R] = ctx.self
     }
 
-  implicit def fs2LiftInstance[F[_]]: Lift[F, Stream[F, *]] =
-    Lift.byFunK(funK(Stream.eval(_)))
+  implicit def fs2LiftInstance[F[_]]: Lift[F, Stream[F, _]] =
+    Lift.byFunK(funK[F, Stream[F, _]](Stream.eval(_)))
 
-  implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, *], Chunk] =
-    new Chunks[Stream[F, *], Chunk] {
+  implicit def fs2ChunksInstance[F[_]]: Chunks[Stream[F, _], Chunk] =
+    new Chunks[Stream[F, _], Chunk] {
       override def chunkN[A](fa: Stream[F, A])(n: Int): Stream[F, Chunk[A]] = fa.chunkN(n)
 
       override def chunks[A](fa: Stream[F, A]): Stream[F, Chunk[A]] = fa.chunks
@@ -41,13 +41,13 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
       override def cons[A](fa: Stream[F, A])(c: Chunk[A]): Stream[F, A] = fa.cons(c)
     }
 
-  implicit def fs2MergeInstance[F[_]: Concurrent]: Merge[Stream[F, *]] =
-    new Merge[Stream[F, *]] {
+  implicit def fs2MergeInstance[F[_]: Concurrent]: Merge[Stream[F, _]] =
+    new Merge[Stream[F, _]] {
       override def merge[A](fa: Stream[F, A])(that: Stream[F, A]): Stream[F, A] = fa merge that
     }
 
-  implicit def fs2CompileInstance[F[_]: Sync]: Compile[Stream[F, *], F] =
-    new Compile[Stream[F, *], F] {
+  implicit def fs2CompileInstance[F[_]: Sync]: Compile[Stream[F, _], F] =
+    new Compile[Stream[F, _], F] {
 
       override def drain[A](fa: Stream[F, A]): F[Unit] = fa.compile.drain
 
@@ -57,34 +57,34 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
         fa.compile.to(ev)
     }
 
-  implicit def fs2ParFlattenInstance[F[_]: Concurrent]: ParFlatten[Stream[F, *]] =
-    new ParFlatten[Stream[F, *]] {
+  implicit def fs2ParFlattenInstance[F[_]: Concurrent]: ParFlatten[Stream[F, _]] =
+    new ParFlatten[Stream[F, _]] {
       override def parFlatten[A](ffa: Stream[F, Stream[F, A]])(maxConcurrent: Int): Stream[F, A] =
         ffa.parJoin(maxConcurrent)
     }
 
-  implicit def fs2PaceInstance[F[_]: CETemporal]: Pace[Stream[F, *]] =
-    new Pace[Stream[F, *]] {
+  implicit def fs2PaceInstance[F[_]: CETemporal]: Pace[Stream[F, _]] =
+    new Pace[Stream[F, _]] {
 
       override def throttled[A](fa: Stream[F, A])(rate: FiniteDuration): Stream[F, A] = fa.metered(rate)
 
       override def delay[A](fa: Stream[F, A])(d: FiniteDuration): Stream[F, A] = fa.delayBy(d)
     }
 
-  implicit def fs2TemporalInstance[F[_]: CETemporal]: Temporal[Stream[F, *], Chunk] =
-    new Temporal[Stream[F, *], Chunk] {
+  implicit def fs2TemporalInstance[F[_]: CETemporal]: Temporal[Stream[F, _], Chunk] =
+    new Temporal[Stream[F, _], Chunk] {
       override def groupWithin[A](fa: Stream[F, A])(n: Int, d: FiniteDuration): Stream[F, Chunk[A]] =
         fa.groupWithin(n, d)
     }
 
-  implicit def fs2RegionThrowInstance[F[_]]: Region[Stream[F, *], F, Resource.ExitCase] =
-    new Region[Stream[F, *], F, Resource.ExitCase] {
+  implicit def fs2RegionThrowInstance[F[_]]: Region[Stream[F, _], F, Resource.ExitCase] =
+    new Region[Stream[F, _], F, Resource.ExitCase] {
       override def regionCase[R](open: F[R])(close: (R, Resource.ExitCase) => F[Unit]): Stream[F, R] =
         Stream.bracketCase(open)(close)
     }
 
-  implicit def fs2BroadcastInstances[F[_]: Concurrent]: Broadcast[Stream[F, *]] =
-    new Broadcast[Stream[F, *]] {
+  implicit def fs2BroadcastInstances[F[_]: Concurrent]: Broadcast[Stream[F, _]] =
+    new Broadcast[Stream[F, _]] {
 
       override def broadcast[A](fa: Stream[F, A])(processors: Stream[F, A] => Stream[F, Unit]*): Stream[F, Unit] =
         fa.broadcastThrough(processors: _*)
@@ -95,39 +95,40 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
 }
 
 private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
-  final implicit def fs2StreamLocal[F[_], R](implicit ctx: F WithLocal R): WithLocal[Stream[F, *], R] =
+  final implicit def fs2StreamLocal[F[_], R](implicit ctx: F WithLocal R): WithLocal[Stream[F, _], R] =
     new FS2Local[F, R] { override val F: F WithLocal R = ctx.asWithLocal }
 
   final implicit def fs2StreamProvide[F[_], G[_], R](implicit
       ctx: WithProvide[F, G, R]
-  ): WithProvide[Stream[F, *], Stream[G, *], R] =
+  ): WithProvide[Stream[F, _], Stream[G, _], R] =
     new FS2Provide[F, G, R] { override val WP: WithProvide[F, G, R] = ctx }
 }
 
 private[fs2Instances] trait Fs2Instances3 {
-  final implicit def fs2StreamContext[F[_], R](implicit ctx: F WithContext R): WithContext[Stream[F, *], R] =
+  final implicit def fs2StreamContext[F[_], R](implicit ctx: F WithContext R): WithContext[Stream[F, _], R] =
     new FS2Context[F, R] { override val F: F WithContext R = ctx.asWithContext }
 }
 
-class FS2StreamHKInstance[A] extends Embed[Stream[*[_], A]] with FunctorK[Stream[*[_], A]] {
+class FS2StreamHKInstance[A]
+    extends Embed[({ type L[x[_]] = Stream[x, A] })#L] with FunctorK[({ type L[x[_]] = Stream[x, A] })#L] {
   def embed[F[_]: FlatMap](ft: F[Stream[F, A]]): Stream[F, A]      = Stream.force(ft)
   def mapK[F[_], G[_]](af: Stream[F, A])(fk: F ~> G): Stream[G, A] = af.translate(fk)
 }
 
-trait FS2Context[F[_], R] extends WithContext[Stream[F, *], R] {
+trait FS2Context[F[_], R] extends WithContext[Stream[F, _], R] {
   implicit def F: F WithContext R
 
-  val functor: Functor[Stream[F, *]] = implicitly
+  val functor: Functor[Stream[F, _]] = implicitly
   def context: Stream[F, R]          = Stream.eval(F.context)
 }
 
-trait FS2Local[F[_], R] extends FS2Context[F, R] with WithLocal[Stream[F, *], R] {
+trait FS2Local[F[_], R] extends FS2Context[F, R] with WithLocal[Stream[F, _], R] {
   implicit def F: F WithLocal R
 
   def local[A](fa: Stream[F, A])(project: R => R): Stream[F, A] = fa.translate(funKFrom[F](F.local(_)(project)))
 }
 
-trait FS2Provide[F[_], G[_], R] extends WithProvide[Stream[F, *], Stream[G, *], R] {
+trait FS2Provide[F[_], G[_], R] extends WithProvide[Stream[F, _], Stream[G, _], R] {
   implicit def WP: WithProvide[F, G, R]
 
   def runContext[A](fa: Stream[F, A])(ctx: R): Stream[G, A] = fa.translate(funKFrom[F](WP.runContext(_)(ctx)))
@@ -135,6 +136,6 @@ trait FS2Provide[F[_], G[_], R] extends WithProvide[Stream[F, *], Stream[G, *], 
 }
 
 trait FS2RunContext[F[_], G[_], R]
-    extends FS2Local[F, R] with FS2Provide[F, G, R] with WithRun[Stream[F, *], Stream[G, *], R] {
+    extends FS2Local[F, R] with FS2Provide[F, G, R] with WithRun[Stream[F, _], Stream[G, _], R] {
   implicit def F: WithRun[F, G, R]
 }
