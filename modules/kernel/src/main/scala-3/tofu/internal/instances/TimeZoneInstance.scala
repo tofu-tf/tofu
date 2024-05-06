@@ -6,7 +6,7 @@ import tofu.time.TimeZone
 
 import java.time.{ZoneId, ZoneOffset}
 
-trait TimeZoneInstance {
+trait TimeZoneInstance:
   // TODO: use higherKind.derived macro when it is ready for scala 3
   given timeZoneRepresentableK: RepresentableK[TimeZone] = new RepresentableK[TimeZone] {
     def tabulate[F[_]](hom: RepK[TimeZone, _] ~> F): TimeZone[F] = new TimeZone[F] {
@@ -17,5 +17,3 @@ trait TimeZoneInstance {
         hom(RepK[TimeZone](_.ofOffset(prefix, offset)))
     }
   }
-
-}

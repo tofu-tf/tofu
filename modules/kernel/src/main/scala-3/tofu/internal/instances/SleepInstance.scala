@@ -9,7 +9,7 @@ import tofu.time.Sleep
 import scala.compiletime.summonFrom
 import scala.concurrent.duration.FiniteDuration
 
-private[tofu] trait SleepInstance {
+private[tofu] trait SleepInstance:
   inline given [F[_]]: Sleep[F] =
     summonFrom {
       case carrier: SleepCE3Carrier[F] => carrier
@@ -22,4 +22,3 @@ private[tofu] trait SleepInstance {
       def sleep(duration: FiniteDuration): F[Unit] = hom(RepK[Sleep](_.sleep(duration)))
     }
   }
-}

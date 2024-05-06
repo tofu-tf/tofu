@@ -10,7 +10,7 @@ import tofu.time.Clock
 import java.util.concurrent.TimeUnit
 import scala.compiletime.summonFrom
 
-private[tofu] trait ClockInstance {
+private[tofu] trait ClockInstance:
   inline given [F[_]]: Clock[F] = summonFrom {
     case carrier: ClockCE3Carrier[F] => carrier
     case carrier: ClockCE2Carrier[F] => carrier
@@ -23,4 +23,3 @@ private[tofu] trait ClockInstance {
       def nanos: F[Long]                    = hom(RepK[Clock](_.nanos))
     }
   }
-}

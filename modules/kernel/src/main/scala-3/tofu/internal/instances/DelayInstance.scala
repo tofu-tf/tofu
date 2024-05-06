@@ -8,7 +8,7 @@ import tofu.internal.carriers.{DelayCarrier2, DelayCarrier3}
 
 import scala.compiletime.summonFrom
 
-private[tofu] trait DelayInstance {
+private[tofu] trait DelayInstance:
   inline given [F[_]]: Delay[F] = summonFrom {
     case carrier: DelayCarrier3[F] => carrier
     case carrier: DelayCarrier2[F] => carrier
@@ -20,4 +20,3 @@ private[tofu] trait DelayInstance {
       def delay[A](a: => A): F[A] = hom(RepK[Delay](_.delay(a)))
     }
   }
-}
