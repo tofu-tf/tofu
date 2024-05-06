@@ -46,7 +46,7 @@ object Dependencies {
 
     val magnolia3 = "1.3.5"
 
-    val typesafeConfig = "1.4.2"
+    val typesafeConfig = "1.4.3"
 
     val zio = "1.0.18"
 
