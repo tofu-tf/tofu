@@ -4,13 +4,13 @@ package derivation
 import derevo.derive
 import org.scalatest.funsuite.AnyFunSuite
 import org.slf4j.helpers.MessageFormatter
-import tofu.data._
+import tofu.data.*
 import glass.macros.Optics
 import tofu.higherKind.RepK
 import tofu.higherKind.RepresentableK
 import cats.~>
 
-import LoggingMidSuite._
+import LoggingMidSuite.*
 
 @derive(loggingMidTry)
 trait Greeter[F[_]] {
@@ -19,7 +19,7 @@ trait Greeter[F[_]] {
 }
 
 object Greeter extends LoggingCompanion[Greeter] {
-  import LoggingMidSuite._
+  import LoggingMidSuite.*
 
   implicit val repK: RepresentableK[Greeter] =
     new RepresentableK[Greeter] {
@@ -51,18 +51,18 @@ object LoggingMidSuite {
   def logging(name: String): Logging[Eff] = new Logging[Eff] {
     private def put(message: String)(logs: Vector[String])                            = logs :+ message
     def write(level: Logging.Level, message: String, values: LoggedValue*): Eff[Unit] = {
-      val interpolated = MessageFormatter.arrayFormat(message, values.toArray).getMessage()
+      val interpolated = MessageFormatter.arrayFormat(message, values.toArray).getMessage
       CalcM.update(put(s"[$level] <$name> $interpolated")).void.focus(State.logs)
     }
   }
 
-  implicit val logs: Logs.Universal[Eff] = logging(_)
+  implicit val logs: Logging.Make[Eff] = logging(_)
 }
 
 class LoggingMidSuite extends AnyFunSuite {
   val greeter: Greeter[Eff] = Greeter.Instance.attachErrLogs[Throwable]
-  val ErrName               = classOf[MissingName].getName()
-  val GreeterName           = classOf[Greeter[Any]].getName()
+  val ErrName               = classOf[MissingName].getName
+  val GreeterName           = classOf[Greeter[Any]].getName
 
   test("should raise an error when instance is not set") {
     val (State(_, logs), result) = greeter.hello.runUnit(State())

@@ -8,6 +8,7 @@ import tethys.writers.tokens.TokenWriter
 import tofu.logging.impl.ContextMarker
 
 import scala.beans.BeanProperty
+import scala.jdk.CollectionConverters._
 
 class TofuLoggingProvider extends AbstractJsonProvider[ILoggingEvent] with JsonFactoryAware {
   import TethysBuilder.receiver
@@ -18,15 +19,13 @@ class TofuLoggingProvider extends AbstractJsonProvider[ILoggingEvent] with JsonF
     val writer: TokenWriter = new JacksonTokenWriter(generator)
     Option(event.getArgumentArray).foreach {
       _.foreach {
-        case lv: LoggedValue =>
-          lv.logFields(writer)(receiver)
+        case lv: LoggedValue => lv.logFields(writer)(receiver)
         case _               =>
       }
     }
 
-    event.getMarker match {
-      case ContextMarker(ctx, _) =>
-        ctx.logFields(writer)(receiver)
+    Option(event.getMarkerList.asScala).toList.flatten.foreach {
+      case ContextMarker(ctx, _) => ctx.logFields(writer)(receiver)
       case _                     =>
     }
   }

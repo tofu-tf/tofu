@@ -5,12 +5,12 @@ import tofu.Guarantee
 import tofu.concurrent.{MakeQVar, QVars}
 import tofu.higherKind.{Mid, Post, Pre}
 import tofu.lift.Lift
-import tofu.logging.impl.{CachedLogs}
+import tofu.logging.impl.CachedLogs
 import tofu.logging.impl.UniversalEmbedLogs
 import tofu.logging.{Logging, Logs}
 
 import scala.reflect.ClassTag
-import tofu.syntax.monadic._
+import tofu.syntax.monadic.*
 import tofu.higherKind.HKAny
 
 object LogsInvariantSyntax {
@@ -22,7 +22,7 @@ object LogsInvariantSyntax {
           QVars[I].of(Map.empty[ClassTag[?], Logging[F]])
         )(new CachedLogs[I, F](logs, _, _))
 
-    def universal(implicit il: Lift[I, F], F: FlatMap[F]): Logs.Universal[F] = new UniversalEmbedLogs(logs)
+    def universal(implicit il: Lift[I, F], F: FlatMap[F]): Logging.Make[F] = new UniversalEmbedLogs(logs)
 
     @deprecated("Use Logs.universal[F]", since = "0.11.0")
     def cachedUniversal(implicit
@@ -31,18 +31,18 @@ object LogsInvariantSyntax {
         IG: Guarantee[I],
         il: Lift[I, F],
         F: FlatMap[F]
-    ): I[Logs.Universal[F]] = cached.map(_.universal)
+    ): I[Logging.Make[F]] = cached.map(_.universal)
 
     /** Collection of useful methods for creating middleware
       * {{{logs.logged[Service].mid(implicit l => new Service[Mid[F, _]]{... })}}}
       */
-    final def logged[U[_[_]]](implicit c: ClassTag[U[HKAny]]): LogWares[U, I, F] =
+    def logged[U[_[_]]](implicit c: ClassTag[U[HKAny]]): LogWares[U, I, F] =
       new LogWares(logs.forService[U[HKAny]])
 
     /** Collection of useful methods for creating middleware
       * {{{logs.nameLogged[Service]("service").mid(implicit l => new Service[Mid[F, _]]{... })}}}
       */
-    final def nameLogged[U[_[_]]](name: String): LogWares[U, I, F] =
+    def nameLogged[U[_[_]]](name: String): LogWares[U, I, F] =
       new LogWares(logs.byName(name))
   }
 
