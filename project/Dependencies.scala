@@ -85,7 +85,7 @@ object Dependencies {
 
     val http4s = "0.22.15"
 
-    val glass = "0.2.2"
+    val glass = "0.3.0"
   }
 
   val noCatsCore        =
