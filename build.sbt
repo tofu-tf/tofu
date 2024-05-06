@@ -188,10 +188,11 @@ lazy val loggingRefined = projectMatrix
   .in(loggingInterop / "refined")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-logging-refined",
     libraryDependencies += refined
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr)
 
 lazy val loggingLog4CatsLegacy = projectMatrix
@@ -208,30 +209,34 @@ lazy val loggingLog4Cats = projectMatrix
   .in(loggingInterop / "log4cats")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-logging-log4cats",
-    libraryDependencies += log4Cats
+    libraryDependencies += log4Cats,
+    libraryDependencies += slf4j // added to fix compiler crash - `cannot resolve reference to type org.slf4j.type.Marker`
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr)
 
 lazy val loggingLogstashLogback = projectMatrix
   .in(loggingInterop / "logstash-logback")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-logging-logstash-logback",
     libraryDependencies ++= Seq(logback, logstashLogback)
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr, loggingDer % Test)
 
 lazy val loggingEnumeratum = projectMatrix
-  .in(loggingInterop / "enums")
+  .in(loggingInterop / "enumeratum")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     libraryDependencies ++= Seq(enumeratum),
     name := "tofu-logging-enumeratum",
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr)
 
 lazy val logging = projectMatrix
@@ -252,6 +257,23 @@ lazy val logging = projectMatrix
   )
   .dependsOn(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
   .jvmPlatform(scala2Versions)
+
+lazy val logging3 = projectMatrix
+  .in(modules / "logging")
+  .aggregate(
+    loggingStr,
+    loggingDer,
+    loggingLayout,
+    loggingRefined,
+    loggingLog4Cats,
+    loggingLogstashLogback,
+  )
+  .settings(
+    defaultSettings,
+    name := "tofu-logging"
+  )
+  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingRefined, loggingLog4Cats)
+  .jvmPlatform(List(Version.scala3))
 
 val util = modules / "util"
 
