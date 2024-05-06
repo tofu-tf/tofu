@@ -37,14 +37,8 @@ object Interop {
   )(path: Expr[String], args: List[quotes.reflect.Term], tps: quotes.reflect.TypeTree*): Expr[X] =
     import quotes.reflect.*
     try {
-      val sym       = Symbol.requiredMethod(path.valueOrAbort)
-      val symExists =
-        try {
-          sym.tree
-          true
-        } catch { case _ => false }
-
-      if !symExists then report.errorAndAbort("Symbol does not exists")
+      val sym = Symbol.requiredMethod(path.valueOrAbort)
+      if !sym.exists then report.errorAndAbort("Symbol does not exists")
       else
         val methodIdent      = Ident(sym.termRef)
         val withTypes        = methodIdent.appliedToTypeTrees(tps.toList)
