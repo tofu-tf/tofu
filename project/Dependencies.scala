@@ -16,13 +16,13 @@ object Dependencies {
 
     val tethys = "0.28.3"
 
-    val cats = "2.9.0"
+    val cats = "2.10.0"
 
     val catsEffect2 = "2.5.5"
 
     val catsEffect3 = "3.4.9"
 
-    val catsMtl = "1.3.1"
+    val catsMtl = "1.4.0"
 
     val catsTagless = "0.15.0"
 

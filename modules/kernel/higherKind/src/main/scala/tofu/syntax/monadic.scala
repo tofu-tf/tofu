@@ -91,7 +91,8 @@ object monadic extends TupleSemigroupalSyntax with ApplicativeSyntax with MonadS
       F.flatTap(fa)(a => F.flatTap(fb)(b => f(a, b)))
   }
 
-  implicit final def tofuSyntaxApplyOps[F[_], A](fa: F[A]): ApplyOps[F, A]      = new ApplyOps(fa)
+  @deprecated("Kept for binary compatibility because of cats #4477", "0.13.0")
+  final def tofuSyntaxApplyOps[F[_], A](fa: F[A]): ApplyOps[F, A]               = new ApplyOps(fa)
   implicit final def tofuSyntaxFlatten[F[_], A](ffa: F[F[A]]): FlattenOps[F, A] = new FlattenOps[F, A](ffa)
   implicit final def tofuSyntaxIfM[F[_]](fa: F[Boolean]): IfMOps[F]             = new IfMOps[F](fa)
   implicit final def tofuSyntaxFlatMapIdOps[A](a: A): FlatMapIdOps[A]           = new FlatMapIdOps[A](a)
