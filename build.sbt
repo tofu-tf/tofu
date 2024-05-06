@@ -395,13 +395,19 @@ lazy val fs2CE2Interop = projectMatrix
 lazy val fs2CE3Interop = projectMatrix
   .in(interop / "fs2" / "ce3")
   .settings(
-    name                             := "tofu-fs2-ce3-interop",
-    libraryDependencies += fs2CE3,
-    libraryDependencies += glassMacro % Test,
-    defaultSettings
+    name := "tofu-fs2-ce3-interop",
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, _)) => Seq(fs2CE3, glassMacro % Test)
+        case Some((3, _)) => Seq(fs2CE3)
+        case _            => Seq.empty
+      }
+    },
+    defaultSettings,
+    scala3MigratedModuleOptions
   )
-  .jvmPlatform(scala2Versions)
-  .dependsOn(coreCE3, streams, derivation % "compile->test")
+  .jvmPlatform(scalaVersions = scala2And3Versions)
+  .dependsOn(coreCE3, streams)
 
 lazy val doobie = projectMatrix
   .in(modules / "doobie" / "core-ce2")
@@ -446,9 +452,10 @@ lazy val streams = projectMatrix
   .settings(
     libraryDependencies ++= List(fs2 % Test),
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-streams",
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(kernel)
 
 val examples = file("examples")
