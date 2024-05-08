@@ -292,11 +292,12 @@ lazy val observable = projectMatrix
   .in(util / "observable")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     libraryDependencies ++= Vector(monix, catsEffect2),
     libraryDependencies += scalatest,
     name := "tofu-observable",
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
 
 lazy val config = projectMatrix
   .in(util / "config")
@@ -344,7 +345,7 @@ lazy val zio2Core = projectMatrix
     libraryDependencies ++= List(zio2, zio2Cats),
     name := "tofu-zio2-core"
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(coreCE3)
 
 lazy val zio1Logging = projectMatrix

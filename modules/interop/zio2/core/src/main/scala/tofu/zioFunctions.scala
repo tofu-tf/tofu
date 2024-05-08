@@ -9,7 +9,7 @@ import zio.{IO, ZIO, Tag => ZTag}
 import scala.annotation.nowarn
 
 object zioFunctions {
-  @nowarn("cat=unused-params")
+  @nowarn
   def expose[U[_[_, _]]: EmbedBK: FunctorBK: Tag.auto.T]: U[ZIO[U[IO], +_, +_]] =
     EmbedBK.of[ZIO[U[IO], +_, +_], U](ZIO.environmentWith(_.get[U[IO]](ZTag[U[IO]]).widenb))
 }

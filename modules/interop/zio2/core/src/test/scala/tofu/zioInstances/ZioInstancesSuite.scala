@@ -40,7 +40,7 @@ object ZioInstancesSuite {
     ()
   }
 
-  @nowarn("cat=unused-params")
+  @nowarn
   def summonZioInstances[E, Env: Tag, Ctx: Tag](): Unit = {
     implicitly[WithRun[ZIO[Env with Ctx, E, _], ZIO[Env, E, _], Ctx]]
     implicitly[WithRun[ZIO[Ctx with Env, E, _], ZIO[Env, E, _], Ctx]]
@@ -49,7 +49,7 @@ object ZioInstancesSuite {
     ()
   }
 
-  @nowarn("cat=unused-params")
+  @nowarn
   def taskAmbiguity: Any = {
     import cats.effect.Sync
     import tofu.Raise
