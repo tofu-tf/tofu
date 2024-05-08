@@ -6,6 +6,12 @@ import tofu.common.Display
 import tofu.magnolia.compat
 import scala.deriving.Mirror
 
+/** Derivation of [[Display]] typeclass for case classes and sealed traits
+  *
+  * @note
+  *   Derived [[Display]] instances will indent nested structures if those are supposed to be on newline. You can see
+  *   examples in the tests.
+  */
 trait DisplayDerivationImpl extends AutoDerivation[Display] {
 
   private type Typeclass[T] = Display[T]
@@ -44,7 +50,7 @@ trait DisplayDerivationImpl extends AutoDerivation[Display] {
           displayedParameterValue          <- current.typeclass.displayBuild(nestedCfg, compat.deref[Typeclass, T](current)(a))
           // this value has at least one element in it by construction,
           // but we avoid using NEVector here due to performance and simplicity
-          adapted :+ value                  = adaptDisplayedParameter(label, displayedParameterValue)
+          adapted :+ value                  = adaptDisplayedParameter(label, displayedParameterValue): @unchecked
           separator                         = if (index + 1 < ctx.parameters.size) fieldSeparator else ""
           adaptedIndentedValueWithSeparator = value + separator + newline
           separatedLabelValue               = adapted :+ adaptedIndentedValueWithSeparator
