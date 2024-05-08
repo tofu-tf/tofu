@@ -1,12 +1,11 @@
 package tofu.data.derived
 
-import java.time.LocalDate
-
 import cats.syntax.option._
-import derevo.derive
-import MergeSuite.{Bar, Foo}
 import org.scalatest.flatspec.AnyFlatSpec
-import Merge.ops._
+import tofu.data.derived.Merge.ops._
+import tofu.data.derived.MergeData._
+
+import java.time.LocalDate
 
 class MergeSuite extends AnyFlatSpec {
   "simple merge" should "prefer left value" in {
@@ -179,10 +178,3 @@ class MergeSuite extends AnyFlatSpec {
 
 }
 
-object MergeSuite {
-  @derive(Merge)
-  final case class Foo(a: Int, b: Option[String], c: Option[Double])
-
-  @derive(Merge)
-  final case class Bar(x: Foo, y: Option[Foo])
-}

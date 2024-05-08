@@ -322,10 +322,17 @@ lazy val derivation = projectMatrix
   .in(modules / "derivation")
   .settings(
     defaultSettings,
-    libraryDependencies ++= Seq(magnolia2, derevo, catsTaglessMacros),
+    scala3MigratedModuleOptions,
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, _)) => Seq(derevo, magnolia2, catsTaglessMacros)
+        case Some((3, _)) => Seq(magnolia3)
+        case _ => Seq.empty
+      }
+    },
     name := "tofu-derivation",
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(kernel)
 
 val zioInterop = modules / "interop" / "zio1"

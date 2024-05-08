@@ -1,13 +1,14 @@
 package tofu.data
 package derived
 
-import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 import cats.kernel.Semigroup
-import magnolia1.{CaseClass, Magnolia, SealedTrait}
 import derevo.Derivation
+import magnolia1.{CaseClass, Magnolia, SealedTrait}
 import tofu.compat.unused
-
 import tofu.internal.DataComp
+import tofu.magnolia.compat
+
+import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 
 trait Merge[A] {
   def merge(a: A, b: A): A
@@ -17,7 +18,8 @@ trait MergeInstances1 {
   type Typeclass[A] = Merge[A]
 
   def join[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] =
-    (a, b) => caseClass.construct(p => p.typeclass.merge(p.dereference(a), p.dereference(b)))
+    (a, b) =>
+      caseClass.construct(p => p.typeclass.merge(compat.deref[Typeclass, T](p)(a), compat.deref[Typeclass, T](p)(b)))
 
   def split[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
     (a, b) => sealedTrait.split(a) { h => if (h.cast.isDefinedAt(b)) h.typeclass.merge(h.cast(a), h.cast(b)) else a }

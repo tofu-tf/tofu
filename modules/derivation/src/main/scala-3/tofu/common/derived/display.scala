@@ -1,10 +1,11 @@
 package tofu.common.derived
 
 import cats.Eval
-import derevo.Derivation
-import magnolia1.{CaseClass, Magnolia, SealedTrait}
+import magnolia1.*
 import tofu.common.Display
 import tofu.magnolia.compat
+import scala.deriving.Mirror
+
 
 /** Derivation of [[Display]] typeclass for case classes and sealed traits
   *
@@ -12,7 +13,7 @@ import tofu.magnolia.compat
   *   Derived [[Display]] instances will indent nested structures if those are supposed to be on newline. You can see
   *   examples in the tests.
   */
-object display extends Derivation[Display] {
+object display extends AutoDerivation[Display] {
 
   private type Typeclass[T] = Display[T]
 
@@ -33,7 +34,7 @@ object display extends Derivation[Display] {
       }
     }
 
-    val shortName: String = ctx.typeName.short
+    val shortName: String = ctx.typeInfo.short
 
     ctx.parameters.zipWithIndex
       .foldLeft(
@@ -59,8 +60,8 @@ object display extends Derivation[Display] {
       .map(s => s :+ brackets.right)
   }
   def split[T](ctx: SealedTrait[Typeclass, T]): Display[T] = (cfg: Display.Config, a: T) =>
-    ctx.split(a)(adtCase => adtCase.typeclass.displayBuild(cfg, adtCase.cast(a)))
+    ctx.choose(a)(adtCase => adtCase.typeclass.displayBuild(cfg, adtCase.cast(a)))
 
-  def instance[T]: Display[T] = macro Magnolia.gen[T]
+  inline def instance[T](using Mirror.Of[T]): Display[T] = autoDerived[T]
 
 }
