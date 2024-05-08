@@ -1,12 +1,8 @@
-package tofu.data
-package derived
+package tofu.data.derived
 
 import cats.kernel.Semigroup
-import derevo.Derivation
-import magnolia1.{CaseClass, Magnolia, SealedTrait}
 import tofu.compat.unused
 import tofu.internal.DataComp
-import tofu.magnolia.compat
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZonedDateTime}
 
@@ -14,20 +10,7 @@ trait Merge[A] {
   def merge(a: A, b: A): A
 }
 
-trait MergeInstances1 {
-  type Typeclass[A] = Merge[A]
-
-  def join[T](caseClass: CaseClass[Typeclass, T]): Typeclass[T] =
-    (a, b) =>
-      caseClass.construct(p => p.typeclass.merge(compat.deref[Typeclass, T](p)(a), compat.deref[Typeclass, T](p)(b)))
-
-  def split[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] =
-    (a, b) => sealedTrait.split(a) { h => if (h.cast.isDefinedAt(b)) h.typeclass.merge(h.cast(a), h.cast(b)) else a }
-
-  implicit def instance[A]: Merge[A] = macro Magnolia.gen[A]
-}
-
-object Merge extends Derivation[Merge] with MergeInstances1 with DataComp[Merge] {
+object Merge extends MergeInstances1 with DataComp[Merge] {
   implicit def optionInstance[A](implicit m: Merge[A]): Merge[Option[A]] =
     (ao, bo) => ao.fold(bo)(a => bo.fold(ao)(b => Some(m.merge(a, b))))
 
