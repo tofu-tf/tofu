@@ -5,7 +5,7 @@ import tofu.common.Display
 import tofu.common.Display.Config
 
 object DisplayData {
-  
+
   case class Bar(value: Int, another: String) derives Display
 
   case class Foo(bar: Bar, field: Double, xs: List[Int]) derives Display

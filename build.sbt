@@ -327,7 +327,7 @@ lazy val derivation = projectMatrix
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, _)) => Seq(derevo, magnolia2, catsTaglessMacros)
         case Some((3, _)) => Seq(magnolia3)
-        case _ => Seq.empty
+        case _            => Seq.empty
       }
     },
     name := "tofu-derivation",

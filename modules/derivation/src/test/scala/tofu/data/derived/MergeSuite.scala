@@ -177,4 +177,3 @@ class MergeSuite extends AnyFlatSpec {
   }
 
 }
-

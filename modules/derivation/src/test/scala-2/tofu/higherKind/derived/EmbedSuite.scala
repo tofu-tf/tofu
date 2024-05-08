@@ -5,12 +5,12 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import cats.data.OptionT
 import EmbedSuite.Foo
-import tofu.syntax.monadic.*
-import tofu.syntax.embed.*
-import cats.instances.either.*
-import cats.instances.option.*
-import cats.syntax.traverse.*
-import cats.syntax.either.*
+import tofu.syntax.monadic._
+import tofu.syntax.embed._
+import cats.instances.either._
+import cats.instances.option._
+import cats.syntax.traverse._
+import cats.syntax.either._
 
 import scala.util.Try
 

@@ -6,7 +6,6 @@ import tofu.common.Display
 import tofu.magnolia.compat
 import scala.deriving.Mirror
 
-
 trait DisplayDerivationImpl extends AutoDerivation[Display] {
 
   private type Typeclass[T] = Display[T]

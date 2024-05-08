@@ -4,7 +4,6 @@ import magnolia1.*
 import tofu.magnolia.compat
 import scala.deriving.Mirror
 
-
 trait MergeInstances1 extends AutoDerivation[Merge] {
   type Typeclass[A] = Merge[A]
 

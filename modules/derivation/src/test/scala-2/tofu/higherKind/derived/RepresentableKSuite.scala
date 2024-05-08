@@ -2,20 +2,20 @@ package tofu.higherKind.derived
 
 import RepresentableKSuite.Foo
 import cats.data.{OptionT, Tuple2K}
-import cats.instances.either.*
-import cats.instances.option.*
-import cats.syntax.either.*
-import cats.syntax.functor.*
-import cats.syntax.traverse.*
-import cats.syntax.option.*
-import cats.tagless.syntax.functorK.*
-import cats.tagless.syntax.semigroupalK.*
+import cats.instances.either._
+import cats.instances.option._
+import cats.syntax.either._
+import cats.syntax.functor._
+import cats.syntax.traverse._
+import cats.syntax.option._
+import cats.tagless.syntax.functorK._
+import cats.tagless.syntax.semigroupalK._
 import cats.{Id, ~>}
 import derevo.derive
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import tofu.data.Embedded
-import tofu.syntax.embed.*
+import tofu.syntax.embed._
 import tofu.syntax.funk.funK
 
 import scala.util.Try

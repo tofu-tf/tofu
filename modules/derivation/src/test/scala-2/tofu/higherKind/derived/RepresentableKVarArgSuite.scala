@@ -3,9 +3,9 @@ package tofu.higherKind.derived
 import cats.data.Tuple2K
 import cats.{Id, ~>}
 import derevo.derive
-import tofu.syntax.embed.*
-import cats.tagless.syntax.functorK.*
-import cats.tagless.syntax.semigroupalK.*
+import tofu.syntax.embed._
+import cats.tagless.syntax.functorK._
+import cats.tagless.syntax.semigroupalK._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import tofu.higherKind.derived.RepresentableKVarArgSuite.Foo
