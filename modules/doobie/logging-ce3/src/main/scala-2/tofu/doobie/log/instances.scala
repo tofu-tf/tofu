@@ -19,50 +19,56 @@ object instances {
       }
 
     def logShow(ev: LogEvent): String = ev match {
-      case Success(s, a, e1, e2)              =>
+      case Success(s, a, l, e1, e2)              =>
         s"""Successful Statement Execution:
            |
            |  ${multiline(s)}
            |
            | arguments = ${loggedArgs(a)}
+           |     label = $l
            |   elapsed = ${e1.toMillis} ms exec + ${e2.toMillis} ms processing (${(e1 + e2).toMillis} ms total)
           """.stripMargin
-      case ProcessingFailure(s, a, e1, e2, _) =>
+      case ProcessingFailure(s, a, l, e1, e2, _) =>
         s"""Failed Resultset Processing:
            |
            |  ${multiline(s)}
            |
            | arguments = ${loggedArgs(a)}
+           |     label = $l
            |   elapsed = ${e1.toMillis} ms exec + ${e2.toMillis} ms processing (failed) (${(e1 + e2).toMillis} ms total)
           """.stripMargin
-      case ExecFailure(s, a, e1, _)           =>
+      case ExecFailure(s, a, l, e1, _)           =>
         s"""Failed Statement Execution:
            |
            |  ${multiline(s)}
            |
            | arguments = ${loggedArgs(a)}
+           |     label = $l
            |   elapsed = ${e1.toMillis} ms exec (failed)
           """.stripMargin
     }
 
     def fields[I, V, R, S](ev: LogEvent, i: I)(implicit r: LogRenderer[I, V, R, S]): R =
       ev match {
-        case Success(s, a, e1, e2)              =>
+        case Success(s, a, l, e1, e2)              =>
           i.field("sql-event-type", "Success") |+|
+            i.field("sql-label", l) |+|
             i.field("sql-statement", oneline(s)) |+|
             i.field("sql-args", loggedArgs(a)) |+|
             i.field("sql-exec-ms", e1.toMillis) |+|
             i.field("sql-processing-ms", e2.toMillis) |+|
             i.field("sql-total-ms", (e1 + e2).toMillis)
-        case ProcessingFailure(s, a, e1, e2, _) =>
+        case ProcessingFailure(s, a, l, e1, e2, _) =>
           i.field("sql-event-type", "ProcessingFailure") |+|
+            i.field("sql-label", l) |+|
             i.field("sql-statement", oneline(s)) |+|
             i.field("sql-args", loggedArgs(a)) |+|
             i.field("sql-exec-ms", e1.toMillis) |+|
             i.field("sql-processing-ms", e2.toMillis) |+|
             i.field("sql-total-ms", (e1 + e2).toMillis)
-        case ExecFailure(s, a, e1, _)           =>
+        case ExecFailure(s, a, l, e1, _)           =>
           i.field("sql-event-type", "ExecFailure") |+|
+            i.field("sql-label", l) |+|
             i.field("sql-statement", oneline(s)) |+|
             i.field("sql-args", loggedArgs(a)) |+|
             i.field("sql-exec-ms", e1.toMillis)
