@@ -200,10 +200,11 @@ lazy val loggingLog4CatsLegacy = projectMatrix
   .in(loggingInterop / "log4cats-legacy")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-logging-log4cats-legacy",
     libraryDependencies += log4CatsLegacy
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr)
 
 lazy val loggingLog4Cats = projectMatrix
