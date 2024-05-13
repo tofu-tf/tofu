@@ -1,8 +1,10 @@
 package tofu.generate
 
-import cats.Functor
+import cats.data.*
+import cats.{Applicative, FlatMap, Functor, Monoid}
 import tofu.Delay
 import tofu.internal.EffectComp
+import tofu.syntax.liftKernel.CatsTaglessLiftSyntax
 import tofu.syntax.monadic.*
 
 import scala.util.Random
@@ -18,7 +20,7 @@ trait GenRandom[F[_]] {
   def nextInt(n: Int): F[Int]
 }
 
-object GenRandom extends EffectComp[GenRandom] {
+object GenRandom extends EffectComp[GenRandom] with GetRandomInstances {
   def nextLong[F[_]](implicit g: GenRandom[F]): F[Long]       = g.nextLong
   def nextInt[F[_]](n: Int)(implicit g: GenRandom[F]): F[Int] = g.nextInt(n)
 
@@ -37,9 +39,19 @@ object GenRandom extends EffectComp[GenRandom] {
     for (rnd <- Delay[I].delay(new Random(random()))) yield new ScalaUtil[F](rnd)
   }
 
-  private class ScalaUtil[F[_]](rnd: Random)(implicit F: Delay[F]) extends GenRandom[F] with GetRandomInstances {
+  private class ScalaUtil[F[_]](rnd: Random)(implicit F: Delay[F]) extends GenRandom[F] {
     def nextLong: F[Long]         = F.delay(rnd.nextLong())
     def nextInt(max: Int): F[Int] = F.delay(rnd.nextInt(max))
   }
 
+  implicit def GenRandomForKleisli[F[_]: GenRandom, R]: GenRandom[Kleisli[F, R, _]]                            = GenRandom[F].lift
+  implicit def GenRandomForOptionT[F[_]: Functor: GenRandom]: GenRandom[OptionT[F, _]]                         = GenRandom[F].lift
+  implicit def GenRandomForEitherT[F[_]: Functor: GenRandom, E]: GenRandom[EitherT[F, E, _]]                   = GenRandom[F].lift
+  implicit def GenRandomForStateT[F[_]: Applicative: GenRandom, S]: GenRandom[StateT[F, S, _]]                 = GenRandom[F].lift
+  implicit def GenRandomForIorT[F[_]: Applicative: GenRandom, L]: GenRandom[IorT[F, L, _]]                     = GenRandom[F].lift
+  implicit def GenRandomForContT[F[_]: FlatMap: GenRandom, R]: GenRandom[ContT[F, R, _]]                       = GenRandom[F].lift
+  implicit def GenRandomForWriterT[F[_]: Applicative: GenRandom, R: Monoid]: GenRandom[WriterT[F, R, _]]       =
+    GenRandom[F].lift
+  implicit def GenRandomForRWST[F[_]: Applicative: GenRandom, R, L: Monoid, S]: GenRandom[RWST[F, R, L, S, _]] =
+    GenRandom[F].lift
 }
