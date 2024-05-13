@@ -344,7 +344,7 @@ lazy val zio2Core = projectMatrix
     libraryDependencies ++= List(zio2, zio2Cats),
     name := "tofu-zio2-core"
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scala2And3Versions)
   .dependsOn(coreCE3)
 
 lazy val zio1Logging = projectMatrix
