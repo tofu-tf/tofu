@@ -2,7 +2,7 @@ package tofu.example.doobie
 
 import cats.data.ReaderT
 import cats.effect.std.Dispatcher
-import cats.effect.{Async, IO, IOApp, Sync}
+import cats.effect.{Async, IO, IOApp}
 import cats.tagless.syntax.functorK._
 import cats.{Apply, Monad}
 import derevo.derive
@@ -10,10 +10,9 @@ import doobie._
 import doobie.implicits._
 import doobie.util.log.LogHandler
 import tofu.doobie.LiftConnectionIO
-import tofu.doobie.log.{EmbeddableLogHandler, LogHandlerF}
 import tofu.doobie.transactor.Txr
+import tofu.higherKind.RepresentableK
 import tofu.higherKind.derived.representableK
-import tofu.kernel.types.PerformThrow
 import tofu.lift.Lift
 import tofu.logging.derivation.{loggable, loggingMidTry}
 import tofu.logging.{Logging, LoggingCompanion}
@@ -45,11 +44,10 @@ trait PersonSql[F[_]] {
 }
 
 object PersonSql extends LoggingCompanion[PersonSql] {
-  def make[DB[_]: Monad: LiftConnectionIO: EmbeddableLogHandler]: PersonSql[DB] = {
-    EmbeddableLogHandler[DB].embedLift(implicit lh => new Impl)
-  }
+  def make[DB[_]: Monad: LiftConnectionIO]: PersonSql[DB] =
+    RepresentableK[PersonSql].mapK(Impl)(Lift[ConnectionIO, DB].liftF)
 
-  final class Impl(implicit lh: LogHandler) extends PersonSql[ConnectionIO] {
+  final private object Impl extends PersonSql[ConnectionIO] {
     def init: ConnectionIO[Unit]                     =
       lsql"create table if not exists person(id int8, name varchar(50), dept_id int8)".update.run.void
     def create(p: Person): ConnectionIO[Unit]        =
@@ -70,11 +68,10 @@ trait DeptSql[F[_]] {
 }
 
 object DeptSql extends LoggingCompanion[DeptSql] {
-  def make[DB[_]: Monad: LiftConnectionIO: EmbeddableLogHandler]: DeptSql[DB] = {
-    EmbeddableLogHandler[DB].embedLift(implicit lh => new Impl)
-  }
+  def make[DB[_]: Monad: LiftConnectionIO]: DeptSql[DB] =
+    RepresentableK[DeptSql].mapK(Impl)(Lift[ConnectionIO, DB].liftF)
 
-  final class Impl(implicit lh: LogHandler) extends DeptSql[ConnectionIO] {
+  final private object Impl extends DeptSql[ConnectionIO] {
     def init: ConnectionIO[Unit]                   =
       lsql"create table if not exists department(id int8, name varchar(50))".update.run.void
     def create(d: Dept): ConnectionIO[Unit]        =
@@ -118,22 +115,21 @@ object TofuDoobieExample extends IOApp.Simple {
     runF[IO, ReaderT[IO, Ctx, *]]
   }
 
-  def runF[I[_]: Async, F[_]: Sync: PerformThrow: WithRun[*[_], I, Ctx]]: I[Unit] = {
+  def runF[I[_], F[_]: Async: WithRun[*[_], I, Ctx]]: I[Unit] = {
     // Simplified wiring below
     implicit val loggingF = Logging.Make.contextual[F, Ctx]
 
-    val transactor   = Transactor.fromDriverManager[I](
+    val transactor   = Transactor.fromDriverManager[F](
       driver = "org.h2.Driver",
-      url = "jdbc:h2:./test"
+      url = "jdbc:h2:./test",
+      logHandler = Some(LogHandler.loggable[F](Logging.Debug))
     )
-    implicit val txr = Txr.continuational(transactor.mapK(Lift.trans[I, F]))
+    implicit val txr = Txr.continuational(transactor)
 
     def initStorage[
-        DB[_]: Tries: Txr[F, *[_]]: Delay: Monad: LiftConnectionIO: WithLocal[*[_], Ctx]: PerformThrow
+        DB[_]: Tries: Txr[F, *[_]]: Delay: Monad: LiftConnectionIO: WithLocal[*[_], Ctx]
     ]: PersonStorage[F] = {
       implicit val loggingDB = Logging.Make.contextual[DB, Ctx]
-
-      implicit val elh = EmbeddableLogHandler.async(LogHandlerF.loggable[DB](Logging.Debug))
 
       val personSql = PersonSql.make[DB].attachErrLogs
       val deptSql   = DeptSql.make[DB].attachErrLogs
