@@ -343,7 +343,8 @@ lazy val zio2Core = projectMatrix
   .settings(
     defaultSettings,
     scala3MigratedModuleOptions,
-    libraryDependencies ++= List(zio2, zio2Cats),
+    libraryDependencies ++= List(zio2, zio2Cats, zio2Test, zio2TestSbt),
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     name := "tofu-zio2-core"
   )
   .jvmPlatform(scalaVersions = scala2And3Versions)
@@ -357,7 +358,7 @@ lazy val zio1Logging = projectMatrix
     name := "tofu-zio-logging"
   )
   .jvmPlatform(scala2Versions)
-  .dependsOn(loggingStr, loggingDer % "test", zio1Core % Test)
+  .dependsOn(loggingStr, loggingDer % Test, zio1Core % Test)
 
 lazy val zio2Logging = projectMatrix
   .in(modules / "interop" / "zio2" / "logging")
@@ -369,7 +370,7 @@ lazy val zio2Logging = projectMatrix
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
   )
   .jvmPlatform(scalaVersions = scala2And3Versions)
-  .dependsOn(loggingStr, loggingDer % "test")
+  .dependsOn(loggingStr, loggingDer % Test, zio2Core % Test)
 
 val interop = modules / "interop"
 

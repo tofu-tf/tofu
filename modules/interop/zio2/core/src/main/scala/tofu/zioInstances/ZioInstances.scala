@@ -61,6 +61,5 @@ private[zioInstances] class ZioInstances {
   final def rioTofuBlockingInstance[R]: RioTofuBlockingInstance[R] =
     rioTofuBlockingInstanceAny.asInstanceOf[RioTofuBlockingInstance[R]]
 
-  private[this] val zioTofuBiInstanceAny               = new ZioTofuBiInstance[Any]
-  final def zioTofuBiInstance[R]: ZioTofuBiInstance[R] = zioTofuBiInstanceAny.asInstanceOf[ZioTofuBiInstance[R]]
+  final def zioTofuBiInstance[R: Tag]: ZioTofuBiInstance[R] = new ZioTofuBiInstance
 }
