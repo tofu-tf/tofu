@@ -33,13 +33,13 @@ private[zioInstances] class ZioTofuImplicits1 extends ZioTofuImplicits2 {
   @inline final implicit def rioTofuBlockingImplicit[R]: RioTofuBlockingInstance[R] =
     rioTofuBlockingInstance[R]
 
-  @inline final implicit def zioTofuBiImplicit[R]: ZioTofuBiInstance[R] = zioTofuBiInstance[R]
+  @inline final implicit def zioTofuBiImplicit[R: Tag]: ZioTofuBiInstance[R] = zioTofuBiInstance[R]
 }
 private[zioInstances] trait ZioTofuImplicits2 extends ZioTofuImplicits3 {
   @inline final implicit def zioTofuErrorsToImplicit[R, E]: ZioTofuErrorsToInstance[R, E, Nothing] =
     zioTofuErrorsToInstance
   @inline final implicit def zioTofuImplicit[R, E]: ZioTofuInstance[R, E]                          = zioTofuInstance
-  @inline final implicit def zioTofuWithRunImplicit[R, E]: ZioTofuWithRunInstance[R, E]            = zioTofuWithRunInstance
+  @inline final implicit def zioTofuWithRunImplicit[R: Tag, E]: ZioTofuWithRunInstance[R, E]       = zioTofuWithRunInstance
   @inline final implicit def zioTofuBlockingImplicit[R, E]: ZioTofuBlockingInstance[R, E]          =
     zioTofuBlockingInstance[R, E]
 }
