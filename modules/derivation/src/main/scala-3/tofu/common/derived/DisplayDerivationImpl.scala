@@ -1,9 +1,10 @@
 package tofu.common.derived
 
 import cats.Eval
-import derevo.Derivation
-import magnolia1.{CaseClass, Magnolia, SealedTrait}
+import magnolia1.*
 import tofu.common.Display
+import tofu.magnolia.compat
+import scala.deriving.Mirror
 
 /** Derivation of [[Display]] typeclass for case classes and sealed traits
   *
@@ -11,12 +12,12 @@ import tofu.common.Display
   *   Derived [[Display]] instances will indent nested structures if those are supposed to be on newline. You can see
   *   examples in the tests.
   */
-object display extends Derivation[Display] {
+trait DisplayDerivationImpl extends AutoDerivation[Display] {
 
   private type Typeclass[T] = Display[T]
 
   def join[T](ctx: CaseClass[Typeclass, T]): Display[T]    = (cfg: Display.Config, a: T) => {
-    import cfg.{fieldSeparator, indent, brackets, fieldAssign, newline}
+    import cfg.*
 
     val nestedIndent = indent + indent
 
@@ -32,7 +33,7 @@ object display extends Derivation[Display] {
       }
     }
 
-    val shortName: String = ctx.typeName.short
+    val shortName: String = ctx.typeInfo.short
 
     ctx.parameters.zipWithIndex
       .foldLeft(
@@ -46,10 +47,10 @@ object display extends Derivation[Display] {
           alreadyDisplayed                 <- acc
           nestedCfg                         = cfg.copy(indent = nestedIndent, brackets = brackets.copy(right = indent + brackets.right))
           label                             = if (cfg.showFieldLabels) current.label + fieldAssign else ""
-          displayedParameterValue          <- current.typeclass.displayBuild(nestedCfg, current.dereference(a))
+          displayedParameterValue          <- current.typeclass.displayBuild(nestedCfg, compat.deref[Typeclass, T](current)(a))
           // this value has at least one element in it by construction,
           // but we avoid using NEVector here due to performance and simplicity
-          adapted :+ value                  = adaptDisplayedParameter(label, displayedParameterValue)
+          adapted :+ value                  = adaptDisplayedParameter(label, displayedParameterValue): @unchecked
           separator                         = if (index + 1 < ctx.parameters.size) fieldSeparator else ""
           adaptedIndentedValueWithSeparator = value + separator + newline
           separatedLabelValue               = adapted :+ adaptedIndentedValueWithSeparator
@@ -58,8 +59,8 @@ object display extends Derivation[Display] {
       .map(s => s :+ brackets.right)
   }
   def split[T](ctx: SealedTrait[Typeclass, T]): Display[T] = (cfg: Display.Config, a: T) =>
-    ctx.split(a)(adtCase => adtCase.typeclass.displayBuild(cfg, adtCase.cast(a)))
+    ctx.choose(a)(adtCase => adtCase.typeclass.displayBuild(cfg, adtCase.cast(a)))
 
-  def instance[T]: Display[T] = macro Magnolia.gen[T]
+  inline def instance[T](using Mirror.Of[T]): Display[T] = autoDerived[T]
 
 }

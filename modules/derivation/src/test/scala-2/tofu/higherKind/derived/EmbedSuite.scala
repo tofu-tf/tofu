@@ -11,6 +11,7 @@ import cats.instances.either._
 import cats.instances.option._
 import cats.syntax.traverse._
 import cats.syntax.either._
+
 import scala.util.Try
 
 class EmbedSuite extends AnyFlatSpec with Matchers {

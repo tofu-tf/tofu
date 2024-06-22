@@ -1,8 +1,8 @@
 package tofu.data.derived
+
 import cats.Monad
 import derevo.Derivation
-import magnolia1.{CaseClass, Magnolia}
-import magnolia1.Monadic
+import magnolia1.{CaseClass, Magnolia, Monadic}
 import tofu.Init
 
 class InitDerivation[F[_]: Monad] extends Derivation[Init[F, *]] {
