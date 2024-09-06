@@ -16,7 +16,7 @@ class PermitSuite extends AnyFunSuite {
   private def summonInstance[I[_]: Sync, F[_]: Async]: MakePermit[I, F] =
     implicitly[MakePermit[I, F]]
 
-  test("check IO has Atom") {
+  test("check Permit") {
     assert(
       MakePermit[IO, ReaderT[IO, Unit, _]]
         .of(2)
