@@ -65,3 +65,19 @@ trait MkSerialAgentCE3Carrier0Macro {
       F
     ], I, F, { val `tofu.interop.CE3Kernel.underlyingSerialAgentByRefAndSemaphore`: Unit }]
 }
+
+trait MkPermitCE2CarrierMacro {
+  final implicit def interopCE2Carrier[I[_], F[_]]: MkPermitCE2Carrier[I, F] =
+    macro Interop.delegate2[MkPermitCE2Carrier[
+      I,
+      F
+    ], I, F, { val `tofu.interop.CE2Kernel.permitBySemaphore`: Unit }]
+}
+
+trait MkPermitCE3CarrierMacro {
+  final implicit def interopCE3Carrier[I[_], F[_]]: MkPermitCE3Carrier[I, F] =
+    macro Interop.delegate2[MkPermitCE3Carrier[
+      I,
+      F
+    ], I, F, { val `tofu.interop.CE3Kernel.permitBySemaphore`: Unit }]
+}

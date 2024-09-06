@@ -165,6 +165,16 @@ object CE2Kernel {
         } yield UnderlyingSemRef[F, G, A](ref, sem)
     }
 
+  final def permitBySemaphore[I[_]: Monad, F[_]](implicit
+      makeSemaphore: MakeSemaphore[I, F]
+  ): MkPermitCE2Carrier[I, F] =
+    new MkPermitCE2Carrier[I, F] {
+      override def permitOf(limit: Long): I[Permit[F]] =
+        makeSemaphore
+          .semaphore(limit)
+          .map(PermitSem(_))
+    }
+
   def boundedParallel[F[_]: Async: Parallel]: BoundedParallelCarrierCE2[F] = new BoundedParallelCarrierCE2.Impl[F] {
     def parTraverse[T[_]: Traverse, A, B](in: T[A])(f: A => F[B]): F[T[B]] =
       Parallel.parTraverse(in)(f)
