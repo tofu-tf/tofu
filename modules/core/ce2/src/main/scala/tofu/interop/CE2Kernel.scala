@@ -172,7 +172,7 @@ object CE2Kernel {
       override def permitOf(limit: Long): I[Permit[F]] =
         makeSemaphore
           .semaphore(limit)
-          .map(PermitSem(_))
+          .map(PermitSemaphore(_))
     }
 
   def boundedParallel[F[_]: Async: Parallel]: BoundedParallelCarrierCE2[F] = new BoundedParallelCarrierCE2.Impl[F] {

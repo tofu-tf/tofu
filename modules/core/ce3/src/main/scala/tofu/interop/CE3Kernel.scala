@@ -171,7 +171,7 @@ object CE3Kernel {
       override def permitOf(limit: Long): I[Permit[F]] =
         makeSemaphore
           .semaphore(limit)
-          .map(new PermitSem[F](_))
+          .map(new PermitSemaphore[F](_))
     }
 
   def boundedParallel[F[_]: Concurrent: Parallel]: BoundedParallelCarrierCE3[F] =

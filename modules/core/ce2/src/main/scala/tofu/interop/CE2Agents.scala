@@ -40,7 +40,7 @@ final case class SerialSemRef[F[_]: Monad, A](ref: Ref[F, A], sem: Semaphore[F])
 
 /** Default implementation of [[tofu.concurrent.Permit]] that use [[cats.effect.concurrent.Semaphore]]
   */
-final case class PermitSem[F[_]](sem: Semaphore[F]) extends Permit[F] {
+final case class PermitSemaphore[F[_]](sem: Semaphore[F]) extends Permit[F] {
   def withPermit[A](fa: F[A]): F[A] = sem.withPermit(fa)
 }
 

@@ -42,7 +42,7 @@ final case class SerialSemRef[F[_]: MonadCancelThrow, A](ref: Ref[F, A], sem: Se
 
 /** Default implementation of [[tofu.concurrent.Permit]] that use [[cats.effect.std.Semaphore]]
   */
-final case class PermitSem[F[_]: MonadCancelThrow](sem: Semaphore[F]) extends Permit[F] {
+final case class PermitSemaphore[F[_]: MonadCancelThrow](sem: Semaphore[F]) extends Permit[F] {
   def withPermit[A](fa: F[A]): F[A] = sem.permit.use(_ => fa)
 }
 
