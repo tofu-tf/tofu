@@ -1,23 +1,22 @@
 package tofu.interop
 
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
-
-import cats.effect.kernel._
+import cats.effect.kernel.*
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.IORuntime
 import cats.effect.{Async, Fiber, IO, Sync}
 import cats.{Functor, Monad, Parallel, Traverse}
 import tofu.compat.unused
-import tofu.concurrent._
+import tofu.concurrent.*
 import tofu.concurrent.impl.QVarSM
 import tofu.internal.NonTofu
-import tofu.internal.carriers._
+import tofu.internal.carriers.*
 import tofu.lift.Lift
-import tofu.syntax.monadic._
+import tofu.syntax.monadic.*
 import tofu.{Fire, Scoped, WithContext}
+
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
 
 object CE3Kernel {
   def delayViaSync[K[_]](implicit KS: Sync[K]): DelayCarrier3[K] =
@@ -163,6 +162,16 @@ object CE3Kernel {
           ref <- makeRef.refOf(a)
           sem <- makeSemaphore.semaphore(1)
         } yield UnderlyingSemRef[F, G, A](ref, sem)
+    }
+
+  final def permitBySemaphore[I[_]: Monad, F[_]: MonadCancelThrow](implicit
+      makeSemaphore: MakeSemaphore[I, F]
+  ): MkPermitCE3Carrier[I, F] =
+    new MkPermitCE3Carrier[I, F] {
+      override def permitOf(limit: Long): I[Permit[F]] =
+        makeSemaphore
+          .semaphore(limit)
+          .map(new PermitSemaphore[F](_))
     }
 
   def boundedParallel[F[_]: Concurrent: Parallel]: BoundedParallelCarrierCE3[F] =
