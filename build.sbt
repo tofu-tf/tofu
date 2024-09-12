@@ -171,7 +171,6 @@ lazy val loggingDerivationAnnotations = projectMatrix
   )
   .jvmPlatform(scala2And3Versions)
 
-
 lazy val loggingLayout = projectMatrix
   .in(modules / "logging" / "layout")
   .settings(
