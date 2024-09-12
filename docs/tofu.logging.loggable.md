@@ -48,8 +48,8 @@ Second, we define two methods that describe how `User` should be logged:
 * `fields`, that represents `User` as a structure, containing two fields with their respective names and values
 * `logShow`, that represents `User` as a string in a log message
 
-
 ## Loggable derivation
+
 a
 Tofu has integration with [derevo](https://github.com/tofu-tf/derevo) library. It allows you to easily generate
 instances of `Loggable[YourClass]` for case classes or ADTs:
@@ -99,7 +99,8 @@ Tofu has several annotations to configure generation of `Loggable`
   case class Card(@masked(MaskMode.Erase) expirationDate: String, @masked(MaskMode.ForLength(4, 12)) cardNumber: String, @masked() owner: String)
   
   ```
-  `Card(737, "1244345632322311", "TOFU PETROV")` will be logged as `Card{expirationDate=...,cardNumber=1244########2311,owner=**** ******}`
+  `Card(737, "1244345632322311", "TOFU PETROV")` will be logged as
+  `Card{expirationDate=...,cardNumber=1244########2311,owner=**** ******}`
 * `@unembed`
    ```scala:reset
   import tofu.logging.derivation.{loggable, unembed}
@@ -113,3 +114,6 @@ Tofu has several annotations to configure generation of `Loggable`
   ```
   `Room(Person("Karl Sagan"), None)` will be logged as `Room{name=Karl Sagan, age=None}`
 
+These annotations belong to a separate dependency-free package `logging-derivation-annotations`.
+Main `logging-derivation` package depends on it.
+It allows for adding these annotations right to your domain classes if there's a need to keep it without dependencies.
