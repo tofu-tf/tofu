@@ -1,7 +1,6 @@
 package tofu.logging.derivation
 
 import scala.annotation.tailrec
-import scala.util.matching.Regex
 
 import tofu.magnolia.compat
 import tofu.magnolia.compat.Param
