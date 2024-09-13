@@ -165,10 +165,11 @@ lazy val loggingDer = projectMatrix
 lazy val loggingDerivationAnnotations = projectMatrix
   .in(modules / "logging" / "derivation-annotations")
   .settings(
-    defaultSettings,
+    scalacWarningConfig,
     scala3MigratedModuleOptions,
-    name := "tofu-logging-derivation"
+    name := "tofu-logging-derivation-annotations"
   )
+  .settings(defaultScalacOptions)
   .jvmPlatform(scala2And3Versions)
 
 lazy val loggingLayout = projectMatrix
