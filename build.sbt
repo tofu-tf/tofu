@@ -264,6 +264,7 @@ lazy val logging = {
       // ($project, $haScala3, $dependsOn)
       (loggingStr, true, true),
       (loggingDer, true, true),
+      (loggingDerivationAnnotations, true, true),
       (loggingLayout, true, true),
       (loggingShapeless, false, true),
       (loggingRefined, true, true),
