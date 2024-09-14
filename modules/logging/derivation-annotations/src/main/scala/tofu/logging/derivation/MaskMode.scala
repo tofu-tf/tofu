@@ -20,4 +20,3 @@ object MaskMode {
   /** Allows to define a custom masker function */
   case class Custom(f: String => String) extends MaskMode
 }
-
