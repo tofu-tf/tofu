@@ -160,7 +160,16 @@ lazy val loggingDer = projectMatrix
     name := "tofu-logging-derivation"
   )
   .jvmPlatform(scala2And3Versions)
-  .dependsOn(loggingStr)
+  .dependsOn(loggingStr, loggingDerivationAnnotations)
+
+lazy val loggingDerivationAnnotations = projectMatrix
+  .in(modules / "logging" / "derivation-annotations")
+  .settings(
+    defaultSettings,
+    scala3MigratedModuleOptions,
+    name := "tofu-logging-derivation-annotations"
+  )
+  .jvmPlatform(scala2And3Versions)
 
 lazy val loggingLayout = projectMatrix
   .in(modules / "logging" / "layout")
@@ -255,6 +264,7 @@ lazy val logging = {
       // ($project, $haScala3, $dependsOn)
       (loggingStr, true, true),
       (loggingDer, true, true),
+      (loggingDerivationAnnotations, true, true),
       (loggingLayout, true, true),
       (loggingShapeless, false, true),
       (loggingRefined, true, true),
