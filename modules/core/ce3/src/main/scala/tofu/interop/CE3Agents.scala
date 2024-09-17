@@ -3,13 +3,13 @@ package tofu.interop
 import cats.effect.Ref
 import cats.effect.kernel.MonadCancelThrow
 import cats.effect.std.Semaphore
+import cats.syntax.all.*
 import cats.{Functor, Monad}
 import tofu.Fire
-import tofu.concurrent.{Agent, SerialAgent}
-import cats.syntax.all._
+import tofu.concurrent.{Agent, Permit, SerialAgent}
 import tofu.lift.Lift
-import tofu.syntax.fire._
-import tofu.syntax.liftKernel._
+import tofu.syntax.fire.*
+import tofu.syntax.liftKernel.*
 
 /** Default implementation of [[tofu.concurrent.Agent]] that consists of [[cats.effect.Ref]] and
   * [[cats.effect.std.Semaphore]]
@@ -38,6 +38,12 @@ final case class SerialSemRef[F[_]: MonadCancelThrow, A](ref: Ref[F, A], sem: Se
     updateM(a => if (f.isDefinedAt(a)) f(a) else a.pure[F])
   def modifySomeM[B](default: B)(f: PartialFunction[A, F[(B, A)]]): F[B] =
     modifyM(a => if (f.isDefinedAt(a)) f(a) else (default, a).pure[F])
+}
+
+/** Default implementation of [[tofu.concurrent.Permit]] that use [[cats.effect.std.Semaphore]]
+  */
+final case class PermitSemaphore[F[_]: MonadCancelThrow](sem: Semaphore[F]) extends Permit[F] {
+  def withPermit[A](fa: F[A]): F[A] = sem.permit.use(_ => fa)
 }
 
 /** If instances of [[cats.effect.Ref]] and [[cats.effect.std.Semaphore]] can not be created for some `G[_]`, but can be

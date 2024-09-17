@@ -160,7 +160,16 @@ lazy val loggingDer = projectMatrix
     name := "tofu-logging-derivation"
   )
   .jvmPlatform(scala2And3Versions)
-  .dependsOn(loggingStr)
+  .dependsOn(loggingStr, loggingDerivationAnnotations)
+
+lazy val loggingDerivationAnnotations = projectMatrix
+  .in(modules / "logging" / "derivation-annotations")
+  .settings(
+    defaultSettings,
+    scala3MigratedModuleOptions,
+    name := "tofu-logging-derivation-annotations"
+  )
+  .jvmPlatform(scala2And3Versions)
 
 lazy val loggingLayout = projectMatrix
   .in(modules / "logging" / "layout")
@@ -241,41 +250,59 @@ lazy val loggingEnumeratum = projectMatrix
   .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr)
 
-lazy val logging = projectMatrix
-  .in(modules / "logging")
-  .aggregate(
-    loggingStr,
-    loggingDer,
-    loggingLayout,
-    loggingShapeless,
-    loggingRefined,
-    loggingLog4Cats,
-    loggingLog4CatsLegacy,
-    loggingLogstashLogback,
-  )
-  .settings(
-    defaultSettings,
-    name := "tofu-logging"
-  )
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
-  .jvmPlatform(scala2Versions)
+lazy val logging = {
+  def projectRefFromMatrix(pm: ProjectMatrix, scalaVersion: String): ProjectReference = {
+    val projects = pm.filterProjects(Seq(VirtualAxis.jvm, VirtualAxis.scalaABIVersion(scalaVersion)))
+    projects.headOption match {
+      case Some(p) => p
+      case None    => throw new Exception(s"Can't found $scalaVersion axis for ${pm}")
+    }
+  }
 
-lazy val logging3 = projectMatrix
-  .in(modules / "logging")
-  .aggregate(
-    loggingStr,
-    loggingDer,
-    loggingLayout,
-    loggingRefined,
-    loggingLog4Cats,
-    loggingLogstashLogback,
-  )
-  .settings(
-    defaultSettings,
-    name := "tofu-logging"
-  )
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingRefined, loggingLog4Cats)
-  .jvmPlatform(List(Version.scala3))
+  val modulesSettings =
+    List(
+      // ($project, $haScala3, $dependsOn)
+      (loggingStr, true, true),
+      (loggingDer, true, true),
+      (loggingDerivationAnnotations, true, true),
+      (loggingLayout, true, true),
+      (loggingShapeless, false, true),
+      (loggingRefined, true, true),
+      (loggingLog4Cats, true, true),
+      (loggingLogstashLogback, true, true),
+    )
+
+  val initial = ProjectMatrix("logging", modules / "logging")
+  scala2And3Versions.foldLeft(initial) { case (prMatrix, scalaVersionValue) =>
+    val scalaAxis = VirtualAxis.scalaABIVersion(scalaVersionValue)
+    prMatrix.customRow(
+      autoScalaLibrary = true,
+      axisValues = Seq(VirtualAxis.jvm, scalaAxis),
+      process = (pr: Project) => {
+        val filterScala                    =
+          if (scalaVersionValue.startsWith("3")) identity[Boolean](_)
+          else (_: Boolean) => true
+        val (aggModules, dependsOnModules) =
+          modulesSettings.foldLeft((List.empty[ProjectReference], List.empty[ClasspathDependency])) {
+            case ((agg, dependsOn), (prM, hasScala3, isInDependsOn)) if filterScala(hasScala3) =>
+              val ref           = projectRefFromMatrix(prM, scalaVersionValue)
+              val nextAgg       = ref :: agg
+              val nextDependsOn = if (isInDependsOn) ClasspathDependency(ref, None) :: dependsOn else dependsOn
+              (nextAgg, nextDependsOn)
+            case (acc, _)                                                                      => acc
+          }
+
+        pr.aggregate(aggModules: _*)
+          .settings(
+            defaultSettings,
+            scalaVersion := scalaVersionValue,
+            name         := "tofu-logging"
+          )
+          .dependsOn(dependsOnModules: _*)
+      }
+    )
+  }
+}
 
 val util = modules / "util"
 

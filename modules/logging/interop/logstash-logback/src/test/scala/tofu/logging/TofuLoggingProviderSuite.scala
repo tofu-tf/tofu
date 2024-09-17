@@ -6,7 +6,6 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.fasterxml.jackson.core.{JsonFactory, JsonGenerator}
-import derevo.derive
 import org.scalatest.funsuite.AnyFunSuite
 import org.slf4j.LoggerFactory
 import tofu.Delay
@@ -55,11 +54,15 @@ class TofuLoggingProviderSuite extends AnyFunSuite {
 }
 
 object TofuLoggingProviderSuite {
-  @derive(tofu.logging.derivation.loggable)
   final case class LoggingContext(inner: LoggingContextInner, what: String)
+  object LoggingContext {
+    implicit val loggable: Loggable[LoggingContext] = tofu.logging.derivation.loggable.instance
+  }
 
-  @derive(tofu.logging.derivation.loggable)
   final case class LoggingContextInner(keks: Int, shreks: Int)
+  object LoggingContextInner {
+    implicit val loggable: Loggable[LoggingContextInner] = tofu.logging.derivation.loggable.instance
+  }
 
   val ExampleCtx = LoggingContext(LoggingContextInner(2, 3), "swamp")
 }

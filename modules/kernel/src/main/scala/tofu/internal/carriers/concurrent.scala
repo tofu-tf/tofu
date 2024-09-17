@@ -1,6 +1,6 @@
 package tofu.internal.carriers
 
-import tofu.concurrent.{MakeAgent, MakeAtom, MakeQVar, MakeSerialAgent}
+import tofu.concurrent.{MakeAgent, MakeAtom, MakePermit, MakeQVar, MakeSerialAgent}
 
 trait MkAtomCE2Carrier[I[_], F[_]] extends MakeAtom[I, F]
 
@@ -33,3 +33,11 @@ object MkSerialAgentCE2Carrier extends MkSerialAgentCE2CarrierMacro
 trait MkSerialAgentCE3Carrier[I[_], F[_]] extends MakeSerialAgent[I, F]
 
 object MkSerialAgentCE3Carrier extends MkSerialAgentCE3CarrierMacro
+
+trait MkPermitCE2Carrier[I[_], F[_]] extends MakePermit[I, F]
+
+object MkPermitCE2Carrier extends MkPermitCE2CarrierMacro
+
+trait MkPermitCE3Carrier[I[_], F[_]] extends MakePermit[I, F]
+
+object MkPermitCE3Carrier extends MkPermitCE3CarrierMacro

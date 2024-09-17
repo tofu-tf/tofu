@@ -6,13 +6,13 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val scala212 = "2.12.19"
+    val scala212 = "2.12.20"
 
     val scala213 = "2.13.12"
 
     val scala3 = "3.3.3"
 
-    val circe = "0.14.9"
+    val circe = "0.14.10"
 
     val tethys = "0.28.3"
 
@@ -22,7 +22,7 @@ object Dependencies {
 
     val catsEffect3 = "3.4.9"
 
-    val catsMtl = "1.4.0"
+    val catsMtl = "1.5.0"
 
     val catsTagless = "0.16.0"
 
@@ -30,11 +30,11 @@ object Dependencies {
 
     val derevo = "0.13.0"
 
-    val slf4j = "2.0.13"
+    val slf4j = "2.0.16"
 
     val fs2 = "2.5.12"
 
-    val fs2CE3 = "3.10.2"
+    val fs2CE3 = "3.11.0"
 
     val logback = "1.3.14"
 

@@ -45,3 +45,13 @@ trait MkSerialAgentCE3Carrier0Macro:
     Interop.delegate2[I, F, MkSerialAgentCE3Carrier[I, F]](
       "tofu.interop.CE3Kernel.underlyingSerialAgentByRefAndSemaphore"
     )
+
+trait MkPermitCE2CarrierMacro:
+  inline given interopCE2Carrier[I[_], F[_]]: MkPermitCE2Carrier[I, F] =
+    Interop.delegate2[I, F, MkPermitCE2Carrier[I, F]]("tofu.interop.CE2Kernel.permitBySemaphore")
+
+trait MkPermitCE3CarrierMacro:
+  inline given underlyinginteropCE3Carrier[I[_], F[_]]: MkPermitCE3Carrier[I, F] =
+    Interop.delegate2[I, F, MkPermitCE3Carrier[I, F]](
+      "tofu.interop.CE3Kernel.permitBySemaphore"
+    )

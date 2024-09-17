@@ -89,7 +89,7 @@ function Home() {
                 </h1>
                 <p className="index__text">
                   <Translate>
-                  Functional programming is a programming paradigm in which it is tried to bind each and everything in pure mathematical functions. It is a declarative type of programming style that focuses on what to solve rather than how to solve (aimed by the imperative style of programming).
+                  Functional programming is a programming paradigm that aims to structure code using pure mathematical functions. It is a declarative style of programming that emphasises describing what should be accomplished, rather than specifying how to accomplish it (which is the focus of imperative programming).
                   </Translate>
                 </p>
               </div>
