@@ -14,7 +14,7 @@ object Dependencies {
 
     val circe = "0.14.10"
 
-    val tethys = "0.28.4"
+    val tethys = "0.29.2"
 
     val cats = "2.12.0"
 
