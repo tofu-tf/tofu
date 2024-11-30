@@ -69,7 +69,7 @@ object Agents {
 }
 
 /** A helper for creating instances of [[tofu.concurrent.Agent]] that use different effects during construction and
-  * work. If you want to use same effect to construct and run `Agent` use [[tofu.concurrent.Agents]]
+  * work. If you want to use same effect to construct and run `Agent` use [[tofu.concurrent.Agent.Make]]
   *
   * Sample usage:
   * {{{
