@@ -523,7 +523,7 @@ lazy val examplesZIO2 = projectMatrix
   .jvmPlatform(scala2Versions)
   .dependsOn(zio2Logging, loggingDer, loggingLayout)
 
-lazy val coreModules =
+lazy val coreModules     =
   Vector(
     higherKindCore,
     kernel,
@@ -535,6 +535,7 @@ lazy val coreModules =
     streams,
     kernelCatsMtlInterop
   )
+lazy val coreModulesDeps = coreModules.map(x => x: MatrixClasspathDep[ProjectMatrixReference])
 
 lazy val ce3CoreModules = Vector(coreCE3)
 
@@ -579,7 +580,7 @@ lazy val docs = projectMatrix // new documentation project
   .dependsOn(mainModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
-lazy val tofu = project
+lazy val tofu = projectMatrix
   .in(file("."))
   .settings(
     defaultSettings,
@@ -589,7 +590,9 @@ lazy val tofu = project
       Def.taskDyn((Test / test).all(filterByScalaVersion(args.head)))
     }.evaluated
   )
+  .jvmPlatform(scala2And3Versions)
   .aggregate(allModules.flatMap(_.projectRefs): _*)
+  .dependsOn(coreModulesDeps: _*)
 
 lazy val defaultScalacOptions =
   Seq(
