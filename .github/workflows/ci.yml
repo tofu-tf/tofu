@@ -28,6 +28,7 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{matrix.java}}
+      - uses: sbt/setup-sbt@v1
 
       - name: Check formatting
         run: sbt scalafmtCheckAll scalafmtSbtCheck
@@ -53,6 +54,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - uses: sbt/setup-sbt@v1
 
       - name: coursier-cache
         uses: coursier/cache-action@v6
