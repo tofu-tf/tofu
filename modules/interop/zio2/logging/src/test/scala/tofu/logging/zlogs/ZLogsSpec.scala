@@ -36,7 +36,7 @@ case object ZLogsSpec extends ZIOSpecDefault {
               events <- LogAppender.events
             } yield {
               val e   = events.head
-              val ctx = e.getMarker.asInstanceOf[ContextMarker].ctx
+              val ctx = e.getMarkerList.get(0).asInstanceOf[ContextMarker].ctx
               assertTrue(LogTree(ctx) == TofuDefaultContextSpec.justZIOContextJson) &&
               assertTrue(
                 e.getArgumentArray.toSet
@@ -61,7 +61,7 @@ case object ZLogsSpec extends ZIOSpecDefault {
             events <- LogAppender.events
           } yield {
             val e    = events.head
-            val ctx  = e.getMarker.asInstanceOf[ContextMarker].ctx
+            val ctx  = e.getMarkerList.get(0).asInstanceOf[ContextMarker].ctx
             val args = e.getArgumentArray.toSet.asInstanceOf[Set[LoggedValue]]
             assertTrue(LogTree(ctx).asObject.get == JsonObject.empty) &&
             assertTrue(args.size == 1) && // non-printable loggerName
@@ -81,7 +81,7 @@ case object ZLogsSpec extends ZIOSpecDefault {
           events <- LogAppender.events
         } yield {
           val e   = events.head
-          val ctx = e.getMarker.asInstanceOf[ContextMarker].ctx
+          val ctx = e.getMarkerList.get(0).asInstanceOf[ContextMarker].ctx
           assertTrue(e.getArgumentArray()(0).asInstanceOf[LoggedValue] == logArg) &&
           assertTrue(LogTree(ctx) == LogTree(expectedContextValue)) &&
           assertTrue(e.getLevel == Level.INFO)
@@ -100,7 +100,7 @@ case object ZLogsSpec extends ZIOSpecDefault {
           events <- LogAppender.events
         } yield {
           val e   = events.head
-          val ctx = e.getMarker.asInstanceOf[ContextMarker].ctx
+          val ctx = e.getMarkerList.get(0).asInstanceOf[ContextMarker].ctx
           assertTrue(e.getArgumentArray()(0).asInstanceOf[LoggedValue] == logArg1) &&
           assertTrue(e.getArgumentArray()(1).asInstanceOf[LoggedValue] == logArg2) &&
           assertTrue(LogTree(ctx).asObject.get == JsonObject.empty) &&
