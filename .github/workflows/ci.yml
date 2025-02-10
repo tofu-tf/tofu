@@ -48,7 +48,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         if: matrix.scala == '2.13' && github.ref == 'refs/heads/master'
         with:
-          github_token: ${{ secrets.REPO_GITHUB_TOKEN }}
+          deploy_key: ${{ secrets.REPO_GITHUB_TOKEN }}
           publish_dir: ./website/build
 
   publish:
