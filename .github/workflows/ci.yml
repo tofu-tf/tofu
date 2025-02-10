@@ -28,6 +28,7 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{matrix.java}}
+      - uses: sbt/setup-sbt@v1
 
       - name: Check formatting
         run: sbt scalafmtCheckAll scalafmtSbtCheck
@@ -36,8 +37,19 @@ jobs:
         run: sbt "testScoped ${{ matrix.scala }} JVM"
 
       - name: Generate docs
-        if: matrix.scala == '2.13'
-        run: sbt ++${{ matrix.scala }} docs/mdoc unidoc
+        if: matrix.scala == '2.13' && github.ref == 'refs/heads/master'
+        run: |
+          sbt ++${{ matrix.scala }} docs/mdoc unidoc
+          cd website
+          npm install
+          npm run build
+      
+      - name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v4
+        if: matrix.scala == '2.13' && github.ref == 'refs/heads/master'
+        with:
+          github_token: ${{ secrets.REPO_GITHUB_TOKEN }}
+          publish_dir: ./website/build
 
   publish:
     name: Publish Artifacts
@@ -53,6 +65,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - uses: sbt/setup-sbt@v1
 
       - name: coursier-cache
         uses: coursier/cache-action@v6
