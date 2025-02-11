@@ -2,13 +2,12 @@ package tofu
 package lift
 
 import cats.arrow.FunctionK
-import cats.data.ReaderT
-import cats.{Applicative, FlatMap, Functor, Monad, ~>}
-import syntax.funk.*
+import cats.data.*
+import cats.{Applicative, FlatMap, Functor, Monad, Monoid, ~>}
 import glass.Contains
+import tofu.internal.{ContextBase, hktAny}
+import tofu.syntax.funk.*
 import tofu.syntax.monadic.*
-import tofu.internal.ContextBase
-import tofu.internal.hktAny
 
 trait Lift[F[_], G[_]] {
   def lift[A](fa: F[A]): G[A]
@@ -40,6 +39,27 @@ object Lift extends LiftInstances1 {
   }
   implicit def liftReaderT[F[_], R]: Lift[F, ReaderT[F, R, _]]                =
     liftReaderTAny.asInstanceOf[Lift[F, ReaderT[F, R, _]]]
+
+  implicit def liftWriterT[F[_]: Applicative, L: Monoid]: Lift[F, WriterT[F, L, _]] =
+    byFunK(WriterT.liftK[F, L])
+
+  implicit def liftOptionT[F[_]: Functor]: Lift[F, OptionT[F, _]] =
+    byFunK(OptionT.liftK[F])
+
+  implicit def liftEitherT[F[_]: Functor, E]: Lift[F, EitherT[F, E, _]] =
+    byFunK(EitherT.liftK[F, E])
+
+  implicit def liftStateT[F[_]: Applicative, S]: Lift[F, StateT[F, S, _]] =
+    byFunK(StateT.liftK[F, S])
+
+  implicit def liftIorT[F[_]: Applicative, L]: Lift[F, IorT[F, L, _]] =
+    byFunK(IorT.liftK[F, L])
+
+  implicit def liftContT[F[_]: FlatMap, R]: Lift[F, ContT[F, R, _]] =
+    byFunK(ContT.liftK[F, R])
+
+  implicit def liftRWST[F[_]: Applicative, R, L: Monoid, S]: Lift[F, RWST[F, R, L, S, _]] =
+    byFunK(RWST.liftK)
 }
 
 private[lift] trait LiftInstances1 extends LiftInstances2 {

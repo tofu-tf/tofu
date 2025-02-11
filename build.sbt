@@ -160,7 +160,16 @@ lazy val loggingDer = projectMatrix
     name := "tofu-logging-derivation"
   )
   .jvmPlatform(scala2And3Versions)
-  .dependsOn(loggingStr)
+  .dependsOn(loggingStr, loggingDerivationAnnotations)
+
+lazy val loggingDerivationAnnotations = projectMatrix
+  .in(modules / "logging" / "derivation-annotations")
+  .settings(
+    defaultSettings,
+    scala3MigratedModuleOptions,
+    name := "tofu-logging-derivation-annotations"
+  )
+  .jvmPlatform(scala2And3Versions)
 
 lazy val loggingLayout = projectMatrix
   .in(modules / "logging" / "layout")
@@ -200,10 +209,11 @@ lazy val loggingLog4CatsLegacy = projectMatrix
   .in(loggingInterop / "log4cats-legacy")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-logging-log4cats-legacy",
     libraryDependencies += log4CatsLegacy
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr)
 
 lazy val loggingLog4Cats = projectMatrix
@@ -240,41 +250,59 @@ lazy val loggingEnumeratum = projectMatrix
   .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr)
 
-lazy val logging = projectMatrix
-  .in(modules / "logging")
-  .aggregate(
-    loggingStr,
-    loggingDer,
-    loggingLayout,
-    loggingShapeless,
-    loggingRefined,
-    loggingLog4Cats,
-    loggingLog4CatsLegacy,
-    loggingLogstashLogback,
-  )
-  .settings(
-    defaultSettings,
-    name := "tofu-logging"
-  )
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingShapeless, loggingRefined, loggingLog4Cats)
-  .jvmPlatform(scala2Versions)
+lazy val logging = {
+  def projectRefFromMatrix(pm: ProjectMatrix, scalaVersion: String): ProjectReference = {
+    val projects = pm.filterProjects(Seq(VirtualAxis.jvm, VirtualAxis.scalaABIVersion(scalaVersion)))
+    projects.headOption match {
+      case Some(p) => p
+      case None    => throw new Exception(s"Can't found $scalaVersion axis for ${pm}")
+    }
+  }
 
-lazy val logging3 = projectMatrix
-  .in(modules / "logging")
-  .aggregate(
-    loggingStr,
-    loggingDer,
-    loggingLayout,
-    loggingRefined,
-    loggingLog4Cats,
-    loggingLogstashLogback,
-  )
-  .settings(
-    defaultSettings,
-    name := "tofu-logging"
-  )
-  .dependsOn(loggingStr, loggingDer, loggingLayout, loggingRefined, loggingLog4Cats)
-  .jvmPlatform(List(Version.scala3))
+  val modulesSettings =
+    List(
+      // ($project, $haScala3, $dependsOn)
+      (loggingStr, true, true),
+      (loggingDer, true, true),
+      (loggingDerivationAnnotations, true, true),
+      (loggingLayout, true, true),
+      (loggingShapeless, false, true),
+      (loggingRefined, true, true),
+      (loggingLog4Cats, true, true),
+      (loggingLogstashLogback, true, true),
+    )
+
+  val initial = ProjectMatrix("logging", modules / "logging")
+  scala2And3Versions.foldLeft(initial) { case (prMatrix, scalaVersionValue) =>
+    val scalaAxis = VirtualAxis.scalaABIVersion(scalaVersionValue)
+    prMatrix.customRow(
+      autoScalaLibrary = true,
+      axisValues = Seq(VirtualAxis.jvm, scalaAxis),
+      process = (pr: Project) => {
+        val filterScala                    =
+          if (scalaVersionValue.startsWith("3")) identity[Boolean](_)
+          else (_: Boolean) => true
+        val (aggModules, dependsOnModules) =
+          modulesSettings.foldLeft((List.empty[ProjectReference], List.empty[ClasspathDependency])) {
+            case ((agg, dependsOn), (prM, hasScala3, isInDependsOn)) if filterScala(hasScala3) =>
+              val ref           = projectRefFromMatrix(prM, scalaVersionValue)
+              val nextAgg       = ref :: agg
+              val nextDependsOn = if (isInDependsOn) ClasspathDependency(ref, None) :: dependsOn else dependsOn
+              (nextAgg, nextDependsOn)
+            case (acc, _)                                                                      => acc
+          }
+
+        pr.aggregate(aggModules: _*)
+          .settings(
+            defaultSettings,
+            scalaVersion := scalaVersionValue,
+            name         := "tofu-logging"
+          )
+          .dependsOn(dependsOnModules: _*)
+      }
+    )
+  }
+}
 
 val util = modules / "util"
 
@@ -292,11 +320,12 @@ lazy val observable = projectMatrix
   .in(util / "observable")
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
     libraryDependencies ++= Vector(monix, catsEffect2),
     libraryDependencies += scalatest,
     name := "tofu-observable",
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
 
 lazy val config = projectMatrix
   .in(util / "config")
@@ -341,10 +370,11 @@ lazy val zio2Core = projectMatrix
   .settings(
     defaultSettings,
     scala3MigratedModuleOptions,
-    libraryDependencies ++= List(zio2, zio2Cats),
+    libraryDependencies ++= List(zio2, zio2Cats, zio2Test, zio2TestSbt),
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     name := "tofu-zio2-core"
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scalaVersions = scala2And3Versions)
   .dependsOn(coreCE3)
 
 lazy val zio1Logging = projectMatrix
@@ -355,7 +385,7 @@ lazy val zio1Logging = projectMatrix
     name := "tofu-zio-logging"
   )
   .jvmPlatform(scala2Versions)
-  .dependsOn(loggingStr, loggingDer % "test", zio1Core % Test)
+  .dependsOn(loggingStr, loggingDer % Test, zio1Core % Test)
 
 lazy val zio2Logging = projectMatrix
   .in(modules / "interop" / "zio2" / "logging")
@@ -367,7 +397,7 @@ lazy val zio2Logging = projectMatrix
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
   )
   .jvmPlatform(scalaVersions = scala2And3Versions)
-  .dependsOn(loggingStr, loggingDer % "test")
+  .dependsOn(loggingStr, loggingDer % Test, zio2Core % Test)
 
 val interop = modules / "interop"
 
@@ -493,7 +523,7 @@ lazy val examplesZIO2 = projectMatrix
   .jvmPlatform(scala2Versions)
   .dependsOn(zio2Logging, loggingDer, loggingLayout)
 
-lazy val coreModules =
+lazy val coreModules     =
   Vector(
     higherKindCore,
     kernel,
@@ -505,6 +535,7 @@ lazy val coreModules =
     streams,
     kernelCatsMtlInterop
   )
+lazy val coreModulesDeps = coreModules.map(x => x: MatrixClasspathDep[ProjectMatrixReference])
 
 lazy val ce3CoreModules = Vector(coreCE3)
 
@@ -549,7 +580,7 @@ lazy val docs = projectMatrix // new documentation project
   .dependsOn(mainModuleDeps: _*)
   .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
 
-lazy val tofu = project
+lazy val tofu = projectMatrix
   .in(file("."))
   .settings(
     defaultSettings,
@@ -559,7 +590,9 @@ lazy val tofu = project
       Def.taskDyn((Test / test).all(filterByScalaVersion(args.head)))
     }.evaluated
   )
+  .jvmPlatform(scala2And3Versions)
   .aggregate(allModules.flatMap(_.projectRefs): _*)
+  .dependsOn(coreModulesDeps: _*)
 
 lazy val defaultScalacOptions =
   Seq(

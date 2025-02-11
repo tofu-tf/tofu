@@ -46,9 +46,7 @@ private[zioInstances] class ZioInstances {
   private[this] val zioTofuInstanceAny: ZioTofuInstance[Any, Any] = new ZioTofuInstance
   final def zioTofuInstance[R, E]: ZioTofuInstance[R, E]          = zioTofuInstanceAny.asInstanceOf[ZioTofuInstance[R, E]]
 
-  private[this] val zioTofuWithRunInstanceAny                          = new ZioTofuWithRunInstance[Any, Any]
-  final def zioTofuWithRunInstance[R, E]: ZioTofuWithRunInstance[R, E] =
-    zioTofuWithRunInstanceAny.asInstanceOf[ZioTofuWithRunInstance[R, E]]
+  final def zioTofuWithRunInstance[R: Tag, E]: ZioTofuWithRunInstance[R, E] = new ZioTofuWithRunInstance
 
   final def zioTofuUnliftManyInstance[R, E, R1: Tag]: ZioTofuUnliftManyInstance[R, E, R1] =
     new ZioTofuUnliftManyInstance
@@ -63,6 +61,5 @@ private[zioInstances] class ZioInstances {
   final def rioTofuBlockingInstance[R]: RioTofuBlockingInstance[R] =
     rioTofuBlockingInstanceAny.asInstanceOf[RioTofuBlockingInstance[R]]
 
-  private[this] val zioTofuBiInstanceAny               = new ZioTofuBiInstance[Any]
-  final def zioTofuBiInstance[R]: ZioTofuBiInstance[R] = zioTofuBiInstanceAny.asInstanceOf[ZioTofuBiInstance[R]]
+  final def zioTofuBiInstance[R: Tag]: ZioTofuBiInstance[R] = new ZioTofuBiInstance
 }

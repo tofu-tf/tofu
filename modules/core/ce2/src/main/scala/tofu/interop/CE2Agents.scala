@@ -3,11 +3,11 @@ package tofu.interop
 import cats.{Functor, Monad}
 import cats.effect.concurrent.{Ref, Semaphore}
 import tofu.Fire
-import tofu.concurrent.{Agent, SerialAgent}
-import cats.syntax.all._
+import tofu.concurrent.{Agent, Permit, SerialAgent}
+import cats.syntax.all.*
 import tofu.lift.Lift
-import tofu.syntax.fire._
-import tofu.syntax.liftKernel._
+import tofu.syntax.fire.*
+import tofu.syntax.liftKernel.*
 
 /** Default implementation of [[tofu.concurrent.Agent]] that consists of [[cats.effect.concurrent.Ref]] and
   * [[cats.effect.concurrent.Semaphore]]
@@ -36,6 +36,12 @@ final case class SerialSemRef[F[_]: Monad, A](ref: Ref[F, A], sem: Semaphore[F])
     updateM(a => if (f.isDefinedAt(a)) f(a) else a.pure[F])
   def modifySomeM[B](default: B)(f: PartialFunction[A, F[(B, A)]]): F[B] =
     modifyM(a => if (f.isDefinedAt(a)) f(a) else (default, a).pure[F])
+}
+
+/** Default implementation of [[tofu.concurrent.Permit]] that use [[cats.effect.concurrent.Semaphore]]
+  */
+final case class PermitSemaphore[F[_]](sem: Semaphore[F]) extends Permit[F] {
+  def withPermit[A](fa: F[A]): F[A] = sem.withPermit(fa)
 }
 
 /** If instances of [[cats.effect.concurrent.Ref]] and [[cats.effect.concurrent.Semaphore]] can not be created for some

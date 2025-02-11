@@ -1,9 +1,13 @@
 package tofu.time
 
-import java.time._
-
-import scala.jdk.CollectionConverters._
+import cats.data.*
+import cats.{Applicative, FlatMap, Functor, Monoid}
 import tofu.Delay
+import tofu.internal.instances.TimeZoneInstance
+import tofu.syntax.liftKernel.CatsTaglessLiftSyntax
+
+import java.time.*
+import scala.jdk.CollectionConverters.*
 
 /** wrapping around ZoneId methods
   */
@@ -27,10 +31,22 @@ trait TimeZone[F[_]] {
   def ofOffset(prefix: String, offset: ZoneOffset): F[ZoneId]
 }
 
-object TimeZone {
+object TimeZone extends TimeZoneInstances {
 
   def apply[F[_]](implicit tz: TimeZone[F]): TimeZone[F] = tz
 
+  implicit def timeZoneForKleisli[F[_]: TimeZone, R]: TimeZone[Kleisli[F, R, _]]                            = TimeZone[F].lift
+  implicit def timeZoneForWriterT[F[_]: Applicative: TimeZone, R: Monoid]: TimeZone[WriterT[F, R, _]]       = TimeZone[F].lift
+  implicit def timeZoneForOptionT[F[_]: Functor: TimeZone]: TimeZone[OptionT[F, _]]                         = TimeZone[F].lift
+  implicit def timeZoneForEitherT[F[_]: Functor: TimeZone, E]: TimeZone[EitherT[F, E, _]]                   = TimeZone[F].lift
+  implicit def timeZoneForStateT[F[_]: Applicative: TimeZone, S]: TimeZone[StateT[F, S, _]]                 = TimeZone[F].lift
+  implicit def timeZoneForIorT[F[_]: Applicative: TimeZone, L]: TimeZone[IorT[F, L, _]]                     = TimeZone[F].lift
+  implicit def timeZoneForContT[F[_]: FlatMap: TimeZone, R]: TimeZone[ContT[F, R, _]]                       = TimeZone[F].lift
+  implicit def timeZoneForRWST[F[_]: Applicative: TimeZone, R, L: Monoid, S]: TimeZone[RWST[F, R, L, S, _]] =
+    TimeZone[F].lift
+}
+
+private[tofu] trait TimeZoneInstances extends TimeZoneInstance {
   implicit def syncSystem[F[_]](implicit F: Delay[F]): TimeZone[F] = new TimeZone[F] {
     def system: F[ZoneId] = F.delay(ZoneId.systemDefault())
 

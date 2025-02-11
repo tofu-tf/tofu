@@ -58,5 +58,5 @@ def foo(bar: Bar): F[Baz] = debug"Entering foo with $bar" *> impl <* debug"Exiti
 ```
 
 ## Example
-Check out the example [here](https://github.com/tofu-tf/tofu/tree/examples/src/main/scala/tofu.example.logging.auto).
+Check out the example [here](https://github.com/tofu-tf/tofu/tree/master/examples/ce2/src/main/scala-2/tofu/example/logging/auto).
 

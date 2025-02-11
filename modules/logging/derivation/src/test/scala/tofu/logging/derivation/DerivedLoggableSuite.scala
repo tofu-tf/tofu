@@ -1,14 +1,15 @@
 package tofu.logging
 package derivation
 
-import derevo.derive
+import java.time.LocalDate
+import java.util.UUID
+
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import tofu.logging.derivation.MaskMode.Custom
 
 class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
 
-  import DerivedLoggableSuite._
+  import DerivedLoggableSamples._
 
   val foo = Foo("zaz", Some(1))
 
@@ -98,52 +99,10 @@ class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
     Loggable[MaskedCustom].logShow(maskedCustom) shouldBe
       "MaskedCustom{sensitiveField=*,firstName=Some(J***),age=**}"
   }
-}
 
-object DerivedLoggableSuite {
-  @derive(loggable)
-  final case class Foo(lol: String, kek: Option[Long])
-
-  @derive(loggable)
-  final case class Bar(
-      @hidden foo1: Option[Foo] = None,
-      @unembed foo2: Option[Foo] = None,
-      foo3: Option[Foo] = None
-  )
-
-  @derive(loggable)
-  final case class Jak(
-      @masked(MaskMode.Erase) one: String,
-      @masked(MaskMode.ForLength(1)) two: Long,
-      @masked(MaskMode.Regexp("\\d*\\.(\\d*)".r)) three: Double,
-      @masked(MaskMode.Regexp("-?\\d*\\.(\\d*)".r)) four: List[Double],
-  )
-
-  @derive(loggable)
-  final case class Baz(foos: List[Foo] = Nil, ys: Vector[Int] = Vector(), zs: Option[List[List[String]]] = None)
-
-  @derive(loggable)
-  final case class MaskedBaz(@masked kek: Option[String], @ignoreOpt a: Option[String] = None)
-
-  @derive(loggable)
-  final case class MaskedOptBaz(
-      @masked maybeStr: Option[String],
-      @masked maybeInt: Option[Int],
-      @masked maybeBool: Option[Boolean],
-      @masked maybeDouble: Option[Double],
-      @masked maybeStr2: Option[String]
-  )
-
-  @derive(loggable)
-  final case class MaskedCustom(
-      @masked(Custom(_ => "*")) sensitiveField: String,
-      @masked(Custom(maskName)) firstName: Option[String],
-      @masked(Custom(maskAge)) age: Int
-  )
-
-  def maskName(name: String): String =
-    name.take(1) + "***"
-
-  def maskAge(i: String): String =
-    "*" * i.length
+  "MaskedContra logging" should "mask fields" in {
+    json(
+      MaskedContra(UUID.randomUUID(), LocalDate.of(2023, 12, 1))
+    ) shouldBe """{"id":"...","date":"2023-##-##"}"""
+  }
 }

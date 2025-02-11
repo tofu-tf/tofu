@@ -6,45 +6,45 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val scala212 = "2.12.19"
+    val scala212 = "2.12.20"
 
     val scala213 = "2.13.12"
 
     val scala3 = "3.3.3"
 
-    val circe = "0.14.5"
+    val circe = "0.14.10"
 
-    val tethys = "0.28.3"
+    val tethys = "0.28.4"
 
-    val cats = "2.9.0"
+    val cats = "2.12.0"
 
     val catsEffect2 = "2.5.5"
 
     val catsEffect3 = "3.4.9"
 
-    val catsMtl = "1.3.1"
+    val catsMtl = "1.5.0"
 
-    val catsTagless = "0.15.0"
+    val catsTagless = "0.16.2"
 
-    val enumeratum = "1.7.3"
+    val enumeratum = "1.7.4"
 
     val derevo = "0.13.0"
 
-    val slf4j = "2.0.13"
+    val slf4j = "2.0.16"
 
-    val fs2 = "2.5.11"
+    val fs2 = "2.5.12"
 
-    val fs2CE3 = "3.10.2"
+    val fs2CE3 = "3.11.0"
 
-    val logback = "1.3.11"
+    val logback = "1.3.14"
 
     val monix = "3.4.1"
 
-    val scalatest = "3.2.18"
+    val scalatest = "3.2.19"
 
-    val magnolia2 = "1.1.9"
+    val magnolia2 = "1.1.10"
 
-    val magnolia3 = "1.3.6"
+    val magnolia3 = "1.3.7"
 
     val typesafeConfig = "1.4.3"
 
@@ -54,15 +54,15 @@ object Dependencies {
 
     val zioCats = "2.5.1.0"
 
-    val zio2Cats = "23.0.0.4"
+    val zio2Cats = "23.1.0.2"
 
-    val shapeless = "2.3.10"
+    val shapeless = "2.3.12"
 
-    val refined = "0.11.1"
+    val refined = "0.11.2"
 
     val doobie = "0.13.4"
 
-    val doobieCE3 = "1.0.0-RC2"
+    val doobieCE3 = "1.0.0-RC5"
 
     // Compile time only
     val macroParadise = "2.1.1"
@@ -81,11 +81,11 @@ object Dependencies {
 
     val logstashLogback = "7.4"
 
-    val groovy = "3.0.21"
+    val groovy = "3.0.22"
 
     val http4s = "0.22.15"
 
-    val glass = "0.2.2"
+    val glass = "0.3.0"
   }
 
   val noCatsCore        =
