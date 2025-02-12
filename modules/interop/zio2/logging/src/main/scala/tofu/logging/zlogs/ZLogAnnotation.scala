@@ -1,6 +1,6 @@
 package tofu.logging.zlogs
 
-import tofu.logging.{LogAnnotation, Loggable}
+import tofu.logging.{LogAnnotation, Loggable, LoggedValue}
 import zio.{Scope, Trace, URIO, ZIO, ZIOAspect}
 
 /** The [[LogAnnotation]] extension allows you add structured log annotations into the default log context. The stored
@@ -43,6 +43,11 @@ object ZLogAnnotation {
 
   def make[A](name: String)(implicit L: Loggable[A]): ZLogAnnotation[A] =
     new ZLogAnnotation[A](name, L)
+
+  def makePlain[A](name: String)(implicit L: Loggable[A]): ZLogAnnotation[A] =
+    new ZLogAnnotation[A](name, L) {
+      override def ->(value: Value): LoggedValue = unnamed(value)
+    }
 
   // Don't use these keys
   private val LoggerNameKey              = "_zLoggerName"
