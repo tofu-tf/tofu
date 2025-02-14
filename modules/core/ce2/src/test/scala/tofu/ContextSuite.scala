@@ -21,7 +21,7 @@ object ContextSuite {
     ()
   }
 
-  def testRunContextSyntax[F[_], G[_], A](fa: F[A])(implicit rc: HasProvide[F, G, Ctx]): G[A] = {
+  def testRunContextSyntax[F[_], G[_], A](fa: F[A])(implicit rc: WithProvide[F, G, Ctx]): G[A] = {
     import syntax.context._
     runContext(fa)(ctx)
   }
@@ -29,7 +29,7 @@ object ContextSuite {
   case class B()
   case class D(a: B)
 
-  object D extends Context.Companion[D]
+  object D extends WithContext.Companion[D]
 
   import D._
 
