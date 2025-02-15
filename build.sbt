@@ -211,7 +211,8 @@ lazy val loggingLog4CatsLegacy = projectMatrix
     defaultSettings,
     scala3MigratedModuleOptions,
     name := "tofu-logging-log4cats-legacy",
-    libraryDependencies += log4CatsLegacy
+    libraryDependencies += log4CatsLegacy,
+    libraryDependencies += slf4j // added to fix compiler crash - `cannot resolve reference to type org.slf4j.type.Marker`
   )
   .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr)
