@@ -19,6 +19,7 @@ trait Mut[F[_], A] {
   def focused[B](implicit focus: A Contains B, F: Functor[F]): Mut[F, B] = new FocusedMut(this, focus)
 }
 
+@deprecated("use Atom", since = "0.5.6")
 object Mut {
   def ref[F[_], A](ref: Ref[F, A]): Mut[F, A]                                        = new RefMut(ref)
   def mvar[F[_], E, A](mvar: MVar[F, A])(implicit bracket: Bracket[F, E]): Mut[F, A] = new MVarMut(mvar)

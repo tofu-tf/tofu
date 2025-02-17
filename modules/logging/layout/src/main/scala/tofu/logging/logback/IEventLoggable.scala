@@ -3,13 +3,14 @@ package logging
 package logback
 
 import java.time.Instant
-
-import cats.syntax.monoid._
+import cats.syntax.monoid.*
 import ch.qos.logback.classic.spi.{ILoggingEvent, ThrowableProxyUtil}
 import impl.ContextMarker
-import syntax.logRenderer._
+import syntax.logRenderer.*
 import tofu.data.PArray
-import tofu.logging.ELKLayout._
+import tofu.logging.ELKLayout.*
+
+import scala.jdk.CollectionConverters._
 
 trait EventLoggable extends DictLoggable[ILoggingEvent] with ToStringLoggable[ILoggingEvent]
 
@@ -24,7 +25,7 @@ class EventBuiltInLoggable extends EventLoggable {
 
 class EventMarkerLoggable extends EventLoggable {
   def fields[I, V, R, S](evt: ILoggingEvent, i: I)(implicit rec: LogRenderer[I, V, R, S]): R =
-    evt.getMarker match {
+    Option(evt.getMarkerList.asScala).toList.flatten.map {
       case null                         => i.noop
       case ContextMarker(marker, Seq()) => marker.logFields(i)
       case ContextMarker(marker, rest)  =>
@@ -33,7 +34,7 @@ class EventMarkerLoggable extends EventLoggable {
         marker.logFields(i) |+|
           i.sub(MarkersField)((v: V) => v.foldable(restArr)(_ putString _.getName))
       case marker                       => i.sub(MarkersField)((v: V) => v.list(1)((v, _) => v.putString(marker.getName)))
-    }
+    }.reduceLeftOption(_ |+| _).getOrElse(i.noop)
 }
 
 class EventArgumentsLoggable extends EventLoggable {

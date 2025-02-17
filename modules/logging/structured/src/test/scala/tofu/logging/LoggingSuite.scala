@@ -114,7 +114,7 @@ object LoggingSuite {
 
   type Run[+A] = ICalc[Pasque, Vector[LogEntry], Nothing, A]
 
-  implicit val logs: Logs.Universal[Run] = new Logs.Universal[Run] {
+  implicit val logs: Logging.Make[Run] = new Logging.Make[Run] {
     def byName(name: String): Logging[Run] =
       (level, message, values) =>
         (Calc.read: Run[Pasque]).flatMap { ctx =>
