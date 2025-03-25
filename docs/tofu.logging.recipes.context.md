@@ -112,6 +112,5 @@ and the result is
 ```
 
 ## Example
-Check out the example [here](https://github.com/tofu-tf/tofu/tree/examples/src/main/scala/tofu.example.logging.service).
+Check out the example [here](https://github.com/tofu-tf/tofu/tree/master/examples/ce2/src/main/scala-2/tofu/example/logging/service).
 
-.

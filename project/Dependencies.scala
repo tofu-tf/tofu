@@ -44,7 +44,7 @@ object Dependencies {
 
     val magnolia2 = "1.1.10"
 
-    val magnolia3 = "1.3.7"
+    val magnolia3 = "1.3.8"
 
     val typesafeConfig = "1.4.3"
 
@@ -81,7 +81,7 @@ object Dependencies {
 
     val logstashLogback = "7.4"
 
-    val groovy = "3.0.22"
+    val groovy = "3.0.23"
 
     val http4s = "0.22.15"
 
