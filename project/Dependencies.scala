@@ -81,7 +81,7 @@ object Dependencies {
 
     val logstashLogback = "7.4"
 
-    val groovy = "3.0.22"
+    val groovy = "3.0.23"
 
     val http4s = "0.22.15"
 
