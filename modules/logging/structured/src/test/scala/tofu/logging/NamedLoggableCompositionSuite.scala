@@ -1,6 +1,5 @@
 package tofu.logging
 
-import tofu.logging._
 import cats.syntax.semigroup._
 import org.scalatest.flatspec.AnyFlatSpec
 
