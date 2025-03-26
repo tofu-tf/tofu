@@ -50,7 +50,7 @@ def run: IO[ExitCode] = {
 ```
 
 ## Example
-Check out the example [here](https://github.com/tofu-tf/tofu/tree/examples/src/main/scala/tofu.example.logging.simple).
+Check out the example [here](https://github.com/tofu-tf/tofu/blob/master/examples/ce2/src/main/scala-2/tofu/example/logging/simple).
 
 
 
