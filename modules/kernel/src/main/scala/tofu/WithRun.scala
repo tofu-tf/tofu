@@ -5,11 +5,14 @@ import tofu.lift.Unlift
 import glass.Equivalent
 import tofu.syntax.funk.funK
 
+import scala.annotation.nowarn
+
 /** Synonym for both [[RunContext]] and [[Unlift]] with explicit `C` as `Ctx` and `G` as `Lower` for better type
   * inference
   *
   * Can be seen as transformation `F[_] = C => G[_]`
   */
+@nowarn("cat=deprecation")
 trait WithRun[F[_], G[_], C] extends WithProvide[F, G, C] with WithLocal[F, C] with RunContext[F] with Unlift[G, F] {
   override type Ctx = C
 

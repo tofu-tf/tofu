@@ -3,12 +3,15 @@ package tofu
 import cats.{Applicative, FlatMap, Functor}
 import glass.{Contains, Extract}
 
+import scala.annotation.nowarn
+
 /** Synonym for [[Context]] with explicit C as Ctx for better type inference
   *
   * There is also a nice type alias: {{{ import tofu.In
   *
   * val fHasMyCtx: MyCtx In F = ??? }}}
   */
+@nowarn("cat=deprecation")
 trait WithContext[F[_], C] extends Context[F] {
   override type Ctx = C
 
