@@ -14,7 +14,7 @@ For any of the recipes you are going to need three things:
 - import syntax: `import tofu.syntax.logging._`
 - provide correct logback configuration (except when you are using `tofu.logging` with your own implementation) — you
   can find the description [here](./tofu.logging.layouts.md) and the
-  example [here](https://github.com/tofu-tf/tofu/tree/examples/src/main/resources/logback.groovy).
+  example [here](https://github.com/tofu-tf/tofu/blob/master/examples/ce2/src/main/resources/logback.groovy).
 
 Recipes are:
 

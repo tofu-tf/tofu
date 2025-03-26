@@ -3,7 +3,6 @@ package tofu.lift
 import cats.data.ReaderT
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
-import tofu.lift.UnliftSubcontext.FatApp
 import glass.Contains
 import UnliftSubcontext._
 import cats.Monad

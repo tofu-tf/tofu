@@ -10,11 +10,11 @@ object Dependencies {
 
     val scala213 = "2.13.12"
 
-    val scala3 = "3.3.3"
+    val scala3 = "3.3.4"
 
     val circe = "0.14.10"
 
-    val tethys = "0.28.4"
+    val tethys = "0.29.3"
 
     val cats = "2.12.0"
 
@@ -26,7 +26,7 @@ object Dependencies {
 
     val catsTagless = "0.16.2"
 
-    val enumeratum = "1.7.4"
+    val enumeratum = "1.7.5"
 
     val derevo = "0.13.0"
 
@@ -44,7 +44,7 @@ object Dependencies {
 
     val magnolia2 = "1.1.10"
 
-    val magnolia3 = "1.3.7"
+    val magnolia3 = "1.3.8"
 
     val typesafeConfig = "1.4.3"
 
@@ -81,7 +81,7 @@ object Dependencies {
 
     val logstashLogback = "7.4"
 
-    val groovy = "3.0.22"
+    val groovy = "3.0.23"
 
     val http4s = "0.22.15"
 
