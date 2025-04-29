@@ -10,6 +10,8 @@ import tofu.common.Display._
 class DisplaySpec extends AnyFunSpec with Matchers {
   describe("derivation") {
 
+    val nl: String = System.lineSeparator()
+
     @derive(display)
     case class Bar(value: Int, another: String)
 
@@ -26,13 +28,13 @@ class DisplaySpec extends AnyFunSpec with Matchers {
         """Bar {
           |	value = 3,
           |	another = "abc"
-          |}""".stripMargin
+          |}""".stripMargin.replace(nl, "\n")
 
       val expectedBarNoLabels =
         """Bar {
           |	3,
           |	"abc"
-          |}""".stripMargin
+          |}""".stripMargin.replace(nl, "\n")
 
       val expectedBarBuild: Vector[String] =
         Vector("Bar {\n", "\tvalue = 3,\n", "\tanother = \"abc\"\n", "}")
@@ -93,7 +95,7 @@ class DisplaySpec extends AnyFunSpec with Matchers {
           |	},
           |	field = 3.4,
           |	xs = List(1, 2, 3)
-          |}""".stripMargin
+          |}""".stripMargin.replace(nl, "\n")
       val expectedFooBuild: Vector[String] =
         Vector(
           "Foo {\n",
@@ -109,6 +111,7 @@ class DisplaySpec extends AnyFunSpec with Matchers {
       it("should display complex case classes string") {
         foo.display() shouldBe expectedFoo
       }
+
       it("should display complex case classes build") {
         val build = Display[Foo].displayBuild(Display.Config.default, foo).value
         build shouldBe expectedFooBuild
@@ -132,7 +135,7 @@ class DisplaySpec extends AnyFunSpec with Matchers {
           """Cont {
             |	a = 4,
             |	b = Nested {a = 5, b = 6, c = 7}
-            |}""".stripMargin
+            |}""".stripMargin.replace(nl, "\n")
         cont.display() shouldBe expectedCont
       }
     }
