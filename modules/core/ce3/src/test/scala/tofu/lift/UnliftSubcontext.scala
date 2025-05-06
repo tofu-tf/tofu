@@ -1,22 +1,21 @@
 package tofu.lift
 
 import tofu.compat.unused
-
 import cats.data.ReaderT
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import glass.Contains
-import UnliftSubcontext._
+import UnliftSubcontext.*
 import cats.Monad
 import org.scalatest.matchers.should.Matchers
-import tofu.HasContext
+import tofu.WithContext
 import cats.effect.unsafe.IORuntime
 
 class UnliftSubcontext extends AnyFlatSpec with Matchers {
   implicit val iort: IORuntime = IORuntime.global
 
-  def context[F[_]: ({ type L[x[_]] = HasContext[x, Big] })#L]: F[Big]      = HasContext[F, Big].context
-  def smallCtx[F[_]: ({ type L[x[_]] = HasContext[x, Small] })#L]: F[Small] = HasContext[F, Small].context
+  def context[F[_]: ({ type L[x[_]] = WithContext[x, Big] })#L]: F[Big]      = WithContext[F, Big].context
+  def smallCtx[F[_]: ({ type L[x[_]] = WithContext[x, Small] })#L]: F[Small] = WithContext[F, Small].context
 
   implicit val ul: Unlift[App, FatApp] = Unlift.subContextUnlift
   val init: Big                        = Big(0, Small(1))
