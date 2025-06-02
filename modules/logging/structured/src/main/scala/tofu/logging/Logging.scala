@@ -128,6 +128,7 @@ object Logging extends LoggingRepresentableKInstances {
   type ForService[F[_], Svc] <: Logging[F]
 
   type Safe[F[_, _]]     = Logging[F[Nothing, _]]
+  @deprecated("Use Safe[F] instead", since = "0.10.4")
   type SafeBase[F[_, _]] = LoggingBase[F[Nothing, _]]
 
   def apply[F[_]](implicit logging: Logging[F]): Logging[F] = logging

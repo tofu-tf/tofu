@@ -110,7 +110,7 @@ object SerialAgents {
 }
 
 /** A helper for creating instances of [[tofu.concurrent.SerialAgent]] that use different effects during construction
-  * and work. If you want to use same effect to construct and run `SerialAgent` use [[tofu.concurrent.SerialAgents]]
+  * and work. If you want to use same effect to construct and run `SerialAgent` use [[tofu.concurrent.SerialAgent.Make]]
   *
   * Sample usage:
   * {{{

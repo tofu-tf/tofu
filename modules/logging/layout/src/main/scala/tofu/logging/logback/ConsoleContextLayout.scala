@@ -1,13 +1,14 @@
 package tofu.logging.logback
 
-import java.util
-
-import ch.qos.logback.classic.{Level, PatternLayout}
 import ch.qos.logback.classic.spi.{ILoggingEvent, IThrowableProxy, LoggerContextVO}
+import ch.qos.logback.classic.{Level, PatternLayout}
 import org.slf4j.Marker
 import org.slf4j.event.KeyValuePair
 import tofu.logging.LoggedValue
 import tofu.logging.impl.ContextMarker
+
+import java.util
+import scala.jdk.CollectionConverters._
 
 class ConsoleContextLayout extends PatternLayout {
 
@@ -29,7 +30,7 @@ class WrappedEvent(event: ILoggingEvent) extends ILoggingEvent {
       case _               =>
     }
 
-    event.getMarker match {
+    Option(event.getMarkerList.asScala).toList.flatten.foreach {
       case ContextMarker(ctx, _) => intoMdc(ctx)
       case _                     =>
     }

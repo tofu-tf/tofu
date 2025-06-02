@@ -35,7 +35,7 @@ class ZLogsSuite extends AnyFlatSpec with Matchers {
 
     val expected = JsonObject("foo" -> "kojima".asJson, "bar" -> 2.asJson).asJson
 
-    items.map(_.getMarker).collect { case ContextMarker(ctx, _) =>
+    items.flatMap(e => Option(e.getMarkerList.asScala)).flatten.collect { case ContextMarker(ctx, _) =>
       LogTree(ctx)
     } should ===(List.fill(2)(expected))
   }
@@ -63,7 +63,7 @@ class ZLogsSuite extends AnyFlatSpec with Matchers {
     Runtime.default.unsafeRun(program.provideLayer(ctxServiceLayer >>> logLayer))
     val items    = appender.list.asScala
     val expected = JsonObject("foo" -> "abc".asJson, "bar" -> 100.asJson).asJson
-    items.map(_.getMarker).collect { case ContextMarker(ctx, _) =>
+    items.flatMap(e => Option(e.getMarkerList.asScala)).flatten.collect { case ContextMarker(ctx, _) =>
       LogTree(ctx)
     } should ===(List.fill(2)(expected))
   }

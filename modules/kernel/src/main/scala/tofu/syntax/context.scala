@@ -4,6 +4,7 @@ import cats.{FlatMap, ~>}
 import tofu._
 
 object context {
+  @deprecated("use hasContext instead", since = "0.10.3")
   def context[F[_]](implicit ctx: Context[F]): F[ctx.Ctx] = ctx.context
 
   def hasContext[F[_], C](implicit ctx: F WithContext C): F[C] = ctx.context

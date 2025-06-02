@@ -18,7 +18,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
     fs2HKInstanceAny.asInstanceOf[FS2StreamHKInstance[A]]
 
   final implicit def fs2StreamRunContext[F[_], G[_], R](implicit
-      fctx: HasContextRun[F, G, R]
+      fctx: WithRun[F, G, R]
   ): WithRun[Stream[F, *], Stream[G, *], R] =
     new FS2RunContext[F, G, R] {
       override val F: WithRun[F, G, R] = fctx.self
@@ -94,7 +94,7 @@ private[fs2Instances] trait Fs2Instances1 extends Fs2Instances2 {
 }
 
 private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
-  final implicit def fs2StreamLocal[F[_], R](implicit fctx: F HasLocal R): WithLocal[Stream[F, *], R] =
+  final implicit def fs2StreamLocal[F[_], R](implicit fctx: F WithLocal R): WithLocal[Stream[F, *], R] =
     new FS2Local[F, R] { override val F: F WithLocal R = fctx.asWithLocal }
 
   final implicit def fs2StreamProvide[F[_], G[_], R](implicit
@@ -104,7 +104,7 @@ private[fs2Instances] trait Fs2Instances2 extends Fs2Instances3 {
 }
 
 private[fs2Instances] trait Fs2Instances3 {
-  final implicit def fs2StreamContext[F[_], R](implicit fctx: F HasContext R): WithContext[Stream[F, *], R] =
+  final implicit def fs2StreamContext[F[_], R](implicit fctx: F WithContext R): WithContext[Stream[F, *], R] =
     new FS2Context[F, R] { override val F: F WithContext R = fctx.asWithContext }
 }
 
