@@ -2,7 +2,10 @@ package tofu
 
 import glass.Contains
 
+import scala.annotation.nowarn
+
 /** Synonym for [[Local]] with explicit C as Ctx for better type inference */
+@nowarn("cat=deprecation")
 trait WithLocal[F[_], C] extends Local[F] with WithContext[F, C] {
 
   /** Alters context for computation
