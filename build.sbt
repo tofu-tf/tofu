@@ -653,7 +653,7 @@ lazy val macros = Seq(
     "-Ymacro-annotations",
     _.isBetween(ScalaVersion.V2_13_0, ScalaVersion.V3_0_0)
   ),
-  libraryDependencies ++= { 
+  libraryDependencies ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 12)) => Seq(compilerPlugin(macroParadise))
       case _             => Seq.empty
