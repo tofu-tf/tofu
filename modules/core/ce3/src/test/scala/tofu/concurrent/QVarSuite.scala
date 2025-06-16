@@ -7,7 +7,6 @@ import cats.effect.{Async, IO, Sync}
 import org.scalatest.funsuite.AnyFunSuite
 import tofu.syntax.monadic._
 
-
 class QVarSuite extends AnyFunSuite {
   implicit val iort: IORuntime = IORuntime.global
 

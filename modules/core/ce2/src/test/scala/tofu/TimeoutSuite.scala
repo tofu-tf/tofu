@@ -11,7 +11,7 @@ import scala.concurrent.duration.DurationInt
 class TimeoutSuite extends AnyFunSuite {
   private val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   private implicit val cs: ContextShift[IO]      = IO.contextShift(executionContext)
-  private implicit val timer: Timer[IO]  = IO.timer(executionContext)
+  private implicit val timer: Timer[IO]          = IO.timer(executionContext)
 
   test("Timeout should cancel") {
     val result = Timeout[IO].timeoutTo[Int](IO.never, 50.milli, IO(42))

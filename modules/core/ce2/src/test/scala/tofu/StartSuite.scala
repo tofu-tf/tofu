@@ -7,7 +7,6 @@ import tofu.concurrent.{MakeAgent, MakeSerialAgent}
 import tofu.syntax.monadic.*
 import tofu.syntax.start.*
 
-
 object StartSuite {
   def summonInstancesForConcurrent[F[_]: Concurrent] = {
     Fire[F]
