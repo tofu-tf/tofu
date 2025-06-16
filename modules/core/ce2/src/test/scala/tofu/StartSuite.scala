@@ -7,9 +7,6 @@ import tofu.concurrent.{MakeAgent, MakeSerialAgent}
 import tofu.syntax.monadic.*
 import tofu.syntax.start.*
 
-import scala.annotation.nowarn
-
-@nowarn("msg=parameter")
 object StartSuite {
   def summonInstancesForConcurrent[F[_]: Concurrent] = {
     Fire[F]
