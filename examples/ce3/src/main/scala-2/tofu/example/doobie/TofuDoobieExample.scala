@@ -22,7 +22,7 @@ import tofu.syntax.doobie.log.string._
 import tofu.syntax.monadic._
 import tofu.{Delay, Tries, WithContext, WithLocal, WithRun}
 
-import scala.annotation.unused
+import scala.annotation.nowarn
 
 // Simple context
 @derive(loggable)
@@ -110,8 +110,9 @@ object PersonStorage extends LoggingCompanion[PersonStorage] {
 
 object TofuDoobieExample extends IOApp.Simple {
 
+  @nowarn
   val run: IO[Unit] = Dispatcher.parallel[IO].use { (disp: Dispatcher[IO]) =>
-    @unused implicit val withDispatcher: WithContext[ReaderT[IO, Ctx, *], Dispatcher[IO]] = WithContext.const(disp)
+    implicit val withDispatcher: WithContext[ReaderT[IO, Ctx, *], Dispatcher[IO]] = WithContext.const(disp)
     runF[IO, ReaderT[IO, Ctx, *]]
   }
 

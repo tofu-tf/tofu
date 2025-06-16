@@ -6,7 +6,9 @@ import tofu.logging.{Loggable, Logs}
 import zio._
 
 import scala.annotation.unused
+import scala.annotation.nowarn
 
+@nowarn("cat=deprecation")
 object ZLogs {
 
   private def make[R](f: Logger => ZLogging[R]) =

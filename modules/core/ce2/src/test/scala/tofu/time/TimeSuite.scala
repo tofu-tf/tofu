@@ -3,11 +3,9 @@ package tofu.time
 import cats.Monad
 import cats.data.*
 import cats.effect.{Concurrent, ContextShift, IO, Timer}
-import tofu.compat.unused
 
 import scala.concurrent.ExecutionContext
 
-@unused
 class TimeSuite {
 
   implicit val ioTimer: Timer[IO]     = IO.timer(ExecutionContext.global)

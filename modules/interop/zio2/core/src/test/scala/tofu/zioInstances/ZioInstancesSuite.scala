@@ -6,7 +6,6 @@ import tofu.lift.{Lift, Unlift, UnliftIO, UnsafeExecFuture}
 import tofu.zioInstances.implicits._
 import zio._
 
-import scala.annotation.nowarn
 
 object ZioInstancesSuite {
 
@@ -40,7 +39,6 @@ object ZioInstancesSuite {
     ()
   }
 
-  @nowarn
   def summonZioInstances[E, Env: Tag, Ctx: Tag](): Unit = {
     implicitly[WithRun[ZIO[Env with Ctx, E, _], ZIO[Env, E, _], Ctx]]
     implicitly[WithRun[ZIO[Ctx with Env, E, _], ZIO[Env, E, _], Ctx]]
@@ -49,7 +47,6 @@ object ZioInstancesSuite {
     ()
   }
 
-  @nowarn
   def taskAmbiguity: Any = {
     import cats.effect.Sync
     import tofu.Raise

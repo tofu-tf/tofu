@@ -628,9 +628,7 @@ lazy val scalacWarningConfig = tpolecatScalacOptions ++= {
   // }.mkString(",")
 
   // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
-  val contextDeprecationInfo    = "cat=deprecation&msg=^(.*((Has)|(With)|(Logging)|(Mut)).*)$:silent"
-  val concurrentDeprecationInfo = "cat=deprecation&msg=^(.*((Mut)|(MVar)).*)$:silent"
-  val deprecationInfo           = s"$contextDeprecationInfo,$concurrentDeprecationInfo"
+  val deprecationInfo = "cat=deprecation:silent"
 
   val verboseWarnings         = "any:wv"
   val scala3MigrationWarnings = "cat=scala3-migration:silent"

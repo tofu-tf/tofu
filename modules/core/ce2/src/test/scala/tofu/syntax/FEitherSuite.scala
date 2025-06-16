@@ -13,7 +13,7 @@ import tofu.syntax.feither._
 import java.util.concurrent.atomic.AtomicInteger
 import scala.annotation.nowarn
 
-@nowarn("msg=a type was inferred to be `Any`") //cat=lint-infer-any filter does not work for Scala 3
+@nowarn//cat=lint-infer-any filter does not work for Scala 3
 class FEitherSuite extends AnyWordSpec with Matchers {
 
   // --Helpers------------------------------------

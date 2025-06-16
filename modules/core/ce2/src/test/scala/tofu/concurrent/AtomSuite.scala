@@ -6,9 +6,7 @@ import cats.data.ReaderT
 import org.scalatest.funsuite.AnyFunSuite
 import cats.Monad
 import tofu.syntax.monadic._
-import tofu.compat.unused
 
-@unused
 class AtomSuite extends AnyFunSuite {
   def summonInstance[I[_]: Sync, F[_]: Sync] = {
     implicitly[MakeAtom[I, F]]
