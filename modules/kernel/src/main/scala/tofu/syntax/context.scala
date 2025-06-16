@@ -2,8 +2,10 @@ package tofu.syntax
 
 import cats.{FlatMap, ~>}
 import tofu._
+import scala.annotation.nowarn
 
 object context {
+  @nowarn("cat=deprecation")
   def context[F[_]](implicit ctx: Context[F]): F[ctx.Ctx] = ctx.context
 
   def hasContext[F[_], C](implicit ctx: F WithContext C): F[C] = ctx.context
