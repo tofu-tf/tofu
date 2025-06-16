@@ -5,7 +5,9 @@ import tofu._
 import tofu.lift.{Lift, Unlift, UnliftIO, UnsafeExecFuture}
 import tofu.zioInstances.implicits._
 import zio._
+import scala.annotation.nowarn
 
+@nowarn
 object ZioInstancesSuite {
 
   def summonZioInstances[E1, E2: Extract[_, E1], R1: Tag, R2: Tag: Contains[_, R1]](): Unit = {

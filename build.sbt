@@ -636,10 +636,10 @@ lazy val scalacWarningConfig = tpolecatScalacOptions ++= {
   Set(
     ScalacOption(s"-Wconf:$deprecationInfo", _ >= ScalaVersion.V3_0_0),
     ScalacOption(
-      s"-Wconf:$deprecationInfo,$scala3MigrationWarnings,$verboseWarnings",
+      s"-Wconf:$verboseWarnings,$deprecationInfo,$scala3MigrationWarnings",
       _.isBetween(ScalaVersion.V2_13_0, ScalaVersion.V3_0_0)
     ),
-    ScalacOption(s"-Wconf:$deprecationInfo,$verboseWarnings", _ < ScalaVersion.V2_13_0)
+    ScalacOption(s"-Wconf:$verboseWarnings,$deprecationInfo", _ < ScalaVersion.V2_13_0)
   )
 }
 
@@ -653,7 +653,7 @@ lazy val macros = Seq(
     "-Ymacro-annotations",
     _.isBetween(ScalaVersion.V2_13_0, ScalaVersion.V3_0_0)
   ),
-  libraryDependencies ++= {
+  libraryDependencies ++= { 
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 12)) => Seq(compilerPlugin(macroParadise))
       case _             => Seq.empty

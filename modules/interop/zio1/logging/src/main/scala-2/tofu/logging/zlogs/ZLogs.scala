@@ -9,6 +9,7 @@ import zio.{Has, UIO, ULayer, ZIO, ZLayer}
 import scala.annotation.nowarn
 import scala.reflect.ClassTag
 
+@nowarn
 object ZLogs {
   val uio: ZLogs[Any] = (name: String) => UIO.effectTotal(new ZUniversalLogging(name))
 
