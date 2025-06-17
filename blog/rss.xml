@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title>Tofu Blog</title>
+        <link>https://tofu-tf.github.io/tofu/blog</link>
+        <description>Tofu Blog</description>
+        <lastBuildDate>Sun, 29 Oct 2017 00:00:00 GMT</lastBuildDate>
+        <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
+        <generator>https://github.com/jpmonette/feed</generator>
+        <language>en</language>
+        <item>
+            <title><![CDATA[Started docs]]></title>
+            <link>https://tofu-tf.github.io/tofu/blog/2017/10/29/hello-docs</link>
+            <guid>https://tofu-tf.github.io/tofu/blog/2017/10/29/hello-docs</guid>
+            <pubDate>Sun, 29 Oct 2017 00:00:00 GMT</pubDate>
+            <description><![CDATA[Starting from today we have docs in tofu.]]></description>
+            <content:encoded><![CDATA[<p>Starting from today we have docs in tofu.<br>
+<!-- -->Also checkout the new logo. Spent over 9000h in draw.io</p>]]></content:encoded>
+        </item>
+    </channel>
+</rss>
