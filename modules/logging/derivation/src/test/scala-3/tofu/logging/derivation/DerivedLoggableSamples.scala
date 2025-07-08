@@ -1,10 +1,10 @@
-package tofu.logging
-package derivation
+package tofu.logging.derivation
 
 import java.time.LocalDate
 import java.util.UUID
-
 import tofu.logging.derivation.MaskMode.Custom
+import tofu.logging.Loggable
+import tofu.logging.SingletonEnumLoggable
 
 object DerivedLoggableSamples:
   final case class Foo(lol: String, kek: Option[Long]) derives Loggable
@@ -45,3 +45,16 @@ object DerivedLoggableSamples:
       @masked(MaskMode.Erase) id: UUID,
       @masked(MaskMode.ForLength(4)) date: LocalDate,
   ) derives Loggable
+
+  sealed trait SealedTraitEnum
+  object SealedTraitEnum:
+    case object A extends SealedTraitEnum
+    case object B extends SealedTraitEnum
+    case object C extends SealedTraitEnum
+  given Loggable[SealedTraitEnum] = SingletonEnumLoggable.derived
+
+  enum Scala3Enum:
+    case A, B, C
+  given Loggable[Scala3Enum] = SingletonEnumLoggable.derived
+
+  final case class Container[A, B, C](a: A, b: B, c: C) derives Loggable
