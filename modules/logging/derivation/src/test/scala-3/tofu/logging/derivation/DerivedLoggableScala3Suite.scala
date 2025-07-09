@@ -1,14 +1,11 @@
 package tofu.logging.derivation
 
-import java.time.LocalDate
-import java.util.UUID
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import tofu.logging.Loggable
 import tofu.logging.TethysBuilder
 
-class DerivedLoggableSuiteScala3 extends AnyFlatSpec with Matchers:
+class DerivedLoggableScala3Suite extends AnyFlatSpec with Matchers:
 
   import tofu.logging.derivation.DerivedLoggableSamples.*
 
