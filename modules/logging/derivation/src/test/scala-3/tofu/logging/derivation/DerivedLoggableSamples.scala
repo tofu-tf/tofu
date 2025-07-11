@@ -46,15 +46,13 @@ object DerivedLoggableSamples:
       @masked(MaskMode.ForLength(4)) date: LocalDate,
   ) derives Loggable
 
-  sealed trait SealedTraitEnum
+  sealed trait SealedTraitEnum derives SingletonEnumLoggable
   object SealedTraitEnum:
     case object A extends SealedTraitEnum
     case object B extends SealedTraitEnum
     case object C extends SealedTraitEnum
-  given Loggable[SealedTraitEnum] = SingletonEnumLoggable.derived
 
-  enum Scala3Enum:
+  enum Scala3Enum derives SingletonEnumLoggable:
     case A, B, C
-  given Loggable[Scala3Enum] = SingletonEnumLoggable.derived
 
   final case class Container[A, B, C](a: A, b: B, c: C) derives Loggable

@@ -15,7 +15,7 @@ object SingletonEnumLoggableMacro:
     enumSymbol.children.foreach: caseSymbol =>
       if (caseSymbol.caseFields.nonEmpty) then
         report.errorAndAbort(
-          s"${enumSymbol.fullName} has non-singleton case ${caseSymbol.name}, therefore singleton enum Loggable instance can not be derived"
+          s"${enumSymbol.fullName} has non-singleton case ${caseSymbol.name}, therefore SingletonEnumLoggable instance can not be derived"
         )
 
     '{ () }

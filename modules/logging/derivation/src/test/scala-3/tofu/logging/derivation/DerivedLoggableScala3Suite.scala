@@ -11,10 +11,10 @@ class DerivedLoggableScala3Suite extends AnyFlatSpec with Matchers:
 
   def json[A: Loggable](a: A) = TethysBuilder(a)
 
-  "SealedTraitEnum singleton enum Loggable" should "correctly log" in:
+  "SealedTraitEnum SingletonEnumLoggable" should "correctly log" in:
     import SealedTraitEnum.*
     json(Container(A, B, C)) shouldBe """{"a":"A","b":"B","c":"C"}"""
 
-  "Scala3Enum singleton enum Loggable" should "correctly log" in:
+  "Scala3Enum SingletonEnumLoggable" should "correctly log" in:
     import Scala3Enum.*
     json(Container(A, B, C)) shouldBe """{"a":"A","b":"B","c":"C"}"""
