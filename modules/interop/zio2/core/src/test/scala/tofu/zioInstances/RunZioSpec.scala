@@ -11,7 +11,7 @@ object RunZioSpec extends ZIOSpecDefault {
   private val app: RIO[Context, Int] = ZIO.serviceWith[Context](_.x)
   private val someResult             = 111
 
-  override def spec =
+  override def spec: zio.test.Spec[Any, Throwable] =
     suite("RunZioSpec")(
       test("should summon and run WithRun instance without errors") {
         for {

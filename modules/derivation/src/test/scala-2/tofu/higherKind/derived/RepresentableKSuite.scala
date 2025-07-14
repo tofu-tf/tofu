@@ -19,7 +19,8 @@ import tofu.syntax.embed._
 import tofu.syntax.funk.funK
 
 import scala.util.Try
-
+import scala.annotation.nowarn
+@nowarn("cat=lint-infer-any")
 class RepresentableKSuite extends AnyFlatSpec with Matchers {
   val checkingFoo: Foo[Either[String, *]] = new Foo[Either[String, *]] {
     override def foo(x: Int, s: String): Either[String, Double] =

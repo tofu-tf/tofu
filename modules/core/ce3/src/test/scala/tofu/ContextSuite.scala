@@ -3,7 +3,9 @@ package tofu
 import cats.Applicative
 import cats.data.ReaderT
 import glass.Contains
+import scala.annotation.nowarn
 
+@nowarn("cat=deprecation")
 object ContextSuite {
   type Ctx >: Unit
 

@@ -3,12 +3,14 @@ package tofu
 import cats.Applicative
 import cats.data.ReaderT
 import glass.Contains
+import scala.annotation.nowarn
 
 object ContextSuite {
   type Ctx >: Unit
 
   val ctx: Ctx = ()
 
+  @nowarn("cat=deprecation")
   def testInstancesForReaderT[F[_]: Applicative](): Unit = {
     implicitly[HasContext[ReaderT[F, Ctx, _], Ctx]]
     implicitly[WithContext[ReaderT[F, Ctx, _], Ctx]]
@@ -21,6 +23,7 @@ object ContextSuite {
     ()
   }
 
+  @nowarn("cat=deprecation")
   def testRunContextSyntax[F[_], G[_], A](fa: F[A])(implicit rc: HasProvide[F, G, Ctx]): G[A] = {
     import syntax.context._
     runContext(fa)(ctx)
