@@ -1,15 +1,16 @@
-package tofu.logging
-package derivation
+package tofu.logging.derivation
 
 import java.time.LocalDate
 import java.util.UUID
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import tofu.logging.Loggable
+import tofu.logging.TethysBuilder
 
 class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
 
-  import DerivedLoggableSamples._
+  import tofu.logging.derivation.DerivedLoggableSamples._
 
   val foo = Foo("zaz", Some(1))
 
