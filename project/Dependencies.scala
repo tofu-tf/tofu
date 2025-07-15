@@ -58,7 +58,7 @@ object Dependencies {
 
     val shapeless = "2.3.12"
 
-    val refined = "0.11.2"
+    val refined = "0.11.3"
 
     val doobie = "0.13.4"
 
@@ -79,7 +79,7 @@ object Dependencies {
 
     val log4Cats = "2.6.0"
 
-    val logstashLogback = "7.4"
+    val logstashLogback = "8.1"
 
     val groovy = "3.0.25"
 
