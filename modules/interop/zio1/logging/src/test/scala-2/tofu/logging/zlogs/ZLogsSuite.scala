@@ -21,7 +21,9 @@ import zio.console.Console
 import zio._
 
 import scala.jdk.CollectionConverters._
+import scala.annotation.nowarn
 
+@nowarn("cat=deprecation")
 class ZLogsSuite extends AnyFlatSpec with Matchers {
 
   "ZLogs contextual" should "log the context" in {

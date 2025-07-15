@@ -1,7 +1,6 @@
 package tofu.syntax
 
 import cats.Monad
-import tofu.compat.unused
 import tofu.{Raise, Timeout}
 import tofu.syntax.foption._
 import tofu.syntax.raise._
@@ -10,8 +9,9 @@ import tofu.syntax.timeout._
 
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
+import scala.annotation.nowarn
 
-@unused
+@nowarn
 object FindRaiseSuite {
   trait CommonError
   trait AnotherCommonError

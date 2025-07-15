@@ -11,7 +11,7 @@ import tofu.compat.unused
 class ScopedSuite {
   def doSomething[F[_]: Async, A](fa: F[A], ea: => A)(calcEc: ExecutionContext)(implicit
       @unused ec: ExecutionContext,
-      @unused block: Blocker[F]
+      block: Blocker[F]
   ): F[List[A]] = {
     implicit val exec: CalcExec[F] = Scoped.makeExecuteCE3(calcEc)
 

@@ -17,7 +17,6 @@ jobs:
     strategy:
       matrix:
         scala: [2.13, 2.12, 3.3]
-        java: [8, 17]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -27,7 +26,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: ${{matrix.java}}
+          java-version: 17
       - uses: sbt/setup-sbt@v1
 
       - name: Check formatting
@@ -36,20 +35,6 @@ jobs:
       - name: Build project
         run: sbt "testScoped ${{ matrix.scala }} JVM"
 
-      - name: Generate docs
-        if: matrix.scala == '2.13' && matrix.java == '17' && github.ref == 'refs/heads/master'
-        run: |
-          sbt ++${{ matrix.scala }} docs/mdoc unidoc
-          cd website
-          npm install
-          npm run build
-      
-      - name: Deploy docs
-        uses: peaceiris/actions-gh-pages@v4
-        if: matrix.scala == '2.13' && matrix.java == '17' && github.ref == 'refs/heads/master'
-        with:
-          deploy_key: ${{ secrets.REPO_GITHUB_TOKEN }}
-          publish_dir: ./website/build
 
   publish:
     name: Publish Artifacts
@@ -67,8 +52,7 @@ jobs:
           java-version: 17
       - uses: sbt/setup-sbt@v1
 
-      - name: coursier-cache
-        uses: coursier/cache-action@v6
+      - uses: coursier/cache-action@v6
 
       - name: Publish artifacts
         env:
@@ -77,3 +61,33 @@ jobs:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
         run: sbt ci-release
+
+  docs:
+    name: Update docs
+    needs: [build]
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - uses: coursier/cache-action@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: sbt/setup-sbt@v1
+
+      - name: Generate docs
+        run: |
+          sbt ++3.3 docs/mdoc unidoc
+          cd website
+          npm install
+          npm run build
+      
+      - name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./website/build

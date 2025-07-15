@@ -9,7 +9,9 @@ import cats.Monad
 import org.scalatest.matchers.should.Matchers
 import tofu.HasContext
 import tofu.compat.unused
+import scala.annotation.nowarn
 
+@nowarn("cat=deprecation")
 class UnliftSubcontext extends AnyFlatSpec with Matchers {
   def context[F[_]: ({ type L[x[_]] = HasContext[x, Big] })#L]: F[Big]      = HasContext[F, Big].context
   def smallCtx[F[_]: ({ type L[x[_]] = HasContext[x, Small] })#L]: F[Small] = HasContext[F, Small].context
