@@ -8,15 +8,15 @@ object Dependencies {
   object Version {
     val scala212 = "2.12.20"
 
-    val scala213 = "2.13.12"
+    val scala213 = "2.13.16"
 
-    val scala3 = "3.3.4"
+    val scala3 = "3.3.6"
 
-    val circe = "0.14.10"
+    val circe = "0.14.14"
 
-    val tethys = "0.29.3"
+    val tethys = "0.29.5"
 
-    val cats = "2.12.0"
+    val cats = "2.13.0"
 
     val catsEffect2 = "2.5.5"
 
@@ -24,17 +24,17 @@ object Dependencies {
 
     val catsMtl = "1.5.0"
 
-    val catsTagless = "0.16.2"
+    val catsTagless = "0.16.3"
 
     val enumeratum = "1.7.5"
 
-    val derevo = "0.13.0"
+    val derevo = "0.14.0"
 
-    val slf4j = "2.0.16"
+    val slf4j = "2.0.17"
 
     val fs2 = "2.5.12"
 
-    val fs2CE3 = "3.11.0"
+    val fs2CE3 = "3.12.0"
 
     val logback = "1.3.14"
 
@@ -44,9 +44,9 @@ object Dependencies {
 
     val magnolia2 = "1.1.10"
 
-    val magnolia3 = "1.3.8"
+    val magnolia3 = "1.3.18"
 
-    val typesafeConfig = "1.4.3"
+    val typesafeConfig = "1.4.4"
 
     val zio = "1.0.18"
 
@@ -62,7 +62,7 @@ object Dependencies {
 
     val doobie = "0.13.4"
 
-    val doobieCE3 = "1.0.0-RC5"
+    val doobieCE3 = "1.0.0-RC10"
 
     // Compile time only
     val macroParadise = "2.1.1"
@@ -73,7 +73,7 @@ object Dependencies {
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.12.0"
+    val collectionCompat = "2.13.0"
 
     val log4CatsLegacy = "1.7.0"
 
@@ -81,7 +81,7 @@ object Dependencies {
 
     val logstashLogback = "8.1"
 
-    val groovy = "3.0.23"
+    val groovy = "3.0.25"
 
     val http4s = "0.22.15"
 
