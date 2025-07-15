@@ -55,8 +55,8 @@ object UnliftSuite {
     ()
   }
 
-  def summonUnliftIOInstances1[F[_]: Async, R](implicit @unused disp: WithContext[F, Dispatcher[F]]): Unit = {
-    @unused implicit val rt: WithContext[F, IORuntime] = WithContext.const(IORuntime.global)
+  def summonUnliftIOInstances1[F[_]: Async, R](implicit disp: WithContext[F, Dispatcher[F]]): Unit = {
+    implicit val rt: WithContext[F, IORuntime] = WithContext.const(IORuntime.global)
 
     implicitly[UnliftIO[F]]
     implicitly[UnliftIO[ReaderT[F, R, _]]]

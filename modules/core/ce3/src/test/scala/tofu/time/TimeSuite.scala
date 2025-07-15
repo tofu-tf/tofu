@@ -3,9 +3,7 @@ package tofu.time
 import cats.Monad
 import cats.data.*
 import cats.effect.{IO, Temporal}
-import tofu.compat.unused
 
-@unused
 class TimeSuite {
 
   def summon[F[_]: Temporal] = {
