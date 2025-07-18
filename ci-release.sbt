@@ -6,7 +6,7 @@ ThisBuild / crossScalaVersions := Vector(
   Dependencies.Version.scala3
 )
 
-ThisBuild / versionScheme := Some("semver-spec")
+ThisBuild / versionScheme := Some("early-semver")
 
 ThisBuild / licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
