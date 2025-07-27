@@ -11,6 +11,12 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CI: true
 
+# Allow this job to clone the repo and create a page deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build:
     name: Build and Test
@@ -65,10 +71,15 @@ jobs:
   docs:
     name: Update docs
     needs: [build]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     if: github.ref == 'refs/heads/master'
+
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
@@ -79,15 +90,15 @@ jobs:
           java-version: 17
       - uses: sbt/setup-sbt@v1
 
-      - name: Generate docs
+      - name: Generate API docs
         run: |
           sbt ++3.3 docs/mdoc unidoc
-          cd website
-          npm install
-          npm run build
-      
-      - name: Deploy docs
-        uses: peaceiris/actions-gh-pages@v4
+
+      - name: Install, build, and upload your site
+        uses: withastro/action@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./website/build
+          path: ./website
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

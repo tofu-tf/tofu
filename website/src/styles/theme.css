@@ -1,0 +1,15 @@
+/* Light mode colors. */
+:root[data-theme='light'] {
+	--sl-color-accent-low: #c8dcd6;
+	--sl-color-accent: #1a7967;
+	--sl-color-accent-high: #153a31;
+	--sl-color-white: #001e17;
+	--sl-color-gray-1: #002f26;
+	--sl-color-gray-2: #004337;
+	--sl-color-gray-3: #006756;
+	--sl-color-gray-4: #469d89;
+	--sl-color-gray-5: #a4ccc1;
+	--sl-color-gray-6: #d6f6ed;
+	--sl-color-gray-7: #ebfbf6;
+	--sl-color-black: #ffffff;
+}

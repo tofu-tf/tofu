@@ -573,14 +573,16 @@ lazy val docs = projectMatrix // new documentation project
     macros,
     tpolecatScalacOptions += ScalacOption(s"-Wconf:cat=other-pure-statement:silent", _ >= ScalaVersion.V2_13_0),
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(mainModuleScala213Refs: _*),
-    ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
+    ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "src" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
-    docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
-    docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
+    mdocVariables := Map("VERSION" -> version.value),
+    mdocExtraArguments := Seq("--no-link-hygiene"),
+    mdocIn := (LocalRootProject / baseDirectory).value / "backup" / "docs",
+    mdocOut := (LocalRootProject / baseDirectory).value / "website" /"src" / "content" / "docs",
   )
   .jvmPlatform(Seq(Version.scala213))
   .dependsOn(mainModuleDeps: _*)
-  .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
+  .enablePlugins(MdocPlugin, ScalaUnidocPlugin)
 
 lazy val tofu =
   aggregatedMixedProject(
