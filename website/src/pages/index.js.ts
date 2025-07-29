@@ -1,12 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import { serveStaticFrom } from '../utils/serveStaticFrom.ts';
 
 export async function GET({ params, request }) {
-
-  const filePath = path.resolve('./src/api/index.js')
-  const content = fs.readFileSync(filePath, 'utf-8');
-
-  return new Response(content, {
-    headers: { "Content-Type": "text/javascript" },
-  });
+  return serveStaticFrom('./src/api', 'index.js');
 }

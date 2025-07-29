@@ -1,9 +1,5 @@
-import apiHtml from "../api/index.html";
+import { serveStaticFrom } from '../utils/serveStaticFrom.ts';
 
 export async function GET({ params, request }) {
-  const response = apiHtml({ slots: { default: "<p>Hello</p>" } });
-
-  return new Response(response, {
-    headers: { "Content-Type": "text/html" },
-  });
+  return serveStaticFrom('./src/api', 'index.html');
 }

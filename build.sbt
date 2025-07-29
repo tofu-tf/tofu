@@ -577,7 +577,7 @@ lazy val docs = projectMatrix // new documentation project
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     mdocVariables := Map("VERSION" -> version.value),
     mdocExtraArguments := Seq("--no-link-hygiene"),
-    mdocIn := (LocalRootProject / baseDirectory).value / "backup" / "docs",
+    mdocIn := (LocalRootProject / baseDirectory).value / "website" /"src" / "content" / "docs",
     mdocOut := (LocalRootProject / baseDirectory).value / "website" /"src" / "content" / "docs",
   )
   .jvmPlatform(Seq(Version.scala213))

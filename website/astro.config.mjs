@@ -48,7 +48,7 @@ export default defineConfig({
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/tofu-tf/tofu' },
 				{ icon: 'telegram', label: 'Telegram', href: 'https://t.me/scala_any/452/' },
-				{ icon: 'seti:scala', label: 'API', href: '/api'}
+				{ icon: 'seti:scala', label: 'API', href: '/tofu/api'}
 			],
 			sidebar: [
 				{ slug: 'docs/getting-started' },
