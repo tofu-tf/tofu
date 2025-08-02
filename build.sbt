@@ -575,10 +575,10 @@ lazy val docs = projectMatrix // new documentation project
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(mainModuleScala213Refs: _*),
     ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "src" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
-    mdocVariables := Map("VERSION" -> version.value),
-    mdocExtraArguments := Seq("--no-link-hygiene"),
-    mdocIn := (LocalRootProject / baseDirectory).value / "website" /"src" / "content" / "docs",
-    mdocOut := (LocalRootProject / baseDirectory).value / "website" /"src" / "content" / "docs",
+    mdocVariables                              := Map("VERSION" -> version.value),
+    mdocExtraArguments                         := Seq("--no-link-hygiene"),
+    mdocIn                                     := (LocalRootProject / baseDirectory).value / "website" / "src" / "content" / "docs",
+    mdocOut                                    := (LocalRootProject / baseDirectory).value / "website" / "src" / "content" / "docs",
   )
   .jvmPlatform(Seq(Version.scala213))
   .dependsOn(mainModuleDeps: _*)
