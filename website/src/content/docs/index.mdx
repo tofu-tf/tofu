@@ -1,0 +1,46 @@
+---
+title: Welcome to Tofu
+description: Functional programming toolkit for Scala.
+template: splash
+hero:
+  tagline:
+   Tofu is a library for functional programming in Scala, 
+   which aims to provide a comprehensive set of tools addressing real-world problems through the prism of the tagless-final approach and functional programming in general.
+  image:
+    file: ../../assets/tofu-mascot.png
+  actions:
+    - text: Read docs
+      link: /tofu/docs/getting-started/
+      icon: right-arrow
+    - text: Give it a star on GitHub! 
+      link: https://github.com/tofu-tf/tofu
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Next steps
+
+<CardGrid>
+	<Card 
+		title="Join Our Community" 
+		icon="comment-alt">
+		Got questions? Ask them here
+
+		[Telegram Group](https://t.me/scala_any/452/)
+
+		[Gitter Group](https://gitter.im/tinkoff-tofu/community)
+	</Card>
+	<LinkCard 
+		title="More Examples" 
+		description="Check out examples with compilable code"
+		href="https://github.com/tofu-tf/tofu/tree/master/examples">
+		Edit `src/content/tofu/docs/index.mdx` to see this page change.
+	</LinkCard>
+	<Card
+		title="Adopters"
+		icon="puzzle">
+		A (non-exhaustive) [list of companies](/tofu/adopters/) that use ToFu in production. 
+	</Card>
+</CardGrid>
