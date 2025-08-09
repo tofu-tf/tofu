@@ -6,6 +6,8 @@ import sbt.internal._
 import sbt.Reference.display
 import complete.DefaultParsers._
 import sbt.librarymanagement.CrossVersion.{binaryScalaVersion, partialVersion}
+import scala.sys.process._
+import scala.util.Try
 
 lazy val scala2Versions     = List(Version.scala212, Version.scala213)
 lazy val scala2And3Versions = scala2Versions ++ List(Version.scala3)
@@ -564,9 +566,14 @@ lazy val zio2Modules = Vector(zio2Logging, zio2Core)
 lazy val allModules =
   coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules ++ zio2Modules :+ docs :+ examplesCE2 :+ examplesCE3 :+ examplesZIO2
 
-lazy val docs = projectMatrix // new documentation project
+lazy val latestGitTag: String =
+  Try("git describe --tags --abbrev=0".!!.trim)
+    .map(_.stripPrefix("v"))
+    .getOrElse("latest")
+lazy val docs                 = projectMatrix // new documentation project
   .in(file("tofu-docs"))
   .settings(
+    version                                    := latestGitTag,
     defaultSettings,
     scala3MigratedModuleOptions,
     noPublishSettings,
@@ -577,8 +584,7 @@ lazy val docs = projectMatrix // new documentation project
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     mdocVariables                              := Map("VERSION" -> version.value),
     mdocExtraArguments                         := Seq("--no-link-hygiene"),
-    mdocIn                                     := (LocalRootProject / baseDirectory).value / "website" / "src" / "content" / "docs",
-    mdocOut                                    := (LocalRootProject / baseDirectory).value / "website" / "src" / "content" / "docs",
+    mdocOut                                    := (LocalRootProject / baseDirectory).value / "website" / "src" / "content" / "docs" / "docs",
   )
   .jvmPlatform(Seq(Version.scala213))
   .dependsOn(mainModuleDeps: _*)

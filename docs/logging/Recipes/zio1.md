@@ -10,7 +10,7 @@ To use logging functional adapted for ZIO users, first add the following depende
 :::tip["Tofu ZIO logging"]{icon="download"}
 
 ```
-"tf.tofu" %% "tofu-zio-logging" % "@VERSION"
+"tf.tofu" %% "tofu-zio-logging" % "@VERSION@"
 ```
 :::
 

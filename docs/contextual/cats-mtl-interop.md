@@ -45,7 +45,7 @@ Usually programmers write your own implicit conversions, but `TOFU` could provid
 For installation interop, add dependency into your project: 
 :::tip[Cats MTL interop]{icon="download"}
 ```
-"tf.tofu" %% "tofu-kernel-cats-mtl" % "@VERSION"
+"tf.tofu" %% "tofu-kernel-cats-mtl" % "@VERSION@"
 ```
 :::
 

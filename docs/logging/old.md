@@ -9,7 +9,7 @@ This page is obsolete. Head on to the [new docs on logging](/tofu/docs/logging/q
 ## Installation
 
 Logging are available as a separate project
-`"tf.tofu" %% "tofu-logging" % "@VERSION"`
+`"tf.tofu" %% "tofu-logging" % "@VERSION@"`
 
 ## Motivation
 

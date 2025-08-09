@@ -5,14 +5,14 @@ title: Config
 ## Installation
 :::tip[Tofu]{icon="download"}
 ```
-"tf.tofu" %% "tofu" % "@VERSION"
+"tf.tofu" %% "tofu" % "@VERSION@"
 ```  
 :::
 
 or as a standalone dependency
 :::tip[Config]{icon="download"} 
 ```
-"tf.tofu" %% "tofu-config" % "@VERSION"
+"tf.tofu" %% "tofu-config" % "@VERSION@"
 ```
 :::  
 

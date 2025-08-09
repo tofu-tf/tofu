@@ -5,13 +5,13 @@ title: Mid
 ## Installation
 :::tip[Tofu]{icon="download"}
 ```
-"tf.tofu" %% "tofu" % "@VERSION"
+"tf.tofu" %% "tofu" % "@VERSION@"
 ```
 :::  
 
 or as a standalone dependency
 :::tip[Higher-kind]{icon="download"}   
-`"tf.tofu" %% "tofu-core-higher-kind" % "@VERSION"` 
+`"tf.tofu" %% "tofu-core-higher-kind" % "@VERSION@"` 
 :::
 
 ## Assumption

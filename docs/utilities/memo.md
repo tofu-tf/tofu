@@ -5,13 +5,13 @@ title: Memo
 ## Installation
 :::tip[Tofu]{icon="download"}
 ```
-"tf.tofu" %% "tofu" % "@VERSION"
+"tf.tofu" %% "tofu" % "@VERSION@"
 ```
 :::  
 or as a standalone dependency
 :::tip[Memo]{icon="download"}   
 ```
-"tf.tofu" %% "tofu-memo" % "@VERSION"
+"tf.tofu" %% "tofu-memo" % "@VERSION@"
 ```
 :::
 
