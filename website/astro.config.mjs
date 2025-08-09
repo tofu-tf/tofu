@@ -3,13 +3,9 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator'
 import starlightBlog from 'starlight-blog'
-import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
-	adapter: node({
-    	mode: 'standalone',
-  	}),
 	image: {
     	domains: ["avatars3.githubusercontent.com"],
   	},
