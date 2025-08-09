@@ -5,16 +5,16 @@ title: Tofu optics
 ## Installation
 :::tip[Tofu]{icon="download"}
 ```
-"tf.tofu" %% "tofu" % "@VERSION"
+"tf.tofu" %% "tofu" % "@VERSION@"
 ```  
 :::
 or as standalone dependencies
 
 :::tip[Optics]{icon="download"}
 ```
-"tf.tofu" %% "tofu-optics-core" % "@VERSION" 
-"tf.tofu" %% "tofu-optics-macro" % "@VERSION"
-"tf.tofu" %% "tofu-optics-interop" % "@VERSION"
+"tf.tofu" %% "tofu-optics-core" % "@VERSION@" 
+"tf.tofu" %% "tofu-optics-macro" % "@VERSION@"
+"tf.tofu" %% "tofu-optics-interop" % "@VERSION@"
 ```  
 :::
  

@@ -4,13 +4,13 @@ title: WithContext
 ## Installation
 :::tip[Tofu]{icon="download"}
 ```
-"tf.tofu" %% "tofu" % "@VERSION"
+"tf.tofu" %% "tofu" % "@VERSION@"
 ```  
 :::
 
 or as a standalone dependency 
 :::tip[Core]{icon="download"}
-`"tf.tofu" %% "tofu-core-*" % "@VERSION"`
+`"tf.tofu" %% "tofu-core-*" % "@VERSION@"`
 :::
 (replace suffix `*` with `ce2` or `ce3` depends on which cats-effect version you use)
 

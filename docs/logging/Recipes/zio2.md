@@ -13,7 +13,7 @@ First add the following dependency:
 
 :::tip["Tofu ZIO2 logging"]{icon="download"}
 ```
-"tf.tofu" %% "tofu-zio2-logging" % "@VERSION"
+"tf.tofu" %% "tofu-zio2-logging" % "@VERSION@"
 ```
 :::
 

@@ -13,7 +13,7 @@ support. Tofu uses mechanism called markers to store context in logs, so it won'
 Luckily for us, tofu brings a logging provider for _Logstash-encoder_:
 
 ```
-"tf.tofu" %% "tofu-logging-logstash-logback" % "@VERSION"
+"tf.tofu" %% "tofu-logging-logstash-logback" % "@VERSION@"
 ```
 
 * **TofuLoggingProvider** provides JSON logs for logstash-logback-encoder. See [README on github](https://github.com/logstash/logstash-logback-encoder) for more details. 
@@ -39,7 +39,7 @@ Luckily for us, tofu brings a logging provider for _Logstash-encoder_:
 In addition, tofu has two own special Layouts:
 
 ```
-"tf.tofu" %% "tofu-logging-layout" % "@VERSION"
+"tf.tofu" %% "tofu-logging-layout" % "@VERSION@"
 ```
 
 * **ELKLayout**

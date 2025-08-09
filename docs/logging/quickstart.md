@@ -12,8 +12,8 @@ Add these dependencies into your project:
 
 :::tip[Tofu Logging]{icon="download"}
 ```
-"tf.tofu" %% "tofu-logging" % "@VERSION"
-"tf.tofu" %% "tofu-logging-derivation" % "@VERSION"
+"tf.tofu" %% "tofu-logging" % "@VERSION@"
+"tf.tofu" %% "tofu-logging-derivation" % "@VERSION@"
 ```
 
 :::
@@ -25,20 +25,20 @@ according package:
 Cats Effect 3 users should add the following dependency:
 
 ```
-"tf.tofu" %% "tofu-core-ce3" % "@VERSION"
+"tf.tofu" %% "tofu-core-ce3" % "@VERSION@"
 ```
 
 and Cats Effect 2 users should add:
 
 ```
-"tf.tofu" %% "tofu-core-ce2" % "@VERSION"
+"tf.tofu" %% "tofu-core-ce2" % "@VERSION@"
 ```
 
 For ZIO users the following is enough:
 
 ```
-"tf.tofu" %% "tofu-zio2-logging" % "@VERSION" // OR:
-"tf.tofu" %% "tofu-zio-logging" % "@VERSION"
+"tf.tofu" %% "tofu-zio2-logging" % "@VERSION@" // OR:
+"tf.tofu" %% "tofu-zio-logging" % "@VERSION@"
 
 ```
 
