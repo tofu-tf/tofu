@@ -97,6 +97,5 @@ jobs:
           path: ./website
       
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
         id: deployment
         uses: actions/deploy-pages@v4
