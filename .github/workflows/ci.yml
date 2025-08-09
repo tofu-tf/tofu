@@ -90,12 +90,18 @@ jobs:
       - name: Generate API docs
         run: |
           sbt ++3.3 docs/mdoc unidoc
-
-      - name: Install & build
-        uses: withastro/action@v3
-        with:
-          path: ./website
+          cd website
+          npm install
+          npm run build
+          mv src/api/lib dist/lib
+          mv src/api/tofu dist/tofu
+          mv src/api/zio dist/zio
+          mv src/api/index.js dist/index.js
+          mkdir -p dist/api
+          mv src/api/index.html dist/api/index.html
       
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./website/dist

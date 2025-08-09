@@ -107,9 +107,9 @@ and if we run `ioService.sayHello` the message will be clean:
 }
 ```
 
-More on that can be found on the dedicated [recipe page](/docs/logging/recipes/context).
+More on that can be found on the dedicated [recipe page](/tofu/docs/logging/recipes/context).
 
 ## What's next
 
-- You can read about core concepts [here](/docs/logging/core-concepts)
-- You can see the recipes and discover what you need to use `logging` [here](/docs/logging/recipes/list)
+- You can read about core concepts [here](/tofu/docs/logging/core-concepts)
+- You can see the recipes and discover what you need to use `logging` [here](/tofu/docs/logging/recipes/list)

@@ -33,7 +33,7 @@ These services do logs.
   - `ZLogging.Make` — is a type alias for `Logs[Id, UIO]`, produces plain instances of `ULogging`.
   - `ZLogging.ZMake[R]` — is a type alias for `Logs[Id, URIO[R, *]]`, produces contextual `ZLogging[R]`.
 
-  Read more about logging factory in [core concepts](/docs/logging/core-concepts).
+  Read more about logging factory in [core concepts](/tofu/docs/logging/core-concepts).
 
 
 * `ZLogging.Make` object\
@@ -85,7 +85,7 @@ is lifted to ZLayer: `(new BarServiceImpl(_, _)).toLayer`
 whenever we want to specify the dependency on a service.
 3. Logging methods can be used:
    * explicitly like `log.info("Start getting datetime")`
-   * via string interpolation provided by [tofu.syntax.logging](/docs/logging/syntax). For this purpose 
+   * via string interpolation provided by [tofu.syntax.logging](/tofu/docs/logging/syntax). For this purpose 
    log service was defined as `implicit`.
 4. To log object Tofu must know how to present it in the log message. This way is described by instances of `Loggable`
 type class. We did provide no one because Tofu already has `java.time` `Loggable` instances.
@@ -127,7 +127,7 @@ Now the output looks like:
 {"level":"DEBUG","message":"Got current date 2021-09-20","date":"2021-09-20"}
 ```
 `Loggable.apply[LocalDate]` summons an instance from the global scope, `.named` converts logged object into a single field named `name`.
-There are several methods to create and modify `Loggable` instances, read more in [Loggable](/docs/logging/loggable) section.
+There are several methods to create and modify `Loggable` instances, read more in [Loggable](/tofu/docs/logging/loggable) section.
 
 ### Context logging
 Let's consider how to log the context along with actual log message. If you have an instance of `Loggable` for your context, 
@@ -139,7 +139,7 @@ import tofu.logging.derivation.loggable
 @derive(loggable)
 final case class Context(requestId: Int)
 ```
-Here we use [Tofu Derevo](https://github.com/tofu-tf/derevo) for automatic derivation [Loggable](/docs/logging/loggable) instance.
+Here we use [Tofu Derevo](https://github.com/tofu-tf/derevo) for automatic derivation [Loggable](/tofu/docs/logging/loggable) instance.
 
 One possible way to add a context to your logs is to use `layerPlainWithContext` which encapsulates dealing with the context inside
 (otherwise you can use `layerContextual` retrieving the context from a ZIO environment `R`, but we won't cover it here).

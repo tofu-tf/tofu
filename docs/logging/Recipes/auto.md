@@ -51,7 +51,7 @@ There is also an alternative — loggingMidErr which also logs any error happene
 
 ## How it works
 
-The idea is based on the [Mid concept](/docs/higher-kind/mid). For every method `def foo(bar: Bar): F[Baz] = impl` it generates
+The idea is based on the [Mid concept](/tofu/docs/higher-kind/mid). For every method `def foo(bar: Bar): F[Baz] = impl` it generates
 it's logging compartment, looking close to that:
 
 ```scala

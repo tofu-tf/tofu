@@ -42,7 +42,7 @@ For ZIO users the following is enough:
 
 ```
 
-See also [ZIO1](/docs/logging/recipes/zio1), [ZIO2](/docs/logging/recipes/zio2) Logging sections.
+See also [ZIO1](/tofu/docs/logging/recipes/zio1), [ZIO2](/tofu/docs/logging/recipes/zio2) Logging sections.
 
 ## Quick demo
 
@@ -68,12 +68,12 @@ def processPayment[F[_] : Monad : Logging](client: Client, amount: Long): F[Resu
 
 ## What's next
 
-- Discover [the key features](/docs/logging/key-features)
-- Get to know [the core concepts](/docs/logging/core-concepts)
-- Learn how to use [the syntax](/docs/logging/syntax)
-- Find a way to use `logging` suitable for you in the [recipes](/docs/logging/recipes/list)
+- Discover [the key features](/tofu/docs/logging/key-features)
+- Get to know [the core concepts](/tofu/docs/logging/core-concepts)
+- Learn how to use [the syntax](/tofu/docs/logging/syntax)
+- Find a way to use `logging` suitable for you in the [recipes](/tofu/docs/logging/recipes/list)
 - Check out [the examples](https://github.com/tofu-tf/tofu/tree/master/examples/ce2/src/main/scala-2/tofu/example/logging)
 
 ## Old documentation
 
-You can also visit obsolete documentation [here](/docs/logging/old).
+You can also visit obsolete documentation [here](/tofu/docs/logging/old).

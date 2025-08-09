@@ -5,7 +5,7 @@ sidebar:
 ---
 
 # Warning
-This page is obsolete. Head on to the [new docs on logging](/docs/logging/quickstart).
+This page is obsolete. Head on to the [new docs on logging](/tofu/docs/logging/quickstart).
 ## Installation
 
 Logging are available as a separate project
