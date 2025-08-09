@@ -6,7 +6,7 @@ sidebar:
 
 Tofu provides an implementation of `zio.ZLogger` and special annotations called `ZLogAnnotation`
 for [ZIO logging facade](https://zio.dev/guides/tutorials/enable-logging-in-a-zio-application).
-If you feel more confident with [Tofu Logging](/tofu/docs/logging/core-concepts/#logging) interface, `ULogging`
+If you feel more confident with [Tofu Logging](/docs/logging/core-concepts/#logging) interface, `ULogging`
 , `ZLogging.Make`, `ZLogs` are at your service.
 
 First add the following dependency:
@@ -65,7 +65,7 @@ The log will be:
 
 ### ZLogAnnotation
 
-A specialized version of [LogAnnotation](/tofu/docs/logging/annotation) allows you to add a context via ZIO aspects:
+A specialized version of [LogAnnotation](/docs/logging/annotation) allows you to add a context via ZIO aspects:
 
 ```scala
 import tofu.logging.zlogs.ZLogAnnotation._
@@ -114,7 +114,7 @@ override def run = {
 ```
 
 `ZLogAnnotation.make[A]` implicitly requires a `Loggable[A]` instance, see more
-in [Loggable](/tofu/docs/logging/loggable) section.
+in [Loggable](/docs/logging/loggable) section.
 
 ### TofuDefaultContext
 

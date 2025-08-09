@@ -14,7 +14,6 @@ export default defineConfig({
     	domains: ["avatars3.githubusercontent.com"],
   	},
 	site: 'https://tofu-tf.github.io',
-  	base: '/tofu',
 	integrations: [
 		starlight({
 			customCss: [
@@ -22,9 +21,6 @@ export default defineConfig({
         		'./src/styles/theme.css',
       		],
 			favicon: 'favicon.ico',
-			editLink: {
-        		baseUrl: 'https://tofu-tf.github.io/tofu/website/',
-      		},
 			plugins: [
 				starlightLinksValidator({
 					exclude: ['/blog', '/blog/'],
@@ -48,7 +44,7 @@ export default defineConfig({
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/tofu-tf/tofu' },
 				{ icon: 'telegram', label: 'Telegram', href: 'https://t.me/scala_any/452/' },
-				{ icon: 'seti:scala', label: 'API', href: '/tofu/api'}
+				{ icon: 'seti:scala', label: 'API', href: '/api'}
 			],
 			sidebar: [
 				{ slug: 'docs/getting-started' },

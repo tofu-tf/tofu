@@ -12,40 +12,40 @@ The library consists of a few modules, which can be installed all at once:
 :::
 or as standalone dependencies:
 
-### [Core](/tofu/docs/core/errors/)
+### [Core](/docs/core/errors/)
 ```
 "tf.tofu" %% "tofu-core-*" % "@VERSION@"
 
 ```
 (replace suffix `*` with `ce2` or `ce3` depends on which cats-effect version you use)
 
-### [Concurrent](/tofu/docs/concurrent/agent/)
+### [Concurrent](/docs/concurrent/agent/)
 ```
 "tf.tofu" %% "tofu-concurrent" % "@VERSION@"
 ``` 
 
-### [Config](/tofu/docs/utilities/config/)
+### [Config](/docs/utilities/config/)
 ```
 "tf.tofu" %% "tofu-config" % "@VERSION@"
 ``` 
 
-### [Env](/tofu/docs/contextual/env/)
+### [Env](/docs/contextual/env/)
 ```
 "tf.tofu" %% "tofu-env" % "@VERSION@"
 ``` 
 
-### [Logging](/tofu/docs/logging/quickstart/)
+### [Logging](/docs/logging/quickstart/)
 ```
 "tf.tofu" %% "tofu-logging" % "@VERSION@"
 ``` 
 
 
-### [Memo](/tofu/docs/utilities/memo/)
+### [Memo](/docs/utilities/memo/)
 ```
 "tf.tofu" %% "tofu-memo" % "@VERSION@"
 ``` 
 
-### [Optics](/tofu/docs/optics/optics/)
+### [Optics](/docs/optics/optics/)
 ```
 "tf.tofu" %% "tofu-optics-core" % "@VERSION@"
 "tf.tofu" %% "tofu-optics-macro" % "@VERSION@"
