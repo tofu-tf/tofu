@@ -7,10 +7,6 @@ on:
     branches: ['master']
     tags: [v*]
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  CI: true
-
 # Allow this job to clone the repo and create a page deployment
 permissions:
   contents: read
@@ -70,9 +66,6 @@ jobs:
 
   docs:
     name: Update docs
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
     steps:
@@ -87,7 +80,7 @@ jobs:
           java-version: 17
       - uses: sbt/setup-sbt@v1
 
-      - name: Generate API docs
+      - name: Generate docs
         run: |
           sbt ++3.3 docs/mdoc unidoc
           cd website

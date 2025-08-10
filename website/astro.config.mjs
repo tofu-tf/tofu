@@ -29,7 +29,7 @@ export default defineConfig({
 					authors: {
 						odomontois: {
 							name: 'Oleg Nizhnik',
-							title: 'Starlight Aficionado',
+							title: 'Odomontois',
 							picture: 'https://avatars3.githubusercontent.com/u/247558?s=460&v=4',
 							url: 'https://github.com/Odomontois',
 						},
