@@ -3,13 +3,9 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator'
 import starlightBlog from 'starlight-blog'
-import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
-	adapter: node({
-    	mode: 'standalone',
-  	}),
 	image: {
     	domains: ["avatars3.githubusercontent.com"],
   	},
@@ -22,9 +18,6 @@ export default defineConfig({
         		'./src/styles/theme.css',
       		],
 			favicon: 'favicon.ico',
-			editLink: {
-        		baseUrl: 'https://tofu-tf.github.io/tofu/website/',
-      		},
 			plugins: [
 				starlightLinksValidator({
 					exclude: ['/blog', '/blog/'],
@@ -36,7 +29,7 @@ export default defineConfig({
 					authors: {
 						odomontois: {
 							name: 'Oleg Nizhnik',
-							title: 'Starlight Aficionado',
+							title: 'Odomontois',
 							picture: 'https://avatars3.githubusercontent.com/u/247558?s=460&v=4',
 							url: 'https://github.com/Odomontois',
 						},
