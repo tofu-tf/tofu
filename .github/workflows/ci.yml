@@ -94,6 +94,7 @@ jobs:
           mv src/api/index.html dist/api/index.html
       
       - name: Deploy docs
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
