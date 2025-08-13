@@ -573,14 +573,13 @@ lazy val latestGitTag: String =
 lazy val docs                 = projectMatrix // new documentation project
   .in(file("tofu-docs"))
   .settings(
+    name                                       := "tofu-docs",
     version                                    := latestGitTag,
     defaultSettings,
     scala3MigratedModuleOptions,
-    noPublishSettings,
     macros,
     tpolecatScalacOptions += ScalacOption(s"-Wconf:cat=other-pure-statement:silent", _ >= ScalaVersion.V2_13_0),
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(mainModuleScala213Refs: _*),
-    ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "src" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
     mdocVariables                              := Map("VERSION" -> version.value),
     mdocExtraArguments                         := Seq("--no-link-hygiene"),
@@ -588,7 +587,7 @@ lazy val docs                 = projectMatrix // new documentation project
   )
   .jvmPlatform(Seq(Version.scala213))
   .dependsOn(mainModuleDeps: _*)
-  .enablePlugins(MdocPlugin, ScalaUnidocPlugin)
+  .enablePlugins(MdocPlugin, TypelevelUnidocPlugin)
 
 lazy val tofu =
   aggregatedMixedProject(
