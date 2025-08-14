@@ -570,18 +570,18 @@ lazy val latestGitTag: String =
   Try("git describe --tags --abbrev=0".!!.trim)
     .map(_.stripPrefix("v"))
     .getOrElse("latest")
-lazy val docs                 = projectMatrix // new documentation project
+
+lazy val docs = projectMatrix // new documentation project
   .in(file("tofu-docs"))
   .settings(
     name                                       := "tofu-docs",
-    version                                    := latestGitTag,
     defaultSettings,
     scala3MigratedModuleOptions,
     macros,
     tpolecatScalacOptions += ScalacOption(s"-Wconf:cat=other-pure-statement:silent", _ >= ScalaVersion.V2_13_0),
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(mainModuleScala213Refs: _*),
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
-    mdocVariables                              := Map("VERSION" -> version.value),
+    mdocVariables                              := Map("VERSION" -> latestGitTag),
     mdocExtraArguments                         := Seq("--no-link-hygiene"),
     mdocOut                                    := (LocalRootProject / baseDirectory).value / "website" / "src" / "content" / "docs" / "docs",
   )
