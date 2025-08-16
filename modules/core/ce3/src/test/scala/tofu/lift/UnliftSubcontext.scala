@@ -5,14 +5,15 @@ import tofu.compat.unused
 import cats.data.ReaderT
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
-import tofu.lift.UnliftSubcontext.FatApp
 import glass.Contains
 import UnliftSubcontext._
 import cats.Monad
 import org.scalatest.matchers.should.Matchers
 import tofu.HasContext
 import cats.effect.unsafe.IORuntime
+import scala.annotation.nowarn
 
+@nowarn("cat=deprecation")
 class UnliftSubcontext extends AnyFlatSpec with Matchers {
   implicit val iort: IORuntime = IORuntime.global
 

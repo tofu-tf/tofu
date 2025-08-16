@@ -7,10 +7,8 @@ import cats.effect.Blocker
 import tofu.syntax.scoped.*
 import tofu.syntax.monadic.*
 import scala.concurrent.Future
-import tofu.compat.unused
 
 class ScopedSuite {
-  @unused
   def doSomething[F[_]: ContextShift: Async, A](fa: F[A], ea: => A)(calcEc: ExecutionContext)(implicit
       ec: ExecutionContext,
       block: Blocker

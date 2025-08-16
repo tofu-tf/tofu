@@ -10,10 +10,11 @@ import cats.effect.unsafe.IORuntime
 
 class ConsoleSuite extends AnyFunSuite {
   implicit val iort: IORuntime = IORuntime.global
+  val nl: String               = System.lineSeparator()
 
   def check[A](inputs: String*)(a: => A): (A, Vector[String]) = {
     val input = new ByteArrayInputStream(
-      inputs.mkString("\n").getBytes("UTF-8")
+      inputs.mkString(nl).getBytes("UTF-8")
     )
 
     val output = new ByteArrayOutputStream()
@@ -22,7 +23,7 @@ class ConsoleSuite extends AnyFunSuite {
       scala.Console.withOut(output)(a)
     }
 
-    val out = new String(output.toByteArray(), "UTF-8").split("\n").toVector
+    val out = new String(output.toByteArray(), "UTF-8").split(nl).toVector
     (res, out)
   }
 

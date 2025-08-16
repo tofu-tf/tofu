@@ -8,11 +8,9 @@ import org.scalatest.funsuite.AnyFunSuite
 import cats.effect.Concurrent
 import cats.Monad
 import tofu.syntax.monadic._
-import tofu.compat.unused
 import scala.concurrent.ExecutionContext
 import cats.effect.ContextShift
 
-@unused
 class QVarSuite extends AnyFunSuite {
   def summonInstance[I[_]: Sync, F[_]: Concurrent] = {
     implicitly[MakeQVar[I, F]]

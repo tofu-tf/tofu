@@ -12,6 +12,8 @@ import tofu.syntax.logging._
 class LoggingSuite extends AnyFlatSpec {
   val exprs = new Exprs[Run]
 
+  val nl: String = System.lineSeparator()
+
   "log tree" should "render map" in {
     assert(
       LogTree(Map[String, LoggedValue]("koo" -> 1, "lo" -> "foo")) ===
@@ -66,7 +68,9 @@ class LoggingSuite extends AnyFlatSpec {
           Logging.Error,
           "runtime exception",
           Json.obj(
-            "stacktrace" -> Json.fromString("java.lang.RuntimeException: ya oshibka\n\tat test1.test2(test3:1337)\n"),
+            "stacktrace" -> Json.fromString(
+              s"java.lang.RuntimeException: ya oshibka${nl}\tat test1.test2(test3:1337)${nl}"
+            ),
             "chaluta"    -> Json.fromLong(42),
           )
         )
@@ -81,7 +85,9 @@ class LoggingSuite extends AnyFlatSpec {
           Logging.Error,
           "runtime exception 2",
           Json.obj(
-            "stacktrace" -> Json.fromString("java.lang.RuntimeException: ya oshibka\n\tat test1.test2(test3:1337)\n"),
+            "stacktrace" -> Json.fromString(
+              s"java.lang.RuntimeException: ya oshibka$nl\tat test1.test2(test3:1337)$nl"
+            ),
             "chaluta"    -> Json.fromLong(42),
             "why"        -> Json.fromString("kek")
           )
@@ -89,7 +95,6 @@ class LoggingSuite extends AnyFlatSpec {
       )
     )
   }
-
 }
 
 object LoggingSuite {

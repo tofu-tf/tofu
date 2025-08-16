@@ -6,6 +6,8 @@ import sbt.internal._
 import sbt.Reference.display
 import complete.DefaultParsers._
 import sbt.librarymanagement.CrossVersion.{binaryScalaVersion, partialVersion}
+import scala.sys.process._
+import scala.util.Try
 
 lazy val scala2Versions     = List(Version.scala212, Version.scala213)
 lazy val scala2And3Versions = scala2Versions ++ List(Version.scala3)
@@ -31,6 +33,39 @@ def filterByScalaVersion(scalaVersionFilter: String) = {
         .map(x => x: ProjectReference): _*
     )
   )
+}
+
+// it's needed to define `logging` and `tofu` aggregated modules
+// to not to pass into `aggregate` and `dependsOn` modules which doesn't support scala3 yet (memo, env etc.)
+def aggregatedMixedProject(
+    id: String,
+    base: File,
+    aggregate: Seq[ProjectMatrix],
+    dependsOn: Seq[ProjectMatrix],
+    settings: Seq[Setting[_]]
+): ProjectMatrix = {
+  def filterSupportScala(pm: ProjectMatrix, scalaVersion: String): Seq[Project] = {
+    pm.filterProjects(Seq(VirtualAxis.jvm, VirtualAxis.scalaABIVersion(scalaVersion)))
+  }
+
+  val initial = ProjectMatrix(id, base)
+  scala2And3Versions.foldLeft(initial) { case (prMatrix, scalaVersionValue) =>
+    val scalaAxis = VirtualAxis.scalaABIVersion(scalaVersionValue)
+    prMatrix.customRow(
+      autoScalaLibrary = true,
+      axisValues = Seq(VirtualAxis.jvm, scalaAxis),
+      process = (pr: Project) => {
+        val aggModules: Seq[ProjectReference] =
+          aggregate.flatMap(filterSupportScala(_, scalaVersionValue)).map(p => (p: ProjectReference))
+        val dependsOnModules                  =
+          dependsOn.flatMap(filterSupportScala(_, scalaVersionValue)).map(ClasspathDependency(_, None))
+
+        pr.settings(settings: _*)
+          .aggregate(aggModules: _*)
+          .dependsOn(dependsOnModules: _*)
+      }
+    )
+  }
 }
 
 lazy val defaultSettings = Seq(
@@ -211,7 +246,8 @@ lazy val loggingLog4CatsLegacy = projectMatrix
     defaultSettings,
     scala3MigratedModuleOptions,
     name := "tofu-logging-log4cats-legacy",
-    libraryDependencies += log4CatsLegacy
+    libraryDependencies += log4CatsLegacy,
+    libraryDependencies += slf4j // added to fix compiler crash - `cannot resolve reference to type org.slf4j.type.Marker`
   )
   .jvmPlatform(scala2And3Versions)
   .dependsOn(loggingStr)
@@ -251,57 +287,25 @@ lazy val loggingEnumeratum = projectMatrix
   .dependsOn(loggingStr)
 
 lazy val logging = {
-  def projectRefFromMatrix(pm: ProjectMatrix, scalaVersion: String): ProjectReference = {
-    val projects = pm.filterProjects(Seq(VirtualAxis.jvm, VirtualAxis.scalaABIVersion(scalaVersion)))
-    projects.headOption match {
-      case Some(p) => p
-      case None    => throw new Exception(s"Can't found $scalaVersion axis for ${pm}")
-    }
-  }
-
-  val modulesSettings =
+  val loggingModules =
     List(
-      // ($project, $haScala3, $dependsOn)
-      (loggingStr, true, true),
-      (loggingDer, true, true),
-      (loggingDerivationAnnotations, true, true),
-      (loggingLayout, true, true),
-      (loggingShapeless, false, true),
-      (loggingRefined, true, true),
-      (loggingLog4Cats, true, true),
-      (loggingLogstashLogback, true, true),
+      loggingStr,
+      loggingDer,
+      loggingDerivationAnnotations,
+      loggingLayout,
+      loggingShapeless,
+      loggingRefined,
+      loggingLog4Cats,
+      loggingLogstashLogback
     )
 
-  val initial = ProjectMatrix("logging", modules / "logging")
-  scala2And3Versions.foldLeft(initial) { case (prMatrix, scalaVersionValue) =>
-    val scalaAxis = VirtualAxis.scalaABIVersion(scalaVersionValue)
-    prMatrix.customRow(
-      autoScalaLibrary = true,
-      axisValues = Seq(VirtualAxis.jvm, scalaAxis),
-      process = (pr: Project) => {
-        val filterScala                    =
-          if (scalaVersionValue.startsWith("3")) identity[Boolean](_)
-          else (_: Boolean) => true
-        val (aggModules, dependsOnModules) =
-          modulesSettings.foldLeft((List.empty[ProjectReference], List.empty[ClasspathDependency])) {
-            case ((agg, dependsOn), (prM, hasScala3, isInDependsOn)) if filterScala(hasScala3) =>
-              val ref           = projectRefFromMatrix(prM, scalaVersionValue)
-              val nextAgg       = ref :: agg
-              val nextDependsOn = if (isInDependsOn) ClasspathDependency(ref, None) :: dependsOn else dependsOn
-              (nextAgg, nextDependsOn)
-            case (acc, _)                                                                      => acc
-          }
-
-        pr.aggregate(aggModules: _*)
-          .settings(
-            defaultSettings,
-            scalaVersion := scalaVersionValue,
-            name         := "tofu-logging"
-          )
-          .dependsOn(dependsOnModules: _*)
-      }
-    )
-  }
+  aggregatedMixedProject(
+    "logging",
+    modules / "logging",
+    loggingModules,
+    loggingModules,
+    Seq(name := "tofu-logging") ++ defaultSettings
+  )
 }
 
 val util = modules / "util"
@@ -523,7 +527,7 @@ lazy val examplesZIO2 = projectMatrix
   .jvmPlatform(scala2Versions)
   .dependsOn(zio2Logging, loggingDer, loggingLayout)
 
-lazy val coreModules =
+lazy val coreModules     =
   Vector(
     higherKindCore,
     kernel,
@@ -535,6 +539,7 @@ lazy val coreModules =
     streams,
     kernelCatsMtlInterop
   )
+lazy val coreModulesDeps = coreModules.map(x => x: MatrixClasspathDep[ProjectMatrixReference])
 
 lazy val ce3CoreModules = Vector(coreCE3)
 
@@ -561,35 +566,43 @@ lazy val zio2Modules = Vector(zio2Logging, zio2Core)
 lazy val allModules =
   coreModules ++ commonModules ++ ce3CoreModules ++ ce3CommonModules ++ zio2Modules :+ docs :+ examplesCE2 :+ examplesCE3 :+ examplesZIO2
 
-lazy val docs = projectMatrix // new documentation project
+lazy val latestGitTag: String =
+  Try("git describe --tags --abbrev=0".!!.trim)
+    .map(_.stripPrefix("v"))
+    .getOrElse("latest")
+lazy val docs                 = projectMatrix // new documentation project
   .in(file("tofu-docs"))
   .settings(
+    name                                       := "tofu-docs",
+    version                                    := latestGitTag,
     defaultSettings,
     scala3MigratedModuleOptions,
-    noPublishSettings,
     macros,
     tpolecatScalacOptions += ScalacOption(s"-Wconf:cat=other-pure-statement:silent", _ >= ScalaVersion.V2_13_0),
     ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(mainModuleScala213Refs: _*),
-    ScalaUnidoc / unidoc / target              := (LocalRootProject / baseDirectory).value / "website" / "static" / "api",
     cleanFiles += (ScalaUnidoc / unidoc / target).value,
-    docusaurusCreateSite                       := docusaurusCreateSite.dependsOn(Compile / unidoc).value,
-    docusaurusPublishGhpages                   := docusaurusPublishGhpages.dependsOn(Compile / unidoc).value
+    mdocVariables                              := Map("VERSION" -> version.value),
+    mdocExtraArguments                         := Seq("--no-link-hygiene"),
+    mdocOut                                    := (LocalRootProject / baseDirectory).value / "website" / "src" / "content" / "docs" / "docs",
   )
   .jvmPlatform(Seq(Version.scala213))
   .dependsOn(mainModuleDeps: _*)
-  .enablePlugins(MdocPlugin, DocusaurusPlugin, ScalaUnidocPlugin)
+  .enablePlugins(MdocPlugin, TypelevelUnidocPlugin)
 
-lazy val tofu = project
-  .in(file("."))
-  .settings(
-    defaultSettings,
-    name       := "tofu",
-    testScoped := Def.inputTaskDyn {
-      val args = spaceDelimited("<arg>").parsed
-      Def.taskDyn((Test / test).all(filterByScalaVersion(args.head)))
-    }.evaluated
+lazy val tofu =
+  aggregatedMixedProject(
+    "tofu",
+    file("."),
+    allModules,
+    coreModules,
+    defaultSettings ++ Seq(
+      name       := "tofu",
+      testScoped := Def.inputTaskDyn {
+        val args = spaceDelimited("<arg>").parsed
+        Def.taskDyn((Test / test).all(filterByScalaVersion(args.head)))
+      }.evaluated
+    )
   )
-  .aggregate(allModules.flatMap(_.projectRefs): _*)
 
 lazy val defaultScalacOptions =
   Seq(
@@ -622,9 +635,7 @@ lazy val scalacWarningConfig = tpolecatScalacOptions ++= {
   // }.mkString(",")
 
   // print warning category for fine-grained suppressing, e.g. @nowarn("cat=unused-params")
-  val contextDeprecationInfo    = "cat=deprecation&msg=^(.*((Has)|(With)|(Logging)|(Mut)).*)$:silent"
-  val concurrentDeprecationInfo = "cat=deprecation&msg=^(.*((Mut)|(MVar)).*)$:silent"
-  val deprecationInfo           = s"$contextDeprecationInfo,$concurrentDeprecationInfo"
+  val deprecationInfo = "cat=deprecation:silent"
 
   val verboseWarnings         = "any:wv"
   val scala3MigrationWarnings = "cat=scala3-migration:silent"
@@ -632,10 +643,10 @@ lazy val scalacWarningConfig = tpolecatScalacOptions ++= {
   Set(
     ScalacOption(s"-Wconf:$deprecationInfo", _ >= ScalaVersion.V3_0_0),
     ScalacOption(
-      s"-Wconf:$deprecationInfo,$scala3MigrationWarnings,$verboseWarnings",
+      s"-Wconf:$verboseWarnings,$deprecationInfo,$scala3MigrationWarnings",
       _.isBetween(ScalaVersion.V2_13_0, ScalaVersion.V3_0_0)
     ),
-    ScalacOption(s"-Wconf:$deprecationInfo,$verboseWarnings", _ < ScalaVersion.V2_13_0)
+    ScalacOption(s"-Wconf:$verboseWarnings,$deprecationInfo", _ < ScalaVersion.V2_13_0)
   )
 }
 
