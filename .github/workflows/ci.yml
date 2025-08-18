@@ -69,8 +69,29 @@ jobs:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
         run: sbt ci-release
 
-  docs:
+  docs-compile:
+    name: Compile docs
+    if: github.ref != 'refs/heads/master' && !startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: coursier/cache-action@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: sbt/setup-sbt@v1
+
+      - name: Generate docs
+        run: |
+          sbt ++3.3 docs/mdoc
+
+  docs-update:
     name: Update docs
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
 
     environment:
       name: github-pages
@@ -99,6 +120,5 @@ jobs:
           path: ./website
       
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
         id: deployment
         uses: actions/deploy-pages@v4

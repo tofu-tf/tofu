@@ -12,6 +12,7 @@ website/node_modules
 website/i18n/*
 website/static/api
 website/.docusaurus
+website/src/content/docs/docs
 node_modules/
 /null
 .vscode
