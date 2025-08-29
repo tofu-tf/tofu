@@ -115,7 +115,7 @@ jobs:
           sbt ++3.3 docs/mdoc
 
       - name: Install & build
-        uses: withastro/action@v3
+        uses: withastro/action@v4
         with:
           path: ./website
       
