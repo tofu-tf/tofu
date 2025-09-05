@@ -50,7 +50,7 @@ object Dependencies {
 
     val zio = "1.0.18"
 
-    val zio2 = "2.1.20"
+    val zio2 = "2.1.21"
 
     val zioCats = "2.5.1.0"
 
