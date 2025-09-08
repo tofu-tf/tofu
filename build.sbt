@@ -33,6 +33,10 @@ def filterByScalaVersion(scalaVersionFilter: String) = {
   )
 }
 
+ThisBuild / version := "0.14.0"
+ThisBuild / Compile / packageBin / publishArtifact := false
+ThisBuild / Compile / packageSrc / publishArtifact := false
+
 // it's needed to define `logging` and `tofu` aggregated modules
 // to not to pass into `aggregate` and `dependsOn` modules which doesn't support scala3 yet (memo, env etc.)
 def aggregatedMixedProject(

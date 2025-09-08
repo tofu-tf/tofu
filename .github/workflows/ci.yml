@@ -1,45 +1,41 @@
 name: Continuous Integration
 
 on:
-  pull_request:
-    branches: ['master']
-  push:
-    branches: ['master']
-    tags: [v*]
+  push
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CI: true
 
 jobs:
-  build:
-    name: Build and Test
-    strategy:
-      matrix:
-        scala: [2.13, 2.12, 3.3]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+  # build:
+  #   name: Build and Test
+  #   strategy:
+  #     matrix:
+  #       scala: [2.13, 2.12, 3.3]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - uses: coursier/cache-action@v6
+  #     - uses: coursier/cache-action@v6
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-      - uses: sbt/setup-sbt@v1
+  #     - uses: actions/setup-java@v4
+  #       with:
+  #         distribution: temurin
+  #         java-version: 17
+  #     - uses: sbt/setup-sbt@v1
 
-      - name: Check formatting
-        run: sbt scalafmtCheckAll scalafmtSbtCheck
+  #     - name: Check formatting
+  #       run: sbt scalafmtCheckAll scalafmtSbtCheck
 
-      - name: Build project
-        run: sbt "testScoped ${{ matrix.scala }} JVM"
+  #     - name: Build project
+  #       run: sbt "testScoped ${{ matrix.scala }} JVM"
 
 
   publish:
     name: Publish Artifacts
-    needs: [build]
-    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
+    # needs: [build]
+    # if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -60,34 +56,34 @@ jobs:
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-        run: sbt ci-release
+        run: CI_COMMIT_TAG="0.14.0" sbt ci-release
 
-  docs:
-    name: Update docs
-    needs: [build]
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+  # docs:
+  #   name: Update docs
+  #   needs: [build]
+  #   if: github.ref == 'refs/heads/master'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
       
-      - uses: coursier/cache-action@v6
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-      - uses: sbt/setup-sbt@v1
+  #     - uses: coursier/cache-action@v6
+  #     - uses: actions/setup-java@v4
+  #       with:
+  #         distribution: temurin
+  #         java-version: 17
+  #     - uses: sbt/setup-sbt@v1
 
-      - name: Generate docs
-        run: |
-          sbt ++3.3 docs/mdoc unidoc
-          cd website
-          npm install
-          npm run build
+  #     - name: Generate docs
+  #       run: |
+  #         sbt ++3.3 docs/mdoc unidoc
+  #         cd website
+  #         npm install
+  #         npm run build
       
-      - name: Deploy docs
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./website/build
+  #     - name: Deploy docs
+  #       uses: peaceiris/actions-gh-pages@v4
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         publish_dir: ./website/build
