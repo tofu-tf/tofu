@@ -12,7 +12,7 @@ object Dependencies {
 
     val scala3 = "3.3.6"
 
-    val circe = "0.14.14"
+    val circe = "0.14.15"
 
     val tethys = "0.29.5"
 
