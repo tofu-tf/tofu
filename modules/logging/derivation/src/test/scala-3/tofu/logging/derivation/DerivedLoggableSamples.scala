@@ -55,4 +55,4 @@ object DerivedLoggableSamples:
   enum Scala3Enum derives SingletonEnumLoggable:
     case A, B, C
 
-  final case class Container[A, B, C](a: A, b: B, c: C) derives Loggable
+  final case class Container[T](a: T, b: T, c: T) derives Loggable
