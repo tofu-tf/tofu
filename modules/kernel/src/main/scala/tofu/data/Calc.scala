@@ -63,7 +63,7 @@ object Calc {
     def cont[R1 <: R, E2, S3, B](
         f: A => Calc[R1, S2, S3, E2, B],
         h: E => Calc[R1, S2, S3, E2, B]
-    ): Calc[R1, S1, S3, E2, B] = Cont(calc, f, h)
+    ): Calc[R1, S1, S3, E2, B]                                                                 = Cont(calc, f, h)
     def flatMap[R1 <: R, E1 >: E, B](f: A => Calc[R1, S2, S2, E1, B]): Calc[R1, S1, S2, E1, B] = cont(f, raise(_: E))
     def >>=[R1 <: R, E1 >: E, B](f: A => Calc[R1, S2, S2, E1, B])                              = flatMap(f)
     def >>[R1 <: R, E1 >: E, B](c: => Calc[R1, S2, S2, E1, B])                                 = flatMap(_ => c)
