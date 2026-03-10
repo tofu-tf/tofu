@@ -38,9 +38,8 @@ object loggingMid
   * For customization create an object with the same parents and abstract type member `Result` and redefine [onEnter]
   * and [onLeave] methods of the `LoggingMidBuilder` trait.
   */
-case class loggingMidCustomLevel(logLevel: Level)
-    extends LoggingMidBuilder.CustomLevelImpl(logLevel) with DerivationKN3[LoggingMid.Of] with PassTypeArgs
-    with ParamRequire[Loggable]                                                                                       {
+case class loggingMidCustomLevel(logLevel: Level) extends LoggingMidBuilder.CustomLevelImpl(logLevel)
+    with DerivationKN3[LoggingMid.Of] with PassTypeArgs with ParamRequire[Loggable] {
   type Result[A] = LoggingMid[A]
   def instance[U[f[_]]]: U[LoggingMid] = macro HigherKindedMacros.factorizeThis[U]
 }
@@ -56,7 +55,7 @@ case class loggingMidCustomLevel(logLevel: Level)
   */
 object loggingMidTry
     extends LoggingErrMidBuilder.DefaultImpl[Throwable] with DerivationKN3[LoggingErrMid.Try] with PassTypeArgs
-    with ParamRequire[Loggable]                                                                                       {
+    with ParamRequire[Loggable] {
   type Result[A] = LoggingErrMid[Throwable, A]
   def instance[U[f[_]]]: U[Result] = macro HigherKindedMacros.factorizeThis[U]
 }
@@ -73,7 +72,7 @@ object loggingMidTry
   */
 case class loggingMidTryCustomLevel(logLevel: Level, errorLogLevel: Level)
     extends LoggingErrMidBuilder.CustomLevelImpl[Throwable](logLevel, errorLogLevel)
-    with DerivationKN3[LoggingErrMid.Try] with PassTypeArgs with ParamRequire[Loggable]                               {
+    with DerivationKN3[LoggingErrMid.Try] with PassTypeArgs with ParamRequire[Loggable] {
   type Result[A] = LoggingErrMid[Throwable, A]
   def instance[U[f[_]]]: U[Result] = macro HigherKindedMacros.factorizeThis[U]
 }
@@ -89,7 +88,7 @@ case class loggingMidTryCustomLevel(logLevel: Level, errorLogLevel: Level)
   */
 object loggingBiMid
     extends LoggingBiMidBuilder.Default with DerivationKN11[LoggingBiMid.Of] with PassTypeArgs
-    with ParamRequire[Loggable]                                                                                       {
+    with ParamRequire[Loggable] {
   type Result[E, A] = LoggingBiMid[E, A]
   def instance[U[f[_, _]]]: U[LoggingBiMid] =
     macro HigherKindedMacros.bifactorizeThis[U]
@@ -107,7 +106,7 @@ object loggingBiMid
   */
 case class loggingBiMidCustomLevel(logLevel: Level, errorLogLevel: Level)
     extends LoggingBiMidBuilder.CustomLogLevel(logLevel, errorLogLevel) with DerivationKN11[LoggingBiMid.Of]
-    with PassTypeArgs with ParamRequire[Loggable]                                                                     {
+    with PassTypeArgs with ParamRequire[Loggable] {
   type Result[E, A] = LoggingBiMid[E, A]
   def instance[U[f[_, _]]]: U[LoggingBiMid] =
     macro HigherKindedMacros.bifactorizeThis[U]
