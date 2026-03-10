@@ -8,7 +8,7 @@ import tofu.lift.Lift
 object lift extends KernelLiftSyntax {
   implicit final class RefLiftSyntax[F[_], A](private val ref: Ref[F, A]) extends AnyVal {
     @deprecated("Use lift with Functor[G] constraint", "0.14.1")
-    def lift[G[_]](lift: Lift[F, G], F: Functor[F]): Ref[G, A]                       = ref.mapK(lift.liftF, F)
+    def lift[G[_]](lift: Lift[F, G], F: Functor[F]): Ref[G, A]          = ref.mapK(lift.liftF, F)
     def lift[G[_]](implicit lift: Lift[F, G], F: Functor[G]): Ref[G, A] = ref.mapK(lift.liftF)
   }
 
