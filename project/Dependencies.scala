@@ -6,15 +6,15 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val scala212 = "2.12.20"
+    val scala212 = "2.12.21"
 
-    val scala213 = "2.13.16"
+    val scala213 = "2.13.18"
 
     val scala3 = "3.3.6"
 
-    val circe = "0.14.14"
+    val circe = "0.14.15"
 
-    val tethys = "0.29.5"
+    val tethys = "0.29.7"
 
     val cats = "2.13.0"
 
@@ -22,31 +22,31 @@ object Dependencies {
 
     val catsEffect3 = "3.4.9"
 
-    val catsMtl = "1.5.0"
+    val catsMtl = "1.6.0"
 
-    val catsTagless = "0.16.3"
+    val catsTagless = "0.16.5"
 
-    val enumeratum = "1.9.0"
+    val enumeratum = "1.9.6"
 
     val derevo = "0.14.0"
 
     val slf4j = "2.0.17"
 
-    val fs2 = "2.5.12"
+    val fs2 = "2.5.13"
 
-    val fs2CE3 = "3.12.0"
+    val fs2CE3 = "3.12.2"
 
-    val logback = "1.3.15"
+    val logback = "1.3.16"
 
     val monix = "3.4.1"
 
     val scalatest = "3.2.19"
 
-    val magnolia2 = "1.1.10"
+    val magnolia2 = "1.1.12"
 
     val magnolia3 = "1.3.18"
 
-    val typesafeConfig = "1.4.4"
+    val typesafeConfig = "1.4.6"
 
     val zio = "1.0.18"
 
@@ -62,18 +62,18 @@ object Dependencies {
 
     val doobie = "0.13.4"
 
-    val doobieCE3 = "1.0.0-RC10"
+    val doobieCE3 = "1.0.0-RC12"
 
     // Compile time only
     val macroParadise = "2.1.1"
 
     val simulacrum = "1.0.1"
 
-    val kindProjector = "0.13.3"
+    val kindProjector = "0.13.4"
 
     val betterMonadicFor = "0.3.1"
 
-    val collectionCompat = "2.13.0"
+    val collectionCompat = "2.14.0"
 
     val log4CatsLegacy = "1.7.0"
 
