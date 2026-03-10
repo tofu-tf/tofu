@@ -59,7 +59,7 @@ trait DaemonicInstances { self: Daemonic.type =>
     )
 }
 
-trait Daemon[F[_], E, A] extends Fiber[F, A]     {
+trait Daemon[F[_], E, A] extends Fiber[F, A] {
   def join: F[A]
   def cancel: F[Unit]
   def poll: F[Option[Exit[E, A]]]
@@ -69,7 +69,7 @@ trait Daemon[F[_], E, A] extends Fiber[F, A]     {
 }
 
 /** Probably Infinite processes */
-object Daemon            extends DaemonInstances {
+object Daemon extends DaemonInstances {
   private[tofu] class Impl[F[_]: Restore: Apply, E, A](process: Fiber[F, A], end: TryableDeferred[F, Exit[E, A]])
       extends Daemon[F, E, A] {
 
