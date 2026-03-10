@@ -6,9 +6,9 @@ object Dependencies {
   val minorVersion = SettingKey[Int]("minor scala version")
 
   object Version {
-    val scala212 = "2.12.20"
+    val scala212 = "2.12.21"
 
-    val scala213 = "2.13.16"
+    val scala213 = "2.13.18"
 
     val scala3 = "3.3.6"
 
@@ -46,7 +46,7 @@ object Dependencies {
 
     val magnolia3 = "1.3.18"
 
-    val typesafeConfig = "1.4.4"
+    val typesafeConfig = "1.4.6"
 
     val zio = "1.0.18"
 
@@ -69,7 +69,7 @@ object Dependencies {
 
     val simulacrum = "1.0.1"
 
-    val kindProjector = "0.13.3"
+    val kindProjector = "0.13.4"
 
     val betterMonadicFor = "0.3.1"
 
