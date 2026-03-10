@@ -20,7 +20,7 @@ object Dependencies {
 
     val catsEffect2 = "2.5.5"
 
-    val catsEffect3 = "3.4.9"
+    val catsEffect3 = "3.7.0"
 
     val catsMtl = "1.6.0"
 
@@ -36,7 +36,7 @@ object Dependencies {
 
     val fs2CE3 = "3.12.2"
 
-    val logback = "1.3.16"
+    val logback = "1.5.32"
 
     val monix = "3.4.1"
 
@@ -50,11 +50,11 @@ object Dependencies {
 
     val zio = "1.0.18"
 
-    val zio2 = "2.1.20"
+    val zio2 = "2.1.24"
 
     val zioCats = "2.5.1.0"
 
-    val zio2Cats = "23.1.0.2"
+    val zio2Cats = "23.1.0.13"
 
     val shapeless = "2.3.13"
 
@@ -77,7 +77,7 @@ object Dependencies {
 
     val log4CatsLegacy = "1.7.0"
 
-    val log4Cats = "2.6.0"
+    val log4Cats = "2.7.1"
 
     val logstashLogback = "8.1"
 

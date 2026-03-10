@@ -2,13 +2,14 @@ package tofu.syntax
 
 import cats.Functor
 import cats.effect.kernel.{Deferred, MonadCancel, Ref}
-import cats.effect.std.Semaphore
+import cats.effect.std.{Queue, Semaphore}
 import tofu.lift.Lift
-import cats.effect.std.Queue
 
 object lift extends KernelLiftSyntax {
   implicit final class RefLiftSyntax[F[_], A](private val ref: Ref[F, A]) extends AnyVal {
-    def lift[G[_]](implicit lift: Lift[F, G], F: Functor[F]): Ref[G, A] = ref.mapK(lift.liftF)
+    @deprecated("Use lift with Functor[G] constraint", "0.14.1")
+    def lift[G[_]](lift: Lift[F, G], F: Functor[F]): Ref[G, A]                                = ref.mapK(lift.liftF, F)
+    def lift[G[_]](implicit lift: Lift[F, G], F: Functor[G], dummy: DummyImplicit): Ref[G, A] = ref.mapK(lift.liftF)
   }
 
   implicit final class DeferredLiftSyntax[F[_], A](private val deferred: Deferred[F, A]) extends AnyVal {
