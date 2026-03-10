@@ -16,7 +16,6 @@ import tofu.syntax.monadic._
   *
   *   - initialize all its natural transformations early and remove the need for additional constraints on `F[_]` later
   *     (e.g. `Bracket`);
-  *
   *   - be able to use another `DB[_]` effect besides `ConnectionIO` and build a layer of transactional logic with it.
   */
 trait Txr[F[_], DB0[_]] {

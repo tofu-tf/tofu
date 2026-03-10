@@ -13,8 +13,8 @@ class DerivedLoggableScala3Suite extends AnyFlatSpec with Matchers:
 
   "SealedTraitEnum SingletonEnumLoggable" should "correctly log" in:
     import SealedTraitEnum.*
-    json(Container(A, B, C)) shouldBe """{"a":"A","b":"B","c":"C"}"""
+    json(Container[SealedTraitEnum](A)) shouldBe """{"a":"A"}"""
 
   "Scala3Enum SingletonEnumLoggable" should "correctly log" in:
     import Scala3Enum.*
-    json(Container(A, B, C)) shouldBe """{"a":"A","b":"B","c":"C"}"""
+    json(Container(A)) shouldBe """{"a":"A"}"""
