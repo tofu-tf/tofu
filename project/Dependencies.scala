@@ -46,7 +46,7 @@ object Dependencies {
 
     val magnolia3 = "1.3.18"
 
-    val typesafeConfig = "1.4.4"
+    val typesafeConfig = "1.4.6"
 
     val zio = "1.0.18"
 
@@ -69,7 +69,7 @@ object Dependencies {
 
     val simulacrum = "1.0.1"
 
-    val kindProjector = "0.13.3"
+    val kindProjector = "0.13.4"
 
     val betterMonadicFor = "0.3.1"
 
