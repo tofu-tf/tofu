@@ -69,7 +69,7 @@ object Dependencies {
 
     val simulacrum = "1.0.1"
 
-    val kindProjector = "0.13.3"
+    val kindProjector = "0.13.4"
 
     val betterMonadicFor = "0.3.1"
 
