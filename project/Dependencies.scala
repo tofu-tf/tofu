@@ -62,7 +62,7 @@ object Dependencies {
 
     val doobie = "0.13.4"
 
-    val doobieCE3 = "1.0.0-RC10"
+    val doobieCE3 = "1.0.0-RC12"
 
     // Compile time only
     val macroParadise = "2.1.1"
