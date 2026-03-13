@@ -34,7 +34,7 @@ object Dependencies {
 
     val fs2 = "2.5.13"
 
-    val fs2CE3 = "3.12.2"
+    val fs2CE3 = "3.13.0"
 
     val logback = "1.5.32"
 
