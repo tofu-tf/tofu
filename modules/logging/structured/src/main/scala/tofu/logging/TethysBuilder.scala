@@ -98,18 +98,25 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
 
   def monoid: Monoid[Unit] = implicitly
 
-  def make(f: TokenWriter => Unit): String = {
+  private def renderRaw(f: TokenWriter => Unit): String = {
     val sw     = new StringWriter()
     sw.append(prefix)
     val writer = tethys.jackson.jacksonTokenWriterProducer.forWriter(sw)
-    writer.writeObjectStart()
-    predefined(writer)
     f(writer)
-    writer.writeObjectEnd()
     writer.flush()
     sw.append(postfix)
     sw.toString
   }
+
+  def make(f: TokenWriter => Unit): String = renderRaw { writer =>
+    writer.writeObjectStart()
+    predefined(writer)
+    f(writer)
+    writer.writeObjectEnd()
+  }
+
+  override def apply[A](a: A)(implicit L: Loggable[A]): String =
+    renderRaw(writer => checkWritten(L.putWrappedValue(a, writer)(receiver), writer))
 }
 
 class TethysBuilderWithCustomFields(customFields: List[(String, RawJson)], prefix: String = "", postfix: String = "")
@@ -121,6 +128,9 @@ class TethysBuilderWithCustomFields(customFields: List[(String, RawJson)], prefi
       tokenWriter.writeRawJson(json.json)
     }
   }
+
+  override def apply[A](a: A)(implicit L: Loggable[A]): String =
+    make(d => L.fields(a, d)(receiver))
 }
 
 object TethysBuilder extends TethysBuilder("", "") {

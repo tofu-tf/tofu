@@ -63,6 +63,10 @@ object Loggable extends LoggableInstances with DataComp[Loggable] {
     /** put single logging field value */
     def putValue[I, V, R, S](a: A, v: V)(implicit r: LogRenderer[I, V, R, S]): S
 
+    /** put value wrapped in its natural container: dict for types with fields, raw value for [[SubLoggable]] */
+    def putWrappedValue[I, V, R, S](a: A, v: V)(implicit r: LogRenderer[I, V, R, S]): S =
+      r.dict(v)(i => fields(a, i))
+
     /** put single logging field value if it's convertible to string, hide it otherwise */
     def putMaskedValue[I, V, R, S](@unused a: A, v: V)(@unused f: String => String)(implicit
         r: LogRenderer[I, V, R, S]
@@ -193,7 +197,8 @@ trait ToStringLoggable[A] extends Loggable[A] {
 
 /** specialized loggable containing no fields, only suitable to be logged as part of something */
 trait SubLoggable[A] extends Loggable[A] {
-  def fields[I, V, R, M](a: A, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R = input.noop
+  def fields[I, V, R, M](a: A, input: I)(implicit receiver: LogRenderer[I, V, R, M]): R        = input.noop
+  override def putWrappedValue[I, V, R, S](a: A, v: V)(implicit r: LogRenderer[I, V, R, S]): S = putValue(a, v)
 }
 
 /** specialized loggable that will not be rendered in the message */

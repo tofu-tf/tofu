@@ -70,6 +70,18 @@ class LoggableSuite extends AnyFlatSpec with Matchers {
   "local date" should "have loggable instance" in {
     LocalDate.ofYearDay(1999, 256).logShow shouldBe "1999-09-13"
   }
+
+  "foldable logging" should "produce json array for list of primitives" in {
+    json(List(1, 2, 3)) shouldBe "[1,2,3]"
+  }
+
+  it should "produce empty json array for empty list" in {
+    json(List.empty[Int]) shouldBe "[]"
+  }
+
+  it should "produce json array for vector of strings" in {
+    json(Vector("a", "b")) shouldBe """["a","b"]"""
+  }
 }
 
 object LoggableSuite {
