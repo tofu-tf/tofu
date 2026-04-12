@@ -101,6 +101,10 @@ class DerivedLoggableSuite extends AnyFlatSpec with Matchers {
       "MaskedCustom{sensitiveField=*,firstName=Some(J***),age=**}"
   }
 
+  "TethysBuilder.renderValue" should "produce json array for list of case classes" in {
+    TethysBuilder.renderValue(List(foo, foo)) shouldBe """[{"lol":"zaz","kek":1},{"lol":"zaz","kek":1}]"""
+  }
+
   "MaskedContra logging" should "mask fields" in {
     json(
       MaskedContra(UUID.randomUUID(), LocalDate.of(2023, 12, 1))

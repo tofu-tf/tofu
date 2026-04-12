@@ -70,6 +70,26 @@ class LoggableSuite extends AnyFlatSpec with Matchers {
   "local date" should "have loggable instance" in {
     LocalDate.ofYearDay(1999, 256).logShow shouldBe "1999-09-13"
   }
+
+  "TethysBuilder.renderValue" should "produce json array for list of primitives" in {
+    TethysBuilder.renderValue(List(1, 2, 3)) shouldBe "[1,2,3]"
+  }
+
+  it should "produce empty json array for empty list" in {
+    TethysBuilder.renderValue(List.empty[Int]) shouldBe "[]"
+  }
+
+  it should "produce json array for vector of strings" in {
+    TethysBuilder.renderValue(Vector("a", "b")) shouldBe """["a","b"]"""
+  }
+
+  it should "produce number for int" in {
+    TethysBuilder.renderValue(1) shouldBe "1"
+  }
+
+  it should "produce string for string" in {
+    TethysBuilder.renderValue("lol") shouldBe """"lol""""
+  }
 }
 
 object LoggableSuite {
