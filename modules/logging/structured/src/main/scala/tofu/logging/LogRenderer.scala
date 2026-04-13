@@ -125,7 +125,11 @@ trait LogBuilder[U] {
   def build[A](as: A*)(implicit L: Loggable[A]): U =
     make { d => as.foldLeft(d.noop)((acc, a) => acc |+| L.fields(a, d)) }
 
-  /** accept loggable value and produce the result */
+  /** accept loggable value and produce the result
+    *
+    * @note
+    *   non-dict types ([[SubLoggable]]) have no fields, so this will produce an empty result for them
+    */
   def apply[A](a: A)(implicit L: Loggable[A]): U =
     make(d => L.fields(a, d))
 }

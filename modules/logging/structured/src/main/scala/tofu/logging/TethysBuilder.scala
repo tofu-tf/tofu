@@ -98,18 +98,28 @@ class TethysBuilder(prefix: String = "", postfix: String = "") extends LogBuilde
 
   def monoid: Monoid[Unit] = implicitly
 
-  def make(f: TokenWriter => Unit): String = {
+  private def renderRaw(f: TokenWriter => Unit): String = {
     val sw     = new StringWriter()
     sw.append(prefix)
     val writer = tethys.jackson.jacksonTokenWriterProducer.forWriter(sw)
-    writer.writeObjectStart()
-    predefined(writer)
     f(writer)
-    writer.writeObjectEnd()
     writer.flush()
     sw.append(postfix)
     sw.toString
   }
+
+  def make(f: TokenWriter => Unit): String = renderRaw { writer =>
+    writer.writeObjectStart()
+    predefined(writer)
+    f(writer)
+    writer.writeObjectEnd()
+  }
+
+  /** render a loggable value directly via [[Loggable.putValue]], without wrapping in a JSON object unlike [[apply]]
+    * this correctly handles non-dict types instead of producing empty objects
+    */
+  def renderValue[A](a: A)(implicit L: Loggable[A]): String =
+    renderRaw(writer => checkWritten(L.putValue(a, writer)(receiver), writer))
 }
 
 class TethysBuilderWithCustomFields(customFields: List[(String, RawJson)], prefix: String = "", postfix: String = "")
