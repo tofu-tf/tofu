@@ -28,15 +28,15 @@ trait Txr[F[_], DB0[_]] {
   def rawTrans: DB ~> F
 
   /** Translates the stream, applying the transactional strategy. */
-  def transP: Stream[DB, *] ~> Stream[F, *]
+  def transP: Stream[DB, _] ~> Stream[F, _]
 
   /** Translates the stream, no strategy applied. */
-  def rawTransP: Stream[DB, *] ~> Stream[F, *]
+  def rawTransP: Stream[DB, _] ~> Stream[F, _]
 }
 
 object Txr {
   type Plain[F[_]]          = Txr[F, ConnectionIO]
-  type Continuational[F[_]] = Txr[F, ConnectionCIO[F, *]]
+  type Continuational[F[_]] = Txr[F, ConnectionCIO[F, _]]
 
   def apply[F[_], DB[_]](implicit ev: Txr[F, DB]): Txr[F, DB]                 = ev
   def Plain[F[_]](implicit ev: Plain[F]): Plain[F]                            = ev
@@ -49,19 +49,19 @@ object Txr {
       val trans: ConnectionIO ~> F    = t.trans
       val rawTrans: ConnectionIO ~> F = t.rawTrans
 
-      val transP: Stream[ConnectionIO, *] ~> Stream[F, *]    = t.transP
-      val rawTransP: Stream[ConnectionIO, *] ~> Stream[F, *] = t.rawTransP
+      val transP: Stream[ConnectionIO, _] ~> Stream[F, _]    = t.transP
+      val rawTransP: Stream[ConnectionIO, _] ~> Stream[F, _] = t.rawTransP
     }
 
   /** Creates a facade that uses `ConnectionCIO` as the database effect.
     */
   def continuational[F[_]: MonadCancelThrow](t: Transactor[F]): Txr.Continuational[F] =
     new Txr.Continuational[F] {
-      val trans: ConnectionCIO[F, *] ~> F    = makeTrans(true)
-      val rawTrans: ConnectionCIO[F, *] ~> F = makeTrans(false)
+      val trans: ConnectionCIO[F, _] ~> F    = makeTrans(true)
+      val rawTrans: ConnectionCIO[F, _] ~> F = makeTrans(false)
 
-      val transP: Stream[ConnectionCIO[F, *], *] ~> Stream[F, *]    = makeTransP(true)
-      val rawTransP: Stream[ConnectionCIO[F, *], *] ~> Stream[F, *] = makeTransP(false)
+      val transP: Stream[ConnectionCIO[F, _], _] ~> Stream[F, _]    = makeTransP(true)
+      val rawTransP: Stream[ConnectionCIO[F, _], _] ~> Stream[F, _] = makeTransP(false)
 
       private def interpret(withStrategy: Boolean): Resource[F, ConnectionCIO.Cont[F]] = for {
         c <- t.connect(t.kernel)
@@ -71,10 +71,10 @@ object Txr {
         _ <- withStrategy.when_(t.strategy.resource.mapK(f))
       } yield f
 
-      private def makeTrans(withStrategy: Boolean): ConnectionCIO[F, *] ~> F =
+      private def makeTrans(withStrategy: Boolean): ConnectionCIO[F, _] ~> F =
         funK(ccio => interpret(withStrategy).use(ccio.run))
 
-      private def makeTransP(withStrategy: Boolean): Stream[ConnectionCIO[F, *], *] ~> Stream[F, *] =
+      private def makeTransP(withStrategy: Boolean): Stream[ConnectionCIO[F, _], _] ~> Stream[F, _] =
         funK(s =>
           Stream
             .resource(interpret(withStrategy))
