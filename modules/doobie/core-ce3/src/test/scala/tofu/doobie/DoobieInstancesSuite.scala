@@ -7,11 +7,11 @@ object DoobieInstancesSuite {
 
   def summonLiftConnectionIO[R, F[_]](): Any = {
     LiftConnectionIO[ConnectionIO]
-    LiftConnectionIO[ConnectionCIO[F, *]]
+    LiftConnectionIO[ConnectionCIO[F, _]]
   }
 
   def summonLiftToConnectionCIO[F[_]](): Any = {
-    Lift[F, ConnectionCIO[F, *]]
+    Lift[F, ConnectionCIO[F, _]]
   }
 
 }

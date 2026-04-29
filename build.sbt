@@ -465,20 +465,23 @@ lazy val doobieLogging = projectMatrix
 lazy val doobieCE3 = projectMatrix
   .in(modules / "doobie" / "core-ce3")
   .settings(
-    libraryDependencies ++= List(doobieCoreCE3, derevo),
+    libraryDependencies += doobieCoreCE3,
     defaultSettings,
+    scala3MigratedModuleOptions,
     name := "tofu-doobie-ce3",
   )
-  .jvmPlatform(scala2Versions)
-  .dependsOn(coreCE3, derivation)
+  .jvmPlatform(scala2And3Versions)
+  .dependsOn(coreCE3)
 
 lazy val doobieLoggingCE3 = projectMatrix
   .in(file("modules/doobie/logging-ce3"))
   .settings(
     defaultSettings,
+    scala3MigratedModuleOptions,
+    libraryDependencies += slf4j, // added to fix compiler crash - `cannot resolve reference to type org.slf4j.type.Marker`
     name := "tofu-doobie-logging-ce3",
   )
-  .jvmPlatform(scala2Versions)
+  .jvmPlatform(scala2And3Versions)
   .dependsOn(doobieCE3, loggingStr)
 
 lazy val streams = projectMatrix
@@ -516,6 +519,7 @@ lazy val examplesCE3 = projectMatrix
   )
   .jvmPlatform(scala2Versions)
   .dependsOn(ce3MainModuleDeps: _*)
+  .dependsOn(derivation)
 
 lazy val examplesZIO2 = projectMatrix
   .in(examples / "zio2")
