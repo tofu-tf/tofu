@@ -44,7 +44,7 @@ object Dependencies {
 
     val magnolia2 = "1.1.12"
 
-    val magnolia3 = "1.3.18"
+    val magnolia3 = "1.3.20"
 
     val typesafeConfig = "1.4.6"
 
