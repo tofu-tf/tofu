@@ -46,7 +46,7 @@ final class CatsTagless1LiftSyntax[T[_[_], _], F[_], A](private val tf: T[F, A])
       unlift: Unlift[F, G],
       G: Functor[G],
       fk: InvariantK[({ type L[x[_]] = T[x, A] })#L]
-  ): G[T[G, A]] =
+  ): G[T[G, A]]                                                                                        =
     G.map(unlift.unlift)(backf => fk.imapK(tf)(unlift.liftF)(backf))
 }
 
@@ -63,6 +63,6 @@ final class CatsTagless2LiftSyntax[T[_[_], _, _], F[_], A, B](private val tf: T[
       unlift: Unlift[F, G],
       G: Functor[G],
       fk: InvariantK[({ type L[x[_]] = T[x, A, B] })#L]
-  ): G[T[G, A, B]] =
+  ): G[T[G, A, B]]                                                                                           =
     G.map(unlift.unlift)(backf => fk.imapK(tf)(unlift.liftF)(backf))
 }

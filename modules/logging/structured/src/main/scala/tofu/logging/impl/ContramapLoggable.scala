@@ -16,5 +16,5 @@ class ContramapLoggable[A, B](val self: Loggable.Base[A], val f: B => A) extends
     self.putMaskedValue(f(b), v)(m)
   override def putMaskedField[I, V, R, M](b: B, name: String, input: I)(m: String => String)(implicit
       receiver: LogRenderer[I, V, R, M]
-  ): R = self.putMaskedField(f(b), name, input)(m)
+  ): R                                                                                                             = self.putMaskedField(f(b), name, input)(m)
 }
