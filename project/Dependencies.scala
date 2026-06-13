@@ -62,7 +62,7 @@ object Dependencies {
 
     val doobie = "0.13.4"
 
-    val doobieCE3 = "1.0.0-RC12"
+    val doobieCE3 = "1.0.0-RC13"
 
     // Compile time only
     val macroParadise = "2.1.1"
@@ -129,10 +129,10 @@ object Dependencies {
   val scalatest         = "org.scalatest"                %% "scalatest"                % Version.scalatest % Test
   val shapeless         = "com.chuusai"                  %% "shapeless"                % Version.shapeless
   val refined           = "eu.timepit"                   %% "refined"                  % Version.refined
-  val doobieCore        = "org.tpolecat"                 %% "doobie-core"              % Version.doobie
-  val doobieH2          = "org.tpolecat"                 %% "doobie-h2"                % Version.doobie
-  val doobieCoreCE3     = "org.tpolecat"                 %% "doobie-core"              % Version.doobieCE3
-  val doobieH2CE3       = "org.tpolecat"                 %% "doobie-h2"                % Version.doobieCE3
+  val doobieCore        = "org.typelevel"                %% "doobie-core"              % Version.doobie
+  val doobieH2          = "org.typelevel"                %% "doobie-h2"                % Version.doobie
+  val doobieCoreCE3     = "org.typelevel"                %% "doobie-core"              % Version.doobieCE3
+  val doobieH2CE3       = "org.typelevel"                %% "doobie-h2"                % Version.doobieCE3
   val collectionCompat  = "org.scala-lang.modules"       %% "scala-collection-compat"  % Version.collectionCompat
   val log4CatsLegacy    = "org.typelevel"                %% "log4cats-core"            % Version.log4CatsLegacy
   val log4Cats          = "org.typelevel"                %% "log4cats-core"            % Version.log4Cats
