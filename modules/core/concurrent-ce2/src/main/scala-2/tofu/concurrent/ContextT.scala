@@ -35,7 +35,7 @@ trait ContextT[F[+_], C[_[_]], +A] { self =>
       f: F ~> G,
       fc: => ContextT[F, C, *] ~> ContextT[G, C, *],
       gc: => ContextT[G, C, *] ~> ContextT[F, C, *]
-  )(implicit ci: InvariantK[C]): ContextT[G, C, A] =
+  )(implicit ci: InvariantK[C]): ContextT[G, C, A]                                            =
     cg => f(run(ci.imapK(cg)(gc)(fc)))
 }
 
