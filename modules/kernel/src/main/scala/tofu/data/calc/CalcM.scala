@@ -67,7 +67,7 @@ object CalcM extends CalcMInstances {
       this
     def translateState[G[+_, +_], ST, R1](
         translator: Translator[Nothing2T, G, ST, Any, R1]
-    ): CalcM[G, R1, (ST, S1), (ST, S2), E, A] = focusSecond
+    ): CalcM[G, R1, (ST, S1), (ST, S2), E, A]                                                                         = focusSecond
   }
 
   final case class Pure[S, +A](a: A) extends CalcMResStatic[S, S, Nothing, A]   {
@@ -81,11 +81,11 @@ object CalcM extends CalcMInstances {
     override def local[R1](f: R1 => R): CalcM[Nothing2T, R1, S, S, Nothing, R] = Read[S, R1]().map(f)
     override def translate[G[+_, +_], R1](
         translator: ITranslator[Nothing2T, G, R, R1]
-    ): CalcM[G, R1, S, S, Nothing, R] =
+    ): CalcM[G, R1, S, S, Nothing, R]                                          =
       CalcM.read[S, R1].map(translator.mapRead)
     def translateState[G[+_, +_], ST, R1](
         translator: Translator[Nothing2T, G, ST, R, R1]
-    ): CalcM[G, R1, (ST, S), (ST, S), Nothing, R] =
+    ): CalcM[G, R1, (ST, S), (ST, S), Nothing, R]                              =
       CalcM.read[S, R1].map(translator.mapRead).focusSecond
   }
   final case class Get[S]()          extends CalcMResStatic[S, S, Nothing, S]   {
@@ -109,7 +109,7 @@ object CalcM extends CalcMInstances {
     override def dimapState[SI1, SO1](
         f: SI1 => S,
         g: S => SO1
-    ): CalcM[λ[(`+x`, `+y`) => Nothing], Any, SI1, SO1, E, Nothing] =
+    ): CalcM[λ[(`+x`, `+y`) => Nothing], Any, SI1, SO1, E, Nothing]              =
       update(g compose f).swap errorAs_ e
   }
   final case class Defer[+F[+_, +_], -R, -S1, +S2, +E, +A](runStep: () => CalcM[F, R, S1, S2, E, A])

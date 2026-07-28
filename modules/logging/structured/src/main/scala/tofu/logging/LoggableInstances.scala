@@ -30,7 +30,7 @@ class LoggableInstances {
     def logValue(a: String): LogParamValue = StrValue(a)
     override def putField[I, V, R, M](a: String, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R =
+    ): R                                   =
       receiver.addString(name, a, input)
   }
 
@@ -62,7 +62,7 @@ class LoggableInstances {
     def logValue(a: BigInt): LogParamValue = BigIntValue(a)
     override def putField[I, V, R, M](a: BigInt, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R =
+    ): R                                   =
       receiver.addBigInt(name, a, input)
   }
 
@@ -70,7 +70,7 @@ class LoggableInstances {
     def logValue(a: BigDecimal): LogParamValue = DecimalValue(a)
     override def putField[I, V, R, M](a: BigDecimal, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R =
+    ): R                                       =
       receiver.addDecimal(name, a, input)
   }
 
@@ -84,7 +84,7 @@ class LoggableInstances {
     def logValue(a: Double): LogParamValue = FloatValue(a)
     override def putField[I, V, R, M](a: Double, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R =
+    ): R                                   =
       receiver.addFloat(name, a, input)
   }
 
@@ -92,7 +92,7 @@ class LoggableInstances {
     def logValue(a: Boolean): LogParamValue = BoolValue(a)
     override def putField[I, V, R, M](a: Boolean, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R =
+    ): R                                    =
       receiver.addBool(name, a, input)
   }
 
@@ -100,7 +100,7 @@ class LoggableInstances {
     def logValue(a: Unit): LogParamValue = NullValue
     override def putField[I, V, R, M](a: Unit, name: String, input: I)(implicit
         receiver: LogRenderer[I, V, R, M]
-    ): R = receiver.noop(input)
+    ): R                                 = receiver.noop(input)
   }
 
   final implicit val nothingLoggable: Loggable[Nothing] = unitLoggable.narrow
