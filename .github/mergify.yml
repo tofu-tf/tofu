@@ -4,9 +4,9 @@ pull_request_rules:
       - author=Tofu-bot
     actions:
       request_reviews:
-        users: [ Odomontois, catostrophe, oskin1, danslapman, funfunfine ]
+        users: [Odomontois, catostrophe, oskin1, danslapman, funfunfine]
       label:
-        add: [ dependency-update ]
+        add: [dependency-update]
 
   - name: Merge Steward's PRs
     conditions:
@@ -30,8 +30,3 @@ pull_request_rules:
       merge:
         method: rebase
 
-  - name: Delete head branch after merge
-    conditions:
-      - merged
-    actions:
-      delete_head_branch:
