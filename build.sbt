@@ -678,7 +678,7 @@ lazy val noPublishSettings =
 lazy val exampleSettings =
   noPublishSettings ++ Set(evictionErrorLevel := Level.Info)
 
-addCommandAlias("fmt", "all tofu/scalafmtSbt tofu/scalafmtAll")
-addCommandAlias("checkfmt", "all tofu/scalafmtSbtCheck tofu/scalafmtCheckAll")
+addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
+addCommandAlias("checkfmt", "all scalafmtSbtCheck scalafmtCheckAll")
 
 addCommandAlias("preparePR", "scalafmtAll ;scalafmtSbt ;reload; clean; Test / compile")
