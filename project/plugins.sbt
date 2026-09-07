@@ -1,6 +1,6 @@
 logLevel := Level.Warn
 
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.6")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.8")
 
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.5.2")
 
