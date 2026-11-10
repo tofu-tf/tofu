@@ -24,7 +24,7 @@ object Dependencies {
 
     val catsMtl = "1.6.0"
 
-    val catsTagless = "0.16.5"
+    val catsTagless = "0.16.6"
 
     val enumeratum = "1.9.6"
 
